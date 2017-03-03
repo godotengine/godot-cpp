@@ -91,6 +91,31 @@ public:
 	}
 #undef cofac
 
+	bool isequal_approx(const Basis& a, const Basis& b) const {
+
+		for (int i=0;i<3;i++) {
+			for (int j=0;j<3;j++) {
+				if ((::fabs(a.elements[i][j]-b.elements[i][j]) < CMP_EPSILON) == false)
+					return false;
+			}
+		}
+
+		return true;
+	}
+
+
+	bool is_orthogonal() const
+	{
+		Basis id;
+		Basis m = (*this)*transposed();
+
+		return isequal_approx(id,m);
+	}
+
+	bool is_rotation() const
+	{
+		return ::fabs(determinant()-1) < CMP_EPSILON && is_orthogonal();
+	}
 
 	void transpose()
 	{
@@ -140,8 +165,6 @@ public:
 	{
 		return Basis(p_axis, p_phi) * (*this);
 	}
-
-	Vector3 get_rotation() const; // need?!
 
 	void scale( const Vector3& p_scale )
 	{
@@ -244,8 +267,6 @@ public:
 		return elements[0][2] * v[0] + elements[1][2] * v[1] + elements[2][2] * v[2];
 	}
 
-	bool isequal_approx(const Basis& a, const Basis& b) const; // need?
-
 	bool operator==(const Basis& p_matrix) const
 	{
 		for (int i=0;i<3;i++) {
@@ -345,10 +366,13 @@ public:
 
 	void set_orthogonal_index(int p_index); // down below
 
-	bool is_orthogonal() const; // need?
-	bool is_rotation() const; // need?
 
-	operator String() const;
+	operator String() const
+	{
+		String s;
+		// @Todo
+		return s;
+	}
 
 	void get_axis_and_angle(Vector3 &r_axis,real_t& r_angle) const;
 

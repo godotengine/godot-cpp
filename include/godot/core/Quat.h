@@ -5,6 +5,8 @@
 
 #include "Vector3.h"
 
+// #include "Basis.h"
+
 namespace godot {
 
 #define CMP_EPSILON 0.00001
@@ -16,17 +18,127 @@ public:
 
 	real_t x,y,z,w;
 
-	real_t length_squared() const;
-	real_t length() const;
-	void normalize();
-	Quat normalized() const;
-	Quat inverse() const;
-	real_t dot(const Quat& q) const;
-	void set_euler(const Vector3& p_euler);
-	Vector3 get_euler() const;
-	Quat slerp(const Quat& q, const real_t& t) const;
-	Quat slerpni(const Quat& q, const real_t& t) const;
-	Quat cubic_slerp(const Quat& q, const Quat& prep, const Quat& postq,const real_t& t) const;
+	real_t length_squared() const; // down below
+	real_t length() const
+	{
+		return ::sqrt(length_squared());
+	}
+
+	void normalize()
+	{
+		*this /= length();
+	}
+
+	Quat normalized() const
+	{
+		return *this / length();
+	}
+
+	Quat inverse() const
+	{
+		return Quat( -x, -y, -z, w );
+	}
+
+	real_t dot(const Quat& q) const; // down below
+	void set_euler(const Vector3& p_euler)
+	{
+		real_t half_a1 = p_euler.x * 0.5;
+		real_t half_a2 = p_euler.y * 0.5;
+		real_t half_a3 = p_euler.z * 0.5;
+
+		// R = X(a1).Y(a2).Z(a3) convention for Euler angles.
+		// Conversion to quaternion as listed in https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19770024290.pdf (page A-2)
+		// a3 is the angle of the first rotation, following the notation in this reference.
+
+		real_t cos_a1 = ::cos(half_a1);
+		real_t sin_a1 = ::sin(half_a1);
+		real_t cos_a2 = ::cos(half_a2);
+		real_t sin_a2 = ::sin(half_a2);
+		real_t cos_a3 = ::cos(half_a3);
+		real_t sin_a3 = ::sin(half_a3);
+
+		set(sin_a1*cos_a2*cos_a3 + sin_a2*sin_a3*cos_a1,
+			-sin_a1*sin_a3*cos_a2 + sin_a2*cos_a1*cos_a3,
+			sin_a1*sin_a2*cos_a3 + sin_a3*cos_a1*cos_a2,
+			-sin_a1*sin_a2*sin_a3 + cos_a1*cos_a2*cos_a3);
+	}
+
+	Vector3 get_euler() const; // down below
+
+	Quat slerp(const Quat& q, const real_t& t) const {
+
+		Quat          to1;
+		real_t        omega, cosom, sinom, scale0, scale1;
+
+
+		// calc cosine
+		cosom = dot(q);
+
+		// adjust signs (if necessary)
+		if ( cosom <0.0 ) {
+			cosom = -cosom;
+			to1.x = - q.x;
+			to1.y = - q.y;
+			to1.z = - q.z;
+			to1.w = - q.w;
+		} else  {
+			to1.x = q.x;
+			to1.y = q.y;
+			to1.z = q.z;
+			to1.w = q.w;
+		}
+
+
+		// calculate coefficients
+
+		if ( (1.0 - cosom) > CMP_EPSILON ) {
+			// standard case (slerp)
+			omega = ::acos(cosom);
+			sinom = ::sin(omega);
+			scale0 = ::sin((1.0 - t) * omega) / sinom;
+			scale1 = ::sin(t * omega) / sinom;
+		} else {
+			// "from" and "to" quaternions are very close
+			//  ... so we can do a linear interpolation
+			scale0 = 1.0 - t;
+			scale1 = t;
+		}
+		// calculate final values
+		return Quat(
+			scale0 * x + scale1 * to1.x,
+			scale0 * y + scale1 * to1.y,
+			scale0 * z + scale1 * to1.z,
+			scale0 * w + scale1 * to1.w
+		);
+	}
+
+	Quat slerpni(const Quat& q, const real_t& t) const {
+
+		const Quat &from = *this;
+
+		real_t dot = from.dot(q);
+
+		if (::fabs(dot) > 0.9999) return from;
+
+		real_t	theta		= ::acos(dot),
+			sinT		= 1.0 / ::sin(theta),
+			newFactor	= ::sin(t * theta) * sinT,
+			invFactor	= ::sin((1.0 - t) * theta) * sinT;
+
+		return Quat(invFactor * from.x + newFactor * q.x,
+					invFactor * from.y + newFactor * q.y,
+					invFactor * from.z + newFactor * q.z,
+					invFactor * from.w + newFactor * q.w);
+	}
+
+	Quat cubic_slerp(const Quat& q, const Quat& prep, const Quat& postq,const real_t& t) const
+	{
+		//the only way to do slerp :|
+		real_t t2 = (1.0-t)*t*2;
+		Quat sp = this->slerp(q,t);
+		Quat sq = prep.slerpni(postq,t);
+		return sp.slerpni(sq,t2);
+	}
 
 	void get_axis_and_angle(Vector3& r_axis, real_t &r_angle) const {
 		r_angle = 2 * ::acos(w);
@@ -35,8 +147,8 @@ public:
 		r_axis.z = z / ::sqrt(1-w*w);
 	}
 
-	void operator*=(const Quat& q);
-	Quat operator*(const Quat& q) const;
+	void operator*=(const Quat& q); // down below
+	Quat operator*(const Quat& q) const; // down below
 
 
 
@@ -55,6 +167,7 @@ public:
 		return Vector3(q.x,q.y,q.z);
 	}
 
+	// everything's down
 	void operator+=(const Quat& q);
 	void operator-=(const Quat& q);
 	void operator*=(const real_t& s);
@@ -69,7 +182,10 @@ public:
 	bool operator==(const Quat& p_quat) const;
 	bool operator!=(const Quat& p_quat) const;
 
-	operator String() const;
+	operator String() const
+	{
+		return String(); // @Todo
+	}
 
 	inline void set( real_t p_x, real_t p_y, real_t p_z, real_t p_w) {
 		x=p_x; y=p_y; z=p_z; w=p_w;
@@ -77,7 +193,19 @@ public:
 	inline Quat(real_t p_x, real_t p_y, real_t p_z, real_t p_w) {
 		x=p_x; y=p_y; z=p_z; w=p_w;
 	}
-	Quat(const Vector3& axis, const real_t& angle);
+	Quat(const Vector3& axis, const real_t& angle)
+	{
+		real_t d = axis.length();
+		if (d==0)
+			set(0,0,0,0);
+		else {
+			real_t sin_angle = ::sin(angle * 0.5);
+			real_t cos_angle = ::cos(angle * 0.5);
+			real_t s = sin_angle / d;
+			set(axis.x * s, axis.y * s, axis.z * s,
+				cos_angle);
+		}
+	}
 
 	Quat(const Vector3& v0, const Vector3& v1) // shortest arc
 	{
@@ -143,6 +271,13 @@ Quat Quat::operator-(const Quat& q2) const {
 	return Quat( q1.x-q2.x, q1.y-q2.y, q1.z-q2.z, q1.w-q2.w);
 }
 
+Quat Quat::operator*(const Quat& q2) const {
+	Quat q1 = *this;
+	q1 *= q2;
+	return q1;
+}
+
+
 Quat Quat::operator-() const {
 	const Quat& q2 = *this;
 	return Quat( -q2.x, -q2.y,  -q2.z,  -q2.w);
@@ -165,6 +300,18 @@ bool Quat::operator!=(const Quat& p_quat) const {
 	return x!=p_quat.x || y!=p_quat.y || z!=p_quat.z || w!=p_quat.w;
 }
 
+
+}
+
+#include "Basis.h"
+
+namespace godot {
+
+Vector3 Quat::get_euler() const
+{
+	Basis m(*this);
+	return m.get_euler();
+}
 
 }
 
