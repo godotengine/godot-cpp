@@ -91,7 +91,6 @@ public:
 
 	void operator +=(const String &s)
 	{
-		// @Todo
 		godot_string_operator_plus(&_godot_string, &_godot_string, &s._godot_string);
 	}
 
