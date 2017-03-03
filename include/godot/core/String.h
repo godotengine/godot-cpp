@@ -23,6 +23,19 @@ public:
 		godot_string_new_data(&_godot_string, contents, strlen(contents));
 	}
 
+	String(const wchar_t *contents)
+	{
+		// @Todo
+		// godot_string_new_data(&_godot_string, contents, strlen(contents));
+		godot_string_new(&_godot_string);
+	}
+
+	String(const wchar_t c)
+	{
+		// @Todo
+		godot_string_new(&_godot_string);
+	}
+
 	String(const String& other)
 	{
 		godot_string_new(&_godot_string);
@@ -35,10 +48,20 @@ public:
 	}
 
 
+	String substr(int p_from,int p_chars) const
+	{
+		return String(); // @Todo
+	}
+
 
 	wchar_t &operator [](const int idx)
 	{
 		return *godot_string_operator_index(&_godot_string, idx);
+	}
+
+	wchar_t operator [](const int idx) const
+	{
+		return *godot_string_operator_index((godot_string *) &_godot_string, idx);
 	}
 
 	int length() const
@@ -64,6 +87,17 @@ public:
 		godot_string_operator_plus(&new_string._godot_string, &_godot_string, &s._godot_string);
 
 		return new_string;
+	}
+
+	void operator +=(const String &s)
+	{
+		// @Todo
+		godot_string_operator_plus(&_godot_string, &_godot_string, &s._godot_string);
+	}
+
+	void operator +=(const wchar_t c)
+	{
+		// @Todo
 	}
 
 	bool operator <(const String &s)
