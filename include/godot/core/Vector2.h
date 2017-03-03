@@ -5,7 +5,7 @@
 
 #include <godot/godot_vector2.h>
 
-#include <String.h>
+#include "String.h"
 
 namespace godot {
 
