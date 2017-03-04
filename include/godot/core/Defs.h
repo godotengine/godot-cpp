@@ -64,6 +64,16 @@ enum Error {
 // @Todo as well as real_t
 
 
+#define CMP_EPSILON 0.00001 // @Todo move this somewhere more global
+#define CMP_EPSILON2 (CMP_EPSILON*CMP_EPSILON) // @Todo same as above
+#define Math_PI 3.14159265358979323846 // I feel like I'm talking to myself
+
+
+#ifndef ERR_FAIL_COND_V
+#define ERR_FAIL_COND_V(cond, ret) do { if (cond) { return ret; } } while(0)
+#endif
+
+
 #ifndef ERR_PRINT
 #define ERR_PRINT(msg)
 #endif

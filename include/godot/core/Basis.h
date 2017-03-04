@@ -1,15 +1,13 @@
 #ifndef BASIS_H
 #define BASIS_H
 
+#include "Defs.h"
+
 #include "Vector3.h"
 
 #include <algorithm>
 
 typedef float real_t; // @Todo move this to a global Godot.h
-
-#define CMP_EPSILON 0.00001 // @Todo move this somewhere more global
-#define CMP_EPSILON2 (CMP_EPSILON*CMP_EPSILON) // @Todo same as above
-#define Math_PI 3.14159265358979323846 // I feel like I'm talking to myself
 
 
 
@@ -657,6 +655,43 @@ Basis::Basis(const Vector3& p_axis, real_t p_phi) {
 	elements[2][0] = p_axis.z * p_axis.x * ( 1.0 - cosine ) - p_axis.y * sine;
 	elements[2][1] = p_axis.y * p_axis.z * ( 1.0 - cosine ) + p_axis.x * sine;
 	elements[2][2] = axis_sq.z + cosine  * ( 1.0 - axis_sq.z );
+
+}
+
+Basis::operator Quat() const {
+	ERR_FAIL_COND_V(is_rotation() == false, Quat());
+
+	real_t trace = elements[0][0] + elements[1][1] + elements[2][2];
+	real_t temp[4];
+
+	if (trace > 0.0)
+	{
+		real_t s = ::sqrt(trace + 1.0);
+		temp[3]=(s * 0.5);
+		s = 0.5 / s;
+
+		temp[0]=((elements[2][1] - elements[1][2]) * s);
+		temp[1]=((elements[0][2] - elements[2][0]) * s);
+		temp[2]=((elements[1][0] - elements[0][1]) * s);
+	}
+	else
+	{
+		int i = elements[0][0] < elements[1][1] ?
+			(elements[1][1] < elements[2][2] ? 2 : 1) :
+			(elements[0][0] < elements[2][2] ? 2 : 0);
+		int j = (i + 1) % 3;
+		int k = (i + 2) % 3;
+
+		real_t s = ::sqrt(elements[i][i] - elements[j][j] - elements[k][k] + 1.0);
+		temp[i] = s * 0.5;
+		s = 0.5 / s;
+
+		temp[3] = (elements[k][j] - elements[j][k]) * s;
+		temp[j] = (elements[j][i] + elements[i][j]) * s;
+		temp[k] = (elements[k][i] + elements[i][k]) * s;
+	}
+
+	return Quat(temp[0],temp[1],temp[2],temp[3]);
 
 }
 

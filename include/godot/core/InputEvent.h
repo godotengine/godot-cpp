@@ -2,6 +2,7 @@
 #define INPUTEVENT_H
 
 #include <cstdint>
+#include <memory.h>
 
 #include "String.h"
 

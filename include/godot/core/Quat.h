@@ -229,7 +229,7 @@ public:
 		}
 	}
 
-	inline Quat() {x=y=z=0; w=1; }
+	Quat() {x=y=z=0; w=1; }
 
 
 };
@@ -250,6 +250,11 @@ void Quat::operator+=(const Quat& q) {
 void Quat::operator-=(const Quat& q) {
 	x -= q.x; y -= q.y; z -= q.z; w -= q.w;
 }
+
+void Quat::operator*=(const Quat& q) {
+	x *= q.x; y *= q.y; z *= q.z; w *= q.w;
+}
+
 
 void Quat::operator*=(const real_t& s) {
 	x *= s; y *= s; z *= s; w *= s;
