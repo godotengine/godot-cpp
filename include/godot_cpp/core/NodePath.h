@@ -1,7 +1,7 @@
 #ifndef NODEPATH_H
 #define NODEPATH_H
 
-#include <String.h>
+#include "String.h"
 
 #include <godot/godot_node_path.h>
 
@@ -12,6 +12,11 @@ class NodePath
 {
 	godot_node_path _node_path;
 public:
+	NodePath()
+	{
+
+	}
+
 	NodePath(const String &from)
 	{
 		godot_node_path_new(&_node_path, (godot_string *) &from);
