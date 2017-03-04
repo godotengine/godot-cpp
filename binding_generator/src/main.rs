@@ -53,18 +53,25 @@ fn main() {
 
 	let json: Vec<GodotClass> = serde_json::from_str::<Vec<GodotClass>>(&file_contents).unwrap();
 
+	let mut forward_declares = String::new();
+	{
+		for class in &json {
+			forward_declares = forward_declares + "class " + strip_name(&class.name) + ";\n";
+		}
+	}
+
 	for class in json {
-		generate_class_binding((base_dir.to_string() + strip_name(&class.name) + ".h").as_str(), &class);
+		generate_class_binding(&forward_declares, (base_dir.to_string() + strip_name(&class.name) + ".h").as_str(), &class);
 	}
 }
 
-fn generate_class_binding(filename: &str, class: &GodotClass) {
+fn generate_class_binding(forward_declares: &String, filename: &str, class: &GodotClass) {
 	let mut file = File::create(filename).unwrap();
 
-	file.write_all(generate_class_content(class).as_bytes());
+	file.write_all(generate_class_content(forward_declares, class).as_bytes());
 }
 
-fn generate_class_content(class: &GodotClass) -> String {
+fn generate_class_content(forward_declares: &String, class: &GodotClass) -> String {
 	let mut contents = String::new();
 
 	contents = contents + "#ifndef ";
@@ -83,7 +90,9 @@ fn generate_class_content(class: &GodotClass) -> String {
 
 	contents = contents + "namespace godot {\n\n";
 
-	contents = contents + "class " + strip_name(&class.name);
+	contents += forward_declares;
+
+	contents = contents + "\n\n\nclass " + strip_name(&class.name);
 
 	if class.base_class != "" {
 		contents = contents + " : public " + strip_name(&class.base_class);
@@ -120,17 +129,16 @@ fn generate_class_content(class: &GodotClass) -> String {
 	contents += "\n\n";
 
 	for method in &class.methods {
-		contents = contents + "\t" + method.return_type.as_str() + " " + method.name.as_str() + "(";
+		contents = contents + "\t" + strip_name(&method.return_type) + (if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { " &" } else { " " }) + method.name.as_str() + "(";
 
 		for (i, argument) in (&method.arguments).iter().enumerate() {
 			if !is_primitive(&argument._type) {
-				contents += "const "
+				contents = contents + "const " + argument._type.as_str() + "&";
+			} else {
+				contents = contents + "const " + argument._type.as_str() + "";
 			}
-			contents = contents + argument._type.as_str();
-			if !is_primitive(&argument._type) {
-				contents += "&";
-			}
-			contents = contents + " " + argument.name.as_str();
+
+			contents = contents + " " + escape_cpp(&argument.name);
 			if i != method.arguments.len() - 1 {
 				contents += ", ";
 			}
@@ -144,7 +152,8 @@ fn generate_class_content(class: &GodotClass) -> String {
 		                    + "\t\t}\n";
 
 		if method.return_type != "void" {
-			contents = contents + "\t\t" + method.return_type.as_str() + " ret;" + "\n";
+			// contents = contents + "\t\t" + strip_name(&method.return_type) + (if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { "*" } else { "" }) + " ret;" + "\n";
+			contents = contents + "\t\t" + if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { "godot_object*" } else { strip_name(&method.return_type) } + " ret;\n";
 		}
 
 		contents = contents + "\t\tconst void *args[] = {\n";
@@ -153,8 +162,10 @@ fn generate_class_content(class: &GodotClass) -> String {
 			contents = contents + "\t\t\t";
 			if is_primitive(&argument._type) {
 				contents = contents + "&" + argument.name.as_str();
+			} else if is_core_type(&argument._type) {
+				contents = contents + "(void *) &" + escape_cpp(&argument.name);
 			} else {
-				contents = contents + "(void *) &" + argument.name.as_str();
+				contents = contents + "(void *) &" + escape_cpp(&argument.name);
 			}
 			contents = contents + ",\n";
 		}
@@ -163,7 +174,9 @@ fn generate_class_content(class: &GodotClass) -> String {
 
 		contents = contents + "\t\tgodot_method_bind_ptrcall(mb, __core_object, args, " + if method.return_type == "void" { "NULL" } else { "&ret" } + ");\n";
 
-		if method.return_type != "void" {
+		if !is_primitive(&method.return_type) && !is_core_type(&method.return_type) {
+			contents = contents + "\t\treturn reinterpret_cast<" + strip_name(&method.return_type) + "&>(ret);\n";
+		} else if method.return_type != "void" {
 			contents = contents + "\t\treturn ret;\n";
 		}
 
@@ -181,11 +194,19 @@ fn generate_class_content(class: &GodotClass) -> String {
 
 
 fn is_core_type(name: &String) -> bool {
-	let core_types = vec!("Vector2", "Vector3", "String", "Variant");
+	let core_types = vec!["Array", "PoolStringArray", "Vector2", "Vector3", "String", "Variant"];
 	core_types.contains(&name.as_str())
 }
 
 fn is_primitive(name: &String) -> bool {
-	let core_types = vec!("int", "bool", "real", "float");
+	let core_types = vec!["int", "bool", "real", "float", "void"];
 	core_types.contains(&name.as_str())
+}
+
+fn escape_cpp(name: &String) -> &str {
+	match name.as_str() {
+		"class" => "_class",
+		"char"  => "_char",
+		x       => x
+	}
 }
