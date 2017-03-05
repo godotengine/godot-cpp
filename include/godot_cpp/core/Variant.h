@@ -409,11 +409,7 @@ public:
 		godot_input_event s = godot_variant_as_input_event(&_godot_variant);
 		return *(InputEvent *) &s;
 	}
-	operator Object*() const
-	{
-		godot_object *s = godot_variant_as_object(&_godot_variant);
-		return (Object *) s;
-	}
+	operator Object() const;
 
 	operator Dictionary() const;
 	operator Array() const;

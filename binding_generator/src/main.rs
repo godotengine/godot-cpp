@@ -142,6 +142,12 @@ fn generate_class_content(forward_declares: &String, class: &GodotClass) -> Stri
 		contents = contents + "\t}\n\n\n";
 	}
 
+	if class.base_class != "" {
+		contents = contents + "\tvoid _init() {\n";
+		contents = contents + "\t\t\n";
+		contents = contents + "\t}\n\n";
+	}
+
 	if class.instanciable {
 		contents = contents + "\tstatic " + strip_name(&class.name) + "& _new();\n";
 		contents = contents + "\tvoid _destroy();\n\n";
@@ -227,13 +233,22 @@ fn generate_class_content(forward_declares: &String, class: &GodotClass) -> Stri
 		contents = contents + "namespace godot {\n\n";
 
 		contents = contents + "" + strip_name(&class.name) + "& " + strip_name(&class.name) + "::_new() {\n";
-		contents = contents + "\tObject *ptr = ClassDB::instance(\"" + class.name.as_str() + "\");\n";
+		contents = contents + "\tObject ptr = ClassDB::instance(\"" + class.name.as_str() + "\");\n";
 		contents = contents + "\treturn reinterpret_cast<" + strip_name(&class.name) + "&>(ptr);";
 		contents = contents + "}\n\n";
 
 		contents = contents + "void " + strip_name(&class.name) + "::_destroy() {\n";
 		contents = contents + "\tgodot_object_destroy(__core_object);\n";
 		contents = contents + "}\n\n\n";
+
+		if class.base_class == "" {
+			// Object
+			contents = contents + "Variant::operator Object()const {\n\n";
+
+			contents = contents + "\treturn Object(godot_variant_as_object(&_godot_variant));\n\n";
+
+			contents = contents + "}\n\n";
+		}
 
 		contents = contents + "}\n";
 	}
@@ -260,6 +275,7 @@ fn escape_cpp(name: &String) -> &str {
 	match name.as_str() {
 		"class" => "_class",
 		"char"  => "_char",
+		"short" => "_short",
 		x       => x
 	}
 }

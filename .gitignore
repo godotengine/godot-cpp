@@ -1,0 +1,3 @@
+include/godot_cpp/*.h
+include/godot.h
+include/godot
