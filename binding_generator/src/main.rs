@@ -8,6 +8,8 @@ use std::fs::File;
 use std::iter::Iterator;
 use std::io::prelude::*;
 
+use std::env;
+
 #[derive(Deserialize)]
 struct GodotClass {
 	name: String,
@@ -23,6 +25,11 @@ struct GodotClass {
 struct GodotMethod {
 	name: String,
 	return_type: String,
+	is_editor: bool,
+	is_noscript: bool,
+	is_const: bool,
+	is_virtual: bool,
+	is_from_script: bool,
 	arguments: Vec<GodotArgument>
 }
 
@@ -43,9 +50,15 @@ fn strip_name(s: &String) -> &str {
 }
 
 fn main() {
-	let base_dir = "/home/karroffel/Gamedev/dlscript_cpp_example/src/include/godot_cpp/";
+	let base_dir = match env::args().nth(2) {
+		Some(x) => x,
+		None    => return
+	};
 
-	let mut file = File::open("/home/karroffel/Development/api.json").unwrap();
+	let mut file = match env::args().nth(1) {
+		Some(x) => File::open(x).unwrap(),
+		None    => return
+	};
 
 	let mut file_contents = String::new();
 
