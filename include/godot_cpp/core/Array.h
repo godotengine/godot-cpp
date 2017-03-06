@@ -3,196 +3,93 @@
 
 #include <godot/godot_array.h>
 
-#include "Variant.h"
+#include "String.h"
 
 namespace godot {
+
+class Variant;
+class PoolByteArray;
+class PoolIntArray;
+class PoolRealArray;
+class PoolStringArray;
+class PoolVector2Array;
+class PoolVector3Array;
+class PoolColorArray;
+
+class Object;
 
 class Array {
 	godot_array _godot_array;
 public:
-	Array()
-	{
-		godot_array_new(&_godot_array);
-	}
+	Array();
 
-	Array(const PoolByteArray& a)
-	{
-		godot_array_new_pool_byte_array(&_godot_array, (godot_pool_byte_array *) &a);
-	}
+	Array(const PoolByteArray& a);
 
-	Array(const PoolIntArray& a)
-	{
-		godot_array_new_pool_int_array(&_godot_array, (godot_pool_int_array *) &a);
-	}
+	Array(const PoolIntArray& a);
 
-	Array(const PoolRealArray& a)
-	{
-		godot_array_new_pool_real_array(&_godot_array, (godot_pool_real_array *) &a);
-	}
+	Array(const PoolRealArray& a);
 
-	Array(const PoolStringArray& a)
-	{
-		godot_array_new_pool_string_array(&_godot_array, (godot_pool_string_array *) &a);
-	}
+	Array(const PoolStringArray& a);
 
-	Array(const PoolVector2Array& a)
-	{
-		godot_array_new_pool_vector2_array(&_godot_array, (godot_pool_vector2_array *) &a);
-	}
+	Array(const PoolVector2Array& a);
 
-	Array(const PoolVector3Array& a)
-	{
-		godot_array_new_pool_vector3_array(&_godot_array, (godot_pool_vector3_array *) &a);
-	}
+	Array(const PoolVector3Array& a);
 
-	Array(const PoolColorArray& a)
-	{
-		godot_array_new_pool_color_array(&_godot_array, (godot_pool_color_array *) &a);
-	}
+	Array(const PoolColorArray& a);
 
-	Variant& operator [](const int idx)
-	{
-		godot_variant *v = godot_array_get(&_godot_array, idx);
-		return *(Variant *) v;
-	}
+	Variant& operator [](const int idx);
 
-	Variant operator [](const int idx) const
-	{
-		// Yes, I'm casting away the const... you can hate me now.
-		// since the result is
-		godot_variant *v = godot_array_get((godot_array *) &_godot_array, idx);
-		return *(Variant *) v;
-	}
+	Variant operator [](const int idx) const;
 
-	void append(const Variant& v)
-	{
-		godot_array_append(&_godot_array, (godot_variant *) &v);
-	}
+	void append(const Variant& v);
 
-	void clear()
-	{
-		godot_array_clear(&_godot_array);
-	}
+	void clear();
 
-	int count(const Variant& v)
-	{
-		return godot_array_count(&_godot_array, (godot_variant *) &v);
-	}
+	int count(const Variant& v);
 
-	bool empty() const
-	{
-		return godot_array_empty(&_godot_array);
-	}
+	bool empty() const;
 
-	void erase(const Variant& v)
-	{
-		godot_array_erase(&_godot_array, (godot_variant *) &v);
-	}
+	void erase(const Variant& v);
 
-	Variant front() const
-	{
-		godot_variant v = godot_array_front(&_godot_array);
-		return *(Variant *) &v;
-	}
+	Variant front() const;
 
-	Variant back() const
-	{
-		godot_variant v = godot_array_back(&_godot_array);
-		return *(Variant *) &v;
-	}
+	Variant back() const;
 
-	int find(const Variant& what, const int from = 0)
-	{
-		return godot_array_find(&_godot_array, (godot_variant *) &what, from);
-	}
+	int find(const Variant& what, const int from = 0);
 
-	int find_last(const Variant& what)
-	{
-		return godot_array_find_last(&_godot_array, (godot_variant *) &what);
-	}
+	int find_last(const Variant& what);
 
-	bool has(const Variant& what) const
-	{
-		return godot_array_has(&_godot_array, (godot_variant *) &what);
-	}
+	bool has(const Variant& what) const;
 
-	uint32_t hash() const
-	{
-		return godot_array_hash(&_godot_array);
-	}
+	uint32_t hash() const;
 
-	void insert(const int pos, const Variant& value)
-	{
-		godot_array_insert(&_godot_array, pos, (godot_variant *) &value);
-	}
+	void insert(const int pos, const Variant& value);
 
-	void invert()
-	{
-		godot_array_invert(&_godot_array);
-	}
+	void invert();
 
-	bool is_shared() const
-	{
-		return godot_array_is_shared(&_godot_array);
-	}
+	bool is_shared() const;
 
-	Variant pop_back()
-	{
-		godot_variant v = godot_array_pop_back(&_godot_array);
-		return *(Variant *) &v;
-	}
+	Variant pop_back();
 
-	Variant pop_front()
-	{
-		godot_variant v = godot_array_pop_front(&_godot_array);
-		return *(Variant *) &v;
-	}
+	Variant pop_front();
 
-	void push_back(const Variant& v)
-	{
-		godot_array_push_back(&_godot_array, (godot_variant *) &v);
-	}
+	void push_back(const Variant& v);
 
-	void push_front(const Variant& v)
-	{
-		godot_array_push_front(&_godot_array, (godot_variant *) &v);
-	}
+	void push_front(const Variant& v);
 
-	void remove(const int idx)
-	{
-		godot_array_remove(&_godot_array, idx);
-	}
+	void remove(const int idx);
 
-	int size() const
-	{
-		return godot_array_size(&_godot_array);
-	}
+	int size() const;
 
-	void resize(const int size)
-	{
-		godot_array_resize(&_godot_array, size);
-	}
+	void resize(const int size);
 
-	int rfind(const Variant& what, const int from = -1)
-	{
-		return godot_array_rfind(&_godot_array, (godot_variant *) &what, from);
-	}
+	int rfind(const Variant& what, const int from = -1);
 
-	void sort()
-	{
-		godot_array_sort(&_godot_array);
-	}
+	void sort();
 
-	void sort_custom(Object *obj, const String& func)
-	{
-		godot_array_sort_custom(&_godot_array, (godot_object *) obj, (godot_string *) &func);
-	}
+	void sort_custom(Object *obj, const String& func);
 
-	~Array()
-	{
-		godot_array_destroy(&_godot_array);
-	}
-
+	~Array();
 
 };
 

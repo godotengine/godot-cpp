@@ -1,0 +1,31 @@
+#!python
+env = Environment()
+env["CXX"] = "clang++"
+env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
+env.Append(CPPPATH=['.', './godot'])
+
+sources = [
+	'godot_cpp/core/Array.cpp',
+	'godot_cpp/core/Basis.cpp',
+	'godot_cpp/core/Color.cpp',
+	'godot_cpp/core/Dictionary.cpp',
+	'godot_cpp/core/Image.cpp',
+	'godot_cpp/core/InputEvent.cpp',
+	'godot_cpp/core/NodePath.cpp',
+	'godot_cpp/core/Plane.cpp',
+	'godot_cpp/core/PoolArrays.cpp',
+	'godot_cpp/core/Quat.cpp',
+	'godot_cpp/core/Rect2.cpp',
+	'godot_cpp/core/Rect3.cpp',
+	'godot_cpp/core/RID.cpp',
+	'godot_cpp/core/String.cpp',
+	'godot_cpp/core/Transform.cpp',
+	'godot_cpp/core/Transform2D.cpp',
+	'godot_cpp/core/Variant.cpp',
+	'godot_cpp/core/Vector2.cpp',
+	'godot_cpp/core/Vector3.cpp'
+]
+
+library = env.SharedLibrary(target='godot_cpp_core', source=sources)
+Default(library)
+

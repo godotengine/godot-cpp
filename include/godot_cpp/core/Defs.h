@@ -61,12 +61,15 @@ enum Error {
 }
 
 // @Todo error handling stuff here plz
-// @Todo as well as real_t
 
+typedef float real_t;
 
-#define CMP_EPSILON 0.00001 // @Todo move this somewhere more global
-#define CMP_EPSILON2 (CMP_EPSILON*CMP_EPSILON) // @Todo same as above
-#define Math_PI 3.14159265358979323846 // I feel like I'm talking to myself
+#define CMP_EPSILON 0.00001
+#define CMP_EPSILON2 (CMP_EPSILON*CMP_EPSILON)
+#define Math_PI 3.14159265358979323846
+
+#define _PLANE_EQ_DOT_EPSILON 0.999
+#define _PLANE_EQ_D_EPSILON 0.0001
 
 
 #ifndef ERR_FAIL_COND_V
@@ -74,8 +77,29 @@ enum Error {
 #endif
 
 
+#ifndef ERR_FAIL_V
+#define ERR_FAIL_V(a) return a
+#endif
+
+#ifndef ERR_FAIL_INDEX
+#define ERR_FAIL_INDEX(a, b)
+#endif
+
+
 #ifndef ERR_PRINT
 #define ERR_PRINT(msg)
+#endif
+
+#ifndef ERR_FAIL_INDEX_V
+#define ERR_FAIL_INDEX_V(a, b, c)
+#endif
+
+#ifndef ERR_FAIL_INDEX
+#define ERR_FAIL_INDEX(a, b)
+#endif
+
+#ifndef ERR_FAIL_COND
+#define ERR_FAIL_COND(a)
 #endif
 
 

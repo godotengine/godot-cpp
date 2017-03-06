@@ -6,6 +6,7 @@
 #include <godot.h>
 
 
+#include <godot_cpp/core/CoreTypes.h>
 #include <godot_cpp/core/Variant.h>
 
 namespace godot {
@@ -225,20 +226,6 @@ struct WrappedMethod0<T, void, p> {
 		return _variant;
 	}
 };
-
-
-
-template<class T, class R, class A0, class A1, R (T::*p)(A0, A1)>
-struct WrappedMethod2;
-
-template<class T, class R, class A0, class A1, class A2, R (T::*p)(A0, A1, A2)>
-struct WrappedMethod3;
-
-template<class T, class R, class A0, class A1, class A2, class A3, R (T::*p)(A0, A1, A2, A3)>
-struct WrappedMethod4;
-
-template<class T, class R, class A0, class A1, class A2, class A3, class A4, R (T::*p)(A0, A1, A2, A3, A4)>
-struct WrappedMethod5;
 
 // method registering
 

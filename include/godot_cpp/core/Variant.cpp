@@ -1,0 +1,455 @@
+#include "Variant.h"
+
+#include <godot/godot_variant.h>
+
+#include "Defs.h"
+
+#include "CoreTypes.h"
+
+#include <iostream>
+
+namespace godot {
+
+Variant::Variant()
+{
+	godot_variant_new_nil(&_godot_variant);
+}
+
+Variant::Variant(const Variant& v)
+{
+	godot_variant_copy(&_godot_variant, &v._godot_variant);
+}
+
+Variant::Variant(bool p_bool)
+{
+	godot_variant_new_bool(&_godot_variant, p_bool);
+}
+
+Variant::Variant(signed int p_int) // real one
+{
+	godot_variant_new_int(&_godot_variant, p_int);
+}
+
+Variant::Variant(unsigned int p_int)
+{
+	godot_variant_new_int(&_godot_variant, p_int);
+}
+
+Variant::Variant(signed short p_short) // real one
+{
+	godot_variant_new_int(&_godot_variant, (int) p_short);
+}
+
+
+Variant::Variant(int64_t p_char) // real one
+{
+	godot_variant_new_int(&_godot_variant, p_char);
+}
+
+Variant::Variant(uint64_t p_char)
+{
+	godot_variant_new_int(&_godot_variant, p_char);
+}
+
+Variant::Variant(float p_float)
+{
+	godot_variant_new_real(&_godot_variant, p_float);
+}
+
+Variant::Variant(double p_double)
+{
+	godot_variant_new_real(&_godot_variant, p_double);
+}
+
+Variant::Variant(const String& p_string)
+{
+	godot_variant_new_string(&_godot_variant, (godot_string *) &p_string);
+}
+
+Variant::Variant(const char * const p_cstring)
+{
+	String s = String(p_cstring);
+	godot_variant_new_string(&_godot_variant, (godot_string *) &s);
+}
+
+Variant::Variant(const wchar_t * p_wstring)
+{
+	String s = p_wstring;
+	godot_variant_new_string(&_godot_variant, (godot_string *) &s);
+}
+
+Variant::Variant(const Vector2& p_vector2)
+{
+	godot_variant_new_vector2(&_godot_variant, (godot_vector2 *) &p_vector2);
+}
+
+Variant::Variant(const Rect2& p_rect2)
+{
+	godot_variant_new_rect2(&_godot_variant, (godot_rect2 *) &p_rect2);
+}
+
+Variant::Variant(const Vector3& p_vector3)
+{
+	godot_variant_new_vector3(&_godot_variant, (godot_vector3 *) &p_vector3);
+}
+
+Variant::Variant(const Plane& p_plane)
+{
+	godot_variant_new_plane(&_godot_variant, (godot_plane *) &p_plane);
+}
+
+
+Variant::Variant(const Rect3& p_aabb)
+{
+	godot_variant_new_rect3(&_godot_variant, (godot_rect3 *) &p_aabb);
+}
+
+Variant::Variant(const Quat& p_quat)
+{
+	godot_variant_new_quat(&_godot_variant, (godot_quat *) &p_quat);
+}
+
+Variant::Variant(const Basis& p_transform)
+{
+	godot_variant_new_basis(&_godot_variant, (godot_basis *) &p_transform);
+}
+
+Variant::Variant(const Transform2D& p_transform)
+{
+	godot_variant_new_transform2d(&_godot_variant, (godot_transform2d *) &p_transform);
+}
+
+Variant::Variant(const Transform& p_transform)
+{
+	godot_variant_new_transform(&_godot_variant, (godot_transform *) &p_transform);
+}
+
+Variant::Variant(const Color& p_color)
+{
+	godot_variant_new_color(&_godot_variant, (godot_color *) &p_color);
+}
+
+Variant::Variant(const Image& p_image)
+{
+	godot_variant_new_image(&_godot_variant, (godot_image *) &p_image);
+}
+
+Variant::Variant(const NodePath& p_path)
+{
+	godot_variant_new_node_path(&_godot_variant, (godot_node_path *) &p_path);
+}
+
+Variant::Variant(const RID& p_rid)
+{
+	godot_variant_new_rid(&_godot_variant, (godot_rid *) &p_rid);
+}
+
+Variant::Variant(const Object* p_object)
+{
+	godot_variant_new_object(&_godot_variant, (godot_object *) p_object);
+}
+
+Variant::Variant(const InputEvent& p_input_event)
+{
+	godot_variant_new_input_event(&_godot_variant, (godot_input_event *) &p_input_event);
+}
+
+Variant::Variant(const Dictionary& p_dictionary)
+{
+	godot_variant_new_dictionary(&_godot_variant, (godot_dictionary *) &p_dictionary);
+}
+
+Variant::Variant(const Array& p_array)
+{
+	godot_variant_new_array(&_godot_variant, (godot_array *) &p_array);
+}
+
+Variant::Variant(const PoolByteArray& p_raw_array)
+{
+	godot_variant_new_pool_byte_array(&_godot_variant, (godot_pool_byte_array *) &p_raw_array);
+}
+
+Variant::Variant(const PoolIntArray& p_int_array)
+{
+	godot_variant_new_pool_int_array(&_godot_variant, (godot_pool_int_array *) &p_int_array);
+}
+
+Variant::Variant(const PoolRealArray& p_real_array)
+{
+	godot_variant_new_pool_real_array(&_godot_variant, (godot_pool_real_array *) &p_real_array);
+}
+
+Variant::Variant(const PoolStringArray& p_string_array)
+{
+	godot_variant_new_pool_string_array(&_godot_variant, (godot_pool_string_array *) &p_string_array);
+}
+
+Variant::Variant(const PoolVector2Array& p_vector2_array)
+{
+	godot_variant_new_pool_vector2_array(&_godot_variant, (godot_pool_vector2_array *) &p_vector2_array);
+}
+
+Variant::Variant(const PoolVector3Array& p_vector3_array)
+{
+	godot_variant_new_pool_vector3_array(&_godot_variant, (godot_pool_vector3_array *) &p_vector3_array);
+}
+
+Variant::Variant(const PoolColorArray& p_color_array)
+{
+	godot_variant_new_pool_color_array(&_godot_variant, (godot_pool_color_array *) &p_color_array);
+}
+
+
+Variant &Variant::operator =(const Variant& v)
+{
+	godot_variant_copy(&_godot_variant, &v._godot_variant);
+	return *this;
+}
+
+
+Variant::operator bool() const
+{
+	bool valid = false;
+	bool result = booleanize(valid);
+	return valid && result;
+}
+Variant::operator signed int() const
+{
+	return godot_variant_as_int(&_godot_variant);
+}
+Variant::operator unsigned int() const // this is the real one
+{
+	return godot_variant_as_int(&_godot_variant);
+}
+Variant::operator signed short() const
+{
+	return godot_variant_as_int(&_godot_variant);
+}
+Variant::operator unsigned short() const
+{
+	return godot_variant_as_int(&_godot_variant);
+}
+Variant::operator signed char() const
+{
+	return godot_variant_as_int(&_godot_variant);
+}
+Variant::operator unsigned char() const
+{
+	return godot_variant_as_int(&_godot_variant);
+}
+Variant::operator int64_t() const
+{
+	return godot_variant_as_int(&_godot_variant);
+}
+Variant::operator uint64_t() const
+{
+	return godot_variant_as_int(&_godot_variant);
+}
+
+
+Variant::operator wchar_t() const
+{
+	return godot_variant_as_int(&_godot_variant);
+}
+
+Variant::operator float() const
+{
+	return godot_variant_as_real(&_godot_variant);
+}
+
+Variant::operator double() const
+{
+	return godot_variant_as_real(&_godot_variant);
+}
+Variant::operator String() const
+{
+	godot_string s = godot_variant_as_string(&_godot_variant);
+	return *(String *) &s;
+}
+Variant::operator Vector2() const
+{
+	godot_vector2 s = godot_variant_as_vector2(&_godot_variant);
+	return *(Vector2 *) &s;
+}
+Variant::operator Rect2() const
+{
+	godot_rect2 s = godot_variant_as_rect2(&_godot_variant);
+	return *(Rect2 *) &s;
+}
+Variant::operator Vector3() const
+{
+	godot_vector3 s = godot_variant_as_vector3(&_godot_variant);
+	return *(Vector3 *) &s;
+}
+Variant::operator Plane() const
+{
+	godot_plane s = godot_variant_as_plane(&_godot_variant);
+	return *(Plane *) &s;
+}
+Variant::operator Rect3() const
+{
+	godot_rect3 s = godot_variant_as_rect3(&_godot_variant);
+	return *(Rect3 *) &s;
+}
+Variant::operator Quat() const
+{
+	godot_quat s = godot_variant_as_quat(&_godot_variant);
+	return *(Quat *) &s;
+}
+Variant::operator Basis() const
+{
+	godot_basis s = godot_variant_as_basis(&_godot_variant);
+	return *(Basis *) &s;
+}
+Variant::operator Transform() const
+{
+	godot_transform s = godot_variant_as_transform(&_godot_variant);
+	return *(Transform *) &s;
+}
+Variant::operator Transform2D() const
+{
+	godot_transform2d s = godot_variant_as_transform2d(&_godot_variant);
+	return *(Transform2D *) &s;
+}
+
+Variant::operator Color() const
+{
+	godot_color s = godot_variant_as_color(&_godot_variant);
+	return *(Color *) &s;
+}
+Variant::operator Image() const
+{
+	godot_image s = godot_variant_as_image(&_godot_variant);
+	return *(Image *) &s;
+}
+Variant::operator NodePath() const
+{
+	godot_node_path s = godot_variant_as_node_path(&_godot_variant);
+	return *(NodePath *) &s;
+}
+Variant::operator RID() const
+{
+	godot_rid s = godot_variant_as_rid(&_godot_variant);
+	return *(RID *) &s;
+}
+Variant::operator InputEvent() const
+{
+	godot_input_event s = godot_variant_as_input_event(&_godot_variant);
+	return *(InputEvent *) &s;
+}
+
+Variant::operator Dictionary() const
+{
+	godot_dictionary d = godot_variant_as_dictionary(&_godot_variant);
+	return *(Dictionary *) &d;
+}
+
+Variant::operator Array() const
+{
+	godot_array s = godot_variant_as_array(&_godot_variant);
+	return *(Array *) &s;
+}
+
+Variant::operator PoolByteArray() const
+{
+	godot_pool_byte_array s = godot_variant_as_pool_byte_array(&_godot_variant);
+	return *(PoolByteArray *) &s;
+}
+Variant::operator PoolIntArray() const
+{
+	godot_pool_int_array s = godot_variant_as_pool_int_array(&_godot_variant);
+	return *(PoolIntArray *) &s;
+}
+Variant::operator PoolRealArray() const
+{
+	godot_pool_real_array s = godot_variant_as_pool_real_array(&_godot_variant);
+	return *(PoolRealArray *) &s;
+}
+Variant::operator PoolStringArray() const
+{
+	godot_pool_string_array s = godot_variant_as_pool_string_array(&_godot_variant);
+	return *(PoolStringArray *) &s;
+}
+Variant::operator PoolVector2Array() const
+{
+	godot_pool_vector2_array s = godot_variant_as_pool_vector2_array(&_godot_variant);
+	return *(PoolVector2Array *) &s;
+}
+Variant::operator PoolVector3Array() const
+{
+	godot_pool_vector3_array s = godot_variant_as_pool_vector3_array(&_godot_variant);
+	return *(PoolVector3Array *) &s;
+}
+Variant::operator PoolColorArray() const
+{
+	godot_pool_color_array s = godot_variant_as_pool_color_array(&_godot_variant);
+	return *(PoolColorArray *) &s;
+}
+
+Variant::Type Variant::get_type() const
+{
+	return (Type) godot_variant_get_type(&_godot_variant);
+}
+
+
+Variant Variant::call(const String& method, const Variant **args, const int arg_count)
+{
+	Variant v;
+	*(godot_variant *) &v = godot_variant_call(&_godot_variant, (godot_string *) &method, (const godot_variant **)args, arg_count);
+	return v;
+}
+
+bool Variant::has_method(const String& method)
+{
+	return godot_variant_has_method(&_godot_variant, (godot_string *) &method);
+}
+
+bool Variant::operator ==(const Variant& b) const
+{
+	return godot_variant_operator_equal(&_godot_variant, &b._godot_variant);
+}
+
+bool Variant::operator !=(const Variant& b) const
+{
+	return !(*this == b);
+}
+
+bool Variant::operator <(const Variant& b) const
+{
+	return godot_variant_operator_less(&_godot_variant, &b._godot_variant);
+}
+
+bool Variant::operator <=(const Variant& b) const
+{
+	return (*this < b) || (*this == b);
+}
+
+bool Variant::operator >(const Variant& b) const
+{
+	return !(*this <= b);
+}
+
+bool Variant::operator >=(const Variant& b) const
+{
+	return !(*this < b);
+}
+
+bool Variant::hash_compare(const Variant& b) const
+{
+	return godot_variant_hash_compare(&_godot_variant, &b._godot_variant);
+}
+
+bool Variant::booleanize(bool &valid) const
+{
+	return godot_variant_booleanize(&_godot_variant, &valid);
+}
+
+Variant::~Variant()
+{
+	godot_variant_destroy(&_godot_variant);
+}
+
+
+
+}
+

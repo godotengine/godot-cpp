@@ -8,6 +8,8 @@ use std::fs::File;
 use std::iter::Iterator;
 use std::io::prelude::*;
 
+use std::collections::HashSet;
+
 use std::env;
 
 #[derive(Deserialize)]
@@ -66,25 +68,40 @@ fn main() {
 
 	let json: Vec<GodotClass> = serde_json::from_str::<Vec<GodotClass>>(&file_contents).unwrap();
 
-	let mut forward_declares = String::new();
-	{
-		for class in &json {
-			forward_declares = forward_declares + "class " + strip_name(&class.name) + ";\n";
+	for class in json {
+		let used_classes = get_used_classes(&class);
+
+		let mut header = File::create((base_dir.to_string() + strip_name(&class.name) + ".hpp").as_str()).unwrap();
+
+		header.write_all(generate_class_header(&used_classes, &class).as_bytes());
+
+		let mut implementation = File::create((base_dir.to_string() + "impl/" + strip_name(&class.name) + ".cpp").as_str()).unwrap();
+		implementation.write_all(generate_class_implementation(&used_classes, &class).as_bytes());
+	}
+}
+
+fn get_used_classes(class: &GodotClass) -> HashSet<&String> {
+
+	let mut classes = HashSet::new();
+
+	// classes.insert(&class.base_class);
+
+	for method in &class.methods {
+		if !is_primitive(&method.return_type) &&!is_core_type(&method.return_type) && !classes.contains(&method.return_type) {
+			classes.insert(&method.return_type);
+		}
+
+		for argument in &method.arguments {
+			if !is_primitive(&argument._type) &&!is_core_type(&argument._type) && !classes.contains(&argument._type) {
+				classes.insert(&argument._type);
+			}
 		}
 	}
 
-	for class in json {
-		generate_class_binding(&forward_declares, (base_dir.to_string() + strip_name(&class.name) + ".h").as_str(), &class);
-	}
+	return classes;
 }
 
-fn generate_class_binding(forward_declares: &String, filename: &str, class: &GodotClass) {
-	let mut file = File::create(filename).unwrap();
-
-	file.write_all(generate_class_content(forward_declares, class).as_bytes());
-}
-
-fn generate_class_content(forward_declares: &String, class: &GodotClass) -> String {
+fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) -> String {
 	let mut contents = String::new();
 
 	contents = contents + "#ifndef ";
@@ -103,7 +120,119 @@ fn generate_class_content(forward_declares: &String, class: &GodotClass) -> Stri
 
 	contents = contents + "namespace godot {\n\n";
 
-	contents += forward_declares;
+	// contents += forward_declares;
+
+	for used_type in used_classes {
+		contents = contents + "class " + strip_name(used_type) + ";\n"
+	}
+
+	contents = contents + "\n\n";
+
+	let core_obj_name = {
+		let mut name = String::new();
+		if class.singleton {
+			name = name + "___static_object_" + strip_name(&class.name);
+		} else {
+			name = name + "__core_object";
+		};
+		name
+	};
+
+	if class.singleton {
+		contents = contents + "\n\nstatic godot_object *" + core_obj_name.as_str() + ";\n\n";
+	}
+
+	contents = contents + "class " + strip_name(&class.name);
+
+	if class.base_class != "" {
+		contents = contents + " : public " + strip_name(&class.base_class);
+	}
+
+	contents = contents + " {\n";
+
+	if class.base_class == "" {
+		contents = contents + "protected:\n\tgodot_object *__core_object = 0;\n\n";
+	}
+
+	if class.singleton {
+		contents = contents + "private:\n";
+		contents = contents + "\tstatic void ___singleton_init();\n";
+	}
+
+	contents = contents + "public:\n\n";
+
+	// default constructor
+
+	{
+		contents = contents + "\t" + strip_name(&class.name) + "();\n\n";
+	}
+
+
+	// pointer constructor
+	{
+		contents = contents + "\t" + strip_name(&class.name) + "(godot_object *ptr);\n\n";
+	}
+
+	if class.base_class != "" {
+		contents = contents + "\tvoid _init();\n\n";
+	}
+
+	if class.instanciable {
+		contents = contents + "\tstatic " + strip_name(&class.name) + " _new();\n";
+		contents = contents + "\tvoid _destroy();\n\n";
+	}
+
+	for (name, value) in &class.constants {
+		contents = contents + "\tconst static int " + name.as_str() + " = " + value.as_i64().unwrap().to_string().as_str() + ";\n";
+	}
+
+	contents += "\n\n";
+
+	for method in &class.methods {
+		contents = contents + "\t" + (if class.singleton { "static " } else if method.is_virtual { "virtual " } else { "" }) + strip_name(&method.return_type) + (if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { " &" } else { " " }) + method.name.as_str() + "(";
+
+		for (i, argument) in (&method.arguments).iter().enumerate() {
+			if !is_primitive(&argument._type) {
+				contents = contents + "const " + argument._type.as_str() + "&";
+			} else {
+				contents = contents + "const " + argument._type.as_str() + "";
+			}
+
+			contents = contents + " " + escape_cpp(&argument.name);
+			if i != method.arguments.len() - 1 {
+				contents += ", ";
+			}
+		}
+
+		contents = contents + ")" + if method.is_const { " const" } else { "" } + ";\n";
+	}
+
+	contents = contents + "};\n\n";
+
+	contents = contents + "}\n";
+
+	contents = contents + "#endif\n";
+
+	contents
+}
+
+
+fn generate_class_implementation(used_classes: &HashSet<&String>, class: &GodotClass) -> String {
+	let mut contents = String::new();
+
+	contents = contents + "#include \"" + strip_name(&class.name) + ".hpp" + "\"\n";
+
+	/* contents = contents + "\n#include \"core/CoreTypes.h\"\n";
+
+	contents = contents + "\n#include <godot.h>\n\n\n";
+
+	if class.base_class != "" {
+		contents = contents + "\n#include \"" + strip_name(&class.base_class) + ".h\"\n\n\n";
+	}
+
+	contents = contents + "namespace godot {\n\n";
+
+	// contents += forward_declares;
 
 	let core_obj_name = {
 		let mut name = String::new();
@@ -197,9 +326,9 @@ fn generate_class_content(forward_declares: &String, class: &GodotClass) -> Stri
 		}
 
 		contents = contents + "\t\tstatic godot_method_bind *mb = NULL;\n"
-		                    + "\t\tif (mb == NULL) {\n"
-		                    + "\t\t\tmb = godot_method_bind_get_method(\"" + class.name.as_str() + "\", \"" + method.name.as_str() + "\");\n"
-		                    + "\t\t}\n";
+			+ "\t\tif (mb == NULL) {\n"
+			+ "\t\t\tmb = godot_method_bind_get_method(\"" + class.name.as_str() + "\", \"" + method.name.as_str() + "\");\n"
+			+ "\t\t}\n";
 
 		if method.return_type != "void" {
 			// contents = contents + "\t\t" + strip_name(&method.return_type) + (if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { "*" } else { "" }) + " ret;" + "\n";
@@ -269,7 +398,7 @@ fn generate_class_content(forward_declares: &String, class: &GodotClass) -> Stri
 
 
 	contents = contents + "#endif\n";
-
+	*/
 	contents
 }
 

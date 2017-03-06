@@ -12,6 +12,8 @@
 
 namespace godot {
 
+class PoolByteArray;
+
 class Image {
 	godot_image _godot_image;
 public:
@@ -76,117 +78,50 @@ public:
 	};
 
 
-	Image()
-	{
-		godot_image_new(&_godot_image);
-	}
+	Image();
 
-	Image(const int width, const int height, const bool mipmaps, const Format format)
-	{
-		godot_image_new_with_size_format(&_godot_image, width, height, mipmaps, (godot_image_format) format);
-	}
+	Image(const int width, const int height, const bool mipmaps, const Format format);
 
-	void blit_rect(const Image& src, const Rect2& src_rect, const Vector2& dest = Vector2(0, 0))
-	{
-		// @DLScript @Todo
-	}
+	void blit_rect(const Image& src, const Rect2& src_rect, const Vector2& dest = Vector2(0, 0));
 
-	void brush_transfer(const Image& src, const Image& brush, const Vector2& pos = Vector2(0, 0))
-	{
-		// @DLScript @Todo
-	}
+	void brush_transfer(const Image& src, const Image& brush, const Vector2& pos = Vector2(0, 0));
 
-	Image brushed(const Image& src, const Image& brush, const Vector2& pos = Vector2(0, 0))
-	{
-		return *this; // @DLScript @Todo
-	}
+	Image brushed(const Image& src, const Image& brush, const Vector2& pos = Vector2(0, 0));
 
-	Image compressed(const Format format)
-	{
-		return *this; // @DLScript @Todo
-	}
+	Image compressed(const Format format);
 
-	Image converted(const Format format)
-	{
-		return *this; // @DLScript @Todo
-	}
+	Image converted(const Format format);
 
-	Image decompressed()
-	{
-		return *this; // @DLScript @Todo
-	}
+	Image decompressed();
 
-	bool empty() const
-	{
-		return true; // @DLScript @Todo
-	}
+	bool empty() const;
 
-	void fix_alpha_edges()
-	{
-		// @DLScript @Todo
-	}
+	void fix_alpha_edges();
 
-	/*
-	PoolByteArray get_data()
-	{
-		// @Todo
-	}
-	*/
+	PoolByteArray get_data();
 
-	Format get_format() const
-	{
-		return Format::FORMAT_RGBAH; // @DLScript @Todo
-	}
 
-	int get_height() const
-	{
-		return godot_image_get_height(&_godot_image);
-	}
+	Format get_format() const;
 
-	Color get_pixel(const int x, const int y, const int mipmap_level = 0)
-	{
-		return Color(); // @DLScript @Todo
-	}
+	int get_height() const;
 
-	Image get_rect(const Rect2& area = Rect2())
-	{
-		return *this; // @DLScript @Todo
-	}
+	Color get_pixel(const int x, const int y, const int mipmap_level = 0);
 
-	Rect2 get_used_rect() const
-	{
-		return Rect2(); // @DLScript @Todo
-	}
+	Image get_rect(const Rect2& area = Rect2());
 
-	int get_width() const
-	{
-		return godot_image_get_width(&_godot_image);
-	}
+	Rect2 get_used_rect() const;
 
-	Error load(const String& path)
-	{
-		return (Error) godot_image_load(&_godot_image, (godot_string *) &path);
-	}
+	int get_width() const;
 
-	void put_pixel(const int x, const int y, const Color& color, int mipmap_level = 0)
-	{
-		// @DLScript @Todo
-	}
+	Error load(const String& path);
 
-	Image resized(const int x, const int y, const Interpolation interpolation = INTERPOLATE_NEAREST)
-	{
-		return *this; // @DLScript @Todo
-	}
+	void put_pixel(const int x, const int y, const Color& color, int mipmap_level = 0);
 
-	Error save_png(const String& path)
-	{
-		return (Error) godot_image_save_png(&_godot_image, (godot_string *) &path); // @Todo Error enum
-	}
+	Image resized(const int x, const int y, const Interpolation interpolation = INTERPOLATE_NEAREST);
 
-	~Image()
-	{
-		godot_image_destroy(&_godot_image);
-	}
+	Error save_png(const String& path);
+
+	~Image();
 };
 
 }

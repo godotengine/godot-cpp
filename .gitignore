@@ -1,3 +1,4 @@
-include/godot_cpp/*.h
+include/godot_cpp/*.hpp
+include/godot_cpp/impl/
 include/godot.h
 include/godot

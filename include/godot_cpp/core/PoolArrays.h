@@ -17,288 +17,124 @@ class Array;
 class PoolByteArray {
 	godot_pool_byte_array _godot_array;
 public:
-	PoolByteArray()
-	{
-		godot_pool_byte_array_new(&_godot_array);
-	}
+	PoolByteArray();
 
-	PoolByteArray(const Array& array)
-	{
-		godot_pool_byte_array_new_with_array(&_godot_array, (godot_array *) &array);
-	}
+	PoolByteArray(const Array& array);
 
-	void append(const uint8_t data)
-	{
-		godot_pool_byte_array_append(&_godot_array, data);
-	}
+	void append(const uint8_t data);
 
-	void append_array(const PoolByteArray& array)
-	{
-		godot_pool_byte_array_append_array(&_godot_array, &array._godot_array);
-	}
+	void append_array(const PoolByteArray& array);
 
-	int insert(const int idx, const uint8_t data)
-	{
-		return godot_pool_byte_array_insert(&_godot_array, idx, data);
-	}
+	int insert(const int idx, const uint8_t data);
 
-	void invert()
-	{
-		godot_pool_byte_array_invert(&_godot_array);
-	}
+	void invert();
 
-	void push_back(const uint8_t data)
-	{
-		godot_pool_byte_array_push_back(&_godot_array, data);
-	}
+	void push_back(const uint8_t data);
 
-	void remove(const int idx)
-	{
-		godot_pool_byte_array_remove(&_godot_array, idx);
-	}
+	void remove(const int idx);
 
-	void resize(const int size)
-	{
-		godot_pool_byte_array_resize(&_godot_array, size);
-	}
+	void resize(const int size);
 
-	void set(const int idx, const uint8_t data)
-	{
-		godot_pool_byte_array_set(&_godot_array, idx, data);
-	}
+	void set(const int idx, const uint8_t data);
 
-	uint8_t operator [](const int idx)
-	{
-		return godot_pool_byte_array_get(&_godot_array, idx);
-	}
+	uint8_t operator [](const int idx);
 
-	int size()
-	{
-		return godot_pool_byte_array_size(&_godot_array);
-	}
+	int size();
 
-
-	~PoolByteArray()
-	{
-		godot_pool_byte_array_destroy(&_godot_array);
-	}
+	~PoolByteArray();
 };
 
 
 class PoolIntArray {
 	godot_pool_int_array _godot_array;
 public:
-	PoolIntArray()
-	{
-		godot_pool_int_array_new(&_godot_array);
-	}
+	PoolIntArray();
 
-	PoolIntArray(const Array& array)
-	{
-		godot_pool_int_array_new_with_array(&_godot_array, (godot_array *) &array);
-	}
+	PoolIntArray(const Array& array);
 
-	void append(const int data)
-	{
-		godot_pool_int_array_append(&_godot_array, data);
-	}
+	void append(const int data);
 
-	void append_array(const PoolIntArray& array)
-	{
-		godot_pool_int_array_append_array(&_godot_array, &array._godot_array);
-	}
+	void append_array(const PoolIntArray& array);
 
-	int insert(const int idx, const int data)
-	{
-		return godot_pool_int_array_insert(&_godot_array, idx, data);
-	}
+	int insert(const int idx, const int data);
 
-	void invert()
-	{
-		godot_pool_int_array_invert(&_godot_array);
-	}
+	void invert();
 
-	void push_back(const int data)
-	{
-		godot_pool_int_array_push_back(&_godot_array, data);
-	}
+	void push_back(const int data);
 
-	void remove(const int idx)
-	{
-		godot_pool_int_array_remove(&_godot_array, idx);
-	}
+	void remove(const int idx);
 
-	void resize(const int size)
-	{
-		godot_pool_int_array_resize(&_godot_array, size);
-	}
+	void resize(const int size);
 
-	void set(const int idx, const int data)
-	{
-		godot_pool_int_array_set(&_godot_array, idx, data);
-	}
+	void set(const int idx, const int data);
 
-	int operator [](const int idx)
-	{
-		return godot_pool_int_array_get(&_godot_array, idx);
-	}
+	int operator [](const int idx);
 
-	int size()
-	{
-		return godot_pool_int_array_size(&_godot_array);
-	}
+	int size();
 
-
-	~PoolIntArray()
-	{
-		godot_pool_int_array_destroy(&_godot_array);
-	}
+	~PoolIntArray();
 };
 
 
 class PoolRealArray {
 	godot_pool_real_array _godot_array;
 public:
-	PoolRealArray()
-	{
-		godot_pool_real_array_new(&_godot_array);
-	}
+	PoolRealArray();
 
-	PoolRealArray(const Array& array)
-	{
-		godot_pool_real_array_new_with_array(&_godot_array, (godot_array *) &array);
-	}
+	PoolRealArray(const Array& array);
 
-	void append(const real_t data)
-	{
-		godot_pool_real_array_append(&_godot_array, data);
-	}
+	void append(const real_t data);
 
-	void append_array(const PoolRealArray& array)
-	{
-		godot_pool_real_array_append_array(&_godot_array, &array._godot_array);
-	}
+	void append_array(const PoolRealArray& array);
 
-	int insert(const int idx, const real_t data)
-	{
-		return godot_pool_real_array_insert(&_godot_array, idx, data);
-	}
+	int insert(const int idx, const real_t data);
 
-	void invert()
-	{
-		godot_pool_real_array_invert(&_godot_array);
-	}
+	void invert();
 
-	void push_back(const real_t data)
-	{
-		godot_pool_real_array_push_back(&_godot_array, data);
-	}
+	void push_back(const real_t data);
 
-	void remove(const int idx)
-	{
-		godot_pool_real_array_remove(&_godot_array, idx);
-	}
+	void remove(const int idx);
 
-	void resize(const int size)
-	{
-		godot_pool_real_array_resize(&_godot_array, size);
-	}
+	void resize(const int size);
 
-	void set(const int idx, const real_t data)
-	{
-		godot_pool_real_array_set(&_godot_array, idx, data);
-	}
+	void set(const int idx, const real_t data);
 
-	real_t operator [](const int idx)
-	{
-		return godot_pool_real_array_get(&_godot_array, idx);
-	}
+	real_t operator [](const int idx);
 
-	int size()
-	{
-		return godot_pool_real_array_size(&_godot_array);
-	}
+	int size();
 
-
-	~PoolRealArray()
-	{
-		godot_pool_real_array_destroy(&_godot_array);
-	}
+	~PoolRealArray();
 };
 
 
 class PoolStringArray {
 	godot_pool_string_array _godot_array;
 public:
-	PoolStringArray()
-	{
-		godot_pool_string_array_new(&_godot_array);
-	}
+	PoolStringArray();
 
-	PoolStringArray(const Array& array)
-	{
-		godot_pool_string_array_new_with_array(&_godot_array, (godot_array *) &array);
-	}
+	PoolStringArray(const Array& array);
 
-	void append(const String& data)
-	{
-		godot_pool_string_array_append(&_godot_array, (godot_string *) &data);
-	}
+	void append(const String& data);
 
-	void append_array(const PoolStringArray& array)
-	{
-		godot_pool_string_array_append_array(&_godot_array, &array._godot_array);
-	}
+	void append_array(const PoolStringArray& array);
 
-	int insert(const int idx, const String& data)
-	{
-		return godot_pool_string_array_insert(&_godot_array, idx, (godot_string *) &data);
-	}
+	int insert(const int idx, const String& data);
 
-	void invert()
-	{
-		godot_pool_string_array_invert(&_godot_array);
-	}
+	void invert();
 
-	void push_back(const String& data)
-	{
-		godot_pool_string_array_push_back(&_godot_array, (godot_string *) &data);
-	}
+	void push_back(const String& data);
 
-	void remove(const int idx)
-	{
-		godot_pool_string_array_remove(&_godot_array, idx);
-	}
+	void remove(const int idx);
 
-	void resize(const int size)
-	{
-		godot_pool_string_array_resize(&_godot_array, size);
-	}
+	void resize(const int size);
 
-	void set(const int idx, const String& data)
-	{
-		godot_pool_string_array_set(&_godot_array, idx, (godot_string *) &data);
-	}
+	void set(const int idx, const String& data);
 
-	String operator [](const int idx)
-	{
-		String s;
-		godot_string str = godot_pool_string_array_get(&_godot_array, idx);
-		godot_string_copy_string((godot_string *) &s, &str);
-		godot_string_destroy(&str);
-		return s;
-	}
+	String operator [](const int idx);
 
-	int size()
-	{
-		return godot_pool_string_array_size(&_godot_array);
-	}
+	int size();
 
-
-	~PoolStringArray()
-	{
-		godot_pool_string_array_destroy(&_godot_array);
-	}
+	~PoolStringArray();
 };
 
 
@@ -306,219 +142,93 @@ public:
 class PoolVector2Array {
 	godot_pool_vector2_array _godot_array;
 public:
-	PoolVector2Array()
-	{
-		godot_pool_vector2_array_new(&_godot_array);
-	}
+	PoolVector2Array();
 
-	PoolVector2Array(const Array& array)
-	{
-		godot_pool_vector2_array_new_with_array(&_godot_array, (godot_array *) &array);
-	}
+	PoolVector2Array(const Array& array);
 
-	void append(const Vector2& data)
-	{
-		godot_pool_vector2_array_append(&_godot_array, (godot_vector2 *) &data);
-	}
+	void append(const Vector2& data);
 
-	void append_array(const PoolVector2Array& array)
-	{
-		godot_pool_vector2_array_append_array(&_godot_array, &array._godot_array);
-	}
+	void append_array(const PoolVector2Array& array);
 
-	int insert(const int idx, const Vector2& data)
-	{
-		return godot_pool_vector2_array_insert(&_godot_array, idx, (godot_vector2 *) &data);
-	}
+	int insert(const int idx, const Vector2& data);
 
-	void invert()
-	{
-		godot_pool_vector2_array_invert(&_godot_array);
-	}
+	void invert();
 
-	void push_back(const Vector2& data)
-	{
-		godot_pool_vector2_array_push_back(&_godot_array, (godot_vector2 *) &data);
-	}
+	void push_back(const Vector2& data);
 
-	void remove(const int idx)
-	{
-		godot_pool_vector2_array_remove(&_godot_array, idx);
-	}
+	void remove(const int idx);
 
-	void resize(const int size)
-	{
-		godot_pool_vector2_array_resize(&_godot_array, size);
-	}
+	void resize(const int size);
 
-	void set(const int idx, const Vector2& data)
-	{
-		godot_pool_vector2_array_set(&_godot_array, idx, (godot_vector2 *) &data);
-	}
+	void set(const int idx, const Vector2& data);
 
-	Vector2 operator [](const int idx)
-	{
-		Vector2 v;
-		*(godot_vector2 *) &v = godot_pool_vector2_array_get(&_godot_array, idx);
-		return v;
-	}
+	Vector2 operator [](const int idx);
 
-	int size()
-	{
-		return godot_pool_vector2_array_size(&_godot_array);
-	}
+	int size();
 
-
-	~PoolVector2Array()
-	{
-		godot_pool_vector2_array_destroy(&_godot_array);
-	}
+	~PoolVector2Array();
 };
 
 
 class PoolVector3Array {
 	godot_pool_vector3_array _godot_array;
 public:
-	PoolVector3Array()
-	{
-		godot_pool_vector3_array_new(&_godot_array);
-	}
+	PoolVector3Array();
 
-	PoolVector3Array(const Array& array)
-	{
-		godot_pool_vector3_array_new_with_array(&_godot_array, (godot_array *) &array);
-	}
+	PoolVector3Array(const Array& array);
 
-	void append(const Vector3& data)
-	{
-		godot_pool_vector3_array_append(&_godot_array, (godot_vector3 *) &data);
-	}
+	void append(const Vector3& data);
 
-	void append_array(const PoolVector3Array& array)
-	{
-		godot_pool_vector3_array_append_array(&_godot_array, &array._godot_array);
-	}
+	void append_array(const PoolVector3Array& array);
 
-	int insert(const int idx, const Vector3& data)
-	{
-		return godot_pool_vector3_array_insert(&_godot_array, idx, (godot_vector3 *) &data);
-	}
+	int insert(const int idx, const Vector3& data);
 
-	void invert()
-	{
-		godot_pool_vector3_array_invert(&_godot_array);
-	}
+	void invert();
 
-	void push_back(const Vector3& data)
-	{
-		godot_pool_vector3_array_push_back(&_godot_array, (godot_vector3 *) &data);
-	}
+	void push_back(const Vector3& data);
 
-	void remove(const int idx)
-	{
-		godot_pool_vector3_array_remove(&_godot_array, idx);
-	}
+	void remove(const int idx);
 
-	void resize(const int size)
-	{
-		godot_pool_vector3_array_resize(&_godot_array, size);
-	}
+	void resize(const int size);
 
-	void set(const int idx, const Vector3& data)
-	{
-		godot_pool_vector3_array_set(&_godot_array, idx, (godot_vector3 *) &data);
-	}
+	void set(const int idx, const Vector3& data);
 
-	Vector3 operator [](const int idx)
-	{
-		Vector3 v;
-		*(godot_vector3 *) &v = godot_pool_vector3_array_get(&_godot_array, idx);
-		return v;
-	}
+	Vector3 operator [](const int idx);
 
-	int size()
-	{
-		return godot_pool_vector3_array_size(&_godot_array);
-	}
+	int size();
 
-
-	~PoolVector3Array()
-	{
-		godot_pool_vector3_array_destroy(&_godot_array);
-	}
+	~PoolVector3Array();
 };
 
 
 class PoolColorArray {
 	godot_pool_color_array _godot_array;
 public:
-	PoolColorArray()
-	{
-		godot_pool_color_array_new(&_godot_array);
-	}
+	PoolColorArray();
 
-	PoolColorArray(const Array& array)
-	{
-		godot_pool_color_array_new_with_array(&_godot_array, (godot_array *) &array);
-	}
+	PoolColorArray(const Array& array);
 
-	void append(const Color& data)
-	{
-		godot_pool_color_array_append(&_godot_array, (godot_color *) &data);
-	}
+	void append(const Color& data);
 
-	void append_array(const PoolColorArray& array)
-	{
-		godot_pool_color_array_append_array(&_godot_array, &array._godot_array);
-	}
+	void append_array(const PoolColorArray& array);
 
-	int insert(const int idx, const Color& data)
-	{
-		return godot_pool_color_array_insert(&_godot_array, idx, (godot_color *) &data);
-	}
+	int insert(const int idx, const Color& data);
 
-	void invert()
-	{
-		godot_pool_color_array_invert(&_godot_array);
-	}
+	void invert();
 
-	void push_back(const Color& data)
-	{
-		godot_pool_color_array_push_back(&_godot_array, (godot_color *) &data);
-	}
+	void push_back(const Color& data);
 
-	void remove(const int idx)
-	{
-		godot_pool_color_array_remove(&_godot_array, idx);
-	}
+	void remove(const int idx);
 
-	void resize(const int size)
-	{
-		godot_pool_color_array_resize(&_godot_array, size);
-	}
+	void resize(const int size);
 
-	void set(const int idx, const Color& data)
-	{
-		godot_pool_color_array_set(&_godot_array, idx, (godot_color *) &data);
-	}
+	void set(const int idx, const Color& data);
 
-	Color operator [](const int idx)
-	{
-		Color v;
-		*(godot_color *) &v = godot_pool_color_array_get(&_godot_array, idx);
-		return v;
-	}
+	Color operator [](const int idx);
 
-	int size()
-	{
-		return godot_pool_color_array_size(&_godot_array);
-	}
+	int size();
 
-
-	~PoolColorArray()
-	{
-		godot_pool_color_array_destroy(&_godot_array);
-	}
+	~PoolColorArray();
 };
 
 

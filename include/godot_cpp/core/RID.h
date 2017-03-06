@@ -11,20 +11,11 @@ class RID {
 	godot_rid _godot_rid;
 public:
 
-	RID(Object *p)
-	{
-		godot_rid_new(&_godot_rid, p);
-	}
+	RID(Object *p);
 
-	int32_t get_rid() const
-	{
-		return godot_rid_get_rid(&_godot_rid);
-	}
+	int32_t get_rid() const;
 
-	~RID()
-	{
-		godot_rid_destroy(&_godot_rid);
-	}
+	~RID();
 };
 
 }
