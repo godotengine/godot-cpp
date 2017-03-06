@@ -1,10 +1,10 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
-#include "Basis.h"
+#include "Basis.hpp"
 
-#include "Plane.h"
-#include "Rect3.h"
+#include "Plane.hpp"
+#include "Rect3.hpp"
 
 namespace godot {
 

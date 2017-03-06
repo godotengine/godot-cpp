@@ -1,7 +1,7 @@
 #ifndef RECT2_H
 #define RECT2_H
 
-#include "Vector2.h"
+#include "Vector2.hpp"
 
 #include <cmath>
 

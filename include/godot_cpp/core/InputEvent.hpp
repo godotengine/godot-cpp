@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <memory.h>
 
-#include "String.h"
+#include "String.hpp"
 
 namespace godot {
 

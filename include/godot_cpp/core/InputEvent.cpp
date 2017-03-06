@@ -1,14 +1,14 @@
-#include "InputEvent.h"
+#include "InputEvent.hpp"
 
 #include <cstdint>
 #include <memory.h>
 
-#include "Vector2.h"
-#include "Transform2D.h"
+#include "Vector2.hpp"
+#include "Transform2D.hp"
 
 #include <cmath>
 
-#include "String.h"
+#include "String.hpp"
 
 namespace godot {
 

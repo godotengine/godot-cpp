@@ -1,11 +1,11 @@
-#include "PoolArrays.h"
+#include "PoolArrays.hpp"
 
-#include "Defs.h"
+#include "Defs.hpp"
 
-#include "String.h"
-#include "Color.h"
-#include "Vector2.h"
-#include "Vector3.h"
+#include "String.hpp"
+#include "Color.hpp"
+#include "Vector2.hpp"
+#include "Vector3.hpp"
 
 #include <godot/godot_pool_arrays.h>
 

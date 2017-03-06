@@ -1,8 +1,8 @@
-#include "Dictionary.h"
+#include "Dictionary.hpp"
 
-#include "Variant.h"
+#include "Variant.hpp"
 
-#include "Array.h"
+#include "Array.hpp"
 
 #include <godot/godot_dictionary.h>
 

@@ -1,13 +1,13 @@
-#include "Image.h"
+#include "Image.hpp"
 
-#include "Defs.h"
+#include "Defs.hpp"
 
-#include "Vector2.h"
-#include "Rect2.h"
-#include "Color.h"
-#include "String.h"
+#include "Vector2.hpp"
+#include "Rect2.hpp"
+#include "Color.hpp"
+#include "String.hpp"
 
-#include "PoolArrays.h"
+#include "PoolArrays.hpp"
 
 #include <godot/godot_image.h>
 

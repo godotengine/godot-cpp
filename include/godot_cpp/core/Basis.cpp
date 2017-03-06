@@ -1,11 +1,11 @@
-#include "Basis.h"
+#include "Basis.hpp"
 
 
-#include "Defs.h"
+#include "Defs.hpp"
 
-#include "Vector3.h"
+#include "Vector3.hpp"
 
-#include "Quat.h"
+#include "Quat.hpp"
 
 #include <algorithm>
 
@@ -597,7 +597,7 @@ Basis::Basis(const Vector3& p_euler) {
 
 }
 
-#include "Quat.h"
+#include "Quat.hpp"
 
 namespace godot {
 

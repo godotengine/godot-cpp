@@ -1,10 +1,10 @@
-#include "Transform2D.h"
+#include "Transform2D.hp"
 
-#include "Vector2.h"
+#include "Vector2.hpp"
 
-#include "String.h"
+#include "String.hpp"
 
-#include "Rect2.h"
+#include "Rect2.hpp"
 
 #include <algorithm>
 

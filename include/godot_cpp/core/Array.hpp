@@ -3,7 +3,7 @@
 
 #include <godot/godot_array.h>
 
-#include "String.h"
+#include "String.hpp"
 
 namespace godot {
 

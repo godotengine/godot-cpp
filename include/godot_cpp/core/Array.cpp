@@ -1,10 +1,10 @@
-#include "Array.h"
+#include "Array.hpp"
 
 #include <cstdlib>
 
 #include <godot/godot_array.h>
 
-#include "Variant.h"
+#include "Variant.hpp"
 
 namespace godot {
 

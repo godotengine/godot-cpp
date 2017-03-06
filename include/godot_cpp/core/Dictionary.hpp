@@ -1,9 +1,9 @@
 #ifndef DICTIONARY_H
 #define DICTIONARY_H
 
-#include "Variant.h"
+#include "Variant.hpp"
 
-#include "Array.h"
+#include "Array.hpp"
 
 #include <godot/godot_dictionary.h>
 

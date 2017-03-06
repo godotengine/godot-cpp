@@ -1,8 +1,8 @@
-#include "Rect3.h"
+#include "Rect3.hpp"
 
-#include "Vector3.h"
+#include "Vector3.hpp"
 
-#include "Plane.h"
+#include "Plane.hpp"
 
 #include <algorithm>
 

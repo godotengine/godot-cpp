@@ -1,11 +1,11 @@
-#include "Transform.h"
+#include "Transform.hpp"
 
-#include "Basis.h"
+#include "Basis.hpp"
 
-#include "Plane.h"
-#include "Rect3.h"
+#include "Plane.hpp"
+#include "Rect3.hpp"
 
-#include "Quat.h"
+#include "Quat.hpp"
 
 namespace godot {
 

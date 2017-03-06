@@ -1,9 +1,9 @@
 #ifndef VECTOR3_H
 #define VECTOR3_H
 
-#include "Defs.h"
+#include "Defs.hpp"
 
-#include "String.h"
+#include "String.hpp"
 
 namespace godot {
 

@@ -1,6 +1,6 @@
-#include "NodePath.h"
+#include "NodePath.hpp"
 
-#include "String.h"
+#include "String.hpp"
 
 #include <godot/godot_node_path.h>
 

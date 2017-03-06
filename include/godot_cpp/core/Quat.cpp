@@ -1,13 +1,13 @@
-#include "Quat.h"
+#include "Quat.hpp"
 
 
 #include <cmath>
 
-#include "Defs.h"
+#include "Defs.hpp"
 
-#include "Vector3.h"
+#include "Vector3.hpp"
 
-#include "Basis.h"
+#include "Basis.hpp"
 
 namespace godot {
 

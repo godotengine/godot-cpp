@@ -1,6 +1,6 @@
-#include "Plane.h"
+#include "Plane.hpp"
 
-#include "Vector3.h"
+#include "Vector3.hpp"
 
 #include <cmath>
 

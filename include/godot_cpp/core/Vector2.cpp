@@ -1,10 +1,10 @@
-#include "Vector2.h"
+#include "Vector2.hpp"
 
 #include <cmath>
 
 #include <godot/godot_vector2.h>
 
-#include "String.h"
+#include "String.hpp"
 
 namespace godot {
 

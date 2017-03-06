@@ -1,7 +1,7 @@
 #ifndef PLANE_H
 #define PLANE_H
 
-#include "Vector3.h"
+#include "Vector3.hpp"
 
 #include <cmath>
 

@@ -1,13 +1,13 @@
-#include "Vector3.h"
+#include "Vector3.hpp"
 
-#include "String.h"
+#include "String.hpp"
 
 #include <stdlib.h>
 
 #include <cmath>
 
 
-#include "Basis.h"
+#include "Basis.hpp"
 
 namespace godot {
 

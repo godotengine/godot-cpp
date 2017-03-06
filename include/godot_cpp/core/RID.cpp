@@ -1,4 +1,4 @@
-#include "RID.h"
+#include "RID.hpp"
 
 #include <godot/godot_rid.h>
 

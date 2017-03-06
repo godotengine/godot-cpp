@@ -11,6 +11,8 @@ class RID {
 	godot_rid _godot_rid;
 public:
 
+	inline RID() {}
+
 	RID(Object *p);
 
 	int32_t get_rid() const;

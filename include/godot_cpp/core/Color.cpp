@@ -1,10 +1,10 @@
-#include "Color.h"
+#include "Color.hpp"
 
 #include <godot/godot_color.h>
 
 #include <cmath>
 
-#include "String.h"
+#include "String.hpp"
 
 namespace godot {
 

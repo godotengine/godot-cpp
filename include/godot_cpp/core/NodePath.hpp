@@ -1,7 +1,7 @@
 #ifndef NODEPATH_H
 #define NODEPATH_H
 
-#include "String.h"
+#include "String.hpp"
 
 #include <godot/godot_node_path.h>
 

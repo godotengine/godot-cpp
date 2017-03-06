@@ -1,10 +1,10 @@
-#include "Variant.h"
+#include "Variant.hpp"
 
 #include <godot/godot_variant.h>
 
-#include "Defs.h"
+#include "Defs.hpp"
 
-#include "CoreTypes.h"
+#include "CoreTypes.hpp"
 
 #include <iostream>
 

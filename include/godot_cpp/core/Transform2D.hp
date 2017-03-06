@@ -1,7 +1,7 @@
 #ifndef TRANSFORM2D_H
 #define TRANSFORM2D_H
 
-#include "Vector2.h"
+#include "Vector2.hpp"
 
 
 namespace godot {

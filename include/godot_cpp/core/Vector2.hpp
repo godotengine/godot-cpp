@@ -4,7 +4,7 @@
 
 #include <godot/godot_vector2.h>
 
-#include "Defs.h"
+#include "Defs.hpp"
 
 namespace godot {
 
