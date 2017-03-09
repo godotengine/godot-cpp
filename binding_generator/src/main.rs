@@ -71,9 +71,11 @@ fn main() {
 	let mut icalls: HashSet<(String, Vec<String>)> = HashSet::new();
 
 	for class in json {
-		if class.api_type == "tools" {
-			continue
-		}
+		// make this toggleable with a command line switch
+		// if class.api_type == "tools" {
+		// 	println!("{}", class.name);
+		// 	continue
+		// }
 		let used_classes = get_used_classes(&class);
 
 		let mut header = File::create((base_dir.to_string() + strip_name(&class.name) + ".hpp").as_str()).unwrap();
