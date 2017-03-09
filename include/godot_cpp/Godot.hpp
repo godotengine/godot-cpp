@@ -20,16 +20,6 @@ namespace godot {
 
 
 
-template<class A, class B>
-A object_cast(B b)
-{
-	A *a = (A*) &b;
-	return *a;
-}
-
-
-
-
 
 // instance and destroy funcs
 
@@ -66,7 +56,7 @@ void register_class()
 
 template<class T, class R, class A0, class A1, class A2, class A3, class A4, R (T::*p)(A0, A1, A2, A3, A4)>
 struct WrappedMethod5 {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -80,7 +70,7 @@ struct WrappedMethod5 {
 
 template<class T, class A0, class A1, class A2, class A3, class A4, void (T::*p)(A0, A1, A2, A3, A4)>
 struct WrappedMethod5<T, void, A0, A1, A2, A3, A4, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -93,7 +83,7 @@ struct WrappedMethod5<T, void, A0, A1, A2, A3, A4, p> {
 
 template<class T, class R, class A0, class A1, class A2, class A3, R (T::*p)(A0, A1, A2, A3)>
 struct WrappedMethod4 {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -107,7 +97,7 @@ struct WrappedMethod4 {
 
 template<class T, class A0, class A1, class A2, class A3, void (T::*p)(A0, A1, A2, A3)>
 struct WrappedMethod4<T, void, A0, A1, A2, A3, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -121,7 +111,7 @@ struct WrappedMethod4<T, void, A0, A1, A2, A3, p> {
 
 template<class T, class R, class A0, class A1, class A2, R (T::*p)(A0, A1, A2)>
 struct WrappedMethod3 {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -135,7 +125,7 @@ struct WrappedMethod3 {
 
 template<class T, class A0, class A1, class A2, void (T::*p)(A0, A1, A2)>
 struct WrappedMethod3<T, void, A0, A1, A2, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -148,7 +138,7 @@ struct WrappedMethod3<T, void, A0, A1, A2, p> {
 
 template<class T, class R, class A0, class A1, R (T::*p)(A0, A1)>
 struct WrappedMethod2 {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -162,7 +152,7 @@ struct WrappedMethod2 {
 
 template<class T, class A0, class A1, void (T::*p)(A0, A1)>
 struct WrappedMethod2<T, void, A0, A1, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -175,7 +165,7 @@ struct WrappedMethod2<T, void, A0, A1, p> {
 
 template<class T, class R, class I, R (T::*p)(I)>
 struct WrappedMethod1 {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -189,7 +179,7 @@ struct WrappedMethod1 {
 
 template <class T, class I, void (T::*p)(I)>
 struct WrappedMethod1<T, void, I, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -204,7 +194,7 @@ struct WrappedMethod1<T, void, I, p> {
 
 template<class T, class R, R (T::*p)()>
 struct WrappedMethod0 {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);
@@ -217,7 +207,7 @@ struct WrappedMethod0 {
 
 template<class T, void (T::*p)()>
 struct WrappedMethod0<T, void, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, int num_args, godot_variant **args)
+	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
 	{
 		godot_variant _variant;
 		godot_variant_new_nil(&_variant);

@@ -71,6 +71,9 @@ fn main() {
 	let mut icalls: HashSet<(String, Vec<String>)> = HashSet::new();
 
 	for class in json {
+		if class.api_type == "tools" {
+			continue
+		}
 		let used_classes = get_used_classes(&class);
 
 		let mut header = File::create((base_dir.to_string() + strip_name(&class.name) + ".hpp").as_str()).unwrap();
@@ -158,7 +161,7 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 	contents = contents + " {\n";
 
 	if class.base_class == "" {
-		contents = contents + "protected:\n\tgodot_object *__core_object = 0;\n\n";
+		contents = contents + "public:\n\tgodot_object *__core_object = 0;\n\n";
 	}
 
 	if class.singleton {
@@ -180,12 +183,22 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 		contents = contents + "\t" + strip_name(&class.name) + "(godot_object *ptr);\n\n";
 	}
 
+	// object constructor
+	if !class.singleton {
+		contents = contents + "\t" + strip_name(&class.name) + "(const Object& ptr);\n\n";
+	}
+
+	// object cast
+	{
+		contents = contents + "\toperator godot_object*();\n\n";
+	}
+
 	if class.base_class != "" {
 		contents = contents + "\tvoid _init();\n\n";
 	}
 
 	if class.instanciable {
-		contents = contents + "\tstatic " + strip_name(&class.name) + "& __new();\n";
+		contents = contents + "\tstatic " + strip_name(&class.name) + " __new();\n";
 		contents = contents + "\tvoid __destroy();\n\n";
 	}
 
@@ -196,10 +209,10 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 	contents += "\n\n";
 
 	for method in &class.methods {
-		contents = contents + "\t" + (if class.singleton { "static " } else if method.is_virtual { "virtual " } else { "" }) + strip_name(&method.return_type) + (if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { " &" } else { " " }) + escape_cpp(&method.name) + "(";
+		contents = contents + "\t" + (if class.singleton { "static " } else if method.is_virtual { "virtual " } else { "" }) + strip_name(&method.return_type) + (if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { " " } else { " " }) + escape_cpp(&method.name) + "(";
 
 		for (i, argument) in (&method.arguments).iter().enumerate() {
-			if !is_primitive(&argument._type) {
+			if !is_primitive(&argument._type) && !is_core_type(&argument._type) {
 				contents = contents + "const " + argument._type.as_str() + "&";
 			} else {
 				contents = contents + "const " + argument._type.as_str() + "";
@@ -240,6 +253,8 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 	contents = contents + "#include \"" + strip_name(&class.name) + ".hpp" + "\"\n";
 
 	contents = contents + "\n#include \"core/CoreTypes.hpp\"\n";
+
+	contents = contents + "\n#include \"Godot.hpp\"\n\n";
 
 	if class.instanciable {
 		contents = contents + "#include \"ClassDB.hpp\"\n";
@@ -294,6 +309,20 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 		contents = contents + "}\n\n\n";
 	}
 
+	// Object constructor
+	if !class.singleton {
+		contents = contents + "" + strip_name(&class.name) + "::" + strip_name(&class.name) + "(const Object& ptr)\n{\n";
+		contents = contents + "\t__core_object = ptr.__core_object;\n";
+		contents = contents + "}\n\n\n";
+	}
+
+	// Object constructor
+	{
+		contents = contents + "" + strip_name(&class.name) + "::operator godot_object*()\n{\n";
+		contents = contents + "\treturn __core_object;\n";
+		contents = contents + "}\n\n\n";
+	}
+
 	if class.base_class != "" {
 		contents = contents + "void " + strip_name(&class.name) + "::" + "_init()\n{\n";
 		contents = contents + "\t\n";
@@ -304,10 +333,10 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 	contents += "\n\n";
 
 	for method in &class.methods {
-		contents = contents + strip_name(&method.return_type) + (if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { " &" } else { " " }) + strip_name(&class.name) + "::" + escape_cpp(&method.name) + "(";
+		contents = contents + strip_name(&method.return_type) + (if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { " " } else { " " }) + strip_name(&class.name) + "::" + escape_cpp(&method.name) + "(";
 
 		for (i, argument) in (&method.arguments).iter().enumerate() {
-			if !is_primitive(&argument._type) {
+			if !is_primitive(&argument._type) && !is_core_type(&argument._type) {
 				contents = contents + "const " + argument._type.as_str() + "&";
 			} else {
 				contents = contents + "const " + argument._type.as_str() + "";
@@ -337,7 +366,7 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 		if method.return_type != "void" {
 			contents = contents + "return ";
 			if !is_primitive(&method.return_type) && !is_core_type(&method.return_type) {
-				contents = contents + "reinterpret_cast<" + strip_name(&method.return_type) + "&>(";
+				contents = contents + strip_name(&method.return_type) + "(";
 			}
 		}
 
@@ -379,9 +408,9 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 
 	if class.instanciable {
 
-		contents = contents + strip_name(&class.name) + "& " + strip_name(&class.name) + "::__new() {\n";
+		contents = contents + strip_name(&class.name) + " " + strip_name(&class.name) + "::__new() {\n";
 		contents = contents + "\tObject ptr = ClassDB::instance(\"" + class.name.as_str() + "\");\n";
-		contents = contents + "\treturn reinterpret_cast<" + strip_name(&class.name) + "&>(ptr);\n";
+		contents = contents + "\treturn ptr;\n";
 		contents = contents + "}\n\n";
 
 		contents = contents + "void " + strip_name(&class.name) + "::__destroy() {\n";
@@ -443,7 +472,7 @@ fn generate_icall_header(icalls: &HashSet<(String, Vec<String>)>) -> String {
 		if is_primitive(t) || is_core_type(t) {
 			t.as_str()
 		} else {
-			"Object& "
+			"godot_object* "
 		}
 	}
 
@@ -464,7 +493,7 @@ fn generate_icall_header(icalls: &HashSet<(String, Vec<String>)>) -> String {
 		contents = contents + return_type(ret) + " " + get_icall_name_ref((ret, args)).as_str() + "(godot_method_bind *mb, godot_object *inst";
 		for arg in args {
 			contents = contents + ", ";
-			if !is_primitive(&arg) {
+			if !is_primitive(&arg) && is_core_type(&arg) {
 				contents = contents + "const " + arg.as_str() + "&";
 			} else {
 				contents = contents + "const " + arg.as_str() + "";
@@ -484,7 +513,7 @@ fn generate_icall_implementation(icalls: &HashSet<(String, Vec<String>)>) -> Str
 		if is_primitive(t) || is_core_type(t) {
 			t.as_str()
 		} else {
-			"Object& "
+			"godot_object* "
 		}
 	}
 
@@ -504,7 +533,7 @@ fn generate_icall_implementation(icalls: &HashSet<(String, Vec<String>)>) -> Str
 		let mut i = 0;
 		for arg in args {
 			contents = contents + ", ";
-			if !is_primitive(&arg) {
+			if !is_primitive(&arg) && is_core_type(&arg) {
 				contents = contents + "const " + arg.as_str() + "&";
 			} else {
 				contents = contents + "const " + arg.as_str() + "";
@@ -530,7 +559,7 @@ fn generate_icall_implementation(icalls: &HashSet<(String, Vec<String>)>) -> Str
 			} else if is_core_type(arg) {
 				contents = contents + "(void *) &arg" + j.to_string().as_str();
 			} else {
-				contents = contents + "(void *) &arg" + j.to_string().as_str();
+				contents = contents + "(void *) *(godot_object**) &arg" + j.to_string().as_str();
 			}
 			contents = contents + ",\n";
 			j = j + 1;
@@ -541,7 +570,7 @@ fn generate_icall_implementation(icalls: &HashSet<(String, Vec<String>)>) -> Str
 		contents = contents + "\tgodot_method_bind_ptrcall(mb, inst, args, " + if ret == "void" { "NULL" } else { "&ret" } + ");\n";
 
 		if !is_primitive(ret) && !is_core_type(ret) {
-			contents = contents + "\treturn reinterpret_cast<Object&>(ret);\n";
+			contents = contents + "\treturn ret;\n";
 		} else if ret != "void" {
 			contents = contents + "\treturn ret;\n";
 		}

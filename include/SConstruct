@@ -2,7 +2,9 @@
 import os
 
 env = Environment()
-env["CXX"] = "clang++"
+
+if ARGUMENTS.get("use_llvm", "yes") == "yes":
+    env["CXX"] = "clang++"
 
 target = ARGUMENTS.get("target", "core")
 
@@ -35,13 +37,18 @@ if (target == "core"):
     library = env.SharedLibrary(target='godot_cpp_core', source=sources)
     Default(library)
 
-elif target == "binding":
-    env.Append(CCFLAGS = ['-Wno-writable-strings'])
+elif target == "bindings":
+    if env["CXX"] == "clang++":
+        env.Append(CCFLAGS = ['-Wno-writable-strings'])
+    else:
+        env.Append(CCFLAGS = ['-Wno-write-strings', '-Wno-return-local-addr'])
+        
     env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
     env.Append(CPPPATH=['.', './godot', './godot_cpp'])
 
-    env.Append(RPATH=['.'])
-    env.Append(LINKFLAGS=['-Rgodot_cpp_core'])
+    env.Append(LINKFLAGS = ['-Wl,-R,\'$$ORIGIN/\''])
+    env.Append(LIBS=['godot_cpp_core'])
+    env.Append(LIBPATH=["."])
 
 
     sources = [os.path.join("godot_cpp/impl/", f) for f in os.listdir("godot_cpp/impl/") if f.endswith('.cpp')]
