@@ -24,7 +24,7 @@ namespace godot {
 // instance and destroy funcs
 
 template<class T>
-void *_godot_class_instance_func(godot_object *p)
+void *_godot_class_instance_func(godot_object *p, void *method_data)
 {
 	T *d = new T(p);
 	d->_init();
@@ -32,7 +32,7 @@ void *_godot_class_instance_func(godot_object *p)
 }
 
 template<class T>
-void _godot_class_destroy_func(godot_object *p, void *data)
+void _godot_class_destroy_func(godot_object *p, void *method_data, void *data)
 {
 	T *d = (T *) data;
 	delete d;
@@ -43,7 +43,14 @@ void _godot_class_destroy_func(godot_object *p, void *data)
 template<class T>
 void register_class()
 {
-	godot_script_register(T::___get_type_name(), T::___get_base_type_name(), _godot_class_instance_func<T>, _godot_class_destroy_func<T>);
+	godot_instance_create_func create = {};
+	create.create_func = _godot_class_instance_func<T>;
+
+	godot_instance_destroy_func destroy = {};
+	destroy.destroy_func = _godot_class_destroy_func<T>;
+
+
+	godot_script_register_class(T::___get_type_name(), T::___get_base_type_name(), create, destroy);
 	T::_register_methods();
 }
 
@@ -52,205 +59,425 @@ void register_class()
 
 
 
-// wrapped methods
-
-template<class T, class R, class A0, class A1, class A2, class A3, class A4, R (T::*p)(A0, A1, A2, A3, A4)>
-struct WrappedMethod5 {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		godot::Variant *v = (godot::Variant *) &_variant;
-		T *obj = (T *) data;
-		godot::Variant **arg = (godot::Variant **) args;
-		*v = (obj->*p)(*arg[0], *arg[1], *arg[2], *arg[3], *arg[4]);
-		return _variant;
-	}
-};
-
-template<class T, class A0, class A1, class A2, class A3, class A4, void (T::*p)(A0, A1, A2, A3, A4)>
-struct WrappedMethod5<T, void, A0, A1, A2, A3, A4, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		T *obj = (T *) data;
-		godot::Variant **arg = (godot::Variant **) args;
-		(obj->*p)(*arg[0], *arg[1], *arg[2], *arg[3], *arg[4]);
-		return _variant;
-	}
-};
-
-template<class T, class R, class A0, class A1, class A2, class A3, R (T::*p)(A0, A1, A2, A3)>
-struct WrappedMethod4 {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		godot::Variant *v = (godot::Variant *) &_variant;
-		T *obj = (T *) data;
-		godot::Variant **arg = (godot::Variant **) args;
-		*v = (obj->*p)(*arg[0], *arg[1], *arg[2], *arg[3]);
-		return _variant;
-	}
-};
-
-template<class T, class A0, class A1, class A2, class A3, void (T::*p)(A0, A1, A2, A3)>
-struct WrappedMethod4<T, void, A0, A1, A2, A3, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		T *obj = (T *) data;
-		godot::Variant **arg = (godot::Variant **) args;
-		(obj->*p)(*arg[0], *arg[1], *arg[2], *arg[3]);
-		return _variant;
-	}
-};
-
-
-template<class T, class R, class A0, class A1, class A2, R (T::*p)(A0, A1, A2)>
-struct WrappedMethod3 {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		godot::Variant *v = (godot::Variant *) &_variant;
-		T *obj = (T *) data;
-		godot::Variant **arg = (godot::Variant **) args;
-		*v = (obj->*p)(*arg[0], *arg[1], *arg[2]);
-		return _variant;
-	}
-};
-
-template<class T, class A0, class A1, class A2, void (T::*p)(A0, A1, A2)>
-struct WrappedMethod3<T, void, A0, A1, A2, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		T *obj = (T *) data;
-		godot::Variant **arg = (godot::Variant **) args;
-		(obj->*p)(*arg[0], *arg[1], *arg[2]);
-		return _variant;
-	}
-};
-
-template<class T, class R, class A0, class A1, R (T::*p)(A0, A1)>
-struct WrappedMethod2 {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		godot::Variant *v = (godot::Variant *) &_variant;
-		T *obj = (T *) data;
-		godot::Variant **arg = (godot::Variant **) args;
-		*v = (obj->*p)(*arg[0], *arg[1]);
-		return _variant;
-	}
-};
-
-template<class T, class A0, class A1, void (T::*p)(A0, A1)>
-struct WrappedMethod2<T, void, A0, A1, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		T *obj = (T *) data;
-		godot::Variant **arg = (godot::Variant **) args;
-		(obj->*p)(*arg[0], *arg[1]);
-		return _variant;
-	}
-};
-
-template<class T, class R, class I, R (T::*p)(I)>
-struct WrappedMethod1 {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		godot::Variant *v = (godot::Variant *) &_variant;
-		T *obj = (T *) data;
-		godot::Variant **arg = (godot::Variant **) args;
-		*v = (obj->*p)(*arg[0]);
-		return _variant;
-	}
-};
-
-template <class T, class I, void (T::*p)(I)>
-struct WrappedMethod1<T, void, I, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		T *obj = (T *) data;
-		godot::Variant **arg = (godot::Variant **) args;
-		(obj->*p)(*arg[0]);
-		return _variant;
-	}
-};
 
 
 
-template<class T, class R, R (T::*p)()>
-struct WrappedMethod0 {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		godot::Variant *v = (godot::Variant *) &_variant;
-		T *obj = (T *) data;
-		*v = (obj->*p)();
-		return _variant;
-	}
-};
 
-template<class T, void (T::*p)()>
-struct WrappedMethod0<T, void, p> {
-	static godot_variant wrapped_method(godot_object *_, void *data, void *, int num_args, godot_variant **args)
-	{
-		godot_variant _variant;
-		godot_variant_new_nil(&_variant);
-		T *obj = (T *) data;
-		(obj->*p)();
-		return _variant;
-	}
-};
+
 
 // method registering
 
+typedef godot_variant (*__godot_wrapper_method)(godot_object *, void *, void *, int, godot_variant **);
 
-template<class T, class R, R (T::*p)()>
-void register_method(char *name, godot_method_attributes attr = {}) {
-	godot_script_add_method(T::___get_type_name(), name, &attr, &WrappedMethod0<T, R, p>::wrapped_method);
-}
 
-template<class T, class R, class A0, R (T::*p)(A0)>
-void register_method(char *name, godot_method_attributes attr = {}) {
-	godot_script_add_method(T::___get_type_name(), name, &attr, &WrappedMethod1<T, R, A0, p>::wrapped_method);
-}
-
-template<class T, class R, class A0, class A1, R (T::*p)(A0, A1)>
-void register_method(char *name, godot_method_attributes attr = {}) {
-	godot_script_add_method(T::___get_type_name(), name, &attr, &WrappedMethod2<T, R, A0, A1, p>::wrapped_method);
-}
-
-template<class T, class R, class A0, class A1, class A2, R (T::*p)(A0, A1, A2)>
-void register_method(char *name, godot_method_attributes attr = {}) {
-	godot_script_add_method(T::___get_type_name(), name, &attr, &WrappedMethod3<T, R, A0, A1, A2, p>::wrapped_method);
-}
-
-template<class T, class R, class A0, class A1, class A2, class A3, R (T::*p)(A0, A1, A2, A3)>
-void register_method(char *name, godot_method_attributes attr = {}) {
-	godot_script_add_method(T::___get_type_name(), name, &attr, &WrappedMethod4<T, R, A0, A1, A2, A3, p>::wrapped_method);
+template<class T, class R, class ...args>
+char *___get_method_class_name(R (T::*p)(args... a))
+{
+	return T::___get_type_name();
 }
 
 
-template<class T, class R, class A0, class A1, class A2, class A3, class A4, R (T::*p)(A0, A1, A2, A3, A4)>
-void register_method(char *name, godot_method_attributes attr = {}) {
-	godot_script_add_method(T::___get_type_name(), name, &attr, &WrappedMethod5<T, R, A0, A1, A2, A3, A4, p>::wrapped_method);
+// wohooo, let the fun begin.
+
+template<class T, class R>
+struct _WrappedMethod0 {
+	R (T::*f)();
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod0<T, R> *method = (_WrappedMethod0<T, R>*) method_data;
+
+		Variant *var = (Variant *) &v;
+
+		*var = (obj->*(method->f))();
+
+		return v;
+	}
+};
+
+
+template<class T>
+struct _WrappedMethod0<T, void> {
+	void (T::*f)();
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod0<T, void> *method = (_WrappedMethod0<T, void>*) method_data;
+
+		(obj->*(method->f))();
+
+		return v;
+	}
+};
+
+template<class T, class R>
+void *___make_wrapper_function(R (T::*f)())
+{
+	_WrappedMethod0<T, R> *p = (_WrappedMethod0<T, R> *) malloc(sizeof(_WrappedMethod0<T, R>));
+	p->f = f;
+	return (void *) p;
 }
 
+template<class T, class R>
+__godot_wrapper_method ___get_wrapper_function(R (T::*f)())
+{
+	return (__godot_wrapper_method) &_WrappedMethod0<T, R>::__wrapped_method;
+}
+
+
+
+
+
+
+
+
+template<class T, class R, class A0>
+struct _WrappedMethod1 {
+	R (T::*f)(A0);
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod1<T, R, A0> *method = (_WrappedMethod1<T, R, A0>*) method_data;
+
+		Variant *var = (Variant *) &v;
+		Variant **arg = (Variant **) args;
+
+		*var = (obj->*(method->f))(*arg[0]);
+
+		return v;
+	}
+};
+
+template<class T, class A0>
+struct _WrappedMethod1<T, void, A0> {
+	void (T::*f)(A0);
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod1<T, void, A0> *method = (_WrappedMethod1<T, void, A0>*) method_data;
+
+		Variant **arg = (Variant **) args;
+
+		(obj->*(method->f))(*arg[0]);
+
+		return v;
+	}
+};
+
+
+template<class T, class R, class A0>
+void *___make_wrapper_function(R (T::*f)(A0))
+{
+	_WrappedMethod1<T, R, A0> *p = (_WrappedMethod1<T, R, A0> *) malloc(sizeof(_WrappedMethod1<T, R, A0>));
+	p->f = f;
+	return (void *) p;
+}
+
+template<class T, class R, class A0>
+__godot_wrapper_method ___get_wrapper_function(R (T::*f)(A0))
+{
+	return (__godot_wrapper_method) &_WrappedMethod1<T, R, A0>::__wrapped_method;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+template<class T, class R, class A0, class A1>
+struct _WrappedMethod2 {
+	R (T::*f)(A0, A1);
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod2<T, R, A0, A1> *method = (_WrappedMethod2<T, R, A0, A1>*) method_data;
+
+		Variant *var = (Variant *) &v;
+		Variant **arg = (Variant **) args;
+
+		*var = (obj->*(method->f))(*arg[0], *arg[1]);
+
+		return v;
+	}
+};
+
+template<class T, class A0, class A1>
+struct _WrappedMethod2<T, void, A0, A1> {
+	void (T::*f)(A0, A1);
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod2<T, void, A0, A1> *method = (_WrappedMethod2<T, void, A0, A1>*) method_data;
+
+		Variant **arg = (Variant **) args;
+
+		(obj->*(method->f))(*arg[0], *arg[1]);
+
+		return v;
+	}
+};
+
+
+template<class T, class R, class A0, class A1>
+void *___make_wrapper_function(R (T::*f)(A0, A1))
+{
+	_WrappedMethod2<T, R, A0, A1> *p = (_WrappedMethod2<T, R, A0, A1> *) malloc(sizeof(_WrappedMethod2<T, R, A0, A1>));
+	p->f = f;
+	return (void *) p;
+}
+
+template<class T, class R, class A0, class A1>
+__godot_wrapper_method ___get_wrapper_function(R (T::*f)(A0, A1))
+{
+	return (__godot_wrapper_method) &_WrappedMethod2<T, R, A0, A1>::__wrapped_method;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+template<class T, class R, class A0, class A1, class A2>
+struct _WrappedMethod3 {
+	R (T::*f)(A0, A1, A2);
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod3<T, R, A0, A1, A2> *method = (_WrappedMethod3<T, R, A0, A1, A2>*) method_data;
+
+		Variant *var = (Variant *) &v;
+		Variant **arg = (Variant **) args;
+
+		*var = (obj->*(method->f))(*arg[0], *arg[1], *arg[2]);
+
+		return v;
+	}
+};
+
+template<class T, class A0, class A1, class A2>
+struct _WrappedMethod3<T, void, A0, A1, A2> {
+	void (T::*f)(A0, A1, A2);
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod3<T, void, A0, A1, A2> *method = (_WrappedMethod3<T, void, A0, A1, A2>*) method_data;
+
+		Variant **arg = (Variant **) args;
+
+		(obj->*(method->f))(*arg[0], *arg[1], *arg[2]);
+
+		return v;
+	}
+};
+
+
+template<class T, class R, class A0, class A1, class A2>
+void *___make_wrapper_function(R (T::*f)(A0, A1, A2))
+{
+	_WrappedMethod3<T, R, A0, A1, A2> *p = (_WrappedMethod3<T, R, A0, A1, A2> *) malloc(sizeof(_WrappedMethod3<T, R, A0, A1, A2>));
+	p->f = f;
+	return (void *) p;
+}
+
+template<class T, class R, class A0, class A1, class A2>
+__godot_wrapper_method ___get_wrapper_function(R (T::*f)(A0, A1, A2))
+{
+	return (__godot_wrapper_method) &_WrappedMethod3<T, R, A0, A1, A2>::__wrapped_method;
+}
+
+
+
+
+
+
+
+
+
+
+
+template<class T, class R, class A0, class A1, class A2, class A3>
+struct _WrappedMethod4 {
+	R (T::*f)(A0, A1, A2, A3);
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod4<T, R, A0, A1, A2, A3> *method = (_WrappedMethod4<T, R, A0, A1, A2, A3>*) method_data;
+
+		Variant *var = (Variant *) &v;
+		Variant **arg = (Variant **) args;
+
+		*var = (obj->*(method->f))(*arg[0], *arg[1], *arg[2], *arg[3]);
+
+		return v;
+	}
+};
+
+template<class T, class A0, class A1, class A2, class A3>
+struct _WrappedMethod4<T, void, A0, A1, A2, A3> {
+	void (T::*f)(A0, A1, A2, A3);
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod4<T, void, A0, A1, A2, A3> *method = (_WrappedMethod4<T, void, A0, A1, A2, A3>*) method_data;
+
+		Variant **arg = (Variant **) args;
+
+		(obj->*(method->f))(*arg[0], *arg[1], *arg[2], *arg[3]);
+
+		return v;
+	}
+};
+
+
+template<class T, class R, class A0, class A1, class A2, class A3>
+void *___make_wrapper_function(R (T::*f)(A0, A1, A2, A3))
+{
+	_WrappedMethod4<T, R, A0, A1, A2, A3> *p = (_WrappedMethod4<T, R, A0, A1, A2, A3> *) malloc(sizeof(_WrappedMethod4<T, R, A0, A1, A2, A3>));
+	p->f = f;
+	return (void *) p;
+}
+
+template<class T, class R, class A0, class A1, class A2, class A3>
+__godot_wrapper_method ___get_wrapper_function(R (T::*f)(A0, A1, A2, A3))
+{
+	return (__godot_wrapper_method) &_WrappedMethod4<T, R, A0, A1, A2, A3>::__wrapped_method;
+}
+
+
+
+
+
+
+
+
+
+
+template<class T, class R, class A0, class A1, class A2, class A3, class A4>
+struct _WrappedMethod5 {
+	R (T::*f)(A0, A1, A2, A3, A4);
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod5<T, R, A0, A1, A2, A3, A4> *method = (_WrappedMethod5<T, R, A0, A1, A2, A3, A4>*) method_data;
+
+		Variant *var = (Variant *) &v;
+		Variant **arg = (Variant **) args;
+
+		*var = (obj->*(method->f))(*arg[0], *arg[1], *arg[2], *arg[3], *arg[4]);
+
+		return v;
+	}
+};
+
+template<class T, class A0, class A1, class A2, class A3, class A4>
+struct _WrappedMethod5<T, void, A0, A1, A2, A3, A4> {
+	void (T::*f)(A0, A1, A2, A3, A4);
+	static godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
+	{
+		godot_variant v;
+		godot_variant_new_nil(&v);
+
+		T *obj = (T *) user_data;
+		_WrappedMethod5<T, void, A0, A1, A2, A3, A4> *method = (_WrappedMethod5<T, void, A0, A1, A2, A3, A4>*) method_data;
+
+		Variant **arg = (Variant **) args;
+
+		(obj->*(method->f))(*arg[0], *arg[1], *arg[2], *arg[3], *arg[4]);
+
+		return v;
+	}
+};
+
+
+template<class T, class R, class A0, class A1, class A2, class A3, class A4>
+void *___make_wrapper_function(R (T::*f)(A0, A1, A2, A3, A4))
+{
+	_WrappedMethod5<T, R, A0, A1, A2, A3, A4> *p = (_WrappedMethod5<T, R, A0, A1, A2, A3, A4> *) malloc(sizeof(_WrappedMethod5<T, R, A0, A1, A2, A3, A4>));
+	p->f = f;
+	return (void *) p;
+}
+
+template<class T, class R, class A0, class A1, class A2, class A3, class A4>
+__godot_wrapper_method ___get_wrapper_function(R (T::*f)(A0, A1, A2, A3, A4))
+{
+	return (__godot_wrapper_method) &_WrappedMethod5<T, R, A0, A1, A2, A3, A4>::__wrapped_method;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+template<class M>
+void register_method(char *name, M method_ptr, godot_method_rpc_mode rpc_type = GODOT_METHOD_RPC_MODE_DISABLED)
+{
+	godot_instance_method method = {};
+	method.method_data = ___make_wrapper_function(method_ptr);
+	method.free_func = free;
+	method.method = (__godot_wrapper_method) ___get_wrapper_function(method_ptr);
+
+
+	godot_method_attributes attr = {};
+	attr.rpc_type = rpc_type;
+
+	godot_script_register_method(___get_method_class_name(method_ptr), name, attr, method);
+}
 
 }
 
