@@ -60,7 +60,7 @@ enum Error {
 
 }
 
-// @Todo error handling stuff here plz
+#include <stdio.h>
 
 typedef float real_t;
 
@@ -87,19 +87,16 @@ typedef float real_t;
 
 
 #ifndef ERR_PRINT
-#define ERR_PRINT(msg)
+#define ERR_PRINT(msg) fprintf(stderr, "ERROR: %ls\n", (msg).c_string())
 #endif
 
 #ifndef ERR_FAIL_INDEX_V
 #define ERR_FAIL_INDEX_V(a, b, c)
 #endif
 
-#ifndef ERR_FAIL_INDEX
-#define ERR_FAIL_INDEX(a, b)
-#endif
 
 #ifndef ERR_FAIL_COND
-#define ERR_FAIL_COND(a)
+#define ERR_FAIL_COND(a) do { if (a) { fprintf(stderr, #a); return; } } while(0)
 #endif
 
 

@@ -64,7 +64,7 @@ bool InputEvent::operator==(const InputEvent &p_event) const {
 				&& action.pressed == p_event.action.pressed;
 		/* clang-format on */
 		default:
-			ERR_PRINT("No logic to compare InputEvents of this type, this shouldn't happen.");
+			ERR_PRINT(String("No logic to compare InputEvents of this type, this shouldn't happen."));
 	}
 
 	return false;

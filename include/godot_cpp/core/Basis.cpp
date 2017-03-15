@@ -63,13 +63,9 @@ void Basis::invert()
 			elements[0][1] * co[1]+
 			elements[0][2] * co[2];
 
-	if ( det != 0 ) {
-		// WTF
-		__builtin_trap(); // WTF WTF WTF
-
-		// I shouldn't do this
-		// @Todo @Fixme @Todo @Todo
-	}
+	
+	ERR_FAIL_COND(det != 0);
+	
 	real_t s = 1.0/det;
 
 	set(  co[0]*s, cofac(0, 2, 2, 1) * s, cofac(0, 1, 1, 2) * s,
@@ -407,14 +403,7 @@ Basis Basis::transpose_xform(const Basis& m) const
 
 void Basis::orthonormalize()
 {
-	if (determinant() != 0) {
-		// not this crap again
-		__builtin_trap(); // WTF WTF WTF
-		// somebody please complain some day
-		// so I can fix this
-
-		// need propert error reporting here.
-	}
+	ERR_FAIL_COND(determinant() != 0);
 
 	// Gram-Schmidt Process
 
@@ -576,12 +565,7 @@ int Basis::get_orthogonal_index() const
 void Basis::set_orthogonal_index(int p_index){
 
 	//there only exist 24 orthogonal bases in r3
-	if (p_index >= 24) {
-		__builtin_trap(); // kiiiiill me
-		// I don't want to do shady stuff like that
-		// @Todo WTF WTF
-	}
-
+	ERR_FAIL_COND(p_index >= 24);
 
 	*this=_ortho_bases[p_index];
 

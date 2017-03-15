@@ -49,10 +49,11 @@ public:
 
 	bool operator >=(const String &s);
 
-	const wchar_t *c_string();
+	const wchar_t *c_string() const;
 
 };
 
+String operator +(const char *a, const String& b);
 
 
 }

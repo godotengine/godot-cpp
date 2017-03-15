@@ -114,7 +114,7 @@ bool String::operator >=(const String &s)
 	return !(*this < s);
 }
 
-const wchar_t *String::c_string()
+const wchar_t *String::c_string() const
 {
 	return godot_string_c_str(&_godot_string);
 }

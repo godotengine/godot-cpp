@@ -4,6 +4,8 @@
 
 #include <cmath>
 
+#include "Defs.hpp"
+
 #include "String.hpp"
 
 namespace godot {
@@ -270,20 +272,16 @@ Color Color::html(const String& p_color)
 	} else if (color.length()==6) {
 		alpha=false;
 	} else {
-		// @Todo error reporting
-		// ERR_EXPLAIN("Invalid Color Code: "+p_color);
-		// ERR_FAIL_V(Color());
-		return Color();
+		ERR_PRINT(String("Invalid Color Code: ") + p_color);
+		ERR_FAIL_V(Color());
 	}
 
 	int a=255;
 	if (alpha) {
 		a=_parse_col(color,0);
 		if (a<0) {
-			// @Todo error reporting
-			// ERR_EXPLAIN("Invalid Color Code: "+p_color);
-			// ERR_FAIL_V(Color());
-			return Color();
+			ERR_PRINT("Invalid Color Code: "+p_color);
+			ERR_FAIL_V(Color());
 		}
 	}
 
@@ -291,24 +289,18 @@ Color Color::html(const String& p_color)
 
 	int r=_parse_col(color,from+0);
 	if (r<0) {
-		// @Todo error reporting
-		// ERR_EXPLAIN("Invalid Color Code: "+p_color);
-		// ERR_FAIL_V(Color());
-		return Color();
+		ERR_PRINT("Invalid Color Code: "+p_color);
+		ERR_FAIL_V(Color());
 	}
 	int g=_parse_col(color,from+2);
 	if (g<0) {
-		// @Todo error reporting
-		// ERR_EXPLAIN("Invalid Color Code: "+p_color);
-		// ERR_FAIL_V(Color());
-		return Color();
+		ERR_PRINT("Invalid Color Code: "+p_color);
+		ERR_FAIL_V(Color());
 	}
 	int b=_parse_col(color,from+4);
 	if (b<0) {
-		// @Todo error reporting
-		// ERR_EXPLAIN("Invalid Color Code: "+p_color);
-		// ERR_FAIL_V(Color());
-		return Color();
+		ERR_PRINT("Invalid Color Code: "+p_color);
+		ERR_FAIL_V(Color());
 	}
 
 	return Color(r/255.0,g/255.0,b/255.0,a/255.0);
