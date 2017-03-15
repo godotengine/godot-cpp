@@ -1,6 +1,16 @@
 #ifndef RECT2_H
 #define RECT2_H
 
+#if defined(_WIN32)
+#  ifdef _GD_CPP_CORE_API_IMPL
+#    define GD_CPP_CORE_API __declspec(dllexport)
+#  else
+#    define GD_CPP_CORE_API __declspec(dllimport)
+#  endif
+#else
+#  define GD_CPP_CORE_API
+#endif
+
 #include "Vector2.hpp"
 
 #include <cmath>
@@ -16,7 +26,7 @@ typedef Vector2 Point2;
 
 class Transform2D;
 
-struct Rect2 {
+struct GD_CPP_CORE_API Rect2 {
 
 	Point2 pos;
 	Size2 size;

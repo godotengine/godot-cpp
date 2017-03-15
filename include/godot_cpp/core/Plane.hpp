@@ -1,6 +1,16 @@
 #ifndef PLANE_H
 #define PLANE_H
 
+#if defined(_WIN32)
+#  ifdef _GD_CPP_CORE_API_IMPL
+#    define GD_CPP_CORE_API __declspec(dllexport)
+#  else
+#    define GD_CPP_CORE_API __declspec(dllimport)
+#  endif
+#else
+#  define GD_CPP_CORE_API
+#endif
+
 #include "Vector3.hpp"
 
 #include <cmath>
@@ -15,7 +25,7 @@ enum ClockDirection {
 	COUNTERCLOCKWISE
 };
 
-class Plane {
+class GD_CPP_CORE_API Plane {
 public:
 	Vector3 normal;
 	real_t d;

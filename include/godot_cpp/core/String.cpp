@@ -120,6 +120,11 @@ const wchar_t *String::c_string() const
 }
 
 
+String operator +(const char *a, const String& b)
+{
+	return String(a) + b;
+}
+
 
 
 }

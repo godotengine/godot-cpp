@@ -1,6 +1,16 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#if defined(_WIN32)
+#  ifdef _GD_CPP_CORE_API_IMPL
+#    define GD_CPP_CORE_API __declspec(dllexport)
+#  else
+#    define GD_CPP_CORE_API __declspec(dllimport)
+#  endif
+#else
+#  define GD_CPP_CORE_API
+#endif
+
 #include <godot/godot_color.h>
 
 #include <cmath>
@@ -10,7 +20,7 @@
 namespace godot {
 
 
-struct Color {
+struct GD_CPP_CORE_API Color {
 
 
 private:

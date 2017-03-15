@@ -125,6 +125,15 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 
 	contents = contents + "#define ";
 	contents = contents + strip_name(&class.name).to_string().to_uppercase().as_str() + "_H\n\n";
+	
+	contents = contents + "#if defined(_WIN32) && defined(_GD_CPP_BINDING_IMPL)\n";
+	contents = contents + "#  define GD_CPP_BINDING_API __declspec(dllexport)\n";
+	contents = contents + "#elif defined(_WIN32)\n";
+	contents = contents + "#  define GD_CPP_BINDING_API __declspec(dllimport)\n";
+	contents = contents + "#else\n";
+	contents = contents + "#  define GD_CPP_BINDING_API\n";
+	contents = contents + "#endif\n\n";
+	
 
 	contents = contents + "\n#include \"core/CoreTypes.hpp\"\n";
 
@@ -154,7 +163,7 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 		name
 	};
 
-	contents = contents + "class " + strip_name(&class.name);
+	contents = contents + "class GD_CPP_BINDING_API " + strip_name(&class.name);
 
 	if class.base_class != "" {
 		contents = contents + " : public " + strip_name(&class.base_class);
@@ -234,7 +243,7 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 
 	if class.base_class == "" {
 		// Object
-		contents = contents + "\ninline Variant::operator Object() const\n{\n\n";
+		contents = contents + "\ninline\n#if defined(_WIN32)\n#  ifdef _GD_CPP_BINDING_IMPL\n      __declspec(dllexport)\n#  else\n      __declspec(dllimport)\n#  endif\n#endif\nVariant::operator Object() const\n{\n\n";
 
 		contents = contents + "\treturn Object(godot_variant_as_object(&_godot_variant));\n\n";
 
@@ -551,7 +560,7 @@ fn generate_icall_implementation(icalls: &HashSet<(String, Vec<String>)>) -> Str
 			contents = contents + "\t" + if !is_core_type(ret) && !is_primitive(ret) { "godot_object*" } else { strip_name(ret) } + " ret;\n";
 		}
 
-		contents = contents + "\tconst void *args[] = {\n";
+		contents = contents + "\tconst void *args[" + if args.len() == 0 { "1" } else { "" } + "] = {\n";
 
 		let mut j = 0;
 		for arg in args {

@@ -1,6 +1,16 @@
 #ifndef TRANSFORM2D_H
 #define TRANSFORM2D_H
 
+#if defined(_WIN32)
+#  ifdef _GD_CPP_CORE_API_IMPL
+#    define GD_CPP_CORE_API __declspec(dllexport)
+#  else
+#    define GD_CPP_CORE_API __declspec(dllimport)
+#  endif
+#else
+#  define GD_CPP_CORE_API
+#endif
+
 #include "Vector2.hpp"
 
 
@@ -10,7 +20,7 @@ typedef Vector2 Size2;
 
 class Rect2;
 
-struct Transform2D {
+struct GD_CPP_CORE_API Transform2D {
 	// Warning #1: basis of Transform2D is stored differently from Basis. In terms of elements array, the basis matrix looks like "on paper":
 	// M = (elements[0][0] elements[1][0])
 	//     (elements[0][1] elements[1][1])

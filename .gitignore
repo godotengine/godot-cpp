@@ -4,3 +4,4 @@ include/godot.h
 include/godot
 *.os
 *.so
+*.obj

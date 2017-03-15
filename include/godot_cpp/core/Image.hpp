@@ -1,6 +1,16 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#if defined(_WIN32)
+#  ifdef _GD_CPP_CORE_API_IMPL
+#    define GD_CPP_CORE_API __declspec(dllexport)
+#  else
+#    define GD_CPP_CORE_API __declspec(dllimport)
+#  endif
+#else
+#  define GD_CPP_CORE_API
+#endif
+
 #include "Defs.hpp"
 
 #include "Vector2.hpp"
@@ -14,7 +24,7 @@ namespace godot {
 
 class PoolByteArray;
 
-class Image {
+class GD_CPP_CORE_API Image {
 	godot_image _godot_image;
 public:
 

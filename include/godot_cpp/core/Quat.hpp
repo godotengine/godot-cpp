@@ -1,6 +1,16 @@
 #ifndef QUAT_H
 #define QUAT_H
 
+#if defined(_WIN32)
+#  ifdef _GD_CPP_CORE_API_IMPL
+#    define GD_CPP_CORE_API __declspec(dllexport)
+#  else
+#    define GD_CPP_CORE_API __declspec(dllimport)
+#  endif
+#else
+#  define GD_CPP_CORE_API
+#endif
+
 #include <cmath>
 
 #include "Vector3.hpp"
@@ -9,7 +19,7 @@
 
 namespace godot {
 
-class Quat{
+class GD_CPP_CORE_API Quat{
 public:
 
 	real_t x,y,z,w;

@@ -3,14 +3,23 @@ import os
 
 env = Environment()
 
-if ARGUMENTS.get("use_llvm", "yes") == "yes":
+if ARGUMENTS.get("use_llvm", "no") == "yes":
     env["CXX"] = "clang++"
 
 target = ARGUMENTS.get("target", "core")
 
+platform = ARGUMENTS.get("p", "linux")
+
 if (target == "core"):
-    env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
+    if platform == "linux":
+        env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
+    
     env.Append(CPPPATH=['.', './godot'])
+	
+    if platform == "windows":
+        env.Append(LIBS=['godot.windows.tools.64.lib'])
+	
+    env.Append(CPPFLAGS=['-D_GD_CPP_CORE_API_IMPL'])
 
     sources = [
         'godot_cpp/core/Array.cpp',
@@ -38,18 +47,20 @@ if (target == "core"):
     Default(library)
 
 elif target == "bindings":
-    if env["CXX"] == "clang++":
-        env.Append(CCFLAGS = ['-Wno-writable-strings'])
-    else:
-        env.Append(CCFLAGS = ['-Wno-write-strings', '-Wno-return-local-addr'])
+    if platform == "linux":
+        if env["CXX"] == "clang++":
+            env.Append(CCFLAGS = ['-Wno-writable-strings'])
+        else:
+            env.Append(CCFLAGS = ['-Wno-write-strings', '-Wno-return-local-addr'])
         
-    env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
+        env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
+        env.Append(LINKFLAGS = ['-Wl,-R,\'$$ORIGIN/\''])
     env.Append(CPPPATH=['.', './godot', './godot_cpp'])
 
-    env.Append(LINKFLAGS = ['-Wl,-R,\'$$ORIGIN/\''])
-    env.Append(LIBS=['godot_cpp_core'])
+    env.Append(LIBS=['godot_cpp_core', 'godot.windows.tools.64'])
     env.Append(LIBPATH=["."])
 
+    env.Append(CPPFLAGS=['-D_GD_CPP_BINDING_IMPL'])
 
     sources = [os.path.join("godot_cpp/impl/", f) for f in os.listdir("godot_cpp/impl/") if f.endswith('.cpp')]
 
