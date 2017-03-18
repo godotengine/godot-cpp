@@ -66,6 +66,11 @@ int String::length() const
 	return len;
 }
 
+void String::operator =(const String &s)
+{
+	godot_string_copy_string(&_godot_string, &s._godot_string);
+}
+
 bool String::operator ==(const String &s)
 {
 	return godot_string_operator_equal(&_godot_string, &s._godot_string);

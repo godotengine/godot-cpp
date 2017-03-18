@@ -57,7 +57,9 @@ elif target == "bindings":
         env.Append(LINKFLAGS = ['-Wl,-R,\'$$ORIGIN/\''])
     env.Append(CPPPATH=['.', './godot', './godot_cpp'])
 
-    env.Append(LIBS=['godot_cpp_core', 'godot.windows.tools.64'])
+    if platform == "windows":
+        env.Append(LIBS=['godot.windows.tools.64'])
+    env.Append(LIBS=['godot_cpp_core'])
     env.Append(LIBPATH=["."])
 
     env.Append(CPPFLAGS=['-D_GD_CPP_BINDING_IMPL'])

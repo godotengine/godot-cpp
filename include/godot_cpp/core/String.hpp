@@ -41,6 +41,8 @@ public:
 
 	int length() const;
 
+	void operator =(const String &s);
+
 	bool operator ==(const String &s);
 
 	bool operator !=(const String &s);

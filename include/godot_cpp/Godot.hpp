@@ -173,7 +173,7 @@ struct _WrappedMethod1<T, void, A0> {
 		(obj->*(method->f))(*arg[0]);
 
 		return v;
-	}
+ 	}
 };
 
 

@@ -504,7 +504,8 @@ fn generate_icall_header(icalls: &HashSet<(String, Vec<String>)>) -> String {
 		contents = contents + return_type(ret) + " " + get_icall_name_ref((ret, args)).as_str() + "(godot_method_bind *mb, godot_object *inst";
 		for arg in args {
 			contents = contents + ", ";
-			if !is_primitive(&arg) && is_core_type(&arg) {
+			// if !is_primitive(&arg) && is_core_type(&arg) {
+			if !is_primitive(&arg) {
 				contents = contents + "const " + arg.as_str() + "&";
 			} else {
 				contents = contents + "const " + arg.as_str() + "";
@@ -544,7 +545,8 @@ fn generate_icall_implementation(icalls: &HashSet<(String, Vec<String>)>) -> Str
 		let mut i = 0;
 		for arg in args {
 			contents = contents + ", ";
-			if !is_primitive(&arg) && is_core_type(&arg) {
+			// if !is_primitive(&arg) && is_core_type(&arg) {
+			if !is_primitive(&arg) {
 				contents = contents + "const " + arg.as_str() + "&";
 			} else {
 				contents = contents + "const " + arg.as_str() + "";
@@ -570,7 +572,7 @@ fn generate_icall_implementation(icalls: &HashSet<(String, Vec<String>)>) -> Str
 			} else if is_core_type(arg) {
 				contents = contents + "(void *) &arg" + j.to_string().as_str();
 			} else {
-				contents = contents + "(void *) *(godot_object**) &arg" + j.to_string().as_str();
+				contents = contents + "(void *) arg" + j.to_string().as_str() + ".__core_object";
 			}
 			contents = contents + ",\n";
 			j = j + 1;
