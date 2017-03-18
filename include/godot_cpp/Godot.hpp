@@ -54,6 +54,20 @@ void register_class()
 	T::_register_methods();
 }
 
+template<class T>
+void register_tool_class()
+{
+	godot_instance_create_func create = {};
+	create.create_func = _godot_class_instance_func<T>;
+
+	godot_instance_destroy_func destroy = {};
+	destroy.destroy_func = _godot_class_destroy_func<T>;
+
+
+	godot_script_register_tool_class(T::___get_type_name(), T::___get_base_type_name(), create, destroy);
+	T::_register_methods();
+}
+
 
 
 
