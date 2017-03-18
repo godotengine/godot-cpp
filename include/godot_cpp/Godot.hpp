@@ -479,6 +479,76 @@ void register_method(char *name, M method_ptr, godot_method_rpc_mode rpc_type = 
 	godot_script_register_method(___get_method_class_name(method_ptr), name, attr, method);
 }
 
+
+
+template<class T, class P>
+struct _PropertySetFunc {
+	void (T::*f)(P);
+	static void _wrapped_setter(godot_object *object, void *method_data, void *user_data, godot_variant value)
+	{
+		_PropertySetFunc<T, P> *set_func = (_PropertySetFunc<T, P> *) method_data;
+		T *obj = (T *) user_data;
+
+		Variant *v = (Variant *) &value;
+
+		(obj->*(set_func->f))(*v);
+	}
+};
+
+template<class T, class P>
+struct _PropertyGetFunc {
+	P (T::*f)();
+	static godot_variant _wrapped_getter(godot_object *object, void *method_data, void *user_data)
+	{
+		_PropertyGetFunc<T, P> *get_func = (_PropertyGetFunc<T, P> *) method_data;
+		T *obj = (T *) user_data;
+
+		godot_variant var;
+		godot_variant_new_nil(&var);
+
+		Variant *v = (Variant *) &var;
+
+		*v = (obj->*(get_func->f))();
+
+		return var;
+	}
+};
+
+
+
+template<class T, class P>
+void register_property(char *name, void (T::*setter)(P), P (T::*getter)(), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,  godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE)
+{
+	Variant def_val = default_value;
+
+	godot_property_attributes attr = {};
+	attr.type = def_val.get_type();
+	attr.default_value = *(godot_variant *) &def_val;
+	attr.hint = hint;
+	attr.listed = true;
+	attr.rset_type = rpc_mode;
+	attr.usage = usage;
+
+	_PropertySetFunc<T, P> *wrapped_set = (_PropertySetFunc<T, P> *) malloc(sizeof(_PropertySetFunc<T, P>));
+	wrapped_set->f = setter;
+
+	_PropertyGetFunc<T, P> *wrapped_get = (_PropertyGetFunc<T, P> *) malloc(sizeof(_PropertyGetFunc<T, P>));
+	wrapped_get->f = getter;
+
+	godot_property_set_func set_func = {};
+	set_func.method_data = (void *) wrapped_set;
+	set_func.free_func   = free;
+	set_func.set_func    = &_PropertySetFunc<T, P>::_wrapped_setter;
+
+	godot_property_get_func get_func = {};
+	get_func.method_data = (void *) wrapped_get;
+	get_func.free_func   = free;
+	get_func.get_func    = &_PropertyGetFunc<T, P>::_wrapped_getter;
+
+	godot_script_register_property(T::___get_type_name(), name, &attr, set_func, get_func);
+
+}
+
 }
 
 #endif // GODOT_H
