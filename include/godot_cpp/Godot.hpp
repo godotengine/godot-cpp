@@ -13,9 +13,10 @@ namespace godot {
 
 
 #define GODOT_CLASS(Name, Base) \
-	public: static char *___get_type_name() { return (char *) #Name; } \
-	static char *___get_base_type_name() { return (char *) #Base; } \
-	Name(godot_object *o) { __core_object = o; } \
+	public: inline static char *___get_type_name() { return (char *) #Name; } \
+	inline static char *___get_base_type_name() { return (char *) #Base; } \
+	inline Name(godot_object *o) { __core_object = o; } \
+	inline Name(const Variant& obj) { __core_object = ((Object) obj).__core_object; } \
 	private:
 
 
@@ -539,7 +540,6 @@ void register_property(char *name, void (T::*setter)(P), P (T::*getter)(), P def
 	attr.type = def_val.get_type();
 	attr.default_value = *(godot_variant *) &def_val;
 	attr.hint = hint;
-	attr.listed = true;
 	attr.rset_type = rpc_mode;
 	attr.usage = usage;
 

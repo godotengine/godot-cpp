@@ -197,6 +197,7 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 	// object constructor
 	if !class.singleton {
 		contents = contents + "\t" + strip_name(&class.name) + "(const Object& ptr);\n\n";
+		contents = contents + "\t" + strip_name(&class.name) + "(const Variant& obj);\n\n";
 	}
 
 	// object cast
@@ -324,6 +325,10 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 	if !class.singleton {
 		contents = contents + "" + strip_name(&class.name) + "::" + strip_name(&class.name) + "(const Object& ptr)\n{\n";
 		contents = contents + "\t__core_object = ptr.__core_object;\n";
+		contents = contents + "}\n\n\n";
+
+		contents = contents + "" + strip_name(&class.name) + "::" + strip_name(&class.name) + "(const Variant& obj)\n{\n";
+		contents = contents + "\t__core_object = ((Object) obj).__core_object;\n";
 		contents = contents + "}\n\n\n";
 	}
 
