@@ -54,7 +54,7 @@ elif target == "bindings":
             env.Append(CCFLAGS = ['-Wno-write-strings', '-Wno-return-local-addr'])
         
         env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
-        env.Append(LINKFLAGS = ['-Wl,-R,\'$$ORIGIN/\''])
+        env.Append(LINKFLAGS = ['-Wl,-R,\'$$ORIGIN\''])
     env.Append(CPPPATH=['.', './godot', './godot_cpp'])
 
     if platform == "windows":

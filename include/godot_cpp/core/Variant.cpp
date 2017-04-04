@@ -32,7 +32,7 @@ Variant::Variant(signed int p_int) // real one
 
 Variant::Variant(unsigned int p_int)
 {
-	godot_variant_new_int(&_godot_variant, p_int);
+	godot_variant_new_uint(&_godot_variant, p_int);
 }
 
 Variant::Variant(signed short p_short) // real one
@@ -48,7 +48,7 @@ Variant::Variant(int64_t p_char) // real one
 
 Variant::Variant(uint64_t p_char)
 {
-	godot_variant_new_int(&_godot_variant, p_char);
+	godot_variant_new_uint(&_godot_variant, p_char);
 }
 
 Variant::Variant(float p_float)
@@ -219,7 +219,7 @@ Variant::operator signed int() const
 }
 Variant::operator unsigned int() const // this is the real one
 {
-	return godot_variant_as_int(&_godot_variant);
+	return godot_variant_as_uint(&_godot_variant);
 }
 Variant::operator signed short() const
 {
@@ -227,7 +227,7 @@ Variant::operator signed short() const
 }
 Variant::operator unsigned short() const
 {
-	return godot_variant_as_int(&_godot_variant);
+	return godot_variant_as_uint(&_godot_variant);
 }
 Variant::operator signed char() const
 {
@@ -235,7 +235,7 @@ Variant::operator signed char() const
 }
 Variant::operator unsigned char() const
 {
-	return godot_variant_as_int(&_godot_variant);
+	return godot_variant_as_uint(&_godot_variant);
 }
 Variant::operator int64_t() const
 {
@@ -243,7 +243,7 @@ Variant::operator int64_t() const
 }
 Variant::operator uint64_t() const
 {
-	return godot_variant_as_int(&_godot_variant);
+	return godot_variant_as_uint(&_godot_variant);
 }
 
 

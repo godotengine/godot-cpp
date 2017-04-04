@@ -15,12 +15,20 @@ namespace godot {
 #define GODOT_CLASS(Name, Base) \
 	public: inline static char *___get_type_name() { return (char *) #Name; } \
 	inline static char *___get_base_type_name() { return (char *) #Base; } \
-	inline Name(godot_object *o) { __core_object = o; } \
-	inline Name(const Variant& obj) { __core_object = ((Object) obj).__core_object; } \
+	Base *self; \
+	inline Name(godot_object *o) { self = (Base *) o; } \
 	private:
+        // inline Name(Object o) { this = (Name *) godot_dlinstance_get_userdata(o.__core_object);\
+        //         memcpy(this, p, sizeof(Name)); } \
+        // inline Name(const Variant& obj) { __core_object = ((Object) obj).__core_object; } \
 
 
 
+template<class T>
+T *as(Object *obj)
+{
+	return (T *) godot_dlinstance_get_userdata(obj);
+}
 
 // instance and destroy funcs
 
