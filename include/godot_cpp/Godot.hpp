@@ -12,6 +12,20 @@
 namespace godot {
 
 
+
+
+#if !defined(_WIN32)
+#define GD_EXPORT
+#else
+#define GD_EXPORT __declspec(dllexport)
+#endif
+
+
+#define GODOT_DLSCRIPT_INIT(arg) extern "C" void GD_EXPORT godot_dlscript_init(arg)
+#define GODOT_DLSCRIPT_TERMINATE(arg) extern "C" void GD_EXPORT godot_dlscript_terminate(arg)
+
+
+
 #define GODOT_CLASS(Name, Base) \
 	public: inline static char *___get_type_name() { return (char *) #Name; } \
 	inline static char *___get_base_type_name() { return (char *) #Base; } \

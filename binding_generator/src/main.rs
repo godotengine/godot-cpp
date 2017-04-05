@@ -270,7 +270,7 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 	}
 
 	for method in &class.methods {
-		contents = contents + "\t" + (if class.singleton { "static " } else if method.is_virtual { "virtual " } else { "" }) + strip_name(&method.return_type) + (if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { " *" } else { " " }) + escape_cpp(&method.name) + "(";
+		contents = contents + "\t" + (if class.singleton { "static " } else { "" }) + strip_name(&method.return_type) + (if !is_core_type(&method.return_type) && !is_primitive(&method.return_type) { " *" } else { " " }) + escape_cpp(&method.name) + "(";
 
 		let mut has_default = false;
 
@@ -425,51 +425,68 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 			contents = contents + "\t}\n\n";
 		}
 
-		contents = contents + "\tstatic godot_method_bind *mb = NULL;\n"
-			+ "\tif (mb == NULL) {\n"
-			+ "\t\tmb = godot_method_bind_get_method(\"" + class.name.as_str() + "\", \"" + method.name.as_str() + "\");\n"
-			+ "\t}\n\t";
+		if method.is_virtual {
 
+			contents = contents + "\tArray __args;\n";
 
-		if method.return_type != "void" {
-			contents = contents + "return ";
-			if !is_primitive(&method.return_type) && !is_core_type(&method.return_type) {
-				contents = contents + "(" + strip_name(&method.return_type) + " *) ";
+			// fill in the args
+			for arg in &method.arguments {
+				contents = contents + "\t__args.append(" + escape_cpp(&arg.name) + ");\n";
 			}
-		}
 
-		let mut args = Vec::new();
+			contents = contents + "\t";
 
-		fn get_icall_type_name(t: &String) -> String {
-			if is_core_type(t) || is_primitive(t) {
-				t.clone()
-			} else {
-				"Object".to_string()
+			if method.return_type != "void" {
+				contents = contents + "return ";
 			}
+
+			contents = contents + "((Object *) " + core_obj_name.as_str() + ")->callv(\"" + method.name.as_str() + "\", __args);\n";
+		} else {
+			contents = contents + "\tstatic godot_method_bind *mb = NULL;\n"
+				+ "\tif (mb == NULL) {\n"
+				+ "\t\tmb = godot_method_bind_get_method(\"" + class.name.as_str() + "\", \"" + method.name.as_str() + "\");\n"
+				+ "\t}\n\t";
+
+
+			if method.return_type != "void" {
+				contents = contents + "return ";
+				if !is_primitive(&method.return_type) && !is_core_type(&method.return_type) {
+					contents = contents + "(" + strip_name(&method.return_type) + " *) ";
+				}
+			}
+
+			let mut args = Vec::new();
+
+			fn get_icall_type_name(t: &String) -> String {
+				if is_core_type(t) || is_primitive(t) {
+					t.clone()
+				} else {
+					"Object".to_string()
+				}
+			}
+
+			for arg in &method.arguments {
+				args.push(get_icall_type_name(&arg._type));
+			}
+
+			let icallsig = (get_icall_type_name(&method.return_type), args);
+
+			let name = get_icall_name(&icallsig);
+
+			icalls.insert(icallsig);
+
+
+			contents = contents + name.as_str() + "(mb, (godot_object *) " + core_obj_name.as_str();
+
+			for arg in &method.arguments {
+				contents = contents + ", " + escape_cpp(&arg.name);
+			}
+
+			// if !is_primitive(&method.return_type) && !is_core_type(&method.return_type) {
+			// 	contents = contents + ")";
+			// }
+			contents = contents + ");\n";
 		}
-
-		for arg in &method.arguments {
-			args.push(get_icall_type_name(&arg._type));
-		}
-
-		let icallsig = (get_icall_type_name(&method.return_type), args);
-
-		let name = get_icall_name(&icallsig);
-
-		icalls.insert(icallsig);
-
-
-
-		contents = contents + name.as_str() + "(mb, (godot_object *) " + core_obj_name.as_str();
-
-		for arg in &method.arguments {
-			contents = contents + ", " + escape_cpp(&arg.name);
-		}
-
-		// if !is_primitive(&method.return_type) && !is_core_type(&method.return_type) {
-		// 	contents = contents + ")";
-		// }
-		contents = contents + ");\n";
 
 		contents = contents + "}\n\n";
 	}
