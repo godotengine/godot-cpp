@@ -15,6 +15,8 @@
 
 namespace godot {
 
+class NodePath;
+
 class GD_CPP_CORE_API String
 {
 	godot_string _godot_string;
@@ -60,6 +62,8 @@ public:
 	bool operator >(const String &s);
 
 	bool operator >=(const String &s);
+
+	operator NodePath() const;
 
 	const wchar_t *c_string() const;
 

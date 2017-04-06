@@ -39,6 +39,25 @@ namespace godot {
 
 
 template<class T>
+struct _ArgCast {
+	static T _arg_cast(Variant a)
+	{
+		return (T) a;
+	}
+};
+
+template<class T>
+struct _ArgCast<T*> {
+	static T *_arg_cast(Variant a)
+	{
+		return (T *) ((Object *) a);
+	}
+};
+
+
+
+
+template<class T>
 T *as(Object *obj)
 {
 	return (T *) godot_dlinstance_get_userdata(obj);
@@ -188,7 +207,7 @@ struct _WrappedMethod1 {
 		Variant *var = (Variant *) &v;
 		Variant **arg = (Variant **) args;
 
-		*var = (obj->*(method->f))(*arg[0]);
+		*var = (obj->*(method->f))(_ArgCast<A0>::_arg_cast(*arg[0]));
 
 		return v;
 	}
@@ -207,7 +226,7 @@ struct _WrappedMethod1<T, void, A0> {
 
 		Variant **arg = (Variant **) args;
 
-		(obj->*(method->f))(*arg[0]);
+		(obj->*(method->f))(_ArgCast<A0>::_arg_cast(*arg[0]));
 
 		return v;
  	}
@@ -253,7 +272,7 @@ struct _WrappedMethod2 {
 		Variant *var = (Variant *) &v;
 		Variant **arg = (Variant **) args;
 
-		*var = (obj->*(method->f))(*arg[0], *arg[1]);
+		*var = (obj->*(method->f))(_ArgCast<A0>::_arg_cast(*arg[0]), _ArgCast<A1>::_arg_cast(*arg[1]));
 
 		return v;
 	}
@@ -272,7 +291,7 @@ struct _WrappedMethod2<T, void, A0, A1> {
 
 		Variant **arg = (Variant **) args;
 
-		(obj->*(method->f))(*arg[0], *arg[1]);
+		(obj->*(method->f))(_ArgCast<A0>::_arg_cast(*arg[0]), _ArgCast<A1>::_arg_cast(*arg[1]));
 
 		return v;
 	}
@@ -318,7 +337,7 @@ struct _WrappedMethod3 {
 		Variant *var = (Variant *) &v;
 		Variant **arg = (Variant **) args;
 
-		*var = (obj->*(method->f))(*arg[0], *arg[1], *arg[2]);
+		*var = (obj->*(method->f))(_ArgCast<A0>::_arg_cast(*arg[0]), _ArgCast<A1>::_arg_cast(*arg[1]), _ArgCast<A2>::_arg_cast(*arg[2]));
 
 		return v;
 	}
@@ -337,7 +356,7 @@ struct _WrappedMethod3<T, void, A0, A1, A2> {
 
 		Variant **arg = (Variant **) args;
 
-		(obj->*(method->f))(*arg[0], *arg[1], *arg[2]);
+		(obj->*(method->f))(_ArgCast<A0>::_arg_cast(*arg[0]), _ArgCast<A1>::_arg_cast(*arg[1]), _ArgCast<A2>::_arg_cast(*arg[2]));
 
 		return v;
 	}
@@ -382,7 +401,7 @@ struct _WrappedMethod4 {
 		Variant *var = (Variant *) &v;
 		Variant **arg = (Variant **) args;
 
-		*var = (obj->*(method->f))(*arg[0], *arg[1], *arg[2], *arg[3]);
+		*var = (obj->*(method->f))(_ArgCast<A0>::_arg_cast(*arg[0]), _ArgCast<A1>::_arg_cast(*arg[1]), _ArgCast<A2>::_arg_cast(*arg[2]), _ArgCast<A3>::_arg_cast(*arg[3]));
 
 		return v;
 	}
@@ -401,7 +420,7 @@ struct _WrappedMethod4<T, void, A0, A1, A2, A3> {
 
 		Variant **arg = (Variant **) args;
 
-		(obj->*(method->f))(*arg[0], *arg[1], *arg[2], *arg[3]);
+		(obj->*(method->f))(_ArgCast<A0>::_arg_cast(*arg[0]), _ArgCast<A1>::_arg_cast(*arg[1]), _ArgCast<A2>::_arg_cast(*arg[2]), _ArgCast<A3>::_arg_cast(*arg[3]));
 
 		return v;
 	}
@@ -445,7 +464,7 @@ struct _WrappedMethod5 {
 		Variant *var = (Variant *) &v;
 		Variant **arg = (Variant **) args;
 
-		*var = (obj->*(method->f))(*arg[0], *arg[1], *arg[2], *arg[3], *arg[4]);
+		*var = (obj->*(method->f))(_ArgCast<A0>::_arg_cast(*arg[0]), _ArgCast<A1>::_arg_cast(*arg[1]), _ArgCast<A2>::_arg_cast(*arg[2]), _ArgCast<A3>::_arg_cast(*arg[3]), _ArgCast<A4>::_arg_cast(*arg[4]));
 
 		return v;
 	}
@@ -464,7 +483,7 @@ struct _WrappedMethod5<T, void, A0, A1, A2, A3, A4> {
 
 		Variant **arg = (Variant **) args;
 
-		(obj->*(method->f))(*arg[0], *arg[1], *arg[2], *arg[3], *arg[4]);
+		(obj->*(method->f))(_ArgCast<A0>::_arg_cast(*arg[0]), _ArgCast<A1>::_arg_cast(*arg[1]), _ArgCast<A2>::_arg_cast(*arg[2]), _ArgCast<A3>::_arg_cast(*arg[3]), _ArgCast<A4>::_arg_cast(*arg[4]));
 
 		return v;
 	}

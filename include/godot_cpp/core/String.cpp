@@ -1,5 +1,7 @@
 #include "String.hpp"
 
+#include "NodePath.hpp"
+
 namespace godot {
 
 
@@ -117,6 +119,11 @@ bool String::operator >(const String &s)
 bool String::operator >=(const String &s)
 {
 	return !(*this < s);
+}
+
+String::operator NodePath() const
+{
+	return NodePath(*this);
 }
 
 const wchar_t *String::c_string() const

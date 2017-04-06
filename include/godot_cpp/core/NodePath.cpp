@@ -9,11 +9,25 @@ namespace godot {
 
 NodePath::NodePath()
 {
+	String from = "";
+	godot_node_path_new(&_node_path, (godot_string *) &from);
+}
 
+NodePath::NodePath(const NodePath &other)
+{
+	String from = other;
+	godot_node_path_new(&_node_path, (godot_string *) &from);
+	godot_node_path_copy(&_node_path, &other._node_path);
 }
 
 NodePath::NodePath(const String &from)
 {
+	godot_node_path_new(&_node_path, (godot_string *) &from);
+}
+
+NodePath::NodePath(const char *contents)
+{
+	String from = contents;
 	godot_node_path_new(&_node_path, (godot_string *) &from);
 }
 
@@ -61,6 +75,11 @@ NodePath::operator String() const
 	godot_string str = godot_node_path_as_string(&_node_path);
 
 	return *(String *) &str;
+}
+
+void NodePath::operator =(const NodePath& other)
+{
+	godot_node_path_copy(&_node_path, &other._node_path);
 }
 
 NodePath::~NodePath()

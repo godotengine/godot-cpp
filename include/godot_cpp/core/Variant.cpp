@@ -385,6 +385,10 @@ Variant::operator PoolColorArray() const
 	godot_pool_color_array s = godot_variant_as_pool_color_array(&_godot_variant);
 	return *(PoolColorArray *) &s;
 }
+Variant::operator Object*() const {
+	godot_object *o = godot_variant_as_object(&_godot_variant);
+	return (Object *) o;
+}
 
 Variant::Type Variant::get_type() const
 {

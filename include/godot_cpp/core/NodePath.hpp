@@ -24,7 +24,11 @@ class GD_CPP_CORE_API NodePath
 public:
 	NodePath();
 
-	NodePath(const String &from);
+	NodePath(const NodePath &other);
+
+	NodePath(const String& from);
+
+	NodePath(const char *contents);
 
 	String get_name(const int idx) const;
 
@@ -41,6 +45,8 @@ public:
 	bool is_empty() const;
 
 	operator String() const;
+
+	void operator =(const NodePath& other);
 
 	~NodePath();
 };

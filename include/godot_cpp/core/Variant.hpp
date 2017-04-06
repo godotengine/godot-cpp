@@ -205,7 +205,7 @@ public:
 	operator NodePath() const;
 	operator RID() const;
 	operator InputEvent() const;
-	operator Object() const;
+	operator Object*() const;
 
 	operator Dictionary() const;
 	operator Array() const;

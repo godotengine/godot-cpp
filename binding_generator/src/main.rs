@@ -33,6 +33,7 @@ struct GodotMethod {
 	is_noscript: bool,
 	is_const: bool,
 	is_virtual: bool,
+	has_varargs: bool,
 	is_from_script: bool,
 	arguments: Vec<GodotArgument>
 }
@@ -295,6 +296,13 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 			}
 		}
 
+		if method.has_varargs {
+			if method.arguments.len() > 0 {
+				contents += ", ";
+			}
+			contents = contents + "const Array& __var_args = Array()";
+		}
+
 		contents = contents + ")" + if method.is_const && !class.singleton { " const" } else { "" } + ";\n";
 		// contents = contents + ")" + if method.is_const { " const" } else { "" } + ";\n";
 	}
@@ -416,6 +424,13 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 			}
 		}
 
+		if method.has_varargs {
+			if method.arguments.len() > 0 {
+				contents += ", ";
+			}
+			contents = contents + "const Array& __var_args";
+		}
+
 		contents = contents + ")" + if method.is_const && !class.singleton { " const" } else { "" } + "\n{\n";
 
 
@@ -425,13 +440,19 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 			contents = contents + "\t}\n\n";
 		}
 
-		if method.is_virtual {
+		if method.is_virtual || method.has_varargs {
 
 			contents = contents + "\tArray __args;\n";
 
 			// fill in the args
 			for arg in &method.arguments {
 				contents = contents + "\t__args.append(" + escape_cpp(&arg.name) + ");\n";
+			}
+
+			if method.has_varargs {
+				contents = contents + "\tfor (int i = 0; i < __var_args.size(); i++) {\n";
+				contents = contents + "\t\t__args.append(__var_args[i]);\n";
+				contents = contents + "\t}\n";
 			}
 
 			contents = contents + "\t";
