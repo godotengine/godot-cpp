@@ -9,6 +9,8 @@
 #include <godot_cpp/core/CoreTypes.hpp>
 #include <godot_cpp/core/Variant.hpp>
 
+#include <godot_cpp/Object.hpp>
+
 namespace godot {
 
 
@@ -21,8 +23,8 @@ namespace godot {
 #endif
 
 
-#define GODOT_DLSCRIPT_INIT(arg) extern "C" void GD_EXPORT godot_dlscript_init(arg)
-#define GODOT_DLSCRIPT_TERMINATE(arg) extern "C" void GD_EXPORT godot_dlscript_terminate(arg)
+#define GODOT_NATIVE_INIT(arg) extern "C" void GD_EXPORT godot_native_init(arg)
+#define GODOT_NATIVE_TERMINATE(arg) extern "C" void GD_EXPORT godot_native_terminate(arg)
 
 
 
@@ -63,7 +65,7 @@ struct _ArgCast<T*> {
 template<class T>
 T *as(Object *obj)
 {
-	return (T *) godot_dlinstance_get_userdata(obj);
+	return (T *) godot_native_get_userdata(obj);
 }
 
 // instance and destroy funcs
@@ -550,7 +552,7 @@ struct _PropertySetFunc {
 
 		Variant *v = (Variant *) &value;
 
-		(obj->*(set_func->f))(*v);
+		(obj->*(set_func->f))(_ArgCast<P>::_arg_cast(*v));
 	}
 };
 
@@ -575,8 +577,92 @@ struct _PropertyGetFunc {
 
 
 
+
+
+
 template<class T, class P>
-void register_property(char *name, void (T::*setter)(P), P (T::*getter)(), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,  godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE)
+struct _PropertyDefaultSetFunc {
+	P (T::*f);
+	static void _wrapped_setter(godot_object *object, void *method_data, void *user_data, godot_variant value)
+	{
+		_PropertyDefaultSetFunc<T, P> *set_func = (_PropertyDefaultSetFunc<T, P> *) method_data;
+		T *obj = (T *) user_data;
+
+		Variant *v = (Variant *) &value;
+
+		(obj->*(set_func->f)) = _ArgCast<P>::_arg_cast(*v);
+	}
+};
+
+template<class T, class P>
+struct _PropertyDefaultGetFunc {
+	P (T::*f);
+	static godot_variant _wrapped_getter(godot_object *object, void *method_data, void *user_data)
+	{
+		_PropertyDefaultGetFunc<T, P> *get_func = (_PropertyDefaultGetFunc<T, P> *) method_data;
+		T *obj = (T *) user_data;
+
+		godot_variant var;
+		godot_variant_new_nil(&var);
+
+		Variant *v = (Variant *) &var;
+
+		*v = (obj->*(get_func->f));
+
+		return var;
+	}
+};
+
+
+template<class T, class P>
+void register_property(char *name, P (T::*var), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,  godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "")
+{
+	Variant def_val = default_value;
+
+	usage = (godot_property_usage_flags) ((int) usage | GODOT_PROPERTY_USAGE_SCRIPT_VARIABLE);
+
+	if (def_val.get_type() == Variant::OBJECT) {
+		Object *o = def_val;
+		if (o && o->is_class("Resource")) {
+			hint = (godot_property_hint) ((int) hint | GODOT_PROPERTY_HINT_RESOURCE_TYPE);
+			hint_string = o->get_class();
+		}
+	}
+
+	godot_string *_hint_string = (godot_string*) &hint_string;
+
+	godot_property_attributes attr = {};
+	attr.type = def_val.get_type();
+	attr.default_value = *(godot_variant *) &def_val;
+	attr.hint = hint;
+	attr.rset_type = rpc_mode;
+	attr.usage = usage;
+	attr.hint_string = *_hint_string;
+
+	_PropertyDefaultSetFunc<T, P> *wrapped_set = (_PropertyDefaultSetFunc<T, P> *) malloc(sizeof(_PropertyDefaultSetFunc<T, P>));
+	wrapped_set->f = var;
+
+	_PropertyDefaultGetFunc<T, P> *wrapped_get = (_PropertyDefaultGetFunc<T, P> *) malloc(sizeof(_PropertyDefaultGetFunc<T, P>));
+	wrapped_get->f = var;
+
+	godot_property_set_func set_func = {};
+	set_func.method_data = (void *) wrapped_set;
+	set_func.free_func   = free;
+	set_func.set_func    = &_PropertyDefaultSetFunc<T, P>::_wrapped_setter;
+
+	godot_property_get_func get_func = {};
+	get_func.method_data = (void *) wrapped_get;
+	get_func.free_func   = free;
+	get_func.get_func    = &_PropertyDefaultGetFunc<T, P>::_wrapped_getter;
+
+	godot_script_register_property(T::___get_type_name(), name, &attr, set_func, get_func);
+}
+
+
+
+
+template<class T, class P>
+void register_property(char *name, void (T::*setter)(P), P (T::*getter)(), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,  godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "")
 {
 	Variant def_val = default_value;
 
@@ -606,6 +692,40 @@ void register_property(char *name, void (T::*setter)(P), P (T::*getter)(), P def
 	godot_script_register_property(T::___get_type_name(), name, &attr, set_func, get_func);
 
 }
+
+template<class T>
+void register_signal(String name, Dictionary args = Dictionary())
+{
+	godot_signal signal = {};
+	signal.name = *(godot_string *)&name;
+	signal.num_args = args.size();
+	signal.num_default_args = 0;
+
+	signal.args = (godot_signal_argument*) godot_alloc(sizeof(godot_signal_argument) * signal.num_args);
+	memset((void *) signal.args, 0, sizeof(godot_signal_argument) * signal.num_args);
+
+
+	for (int i = 0; i < signal.num_args; i++) {
+		// Array entry = args[i];
+		// String name = entry[0];
+		String name = args.keys()[i];
+		godot_string *_key = (godot_string *)&name;
+		godot_string_new(&signal.args[i].name);
+		godot_string_copy_string(&signal.args[i].name, _key);
+
+		// if (entry.size() > 1) {
+		// 	signal.args[i].type = entry[1];
+		// }
+		signal.args[i].type = args.values()[i];
+	}
+
+	godot_script_register_signal(T::___get_type_name(), &signal);
+
+	for (int i = 0; i < signal.num_args; i++) {
+		godot_string_destroy(&signal.args[i].name);
+	}
+}
+
 
 }
 

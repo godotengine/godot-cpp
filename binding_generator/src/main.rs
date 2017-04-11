@@ -21,6 +21,7 @@ struct GodotClass {
 	api_type: String,
 	singleton: bool,
 	instanciable: bool,
+	is_reference: bool,
 	constants: Map<String, Value>,
 	methods: Vec<GodotMethod>
 }
@@ -43,6 +44,7 @@ struct GodotArgument {
 	name: String,
 	#[serde(rename = "type")]
 	_type: String,
+	has_default_value: bool,
 	default_value: String
 }
 
@@ -73,7 +75,7 @@ fn main() {
 
 	let mut icalls: HashSet<(String, Vec<String>)> = HashSet::new();
 
-	for class in json {
+	for class in &json {
 		// make this toggleable with a command line switch
 		// if class.api_type == "tools" {
 		// 	println!("{}", class.name);
@@ -96,7 +98,7 @@ fn main() {
 
 	let mut icall_implmentation = File::create((base_dir.to_string() + "impl/__icalls.cpp").as_str()).unwrap();
 
-	icall_implmentation.write_all(generate_icall_implementation(&icalls).as_bytes());
+	icall_implmentation.write_all(generate_icall_implementation(&json, &icalls).as_bytes());
 }
 
 fn get_used_classes(class: &GodotClass) -> HashSet<&String> {
@@ -187,9 +189,9 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 
 	// default constructor
 
-	// {
-	// 	contents = contents + "\t" + strip_name(&class.name) + "();\n\n";
-	// }
+	{
+		contents = contents + "\tstatic " + strip_name(&class.name) + "* _new();\n\n";
+	}
 
 
 	// pointer constructor
@@ -203,7 +205,7 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 	// 	contents = contents + "\t" + strip_name(&class.name) + "(const Variant& obj);\n\n";
 	// }
 
-	if class.base_class != "" {
+	if class.name != "Object" {
 		contents = contents + "\tvoid _init();\n\n";
 	}
 
@@ -284,7 +286,7 @@ fn generate_class_header(used_classes: &HashSet<&String>, class: &GodotClass) ->
 
 			contents = contents + escape_cpp(&argument.name);
 
-			if argument.default_value != "" || has_default {
+			if argument.has_default_value || has_default {
 				contents = contents + " = " + escape_default_arg(&argument._type, &argument.default_value).as_str();
 				has_default = true;
 			}// else if has_default {
@@ -374,11 +376,13 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 
 	// default constructor
 
-	// {
-	// 	contents = contents + "" + strip_name(&class.name) + "::" + strip_name(&class.name) + "()\n{\n";
-	// 	contents = contents + "\t\n";
-	// 	contents = contents + "}\n\n";
-	// }
+	{
+		contents = contents + strip_name(&class.name) + " *" + strip_name(&class.name) + "::_new()\n{\n";
+		contents = contents + "\tgodot_class_constructor constructor = godot_get_class_constructor(\"" + class.name.as_str() + "\");\n";
+		contents = contents + "\tif (!constructor) { return nullptr; }\n";
+		contents = contents + "\treturn (" + strip_name(&class.name) + " *) constructor();\n";
+		contents = contents + "}\n\n";
+	}
 
 
 	// pointer constructor
@@ -399,7 +403,7 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 	// 	contents = contents + "}\n\n\n";
 	// }
 
-	if class.base_class != "" {
+	if class.name != "Object" {
 		contents = contents + "void " + strip_name(&class.name) + "::" + "_init()\n{\n";
 		contents = contents + "\t\n";
 		contents = contents + "}\n\n";
@@ -459,6 +463,10 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 
 			if method.return_type != "void" {
 				contents = contents + "return ";
+
+				if !is_primitive(&method.return_type) && !is_core_type(&method.return_type) {
+					contents = contents + "(" + strip_name(&method.return_type) + " *) (Object *) ";
+				}
 			}
 
 			contents = contents + "((Object *) " + core_obj_name.as_str() + ")->callv(\"" + method.name.as_str() + "\", __args);\n";
@@ -482,7 +490,7 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 				if is_core_type(t) || is_primitive(t) {
 					t.clone()
 				} else {
-					"Object".to_string()
+					t.clone()
 				}
 			}
 
@@ -574,11 +582,12 @@ fn get_icall_name_ref(sig: (&String, &Vec<String>)) -> String {
 
 fn generate_icall_header(icalls: &HashSet<(String, Vec<String>)>) -> String {
 
-	fn return_type(t: &String) -> &str {
+	fn return_type(t: &String) -> String {
 		if is_primitive(t) || is_core_type(t) {
-			t.as_str()
+			t.clone()
 		} else {
-			"godot_object* "
+			let s = String::new() + t.as_str() + " *";
+			s
 		}
 	}
 
@@ -591,12 +600,29 @@ fn generate_icall_header(icalls: &HashSet<(String, Vec<String>)>) -> String {
 	contents = contents + "#include <godot.h>\n\n\n";
 
 	contents = contents + "#include \"core/CoreTypes.hpp\"\n";
-	contents = contents + "#include \"Object.hpp\"\n\n\n";
+	// contents = contents + "#include \"Object.hpp\"\n\n\n";
+
+	let mut types_used = HashSet::new();
+
+	for &(ref ret, ref args) in icalls {
+		if !is_primitive(ret) && !is_core_type(ret) {
+			types_used.insert(ret.clone());
+		}
+		for arg in args {
+			if !is_core_type(&arg) && !is_primitive(&arg) {
+				types_used.insert(arg.clone());
+			}
+		}
+	}
+
+	for ref type_ in types_used {
+		contents = contents + "#include \"" + strip_name(type_) + ".hpp\"\n\n\n";
+	}
 
 	contents = contents + "using namespace godot;\n\n\n";
 
 	for &(ref ret, ref args) in icalls {
-		contents = contents + return_type(ret) + " " + get_icall_name_ref((ret, args)).as_str() + "(godot_method_bind *mb, godot_object *inst";
+		contents = contents + return_type(ret).as_str() + " " + get_icall_name_ref((ret, args)).as_str() + "(godot_method_bind *mb, godot_object *inst";
 		for arg in args {
 			contents = contents + ", ";
 			if is_core_type(&arg) {
@@ -616,15 +642,25 @@ fn generate_icall_header(icalls: &HashSet<(String, Vec<String>)>) -> String {
 	contents
 }
 
-fn generate_icall_implementation(icalls: &HashSet<(String, Vec<String>)>) -> String {
+fn generate_icall_implementation(class_api: &Vec<GodotClass>, icalls: &HashSet<(String, Vec<String>)>) -> String {
 
-	fn return_type(t: &String) -> &str {
+	fn return_type(t: &String) -> String {
 		if is_primitive(t) || is_core_type(t) {
-			t.as_str()
+			t.clone()
 		} else {
-			"godot_object* "
+			let s = String::new() + t.as_str() + " *";
+			s
 		}
 	}
+
+	let is_reference = |name: &String| {
+		for class in class_api {
+			if class.name.as_str() == name.as_str() {
+				return class.is_reference;
+			}
+		}
+		false
+	};
 
 	let mut contents = String::new();
 
@@ -638,7 +674,7 @@ fn generate_icall_implementation(icalls: &HashSet<(String, Vec<String>)>) -> Str
 	contents = contents + "using namespace godot;\n\n\n";
 
 	for &(ref ret, ref args) in icalls {
-		contents = contents + return_type(ret) + " " + get_icall_name_ref((ret, args)).as_str() + "(godot_method_bind *mb, godot_object *inst";
+		contents = contents + return_type(ret).as_str() + " " + get_icall_name_ref((ret, args)).as_str() + "(godot_method_bind *mb, godot_object *inst";
 		let mut i = 0;
 		for arg in args {
 			contents = contents + ", ";
@@ -658,7 +694,11 @@ fn generate_icall_implementation(icalls: &HashSet<(String, Vec<String>)>) -> Str
 		contents = contents + "{\n";
 
 		if ret != "void" {
-			contents = contents + "\t" + if !is_core_type(ret) && !is_primitive(ret) { "godot_object*" } else { strip_name(ret) } + " ret;\n";
+			contents = contents + "\t" + strip_name(ret) + if !is_core_type(ret) && !is_primitive(ret) { " *" } else { "" } + " ret;\n";
+			if !is_core_type(ret) && !is_primitive(ret) && is_reference(ret) {
+				println!("{} is ref", ret);
+				contents = contents + "\t" + "ret = " + strip_name(ret) + "::_new();\n";
+			}
 		}
 
 		contents = contents + "\tconst void *args[" + if args.len() == 0 { "1" } else { "" } + "] = {\n";
