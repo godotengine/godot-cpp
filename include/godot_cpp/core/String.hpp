@@ -65,7 +65,7 @@ public:
 
 	operator NodePath() const;
 
-	const wchar_t *c_string() const;
+	const char *c_string() const;
 
 };
 

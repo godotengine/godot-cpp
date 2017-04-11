@@ -126,7 +126,7 @@ String::operator NodePath() const
 	return NodePath(*this);
 }
 
-const wchar_t *String::c_string() const
+const char *String::c_string() const
 {
 	return godot_string_c_str(&_godot_string);
 }
