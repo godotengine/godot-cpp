@@ -490,7 +490,7 @@ fn generate_class_implementation(icalls: &mut HashSet<(String, Vec<String>)>, us
 				if is_core_type(t) || is_primitive(t) {
 					t.clone()
 				} else {
-					t.clone()
+					String::from("Object")
 				}
 			}
 
@@ -586,8 +586,7 @@ fn generate_icall_header(icalls: &HashSet<(String, Vec<String>)>) -> String {
 		if is_primitive(t) || is_core_type(t) {
 			t.clone()
 		} else {
-			let s = String::new() + t.as_str() + " *";
-			s
+			String::from("Object *")
 		}
 	}
 
@@ -600,24 +599,9 @@ fn generate_icall_header(icalls: &HashSet<(String, Vec<String>)>) -> String {
 	contents = contents + "#include <godot.h>\n\n\n";
 
 	contents = contents + "#include \"core/CoreTypes.hpp\"\n";
-	// contents = contents + "#include \"Object.hpp\"\n\n\n";
+	contents = contents + "#include \"Object.hpp\"\n\n\n";
 
-	let mut types_used = HashSet::new();
 
-	for &(ref ret, ref args) in icalls {
-		if !is_primitive(ret) && !is_core_type(ret) {
-			types_used.insert(ret.clone());
-		}
-		for arg in args {
-			if !is_core_type(&arg) && !is_primitive(&arg) {
-				types_used.insert(arg.clone());
-			}
-		}
-	}
-
-	for ref type_ in types_used {
-		contents = contents + "#include \"" + strip_name(type_) + ".hpp\"\n\n\n";
-	}
 
 	contents = contents + "using namespace godot;\n\n\n";
 
@@ -631,7 +615,7 @@ fn generate_icall_header(icalls: &HashSet<(String, Vec<String>)>) -> String {
 			} else if is_primitive(&arg) {
 				contents = contents + "const " + arg.as_str() + " ";
 			} else {
-				contents = contents + "const " + arg.as_str() + " *";
+				contents = contents + "const Object *";
 			}
 		}
 		contents = contents + ");\n";
@@ -695,9 +679,8 @@ fn generate_icall_implementation(class_api: &Vec<GodotClass>, icalls: &HashSet<(
 
 		if ret != "void" {
 			contents = contents + "\t" + strip_name(ret) + if !is_core_type(ret) && !is_primitive(ret) { " *" } else { "" } + " ret;\n";
-			if !is_core_type(ret) && !is_primitive(ret) && is_reference(ret) {
-				println!("{} is ref", ret);
-				contents = contents + "\t" + "ret = " + strip_name(ret) + "::_new();\n";
+			if !is_core_type(ret) && !is_primitive(ret) {
+				contents = contents + "\t" + "ret = nullptr;\n";
 			}
 		}
 
