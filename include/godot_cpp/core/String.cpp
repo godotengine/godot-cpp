@@ -2,13 +2,11 @@
 
 #include "NodePath.hpp"
 
-namespace godot {
-
-
 #include <godot/godot_string.h>
 
 #include <string.h>
 
+namespace godot {
 
 godot::String::String()
 {
