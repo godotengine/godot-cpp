@@ -17,7 +17,7 @@ target = ARGUMENTS.get("target", "core")
 platform = ARGUMENTS.get("p", "linux")
 
 
-godot_name = "godot." + platform + ".tools.64"
+godot_name = "godot." + ("x11" if platform == "linux" else platform) + ".tools.64"
 
 
 def add_sources(sources, directory):
@@ -49,11 +49,16 @@ elif target == "bindings":
 
     if ARGUMENTS.get("generate_bindings", "no") == "yes":
         godot_executable = godot_bin_path + godot_name
+
+        if env["CXX"] == "clang++":
+            godot_executable += ".llvm"
+
         if platform == "windows":
             godot_executable += ".exe"
         
         # TODO Generating the API should be done only if the Godot build is more recent than the JSON file
         json_api_file = 'godot_api.json'
+
         subprocess.call([godot_executable, '--gdnative-generate-json-api', json_api_file])
 
         binding_generator_executable = '../binding_generator/target/debug/binding_generator'
