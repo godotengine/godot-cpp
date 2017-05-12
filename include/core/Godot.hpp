@@ -6,10 +6,10 @@
 #include <godot.h>
 
 
-#include <godot_cpp/core/CoreTypes.hpp>
-#include <godot_cpp/core/Variant.hpp>
+#include <CoreTypes.hpp>
+#include <Variant.hpp>
 
-#include <godot_cpp/Object.hpp>
+#include <Object.hpp>
 
 namespace godot {
 

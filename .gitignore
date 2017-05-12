@@ -1,7 +1,8 @@
-include/godot_cpp/*.hpp
-include/godot_cpp/impl/
-include/godot.h
-include/godot
+src/*.cpp
+include/*.hpp
 *.os
 *.so
 *.obj
+*.pyc
+*.json
+bin

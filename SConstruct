@@ -3,9 +3,11 @@ import os, subprocess
 
 
 # Local dependency paths, adapt them to your setup
-godot_headers_path = "../../godot_headers/"
-godot_bin_path = "../../godot_fork/bin/"
-godot_lib_path = "../../godot_fork/bin/"
+godot_headers_path = "../godot_headers/"
+godot_bin_path = "../godot_fork/bin/"
+
+# for windows
+godot_lib_path = "../godot_fork/bin/"
 
 
 env = Environment()
@@ -30,7 +32,7 @@ if target == "core":
     if platform == "linux":
         env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
     
-    env.Append(CPPPATH=['.', godot_headers_path])
+    env.Append(CPPPATH=['include/core', godot_headers_path])
 
     if platform == "windows":
         env.Append(LIBS=[godot_name + '.lib'])
@@ -39,9 +41,9 @@ if target == "core":
     env.Append(CPPFLAGS=['-D_GD_CPP_CORE_API_IMPL'])
 
     sources = []
-    add_sources(sources, "godot_cpp/core")
+    add_sources(sources, "src/core")
 
-    library = env.SharedLibrary(target='godot_cpp_core', source=sources)
+    library = env.SharedLibrary(target='bin/godot_cpp_core', source=sources)
     Default(library)
 
 
@@ -61,16 +63,13 @@ elif target == "bindings":
 
         subprocess.call([godot_executable, '--gdnative-generate-json-api', json_api_file])
 
-        binding_generator_executable = '../binding_generator/target/debug/binding_generator'
-        if platform == "windows":
-            binding_generator_executable += ".exe"
+        # actually create the bindings here
+        
+        import binding_generator
 
-        # TODO Should that be the job of the generator?
-        if not os.path.isdir('godot_cpp/impl'):
-            os.mkdir('godot_cpp/impl')
-
-        # Note: the binding generator should have been built before
-        subprocess.call([binding_generator_executable, json_api_file, 'godot_cpp/'])
+        
+        binding_generator.generate_bindings(json_api_file)
+       
 
     if platform == "linux":
         if env["CXX"] == "clang++":
@@ -80,20 +79,20 @@ elif target == "bindings":
         
         env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
         env.Append(LINKFLAGS = ['-Wl,-R,\'$$ORIGIN\''])
-    env.Append(CPPPATH=['.', godot_headers_path, './godot_cpp'])
+    env.Append(CPPPATH=['.', godot_headers_path, 'include', 'include/core'])
 
     if platform == "windows":
         env.Append(LIBS=[godot_name])
         env.Append(LIBPATH=[godot_lib_path])
 
     env.Append(LIBS=['godot_cpp_core'])
-    env.Append(LIBPATH=['.'])
+    env.Append(LIBPATH=['bin'])
 
     env.Append(CPPFLAGS=['-D_GD_CPP_BINDING_IMPL'])
 
     sources = []
-    add_sources(sources, "godot_cpp/impl/")
+    add_sources(sources, "src")
 
-    library = env.SharedLibrary(target='godot_cpp_bindings', source=sources)
+    library = env.SharedLibrary(target='bin/godot_cpp_bindings', source=sources)
     Default(library)
 

@@ -1,9 +1,0 @@
-[package]
-name = "binding_generator"
-version = "0.1.0"
-authors = ["karroffel"]
-
-[dependencies]
-serde = "*"
-serde_json = "*"
-serde_derive = "*"
