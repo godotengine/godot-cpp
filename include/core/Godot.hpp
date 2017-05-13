@@ -1,5 +1,5 @@
-#ifndef GODOT_H
-#define GODOT_H
+#ifndef GODOT_HPP
+#define GODOT_HPP
 
 #include <cstdlib>
 
@@ -11,7 +11,28 @@
 
 #include <Object.hpp>
 
+#include <GodotGlobal.hpp>
+
+
 namespace godot {
+
+
+template<class T>
+class GodotScript {
+public:
+	T *owner;
+	
+	// GodotScript() {}
+
+	void _init() {}
+	static char *___get_base_type_name()
+	{
+		return T::___get_class_name();
+	}
+
+	static void _register_methods() {}
+};
+
 
 
 
@@ -28,11 +49,8 @@ namespace godot {
 
 
 
-#define GODOT_CLASS(Name, Base) \
+#define GODOT_CLASS(Name) \
 	public: inline static char *___get_type_name() { return (char *) #Name; } \
-	inline static char *___get_base_type_name() { return (char *) #Base; } \
-	Base *self; \
-	inline Name(godot_object *o) { self = (Base *) o; } \
 	private:
 
 #define GODOT_SUBCLASS(Name, Base) \
@@ -73,7 +91,8 @@ T *as(Object *obj)
 template<class T>
 void *_godot_class_instance_func(godot_object *p, void *method_data)
 {
-	T *d = new T(p);
+	T *d = new T();
+	*(godot_object **) &d->owner = p;
 	d->_init();
 	return d;
 }

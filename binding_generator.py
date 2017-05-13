@@ -441,7 +441,7 @@ def generate_icall_implementation(icalls):
     source.append("")
     source.append("")
     
-    source.append("using namespace godot;")
+    source.append("namespace godot {")
     source.append("")
     
     for icall in icalls:
@@ -497,6 +497,7 @@ def generate_icall_implementation(icalls):
         
         source.append("}")
     
+    source.append("}")
     source.append("")
     
     return "\n".join(source)

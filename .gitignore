@@ -1,4 +1,5 @@
 src/*.cpp
+src/*.hpp
 include/*.hpp
 *.os
 *.so

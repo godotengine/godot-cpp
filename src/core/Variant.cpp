@@ -399,7 +399,7 @@ Variant::Type Variant::get_type() const
 Variant Variant::call(const String& method, const Variant **args, const int arg_count)
 {
 	Variant v;
-	*(godot_variant *) &v = godot_variant_call(&_godot_variant, (godot_string *) &method, (const godot_variant **)args, arg_count);
+	*(godot_variant *) &v = godot_variant_call(&_godot_variant, (godot_string *) &method, (const godot_variant **)args, arg_count, nullptr);
 	return v;
 }
 
