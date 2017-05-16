@@ -282,8 +282,9 @@ def generate_class_implementation(icalls, used_classes, c):
         
         
         if method["is_virtual"] or method["has_varargs"]:
-        
-            source.append("\tVariant __given_args[" + str(len(method["arguments"])) + "];")
+
+            if len(method["arguments"]) != 0:
+                source.append("\tVariant __given_args[" + str(len(method["arguments"])) + "];")
             
             for i, argument in enumerate(method["arguments"]):
                 source.append("\tgodot_variant_new_nil((godot_variant *) &__given_args[" + str(i) + "]);")
