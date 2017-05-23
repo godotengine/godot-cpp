@@ -576,8 +576,6 @@ def is_core_type(name):
                   "Color",
                   "Dictionary",
                   "Error",
-                  "Image",
-                  "InputEvent",
                   "NodePath",
                   "Plane",
                   "PoolByteArray",

@@ -17,7 +17,7 @@ NodePath::NodePath(const NodePath &other)
 {
 	String from = other;
 	godot_node_path_new(&_node_path, (godot_string *) &from);
-	godot_node_path_copy(&_node_path, &other._node_path);
+	godot_node_path_operator_equal(&_node_path, &other._node_path);
 }
 
 NodePath::NodePath(const String &from)
@@ -79,7 +79,7 @@ NodePath::operator String() const
 
 void NodePath::operator =(const NodePath& other)
 {
-	godot_node_path_copy(&_node_path, &other._node_path);
+	godot_node_path_operator_equal(&_node_path, &other._node_path);
 }
 
 NodePath::~NodePath()

@@ -7,8 +7,6 @@
 #include "Basis.hpp"
 #include "Color.hpp"
 #include "Dictionary.hpp"
-#include "Image.hpp"
-#include "InputEvent.hpp"
 #include "NodePath.hpp"
 #include "Plane.hpp"
 #include "PoolArrays.hpp"

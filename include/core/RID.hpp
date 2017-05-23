@@ -27,7 +27,6 @@ public:
 
 	int32_t get_rid() const;
 
-	~RID();
 };
 
 }

@@ -17,8 +17,6 @@
 
 #include "Basis.hpp"
 #include "Color.hpp"
-#include "Image.hpp"
-#include "InputEvent.hpp"
 #include "NodePath.hpp"
 #include "Plane.hpp"
 #include "PoolArrays.hpp"
@@ -67,21 +65,19 @@ public:
 
 		// misc types
 		COLOR,
-		IMAGE,			// 15
-		NODE_PATH,
+		NODE_PATH,              // 15
 		_RID,
 		OBJECT,
-		INPUT_EVENT,
-		DICTIONARY,		// 20
+		DICTIONARY,
 		ARRAY,
 
 		// arrays
-		POOL_BYTE_ARRAY,
+		POOL_BYTE_ARRAY,        // 20
 		POOL_INT_ARRAY,
 		POOL_REAL_ARRAY,
-		POOL_STRING_ARRAY,	// 25
+		POOL_STRING_ARRAY,
 		POOL_VECTOR2_ARRAY,
-		POOL_VECTOR3_ARRAY,
+		POOL_VECTOR3_ARRAY,     // 25
 		POOL_COLOR_ARRAY,
 
 		VARIANT_MAX
@@ -140,15 +136,11 @@ public:
 
 	Variant(const Color& p_color);
 
-	Variant(const Image& p_image);
-
 	Variant(const NodePath& p_path);
 
 	Variant(const RID& p_rid);
 
 	Variant(const Object* p_object);
-
-	Variant(const InputEvent& p_input_event);
 
 	Variant(const Dictionary& p_dictionary);
 
@@ -201,10 +193,8 @@ public:
 
 	operator Color() const;
 
-	operator Image() const;
 	operator NodePath() const;
 	operator RID() const;
-	operator InputEvent() const;
 	operator Object*() const;
 
 	operator Dictionary() const;

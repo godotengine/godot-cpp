@@ -2,6 +2,7 @@
 #define GODOT_HPP
 
 #include <cstdlib>
+#include <cstring>
 
 #include <godot.h>
 

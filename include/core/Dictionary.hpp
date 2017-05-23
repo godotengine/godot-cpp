@@ -38,8 +38,6 @@ public:
 
 	Array keys() const;
 
-	int parse_json(const String& json);
-
 	Variant &operator [](const Variant& key);
 
 	const Variant &operator [](const Variant& key) const;

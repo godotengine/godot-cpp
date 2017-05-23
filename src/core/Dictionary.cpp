@@ -49,11 +49,6 @@ Array Dictionary::keys() const
 	return *(Array *) &a;
 }
 
-int Dictionary::parse_json(const String& json)
-{
-	return godot_dictionary_parse_json(&_godot_dictionary, (godot_string *) &json);
-}
-
 Variant &Dictionary::operator [](const Variant& key)
 {
 	return *(Variant *) godot_dictionary_operator_index(&_godot_dictionary, (godot_variant *) &key);

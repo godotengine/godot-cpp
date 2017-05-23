@@ -129,11 +129,6 @@ Variant::Variant(const Color& p_color)
 	godot_variant_new_color(&_godot_variant, (godot_color *) &p_color);
 }
 
-Variant::Variant(const Image& p_image)
-{
-	godot_variant_new_image(&_godot_variant, (godot_image *) &p_image);
-}
-
 Variant::Variant(const NodePath& p_path)
 {
 	godot_variant_new_node_path(&_godot_variant, (godot_node_path *) &p_path);
@@ -147,11 +142,6 @@ Variant::Variant(const RID& p_rid)
 Variant::Variant(const Object* p_object)
 {
 	godot_variant_new_object(&_godot_variant, (godot_object *) p_object);
-}
-
-Variant::Variant(const InputEvent& p_input_event)
-{
-	godot_variant_new_input_event(&_godot_variant, (godot_input_event *) &p_input_event);
 }
 
 Variant::Variant(const Dictionary& p_dictionary)
@@ -317,11 +307,6 @@ Variant::operator Color() const
 	godot_color s = godot_variant_as_color(&_godot_variant);
 	return *(Color *) &s;
 }
-Variant::operator Image() const
-{
-	godot_image s = godot_variant_as_image(&_godot_variant);
-	return *(Image *) &s;
-}
 Variant::operator NodePath() const
 {
 	godot_node_path s = godot_variant_as_node_path(&_godot_variant);
@@ -331,11 +316,6 @@ Variant::operator RID() const
 {
 	godot_rid s = godot_variant_as_rid(&_godot_variant);
 	return *(RID *) &s;
-}
-Variant::operator InputEvent() const
-{
-	godot_input_event s = godot_variant_as_input_event(&_godot_variant);
-	return *(InputEvent *) &s;
 }
 
 Variant::operator Dictionary() const

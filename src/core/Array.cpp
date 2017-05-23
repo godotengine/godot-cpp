@@ -131,11 +131,6 @@ void Array::invert()
 	godot_array_invert(&_godot_array);
 }
 
-bool Array::is_shared() const
-{
-	return godot_array_is_shared(&_godot_array);
-}
-
 Variant Array::pop_back()
 {
 	godot_variant v = godot_array_pop_back(&_godot_array);
