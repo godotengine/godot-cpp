@@ -55,7 +55,7 @@ And our file structure will be
 # Creating simple class
 
 Create `init.cpp` under `SimpleLibrary/src/` and add the following code
-```
+```cpp
 #include <godot.h>
 
 #include <core/Godot.hpp>
@@ -102,7 +102,7 @@ This creates the file `libtest.so` in your `SimpleLibrary/lib` directory. For wi
 follow [godot_header/README.md](https://github.com/GodotNativeTools/godot_headers/blob/master/README.md) file to create the `.gdn`
 
 # Implementing with gdscript
-```
+```gdscript
 var simpleclass = load("res://simpleclass.gdn").new();
 simpleclass.method("Test argument");
 ```
