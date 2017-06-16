@@ -28,10 +28,15 @@ def add_sources(sources, directory):
             sources.append(directory + '/' + file)
 
 
+if platform == "osx":
+    env.Append(CCFLAGS = ['-g','-O3', '-std=c++14', '-arch', 'x86_64'])
+    env.Append(LINKFLAGS = ['-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup'])
+
 if target == "core":
     if platform == "linux":
         env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
     
+
     env.Append(CPPPATH=['include/core', godot_headers_path])
 
     if platform == "windows":
@@ -79,6 +84,7 @@ elif target == "bindings":
         
         env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
         env.Append(LINKFLAGS = ['-Wl,-R,\'$$ORIGIN\''])
+
     env.Append(CPPPATH=['.', godot_headers_path, 'include', 'include/core'])
 
     if platform == "windows":

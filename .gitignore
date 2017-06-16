@@ -6,4 +6,5 @@ include/*.hpp
 *.obj
 *.pyc
 *.json
+*.dblite
 bin
