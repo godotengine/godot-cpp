@@ -268,7 +268,7 @@ String PoolStringArray::operator [](const int idx)
 {
 	String s;
 	godot_string str = godot_pool_string_array_get(&_godot_array, idx);
-	godot_string_copy_string((godot_string *) &s, &str);
+	godot_string_new_copy((godot_string *) &s, &str);
 	godot_string_destroy(&str);
 	return s;
 }

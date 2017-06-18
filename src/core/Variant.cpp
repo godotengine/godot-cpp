@@ -17,7 +17,7 @@ Variant::Variant()
 
 Variant::Variant(const Variant& v)
 {
-	godot_variant_copy(&_godot_variant, &v._godot_variant);
+	godot_variant_new_copy(&_godot_variant, &v._godot_variant);
 }
 
 Variant::Variant(bool p_bool)
@@ -192,7 +192,7 @@ Variant::Variant(const PoolColorArray& p_color_array)
 
 Variant &Variant::operator =(const Variant& v)
 {
-	godot_variant_copy(&_godot_variant, &v._godot_variant);
+	godot_variant_new_copy(&_godot_variant, &v._godot_variant);
 	return *this;
 }
 

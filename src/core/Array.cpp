@@ -52,7 +52,7 @@ Array::Array(const PoolColorArray& a)
 
 Variant& Array::operator [](const int idx)
 {
-	godot_variant *v = godot_array_get(&_godot_array, idx);
+	godot_variant *v = godot_array_operator_index(&_godot_array, idx);
 	return *(Variant *) v;
 }
 
@@ -60,7 +60,7 @@ Variant Array::operator [](const int idx) const
 {
 	// Yes, I'm casting away the const... you can hate me now.
 	// since the result is
-	godot_variant *v = godot_array_get((godot_array *) &_godot_array, idx);
+	godot_variant *v = godot_array_operator_index((godot_array *) &_godot_array, idx);
 	return *(Variant *) v;
 }
 
