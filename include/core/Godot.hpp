@@ -730,7 +730,6 @@ void register_signal(String name, Dictionary args = Dictionary())
 		// String name = entry[0];
 		String name = args.keys()[i];
 		godot_string *_key = (godot_string *)&name;
-		godot_string_new(&signal.args[i].name);
 		godot_string_new_copy(&signal.args[i].name, _key);
 
 		// if (entry.size() > 1) {
