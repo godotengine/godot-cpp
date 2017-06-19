@@ -89,7 +89,12 @@ def generate_class_header(used_classes, c):
     
     for name in c["constants"]:
         source.append("\tconst static int " + name + " = " + str(c["constants"][name]) + ";")
+
     
+    if c["instanciable"]:
+        source.append("\tstatic void *operator new(size_t);")
+        
+        source.append("\tstatic void operator delete(void *);")
     
     source.append("")
     source.append("\n\t// methods")
@@ -233,7 +238,16 @@ def generate_class_implementation(icalls, used_classes, c):
     
     
     
+    if c["instanciable"]:
+        source.append("void *" + strip_name(c["name"]) + "::operator new(size_t)")
+        source.append("{")
+        source.append("\treturn godot_get_class_constructor(\"" + c["name"] + "\")();")
+        source.append("}")
         
+        source.append("void " + strip_name(c["name"]) + "::operator delete(void *ptr)")
+        source.append("{")
+        source.append("\tgodot_object_destroy((godot_object *)ptr);")
+        source.append("}")
     
     for method in c["methods"]:
         method_signature = ""
