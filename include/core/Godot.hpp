@@ -78,6 +78,14 @@ struct _ArgCast<T*> {
 	}
 };
 
+template<>
+struct _ArgCast<Variant> {
+	static Variant _arg_cast(Variant a)
+	{
+		return a;
+	}
+};
+
 
 
 
