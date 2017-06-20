@@ -9,6 +9,7 @@
 
 #include <CoreTypes.hpp>
 #include <Variant.hpp>
+#include <Ref.hpp>
 
 #include <Object.hpp>
 

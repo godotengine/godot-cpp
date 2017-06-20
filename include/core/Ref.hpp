@@ -84,10 +84,17 @@ public:
 	{
 		ref(from);
 	}
+
+	template<class T_Other>
+	void operator=(const Ref<T_Other> &from)
+	{
+		Ref<T> n((T *) from.ptr());
+		ref(n);
+	}
 	
 	void operator=(const Variant &variant)
 	{
-		T *r = variant;
+		T *r = (T *) (Object *) variant;
 		if (!r) {
 			unref();
 			return;
@@ -101,17 +108,26 @@ public:
 	
 	operator Variant() const
 	{
-		ref();
-		return Variant((Object *) this);
+		if (reference) reference->reference();
+		return Variant((Object *) reference);
 	}
 	
+	template<class T_Other>
+	Ref(const Ref<T_Other> &from)
+	{
+		if (from.ptr())
+			ref_pointer((T *) from.ptr());
+		else
+			reference = nullptr;
+	}
 	
 	Ref(const Ref &from)
 	{
 		reference = nullptr;
 		ref(from);
 	}
-	
+
+
 	Ref(T *r)
 	{
 		if (r)
@@ -120,10 +136,13 @@ public:
 			reference = nullptr;
 	}
 	
+	template<class T_Other>
+	Ref(T_Other *r) : Ref((T *) r) {}
+
 	Ref(const Variant &variant)
 	{
 		reference = nullptr;
-		T *r = variant;
+		T *r = (T *) (Object *) variant;
 		if (!r) {
 			unref();
 			return;

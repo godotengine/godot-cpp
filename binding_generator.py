@@ -4,8 +4,11 @@ import json
 
 # comment.
 
+classes = []
+
 def generate_bindings(path):
     
+    global classes
     classes = json.load(open(path))
     
     icalls = set()
@@ -31,8 +34,23 @@ def generate_bindings(path):
     icall_source_file = open("src/__icalls.cpp", "w+")
     icall_source_file.write(generate_icall_implementation(icalls))
 
-        
-        
+
+def is_reference_type(t):
+    for c in classes:
+        if c['name'] != t:
+            continue
+        if c['is_reference']:
+            return True
+    return False
+
+def make_gdnative_type(t):
+    if is_class_type(t):
+        if is_reference_type(t):
+            return "Ref<" + strip_name(t) + "> "
+        else:
+            return strip_name(t) + " *"
+    else:
+        return strip_name(t) + " "
 
 def generate_class_header(used_classes, c):
 
@@ -59,6 +77,7 @@ def generate_class_header(used_classes, c):
     
     
     source.append("#include <CoreTypes.hpp>")
+    source.append("#include <Ref.hpp>")
     
     if c["base_class"] != "":
         source.append("#include <" + strip_name(c["base_class"]) + ".hpp>")
@@ -104,15 +123,14 @@ def generate_class_header(used_classes, c):
         method_signature = ""
         
         method_signature += "static " if c["singleton"] else ""
-        method_signature += strip_name(method["return_type"])
-        method_signature += " *" if is_class_type(method["return_type"]) else " "
+        method_signature += make_gdnative_type(method["return_type"])
         method_signature += escape_cpp(method["name"]) + "("
-        
-        
+            
+            
         has_default_argument = False
         
         for i, argument in enumerate(method["arguments"]):
-            method_signature += "const " + argument["type"] + (" *" if is_class_type(argument["type"]) else " ")
+            method_signature += "const " + make_gdnative_type(argument["type"])
             method_signature += escape_cpp(argument["name"])
             
             
@@ -196,6 +214,7 @@ def generate_class_implementation(icalls, used_classes, c):
     source.append("")
     
     source.append("#include <CoreTypes.hpp>")
+    source.append("#include <Ref.hpp>")
     
     source.append("#include <Godot.hpp>")
     source.append("")
@@ -252,12 +271,11 @@ def generate_class_implementation(icalls, used_classes, c):
     for method in c["methods"]:
         method_signature = ""
         
-        method_signature += strip_name(method["return_type"])
-        method_signature += " *" if is_class_type(method["return_type"]) else " "
+        method_signature += make_gdnative_type(method["return_type"])
         method_signature += strip_name(c["name"]) + "::" + escape_cpp(method["name"]) + "("
         
         for i, argument in enumerate(method["arguments"]):
-            method_signature += "const " + argument["type"] + (" *" if is_class_type(argument["type"]) else " ")
+            method_signature += "const " + make_gdnative_type(argument["type"])
             method_signature += escape_cpp(argument["name"])
             
             if i != len(method["arguments"]) - 1:
@@ -286,7 +304,13 @@ def generate_class_implementation(icalls, used_classes, c):
         return_statement = ""
         
         if method["return_type"] != "void":
-            return_statement += "return " + ("(" + strip_name(method["return_type"]) + " *) " if is_class_type(method["return_type"]) else "")
+            if is_class_type(method["return_type"]):
+                if is_reference_type(method["return_type"]):
+                    return_statement += "return Ref<" + strip_name(method["return_type"]) + ">(";
+                else:
+                    return_statement += "return " + ("(" + strip_name(method["return_type"]) + " *) " if is_class_type(method["return_type"]) else "")
+            else:
+                return_statement += "return "
         
         def get_icall_type_name(name):
             if is_class_type(name):
@@ -295,7 +319,7 @@ def generate_class_implementation(icalls, used_classes, c):
         
         
         
-        if method["is_virtual"] or method["has_varargs"]:
+        if method["has_varargs"]:
 
             if len(method["arguments"]) != 0:
                 source.append("\tVariant __given_args[" + str(len(method["arguments"])) + "];")
@@ -347,8 +371,13 @@ def generate_class_implementation(icalls, used_classes, c):
             if method["return_type"] != "void":
                 cast = ""
                 if is_class_type(method["return_type"]):
-                    cast += "(" + strip_name(method["return_type"]) + " *) (Object *) "
-                source.append("\treturn " + cast + "__result;")
+                    if is_reference_type(method["return_type"]):
+                        cast += "Ref<" + stip_name(method["return_type"]) + ">(__result);"
+                    else:
+                        cast += "(" + strip_name(method["return_type"]) + " *) (Object *) __result;"
+                else:
+                    cast += "__result;"
+                source.append("\treturn " + cast)
             
             
             
@@ -369,11 +398,11 @@ def generate_class_implementation(icalls, used_classes, c):
             return_statement += icall_name + "(mb, (godot_object *) " + core_object_name
             
             for arg in method["arguments"]:
-                return_statement += ", " + escape_cpp(arg["name"])
+                return_statement += ", " + escape_cpp(arg["name"]) + (".ptr()" if is_reference_type(arg["type"]) else "")
                 
             return_statement += ")"
             
-            source.append("\t" + return_statement + ";")
+            source.append("\t" + return_statement + (")" if is_reference_type(method["return_type"]) else "") + ";")
         
         source.append("}")
         source.append("")
