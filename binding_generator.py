@@ -229,7 +229,7 @@ def generate_class_implementation(icalls, used_classes, c):
         source.append("static inline void ___singleton_init()")
         source.append("{")
         source.append("\tif (" + core_object_name + " == nullptr) {")
-        source.append("\t\t" + core_object_name + " = godot_global_get_singleton(\"" + c["name"] + "\");")
+        source.append("\t\t" + core_object_name + " = godot_global_get_singleton(\"" + strip_name(c["name"]) + "\");")
         source.append("\t}")
         source.append("}")
         
