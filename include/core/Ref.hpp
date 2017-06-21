@@ -108,7 +108,6 @@ public:
 	
 	operator Variant() const
 	{
-		if (reference) reference->reference();
 		return Variant((Object *) reference);
 	}
 	
@@ -130,10 +129,8 @@ public:
 
 	Ref(T *r)
 	{
-		if (r)
-			ref_pointer(r);
-		else
-			reference = nullptr;
+		r->reference();
+		reference = r;
 	}
 	
 	template<class T_Other>
@@ -152,6 +149,14 @@ public:
 		re.reference = r;
 		ref(re);
 		re.reference = nullptr;
+	}
+
+	template<class T_Other>
+	static Ref<T> __internal_constructor(T_Other *r)
+	{
+		Ref<T> ref;
+		ref.reference = (T *) r;
+		return ref;
 	}
 	
 	

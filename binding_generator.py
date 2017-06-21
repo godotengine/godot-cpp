@@ -306,7 +306,7 @@ def generate_class_implementation(icalls, used_classes, c):
         if method["return_type"] != "void":
             if is_class_type(method["return_type"]):
                 if is_reference_type(method["return_type"]):
-                    return_statement += "return Ref<" + strip_name(method["return_type"]) + ">(";
+                    return_statement += "return Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor(";
                 else:
                     return_statement += "return " + ("(" + strip_name(method["return_type"]) + " *) " if is_class_type(method["return_type"]) else "")
             else:
@@ -372,7 +372,7 @@ def generate_class_implementation(icalls, used_classes, c):
                 cast = ""
                 if is_class_type(method["return_type"]):
                     if is_reference_type(method["return_type"]):
-                        cast += "Ref<" + stip_name(method["return_type"]) + ">(__result);"
+                        cast += "Ref<" + stip_name(method["return_type"]) + ">::__internal_constructor(__result);"
                     else:
                         cast += "(" + strip_name(method["return_type"]) + " *) (Object *) __result;"
                 else:
