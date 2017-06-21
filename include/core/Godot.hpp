@@ -9,6 +9,7 @@
 
 #include <CoreTypes.hpp>
 #include <Variant.hpp>
+#include <Ref.hpp>
 
 #include <Object.hpp>
 
@@ -66,7 +67,7 @@ template<class T>
 struct _ArgCast {
 	static T _arg_cast(Variant a)
 	{
-		return a.operator T();
+		return static_cast<T>(a);
 	}
 };
 
