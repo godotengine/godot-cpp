@@ -166,6 +166,12 @@ char *___get_method_class_name(R (T::*p)(args... a))
 	return T::___get_type_name();
 }
 
+template<class T, class R, class ...args>
+char *___get_method_class_name(R (T::*p)(args... a) const)
+{
+	return T::___get_type_name();
+}
+
 
 // wohooo, let the fun begin.
 
@@ -538,9 +544,18 @@ __godot_wrapper_method ___get_wrapper_function(R (T::*f)(A0, A1, A2, A3, A4))
 	return (__godot_wrapper_method) &_WrappedMethod5<T, R, A0, A1, A2, A3, A4>::__wrapped_method;
 }
 
+template<class T, class R, class ...A>
+void *___make_wrapper_function(R (T::*f)(A...) const)
+{
+	return ___make_wrapper_function((R (T::*)(A...)) f);
+}
 
 
-
+template<class T, class R, class ...A>
+__godot_wrapper_method ___get_wrapper_function(R (T::*f)(A...) const)
+{
+	return ___get_wrapper_function((R (T::*)(A...)) f);
+}
 
 
 
