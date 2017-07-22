@@ -84,14 +84,14 @@ bool String::operator !=(const String &s)
 String String::operator +(const String &s)
 {
 	String new_string = *this;
-	godot_string_operator_plus(&new_string._godot_string, &s._godot_string);
+	new_string._godot_string = godot_string_operator_plus(&new_string._godot_string, &s._godot_string);
 
 	return new_string;
 }
 
 void String::operator +=(const String &s)
 {
-	godot_string_operator_plus(&_godot_string, &s._godot_string);
+	_godot_string = godot_string_operator_plus(&_godot_string, &s._godot_string);
 }
 
 void String::operator +=(const wchar_t c)
