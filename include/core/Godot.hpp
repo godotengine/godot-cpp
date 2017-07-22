@@ -50,7 +50,6 @@ public:
 #define GODOT_NATIVE_TERMINATE(arg) extern "C" void GD_EXPORT godot_native_terminate(arg)
 
 
-
 #define GODOT_CLASS(Name) \
 	public: inline static char *___get_type_name() { return (char *) #Name; } \
 	private:
@@ -58,7 +57,7 @@ public:
 #define GODOT_SUBCLASS(Name, Base) \
 	public: inline static char *___get_type_name() { return (char *) #Name; } \
 	inline static char *___get_base_type_name() { return (char *) #Base; } \
-	inline Name(godot_object *o) : Base(o) {} \
+	//inline Name(godot_object *o) : Base(o) {} \
 	private:
 
 
