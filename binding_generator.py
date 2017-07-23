@@ -50,6 +50,10 @@ def make_gdnative_type(t):
         else:
             return strip_name(t) + " *"
     else:
+        if t == "int":
+            return "int64_t "
+        if t == "float" or t == "real":
+            return "double "
         return strip_name(t) + " "
 
 def generate_class_header(used_classes, c):
@@ -73,6 +77,7 @@ def generate_class_header(used_classes, c):
     source.append("")
     
     source.append("#include <godot.h>")
+    source.append("#include <stdint.h>")
     source.append("")
     
     
@@ -427,7 +432,7 @@ def generate_icall_header(icalls):
     source.append("")
     
     source.append("#include <godot.h>")
-    source.append("")
+    source.append("#include <stdint.h>")
     source.append("")
     
     source.append("#include <CoreTypes.hpp>")
@@ -477,7 +482,7 @@ def generate_icall_implementation(icalls):
     source.append("")
     
     source.append("#include <godot.h>")
-    source.append("")
+    source.append("#include <stdint.h>")
     source.append("")
     
     source.append("#include <CoreTypes.hpp>")
@@ -513,7 +518,7 @@ def generate_icall_implementation(icalls):
         source.append(method_signature + " {")
         
         if ret_type != "void":
-            source.append("\t" + strip_name(ret_type) + (" *" if is_class_type(ret_type) else " ") + "ret;")
+            source.append("\t" + return_type(ret_type) + "ret;")
             if is_class_type(ret_type):
                 source.append("\tret = nullptr;")
         
@@ -567,6 +572,10 @@ def generate_icall_implementation(icalls):
 def return_type(t):
     if is_class_type(t):
         return "Object *"
+    if t == "int":
+        return "int64_t "
+    if t == "float" or t == "real":
+        return "double "
     return t + " "
 
 
