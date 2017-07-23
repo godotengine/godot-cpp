@@ -1,16 +1,6 @@
 #ifndef VECTOR3_H
 #define VECTOR3_H
 
-#if defined(_WIN32)
-#  ifdef _GD_CPP_CORE_API_IMPL
-#    define GD_CPP_CORE_API __declspec(dllexport)
-#  else
-#    define GD_CPP_CORE_API __declspec(dllimport)
-#  endif
-#else
-#  define GD_CPP_CORE_API
-#endif
-
 #include "Defs.hpp"
 
 #include "String.hpp"
@@ -18,7 +8,7 @@
 namespace godot {
 
 
-struct GD_CPP_CORE_API Vector3 {
+struct Vector3 {
 
 	enum Axis {
 		AXIS_X,
@@ -39,8 +29,6 @@ struct GD_CPP_CORE_API Vector3 {
 	Vector3(real_t x, real_t y, real_t z);
 
 	Vector3();
-
-	Vector3(const Vector3& b);
 
 	const real_t& operator[](int p_axis) const;
 

@@ -1,16 +1,6 @@
 #ifndef POOLARRAYS_H
 #define POOLARRAYS_H
 
-#if defined(_WIN32)
-#  ifdef _GD_CPP_CORE_API_IMPL
-#    define GD_CPP_CORE_API __declspec(dllexport)
-#  else
-#    define GD_CPP_CORE_API __declspec(dllimport)
-#  endif
-#else
-#  define GD_CPP_CORE_API
-#endif
-
 #include "Defs.hpp"
 
 #include "String.hpp"
@@ -24,7 +14,7 @@ namespace godot {
 
 class Array;
 
-class GD_CPP_CORE_API PoolByteArray {
+class PoolByteArray {
 	godot_pool_byte_array _godot_array;
 public:
 	PoolByteArray();
@@ -55,7 +45,7 @@ public:
 };
 
 
-class GD_CPP_CORE_API PoolIntArray {
+class PoolIntArray {
 	godot_pool_int_array _godot_array;
 public:
 	PoolIntArray();
@@ -86,7 +76,7 @@ public:
 };
 
 
-class GD_CPP_CORE_API PoolRealArray {
+class PoolRealArray {
 	godot_pool_real_array _godot_array;
 public:
 	PoolRealArray();
@@ -117,7 +107,7 @@ public:
 };
 
 
-class GD_CPP_CORE_API PoolStringArray {
+class PoolStringArray {
 	godot_pool_string_array _godot_array;
 public:
 	PoolStringArray();
@@ -149,7 +139,7 @@ public:
 
 
 
-class GD_CPP_CORE_API PoolVector2Array {
+class PoolVector2Array {
 	godot_pool_vector2_array _godot_array;
 public:
 	PoolVector2Array();
@@ -180,7 +170,7 @@ public:
 };
 
 
-class GD_CPP_CORE_API PoolVector3Array {
+class PoolVector3Array {
 	godot_pool_vector3_array _godot_array;
 public:
 	PoolVector3Array();
@@ -211,7 +201,7 @@ public:
 };
 
 
-class GD_CPP_CORE_API PoolColorArray {
+class PoolColorArray {
 	godot_pool_color_array _godot_array;
 public:
 	PoolColorArray();

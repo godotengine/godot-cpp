@@ -26,13 +26,6 @@ Vector3::Vector3()
 	this->z = 0;
 }
 
-Vector3::Vector3(const Vector3& b)
-{
-	this->x = b.x;
-	this->y = b.y;
-	this->z = b.z;
-}
-
 const real_t& Vector3::operator[](int p_axis) const
 {
 	return coord[p_axis];

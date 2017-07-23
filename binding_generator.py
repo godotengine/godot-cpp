@@ -62,18 +62,6 @@ def generate_class_header(used_classes, c):
     source.append("#ifndef GODOT_CPP_" + strip_name(c["name"]).upper() + "_HPP")
     source.append("#define GODOT_CPP_" + strip_name(c["name"]).upper() + "_HPP")
     source.append("")
-    
-    
-    source.append("#if defined(_WIN32) && defined(_GD_CPP_BINDING_IMPL)")
-    source.append("#  define GD_CPP_BINDING_API __declspec(dllexport)")
-    source.append("#elif defined(_WIN32)")
-    source.append("#  define GD_CPP_BINDING_API __declspec(dllimport)")
-    source.append("#else")
-    source.append("#  define GD_CPP_BINDING_API")
-    source.append("#endif");
-    source.append("")
-    source.append("")
-    source.append("")
     source.append("")
     
     source.append("#include <godot.h>")
@@ -101,7 +89,7 @@ def generate_class_header(used_classes, c):
     
     
     # generate the class definition here
-    source.append("class GD_CPP_BINDING_API " + strip_name(c["name"]) + ("" if c["base_class"] == "" else (" : public " + strip_name(c["base_class"])) ) + " {")
+    source.append("class " + strip_name(c["name"]) + ("" if c["base_class"] == "" else (" : public " + strip_name(c["base_class"])) ) + " {")
     
     source.append("public:")
     source.append("")
@@ -253,7 +241,7 @@ def generate_class_implementation(icalls, used_classes, c):
         source.append("static inline void ___singleton_init()")
         source.append("{")
         source.append("\tif (" + core_object_name + " == nullptr) {")
-        source.append("\t\t" + core_object_name + " = godot_global_get_singleton(\"" + strip_name(c["name"]) + "\");")
+        source.append("\t\t" + core_object_name + " = godot_global_get_singleton((char *) \"" + strip_name(c["name"]) + "\");")
         source.append("\t}")
         source.append("}")
         
@@ -265,7 +253,7 @@ def generate_class_implementation(icalls, used_classes, c):
     if c["instanciable"]:
         source.append("void *" + strip_name(c["name"]) + "::operator new(size_t)")
         source.append("{")
-        source.append("\treturn godot_get_class_constructor(\"" + c["name"] + "\")();")
+        source.append("\treturn godot_get_class_constructor((char *)\"" + c["name"] + "\")();")
         source.append("}")
         
         source.append("void " + strip_name(c["name"]) + "::operator delete(void *ptr)")
