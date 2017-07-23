@@ -3,12 +3,8 @@ import os, subprocess
 
 
 # Local dependency paths, adapt them to your setup
-godot_headers_path = "../godot_headers/"
-godot_bin_path = "../godot_fork/bin/"
-
-# for windows
-godot_lib_path = "../godot_fork/bin/"
-
+godot_headers_path = ARGUMENTS.get("headers", "../godot_headers/")
+godot_bin_path = ARGUMENTS.get("godotpath", "../godot_fork/bin/")
 
 env = Environment()
 
@@ -18,25 +14,27 @@ if ARGUMENTS.get("use_llvm", "no") == "yes":
 target = ARGUMENTS.get("target", "core")
 platform = ARGUMENTS.get("p", "linux")
 
-
 godot_name = "godot." + ("x11" if platform == "linux" else platform) + ".tools.64"
-
 
 def add_sources(sources, directory):
     for file in os.listdir(directory):
         if file.endswith('.cpp'):
             sources.append(directory + '/' + file)
 
-
+# put stuff that is the same for all first, saves duplication 
 if platform == "osx":
     env.Append(CCFLAGS = ['-g','-O3', '-std=c++14', '-arch', 'x86_64'])
     env.Append(LINKFLAGS = ['-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup'])
-
+elif platform == "linux":
+    env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
+    env.Append(LINKFLAGS = ['-Wl,-R,\'$$ORIGIN\''])
+elif platform == "windows":
+    # need to add detection of msvc vs mingw, this is for msvc...
+    env.Append(CCFLAGS = ['/MD', '/WX', '/O2', '/EHsc', '/nologo'])
+    env.Append(LINKFLAGS = ['/WX'])
+    godot_lib_path = ARGUMENTS.get("godotlibpath", godot_bin_path)
+ 
 if target == "core":
-    if platform == "linux":
-        env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
-    
-
     env.Append(CPPPATH=['include/core', godot_headers_path])
 
     if platform == "windows":
@@ -82,9 +80,6 @@ elif target == "bindings":
         else:
             env.Append(CCFLAGS = ['-Wno-write-strings', '-Wno-return-local-addr'])
         
-        env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
-        env.Append(LINKFLAGS = ['-Wl,-R,\'$$ORIGIN\''])
-
     env.Append(CPPPATH=['.', godot_headers_path, 'include', 'include/core'])
 
     if platform == "windows":
