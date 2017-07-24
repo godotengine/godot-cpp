@@ -1,16 +1,6 @@
 #ifndef VARIANT_H
 #define VARIANT_H
 
-#if defined(_WIN32)
-#  ifdef _GD_CPP_CORE_API_IMPL
-#    define GD_CPP_CORE_API __declspec(dllexport)
-#  else
-#    define GD_CPP_CORE_API __declspec(dllimport)
-#  endif
-#else
-#  define GD_CPP_CORE_API
-#endif
-
 #include <godot/godot_variant.h>
 
 #include "Defs.hpp"
@@ -38,7 +28,7 @@ class Dictionary;
 
 class Array;
 
-class GD_CPP_CORE_API Variant {
+class Variant {
 	godot_variant _godot_variant;
 public:
 	enum Type {
