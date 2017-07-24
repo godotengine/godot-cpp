@@ -2,9 +2,11 @@
 
 #include "String.hpp"
 
-#include <godot.h>
+#include <godot/gdnative.h>
 
 namespace godot {
+
+void *_RegisterState::nativescript_handle;
 
 void Godot::print(const String& message)
 {
@@ -22,3 +24,22 @@ void Godot::print_error(const String& description, const String& function, const
 }
 
 };
+
+void gdnative_init(godot_gdnative_init_options *options);
+extern "C" void GDN_EXPORT godot_gdnative_init(godot_gdnative_init_options *options)
+{
+	gdnative_init(options);
+}
+
+void gdnative_terminate(godot_gdnative_terminate_options *options);
+extern "C" void GDN_EXPORT godot_gdnative_terminate(godot_gdnative_terminate_options *options)
+{
+	gdnative_terminate(options);
+}
+
+void nativescript_init();
+extern "C" void GDN_EXPORT godot_nativescript_init(void *handle)
+{
+	godot::_RegisterState::nativescript_handle = handle;
+	nativescript_init();
+}

@@ -2,8 +2,6 @@
 
 #include <cstdlib>
 
-#include <godot/godot_array.h>
-
 #include "Variant.hpp"
 
 namespace godot {

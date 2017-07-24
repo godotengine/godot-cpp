@@ -4,7 +4,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <godot.h>
+#include <godot/gdnative.h>
+#include <godot_nativescript.h>
 
 
 #include <CoreTypes.hpp>
@@ -39,16 +40,10 @@ public:
 
 
 
-#if !defined(_WIN32)
-#define GD_EXPORT
-#else
-#define GD_EXPORT __declspec(dllexport)
-#endif
+#define GDNATIVE_INIT(arg) void gdnative_init(arg)
+#define GDNATIVE_TERMINATE(arg) void gdnative_terminate(arg)
 
-
-#define GODOT_NATIVE_INIT(arg) extern "C" void GD_EXPORT godot_native_init(arg)
-#define GODOT_NATIVE_TERMINATE(arg) extern "C" void GD_EXPORT godot_native_terminate(arg)
-
+#define NATIVESCRIPT_INIT() void nativescript_init()
 
 #define GODOT_CLASS(Name) \
 	public: inline static char *___get_type_name() { return (char *) #Name; } \
@@ -92,7 +87,7 @@ struct _ArgCast<Variant> {
 template<class T>
 T *as(Object *obj)
 {
-	return (T *) godot_native_get_userdata(obj);
+	return (T *) godot_nativescript_get_userdata(obj);
 }
 
 // instance and destroy funcs
@@ -114,7 +109,6 @@ void _godot_class_destroy_func(godot_object *p, void *method_data, void *data)
 }
 
 
-
 template<class T>
 void register_class()
 {
@@ -125,7 +119,7 @@ void register_class()
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
 
-	godot_script_register_class(T::___get_type_name(), T::___get_base_type_name(), create, destroy);
+	godot_nativescript_register_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
 	T::_register_methods();
 }
 
@@ -139,7 +133,7 @@ void register_tool_class()
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
 
-	godot_script_register_tool_class(T::___get_type_name(), T::___get_base_type_name(), create, destroy);
+	godot_nativescript_register_tool_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
 	T::_register_methods();
 }
 
@@ -292,7 +286,7 @@ void register_method(char *name, M method_ptr, godot_method_rpc_mode rpc_type = 
 	godot_method_attributes attr = {};
 	attr.rpc_type = rpc_type;
 
-	godot_script_register_method(___get_method_class_name(method_ptr), name, attr, method);
+	godot_nativescript_register_method(godot::_RegisterState::nativescript_handle, ___get_method_class_name(method_ptr), name, attr, method);
 }
 
 
@@ -300,12 +294,12 @@ void register_method(char *name, M method_ptr, godot_method_rpc_mode rpc_type = 
 template<class T, class P>
 struct _PropertySetFunc {
 	void (T::*f)(P);
-	static void _wrapped_setter(godot_object *object, void *method_data, void *user_data, godot_variant value)
+	static void _wrapped_setter(godot_object *object, void *method_data, void *user_data, godot_variant *value)
 	{
 		_PropertySetFunc<T, P> *set_func = (_PropertySetFunc<T, P> *) method_data;
 		T *obj = (T *) user_data;
 
-		Variant *v = (Variant *) &value;
+		Variant *v = (Variant *) value;
 
 		(obj->*(set_func->f))(_ArgCast<P>::_arg_cast(*v));
 	}
@@ -338,12 +332,12 @@ struct _PropertyGetFunc {
 template<class T, class P>
 struct _PropertyDefaultSetFunc {
 	P (T::*f);
-	static void _wrapped_setter(godot_object *object, void *method_data, void *user_data, godot_variant value)
+	static void _wrapped_setter(godot_object *object, void *method_data, void *user_data, godot_variant *value)
 	{
 		_PropertyDefaultSetFunc<T, P> *set_func = (_PropertyDefaultSetFunc<T, P> *) method_data;
 		T *obj = (T *) user_data;
 
-		Variant *v = (Variant *) &value;
+		Variant *v = (Variant *) value;
 
 		(obj->*(set_func->f)) = _ArgCast<P>::_arg_cast(*v);
 	}
@@ -410,7 +404,7 @@ void register_property(char *name, P (T::*var), P default_value, godot_method_rp
 	get_func.free_func   = godot_free;
 	get_func.get_func    = &_PropertyDefaultGetFunc<T, P>::_wrapped_getter;
 
-	godot_script_register_property(T::___get_type_name(), name, &attr, set_func, get_func);
+	godot_nativescript_register_property(godot::_RegisterState::nativescript_handle, T::___get_type_name(), name, &attr, set_func, get_func);
 }
 
 
@@ -444,7 +438,7 @@ void register_property(char *name, void (T::*setter)(P), P (T::*getter)(), P def
 	get_func.free_func   = godot_free;
 	get_func.get_func    = &_PropertyGetFunc<T, P>::_wrapped_getter;
 
-	godot_script_register_property(T::___get_type_name(), name, &attr, set_func, get_func);
+	godot_nativescript_register_property(godot::_RegisterState::nativescript_handle, T::___get_type_name(), name, &attr, set_func, get_func);
 
 }
 
@@ -473,11 +467,13 @@ void register_signal(String name, Dictionary args = Dictionary())
 		signal.args[i].type = args.values()[i];
 	}
 
-	godot_script_register_signal(T::___get_type_name(), &signal);
+	godot_nativescript_register_signal(godot::_RegisterState::nativescript_handle, T::___get_type_name(), &signal);
 
 	for (int i = 0; i < signal.num_args; i++) {
 		godot_string_destroy(&signal.args[i].name);
 	}
+	
+	godot_free(signal.args);
 }
 
 

@@ -1,7 +1,7 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include <godot/godot_string.h>
+#include <godot/string.h>
 
 namespace godot {
 

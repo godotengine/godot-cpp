@@ -4,7 +4,6 @@
 
 #include "Array.hpp"
 
-#include <godot/godot_dictionary.h>
 
 namespace godot {
 

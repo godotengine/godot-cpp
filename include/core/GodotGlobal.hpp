@@ -15,6 +15,12 @@ public:
 
 };
 
+
+
+struct _RegisterState {
+	static void *nativescript_handle;
+};
+
 }
 
 #endif

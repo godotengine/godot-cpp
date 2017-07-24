@@ -15,7 +15,7 @@ env = Environment()
 if ARGUMENTS.get("use_llvm", "no") == "yes":
     env["CXX"] = "clang++"
 
-target = ARGUMENTS.get("target", "core")
+target = ARGUMENTS.get("target", "debug")
 platform = ARGUMENTS.get("p", "linux")
 
 
@@ -33,7 +33,7 @@ if platform == "osx":
     env.Append(LINKFLAGS = ['-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup'])
 
 if platform == "linux":
-    env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
+    env.Append(CCFLAGS = ['-fPIC', '-g','-O3', '-std=c++14'])
 
 env.Append(CPPPATH=['.', godot_headers_path, 'include', 'include/core'])
 
