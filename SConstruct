@@ -33,7 +33,7 @@ if platform == "osx":
     env.Append(LINKFLAGS = ['-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup'])
 
 if platform == "linux":
-    env.Append(CCFLAGS = ['-g','-O3', '-std=c++14'])
+    env.Append(CCFLAGS = ['-g','-O3', '-std=c++14', '-fPIC'])
 
 env.Append(CPPPATH=['.', godot_headers_path, 'include', 'include/core'])
 

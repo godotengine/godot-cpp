@@ -1,7 +1,7 @@
 #ifndef RID_H
 #define RID_H
 
-#include <godot/godot_rid.h>
+#include <godot/rid.h>
 
 namespace godot {
 

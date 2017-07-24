@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <godot.h>
+#include <godot_nativescript.h>
 
 
 #include <CoreTypes.hpp>

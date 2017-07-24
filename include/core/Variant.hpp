@@ -1,7 +1,7 @@
 #ifndef VARIANT_H
 #define VARIANT_H
 
-#include <godot/godot_variant.h>
+#include <godot/variant.h>
 
 #include "Defs.hpp"
 
