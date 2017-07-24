@@ -1,6 +1,6 @@
 #include "Color.hpp"
 
-#include <godot/godot_color.h>
+#include <godot/color.h>
 
 #include <cmath>
 

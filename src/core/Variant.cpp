@@ -1,6 +1,6 @@
 #include "Variant.hpp"
 
-#include <godot/godot_variant.h>
+#include <godot/variant.h>
 
 #include "Defs.hpp"
 

@@ -2,7 +2,7 @@
 
 #include "String.hpp"
 
-#include <godot.h>
+#include <godot_nativescript.h>
 
 namespace godot {
 

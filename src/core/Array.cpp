@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 
-#include <godot/godot_array.h>
+#include <godot/array.h>
 
 #include "Variant.hpp"
 
