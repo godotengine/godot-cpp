@@ -26,20 +26,20 @@ $ cd cpp_bindings
 
 Edit `SConstruct` file and assign your godot executable path at line:7 `godot_bin_path = "../godot_fork/bin/"`,
 
-Building core/bindings, (`libgodot_cpp_core.so` , `libgodot_cpp_bindings.so`)
+Building cpp_bindings
 ```
 $ scons p=linux
-$ scons p=linux target=bindings generate_bindings=yes
 ```
-resulting libraries will be placed under `bin/` and generated bindings will be found under `includes/*`
+resulting libraries will be placed under `bin/` and the generated headers will be placed under `include/*`
 
-Note: Use `use_llvm=yes` to use clang.
+Note:
+	Using `generate_bindings=yes` you can generate `godot_api.json` (Godot API)
+	Use `use_llvm=yes` to use clang++.
 
-copy Core && Bindings librarys into `SimpleLibrary/lib` folder
+Copy bindings librarys into `SimpleLibrary/lib` folder
 ```
 $ cd ..
-$ cp cpp_bindings/bin/libgodot_cpp_core.so lib/
-$ cp cpp_bindings/bin/libgodot_cpp_bindings.so lib/
+$ cp cpp_bindings/bin/libgodot_cpp_bindings.a lib/
 ```
 And our file structure will be
 ```
@@ -47,19 +47,15 @@ And our file structure will be
   ├── cpp_bindings/
   ├── godot_headers/
   ├── lib/
-  │       ├── libgodot_cpp_core.so
-  │       ├── libgodot_cpp_bindings.so
+  │	  └──libgodot_cpp_bindings.a
   └── src/
 ```
 
 # Creating simple class
 
 Create `init.cpp` under `SimpleLibrary/src/` and add the following code
-```cpp
-#include <godot.h>
-
+```
 #include <core/Godot.hpp>
-#include <core/GodotGlobal.hpp>
 #include <Reference.hpp>
 
 using namespace godot;
@@ -82,10 +78,29 @@ public:
 
         static void _register_methods() {
            register_method("method", &SimpleClass::method);
+	   
+	   /**
+	    * How to register exports like gdscript
+	    * export var _name = "SimpleClass"
+	    **/
+	   register_property((char *)"base/name", &SimpleClass::_name, String("SimpleClass"));
         }
+	
+	String _name;
 };
 
-GODOT_NATIVE_INIT(godot_native_init_options *options) {
+/** GDNative Initialize **/
+GDNATIVE_INIT(godot_gdnative_init_options *options) {
+
+}
+
+/** GDNative Terminate **/
+GDNATIVE_TERMINATE(godot_gdnative_terminate_options *options) {
+
+}
+
+/** NativeScript Initialize **/
+NATIVESCRIPT_INIT() {
         register_class<SimpleClass>();
 }
 ```
@@ -93,16 +108,17 @@ GODOT_NATIVE_INIT(godot_native_init_options *options) {
 # Compiling
 ```
 $ cd ..
-$ clang -fPIC -o src/init.os -c src/init.cpp -g -O3 -std=c++14 -Icpp_bindings/include -Igodot_headers -Icpp_bindings/include/core
-$ clang -o lib/libtest.so -shared src/init.os -Llib -lgodot_cpp_core -lgodot_cpp_bindings
+$ clang -fPIC -o src/init.os -c src/init.cpp -g -O3 -std=c++14 -Icpp_bindings/include -Igodot_headers -Icpp_bindings/include/
+$ clang -o lib/libtest.so -shared src/init.os -Llib -lgodot_cpp_bindings
 ```
 This creates the file `libtest.so` in your `SimpleLibrary/lib` directory. For windows you need to find out what compiler flags need to be used.
 
-# Creating `.gdn` file
-follow [godot_header/README.md](https://github.com/GodotNativeTools/godot_headers/blob/master/README.md) file to create the `.gdn`
+# Creating `.gdns` file
+follow [godot_header/README.md](https://github.com/GodotNativeTools/godot_headers/blob/master/README.md#how-do-i-use-native-scripts-from-the-editor) to create the `.gdns` 
 
 # Implementing with gdscript
 ```gdscript
-var simpleclass = load("res://simpleclass.gdn").new();
+var simpleclass = load("res://simpleclass.gdns").new();
 simpleclass.method("Test argument");
 ```
+
