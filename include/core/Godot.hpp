@@ -24,11 +24,11 @@ template<class T>
 class GodotScript {
 public:
 	T *owner;
-	
+
 	// GodotScript() {}
 
 	void _init() {}
-	static char *___get_base_type_name()
+	static const char *___get_base_type_name()
 	{
 		return T::___get_class_name();
 	}
@@ -46,13 +46,12 @@ public:
 #define NATIVESCRIPT_INIT() void nativescript_init()
 
 #define GODOT_CLASS(Name) \
-	public: inline static char *___get_type_name() { return (char *) #Name; } \
+	public: inline static const char *___get_type_name() { return static_cast<const char *>(#Name); } \
 	private:
 
 #define GODOT_SUBCLASS(Name, Base) \
-	public: inline static char *___get_type_name() { return (char *) #Name; } \
-	inline static char *___get_base_type_name() { return (char *) #Base; } \
-	//inline Name(godot_object *o) : Base(o) {} \
+	public: inline static const char *___get_type_name() { return static_cast<const char *>(#Name); } \
+	inline static const char *___get_base_type_name() { return static_cast<const char *>(#Base); } \
 	private:
 
 
@@ -154,13 +153,13 @@ typedef godot_variant (*__godot_wrapper_method)(godot_object *, void *, void *, 
 
 
 template<class T, class R, class ...args>
-char *___get_method_class_name(R (T::*p)(args... a))
+const char *___get_method_class_name(R (T::*p)(args... a))
 {
 	return T::___get_type_name();
 }
 
 template<class T, class R, class ...args>
-char *___get_method_class_name(R (T::*p)(args... a) const)
+const char *___get_method_class_name(R (T::*p)(args... a) const)
 {
 	return T::___get_type_name();
 }
@@ -275,7 +274,7 @@ __godot_wrapper_method ___get_wrapper_function(R (T::*f)(A...) const)
 
 
 template<class M>
-void register_method(char *name, M method_ptr, godot_method_rpc_mode rpc_type = GODOT_METHOD_RPC_MODE_DISABLED)
+void register_method(const char *name, M method_ptr, godot_method_rpc_mode rpc_type = GODOT_METHOD_RPC_MODE_DISABLED)
 {
 	godot_instance_method method = {};
 	method.method_data = ___make_wrapper_function(method_ptr);
@@ -364,7 +363,7 @@ struct _PropertyDefaultGetFunc {
 
 
 template<class T, class P>
-void register_property(char *name, P (T::*var), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,  godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "")
+void register_property(const char *name, P (T::*var), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,  godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "")
 {
 	Variant def_val = default_value;
 
@@ -411,7 +410,7 @@ void register_property(char *name, P (T::*var), P default_value, godot_method_rp
 
 
 template<class T, class P>
-void register_property(char *name, void (T::*setter)(P), P (T::*getter)(), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,  godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "")
+void register_property(const char *name, void (T::*setter)(P), P (T::*getter)(), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,  godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "")
 {
 	Variant def_val = default_value;
 
@@ -472,7 +471,7 @@ void register_signal(String name, Dictionary args = Dictionary())
 	for (int i = 0; i < signal.num_args; i++) {
 		godot_string_destroy(&signal.args[i].name);
 	}
-	
+
 	godot_free(signal.args);
 }
 
