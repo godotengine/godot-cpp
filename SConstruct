@@ -9,8 +9,11 @@ godot_bin_path = "../godot_fork/bin/"
 # for windows
 godot_lib_path = "../godot_fork/bin/"
 
-
+# This makes sure to keep the session environment variables on windows, 
+# that way you can run scons in a vs 2017 prompt and it will find all the required tools
 env = Environment()
+if platform == "windows":
+    env = Environment(ENV = os.environ)
 
 if ARGUMENTS.get("use_llvm", "no") == "yes":
     env["CXX"] = "clang++"
