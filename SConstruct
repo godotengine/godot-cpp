@@ -40,6 +40,10 @@ if platform == "linux":
 env.Append(CPPPATH=['.', godot_headers_path, 'include', 'include/core'])
 
 if platform == "windows":
+    if target == "debug":
+        env.Append(CCFLAGS = ['-EHsc', '-D_DEBUG', '/MDd'])
+    else:
+        env.Append(CCFLAGS = ['-O2', '-EHsc', '-DNDEBUG', '/MD'])
     env.Append(LIBS=[godot_name])
     env.Append(LIBPATH=[godot_lib_path])
 
