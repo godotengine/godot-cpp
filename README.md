@@ -2,7 +2,7 @@
 C++ bindings for the Godot script API
 
 # Creating a GDNative library (Linux)
-Create a director named `SimpleLibrary` with subdirector `lib, src`
+Create a directory named `SimpleLibrary` with subdirectories `lib, src`
 
 Getting latest `cpp_bindings` and `godot_headers`
 ```
@@ -10,7 +10,7 @@ $ cd SimpleLibrary
 $ git clone https://github.com/GodotNativeTools/cpp_bindings
 $ git clone https://github.com/GodotNativeTools/godot_headers
 ```
-right now our file structure should look like this
+right now our directory structure should look like this
 ```
 [SimpleLibrary]
 	├── cpp_bindings/
@@ -36,12 +36,12 @@ Note:
 	Using `generate_bindings=yes` you can generate `godot_api.json` (Godot API)
 	Use `use_llvm=yes` to use clang++.
 
-Copy bindings librarys into `SimpleLibrary/lib` folder
+Copy binding libraries into the `SimpleLibrary/lib` folder
 ```
 $ cd ..
 $ cp cpp_bindings/bin/libgodot_cpp_bindings.a lib/
 ```
-And our file structure will be
+And our directory structure will be
 ```
 [SimpleLibrary]
   ├── cpp_bindings/
