@@ -44,7 +44,9 @@ def is_reference_type(t):
     return False
 
 def make_gdnative_type(t):
-    if is_class_type(t):
+    if is_enum(t):
+        return remove_enum_prefix(t) + " "
+    elif is_class_type(t):
         if is_reference_type(t):
             return "Ref<" + strip_name(t) + "> "
         else:
@@ -71,6 +73,24 @@ def generate_class_header(used_classes, c):
     
     source.append("#include <CoreTypes.hpp>")
     source.append("#include <Ref.hpp>")
+
+    class_name = strip_name(c["name"])
+
+    included = []
+
+    for used_class in used_classes:
+        if is_enum(used_class) and is_nested_type(used_class):
+            used_class_name = remove_enum_prefix(extract_nested_type(used_class))
+            if used_class_name not in included:
+                included.append(used_class_name)
+                source.append("#include <" + used_class_name + ".hpp>")
+        elif is_enum(used_class) and is_nested_type(used_class) and not is_nested_type(used_class, class_name):
+            used_class_name = remove_enum_prefix(used_class)
+            if used_class_name not in included:
+                included.append(used_class_name)
+                source.append("#include <" + used_class_name + ".hpp>")
+
+    source.append("")
     
     if c["base_class"] != "":
         source.append("#include <" + strip_name(c["base_class"]) + ".hpp>")
@@ -79,28 +99,42 @@ def generate_class_header(used_classes, c):
     
     source.append("namespace godot {")
     source.append("")
-    
-    
+
+
     for used_type in used_classes:
-        source.append("class " + strip_name(used_type) + ";")
+        if is_enum(used_type) or is_nested_type(used_type, class_name):
+            continue
+        else:
+            source.append("class " + strip_name(used_type) + ";")
     
     
     source.append("")
     
     
     # generate the class definition here
-    source.append("class " + strip_name(c["name"]) + ("" if c["base_class"] == "" else (" : public " + strip_name(c["base_class"])) ) + " {")
+    source.append("class " + class_name + ("" if c["base_class"] == "" else (" : public " + strip_name(c["base_class"])) ) + " {")
     
     source.append("public:")
     source.append("")
-    
+
     # ___get_class_name
     source.append("\tstatic inline char *___get_class_name() { return (char *) \"" + strip_name(c["name"]) + "\"; }")
-    
-    source.append("\t// constants")
+
+    enum_values = []
+
+    source.append("\n\t// enums")
+    for enum in c["enums"]:
+        source.append("\tenum " + strip_name(enum["name"]) + " {")
+        for value in enum["values"]:
+            source.append("\t\t" + remove_nested_type_prefix(value) + " = " + str(enum["values"][value]) + ",")
+            enum_values.append(value)
+        source.append("\t};")
+
+    source.append("\n\t// constants")
     
     for name in c["constants"]:
-        source.append("\tconst static int " + name + " = " + str(c["constants"][name]) + ";")
+        if name not in enum_values:
+            source.append("\tconst static int " + name + " = " + str(c["constants"][name]) + ";")
 
     
     if c["instanciable"]:
@@ -108,7 +142,6 @@ def generate_class_header(used_classes, c):
         
         source.append("\tstatic void operator delete(void *);")
     
-    source.append("")
     source.append("\n\t// methods")
     
     for method in c["methods"]:
@@ -201,8 +234,9 @@ def generate_class_header(used_classes, c):
 
 
 def generate_class_implementation(icalls, used_classes, c):
+    class_name = strip_name(c["name"])
     source = []
-    source.append("#include <" + strip_name(c["name"]) + ".hpp>")
+    source.append("#include <" + class_name + ".hpp>")
     source.append("")
     source.append("")
     
@@ -218,7 +252,10 @@ def generate_class_implementation(icalls, used_classes, c):
     source.append("")
     
     for used_class in used_classes:
-        source.append("#include <" + strip_name(used_class) + ".hpp>")
+        if is_enum(used_class):
+            continue
+        else:
+            source.append("#include <" + strip_name(used_class) + ".hpp>")
     
     source.append("")
     source.append("")
@@ -298,7 +335,9 @@ def generate_class_implementation(icalls, used_classes, c):
         
         if method["return_type"] != "void":
             if is_class_type(method["return_type"]):
-                if is_reference_type(method["return_type"]):
+                if is_enum(method["return_type"]):
+                    return_statement += "return (" + remove_enum_prefix(method["return_type"]) + ") "
+                elif is_reference_type(method["return_type"]):
                     return_statement += "return Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor(";
                 else:
                     return_statement += "return " + ("(" + strip_name(method["return_type"]) + " *) " if is_class_type(method["return_type"]) else "")
@@ -306,6 +345,8 @@ def generate_class_implementation(icalls, used_classes, c):
                 return_statement += "return "
         
         def get_icall_type_name(name):
+            if is_enum(name):
+                return "int"
             if is_class_type(name):
                 return "Object"
             return name
@@ -606,6 +647,20 @@ def strip_name(name):
         return name[1:]
     return name
 
+def extract_nested_type(nested_type):
+    return strip_name(nested_type[:nested_type.find("::")])
+
+def remove_nested_type_prefix(name):
+    return name if name.find("::") == -1 else strip_name(name[name.find("::") + 2:])
+
+def remove_enum_prefix(name):
+    return strip_name(name[name.find("enum.") + 5:])
+
+def is_nested_type(name, type = ""):
+    return name.find(type + "::") != -1
+
+def is_enum(name):
+    return name.find("enum.") == 0
 
 def is_class_type(name):
     return not is_core_type(name) and not is_primitive(name)

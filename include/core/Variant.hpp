@@ -74,6 +74,46 @@ public:
 
 	};
 
+	enum Operator {
+
+		//comparation
+		OP_EQUAL,
+		OP_NOT_EQUAL,
+		OP_LESS,
+		OP_LESS_EQUAL,
+		OP_GREATER,
+		OP_GREATER_EQUAL,
+
+		//mathematic
+		OP_ADD,
+		OP_SUBSTRACT,
+		OP_MULTIPLY,
+		OP_DIVIDE,
+		OP_NEGATE,
+		OP_POSITIVE,
+		OP_MODULE,
+		OP_STRING_CONCAT,
+
+		//bitwise
+		OP_SHIFT_LEFT,
+		OP_SHIFT_RIGHT,
+		OP_BIT_AND,
+		OP_BIT_OR,
+		OP_BIT_XOR,
+		OP_BIT_NEGATE,
+
+		//logic
+		OP_AND,
+		OP_OR,
+		OP_XOR,
+		OP_NOT,
+
+		//containment
+		OP_IN,
+		OP_MAX
+
+	};
+
 	Variant();
 
 	Variant(const Variant& v);
