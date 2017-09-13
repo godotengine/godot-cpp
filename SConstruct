@@ -3,11 +3,11 @@ import os, subprocess
 
 
 # Local dependency paths, adapt them to your setup
-godot_headers_path = "../godot_headers/"
-godot_bin_path = "../godot_fork/bin/"
+godot_headers_path = ARGUMENTS.get("headers", "../godot_headers/")
+godot_bin_path = ARGUMENTS.get("godotbinpath", "../godot_fork/bin/")
 
 # for windows
-godot_lib_path = "../godot_fork/bin/"
+godot_lib_path = ARGUMENTS.get("godotlibpath", godot_bin_path)
 
 target = ARGUMENTS.get("target", "debug")
 platform = ARGUMENTS.get("p", "linux")
