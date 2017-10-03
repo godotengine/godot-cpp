@@ -52,7 +52,7 @@ public:
 	String capitalize() const;
 	bool empty() const;
 	bool ends_with(String &text) const;
-	void erase(int position, int chars) const;
+	void erase(int position, int chars);
 	int find(String what, int from = 0) const;
 	int find_last(String what) const;
 	int findn(String what, int from = 0) const;
