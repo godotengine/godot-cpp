@@ -259,7 +259,7 @@ public:
 
 	bool hash_compare(const Variant& b) const;
 
-	bool booleanize(bool &valid) const;
+	bool booleanize() const;
 
 	~Variant();
 
