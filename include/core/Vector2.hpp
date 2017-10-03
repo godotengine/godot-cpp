@@ -1,7 +1,7 @@
 #ifndef VECTOR2_H
 #define VECTOR2_H
 
-#include <godot/vector2.h>
+#include <gdnative/vector2.h>
 
 #include "Defs.hpp"
 

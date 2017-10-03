@@ -66,7 +66,7 @@ def generate_class_header(used_classes, c):
     source.append("")
     source.append("")
     
-    source.append("#include <godot/gdnative.h>")
+    source.append("#include <gdnative/gdnative.h>")
     source.append("#include <stdint.h>")
     source.append("")
     
@@ -460,7 +460,7 @@ def generate_icall_header(icalls):
     
     source.append("")
     
-    source.append("#include <godot/gdnative.h>")
+    source.append("#include <gdnative/gdnative.h>")
     source.append("#include <stdint.h>")
     source.append("")
     
@@ -510,7 +510,7 @@ def generate_icall_implementation(icalls):
     
     source.append("")
     
-    source.append("#include <godot/gdnative.h>")
+    source.append("#include <gdnative/gdnative.h>")
     source.append("#include <stdint.h>")
     source.append("")
     

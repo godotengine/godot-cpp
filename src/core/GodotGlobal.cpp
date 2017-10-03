@@ -2,7 +2,7 @@
 
 #include "String.hpp"
 
-#include <godot/gdnative.h>
+#include <gdnative/gdnative.h>
 
 namespace godot {
 

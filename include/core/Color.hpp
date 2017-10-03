@@ -1,7 +1,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-#include <godot/color.h>
+#include <gdnative/color.h>
 
 #include <cmath>
 

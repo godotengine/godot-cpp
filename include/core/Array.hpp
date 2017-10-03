@@ -1,7 +1,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#include <godot/array.h>
+#include <gdnative/array.h>
 
 #include "String.hpp"
 

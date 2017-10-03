@@ -1,6 +1,6 @@
 #include "RID.hpp"
 
-#include <godot/rid.h>
+#include <gdnative/rid.h>
 
 namespace godot {
 

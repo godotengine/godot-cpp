@@ -8,7 +8,7 @@
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 
-#include <godot/pool_arrays.h>
+#include <gdnative/pool_arrays.h>
 
 namespace godot {
 

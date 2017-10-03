@@ -1,6 +1,6 @@
 #include "Variant.hpp"
 
-#include <godot/variant.h>
+#include <gdnative/variant.h>
 
 #include "Defs.hpp"
 
@@ -199,9 +199,7 @@ Variant &Variant::operator =(const Variant& v)
 
 Variant::operator bool() const
 {
-	bool valid = false;
-	bool result = booleanize(valid);
-	return valid && result;
+	return booleanize();
 }
 Variant::operator signed int() const
 {
@@ -423,9 +421,9 @@ bool Variant::hash_compare(const Variant& b) const
 	return godot_variant_hash_compare(&_godot_variant, &b._godot_variant);
 }
 
-bool Variant::booleanize(bool &valid) const
+bool Variant::booleanize() const
 {
-	return godot_variant_booleanize(&_godot_variant, &valid);
+	return godot_variant_booleanize(&_godot_variant);
 }
 
 Variant::~Variant()

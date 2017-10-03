@@ -3,7 +3,7 @@
 
 #include "String.hpp"
 
-#include <godot/node_path.h>
+#include <gdnative/node_path.h>
 
 namespace godot {
 
