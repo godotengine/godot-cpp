@@ -28,13 +28,13 @@ Edit `SConstruct` file and assign your godot executable path at line:7 `godot_bi
 
 Building cpp_bindings
 ```
-$ scons p=linux
+$ scons godotbinpath="../godot_fork/bin/" headers="../godot_headers/" p=linux generate_bindings=yes
 ```
 resulting libraries will be placed under `bin/` and the generated headers will be placed under `include/*`
 
-Note:
-	Using `generate_bindings=yes` you can generate `godot_api.json` (Godot API)
-	Use `use_llvm=yes` to use clang++.
+**Note:**
+> `generate_bindings=yes` is used to generate C++ bindings (`godot_api.json` - Godot API)
+> Include `use_llvm=yes` for using clang++
 
 Copy binding libraries into the `SimpleLibrary/lib` folder
 ```
@@ -84,6 +84,9 @@ public:
 	    * export var _name = "SimpleClass"
 	    **/
 	   register_property((char *)"base/name", &SimpleClass::_name, String("SimpleClass"));
+
+           /** For registering signal **/
+           // register_signal<SimpleClass>("signal_name");
         }
 	
 	String _name;
@@ -108,7 +111,7 @@ NATIVESCRIPT_INIT() {
 # Compiling
 ```
 $ cd ..
-$ clang -fPIC -o src/init.os -c src/init.cpp -g -O3 -std=c++14 -Icpp_bindings/include -Igodot_headers -Icpp_bindings/include/
+$ clang -fPIC -o src/init.os -c src/init.cpp -g -O3 -std=c++14 -Icpp_bindings/include -Igodot_headers
 $ clang -o lib/libtest.so -shared src/init.os -Llib -lgodot_cpp_bindings
 ```
 This creates the file `libtest.so` in your `SimpleLibrary/lib` directory. For windows you need to find out what compiler flags need to be used.
