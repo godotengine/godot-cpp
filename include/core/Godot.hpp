@@ -60,7 +60,7 @@ template<class T>
 struct _ArgCast {
 	static T _arg_cast(Variant a)
 	{
-		return static_cast<T>(a);
+		return a;
 	}
 };
 
