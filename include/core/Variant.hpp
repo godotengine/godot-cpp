@@ -1,7 +1,7 @@
 #ifndef VARIANT_H
 #define VARIANT_H
 
-#include <godot/variant.h>
+#include <gdnative/variant.h>
 
 #include "Defs.hpp"
 
@@ -259,7 +259,7 @@ public:
 
 	bool hash_compare(const Variant& b) const;
 
-	bool booleanize(bool &valid) const;
+	bool booleanize() const;
 
 	~Variant();
 

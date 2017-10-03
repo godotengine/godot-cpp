@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <godot/vector2.h>
+#include <gdnative/vector2.h>
 
 #include "String.hpp"
 

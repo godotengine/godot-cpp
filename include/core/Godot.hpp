@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <godot/gdnative.h>
-#include <godot_nativescript.h>
+#include <gdnative/gdnative.h>
+#include <nativescript/godot_nativescript.h>
 
 
 #include <CoreTypes.hpp>

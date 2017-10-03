@@ -2,7 +2,7 @@
 
 #include "NodePath.hpp"
 
-#include <godot/string.h>
+#include <gdnative/string.h>
 
 #include <string.h>
 
