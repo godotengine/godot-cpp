@@ -153,7 +153,7 @@ bool String::ends_with(String &p_string) const {
 	return godot_string_ends_with(&_godot_string, &p_string._godot_string);
 }
 
-void String::erase(int position, int chars) const {
+void String::erase(int position, int chars) {
 	godot_string_erase(&_godot_string, position, chars);
 }
 
