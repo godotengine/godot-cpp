@@ -1,12 +1,9 @@
 #include "Color.hpp"
+#include "Defs.hpp"
+#include "String.hpp"
 
 #include <gdnative/color.h>
-
 #include <cmath>
-
-#include "Defs.hpp"
-
-#include "String.hpp"
 
 namespace godot {
 

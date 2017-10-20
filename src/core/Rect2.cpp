@@ -1,12 +1,9 @@
 #include "Rect2.hpp"
-
 #include "Vector2.hpp"
-
 #include "String.hpp"
+#include "Transform2D.hpp"
 
 #include <cmath>
-
-#include "Transform2D.hpp"
 
 namespace godot {
 

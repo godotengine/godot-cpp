@@ -1,6 +1,7 @@
 src/*.cpp
 src/*.hpp
 include/*.hpp
+logs/*
 *.o
 *.os
 *.so

@@ -4,6 +4,7 @@
 #include "NodePath.hpp"
 #include "PoolArrays.hpp"
 #include "Variant.hpp"
+#include "GodotGlobal.hpp"
 
 #include <gdnative/string.h>
 
@@ -12,53 +13,53 @@
 namespace godot {
 
 godot::String::String() {
-	godot_string_new(&_godot_string);
+	godot::api->godot_string_new(&_godot_string);
 }
 
 String::String(const char *contents) {
-	godot_string_new_data(&_godot_string, contents, strlen(contents));
+	godot::api->godot_string_new_data(&_godot_string, contents, strlen(contents));
 }
 
 String::String(const wchar_t *contents) {
 	// @Todo
-	// godot_string_new_data(&_godot_string, contents, strlen(contents));
-	godot_string_new(&_godot_string);
+	// godot::api->godot_string_new_data(&_godot_string, contents, strlen(contents));
+	godot::api->godot_string_new(&_godot_string);
 }
 
 String::String(const wchar_t c) {
 	// @Todo
-	godot_string_new(&_godot_string);
+	godot::api->godot_string_new(&_godot_string);
 }
 
 String::String(const String &other) {
-	godot_string_new_copy(&_godot_string, &other._godot_string);
+	godot::api->godot_string_new_copy(&_godot_string, &other._godot_string);
 }
 
 String::~String() {
-	godot_string_destroy(&_godot_string);
+	godot::api->godot_string_destroy(&_godot_string);
 }
 
 wchar_t &String::operator[](const int idx) {
-	return *godot_string_operator_index(&_godot_string, idx);
+	return *godot::api->godot_string_operator_index(&_godot_string, idx);
 }
 
 wchar_t String::operator[](const int idx) const {
-	return *godot_string_operator_index((godot_string *)&_godot_string, idx);
+	return *godot::api->godot_string_operator_index((godot_string *)&_godot_string, idx);
 }
 
 int String::length() const {
 	int len = 0;
-	godot_string_get_data(&_godot_string, nullptr, &len);
+	godot::api->godot_string_get_data(&_godot_string, nullptr, &len);
 	return len;
 }
 
 void String::operator=(const String &s) {
-	godot_string_destroy(&_godot_string);
-	godot_string_new_copy(&_godot_string, &s._godot_string);
+	godot::api->godot_string_destroy(&_godot_string);
+	godot::api->godot_string_new_copy(&_godot_string, &s._godot_string);
 }
 
 bool String::operator==(const String &s) {
-	return godot_string_operator_equal(&_godot_string, &s._godot_string);
+	return godot::api->godot_string_operator_equal(&_godot_string, &s._godot_string);
 }
 
 bool String::operator!=(const String &s) {
@@ -68,13 +69,13 @@ bool String::operator!=(const String &s) {
 String String::operator+(const String &s) {
 	String new_string = *this;
 	new_string._godot_string =
-			godot_string_operator_plus(&new_string._godot_string, &s._godot_string);
+			godot::api->godot_string_operator_plus(&new_string._godot_string, &s._godot_string);
 
 	return new_string;
 }
 
 void String::operator+=(const String &s) {
-	_godot_string = godot_string_operator_plus(&_godot_string, &s._godot_string);
+	_godot_string = godot::api->godot_string_operator_plus(&_godot_string, &s._godot_string);
 }
 
 void String::operator+=(const wchar_t c) {
@@ -82,11 +83,11 @@ void String::operator+=(const wchar_t c) {
 }
 
 bool String::operator<(const String &s) {
-	return godot_string_operator_less(&_godot_string, &s._godot_string);
+	return godot::api->godot_string_operator_less(&_godot_string, &s._godot_string);
 }
 
 bool String::operator<=(const String &s) {
-	return godot_string_operator_less(&_godot_string, &s._godot_string) ||
+	return godot::api->godot_string_operator_less(&_godot_string, &s._godot_string) ||
 		   (*this == s);
 }
 
@@ -103,7 +104,7 @@ String::operator NodePath() const {
 }
 
 const char *String::c_string() const {
-	return godot_string_c_str(&_godot_string);
+	return godot::api->godot_string_c_str(&_godot_string);
 }
 
 String operator+(const char *a, const String &b) {
@@ -111,322 +112,322 @@ String operator+(const char *a, const String &b) {
 }
 
 bool String::begins_with(String &p_string) const {
-	return godot_string_begins_with(&_godot_string, &p_string._godot_string);
+	return godot::api->godot_string_begins_with(&_godot_string, &p_string._godot_string);
 }
 
 bool String::begins_with_char_array(const char *p_char_array) const {
-	return godot_string_begins_with_char_array(&_godot_string, p_char_array);
+	return godot::api->godot_string_begins_with_char_array(&_godot_string, p_char_array);
 }
 
 PoolStringArray String::bigrams() const {
-	godot_array arr = godot_string_bigrams(&_godot_string);
+	godot_array arr = godot::api->godot_string_bigrams(&_godot_string);
 
 	return *(PoolStringArray *)&arr;
 }
 
 String String::c_escape() const {
 	String new_string;
-	new_string._godot_string = godot_string_c_escape(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_c_escape(&_godot_string);
 
 	return new_string;
 }
 
 String String::c_unescape() const {
 	String new_string;
-	new_string._godot_string = godot_string_c_unescape(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_c_unescape(&_godot_string);
 
 	return new_string;
 }
 
 String String::capitalize() const {
 	String new_string;
-	new_string._godot_string = godot_string_capitalize(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_capitalize(&_godot_string);
 
 	return new_string;
 }
 
 bool String::empty() const {
-	return godot_string_empty(&_godot_string);
+	return godot::api->godot_string_empty(&_godot_string);
 }
 
 bool String::ends_with(String &p_string) const {
-	return godot_string_ends_with(&_godot_string, &p_string._godot_string);
+	return godot::api->godot_string_ends_with(&_godot_string, &p_string._godot_string);
 }
 
 void String::erase(int position, int chars) {
-	godot_string_erase(&_godot_string, position, chars);
+	godot::api->godot_string_erase(&_godot_string, position, chars);
 }
 
 int String::find(String p_what, int p_from) const {
-	return godot_string_find(&_godot_string, p_what._godot_string);
+	return godot::api->godot_string_find(&_godot_string, p_what._godot_string);
 }
 
 int String::find_last(String what) const {
-	return godot_string_find_last(&_godot_string, what._godot_string);
+	return godot::api->godot_string_find_last(&_godot_string, what._godot_string);
 }
 
 int String::findn(String what, int from) const {
-	return godot_string_findn(&_godot_string, what._godot_string);
+	return godot::api->godot_string_findn(&_godot_string, what._godot_string);
 }
 
 String String::format(Variant values, String placeholder) const {
 	String new_string;
-	new_string._godot_string = godot_string_format(&_godot_string, (godot_variant *)&values);
+	new_string._godot_string = godot::api->godot_string_format(&_godot_string, (godot_variant *)&values);
 
 	return new_string;
 }
 
 String String::get_base_dir() const {
 	String new_string;
-	new_string._godot_string = godot_string_get_base_dir(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_get_base_dir(&_godot_string);
 
 	return new_string;
 }
 
 String String::get_basename() const {
-	godot_string new_string = godot_string_get_basename(&_godot_string);
+	godot_string new_string = godot::api->godot_string_get_basename(&_godot_string);
 	return *(String *)&new_string;
 }
 
 String String::get_extension() const {
-	godot_string new_string = godot_string_get_extension(&_godot_string);
+	godot_string new_string = godot::api->godot_string_get_extension(&_godot_string);
 	return *(String *)&new_string;
 }
 
 String String::get_file() const {
-	godot_string new_string = godot_string_get_file(&_godot_string);
+	godot_string new_string = godot::api->godot_string_get_file(&_godot_string);
 	return *(String *)&new_string;
 }
 
 int String::hash() const {
-	return godot_string_hash(&_godot_string);
+	return godot::api->godot_string_hash(&_godot_string);
 }
 
 int String::hex_to_int() const {
-	return godot_string_hex_to_int(&_godot_string);
+	return godot::api->godot_string_hex_to_int(&_godot_string);
 }
 
 String String::insert(int position, String what) const {
 	String new_string;
-	new_string._godot_string = godot_string_insert(&_godot_string, position, what._godot_string);
+	new_string._godot_string = godot::api->godot_string_insert(&_godot_string, position, what._godot_string);
 
 	return new_string;
 }
 
 bool String::is_abs_path() const {
-	return godot_string_is_abs_path(&_godot_string);
+	return godot::api->godot_string_is_abs_path(&_godot_string);
 }
 
 bool String::is_rel_path() const {
-	return godot_string_is_rel_path(&_godot_string);
+	return godot::api->godot_string_is_rel_path(&_godot_string);
 }
 
 bool String::is_subsequence_of(String text) const {
-	return godot_string_is_subsequence_of(&_godot_string, &text._godot_string);
+	return godot::api->godot_string_is_subsequence_of(&_godot_string, &text._godot_string);
 }
 
 bool String::is_subsequence_ofi(String text) const {
-	return godot_string_is_subsequence_ofi(&_godot_string, &text._godot_string);
+	return godot::api->godot_string_is_subsequence_ofi(&_godot_string, &text._godot_string);
 }
 
 bool String::is_valid_float() const {
-	return godot_string_is_valid_float(&_godot_string);
+	return godot::api->godot_string_is_valid_float(&_godot_string);
 }
 
 bool String::is_valid_html_color() const {
-	return godot_string_is_valid_html_color(&_godot_string);
+	return godot::api->godot_string_is_valid_html_color(&_godot_string);
 }
 
 bool String::is_valid_identifier() const {
-	return godot_string_is_valid_identifier(&_godot_string);
+	return godot::api->godot_string_is_valid_identifier(&_godot_string);
 }
 
 bool String::is_valid_integer() const {
-	return godot_string_is_numeric(&_godot_string);
+	return godot::api->godot_string_is_numeric(&_godot_string);
 }
 
 bool String::is_valid_ip_address() const {
-	return godot_string_is_valid_ip_address(&_godot_string);
+	return godot::api->godot_string_is_valid_ip_address(&_godot_string);
 }
 
 String String::json_escape() const {
 	String new_string;
-	new_string._godot_string = godot_string_json_escape(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_json_escape(&_godot_string);
 
 	return new_string;
 }
 
 String String::left(int position) const {
 	String new_string;
-	new_string._godot_string = godot_string_left(&_godot_string, position);
+	new_string._godot_string = godot::api->godot_string_left(&_godot_string, position);
 
 	return new_string;
 }
 
 bool String::match(String expr) const {
-	return godot_string_match(&_godot_string, &expr._godot_string);
+	return godot::api->godot_string_match(&_godot_string, &expr._godot_string);
 }
 
 bool String::matchn(String expr) const {
-	return godot_string_match(&_godot_string, &expr._godot_string);
+	return godot::api->godot_string_match(&_godot_string, &expr._godot_string);
 }
 
 PoolByteArray String::md5_buffer() const {
-	godot_pool_byte_array arr = godot_string_md5_buffer(&_godot_string);
+	godot_pool_byte_array arr = godot::api->godot_string_md5_buffer(&_godot_string);
 	return *(PoolByteArray *)&arr;
 }
 
 String String::md5_text() const {
 	String new_string;
-	new_string._godot_string = godot_string_md5_text(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_md5_text(&_godot_string);
 
 	return new_string;
 }
 
 int String::ord_at(int at) const {
-	return godot_string_ord_at(&_godot_string, at);
+	return godot::api->godot_string_ord_at(&_godot_string, at);
 }
 
 String String::pad_decimals(int digits) const {
 	String new_string;
-	new_string._godot_string = godot_string_pad_decimals(&_godot_string, digits);
+	new_string._godot_string = godot::api->godot_string_pad_decimals(&_godot_string, digits);
 
 	return new_string;
 }
 
 String String::pad_zeros(int digits) const {
 	String new_string;
-	new_string._godot_string = godot_string_pad_zeros(&_godot_string, digits);
+	new_string._godot_string = godot::api->godot_string_pad_zeros(&_godot_string, digits);
 
 	return new_string;
 }
 
 String String::percent_decode() const {
 	String new_string;
-	new_string._godot_string = godot_string_percent_decode(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_percent_decode(&_godot_string);
 
 	return new_string;
 }
 
 String String::percent_encode() const {
 	String new_string;
-	new_string._godot_string = godot_string_percent_encode(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_percent_encode(&_godot_string);
 
 	return new_string;
 }
 
 String String::plus_file(String file) const {
 	String new_string;
-	new_string._godot_string = godot_string_plus_file(&_godot_string, &file._godot_string);
+	new_string._godot_string = godot::api->godot_string_plus_file(&_godot_string, &file._godot_string);
 
 	return new_string;
 }
 
 String String::replace(String p_key, String p_with) const {
 	String new_string;
-	new_string._godot_string = godot_string_replace(&_godot_string, p_key._godot_string, p_with._godot_string);
+	new_string._godot_string = godot::api->godot_string_replace(&_godot_string, p_key._godot_string, p_with._godot_string);
 
 	return new_string;
 }
 
 String String::replacen(String what, String forwhat) const {
 	String new_string;
-	new_string._godot_string = godot_string_replacen(&_godot_string, what._godot_string, forwhat._godot_string);
+	new_string._godot_string = godot::api->godot_string_replacen(&_godot_string, what._godot_string, forwhat._godot_string);
 
 	return new_string;
 }
 
 int String::rfind(String what, int from) const {
-	return godot_string_rfind(&_godot_string, what._godot_string);
+	return godot::api->godot_string_rfind(&_godot_string, what._godot_string);
 }
 
 int String::rfindn(String what, int from) const {
 	// From -1
-	return godot_string_rfindn(&_godot_string, what._godot_string);
+	return godot::api->godot_string_rfindn(&_godot_string, what._godot_string);
 }
 
 String String::right(int position) const {
 	String new_string;
-	new_string._godot_string = godot_string_right(&_godot_string, position);
+	new_string._godot_string = godot::api->godot_string_right(&_godot_string, position);
 
 	return new_string;
 }
 
 PoolByteArray String::sha256_buffer() const {
-	godot_pool_byte_array arr = godot_string_sha256_buffer(&_godot_string);
+	godot_pool_byte_array arr = godot::api->godot_string_sha256_buffer(&_godot_string);
 
 	return *(PoolByteArray *)&arr;
 }
 
 String String::sha256_text() const {
 	String new_string;
-	new_string._godot_string = godot_string_sha256_text(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_sha256_text(&_godot_string);
 
 	return new_string;
 }
 
 float String::similarity(String text) const {
-	return godot_string_similarity(&_godot_string, &text._godot_string);
+	return godot::api->godot_string_similarity(&_godot_string, &text._godot_string);
 }
 
 PoolStringArray String::split(String divisor, bool allow_empty) const {
-	godot_array arr = godot_string_split(&_godot_string, &divisor._godot_string);
+	godot_array arr = godot::api->godot_string_split(&_godot_string, &divisor._godot_string);
 
 	return *(PoolStringArray *)&arr;
 }
 
 PoolRealArray String::split_floats(String divisor, bool allow_empty) const {
-	godot_array arr = godot_string_split_floats(&_godot_string, &divisor._godot_string);
+	godot_array arr = godot::api->godot_string_split_floats(&_godot_string, &divisor._godot_string);
 
 	return *(PoolRealArray *)&arr;
 }
 
 String String::strip_edges(bool left, bool right) const {
 	String new_string;
-	new_string._godot_string = godot_string_strip_edges(&_godot_string, left, right);
+	new_string._godot_string = godot::api->godot_string_strip_edges(&_godot_string, left, right);
 
 	return new_string;
 }
 
 String String::substr(int from, int len) const {
 	String new_string;
-	new_string._godot_string = godot_string_substr(&_godot_string, from, len);
+	new_string._godot_string = godot::api->godot_string_substr(&_godot_string, from, len);
 
 	return new_string;
 }
 
 float String::to_float() const {
-	return godot_string_to_float(&_godot_string);
+	return godot::api->godot_string_to_float(&_godot_string);
 }
 
 int64_t String::to_int() const {
-	return godot_string_to_int(&_godot_string);
+	return godot::api->godot_string_to_int(&_godot_string);
 }
 
 String String::to_lower() const {
 	String new_string;
-	new_string._godot_string = godot_string_to_lower(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_to_lower(&_godot_string);
 
 	return new_string;
 }
 
 String String::to_upper() const {
 	String new_string;
-	new_string._godot_string = godot_string_to_upper(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_to_upper(&_godot_string);
 
 	return new_string;
 }
 
 String String::xml_escape() const {
 	String new_string;
-	new_string._godot_string = godot_string_xml_escape(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_xml_escape(&_godot_string);
 
 	return new_string;
 }
 
 String String::xml_unescape() const {
 	String new_string;
-	new_string._godot_string = godot_string_xml_unescape(&_godot_string);
+	new_string._godot_string = godot::api->godot_string_xml_unescape(&_godot_string);
 
 	return new_string;
 }

@@ -1,10 +1,13 @@
 #ifndef GODOT_GLOBAL_HPP
 #define GODOT_GLOBAL_HPP
 
+#include <gdnative_api_struct.gen.h>
 #include "String.hpp"
 
 
 namespace godot {
+
+extern "C" const godot_gdnative_api_struct *api;
 
 class Godot {
 

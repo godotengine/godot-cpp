@@ -1,5 +1,4 @@
 #include "Plane.hpp"
-
 #include "Vector3.hpp"
 
 #include <cmath>
