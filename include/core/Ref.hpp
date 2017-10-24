@@ -2,6 +2,7 @@
 #define REF_H
 
 #include "Variant.hpp"
+#include "GodotGlobal.hpp"
 
 namespace godot {
 
@@ -156,7 +157,7 @@ public:
 	void unref()
 	{
 		if (reference && reference->unreference()) {
-			godot_object_destroy((godot_object *) reference);
+			godot::api->godot_object_destroy((godot_object *) reference);
 		}
 		reference = nullptr;
 	}

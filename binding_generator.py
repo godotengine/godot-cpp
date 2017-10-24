@@ -66,7 +66,7 @@ def generate_class_header(used_classes, c):
     source.append("")
     source.append("")
     
-    source.append("#include <gdnative/gdnative.h>")
+    source.append("#include <gdnative_api_struct.gen.h>")
     source.append("#include <stdint.h>")
     source.append("")
     
@@ -240,6 +240,7 @@ def generate_class_implementation(icalls, used_classes, c):
     source.append("")
     source.append("")
     
+    source.append("#include <GodotGlobal.hpp>")
     source.append("#include <CoreTypes.hpp>")
     source.append("#include <Ref.hpp>")
     
@@ -278,7 +279,7 @@ def generate_class_implementation(icalls, used_classes, c):
         source.append("static inline void ___singleton_init()")
         source.append("{")
         source.append("\tif (" + core_object_name + " == nullptr) {")
-        source.append("\t\t" + core_object_name + " = godot_global_get_singleton((char *) \"" + strip_name(c["name"]) + "\");")
+        source.append("\t\t" + core_object_name + " = godot::api->godot_global_get_singleton((char *) \"" + strip_name(c["name"]) + "\");")
         source.append("\t}")
         source.append("}")
         
@@ -290,12 +291,12 @@ def generate_class_implementation(icalls, used_classes, c):
     if c["instanciable"]:
         source.append("void *" + strip_name(c["name"]) + "::operator new(size_t)")
         source.append("{")
-        source.append("\treturn godot_get_class_constructor((char *)\"" + c["name"] + "\")();")
+        source.append("\treturn godot::api->godot_get_class_constructor((char *)\"" + c["name"] + "\")();")
         source.append("}")
         
         source.append("void " + strip_name(c["name"]) + "::operator delete(void *ptr)")
         source.append("{")
-        source.append("\tgodot_object_destroy((godot_object *)ptr);")
+        source.append("\tgodot::api->godot_object_destroy((godot_object *)ptr);")
         source.append("}")
     
     for method in c["methods"]:
@@ -328,7 +329,7 @@ def generate_class_implementation(icalls, used_classes, c):
         
         source.append("\tstatic godot_method_bind *mb = NULL;")
         source.append("\tif (mb == NULL) {")
-        source.append("\t\tmb = godot_method_bind_get_method(\"" + c["name"] +"\", \"" + method["name"] + "\");")
+        source.append("\t\tmb = godot::api->godot_method_bind_get_method(\"" + c["name"] +"\", \"" + method["name"] + "\");")
         source.append("\t}")
         
         return_statement = ""
@@ -359,7 +360,7 @@ def generate_class_implementation(icalls, used_classes, c):
                 source.append("\tVariant __given_args[" + str(len(method["arguments"])) + "];")
             
             for i, argument in enumerate(method["arguments"]):
-                source.append("\tgodot_variant_new_nil((godot_variant *) &__given_args[" + str(i) + "]);")
+                source.append("\tgodot::api->godot_variant_new_nil((godot_variant *) &__given_args[" + str(i) + "]);")
                 
             source.append("")
             
@@ -392,13 +393,13 @@ def generate_class_implementation(icalls, used_classes, c):
             source.append("")
             
             source.append("\tVariant __result;")
-            source.append("\t*(godot_variant *) &__result = godot_method_bind_call(mb, (godot_object *) " + core_object_name + ", (const godot_variant **) __args, " + size + ", nullptr);")
+            source.append("\t*(godot_variant *) &__result = godot::api->godot_method_bind_call(mb, (godot_object *) " + core_object_name + ", (const godot_variant **) __args, " + size + ", nullptr);")
             
             source.append("")
             
             
             for i, argument in enumerate(method["arguments"]):
-                source.append("\tgodot_variant_destroy((godot_variant *) &__given_args[" + str(i) + "]);")
+                source.append("\tgodot::api->godot_variant_destroy((godot_variant *) &__given_args[" + str(i) + "]);")
                 
             source.append("")
             
@@ -460,7 +461,7 @@ def generate_icall_header(icalls):
     
     source.append("")
     
-    source.append("#include <gdnative/gdnative.h>")
+    source.append("#include <gdnative_api_struct.gen.h>")
     source.append("#include <stdint.h>")
     source.append("")
     
@@ -510,10 +511,11 @@ def generate_icall_implementation(icalls):
     
     source.append("")
     
-    source.append("#include <gdnative/gdnative.h>")
+    source.append("#include <gdnative_api_struct.gen.h>")
     source.append("#include <stdint.h>")
     source.append("")
     
+    source.append("#include <GodotGlobal.hpp>")
     source.append("#include <CoreTypes.hpp>")
     source.append("#include <Object.hpp>")
     source.append("")
@@ -568,7 +570,7 @@ def generate_icall_implementation(icalls):
         source.append("\t};")
         source.append("")
         
-        source.append("\tgodot_method_bind_ptrcall(mb, inst, args, " + ("nullptr" if ret_type == "void" else "&ret") + ");")
+        source.append("\tgodot::api->godot_method_bind_ptrcall(mb, inst, args, " + ("nullptr" if ret_type == "void" else "&ret") + ");")
         
         if ret_type != "void":
             source.append("\treturn ret;")

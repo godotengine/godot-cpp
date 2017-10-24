@@ -1,7 +1,5 @@
 #include "Rect3.hpp"
-
 #include "Vector3.hpp"
-
 #include "Plane.hpp"
 
 #include <algorithm>

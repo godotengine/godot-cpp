@@ -1,9 +1,6 @@
 #include "Transform2D.hpp"
-
 #include "Vector2.hpp"
-
 #include "String.hpp"
-
 #include "Rect2.hpp"
 
 #include <algorithm>

@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <gdnative/gdnative.h>
+#include <gdnative_api_struct.gen.h>
 #include <nativescript/godot_nativescript.h>
 
 
@@ -86,7 +86,7 @@ struct _ArgCast<Variant> {
 template<class T>
 T *as(Object *obj)
 {
-	return (T *) godot_nativescript_get_userdata(obj);
+	return (T *) godot::api->godot_nativescript_get_userdata(obj);
 }
 
 // instance and destroy funcs
@@ -118,7 +118,7 @@ void register_class()
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
 
-	godot_nativescript_register_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
+	godot::api->godot_nativescript_register_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
 	T::_register_methods();
 }
 
@@ -132,7 +132,7 @@ void register_tool_class()
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
 
-	godot_nativescript_register_tool_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
+	godot::api->godot_nativescript_register_tool_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
 	T::_register_methods();
 }
 
@@ -216,7 +216,7 @@ template<class T, class R, class... As>
 godot_variant __wrapped_method(godot_object *, void *method_data, void *user_data, int num_args, godot_variant **args)
 {
 	godot_variant v;
-	godot_variant_new_nil(&v);
+	godot::api->godot_variant_new_nil(&v);
 
 	T *obj = (T *) user_data;
 	_WrappedMethod<T, R, As...> *method = (_WrappedMethod<T, R, As...>*) method_data;
@@ -233,7 +233,7 @@ template<class T, class R, class... As>
 void *___make_wrapper_function(R (T::*f)(As...))
 {
 	using MethodType = _WrappedMethod<T, R, As...>;
-	MethodType *p = (MethodType *) godot_alloc(sizeof(MethodType));
+	MethodType *p = (MethodType *) godot::api->godot_alloc(sizeof(MethodType));
 	p->f = f;
 	return (void *) p;
 }
@@ -278,14 +278,14 @@ void register_method(const char *name, M method_ptr, godot_method_rpc_mode rpc_t
 {
 	godot_instance_method method = {};
 	method.method_data = ___make_wrapper_function(method_ptr);
-	method.free_func = godot_free;
+	method.free_func = godot::api->godot_free;
 	method.method = (__godot_wrapper_method) ___get_wrapper_function(method_ptr);
 
 
 	godot_method_attributes attr = {};
 	attr.rpc_type = rpc_type;
 
-	godot_nativescript_register_method(godot::_RegisterState::nativescript_handle, ___get_method_class_name(method_ptr), name, attr, method);
+	godot::api->godot_nativescript_register_method(godot::_RegisterState::nativescript_handle, ___get_method_class_name(method_ptr), name, attr, method);
 }
 
 
@@ -313,7 +313,7 @@ struct _PropertyGetFunc {
 		T *obj = (T *) user_data;
 
 		godot_variant var;
-		godot_variant_new_nil(&var);
+		godot::api->godot_variant_new_nil(&var);
 
 		Variant *v = (Variant *) &var;
 
@@ -351,7 +351,7 @@ struct _PropertyDefaultGetFunc {
 		T *obj = (T *) user_data;
 
 		godot_variant var;
-		godot_variant_new_nil(&var);
+		godot::api->godot_variant_new_nil(&var);
 
 		Variant *v = (Variant *) &var;
 
@@ -387,23 +387,23 @@ void register_property(const char *name, P (T::*var), P default_value, godot_met
 	attr.usage = usage;
 	attr.hint_string = *_hint_string;
 
-	_PropertyDefaultSetFunc<T, P> *wrapped_set = (_PropertyDefaultSetFunc<T, P> *) godot_alloc(sizeof(_PropertyDefaultSetFunc<T, P>));
+	_PropertyDefaultSetFunc<T, P> *wrapped_set = (_PropertyDefaultSetFunc<T, P> *)godot::api->godot_alloc(sizeof(_PropertyDefaultSetFunc<T, P>));
 	wrapped_set->f = var;
 
-	_PropertyDefaultGetFunc<T, P> *wrapped_get = (_PropertyDefaultGetFunc<T, P> *) godot_alloc(sizeof(_PropertyDefaultGetFunc<T, P>));
+	_PropertyDefaultGetFunc<T, P> *wrapped_get = (_PropertyDefaultGetFunc<T, P> *) godot::api->godot_alloc(sizeof(_PropertyDefaultGetFunc<T, P>));
 	wrapped_get->f = var;
 
 	godot_property_set_func set_func = {};
 	set_func.method_data = (void *) wrapped_set;
-	set_func.free_func   = godot_free;
+	set_func.free_func   = godot::api->godot_free;
 	set_func.set_func    = &_PropertyDefaultSetFunc<T, P>::_wrapped_setter;
 
 	godot_property_get_func get_func = {};
 	get_func.method_data = (void *) wrapped_get;
-	get_func.free_func   = godot_free;
+	get_func.free_func   = godot::api->godot_free;
 	get_func.get_func    = &_PropertyDefaultGetFunc<T, P>::_wrapped_getter;
 
-	godot_nativescript_register_property(godot::_RegisterState::nativescript_handle, T::___get_type_name(), name, &attr, set_func, get_func);
+	godot::api->godot_nativescript_register_property(godot::_RegisterState::nativescript_handle, T::___get_type_name(), name, &attr, set_func, get_func);
 }
 
 
@@ -421,23 +421,23 @@ void register_property(const char *name, void (T::*setter)(P), P (T::*getter)(),
 	attr.rset_type = rpc_mode;
 	attr.usage = usage;
 
-	_PropertySetFunc<T, P> *wrapped_set = (_PropertySetFunc<T, P> *) godot_alloc(sizeof(_PropertySetFunc<T, P>));
+	_PropertySetFunc<T, P> *wrapped_set = (_PropertySetFunc<T, P> *) godot::api->godot_alloc(sizeof(_PropertySetFunc<T, P>));
 	wrapped_set->f = setter;
 
-	_PropertyGetFunc<T, P> *wrapped_get = (_PropertyGetFunc<T, P> *) godot_alloc(sizeof(_PropertyGetFunc<T, P>));
+	_PropertyGetFunc<T, P> *wrapped_get = (_PropertyGetFunc<T, P> *) godot::api->godot_alloc(sizeof(_PropertyGetFunc<T, P>));
 	wrapped_get->f = getter;
 
 	godot_property_set_func set_func = {};
 	set_func.method_data = (void *) wrapped_set;
-	set_func.free_func   = godot_free;
+	set_func.free_func   = godot::api->godot_free;
 	set_func.set_func    = &_PropertySetFunc<T, P>::_wrapped_setter;
 
 	godot_property_get_func get_func = {};
 	get_func.method_data = (void *) wrapped_get;
-	get_func.free_func   = godot_free;
+	get_func.free_func   = godot::api->godot_free;
 	get_func.get_func    = &_PropertyGetFunc<T, P>::_wrapped_getter;
 
-	godot_nativescript_register_property(godot::_RegisterState::nativescript_handle, T::___get_type_name(), name, &attr, set_func, get_func);
+	godot::api->godot_nativescript_register_property(godot::_RegisterState::nativescript_handle, T::___get_type_name(), name, &attr, set_func, get_func);
 
 }
 
@@ -449,7 +449,7 @@ void register_signal(String name, Dictionary args = Dictionary())
 	signal.num_args = args.size();
 	signal.num_default_args = 0;
 
-	signal.args = (godot_signal_argument*) godot_alloc(sizeof(godot_signal_argument) * signal.num_args);
+	signal.args = (godot_signal_argument*) godot::api->godot_alloc(sizeof(godot_signal_argument) * signal.num_args);
 	memset((void *) signal.args, 0, sizeof(godot_signal_argument) * signal.num_args);
 
 
@@ -458,7 +458,7 @@ void register_signal(String name, Dictionary args = Dictionary())
 		// String name = entry[0];
 		String name = args.keys()[i];
 		godot_string *_key = (godot_string *)&name;
-		godot_string_new_copy(&signal.args[i].name, _key);
+		godot::api->godot_string_new_copy(&signal.args[i].name, _key);
 
 		// if (entry.size() > 1) {
 		// 	signal.args[i].type = entry[1];
@@ -466,13 +466,13 @@ void register_signal(String name, Dictionary args = Dictionary())
 		signal.args[i].type = args.values()[i];
 	}
 
-	godot_nativescript_register_signal(godot::_RegisterState::nativescript_handle, T::___get_type_name(), &signal);
+	godot::api->godot_nativescript_register_signal(godot::_RegisterState::nativescript_handle, T::___get_type_name(), &signal);
 
 	for (int i = 0; i < signal.num_args; i++) {
-		godot_string_destroy(&signal.args[i].name);
+		godot::api->godot_string_destroy(&signal.args[i].name);
 	}
 
-	godot_free(signal.args);
+	godot::api->godot_free(signal.args);
 }
 
 

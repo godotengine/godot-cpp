@@ -3,14 +3,11 @@ import os, subprocess
 
 
 # Local dependency paths, adapt them to your setup
-godot_headers_path = ARGUMENTS.get("headers", "../godot_headers/")
-godot_bin_path = ARGUMENTS.get("godotbinpath", "../godot_fork/bin/")
-
-# for windows
-godot_lib_path = ARGUMENTS.get("godotlibpath", godot_bin_path)
+godot_headers_path = ARGUMENTS.get("headers", os.getenv("GODOT_HEADERS", "../godot_headers/"))
+godot_bin_path = ARGUMENTS.get("godotbinpath", os.getenv("GODOT_BIN_PATH", "../godot_fork/bin/"))
 
 target = ARGUMENTS.get("target", "debug")
-platform = ARGUMENTS.get("p", "linux")
+platform = ARGUMENTS.get("p", ARGUMENTS.get("platform", "linux"))
 
 # This makes sure to keep the session environment variables on windows, 
 # that way you can run scons in a vs 2017 prompt and it will find all the required tools
@@ -22,7 +19,6 @@ if ARGUMENTS.get("use_llvm", "no") == "yes":
     env["CXX"] = "clang++"
 
 godot_name = "godot." + ("x11" if platform == "linux" else platform) + ".tools.64"
-
 
 def add_sources(sources, directory):
     for file in os.listdir(directory):
@@ -44,12 +40,9 @@ if platform == "windows":
         env.Append(CCFLAGS = ['-EHsc', '-D_DEBUG', '/MDd'])
     else:
         env.Append(CCFLAGS = ['-O2', '-EHsc', '-DNDEBUG', '/MD'])
-    env.Append(LIBS=[godot_name])
-    env.Append(LIBPATH=[godot_lib_path])
 
 sources = []
 add_sources(sources, "src/core")
-
 
 if ARGUMENTS.get("generate_bindings", "no") == "yes":
     godot_executable = godot_bin_path + godot_name
@@ -71,7 +64,6 @@ if ARGUMENTS.get("generate_bindings", "no") == "yes":
 
     
     binding_generator.generate_bindings(json_api_file)
-
 
 add_sources(sources, "src")
 

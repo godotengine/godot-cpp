@@ -6,7 +6,6 @@
 
 #include <cmath>
 
-
 #include "Basis.hpp"
 
 namespace godot {
