@@ -4,7 +4,7 @@
 #include "Basis.hpp"
 
 #include "Plane.hpp"
-#include "Rect3.hpp"
+#include "AABB.hpp"
 
 namespace godot {
 
@@ -53,8 +53,8 @@ public:
 	Plane xform(const Plane& p_plane) const;
 	Plane xform_inv(const Plane& p_plane) const;
 
-	Rect3 xform(const Rect3& p_aabb) const;
-	Rect3 xform_inv(const Rect3& p_aabb) const;
+	AABB xform(const AABB& p_aabb) const;
+	AABB xform_inv(const AABB& p_aabb) const;
 
 	void operator*=(const Transform& p_transform);
 	Transform operator*(const Transform& p_transform) const;

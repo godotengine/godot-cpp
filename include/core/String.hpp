@@ -40,7 +40,8 @@ public:
 	operator NodePath() const;
 
 	int length() const;
-	const char *c_string() const;
+	const wchar_t *unicode_str() const;
+	void get_c_string(char *p_dest, int *p_size) const;
 
 	int64_t find(String p_what) const;
 	int64_t find_from(String p_what, int64_t p_from) const;
@@ -106,6 +107,8 @@ public:
 };
 
 String operator+(const char *a, const String &b);
+String operator+(const wchar_t *a, const String &b);
+
 }
 
 #endif // STRING_H

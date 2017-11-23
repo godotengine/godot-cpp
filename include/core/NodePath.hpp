@@ -24,8 +24,6 @@ public:
 
 	int get_name_count() const;
 
-	String get_property() const;
-
 	String get_subname(const int idx) const;
 
 	int get_subname_count() const;
