@@ -41,6 +41,7 @@ public:
 
 	int length() const;
 	const wchar_t *unicode_str() const;
+	char *alloc_c_string() const;
 	void get_c_string(char *p_dest, int *p_size) const;
 
 	int64_t find(String p_what) const;

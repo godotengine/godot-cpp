@@ -17,52 +17,34 @@ void Godot::print_warning(const String& description, const String& function, con
 {
 	int len;
 
-	description.get_c_string(NULL, &len);
-	char * c_desc = (char *)godot::api->godot_alloc(len + 1);
-	description.get_c_string(c_desc, &len);
-	c_desc[len] = '\0';
+	char * c_desc = description.alloc_c_string();
+	char * c_func = function.alloc_c_string();
+	char * c_file = file.alloc_c_string();
 
-	function.get_c_string(NULL, &len);
-	char * c_func = (char *)godot::api->godot_alloc(len + 1);
-	function.get_c_string(c_func, &len);
-	c_func[len] = '\0';
+	if (c_desc != NULL && c_func !=NULL && c_file != NULL) {
+		godot::api->godot_print_warning(c_desc, c_func, c_file, line);
+	};
 
-	file.get_c_string(NULL, &len);
-	char * c_file = (char *)godot::api->godot_alloc(len + 1);
-	file.get_c_string(c_file, &len);
-	c_file[len] = '\0';
-
-	godot::api->godot_print_warning(c_desc, c_func, c_file, line);
-
-	godot::api->godot_free(c_desc);
-	godot::api->godot_free(c_func);
-	godot::api->godot_free(c_file);
+	if (c_desc != NULL) godot::api->godot_free(c_desc);
+	if (c_func != NULL) godot::api->godot_free(c_func);
+	if (c_file != NULL) godot::api->godot_free(c_file);
 }
 
 void Godot::print_error(const String& description, const String& function, const String& file, int line)
 {
 	int len;
 
-	description.get_c_string(NULL, &len);
-	char * c_desc = (char *)godot::api->godot_alloc(len + 1);
-	description.get_c_string(c_desc, &len);
-	c_desc[len] = '\0';
+	char * c_desc = description.alloc_c_string();
+	char * c_func = function.alloc_c_string();
+	char * c_file = file.alloc_c_string();
 
-	function.get_c_string(NULL, &len);
-	char * c_func = (char *)godot::api->godot_alloc(len + 1);
-	function.get_c_string(c_func, &len);
-	c_func[len] = '\0';
+	if (c_desc != NULL && c_func !=NULL && c_file != NULL) {
+		godot::api->godot_print_error(c_desc, c_func, c_file, line);
+	};
 
-	file.get_c_string(NULL, &len);
-	char * c_file = (char *)godot::api->godot_alloc(len + 1);
-	file.get_c_string(c_file, &len);
-	c_file[len] = '\0';
-
-	godot::api->godot_print_error(c_desc, c_func, c_file, line);
-
-	godot::api->godot_free(c_desc);
-	godot::api->godot_free(c_func);
-	godot::api->godot_free(c_file);
+	if (c_desc != NULL) godot::api->godot_free(c_desc);
+	if (c_func != NULL) godot::api->godot_free(c_func);
+	if (c_file != NULL) godot::api->godot_free(c_file);
 }
 
 };
