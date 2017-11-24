@@ -103,11 +103,35 @@ String::operator NodePath() const {
 	return NodePath(*this);
 }
 
-const char *String::c_string() const {
-	return godot::api->godot_string_c_str(&_godot_string);
+const wchar_t *String::unicode_str() const {
+	return godot::api->godot_string_unicode_str(&_godot_string);
+}
+
+char *String::alloc_c_string() const {
+	int len;
+
+	// figure out the lenght of our string
+	get_c_string(NULL, &len);
+
+	// allocate our buffer
+	char * result = (char *)godot::api->godot_alloc(len + 1);
+	if (result != NULL) {
+		get_c_string(result, &len);
+		result[len] = '\0';
+	}
+	
+	return result;
+}
+
+void String::get_c_string(char *p_dest, int *p_size) const {
+	godot::api->godot_string_get_data(&_godot_string, p_dest, p_size);
 }
 
 String operator+(const char *a, const String &b) {
+	return String(a) + b;
+}
+
+String operator+(const wchar_t *a, const String &b) {
 	return String(a) + b;
 }
 

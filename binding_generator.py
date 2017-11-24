@@ -684,7 +684,7 @@ def is_core_type(name):
                   "PoolColorArray",
                   "Quat",
                   "Rect2",
-                  "Rect3",
+                  "AABB",
                   "RID",
                   "String",
                   "Transform",
@@ -713,7 +713,8 @@ def escape_cpp(name):
         "switch":   "_switch",
         "export":   "_export",
         "template": "_template",
-        "new":      "new_"
+        "new":      "new_",
+        "operator": "_operator"
     }
     if name in escapes:
         return escapes[name]

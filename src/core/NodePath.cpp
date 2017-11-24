@@ -43,12 +43,6 @@ int NodePath::get_name_count() const
 	return godot::api->godot_node_path_get_name_count(&_node_path);
 }
 
-String NodePath::get_property() const
-{
-	godot_string str = godot::api->godot_node_path_get_property(&_node_path);
-	return *(String *) &str;
-}
-
 String NodePath::get_subname(const int idx) const
 {
 	godot_string str = godot::api->godot_node_path_get_subname(&_node_path, idx);

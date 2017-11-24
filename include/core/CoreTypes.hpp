@@ -3,6 +3,7 @@
 
 #include "Defs.hpp"
 
+#include "AABB.hpp"
 #include "Array.hpp"
 #include "Basis.hpp"
 #include "Color.hpp"
@@ -12,7 +13,6 @@
 #include "PoolArrays.hpp"
 #include "Quat.hpp"
 #include "Rect2.hpp"
-#include "Rect3.hpp"
 #include "RID.hpp"
 #include "String.hpp"
 #include "Transform.hpp"

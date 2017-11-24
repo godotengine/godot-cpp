@@ -3,7 +3,7 @@
 #include "Basis.hpp"
 
 #include "Plane.hpp"
-#include "Rect3.hpp"
+#include "AABB.hpp"
 
 #include "Quat.hpp"
 
@@ -85,14 +85,14 @@ Plane Transform::xform_inv(const Plane& p_plane) const {
 
 }
 
-Rect3 Transform::xform(const Rect3& p_aabb) const {
+AABB Transform::xform(const AABB& p_aabb) const {
 	/* define vertices */
 	Vector3 x=basis.get_axis(0)*p_aabb.size.x;
 	Vector3 y=basis.get_axis(1)*p_aabb.size.y;
 	Vector3 z=basis.get_axis(2)*p_aabb.size.z;
 	Vector3 pos = xform( p_aabb.pos );
 //could be even further optimized
-	Rect3 new_aabb;
+	AABB new_aabb;
 	new_aabb.pos=pos;
 	new_aabb.expand_to( pos+x );
 	new_aabb.expand_to( pos+y );
@@ -104,7 +104,7 @@ Rect3 Transform::xform(const Rect3& p_aabb) const {
 	return new_aabb;
 
 }
-Rect3 Transform::xform_inv(const Rect3& p_aabb) const {
+AABB Transform::xform_inv(const AABB& p_aabb) const {
 
 	/* define vertices */
 	Vector3 vertices[8]={
@@ -119,7 +119,7 @@ Rect3 Transform::xform_inv(const Rect3& p_aabb) const {
 	};
 
 
-	Rect3 ret;
+	AABB ret;
 
 	ret.pos=xform_inv(vertices[0]);
 

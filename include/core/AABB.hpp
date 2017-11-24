@@ -1,5 +1,5 @@
-#ifndef RECT3_H
-#define RECT3_H
+#ifndef AABB_H
+#define AABB_H
 
 #include "Vector3.hpp"
 
@@ -9,7 +9,7 @@
 
 namespace godot {
 
-class Rect3 {
+class AABB {
 public:
 	Vector3 pos;
 	Vector3 size;
@@ -31,16 +31,16 @@ public:
 	inline void set_size(const Vector3& p_size) { size=p_size; }
 
 
-	bool operator==(const Rect3& p_rval) const;
-	bool operator!=(const Rect3& p_rval) const;
+	bool operator==(const AABB& p_rval) const;
+	bool operator!=(const AABB& p_rval) const;
 
-	bool intersects(const Rect3& p_aabb) const; /// Both AABBs overlap
-	bool intersects_inclusive(const Rect3& p_aabb) const; /// Both AABBs (or their faces) overlap
-	bool encloses(const Rect3 & p_aabb) const; /// p_aabb is completely inside this
+	bool intersects(const AABB& p_aabb) const; /// Both AABBs overlap
+	bool intersects_inclusive(const AABB& p_aabb) const; /// Both AABBs (or their faces) overlap
+	bool encloses(const AABB & p_aabb) const; /// p_aabb is completely inside this
 
-	Rect3 merge(const Rect3& p_with) const;
-	void merge_with(const Rect3& p_aabb); ///merge with another AABB
-	Rect3 intersection(const Rect3& p_aabb) const; ///get box where two intersect, empty if no intersection occurs
+	AABB merge(const AABB& p_with) const;
+	void merge_with(const AABB& p_aabb); ///merge with another AABB
+	AABB intersection(const AABB& p_aabb) const; ///get box where two intersect, empty if no intersection occurs
 	bool intersects_segment(const Vector3& p_from, const Vector3& p_to,Vector3* r_clip=NULL,Vector3* r_normal=NULL) const;
 	bool intersects_ray(const Vector3& p_from, const Vector3& p_dir,Vector3* r_clip=NULL,Vector3* r_normal=NULL) const;
 	bool smits_intersect_ray(const Vector3 &from,const Vector3& p_dir, real_t t0, real_t t1) const;
@@ -60,20 +60,20 @@ public:
 	int get_shortest_axis_index() const;
 	real_t get_shortest_axis_size() const;
 
-	Rect3 grow(real_t p_by) const;
+	AABB grow(real_t p_by) const;
 	void grow_by(real_t p_amount);
 
 	void get_edge(int p_edge,Vector3& r_from,Vector3& r_to) const;
 	Vector3 get_endpoint(int p_point) const;
 
-	Rect3 expand(const Vector3& p_vector) const;
+	AABB expand(const Vector3& p_vector) const;
 	void project_range_in_plane(const Plane& p_plane,real_t &r_min,real_t& r_max) const;
 	void expand_to(const Vector3& p_vector); /** expand to contain a point if necesary */
 
 	operator String() const;
 
-	inline Rect3() {}
-	inline Rect3(const Vector3 &p_pos,const Vector3& p_size) { pos=p_pos; size=p_size; }
+	inline AABB() {}
+	inline AABB(const Vector3 &p_pos,const Vector3& p_size) { pos=p_pos; size=p_size; }
 
 
 };

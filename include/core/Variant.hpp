@@ -5,6 +5,7 @@
 
 #include "Defs.hpp"
 
+#include "AABB.hpp"
 #include "Basis.hpp"
 #include "Color.hpp"
 #include "NodePath.hpp"
@@ -12,7 +13,6 @@
 #include "PoolArrays.hpp"
 #include "Quat.hpp"
 #include "Rect2.hpp"
-#include "Rect3.hpp"
 #include "RID.hpp"
 #include "String.hpp"
 #include "Transform.hpp"
@@ -154,7 +154,7 @@ public:
 	Variant(const Plane& p_plane);
 
 
-	Variant(const Rect3& p_aabb);
+	Variant(const AABB& p_aabb);
 
 	Variant(const Quat& p_quat);
 
@@ -215,7 +215,7 @@ public:
 	operator Rect2() const;
 	operator Vector3() const;
 	operator Plane() const;
-	operator Rect3() const;
+	operator AABB() const;
 	operator Quat() const;
 	operator Basis() const;
 	operator Transform() const;

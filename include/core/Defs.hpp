@@ -87,7 +87,7 @@ typedef float real_t;
 
 
 #ifndef ERR_PRINT
-#define ERR_PRINT(msg) fprintf(stderr, "ERROR: %s\n", (msg).c_string())
+#define ERR_PRINT(msg) fprintf(stderr, "ERROR: %S\n", (msg).unicode_str())
 #endif
 
 #ifndef ERR_FAIL_INDEX_V

@@ -99,9 +99,9 @@ Variant::Variant(const Plane& p_plane)
 }
 
 
-Variant::Variant(const Rect3& p_aabb)
+Variant::Variant(const AABB& p_aabb)
 {
-	godot::api->godot_variant_new_rect3(&_godot_variant, (godot_rect3 *) &p_aabb);
+	godot::api->godot_variant_new_aabb(&_godot_variant, (godot_aabb *) &p_aabb);
 }
 
 Variant::Variant(const Quat& p_quat)
@@ -274,10 +274,10 @@ Variant::operator Plane() const
 	godot_plane s = godot::api->godot_variant_as_plane(&_godot_variant);
 	return *(Plane *) &s;
 }
-Variant::operator Rect3() const
+Variant::operator AABB() const
 {
-	godot_rect3 s = godot::api->godot_variant_as_rect3(&_godot_variant);
-	return *(Rect3 *) &s;
+	godot_aabb s = godot::api->godot_variant_as_aabb(&_godot_variant);
+	return *(AABB *) &s;
 }
 Variant::operator Quat() const
 {
