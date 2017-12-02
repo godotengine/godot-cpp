@@ -28,7 +28,7 @@ Edit `SConstruct` file and assign your godot executable path at line:7 `godot_bi
 
 Building cpp_bindings
 ```
-$ scons godotbinpath="../godot_fork/bin/" headers="../godot_headers/" p=linux generate_bindings=yes
+$ scons godotbinpath="<GODOT-FORK>/bin/" headers="<GODOT-FORK>/modules/gdnative/include/" p=linux generate_bindings=yes
 ```
 resulting libraries will be placed under `bin/` and the generated headers will be placed under `include/*`
 
