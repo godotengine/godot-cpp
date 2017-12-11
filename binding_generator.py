@@ -71,8 +71,8 @@ def generate_class_header(used_classes, c):
     source.append("")
     
     
-    source.append("#include <CoreTypes.hpp>")
-    source.append("#include <Ref.hpp>")
+    source.append("#include <core/CoreTypes.hpp>")
+    source.append("#include <core/Ref.hpp>")
 
     class_name = strip_name(c["name"])
 
@@ -240,11 +240,11 @@ def generate_class_implementation(icalls, used_classes, c):
     source.append("")
     source.append("")
     
-    source.append("#include <GodotGlobal.hpp>")
-    source.append("#include <CoreTypes.hpp>")
-    source.append("#include <Ref.hpp>")
+    source.append("#include <core/GodotGlobal.hpp>")
+    source.append("#include <core/CoreTypes.hpp>")
+    source.append("#include <core/Ref.hpp>")
     
-    source.append("#include <Godot.hpp>")
+    source.append("#include <core/Godot.hpp>")
     source.append("")
     
     
@@ -465,7 +465,7 @@ def generate_icall_header(icalls):
     source.append("#include <stdint.h>")
     source.append("")
     
-    source.append("#include <CoreTypes.hpp>")
+    source.append("#include <core/CoreTypes.hpp>")
     source.append("#include <Object.hpp>")
     source.append("")
     source.append("")
@@ -515,8 +515,8 @@ def generate_icall_implementation(icalls):
     source.append("#include <stdint.h>")
     source.append("")
     
-    source.append("#include <GodotGlobal.hpp>")
-    source.append("#include <CoreTypes.hpp>")
+    source.append("#include <core/GodotGlobal.hpp>")
+    source.append("#include <core/CoreTypes.hpp>")
     source.append("#include <Object.hpp>")
     source.append("")
     source.append("")

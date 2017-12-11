@@ -8,13 +8,13 @@
 #include <nativescript/godot_nativescript.h>
 
 
-#include <CoreTypes.hpp>
-#include <Variant.hpp>
-#include <Ref.hpp>
+#include <core/CoreTypes.hpp>
+#include <core/Variant.hpp>
+#include <core/Ref.hpp>
 
 #include <Object.hpp>
 
-#include <GodotGlobal.hpp>
+#include <core/GodotGlobal.hpp>
 
 
 namespace godot {
