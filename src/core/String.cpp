@@ -12,23 +12,33 @@
 
 namespace godot {
 
+godot::CharString::~CharString() {
+	godot::api->godot_char_string_destroy(&_char_string);
+}
+
+int godot::CharString::length() const {
+	return godot::api->godot_char_string_length(&_char_string);
+}
+
+const char *godot::CharString::get_data() const {
+	return godot::api->godot_char_string_get_data(&_char_string);
+}
+
 godot::String::String() {
 	godot::api->godot_string_new(&_godot_string);
 }
 
 String::String(const char *contents) {
-	godot::api->godot_string_new_data(&_godot_string, contents, strlen(contents));
+	godot::api->godot_string_new(&_godot_string);
+	godot::api->godot_string_parse_utf8(&_godot_string, contents);
 }
 
 String::String(const wchar_t *contents) {
-	// @Todo
-	// godot::api->godot_string_new_data(&_godot_string, contents, strlen(contents));
-	godot::api->godot_string_new(&_godot_string);
+	godot::api->godot_string_new_with_wide_string(&_godot_string, contents, wcslen(contents));
 }
 
 String::String(const wchar_t c) {
-	// @Todo
-	godot::api->godot_string_new(&_godot_string);
+	godot::api->godot_string_new_with_wide_string(&_godot_string, &c, 1);
 }
 
 String::String(const String &other) {
@@ -48,9 +58,7 @@ wchar_t String::operator[](const int idx) const {
 }
 
 int String::length() const {
-	int len = 0;
-	godot::api->godot_string_get_data(&_godot_string, nullptr, &len);
-	return len;
+	return godot::api->godot_string_length(&_godot_string);
 }
 
 void String::operator=(const String &s) {
@@ -68,8 +76,7 @@ bool String::operator!=(const String &s) {
 
 String String::operator+(const String &s) {
 	String new_string = *this;
-	new_string._godot_string =
-			godot::api->godot_string_operator_plus(&new_string._godot_string, &s._godot_string);
+	new_string._godot_string = godot::api->godot_string_operator_plus(&new_string._godot_string, &s._godot_string);
 
 	return new_string;
 }
@@ -104,27 +111,44 @@ String::operator NodePath() const {
 }
 
 const wchar_t *String::unicode_str() const {
-	return godot::api->godot_string_unicode_str(&_godot_string);
+	return godot::api->godot_string_wide_str(&_godot_string);
 }
 
 char *String::alloc_c_string() const {
-	int len;
 
-	// figure out the lenght of our string
-	get_c_string(NULL, &len);
+	godot_char_string contents = godot::api->godot_string_utf8(&_godot_string);
 
-	// allocate our buffer
-	char * result = (char *)godot::api->godot_alloc(len + 1);
-	if (result != NULL) {
-		get_c_string(result, &len);
-		result[len] = '\0';
+	int length = godot::api->godot_char_string_length(&contents);
+
+	char *result = (char *) godot::api->godot_alloc(length + 1);
+
+	if (result) {
+		memcpy(result, godot::api->godot_char_string_get_data(&contents), length + 1);
 	}
-	
+
+	godot::api->godot_char_string_destroy(&contents);
+
 	return result;
 }
 
-void String::get_c_string(char *p_dest, int *p_size) const {
-	godot::api->godot_string_get_data(&_godot_string, p_dest, p_size);
+CharString String::utf8() const {
+	CharString ret;
+
+	ret._char_string = godot::api->godot_string_utf8(&_godot_string);
+
+	return ret;
+}
+
+CharString String::ascii(bool p_extended) const {
+
+	CharString ret;
+
+	if (p_extended)
+		ret._char_string = godot::api->godot_string_ascii_extended(&_godot_string);
+	else
+		ret._char_string = godot::api->godot_string_ascii(&_godot_string);
+
+	return ret;
 }
 
 String operator+(const char *a, const String &b) {

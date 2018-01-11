@@ -38,13 +38,6 @@ public:
 
 
 
-
-
-#define GDNATIVE_INIT(arg) void gdnative_init(arg)
-#define GDNATIVE_TERMINATE(arg) void gdnative_terminate(arg)
-
-#define NATIVESCRIPT_INIT() void nativescript_init()
-
 #define GODOT_CLASS(Name) \
 	public: inline static const char *___get_type_name() { return static_cast<const char *>(#Name); } \
 	private:

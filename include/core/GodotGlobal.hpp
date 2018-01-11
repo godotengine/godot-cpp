@@ -17,6 +17,9 @@ public:
 	static void print_warning(const String& description, const String& function, const String& file, int line);
 	static void print_error(const String& description, const String& function, const String& file, int line);
 
+	static void gdnative_init(godot_gdnative_init_options *o);
+	static void gdnative_terminate(godot_gdnative_terminate_options *o);
+	static void nativescript_init(void *handle);
 };
 
 

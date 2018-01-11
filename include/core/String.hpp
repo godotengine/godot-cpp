@@ -10,6 +10,20 @@ class Variant;
 class PoolByteArray;
 class PoolRealArray;
 class PoolStringArray;
+class String;
+
+class CharString {
+
+	friend class String;
+
+	godot_char_string _char_string;
+
+public:
+	~CharString();
+
+	int length() const;
+	const char *get_data() const;
+};
 
 class String {
 	godot_string _godot_string;
@@ -42,7 +56,8 @@ public:
 	int length() const;
 	const wchar_t *unicode_str() const;
 	char *alloc_c_string() const;
-	void get_c_string(char *p_dest, int *p_size) const;
+	CharString utf8() const;
+	CharString ascii(bool p_extended = false) const;
 
 	int64_t find(String p_what) const;
 	int64_t find_from(String p_what, int64_t p_from) const;

@@ -47,10 +47,7 @@ void Godot::print_error(const String& description, const String& function, const
 	if (c_file != NULL) godot::api->godot_free(c_file);
 }
 
-};
-
-void gdnative_init(godot_gdnative_init_options *options);
-extern "C" void GDN_EXPORT godot_gdnative_init(godot_gdnative_init_options *options)
+void Godot::gdnative_init(godot_gdnative_init_options *options)
 {
 	godot::api = options->api_struct;
 
@@ -63,19 +60,16 @@ extern "C" void GDN_EXPORT godot_gdnative_init(godot_gdnative_init_options *opti
 			default: break;
 		};
 	};
-
-	gdnative_init(options);
 }
 
-void gdnative_terminate(godot_gdnative_terminate_options *options);
-extern "C" void GDN_EXPORT godot_gdnative_terminate(godot_gdnative_terminate_options *options)
+void Godot::gdnative_terminate(godot_gdnative_terminate_options *options)
 {
-	gdnative_terminate(options);
+	// reserved for future use.
 }
 
-void nativescript_init();
-extern "C" void GDN_EXPORT godot_nativescript_init(void *handle)
+void Godot::nativescript_init(void *handle)
 {
 	godot::_RegisterState::nativescript_handle = handle;
-	nativescript_init();
 }
+
+};
