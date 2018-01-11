@@ -20,6 +20,20 @@ PoolByteArray::PoolByteArray(const Array& array)
 	godot::api->godot_pool_byte_array_new_with_array(&_godot_array, (godot_array *) &array);
 }
 
+PoolByteArray::Read PoolByteArray::read() const
+{
+	Read read;
+	read._read_access = godot::api->godot_pool_byte_array_read(&_godot_array);
+	return read;
+}
+
+PoolByteArray::Write PoolByteArray::write()
+{
+	Write write;
+	write._write_access = godot::api->godot_pool_byte_array_write(&_godot_array);
+	return write;
+}
+
 void PoolByteArray::append(const uint8_t data)
 {
 	godot::api->godot_pool_byte_array_append(&_godot_array, data);
@@ -88,6 +102,20 @@ PoolIntArray::PoolIntArray(const Array& array)
 	godot::api->godot_pool_int_array_new_with_array(&_godot_array, (godot_array *) &array);
 }
 
+PoolIntArray::Read PoolIntArray::read() const
+{
+	Read read;
+	read._read_access = godot::api->godot_pool_int_array_read(&_godot_array);
+	return read;
+}
+
+PoolIntArray::Write PoolIntArray::write()
+{
+	Write write;
+	write._write_access = godot::api->godot_pool_int_array_write(&_godot_array);
+	return write;
+}
+
 void PoolIntArray::append(const int data)
 {
 	godot::api->godot_pool_int_array_append(&_godot_array, data);
@@ -148,6 +176,20 @@ PoolIntArray::~PoolIntArray()
 PoolRealArray::PoolRealArray()
 {
 	godot::api->godot_pool_real_array_new(&_godot_array);
+}
+
+PoolRealArray::Read PoolRealArray::read() const
+{
+	Read read;
+	read._read_access = godot::api->godot_pool_real_array_read(&_godot_array);
+	return read;
+}
+
+PoolRealArray::Write PoolRealArray::write()
+{
+	Write write;
+	write._write_access = godot::api->godot_pool_real_array_write(&_godot_array);
+	return write;
 }
 
 PoolRealArray::PoolRealArray(const Array& array)
@@ -223,6 +265,20 @@ PoolStringArray::PoolStringArray(const Array& array)
 	godot::api->godot_pool_string_array_new_with_array(&_godot_array, (godot_array *) &array);
 }
 
+PoolStringArray::Read PoolStringArray::read() const
+{
+	Read read;
+	read._read_access = godot::api->godot_pool_string_array_read(&_godot_array);
+	return read;
+}
+
+PoolStringArray::Write PoolStringArray::write()
+{
+	Write write;
+	write._write_access = godot::api->godot_pool_string_array_write(&_godot_array);
+	return write;
+}
+
 void PoolStringArray::append(const String& data)
 {
 	godot::api->godot_pool_string_array_append(&_godot_array, (godot_string *) &data);
@@ -295,6 +351,20 @@ PoolVector2Array::PoolVector2Array(const Array& array)
 	godot::api->godot_pool_vector2_array_new_with_array(&_godot_array, (godot_array *) &array);
 }
 
+PoolVector2Array::Read PoolVector2Array::read() const
+{
+	Read read;
+	read._read_access = godot::api->godot_pool_vector2_array_read(&_godot_array);
+	return read;
+}
+
+PoolVector2Array::Write PoolVector2Array::write()
+{
+	Write write;
+	write._write_access = godot::api->godot_pool_vector2_array_write(&_godot_array);
+	return write;
+}
+
 void PoolVector2Array::append(const Vector2& data)
 {
 	godot::api->godot_pool_vector2_array_append(&_godot_array, (godot_vector2 *) &data);
@@ -365,6 +435,20 @@ PoolVector3Array::PoolVector3Array(const Array& array)
 	godot::api->godot_pool_vector3_array_new_with_array(&_godot_array, (godot_array *) &array);
 }
 
+PoolVector3Array::Read PoolVector3Array::read() const
+{
+	Read read;
+	read._read_access = godot::api->godot_pool_vector3_array_read(&_godot_array);
+	return read;
+}
+
+PoolVector3Array::Write PoolVector3Array::write()
+{
+	Write write;
+	write._write_access = godot::api->godot_pool_vector3_array_write(&_godot_array);
+	return write;
+}
+
 void PoolVector3Array::append(const Vector3& data)
 {
 	godot::api->godot_pool_vector3_array_append(&_godot_array, (godot_vector3 *) &data);
@@ -432,6 +516,20 @@ PoolColorArray::PoolColorArray()
 PoolColorArray::PoolColorArray(const Array& array)
 {
 	godot::api->godot_pool_color_array_new_with_array(&_godot_array, (godot_array *) &array);
+}
+
+PoolColorArray::Read PoolColorArray::read() const
+{
+	Read read;
+	read._read_access = godot::api->godot_pool_color_array_read(&_godot_array);
+	return read;
+}
+
+PoolColorArray::Write PoolColorArray::write()
+{
+	Write write;
+	write._write_access = godot::api->godot_pool_color_array_write(&_godot_array);
+	return write;
 }
 
 void PoolColorArray::append(const Color& data)
