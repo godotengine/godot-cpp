@@ -21,6 +21,13 @@ namespace godot {
 
 
 template<class T>
+T *as(Object *obj)
+{
+	return (T *) godot::nativescript_api->godot_nativescript_get_userdata(obj);
+}
+
+
+template<class T>
 class GodotScript {
 public:
 	T *owner;
@@ -31,6 +38,11 @@ public:
 	static const char *___get_base_type_name()
 	{
 		return T::___get_class_name();
+	}
+
+	static GodotScript<T> *___get_from_variant(Variant a)
+	{
+		return as<GodotScript<T> >((Object *) a);
 	}
 
 	static void _register_methods() {}
@@ -48,7 +60,6 @@ public:
 	private:
 
 
-
 template<class T>
 struct _ArgCast {
 	static T _arg_cast(Variant a)
@@ -61,7 +72,7 @@ template<class T>
 struct _ArgCast<T*> {
 	static T *_arg_cast(Variant a)
 	{
-		return (T *) ((Object *) a);
+		return (T *) T::___get_from_variant(a);
 	}
 };
 
@@ -76,11 +87,6 @@ struct _ArgCast<Variant> {
 
 
 
-template<class T>
-T *as(Object *obj)
-{
-	return (T *) godot::nativescript_api->godot_nativescript_get_userdata(obj);
-}
 
 // instance and destroy funcs
 

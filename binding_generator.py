@@ -120,6 +120,8 @@ def generate_class_header(used_classes, c):
     # ___get_class_name
     source.append("\tstatic inline char *___get_class_name() { return (char *) \"" + strip_name(c["name"]) + "\"; }")
 
+    source.append("\tstatic inline Object *___get_from_variant(Variant a) { return (Object *) a; }")
+
     enum_values = []
 
     source.append("\n\t// enums")
