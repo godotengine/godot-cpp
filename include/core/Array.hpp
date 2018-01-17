@@ -22,6 +22,8 @@ class Array {
 	godot_array _godot_array;
 public:
 	Array();
+	Array(const Array & other);
+	Array & operator=(const Array & other);
 
 	Array(const PoolByteArray& a);
 
