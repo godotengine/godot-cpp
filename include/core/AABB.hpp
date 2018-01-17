@@ -11,7 +11,7 @@ namespace godot {
 
 class AABB {
 public:
-	Vector3 pos;
+	Vector3 position;
 	Vector3 size;
 
 	real_t get_area() const; /// get area
@@ -25,8 +25,8 @@ public:
 		return (size.x<=CMP_EPSILON && size.y<=CMP_EPSILON  && size.z<=CMP_EPSILON);
 	}
 
-	inline const Vector3& get_pos() const { return pos; }
-	inline void set_pos(const Vector3& p_pos) { pos=p_pos; }
+	inline const Vector3& get_position() const { return position; }
+	inline void set_position(const Vector3& p_position) { position=p_position; }
 	inline const Vector3& get_size() const { return size; }
 	inline void set_size(const Vector3& p_size) { size=p_size; }
 
@@ -73,7 +73,7 @@ public:
 	operator String() const;
 
 	inline AABB() {}
-	inline AABB(const Vector3 &p_pos,const Vector3& p_size) { pos=p_pos; size=p_size; }
+	inline AABB(const Vector3 &p_pos,const Vector3& p_size) { position=p_pos; size=p_size; }
 
 
 };
