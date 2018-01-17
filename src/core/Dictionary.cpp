@@ -10,6 +10,18 @@ Dictionary::Dictionary()
 	godot::api->godot_dictionary_new(&_godot_dictionary);
 }
 
+Dictionary::Dictionary(const Dictionary & other)
+{
+	godot::api->godot_dictionary_new_copy(&_godot_dictionary, &other._godot_dictionary);
+}
+
+Dictionary & Dictionary::operator=(const Dictionary & other)
+{
+	godot::api->godot_dictionary_destroy(&_godot_dictionary);
+	godot::api->godot_dictionary_new_copy(&_godot_dictionary, &other._godot_dictionary);
+	return *this;
+}
+
 void Dictionary::clear()
 {
 	godot::api->godot_dictionary_clear(&_godot_dictionary);

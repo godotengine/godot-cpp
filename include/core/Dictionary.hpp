@@ -13,6 +13,8 @@ class Dictionary {
 	godot_dictionary _godot_dictionary;
 public:
 	Dictionary();
+	Dictionary(const Dictionary & other);
+	Dictionary & operator=(const Dictionary & other);
 
 	void clear();
 

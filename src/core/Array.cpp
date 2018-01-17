@@ -13,6 +13,18 @@ Array::Array()
 	godot::api->godot_array_new(&_godot_array);
 }
 
+Array::Array(const Array & other)
+{
+	godot::api->godot_array_new_copy(&_godot_array, &other._godot_array);
+}
+
+Array & Array::operator=(const Array & other)
+{
+	godot::api->godot_array_destroy(&_godot_array);
+	godot::api->godot_array_new_copy(&_godot_array, &other._godot_array);
+	return *this;
+}
+
 Array::Array(const PoolByteArray& a)
 {
 	godot::api->godot_array_new_pool_byte_array(&_godot_array, (godot_pool_byte_array *) &a);
