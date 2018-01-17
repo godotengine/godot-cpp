@@ -448,9 +448,11 @@ void register_signal(String name, Dictionary args = Dictionary())
 	signal.num_args = args.size();
 	signal.num_default_args = 0;
 
-	signal.args = (godot_signal_argument*) godot::api->godot_alloc(sizeof(godot_signal_argument) * signal.num_args);
-	memset((void *) signal.args, 0, sizeof(godot_signal_argument) * signal.num_args);
-
+	// Need to check because malloc(0) is platform-dependent. Zero arguments will leave args to NULL.
+	if(signal.num_args != 0) {
+		signal.args = (godot_signal_argument*) godot::api->godot_alloc(sizeof(godot_signal_argument) * signal.num_args);
+		memset((void *) signal.args, 0, sizeof(godot_signal_argument) * signal.num_args);
+	}
 
 	for (int i = 0; i < signal.num_args; i++) {
 		// Array entry = args[i];
@@ -471,7 +473,9 @@ void register_signal(String name, Dictionary args = Dictionary())
 		godot::api->godot_string_destroy(&signal.args[i].name);
 	}
 
-	godot::api->godot_free(signal.args);
+	if(signal.args) {
+		godot::api->godot_free(signal.args);
+	}
 }
 
 
