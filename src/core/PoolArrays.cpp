@@ -15,6 +15,18 @@ PoolByteArray::PoolByteArray()
 	godot::api->godot_pool_byte_array_new(&_godot_array);
 }
 
+PoolByteArray::PoolByteArray(const PoolByteArray &p_other)
+{
+	godot::api->godot_pool_byte_array_new_copy(&_godot_array, &p_other._godot_array);
+}
+
+PoolByteArray &PoolByteArray::operator=(const PoolByteArray & p_other)
+{
+	godot::api->godot_pool_byte_array_destroy(&_godot_array);
+	godot::api->godot_pool_byte_array_new_copy(&_godot_array, &p_other._godot_array);
+	return *this;
+}
+
 PoolByteArray::PoolByteArray(const Array& array)
 {
 	godot::api->godot_pool_byte_array_new_with_array(&_godot_array, (godot_array *) &array);
@@ -95,6 +107,18 @@ PoolByteArray::~PoolByteArray()
 PoolIntArray::PoolIntArray()
 {
 	godot::api->godot_pool_int_array_new(&_godot_array);
+}
+
+PoolIntArray::PoolIntArray(const PoolIntArray &p_other)
+{
+	godot::api->godot_pool_int_array_new_copy(&_godot_array, &p_other._godot_array);
+}
+
+PoolIntArray &PoolIntArray::operator=(const PoolIntArray &p_other)
+{
+	godot::api->godot_pool_int_array_destroy(&_godot_array);
+	godot::api->godot_pool_int_array_new_copy(&_godot_array, &p_other._godot_array);
+	return *this;
 }
 
 PoolIntArray::PoolIntArray(const Array& array)
@@ -178,6 +202,18 @@ PoolRealArray::PoolRealArray()
 	godot::api->godot_pool_real_array_new(&_godot_array);
 }
 
+PoolRealArray::PoolRealArray(const PoolRealArray &p_other)
+{
+	godot::api->godot_pool_real_array_new_copy(&_godot_array, &p_other._godot_array);
+}
+
+PoolRealArray &PoolRealArray::operator=(const PoolRealArray &p_other)
+{
+	godot::api->godot_pool_real_array_destroy(&_godot_array);
+	godot::api->godot_pool_real_array_new_copy(&_godot_array, &p_other._godot_array);
+	return *this;
+}
+
 PoolRealArray::Read PoolRealArray::read() const
 {
 	Read read;
@@ -258,6 +294,18 @@ PoolRealArray::~PoolRealArray()
 PoolStringArray::PoolStringArray()
 {
 	godot::api->godot_pool_string_array_new(&_godot_array);
+}
+
+PoolStringArray::PoolStringArray(const PoolStringArray &p_other)
+{
+	godot::api->godot_pool_string_array_new_copy(&_godot_array, &p_other._godot_array);
+}
+
+PoolStringArray &PoolStringArray::operator=(const PoolStringArray &p_other)
+{
+	godot::api->godot_pool_string_array_destroy(&_godot_array);
+	godot::api->godot_pool_string_array_new_copy(&_godot_array, &p_other._godot_array);
+	return *this;
 }
 
 PoolStringArray::PoolStringArray(const Array& array)
@@ -346,6 +394,18 @@ PoolVector2Array::PoolVector2Array()
 	godot::api->godot_pool_vector2_array_new(&_godot_array);
 }
 
+PoolVector2Array::PoolVector2Array(const PoolVector2Array &p_other)
+{
+	godot::api->godot_pool_vector2_array_new_copy(&_godot_array, &p_other._godot_array);
+}
+
+PoolVector2Array &PoolVector2Array::operator=(const PoolVector2Array &p_other)
+{
+	godot::api->godot_pool_vector2_array_destroy(&_godot_array);
+	godot::api->godot_pool_vector2_array_new_copy(&_godot_array, &p_other._godot_array);
+	return *this;
+}
+
 PoolVector2Array::PoolVector2Array(const Array& array)
 {
 	godot::api->godot_pool_vector2_array_new_with_array(&_godot_array, (godot_array *) &array);
@@ -430,6 +490,18 @@ PoolVector3Array::PoolVector3Array()
 	godot::api->godot_pool_vector3_array_new(&_godot_array);
 }
 
+PoolVector3Array::PoolVector3Array(const PoolVector3Array &p_other)
+{
+	godot::api->godot_pool_vector3_array_new_copy(&_godot_array, &p_other._godot_array);
+}
+
+PoolVector3Array &PoolVector3Array::operator=(const PoolVector3Array &p_other)
+{
+	godot::api->godot_pool_vector3_array_destroy(&_godot_array);
+	godot::api->godot_pool_vector3_array_new_copy(&_godot_array, &p_other._godot_array);
+	return *this;
+}
+
 PoolVector3Array::PoolVector3Array(const Array& array)
 {
 	godot::api->godot_pool_vector3_array_new_with_array(&_godot_array, (godot_array *) &array);
@@ -511,6 +583,18 @@ PoolVector3Array::~PoolVector3Array()
 PoolColorArray::PoolColorArray()
 {
 	godot::api->godot_pool_color_array_new(&_godot_array);
+}
+
+PoolColorArray::PoolColorArray(const PoolColorArray &p_other)
+{
+	godot::api->godot_pool_color_array_new_copy(&_godot_array, &p_other._godot_array);
+}
+
+PoolColorArray &PoolColorArray::operator=(const PoolColorArray &p_other)
+{
+	godot::api->godot_pool_color_array_destroy(&_godot_array);
+	godot::api->godot_pool_color_array_new_copy(&_godot_array, &p_other._godot_array);
+	return *this;
 }
 
 PoolColorArray::PoolColorArray(const Array& array)

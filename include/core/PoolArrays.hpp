@@ -64,6 +64,8 @@ public:
 	};
 
 	PoolByteArray();
+	PoolByteArray(const PoolByteArray &p_other);
+	PoolByteArray &operator=(const PoolByteArray & p_other);
 
 	PoolByteArray(const Array& array);
 
@@ -143,6 +145,8 @@ public:
 	};
 
 	PoolIntArray();
+	PoolIntArray(const PoolIntArray &p_other);
+	PoolIntArray &operator=(const PoolIntArray &p_other);
 
 	PoolIntArray(const Array& array);
 
@@ -222,6 +226,8 @@ public:
 	};
 
 	PoolRealArray();
+	PoolRealArray(const PoolRealArray &p_other);
+	PoolRealArray &operator=(const PoolRealArray &p_other);
 
 	PoolRealArray(const Array& array);
 
@@ -301,6 +307,8 @@ public:
 	};
 
 	PoolStringArray();
+	PoolStringArray(const PoolStringArray &p_other);
+	PoolStringArray &operator=(const PoolStringArray &p_other);
 
 	PoolStringArray(const Array& array);
 
@@ -381,6 +389,8 @@ public:
 	};
 
 	PoolVector2Array();
+	PoolVector2Array(const PoolVector2Array &p_other);
+	PoolVector2Array &operator=(const PoolVector2Array &p_other);
 
 	PoolVector2Array(const Array& array);
 
@@ -460,6 +470,8 @@ public:
 	};
 
 	PoolVector3Array();
+	PoolVector3Array(const PoolVector3Array &p_other);
+	PoolVector3Array &operator=(const PoolVector3Array &p_other);
 
 	PoolVector3Array(const Array& array);
 
@@ -539,6 +551,8 @@ public:
 	};
 
 	PoolColorArray();
+	PoolColorArray(const PoolColorArray &p_other);
+	PoolColorArray &operator=(const PoolColorArray &p_other);
 
 	PoolColorArray(const Array& array);
 
