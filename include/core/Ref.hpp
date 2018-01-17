@@ -162,6 +162,11 @@ public:
 		reference = nullptr;
 	}
 	
+	void instance()
+	{
+		ref(new T);
+	}
+
 	Ref()
 	{
 		reference = nullptr;
