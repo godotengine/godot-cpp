@@ -8,17 +8,17 @@ namespace godot {
 
 bool AABB::intersects(const AABB& p_aabb) const {
 
-	if ( pos.x >= (p_aabb.pos.x + p_aabb.size.x) )
+	if ( position.x >= (p_aabb.position.x + p_aabb.size.x) )
 		return false;
-	if ( (pos.x+size.x) <= p_aabb.pos.x  )
+	if ( (position.x+size.x) <= p_aabb.position.x  )
 		return false;
-	if ( pos.y >= (p_aabb.pos.y + p_aabb.size.y) )
+	if ( position.y >= (p_aabb.position.y + p_aabb.size.y) )
 		return false;
-	if ( (pos.y+size.y) <= p_aabb.pos.y  )
+	if ( (position.y+size.y) <= p_aabb.position.y  )
 		return false;
-	if ( pos.z >= (p_aabb.pos.z + p_aabb.size.z) )
+	if ( position.z >= (p_aabb.position.z + p_aabb.size.z) )
 		return false;
-	if ( (pos.z+size.z) <= p_aabb.pos.z  )
+	if ( (position.z+size.z) <= p_aabb.position.z  )
 		return false;
 
 	return true;
@@ -26,17 +26,17 @@ bool AABB::intersects(const AABB& p_aabb) const {
 
 bool AABB::intersects_inclusive(const AABB& p_aabb) const {
 
-	if ( pos.x > (p_aabb.pos.x + p_aabb.size.x) )
+	if ( position.x > (p_aabb.position.x + p_aabb.size.x) )
 		return false;
-	if ( (pos.x+size.x) < p_aabb.pos.x  )
+	if ( (position.x+size.x) < p_aabb.position.x  )
 		return false;
-	if ( pos.y > (p_aabb.pos.y + p_aabb.size.y) )
+	if ( position.y > (p_aabb.position.y + p_aabb.size.y) )
 		return false;
-	if ( (pos.y+size.y) < p_aabb.pos.y  )
+	if ( (position.y+size.y) < p_aabb.position.y  )
 		return false;
-	if ( pos.z > (p_aabb.pos.z + p_aabb.size.z) )
+	if ( position.z > (p_aabb.position.z + p_aabb.size.z) )
 		return false;
-	if ( (pos.z+size.z) < p_aabb.pos.z  )
+	if ( (position.z+size.z) < p_aabb.position.z  )
 		return false;
 
 	return true;
@@ -44,10 +44,10 @@ bool AABB::intersects_inclusive(const AABB& p_aabb) const {
 
 bool AABB::encloses(const AABB & p_aabb) const {
 
-	Vector3 src_min=pos;
-	Vector3 src_max=pos+size;
-	Vector3 dst_min=p_aabb.pos;
-	Vector3 dst_max=p_aabb.pos+p_aabb.size;
+	Vector3 src_min=position;
+	Vector3 src_max=position+size;
+	Vector3 dst_min=p_aabb.position;
+	Vector3 dst_max=p_aabb.position+p_aabb.size;
 
 	return  (
 		 (src_min.x <= dst_min.x) &&
@@ -62,7 +62,7 @@ bool AABB::encloses(const AABB & p_aabb) const {
 Vector3 AABB::get_support(const Vector3& p_normal) const {
 
 	Vector3 half_extents = size * 0.5;
-	Vector3 ofs = pos + half_extents;
+	Vector3 ofs = position + half_extents;
 
 	return Vector3(
 			(p_normal.x>0) ? -half_extents.x : half_extents.x,
@@ -75,14 +75,14 @@ Vector3 AABB::get_support(const Vector3& p_normal) const {
 Vector3 AABB::get_endpoint(int p_point) const {
 
 	switch(p_point) {
-		case 0: return Vector3( pos.x	, pos.y		, pos.z		);
-		case 1: return Vector3( pos.x	, pos.y		, pos.z+size.z	);
-		case 2: return Vector3( pos.x	, pos.y+size.y	, pos.z		);
-		case 3: return Vector3( pos.x	, pos.y+size.y	, pos.z+size.z	);
-		case 4: return Vector3( pos.x+size.x	, pos.y		, pos.z		);
-		case 5: return Vector3( pos.x+size.x	, pos.y		, pos.z+size.z	);
-		case 6: return Vector3( pos.x+size.x	, pos.y+size.y	, pos.z		);
-		case 7: return Vector3( pos.x+size.x	, pos.y+size.y	, pos.z+size.z	);
+		case 0: return Vector3( position.x	, position.y		, position.z		);
+		case 1: return Vector3( position.x	, position.y		, position.z+size.z	);
+		case 2: return Vector3( position.x	, position.y+size.y	, position.z		);
+		case 3: return Vector3( position.x	, position.y+size.y	, position.z+size.z	);
+		case 4: return Vector3( position.x+size.x	, position.y		, position.z		);
+		case 5: return Vector3( position.x+size.x	, position.y		, position.z+size.z	);
+		case 6: return Vector3( position.x+size.x	, position.y+size.y	, position.z		);
+		case 7: return Vector3( position.x+size.x	, position.y+size.y	, position.z+size.z	);
 	};
 
 	ERR_FAIL_V(Vector3());
@@ -91,7 +91,7 @@ Vector3 AABB::get_endpoint(int p_point) const {
 bool AABB::intersects_convex_shape(const Plane *p_planes, int p_plane_count) const {
 
 	Vector3 half_extents = size * 0.5;
-	Vector3 ofs = pos + half_extents;
+	Vector3 ofs = position + half_extents;
 
 	for(int i=0;i<p_plane_count;i++) {
 		const Plane &p=p_planes[i];
@@ -110,17 +110,17 @@ bool AABB::intersects_convex_shape(const Plane *p_planes, int p_plane_count) con
 
 bool AABB::has_point(const Vector3& p_point) const {
 
-	if (p_point.x<pos.x)
+	if (p_point.x<position.x)
 		return false;
-	if (p_point.y<pos.y)
+	if (p_point.y<position.y)
 		return false;
-	if (p_point.z<pos.z)
+	if (p_point.z<position.z)
 		return false;
-	if (p_point.x>pos.x+size.x)
+	if (p_point.x>position.x+size.x)
 		return false;
-	if (p_point.y>pos.y+size.y)
+	if (p_point.y>position.y+size.y)
 		return false;
-	if (p_point.z>pos.z+size.z)
+	if (p_point.z>position.z+size.z)
 		return false;
 
 	return true;
@@ -129,8 +129,8 @@ bool AABB::has_point(const Vector3& p_point) const {
 
 void AABB::expand_to(const Vector3& p_vector) {
 
-	Vector3 begin=pos;
-	Vector3 end=pos+size;
+	Vector3 begin=position;
+	Vector3 end=position+size;
 
 	if (p_vector.x<begin.x)
 		begin.x=p_vector.x;
@@ -146,14 +146,14 @@ void AABB::expand_to(const Vector3& p_vector) {
 	if (p_vector.z>end.z)
 		end.z=p_vector.z;
 
-	pos=begin;
+	position=begin;
 	size=end-begin;
 }
 
 void AABB::project_range_in_plane(const Plane& p_plane,real_t &r_min,real_t& r_max) const {
 
 	Vector3 half_extents( size.x * 0.5, size.y * 0.5, size.z * 0.5 );
-	Vector3 center( pos.x + half_extents.x, pos.y + half_extents.y, pos.z + half_extents.z );
+	Vector3 center( position.x + half_extents.x, position.y + half_extents.y, position.z + half_extents.z );
 
 	real_t length = p_plane.normal.abs().dot(half_extents);
 	real_t distance = p_plane.distance_to( center );
@@ -197,23 +197,23 @@ bool AABB::smits_intersect_ray(const Vector3 &from,const Vector3& dir, real_t t0
 	real_t divy=1.0/dir.y;
 	real_t divz=1.0/dir.z;
 
-	Vector3 upbound=pos+size;
+	Vector3 upbound=position+size;
 	real_t tmin, tmax, tymin, tymax, tzmin, tzmax;
 	if (dir.x >= 0) {
-		tmin = (pos.x - from.x) * divx;
+		tmin = (position.x - from.x) * divx;
 		tmax = (upbound.x - from.x) * divx;
 	}
 	else {
 		tmin = (upbound.x - from.x) * divx;
-		tmax = (pos.x - from.x) * divx;
+		tmax = (position.x - from.x) * divx;
 	}
 	if (dir.y >= 0) {
-		tymin = (pos.y - from.y) * divy;
+		tymin = (position.y - from.y) * divy;
 		tymax = (upbound.y - from.y) * divy;
 	}
 	else {
 		tymin = (upbound.y - from.y) * divy;
-		tymax = (pos.y - from.y) * divy;
+		tymax = (position.y - from.y) * divy;
 	}
 	if ( (tmin > tymax) || (tymin > tmax) )
 		return false;
@@ -222,12 +222,12 @@ bool AABB::smits_intersect_ray(const Vector3 &from,const Vector3& dir, real_t t0
 	if (tymax < tmax)
 		tmax = tymax;
 	if (dir.z >= 0) {
-		tzmin = (pos.z - from.z) * divz;
+		tzmin = (position.z - from.z) * divz;
 		tzmax = (upbound.z - from.z) * divz;
 	}
 	else {
 		tzmin = (upbound.z - from.z) * divz;
-		tzmax = (pos.z - from.z) * divz;
+		tzmax = (position.z - from.z) * divz;
 	}
 	if ( (tmin > tzmax) || (tzmin > tmax) )
 		return false;
@@ -240,9 +240,9 @@ bool AABB::smits_intersect_ray(const Vector3 &from,const Vector3& dir, real_t t0
 
 void AABB::grow_by(real_t p_amount) {
 
-	pos.x-=p_amount;
-	pos.y-=p_amount;
-	pos.z-=p_amount;
+	position.x-=p_amount;
+	position.y-=p_amount;
+	position.z-=p_amount;
 	size.x+=2.0*p_amount;
 	size.y+=2.0*p_amount;
 	size.z+=2.0*p_amount;
@@ -257,12 +257,12 @@ real_t AABB::get_area() const {
 
 bool AABB::operator==(const AABB& p_rval) const {
 
-	return ((pos==p_rval.pos) && (size==p_rval.size));
+	return ((position==p_rval.position) && (size==p_rval.size));
 
 }
 bool AABB::operator!=(const AABB& p_rval) const {
 
-	return ((pos!=p_rval.pos) || (size!=p_rval.size));
+	return ((position!=p_rval.position) || (size!=p_rval.size));
 
 }
 
@@ -272,8 +272,8 @@ void AABB::merge_with(const AABB& p_aabb) {
 	Vector3 end_1,end_2;
 	Vector3 min,max;
 
-	beg_1=pos;
-	beg_2=p_aabb.pos;
+	beg_1=position;
+	beg_2=p_aabb.position;
 	end_1=Vector3(size.x,size.y,size.z)+beg_1;
 	end_2=Vector3(p_aabb.size.x,p_aabb.size.y,p_aabb.size.z)+beg_2;
 
@@ -285,16 +285,16 @@ void AABB::merge_with(const AABB& p_aabb) {
 	max.y=(end_1.y>end_2.y)?end_1.y:end_2.y;
 	max.z=(end_1.z>end_2.z)?end_1.z:end_2.z;
 
-	pos=min;
+	position=min;
 	size=max-min;
 }
 
 AABB AABB::intersection(const AABB& p_aabb) const {
 
-	Vector3 src_min=pos;
-	Vector3 src_max=pos+size;
-	Vector3 dst_min=p_aabb.pos;
-	Vector3 dst_max=p_aabb.pos+p_aabb.size;
+	Vector3 src_min=position;
+	Vector3 src_max=position+size;
+	Vector3 dst_min=p_aabb.position;
+	Vector3 dst_max=p_aabb.position+p_aabb.size;
 
 	Vector3 min,max;
 
@@ -332,18 +332,18 @@ AABB AABB::intersection(const AABB& p_aabb) const {
 bool AABB::intersects_ray(const Vector3& p_from, const Vector3& p_dir,Vector3* r_clip,Vector3* r_normal) const {
 
 	Vector3 c1, c2;
-	Vector3 end = pos+size;
+	Vector3 end = position+size;
 	real_t near=-1e20;
 	real_t far=1e20;
 	int axis=0;
 
 	for (int i=0;i<3;i++){
 		if (p_dir[i] == 0){
-			if ((p_from[i] < pos[i]) || (p_from[i] > end[i])) {
+			if ((p_from[i] < position[i]) || (p_from[i] > end[i])) {
 				return false;
 			}
 		} else { // ray not parallel to planes in this direction
-			c1[i] = (pos[i] - p_from[i]) / p_dir[i];
+			c1[i] = (position[i] - p_from[i]) / p_dir[i];
 			c2[i] = (end[i] - p_from[i]) / p_dir[i];
 
 			if(c1[i] > c2[i]){
@@ -383,7 +383,7 @@ bool AABB::intersects_segment(const Vector3& p_from, const Vector3& p_to,Vector3
 	for(int i=0;i<3;i++) {
 		real_t seg_from=p_from[i];
 		real_t seg_to=p_to[i];
-		real_t box_begin=pos[i];
+		real_t box_begin=position[i];
 		real_t box_end=box_begin+size[i];
 		real_t cmin,cmax;
 		real_t csign;
@@ -438,14 +438,14 @@ bool AABB::intersects_segment(const Vector3& p_from, const Vector3& p_to,Vector3
 bool AABB::intersects_plane(const Plane &p_plane) const {
 
 	Vector3 points[8] = {
-		Vector3( pos.x	, pos.y		, pos.z		),
-		Vector3( pos.x	, pos.y		, pos.z+size.z	),
-		Vector3( pos.x	, pos.y+size.y	, pos.z		),
-		Vector3( pos.x	, pos.y+size.y	, pos.z+size.z	),
-		Vector3( pos.x+size.x	, pos.y		, pos.z		),
-		Vector3( pos.x+size.x	, pos.y		, pos.z+size.z	),
-		Vector3( pos.x+size.x	, pos.y+size.y	, pos.z		),
-		Vector3( pos.x+size.x	, pos.y+size.y	, pos.z+size.z	),
+		Vector3( position.x	, position.y		, position.z		),
+		Vector3( position.x	, position.y		, position.z+size.z	),
+		Vector3( position.x	, position.y+size.y	, position.z		),
+		Vector3( position.x	, position.y+size.y	, position.z+size.z	),
+		Vector3( position.x+size.x	, position.y		, position.z		),
+		Vector3( position.x+size.x	, position.y		, position.z+size.z	),
+		Vector3( position.x+size.x	, position.y+size.y	, position.z		),
+		Vector3( position.x+size.x	, position.y+size.y	, position.z+size.z	),
 	};
 
 	bool over=false;
@@ -562,68 +562,68 @@ void AABB::get_edge(int p_edge,Vector3& r_from,Vector3& r_to) const {
 
 		case 0:{
 
-			r_from=Vector3( pos.x+size.x	, pos.y		, pos.z		);
-			r_to=Vector3( pos.x	, pos.y		, pos.z		);
+			r_from=Vector3( position.x+size.x	, position.y		, position.z		);
+			r_to=Vector3( position.x	, position.y		, position.z		);
 		} break;
 		case 1:{
 
-			r_from=Vector3( pos.x+size.x	, pos.y		, pos.z+size.z	);
-			r_to=Vector3( pos.x+size.x	, pos.y		, pos.z		);
+			r_from=Vector3( position.x+size.x	, position.y		, position.z+size.z	);
+			r_to=Vector3( position.x+size.x	, position.y		, position.z		);
 		} break;
 		case 2:{
-			r_from=Vector3( pos.x	, pos.y		, pos.z+size.z	);
-			r_to=Vector3( pos.x+size.x	, pos.y		, pos.z+size.z	);
+			r_from=Vector3( position.x	, position.y		, position.z+size.z	);
+			r_to=Vector3( position.x+size.x	, position.y		, position.z+size.z	);
 
 		} break;
 		case 3:{
 
-			r_from=Vector3( pos.x	, pos.y		, pos.z		);
-			r_to=Vector3( pos.x	, pos.y		, pos.z+size.z	);
+			r_from=Vector3( position.x	, position.y		, position.z		);
+			r_to=Vector3( position.x	, position.y		, position.z+size.z	);
 
 		} break;
 		case 4:{
 
-			r_from=Vector3( pos.x	, pos.y+size.y		, pos.z		);
-			r_to=Vector3( pos.x+size.x	, pos.y+size.y		, pos.z		);
+			r_from=Vector3( position.x	, position.y+size.y		, position.z		);
+			r_to=Vector3( position.x+size.x	, position.y+size.y		, position.z		);
 		} break;
 		case 5:{
 
-			r_from=Vector3( pos.x+size.x	, pos.y+size.y		, pos.z		);
-			r_to=Vector3( pos.x+size.x	, pos.y+size.y		, pos.z+size.z	);
+			r_from=Vector3( position.x+size.x	, position.y+size.y		, position.z		);
+			r_to=Vector3( position.x+size.x	, position.y+size.y		, position.z+size.z	);
 		} break;
 		case 6:{
-			r_from=Vector3( pos.x+size.x	, pos.y+size.y		, pos.z+size.z	);
-			r_to=Vector3( pos.x	, pos.y+size.y		, pos.z+size.z	);
+			r_from=Vector3( position.x+size.x	, position.y+size.y		, position.z+size.z	);
+			r_to=Vector3( position.x	, position.y+size.y		, position.z+size.z	);
 
 		} break;
 		case 7:{
 
-			r_from=Vector3( pos.x	, pos.y+size.y		, pos.z+size.z	);
-			r_to=Vector3( pos.x	, pos.y+size.y		, pos.z		);
+			r_from=Vector3( position.x	, position.y+size.y		, position.z+size.z	);
+			r_to=Vector3( position.x	, position.y+size.y		, position.z		);
 
 		} break;
 		case 8:{
 
-			r_from=Vector3( pos.x	, pos.y		, pos.z+size.z	);
-			r_to=Vector3( pos.x	, pos.y+size.y		, pos.z+size.z	);
+			r_from=Vector3( position.x	, position.y		, position.z+size.z	);
+			r_to=Vector3( position.x	, position.y+size.y		, position.z+size.z	);
 
 		} break;
 		case 9:{
 
-			r_from=Vector3( pos.x	, pos.y		, pos.z		);
-			r_to=Vector3( pos.x	, pos.y+size.y	, pos.z		);
+			r_from=Vector3( position.x	, position.y		, position.z		);
+			r_to=Vector3( position.x	, position.y+size.y	, position.z		);
 
 		} break;
 		case 10:{
 
-			r_from=Vector3( pos.x+size.x	, pos.y		, pos.z		);
-			r_to=Vector3( pos.x+size.x	, pos.y+size.y	, pos.z		);
+			r_from=Vector3( position.x+size.x	, position.y		, position.z		);
+			r_to=Vector3( position.x+size.x	, position.y+size.y	, position.z		);
 
 		} break;
 		case 11:{
 
-			r_from=Vector3( pos.x+size.x	, pos.y		, pos.z+size.z		);
-			r_to=Vector3( pos.x+size.x	, pos.y+size.y	, pos.z+size.z		);
+			r_from=Vector3( position.x+size.x	, position.y		, position.z+size.z		);
+			r_to=Vector3( position.x+size.x	, position.y+size.y	, position.z+size.z		);
 
 		} break;
 
@@ -633,7 +633,7 @@ void AABB::get_edge(int p_edge,Vector3& r_from,Vector3& r_to) const {
 
 AABB::operator String() const {
 
-	//return String()+pos +" - "+ size;
+	//return String()+position +" - "+ size;
 	return String(); // @Todo
 }
 
