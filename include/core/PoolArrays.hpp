@@ -24,6 +24,14 @@ public:
 		friend class PoolByteArray;
 		godot_pool_byte_array_read_access *_read_access;
 	public:
+		inline Read() {
+			_read_access = NULL;
+		}
+
+		inline Read(const Read & p_other) {
+			_read_access = godot::api->godot_pool_byte_array_read_access_copy(p_other._read_access);
+		}
+
 		inline ~Read() {
 			godot::api->godot_pool_byte_array_read_access_destroy(_read_access);
 		}
@@ -45,6 +53,13 @@ public:
 		friend class PoolByteArray;
 		godot_pool_byte_array_write_access *_write_access;
 	public:
+		inline Write() {
+			_write_access = NULL;
+		}
+
+		inline Write(const Write & p_other) {
+			_write_access = godot::api->godot_pool_byte_array_write_access_copy(p_other._write_access);
+		}
 
 		inline ~Write() {
 			godot::api->godot_pool_byte_array_write_access_destroy(_write_access);
@@ -105,6 +120,14 @@ public:
 		friend class PoolIntArray;
 		godot_pool_int_array_read_access *_read_access;
 	public:
+		inline Read() {
+			_read_access = NULL;
+		}
+
+		inline Read(const Read & p_other) {
+			_read_access = godot::api->godot_pool_int_array_read_access_copy(p_other._read_access);
+		}
+
 		inline ~Read() {
 			godot::api->godot_pool_int_array_read_access_destroy(_read_access);
 		}
@@ -126,6 +149,13 @@ public:
 		friend class PoolIntArray;
 		godot_pool_int_array_write_access *_write_access;
 	public:
+		inline Write() {
+			_write_access = NULL;
+		}
+
+		inline Write(const Write & p_other) {
+			_write_access = godot::api->godot_pool_int_array_write_access_copy(p_other._write_access);
+		}
 
 		inline ~Write() {
 			godot::api->godot_pool_int_array_write_access_destroy(_write_access);
@@ -186,6 +216,14 @@ public:
 		friend class PoolRealArray;
 		godot_pool_real_array_read_access *_read_access;
 	public:
+		inline Read() {
+			_read_access = NULL;
+		}
+
+		inline Read(const Read & p_other) {
+			_read_access = godot::api->godot_pool_real_array_read_access_copy(p_other._read_access);
+		}
+
 		inline ~Read() {
 			godot::api->godot_pool_real_array_read_access_destroy(_read_access);
 		}
@@ -207,6 +245,13 @@ public:
 		friend class PoolRealArray;
 		godot_pool_real_array_write_access *_write_access;
 	public:
+		inline Write() {
+			_write_access = NULL;
+		}
+
+		inline Write(const Write & p_other) {
+			_write_access = godot::api->godot_pool_real_array_write_access_copy(p_other._write_access);
+		}
 
 		inline ~Write() {
 			godot::api->godot_pool_real_array_write_access_destroy(_write_access);
@@ -267,6 +312,14 @@ public:
 		friend class PoolStringArray;
 		godot_pool_string_array_read_access *_read_access;
 	public:
+		inline Read() {
+			_read_access = NULL;
+		}
+
+		inline Read(const Read & p_other) {
+			_read_access = godot::api->godot_pool_string_array_read_access_copy(p_other._read_access);
+		}
+
 		inline ~Read() {
 			godot::api->godot_pool_string_array_read_access_destroy(_read_access);
 		}
@@ -288,6 +341,13 @@ public:
 		friend class PoolStringArray;
 		godot_pool_string_array_write_access *_write_access;
 	public:
+		inline Write() {
+			_write_access = NULL;
+		}
+
+		inline Write(const Write & p_other) {
+			_write_access = godot::api->godot_pool_string_array_write_access_copy(p_other._write_access);
+		}
 
 		inline ~Write() {
 			godot::api->godot_pool_string_array_write_access_destroy(_write_access);
@@ -349,6 +409,14 @@ public:
 		friend class PoolVector2Array;
 		godot_pool_vector2_array_read_access *_read_access;
 	public:
+		inline Read() {
+			_read_access = NULL;
+		}
+
+		inline Read(const Read & p_other) {
+			_read_access = godot::api->godot_pool_vector2_array_read_access_copy(p_other._read_access);
+		}
+
 		inline ~Read() {
 			godot::api->godot_pool_vector2_array_read_access_destroy(_read_access);
 		}
@@ -370,6 +438,13 @@ public:
 		friend class PoolVector2Array;
 		godot_pool_vector2_array_write_access *_write_access;
 	public:
+		inline Write() {
+			_write_access = NULL;
+		}
+
+		inline Write(const Write & p_other) {
+			_write_access = godot::api->godot_pool_vector2_array_write_access_copy(p_other._write_access);
+		}
 
 		inline ~Write() {
 			godot::api->godot_pool_vector2_array_write_access_destroy(_write_access);
@@ -430,6 +505,14 @@ public:
 		friend class PoolVector3Array;
 		godot_pool_vector3_array_read_access *_read_access;
 	public:
+		inline Read() {
+			_read_access = NULL;
+		}
+
+		inline Read(const Read & p_other) {
+			_read_access = godot::api->godot_pool_vector3_array_read_access_copy(p_other._read_access);
+		}
+
 		inline ~Read() {
 			godot::api->godot_pool_vector3_array_read_access_destroy(_read_access);
 		}
@@ -451,6 +534,13 @@ public:
 		friend class PoolVector3Array;
 		godot_pool_vector3_array_write_access *_write_access;
 	public:
+		inline Write() {
+			_write_access = NULL;
+		}
+
+		inline Write(const Write & p_other) {
+			_write_access = godot::api->godot_pool_vector3_array_write_access_copy(p_other._write_access);
+		}
 
 		inline ~Write() {
 			godot::api->godot_pool_vector3_array_write_access_destroy(_write_access);
@@ -511,6 +601,14 @@ public:
 		friend class PoolColorArray;
 		godot_pool_color_array_read_access *_read_access;
 	public:
+		inline Read() {
+			_read_access = NULL;
+		}
+
+		inline Read(const Read & p_other) {
+			_read_access = godot::api->godot_pool_color_array_read_access_copy(p_other._read_access);
+		}
+
 		inline ~Read() {
 			godot::api->godot_pool_color_array_read_access_destroy(_read_access);
 		}
@@ -532,6 +630,13 @@ public:
 		friend class PoolColorArray;
 		godot_pool_color_array_write_access *_write_access;
 	public:
+		inline Write() {
+			_write_access = NULL;
+		}
+
+		inline Write(const Write & p_other) {
+			_write_access = godot::api->godot_pool_color_array_write_access_copy(p_other._write_access);
+		}
 
 		inline ~Write() {
 			godot::api->godot_pool_color_array_write_access_destroy(_write_access);
