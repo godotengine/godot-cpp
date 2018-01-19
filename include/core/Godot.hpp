@@ -440,6 +440,12 @@ void register_property(const char *name, void (T::*setter)(P), P (T::*getter)(),
 
 }
 
+template<class T, class P>
+void register_property(const char *name, void (T::*setter)(P), P (T::*getter)() const, P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,  godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "")
+{
+	register_property(name, setter, (P (T::*)()) getter, default_value, rpc_mode, usage, hint, hint_string);
+}
+
 template<class T>
 void register_signal(String name, Dictionary args = Dictionary())
 {
