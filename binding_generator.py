@@ -341,7 +341,7 @@ def generate_class_implementation(icalls, used_classes, c):
                 if is_enum(method["return_type"]):
                     return_statement += "return (" + remove_enum_prefix(method["return_type"]) + ") "
                 elif is_reference_type(method["return_type"]):
-                    return_statement += "return Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor(";
+                    return_statement += "return Ref<" + strip_name(method["return_type"]) + ">(";
                 else:
                     return_statement += "return " + ("(" + strip_name(method["return_type"]) + " *) " if is_class_type(method["return_type"]) else "")
             else:

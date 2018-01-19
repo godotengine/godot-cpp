@@ -10,24 +10,6 @@ template<class T>
 class Ref {
 	T *reference;
 
-	void ref(const Ref &from)
-	{
-		if (from.reference == reference)  return;
-		
-		unref();
-		
-		reference = from.reference;
-		if (reference)  reference->reference();
-	}
-	
-	void ref_pointer(T *r)
-	{
-		if (!r)  return;
-		
-		if (r->init_ref())  reference = r;
-	}
-	
-	
 public:
 	inline bool operator==(const Ref<T> &r) const
 	{
@@ -73,28 +55,37 @@ public:
 	
 	void operator=(const Ref &from)
 	{
-		ref(from);
+		if (reference)
+			unref();
+
+		if (from.reference) {
+			reference = from.reference;
+			reference->reference();
+		} else {
+			reference = nullptr;
+		}
 	}
 
 	template<class T_Other>
 	void operator=(const Ref<T_Other> &from)
 	{
-		Ref<T> n((T *) from.ptr());
-		ref(n);
+		if (reference)
+			unref();
+
+		if (from.reference) {
+			reference = (T *) from.reference;
+			reference->reference();
+		} else {
+			reference = nullptr;
+		}
 	}
 	
 	void operator=(const Variant &variant)
 	{
-		T *r = (T *) (Object *) variant;
-		if (!r) {
+		if (reference)
 			unref();
-			return;
-		}
-		
-		Ref re;
-		re.reference = r;
-		ref(re);
-		re.reference = nullptr;
+
+		reference = (T *) (Object *) variant;
 	}
 	
 	operator Variant() const
@@ -105,22 +96,27 @@ public:
 	template<class T_Other>
 	Ref(const Ref<T_Other> &from)
 	{
-		if (from.ptr())
-			ref_pointer((T *) from.ptr());
-		else
+		if (from.reference) {
+			reference = (T *) from.reference;
+			reference->reference();
+		} else {
 			reference = nullptr;
+		}
 	}
 	
 	Ref(const Ref &from)
 	{
-		reference = nullptr;
-		ref(from);
+		if (from.reference) {
+			reference = from.reference;
+			reference->reference();
+		} else {
+			reference = nullptr;
+		}
 	}
 
 
 	Ref(T *r)
 	{
-		r->reference();
 		reference = r;
 	}
 	
@@ -129,28 +125,9 @@ public:
 
 	Ref(const Variant &variant)
 	{
-		reference = nullptr;
-		T *r = (T *) (Object *) variant;
-		if (!r) {
-			unref();
-			return;
-		}
-		
-		Ref re;
-		re.reference = r;
-		ref(re);
-		re.reference = nullptr;
+		reference = (T *) (Object *) variant;
 	}
 
-	template<class T_Other>
-	static Ref<T> __internal_constructor(T_Other *r)
-	{
-		Ref<T> ref;
-		ref.reference = (T *) r;
-		return ref;
-	}
-	
-	
 	inline bool is_valid() const { return reference != nullptr; }
 	inline bool is_null() const { return reference == nullptr; }
 	
@@ -164,7 +141,9 @@ public:
 	
 	void instance()
 	{
-		ref(new T);
+		unref();
+
+		reference = new T;
 	}
 
 	Ref()
