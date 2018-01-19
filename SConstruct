@@ -46,7 +46,7 @@ if ARGUMENTS.get("generate_bindings", "no") == "yes":
     # TODO Generating the API should be done only if the Godot build is more recent than the JSON file
     json_api_file = 'godot_api.json'
 
-    subprocess.call([godot_bin_path, '--gdnative-generate-json-api', json_api_file])
+    subprocess.call([os.path.expanduser(godot_bin_path), '--gdnative-generate-json-api', json_api_file])
 
     # actually create the bindings here
     
