@@ -11,11 +11,23 @@ class RID {
 	godot_rid _godot_rid;
 public:
 
-	inline RID() {}
+	RID();
 
 	RID(Object *p);
 
 	int32_t get_rid() const;
+
+	inline bool is_valid() const {
+		// is_valid() is not available in the C API...
+		return *this == RID();
+	}
+
+	bool operator==(const RID & p_other) const;
+	bool operator!=(const RID & p_other) const;
+	bool operator<(const RID & p_other) const;
+	bool operator>(const RID & p_other) const;
+	bool operator<=(const RID & p_other) const;
+	bool operator>=(const RID & p_other) const;
 
 };
 
