@@ -1,12 +1,19 @@
+# Generated bindings
 src/*.cpp
 src/*.hpp
 include/*.hpp
+*.json
+
+# Misc
 logs/*
+
+# Binaries
 *.o
 *.os
 *.so
 *.obj
 *.pyc
-*.json
 *.dblite
+*.pdb
+*.lib
 bin
