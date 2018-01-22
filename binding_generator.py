@@ -72,9 +72,14 @@ def generate_class_header(used_classes, c):
     
     
     source.append("#include <core/CoreTypes.hpp>")
-    source.append("#include <core/Ref.hpp>")
 
     class_name = strip_name(c["name"])
+
+    # Ref<T> is not included in object.h in Godot either,
+    # so don't include it here because it's not needed
+    if class_name != "Object":
+        source.append("#include <core/Ref.hpp>")
+
 
     included = []
 
