@@ -388,7 +388,7 @@ String Color::to_html(bool p_alpha) const
 
 Color::operator String() const
 {
-	return String(); // @Todo
+	return String::num(r) + ", " + String::num(g) + ", " + String::num(b) + ", " + String::num(a);
 }
 
 

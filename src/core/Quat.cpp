@@ -7,6 +7,76 @@
 
 namespace godot {
 
+// set_euler_xyz expects a vector containing the Euler angles in the format
+// (ax,ay,az), where ax is the angle of rotation around x axis,
+// and similar for other axes.
+// This implementation uses XYZ convention (Z is the first rotation).
+void Quat::set_euler_xyz(const Vector3 &p_euler) {
+	real_t half_a1 = p_euler.x * 0.5;
+	real_t half_a2 = p_euler.y * 0.5;
+	real_t half_a3 = p_euler.z * 0.5;
+
+	// R = X(a1).Y(a2).Z(a3) convention for Euler angles.
+	// Conversion to quaternion as listed in https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19770024290.pdf (page A-2)
+	// a3 is the angle of the first rotation, following the notation in this reference.
+
+	real_t cos_a1 = ::cos(half_a1);
+	real_t sin_a1 = ::sin(half_a1);
+	real_t cos_a2 = ::cos(half_a2);
+	real_t sin_a2 = ::sin(half_a2);
+	real_t cos_a3 = ::cos(half_a3);
+	real_t sin_a3 = ::sin(half_a3);
+
+	set(sin_a1 * cos_a2 * cos_a3 + sin_a2 * sin_a3 * cos_a1,
+			-sin_a1 * sin_a3 * cos_a2 + sin_a2 * cos_a1 * cos_a3,
+			sin_a1 * sin_a2 * cos_a3 + sin_a3 * cos_a1 * cos_a2,
+			-sin_a1 * sin_a2 * sin_a3 + cos_a1 * cos_a2 * cos_a3);
+}
+
+// get_euler_xyz returns a vector containing the Euler angles in the format
+// (ax,ay,az), where ax is the angle of rotation around x axis,
+// and similar for other axes.
+// This implementation uses XYZ convention (Z is the first rotation).
+Vector3 Quat::get_euler_xyz() const {
+	Basis m(*this);
+	return m.get_euler_xyz();
+}
+
+// set_euler_yxz expects a vector containing the Euler angles in the format
+// (ax,ay,az), where ax is the angle of rotation around x axis,
+// and similar for other axes.
+// This implementation uses YXZ convention (Z is the first rotation).
+void Quat::set_euler_yxz(const Vector3 &p_euler) {
+	real_t half_a1 = p_euler.y * 0.5;
+	real_t half_a2 = p_euler.x * 0.5;
+	real_t half_a3 = p_euler.z * 0.5;
+
+	// R = Y(a1).X(a2).Z(a3) convention for Euler angles.
+	// Conversion to quaternion as listed in https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19770024290.pdf (page A-6)
+	// a3 is the angle of the first rotation, following the notation in this reference.
+
+	real_t cos_a1 = ::cos(half_a1);
+	real_t sin_a1 = ::sin(half_a1);
+	real_t cos_a2 = ::cos(half_a2);
+	real_t sin_a2 = ::sin(half_a2);
+	real_t cos_a3 = ::cos(half_a3);
+	real_t sin_a3 = ::sin(half_a3);
+
+	set(sin_a1 * cos_a2 * sin_a3 + cos_a1 * sin_a2 * cos_a3,
+			sin_a1 * cos_a2 * cos_a3 - cos_a1 * sin_a2 * sin_a3,
+			-sin_a1 * sin_a2 * cos_a3 + cos_a1 * sin_a2 * sin_a3,
+			sin_a1 * sin_a2 * sin_a3 + cos_a1 * cos_a2 * cos_a3);
+}
+
+// get_euler_yxz returns a vector containing the Euler angles in the format
+// (ax,ay,az), where ax is the angle of rotation around x axis,
+// and similar for other axes.
+// This implementation uses YXZ convention (Z is the first rotation).
+Vector3 Quat::get_euler_yxz() const {
+	Basis m(*this);
+	return m.get_euler_yxz();
+}
+
 real_t Quat::length() const
 {
 	return ::sqrt(length_squared());
@@ -25,29 +95,6 @@ Quat Quat::normalized() const
 Quat Quat::inverse() const
 {
 	return Quat( -x, -y, -z, w );
-}
-
-void Quat::set_euler(const Vector3& p_euler)
-{
-	real_t half_a1 = p_euler.x * 0.5;
-	real_t half_a2 = p_euler.y * 0.5;
-	real_t half_a3 = p_euler.z * 0.5;
-
-	// R = X(a1).Y(a2).Z(a3) convention for Euler angles.
-	// Conversion to quaternion as listed in https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19770024290.pdf (page A-2)
-	// a3 is the angle of the first rotation, following the notation in this reference.
-
-	real_t cos_a1 = ::cos(half_a1);
-	real_t sin_a1 = ::sin(half_a1);
-	real_t cos_a2 = ::cos(half_a2);
-	real_t sin_a2 = ::sin(half_a2);
-	real_t cos_a3 = ::cos(half_a3);
-	real_t sin_a3 = ::sin(half_a3);
-
-	set(sin_a1*cos_a2*cos_a3 + sin_a2*sin_a3*cos_a1,
-		-sin_a1*sin_a3*cos_a2 + sin_a2*cos_a1*cos_a3,
-		sin_a1*sin_a2*cos_a3 + sin_a3*cos_a1*cos_a2,
-		-sin_a1*sin_a2*sin_a3 + cos_a1*cos_a2*cos_a3);
 }
 
 Quat Quat::slerp(const Quat& q, const real_t& t) const {
@@ -261,13 +308,6 @@ bool Quat::operator==(const Quat& p_quat) const {
 
 bool Quat::operator!=(const Quat& p_quat) const {
 	return x!=p_quat.x || y!=p_quat.y || z!=p_quat.z || w!=p_quat.w;
-}
-
-
-Vector3 Quat::get_euler() const
-{
-	Basis m(*this);
-	return m.get_euler();
 }
 
 }

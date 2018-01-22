@@ -327,7 +327,7 @@ Vector3 Vector3::snapped(const float by)
 
 Vector3::operator String() const
 {
-	return String(); // @Todo
+	return String::num(x) + ", " + String::num(y) + ", " + String::num(z);
 }
 
 

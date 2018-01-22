@@ -24,6 +24,55 @@ const char *godot::CharString::get_data() const {
 	return godot::api->godot_char_string_get_data(&_char_string);
 }
 
+String String::num(double p_num, int p_decimals) {
+	String new_string;
+	new_string._godot_string = godot::api->godot_string_num_with_decimals(p_num, p_decimals);
+
+	return new_string;
+}
+
+String String::num_scientific(double p_num) {
+	String new_string;
+	new_string._godot_string = godot::api->godot_string_num_scientific(p_num);
+
+	return new_string;
+}
+
+String String::num_real(double p_num) {
+	String new_string;
+	new_string._godot_string = godot::api->godot_string_num_real(p_num);
+
+	return new_string;
+}
+
+String String::num_int64(int64_t p_num, int base, bool capitalize_hex) {
+	String new_string;
+	new_string._godot_string = godot::api->godot_string_num_int64_capitalized(p_num, base, capitalize_hex);
+
+	return new_string;
+}
+
+String String::chr(godot_char_type p_char) {
+	String new_string;
+	new_string._godot_string = godot::api->godot_string_chr(p_char);
+
+	return new_string;
+}
+
+String String::md5(const uint8_t *p_md5) {
+	String new_string;
+	new_string._godot_string = godot::api->godot_string_md5(p_md5);
+
+	return new_string;
+}
+
+String String::hex_encode_buffer(const uint8_t *p_buffer, int p_len) {
+	String new_string;
+	new_string._godot_string = godot::api->godot_string_hex_encode_buffer(p_buffer, p_len);
+
+	return new_string;
+}
+
 godot::String::String() {
 	godot::api->godot_string_new(&_godot_string);
 }

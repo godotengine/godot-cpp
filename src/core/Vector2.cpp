@@ -252,7 +252,7 @@ Vector2 Vector2::snapped(const Vector2& p_by) const
 
 Vector2::operator String() const
 {
-	return String(); /* @Todo String::num() */
+	return String::num(x) + ", " + String::num(y);
 }
 
 
