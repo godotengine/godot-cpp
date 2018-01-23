@@ -340,8 +340,7 @@ Transform2D Transform2D::interpolate_with(const Transform2D& p_transform, real_t
 
 Transform2D::operator String() const {
 
-	//return String(String()+elements[0]+", "+elements[1]+", "+elements[2]);
-	return String(); // @Todo
+	return String(String() + elements[0] + ", " + elements[1] + ", " + elements[2]);
 }
 
 }

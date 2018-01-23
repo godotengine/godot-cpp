@@ -64,9 +64,13 @@ public:
 
 	Vector3 get_scale() const;
 
-	Vector3 get_euler() const;
+	Vector3 get_euler_xyz() const;
+	void set_euler_xyz(const Vector3 &p_euler);
+	Vector3 get_euler_yxz() const;
+	void set_euler_yxz(const Vector3 &p_euler);
 
-	void set_euler(const Vector3& p_euler);
+	inline Vector3 get_euler() const { return get_euler_yxz(); }
+	inline void set_euler(const Vector3& p_euler) { set_euler_yxz(p_euler); }
 
 	// transposed dot products
 	real_t tdotx(const Vector3& v) const;

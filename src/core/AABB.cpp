@@ -633,8 +633,7 @@ void AABB::get_edge(int p_edge,Vector3& r_from,Vector3& r_to) const {
 
 AABB::operator String() const {
 
-	//return String()+position +" - "+ size;
-	return String(); // @Todo
+	return String() + position + " - " + size;
 }
 
 }

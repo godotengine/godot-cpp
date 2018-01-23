@@ -59,7 +59,7 @@ void Basis::invert()
 			elements[0][2] * co[2];
 
 	
-	ERR_FAIL_COND(det != 0);
+	ERR_FAIL_COND(det == 0);
 	
 	real_t s = 1.0/det;
 
@@ -179,8 +179,18 @@ Vector3 Basis::get_scale() const
 	);
 }
 
-Vector3 Basis::get_euler() const
-{
+// get_euler_xyz returns a vector containing the Euler angles in the format
+// (a1,a2,a3), where a3 is the angle of the first rotation, and a1 is the last
+// (following the convention they are commonly defined in the literature).
+//
+// The current implementation uses XYZ convention (Z is the first rotation),
+// so euler.z is the angle of the (first) rotation around Z axis and so on,
+//
+// And thus, assuming the matrix is a rotation matrix, this function returns
+// the angles in the decomposition R = X(a1).Y(a2).Z(a3) where Z(a) rotates
+// around the z-axis by a and so on.
+Vector3 Basis::get_euler_xyz() const {
+
 	// Euler angles in XYZ convention.
 	// See https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
 	//
@@ -190,49 +200,129 @@ Vector3 Basis::get_euler() const
 
 	Vector3 euler;
 
-	if (is_rotation() == false)
-		return euler;
+	ERR_FAIL_COND_V(is_rotation() == false, euler);
 
-	euler.y = ::asin(elements[0][2]);
-	if ( euler.y < Math_PI*0.5) {
-		if ( euler.y > -Math_PI*0.5) {
-			euler.x = ::atan2(-elements[1][2],elements[2][2]);
-			euler.z = ::atan2(-elements[0][1],elements[0][0]);
-
+	real_t sy = elements[0][2];
+	if (sy < 1.0) {
+		if (sy > -1.0) {
+			// is this a pure Y rotation?
+			if (elements[1][0] == 0.0 && elements[0][1] == 0.0 && elements[1][2] == 0 && elements[2][1] == 0 && elements[1][1] == 1) {
+				// return the simplest form (human friendlier in editor and scripts)
+				euler.x = 0;
+				euler.y = atan2(elements[0][2], elements[0][0]);
+				euler.z = 0;
+			} else {
+				euler.x = ::atan2(-elements[1][2], elements[2][2]);
+				euler.y = ::asin(sy);
+				euler.z = ::atan2(-elements[0][1], elements[0][0]);
+			}
 		} else {
-			real_t r = ::atan2(elements[1][0],elements[1][1]);
+			euler.x = -::atan2(elements[0][1], elements[1][1]);
+			euler.y = -Math_PI / 2.0;
 			euler.z = 0.0;
-			euler.x = euler.z - r;
-
 		}
 	} else {
-		real_t r = ::atan2(elements[0][1],elements[1][1]);
+		euler.x = ::atan2(elements[0][1], elements[1][1]);
+		euler.y = Math_PI / 2.0;
+		euler.z = 0.0;
+	}
+	return euler;
+}
+
+// set_euler_xyz expects a vector containing the Euler angles in the format
+// (ax,ay,az), where ax is the angle of rotation around x axis,
+// and similar for other axes.
+// The current implementation uses XYZ convention (Z is the first rotation).
+void Basis::set_euler_xyz(const Vector3 &p_euler) {
+
+	real_t c, s;
+
+	c = ::cos(p_euler.x);
+	s = ::sin(p_euler.x);
+	Basis xmat(1.0, 0.0, 0.0, 0.0, c, -s, 0.0, s, c);
+
+	c = ::cos(p_euler.y);
+	s = ::sin(p_euler.y);
+	Basis ymat(c, 0.0, s, 0.0, 1.0, 0.0, -s, 0.0, c);
+
+	c = ::cos(p_euler.z);
+	s = ::sin(p_euler.z);
+	Basis zmat(c, -s, 0.0, s, c, 0.0, 0.0, 0.0, 1.0);
+
+	//optimizer will optimize away all this anyway
+	*this = xmat * (ymat * zmat);
+}
+
+// get_euler_yxz returns a vector containing the Euler angles in the YXZ convention,
+// as in first-Z, then-X, last-Y. The angles for X, Y, and Z rotations are returned
+// as the x, y, and z components of a Vector3 respectively.
+Vector3 Basis::get_euler_yxz() const {
+
+	// Euler angles in YXZ convention.
+	// See https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
+	//
+	// rot =  cy*cz+sy*sx*sz    cz*sy*sx-cy*sz        cx*sy
+	//        cx*sz             cx*cz                 -sx
+	//        cy*sx*sz-cz*sy    cy*cz*sx+sy*sz        cy*cx
+
+	Vector3 euler;
+
+	ERR_FAIL_COND_V(is_rotation() == false, euler);
+
+	real_t m12 = elements[1][2];
+
+	if (m12 < 1) {
+		if (m12 > -1) {
+			// is this a pure X rotation?
+			if (elements[1][0] == 0 && elements[0][1] == 0 && elements[0][2] == 0 && elements[2][0] == 0 && elements[0][0] == 1) {
+				// return the simplest form (human friendlier in editor and scripts)
+				euler.x = atan2(-m12, elements[1][1]);
+				euler.y = 0;
+				euler.z = 0;
+			} else {
+				euler.x = asin(-m12);
+				euler.y = atan2(elements[0][2], elements[2][2]);
+				euler.z = atan2(elements[1][0], elements[1][1]);
+			}
+		} else { // m12 == -1
+			euler.x = Math_PI * 0.5;
+			euler.y = -atan2(-elements[0][1], elements[0][0]);
+			euler.z = 0;
+		}
+	} else { // m12 == 1
+		euler.x = -Math_PI * 0.5;
+		euler.y = -atan2(-elements[0][1], elements[0][0]);
 		euler.z = 0;
-		euler.x = r - euler.z;
 	}
 
 	return euler;
 }
 
-void Basis::set_euler(const Vector3& p_euler)
-{
+// set_euler_yxz expects a vector containing the Euler angles in the format
+// (ax,ay,az), where ax is the angle of rotation around x axis,
+// and similar for other axes.
+// The current implementation uses YXZ convention (Z is the first rotation).
+void Basis::set_euler_yxz(const Vector3 &p_euler) {
+
 	real_t c, s;
 
 	c = ::cos(p_euler.x);
 	s = ::sin(p_euler.x);
-	Basis xmat(1.0,0.0,0.0,0.0,c,-s,0.0,s,c);
+	Basis xmat(1.0, 0.0, 0.0, 0.0, c, -s, 0.0, s, c);
 
 	c = ::cos(p_euler.y);
 	s = ::sin(p_euler.y);
-	Basis ymat(c,0.0,s,0.0,1.0,0.0,-s,0.0,c);
+	Basis ymat(c, 0.0, s, 0.0, 1.0, 0.0, -s, 0.0, c);
 
 	c = ::cos(p_euler.z);
 	s = ::sin(p_euler.z);
-	Basis zmat(c,-s,0.0,s,c,0.0,0.0,0.0,1.0);
+	Basis zmat(c, -s, 0.0, s, c, 0.0, 0.0, 0.0, 1.0);
 
 	//optimizer will optimize away all this anyway
-	*this = xmat*(ymat*zmat);
+	*this = ymat * xmat * zmat;
 }
+
+
 
 // transposed dot products
 real_t Basis::tdotx(const Vector3& v) const  {
@@ -344,7 +434,16 @@ Basis Basis::operator*(real_t p_val) const {
 Basis::operator String() const
 {
 	String s;
-	// @Todo
+	for (int i = 0; i < 3; i++) {
+
+		for (int j = 0; j < 3; j++) {
+
+			if (i != 0 || j != 0)
+				s += ", ";
+
+			s += String::num(elements[i][j]);
+		}
+	}
 	return s;
 }
 
@@ -398,7 +497,7 @@ Basis Basis::transpose_xform(const Basis& m) const
 
 void Basis::orthonormalize()
 {
-	ERR_FAIL_COND(determinant() != 0);
+	ERR_FAIL_COND(determinant() == 0);
 
 	// Gram-Schmidt Process
 
@@ -617,7 +716,8 @@ Basis::Basis(const Vector3& p_axis, real_t p_phi) {
 }
 
 Basis::operator Quat() const {
-	ERR_FAIL_COND_V(is_rotation() == false, Quat());
+	//commenting this check because precision issues cause it to fail when it shouldn't
+	//ERR_FAIL_COND_V(is_rotation() == false, Quat());
 
 	real_t trace = elements[0][0] + elements[1][1] + elements[2][2];
 	real_t temp[4];
