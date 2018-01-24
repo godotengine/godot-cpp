@@ -93,18 +93,23 @@ public:
 };
 
 /** GDNative Initialize **/
-GDNATIVE_INIT(godot_gdnative_init_options *options) {
-
+extern "C" void GDN_EXPORT godot_gdnative_init(godot_gdnative_init_options *o)
+{
+    godot::Godot::gdnative_init(o);
 }
 
 /** GDNative Terminate **/
-GDNATIVE_TERMINATE(godot_gdnative_terminate_options *options) {
-
+extern "C" void GDN_EXPORT godot_gdnative_terminate(godot_gdnative_terminate_options *o)
+{
+    godot::Godot::gdnative_terminate(o);
 }
 
 /** NativeScript Initialize **/
-NATIVESCRIPT_INIT() {
-        register_class<SimpleClass>();
+extern "C" void GDN_EXPORT godot_nativescript_init(void *handle)
+{
+    godot::Godot::nativescript_init(handle);
+
+    godot::register_class<SimpleClass>();
 }
 ```
 
