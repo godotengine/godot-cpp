@@ -19,7 +19,7 @@ public:
 
 	inline bool is_valid() const {
 		// is_valid() is not available in the C API...
-		return *this == RID();
+		return *this != RID();
 	}
 
 	bool operator==(const RID & p_other) const;
