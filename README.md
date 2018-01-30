@@ -54,7 +54,7 @@ And our directory structure will be
 # Creating simple class
 
 Create `init.cpp` under `SimpleLibrary/src/` and add the following code
-```
+```cpp
 #include <core/Godot.hpp>
 #include <Reference.hpp>
 
