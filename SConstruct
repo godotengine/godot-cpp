@@ -96,7 +96,10 @@ elif env['platform'] == 'windows':
         env.Append(LINKFLAGS=['--static', '-Wl,--no-undefined', '-static-libgcc', '-static-libstdc++'])
 
 
-env.Append(CPPPATH=['.', env['headers_dir'], 'include', 'include/core'])
+env.Append(CPPPATH=['.', env['headers_dir'], 'include', 'include/gen', 'include/core'])
+
+# Generate bindings?
+json_api_file = ''
 
 # Generate bindings?
 json_api_file = ''
@@ -104,7 +107,7 @@ json_api_file = ''
 if ARGUMENTS.get('use_custom_api_file', 'no') == 'yes':
     json_api_file = ARGUMENTS.get('custom_api_file', '')
 else:
-    json_api_file = os.path.join(os.getcwd(), 'godot_api.json')
+    json_api_file = os.path.join(os.getcwd(), 'godot_headers', 'api.json')
 
 if ARGUMENTS.get('generate_bindings', 'no') == 'yes':
     # Actually create the bindings here
@@ -113,9 +116,11 @@ if ARGUMENTS.get('generate_bindings', 'no') == 'yes':
 
     binding_generator.generate_bindings(json_api_file)
 
+
+# source to compile
 sources = []
 add_sources(sources, 'src/core', 'cpp')
-add_sources(sources, 'src', 'cpp')
+add_sources(sources, 'src/gen', 'cpp')
 
 library = env.StaticLibrary(
     target='bin/' + 'libgodot-cpp.{}.{}.{}'.format(env['platform'], env['target'], env['bits']), source=sources

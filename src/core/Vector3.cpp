@@ -229,12 +229,12 @@ real_t Vector3::length_squared() const
 
 real_t Vector3::distance_squared_to(const Vector3& b) const
 {
-	return (b-*this).length();
+	return (b-*this).length_squared();
 }
 
 real_t Vector3::distance_to(const Vector3& b) const
 {
-	return (b-*this).length_squared();
+	return (b-*this).length();
 }
 
 real_t Vector3::dot(const Vector3& b) const

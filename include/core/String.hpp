@@ -8,6 +8,7 @@ namespace godot {
 class NodePath;
 class Variant;
 class PoolByteArray;
+class PoolIntArray;
 class PoolRealArray;
 class PoolStringArray;
 class String;
@@ -120,6 +121,7 @@ public:
 	String sha256_text() const;
 	float similarity(String text) const;
 	PoolStringArray split(String divisor, bool allow_empty = true) const;
+	PoolIntArray split_ints(String divisor, bool allow_empty = true) const;
 	PoolRealArray split_floats(String divisor, bool allow_empty = true) const;
 	String strip_edges(bool left = true, bool right = true) const;
 	String substr(int from, int len) const;

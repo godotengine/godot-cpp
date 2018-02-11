@@ -5,6 +5,7 @@
 #include "Defs.hpp"
 #include "CoreTypes.hpp"
 #include "GodotGlobal.hpp"
+#include "Object.hpp"
 
 #include <iostream>
 
@@ -141,7 +142,7 @@ Variant::Variant(const RID& p_rid)
 
 Variant::Variant(const Object* p_object)
 {
-	godot::api->godot_variant_new_object(&_godot_variant, (godot_object *) p_object);
+	godot::api->godot_variant_new_object(&_godot_variant, p_object->_owner);
 }
 
 Variant::Variant(const Dictionary& p_dictionary)
@@ -363,9 +364,8 @@ Variant::operator PoolColorArray() const
 	godot_pool_color_array s = godot::api->godot_variant_as_pool_color_array(&_godot_variant);
 	return *(PoolColorArray *) &s;
 }
-Variant::operator Object*() const {
-	godot_object *o = godot::api->godot_variant_as_object(&_godot_variant);
-	return (Object *) o;
+Variant::operator godot_object*() const {
+	return godot::api->godot_variant_as_object(&_godot_variant);
 }
 
 Variant::Type Variant::get_type() const

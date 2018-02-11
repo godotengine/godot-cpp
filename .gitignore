@@ -1,8 +1,3 @@
-# Generated bindings
-src/*.cpp
-src/*.hpp
-include/*.hpp
-
 # Misc
 logs/*
 
@@ -16,3 +11,8 @@ logs/*
 *.pdb
 *.lib
 bin
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes
