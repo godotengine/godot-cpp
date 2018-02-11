@@ -23,35 +23,14 @@ namespace godot {
 template<class T>
 T *as(Object *obj)
 {
-	return (T *) godot::nativescript_api->godot_nativescript_get_userdata(obj);
+	return (T *) godot::nativescript_api->godot_nativescript_get_userdata(obj->_owner);
 }
 
 
-template<class T>
-class GodotScript {
-public:
-	T *owner;
-
-	// GodotScript() {}
-
-	void _init() {}
-	static const char *___get_base_type_name()
-	{
-		return T::___get_class_name();
-	}
-
-	static GodotScript<T> *___get_from_variant(Variant a)
-	{
-		return as<GodotScript<T> >((Object *) a);
-	}
-
-	static void _register_methods() {}
-};
-
-
-
-#define GODOT_CLASS(Name) \
+#define GODOT_CLASS(Name, Base) \
 	public: inline static const char *___get_type_name() { return static_cast<const char *>(#Name); } \
+	inline static const char *___get_base_type_name() { return Base::___get_class_name(); } \
+	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *) godot::as<Name>(godot::Object::___get_from_variant(a)); } \
 	private:
 
 #define GODOT_SUBCLASS(Name, Base) \
@@ -94,7 +73,7 @@ template<class T>
 void *_godot_class_instance_func(godot_object *p, void *method_data)
 {
 	T *d = new T();
-	*(godot_object **) &d->owner = p;
+	d->_owner = p;
 	d->_init();
 	return d;
 }
@@ -369,7 +348,7 @@ void register_property(const char *name, P (T::*var), P default_value, godot_met
 	usage = (godot_property_usage_flags) ((int) usage | GODOT_PROPERTY_USAGE_SCRIPT_VARIABLE);
 
 	if (def_val.get_type() == Variant::OBJECT) {
-		Object *o = def_val;
+		Object *o = P::___get_from_variant(def_val);
 		if (o && o->is_class("Resource")) {
 			hint = (godot_property_hint) ((int) hint | GODOT_PROPERTY_HINT_RESOURCE_TYPE);
 			hint_string = o->get_class();
