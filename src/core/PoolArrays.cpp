@@ -91,7 +91,7 @@ uint8_t PoolByteArray::operator [](const int idx)
 	return godot::api->godot_pool_byte_array_get(&_godot_array, idx);
 }
 
-int PoolByteArray::size()
+int PoolByteArray::size() const
 {
 	return godot::api->godot_pool_byte_array_size(&_godot_array);
 }
@@ -185,7 +185,7 @@ int PoolIntArray::operator [](const int idx)
 	return godot::api->godot_pool_int_array_get(&_godot_array, idx);
 }
 
-int PoolIntArray::size()
+int PoolIntArray::size() const
 {
 	return godot::api->godot_pool_int_array_size(&_godot_array);
 }
@@ -278,7 +278,7 @@ real_t PoolRealArray::operator [](const int idx)
 	return godot::api->godot_pool_real_array_get(&_godot_array, idx);
 }
 
-int PoolRealArray::size()
+int PoolRealArray::size() const
 {
 	return godot::api->godot_pool_real_array_size(&_godot_array);
 }
@@ -376,7 +376,7 @@ String PoolStringArray::operator [](const int idx)
 	return s;
 }
 
-int PoolStringArray::size()
+int PoolStringArray::size() const
 {
 	return godot::api->godot_pool_string_array_size(&_godot_array);
 }
@@ -472,7 +472,7 @@ Vector2 PoolVector2Array::operator [](const int idx)
 	return v;
 }
 
-int PoolVector2Array::size()
+int PoolVector2Array::size() const
 {
 	return godot::api->godot_pool_vector2_array_size(&_godot_array);
 }
@@ -568,7 +568,7 @@ Vector3 PoolVector3Array::operator [](const int idx)
 	return v;
 }
 
-int PoolVector3Array::size()
+int PoolVector3Array::size() const
 {
 	return godot::api->godot_pool_vector3_array_size(&_godot_array);
 }
@@ -663,7 +663,7 @@ Color PoolColorArray::operator [](const int idx)
 	return v;
 }
 
-int PoolColorArray::size()
+int PoolColorArray::size() const
 {
 	return godot::api->godot_pool_color_array_size(&_godot_array);
 }
