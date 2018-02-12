@@ -106,7 +106,7 @@ public:
 
 	uint8_t operator [](const int idx);
 
-	int size();
+	int size() const;
 
 	~PoolByteArray();
 };
@@ -202,7 +202,7 @@ public:
 
 	int operator [](const int idx);
 
-	int size();
+	int size() const;
 
 	~PoolIntArray();
 };
@@ -298,7 +298,7 @@ public:
 
 	real_t operator [](const int idx);
 
-	int size();
+	int size() const;
 
 	~PoolRealArray();
 };
@@ -394,7 +394,7 @@ public:
 
 	String operator [](const int idx);
 
-	int size();
+	int size() const;
 
 	~PoolStringArray();
 };
@@ -491,7 +491,7 @@ public:
 
 	Vector2 operator [](const int idx);
 
-	int size();
+	int size() const;
 
 	~PoolVector2Array();
 };
@@ -587,7 +587,7 @@ public:
 
 	Vector3 operator [](const int idx);
 
-	int size();
+	int size() const;
 
 	~PoolVector3Array();
 };
@@ -683,7 +683,7 @@ public:
 
 	Color operator [](const int idx);
 
-	int size();
+	int size() const;
 
 	~PoolColorArray();
 };
