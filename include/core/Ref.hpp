@@ -3,9 +3,10 @@
 
 #include "Variant.hpp"
 #include "GodotGlobal.hpp"
-#include "../Reference.hpp"
 
 namespace godot {
+class Reference;
+class Object;
 
 // Replicates Godot's Ref<T> behavior
 // Rewritten from f5234e70be7dec4930c2d5a0e829ff480d044b1d.
