@@ -8,7 +8,7 @@ namespace godot {
 
 typedef Vector2 Size2;
 
-class Rect2;
+struct Rect2;
 
 struct Transform2D {
 	// Warning #1: basis of Transform2D is stored differently from Basis. In terms of elements array, the basis matrix looks like "on paper":

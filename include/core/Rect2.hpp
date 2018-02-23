@@ -14,7 +14,7 @@ class String;
 typedef Vector2 Size2;
 typedef Vector2 Point2;
 
-class Transform2D;
+struct Transform2D;
 
 struct Rect2 {
 
