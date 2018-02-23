@@ -88,17 +88,17 @@ def generate_class_header(used_classes, c):
             used_class_name = remove_enum_prefix(extract_nested_type(used_class))
             if used_class_name not in included:
                 included.append(used_class_name)
-                source.append("#include <" + used_class_name + ".hpp>")
+                source.append("#include \"" + used_class_name + ".hpp\"")
         elif is_enum(used_class) and is_nested_type(used_class) and not is_nested_type(used_class, class_name):
             used_class_name = remove_enum_prefix(used_class)
             if used_class_name not in included:
                 included.append(used_class_name)
-                source.append("#include <" + used_class_name + ".hpp>")
+                source.append("#include \"" + used_class_name + ".hpp\"")
 
     source.append("")
     
     if c["base_class"] != "":
-        source.append("#include <" + strip_name(c["base_class"]) + ".hpp>")
+        source.append("#include \"" + strip_name(c["base_class"]) + ".hpp\"")
         
         
     
@@ -243,7 +243,7 @@ def generate_class_header(used_classes, c):
 def generate_class_implementation(icalls, used_classes, c):
     class_name = strip_name(c["name"])
     source = []
-    source.append("#include <" + class_name + ".hpp>")
+    source.append("#include \"" + class_name + ".hpp\"")
     source.append("")
     source.append("")
     
@@ -263,7 +263,7 @@ def generate_class_implementation(icalls, used_classes, c):
         if is_enum(used_class):
             continue
         else:
-            source.append("#include <" + strip_name(used_class) + ".hpp>")
+            source.append("#include \"" + strip_name(used_class) + ".hpp\"")
     
     source.append("")
     source.append("")
@@ -473,7 +473,7 @@ def generate_icall_header(icalls):
     source.append("")
     
     source.append("#include <core/CoreTypes.hpp>")
-    source.append("#include <Object.hpp>")
+    source.append("#include \"Object.hpp\"")
     source.append("")
     source.append("")
     
@@ -524,7 +524,7 @@ def generate_icall_implementation(icalls):
     
     source.append("#include <core/GodotGlobal.hpp>")
     source.append("#include <core/CoreTypes.hpp>")
-    source.append("#include <Object.hpp>")
+    source.append("#include \"Object.hpp\"")
     source.append("")
     source.append("")
     
