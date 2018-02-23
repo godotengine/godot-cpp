@@ -334,8 +334,8 @@ def generate_class_implementation(icalls, used_classes, c):
             source.append("\t___singleton_init();")
         
         
-        source.append("\tstatic godot_method_bind *mb = NULL;")
-        source.append("\tif (mb == NULL) {")
+        source.append("\tstatic godot_method_bind *mb = nullptr;")
+        source.append("\tif (mb == nullptr) {")
         source.append("\t\tmb = godot::api->godot_method_bind_get_method(\"" + c["name"] +"\", \"" + method["name"] + "\");")
         source.append("\t}")
         

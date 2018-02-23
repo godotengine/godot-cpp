@@ -454,7 +454,7 @@ void register_signal(String name, Dictionary args = Dictionary())
 	signal.num_args = args.size();
 	signal.num_default_args = 0;
 
-	// Need to check because malloc(0) is platform-dependent. Zero arguments will leave args to NULL.
+	// Need to check because malloc(0) is platform-dependent. Zero arguments will leave args to nullptr.
 	if(signal.num_args != 0) {
 		signal.args = (godot_signal_argument*) godot::api->godot_alloc(sizeof(godot_signal_argument) * signal.num_args);
 		memset((void *) signal.args, 0, sizeof(godot_signal_argument) * signal.num_args);
