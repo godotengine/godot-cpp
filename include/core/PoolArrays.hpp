@@ -25,7 +25,7 @@ public:
 		godot_pool_byte_array_read_access *_read_access;
 	public:
 		inline Read() {
-			_read_access = NULL;
+			_read_access = nullptr;
 		}
 
 		inline Read(const Read & p_other) {
@@ -54,7 +54,7 @@ public:
 		godot_pool_byte_array_write_access *_write_access;
 	public:
 		inline Write() {
-			_write_access = NULL;
+			_write_access = nullptr;
 		}
 
 		inline Write(const Write & p_other) {
@@ -121,7 +121,7 @@ public:
 		godot_pool_int_array_read_access *_read_access;
 	public:
 		inline Read() {
-			_read_access = NULL;
+			_read_access = nullptr;
 		}
 
 		inline Read(const Read & p_other) {
@@ -150,7 +150,7 @@ public:
 		godot_pool_int_array_write_access *_write_access;
 	public:
 		inline Write() {
-			_write_access = NULL;
+			_write_access = nullptr;
 		}
 
 		inline Write(const Write & p_other) {
@@ -217,7 +217,7 @@ public:
 		godot_pool_real_array_read_access *_read_access;
 	public:
 		inline Read() {
-			_read_access = NULL;
+			_read_access = nullptr;
 		}
 
 		inline Read(const Read & p_other) {
@@ -246,7 +246,7 @@ public:
 		godot_pool_real_array_write_access *_write_access;
 	public:
 		inline Write() {
-			_write_access = NULL;
+			_write_access = nullptr;
 		}
 
 		inline Write(const Write & p_other) {
@@ -313,7 +313,7 @@ public:
 		godot_pool_string_array_read_access *_read_access;
 	public:
 		inline Read() {
-			_read_access = NULL;
+			_read_access = nullptr;
 		}
 
 		inline Read(const Read & p_other) {
@@ -342,7 +342,7 @@ public:
 		godot_pool_string_array_write_access *_write_access;
 	public:
 		inline Write() {
-			_write_access = NULL;
+			_write_access = nullptr;
 		}
 
 		inline Write(const Write & p_other) {
@@ -410,7 +410,7 @@ public:
 		godot_pool_vector2_array_read_access *_read_access;
 	public:
 		inline Read() {
-			_read_access = NULL;
+			_read_access = nullptr;
 		}
 
 		inline Read(const Read & p_other) {
@@ -439,7 +439,7 @@ public:
 		godot_pool_vector2_array_write_access *_write_access;
 	public:
 		inline Write() {
-			_write_access = NULL;
+			_write_access = nullptr;
 		}
 
 		inline Write(const Write & p_other) {
@@ -506,7 +506,7 @@ public:
 		godot_pool_vector3_array_read_access *_read_access;
 	public:
 		inline Read() {
-			_read_access = NULL;
+			_read_access = nullptr;
 		}
 
 		inline Read(const Read & p_other) {
@@ -535,7 +535,7 @@ public:
 		godot_pool_vector3_array_write_access *_write_access;
 	public:
 		inline Write() {
-			_write_access = NULL;
+			_write_access = nullptr;
 		}
 
 		inline Write(const Write & p_other) {
@@ -602,7 +602,7 @@ public:
 		godot_pool_color_array_read_access *_read_access;
 	public:
 		inline Read() {
-			_read_access = NULL;
+			_read_access = nullptr;
 		}
 
 		inline Read(const Read & p_other) {
@@ -631,7 +631,7 @@ public:
 		godot_pool_color_array_write_access *_write_access;
 	public:
 		inline Write() {
-			_write_access = NULL;
+			_write_access = nullptr;
 		}
 
 		inline Write(const Write & p_other) {

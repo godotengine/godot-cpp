@@ -5,8 +5,8 @@
 namespace godot {
 
 void *_RegisterState::nativescript_handle;
-const godot_gdnative_core_api_struct *api = NULL;
-const godot_gdnative_ext_nativescript_api_struct *nativescript_api = NULL;
+const godot_gdnative_core_api_struct *api = nullptr;
+const godot_gdnative_ext_nativescript_api_struct *nativescript_api = nullptr;
 
 void Godot::print(const String& message)
 {
@@ -21,13 +21,13 @@ void Godot::print_warning(const String& description, const String& function, con
 	char * c_func = function.alloc_c_string();
 	char * c_file = file.alloc_c_string();
 
-	if (c_desc != NULL && c_func !=NULL && c_file != NULL) {
+	if (c_desc != nullptr && c_func !=nullptr && c_file != nullptr) {
 		godot::api->godot_print_warning(c_desc, c_func, c_file, line);
 	};
 
-	if (c_desc != NULL) godot::api->godot_free(c_desc);
-	if (c_func != NULL) godot::api->godot_free(c_func);
-	if (c_file != NULL) godot::api->godot_free(c_file);
+	if (c_desc != nullptr) godot::api->godot_free(c_desc);
+	if (c_func != nullptr) godot::api->godot_free(c_func);
+	if (c_file != nullptr) godot::api->godot_free(c_file);
 }
 
 void Godot::print_error(const String& description, const String& function, const String& file, int line)
@@ -38,13 +38,13 @@ void Godot::print_error(const String& description, const String& function, const
 	char * c_func = function.alloc_c_string();
 	char * c_file = file.alloc_c_string();
 
-	if (c_desc != NULL && c_func !=NULL && c_file != NULL) {
+	if (c_desc != nullptr && c_func !=nullptr && c_file != nullptr) {
 		godot::api->godot_print_error(c_desc, c_func, c_file, line);
 	};
 
-	if (c_desc != NULL) godot::api->godot_free(c_desc);
-	if (c_func != NULL) godot::api->godot_free(c_func);
-	if (c_file != NULL) godot::api->godot_free(c_file);
+	if (c_desc != nullptr) godot::api->godot_free(c_desc);
+	if (c_func != nullptr) godot::api->godot_free(c_func);
+	if (c_file != nullptr) godot::api->godot_free(c_file);
 }
 
 void Godot::gdnative_init(godot_gdnative_init_options *options)
