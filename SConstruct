@@ -28,14 +28,14 @@ env = Environment()
 if target_platform == 'windows':
     env = Environment(ENV = os.environ)
 
-if ARGUMENTS.get('use_llvm', 'no') == 'yes':
-    env['CXX'] = 'clang++'
-
 
 if target_platform == 'linux':
     result_name += '.linux.' + target_arch
 
     env['CXX']='gcc-5'
+    if ARGUMENTS.get('use_llvm', 'no') == 'yes':
+        env['CXX'] = 'clang++'
+
     env.Append(CCFLAGS = [ '-fPIC', '-g', '-O3', '-std=c++14', '-Wwrite-strings' ])
     env.Append(LINKFLAGS = [ '-Wl,-R,\'$$ORIGIN\'' ])
 
@@ -67,6 +67,9 @@ elif target_platform == 'windows':
         env.Append(LINKFLAGS = [ '--static', '-Wl,--no-undefined', '-static-libgcc', '-static-libstdc++' ])
 
 elif platform == 'osx':
+    if ARGUMENTS.get('use_llvm', 'no') == 'yes':
+        env['CXX'] = 'clang++'
+
     env.Append(CCFLAGS = [ '-g','-O3', '-std=c++14', '-arch', 'x86_64' ])
     env.Append(LINKFLAGS = [ '-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup' ])
 
