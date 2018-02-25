@@ -3,9 +3,6 @@
 import os, subprocess, platform
 
 
-def add_source(sources, name):
-  sources.append(name)
-
 def add_sources(sources, dir, extension):
   for f in os.listdir(dir):
       if f.endswith('.' + extension):
@@ -21,7 +18,7 @@ target = ARGUMENTS.get('target', 'debug')
 # Local dependency paths, adapt them to your setup
 godot_headers = ARGUMENTS.get('headers', '../godot_headers')
 godot_bin_path = ARGUMENTS.get('godotbinpath', os.getenv('GODOT_BIN_PATH', '../godot_fork/bin/godot.x11.tools.64.llvm'))
-result_path = 'bin/'
+result_path = 'bin'
 result_name = ARGUMENTS.get('n', ARGUMENTS.get('name', os.path.relpath('.', '..')))
 
 
@@ -53,7 +50,7 @@ elif target_platform == 'windows':
     result_name += '.windows.' + target_arch
 
     if host_platform == 'Windows':
-        result_name += '.dll'
+        result_name += '.lib'
 
         env.Append(LINKFLAGS = [ '/WX' ])
         if target == 'debug':
@@ -77,10 +74,9 @@ elif platform == 'osx':
 env.Append(CPPPATH=['.', godot_headers, 'include', 'include/core'])
 
 
-if ARGUMENTS.get('generate_bindings', 'no') == 'yes':
-    # TODO Generating the API should be done only if the Godot build is more recent than the JSON file
-    json_api_file = os.path.join(os.getcwd(), 'godot_api.json')
-
+# Generate bindings
+json_api_file = os.path.join(os.getcwd(), 'godot_api.json')
+if os.path.exists(json_api_file) == False or ARGUMENTS.get('regenerate_bindings', 'no') == 'yes':
     subprocess.call([os.path.expanduser(godot_bin_path), '--gdnative-generate-json-api', json_api_file])
 
     # actually create the bindings here
