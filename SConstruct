@@ -22,13 +22,6 @@ result_path = 'bin'
 result_name = ARGUMENTS.get('n', ARGUMENTS.get('name', os.path.relpath('.', '..')))
 
 
-# This makes sure to keep the session environment variables on windows, 
-# that way you can run scons in a vs 2017 prompt and it will find all the required tools
-env = Environment()
-if target_platform == 'windows':
-    env = Environment(ENV = os.environ)
-
-
 if target_platform == 'linux':
     result_name += '.linux.' + target_arch
 
@@ -47,6 +40,13 @@ if target_platform == 'linux':
         env.Append(LINKFLAGS = [ '-m64' ])
 
 elif target_platform == 'windows':
+    # This makes sure to keep the session environment variables on windows,
+    # that way you can run scons in a vs 2017 prompt and it will find all the required tools
+    if (target_arch == '64'):
+        env = Environment(ENV = os.environ, TARGET_ARCH='amd64')
+    else:
+        env = Environment(ENV = os.environ, TARGET_ARCH='x86')
+
     result_name += '.windows.' + target_arch
 
     if host_platform == 'Windows':
@@ -54,9 +54,9 @@ elif target_platform == 'windows':
 
         env.Append(LINKFLAGS = [ '/WX' ])
         if target == 'debug':
-            env.Append(CCFLAGS = ['-EHsc', '-D_DEBUG', '/MDd' ])
+            env.Append(CCFLAGS = ['/EHsc', '/D_DEBUG', '/MDd' ])
         else:
-            env.Append(CCFLAGS = ['-O2', '-EHsc', '-DNDEBUG', '/MD' ])
+            env.Append(CCFLAGS = ['/O2', '/EHsc', '/DNDEBUG', '/MD' ])
     else:
         if target_arch == '32':
             env['CXX']='i686-w64-mingw32-g++'
