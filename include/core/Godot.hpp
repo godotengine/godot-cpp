@@ -487,7 +487,7 @@ void register_signal(String name, Dictionary args = Dictionary())
 template<class T, class... Args>
 void register_signal(String name, Args... varargs)
 {
-	register_signal<T>(name, helpers::add_all(Dictionary(), varargs...));
+	register_signal<T>(name, Dictionary::make(varargs...));
 }
 
 }

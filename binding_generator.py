@@ -221,7 +221,7 @@ def generate_class_header(used_classes, c):
             if len(method["arguments"]) > 0:
                 method_signature += ", "
                 method_arguments += ", "
-            vararg_templates += "\ttemplate <class... Args> " + method_signature + "Args... args){\n\t\treturn " + method_name + "(" + method_arguments + "godot::helpers::append_all(Array(), args...));\n\t}\n"""
+            vararg_templates += "\ttemplate <class... Args> " + method_signature + "Args... args){\n\t\treturn " + method_name + "(" + method_arguments + "Array::make(args...));\n\t}\n"""
             method_signature += "const Array& __var_args = Array()"
             
         method_signature += ")" + (" const" if method["is_const"] and not c["singleton"] else "")
