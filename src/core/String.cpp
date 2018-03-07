@@ -267,9 +267,18 @@ int String::findn(String what, int from) const {
 	return godot::api->godot_string_findn(&_godot_string, what._godot_string);
 }
 
-String String::format(Variant values, String placeholder) const {
+String String::format(Variant values) const {
 	String new_string;
 	new_string._godot_string = godot::api->godot_string_format(&_godot_string, (godot_variant *)&values);
+
+	return new_string;
+}
+
+String String::format(Variant values, String placeholder) const {
+	String new_string;
+	godot_char_string contents = godot::api->godot_string_utf8(&placeholder._godot_string);
+	new_string._godot_string = godot::api->godot_string_format_with_custom_placeholder(&_godot_string, (godot_variant *)&values, godot::api->godot_char_string_get_data(&contents));
+	godot::api->godot_char_string_destroy(&contents);
 
 	return new_string;
 }
