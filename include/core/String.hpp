@@ -81,6 +81,7 @@ public:
 	int find(String what, int from = 0) const;
 	int find_last(String what) const;
 	int findn(String what, int from = 0) const;
+	String format(Variant values) const;
 	String format(Variant values, String placeholder) const;
 	String get_base_dir() const;
 	String get_basename() const;
@@ -128,6 +129,7 @@ public:
 	String to_upper() const;
 	String xml_escape() const;
 	String xml_unescape() const;
+
 };
 
 String operator+(const char *a, const String &b);

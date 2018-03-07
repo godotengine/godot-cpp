@@ -3,6 +3,7 @@
 
 #include <gdnative_api_struct.gen.h>
 #include "String.hpp"
+#include "Array.hpp"
 
 
 namespace godot {
@@ -20,6 +21,11 @@ public:
 	static void gdnative_init(godot_gdnative_init_options *o);
 	static void gdnative_terminate(godot_gdnative_terminate_options *o);
 	static void nativescript_init(void *handle);
+
+	template <class... Args>
+	static void print(const String& fmt, Args... values) {
+		print(fmt.format(Array::make(values...)));
+	}
 };
 
 
