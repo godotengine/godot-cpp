@@ -115,6 +115,7 @@ def generate_class_header(used_classes, c):
     
     source.append("")
     
+    vararg_templates = ""
     
     # generate the class definition here
     source.append("class " + class_name + ("" if c["base_class"] == "" else (" : public " + strip_name(c["base_class"])) ) + " {")
@@ -157,14 +158,18 @@ def generate_class_header(used_classes, c):
         
         method_signature += "static " if c["singleton"] else ""
         method_signature += make_gdnative_type(method["return_type"])
-        method_signature += escape_cpp(method["name"]) + "("
+        method_name = escape_cpp(method["name"])
+        method_signature +=  method_name + "("
             
             
         has_default_argument = False
+        method_arguments = ""
         
         for i, argument in enumerate(method["arguments"]):
             method_signature += "const " + make_gdnative_type(argument["type"])
-            method_signature += escape_cpp(argument["name"])
+            argument_name = escape_cpp(argument["name"])
+            method_signature += argument_name
+            method_arguments += argument_name
             
             
             # default arguments
@@ -210,10 +215,13 @@ def generate_class_header(used_classes, c):
             
             if i != len(method["arguments"]) - 1:
                 method_signature += ", "
+                method_arguments += ","
                 
         if method["has_varargs"]:
             if len(method["arguments"]) > 0:
                 method_signature += ", "
+                method_arguments += ", "
+            vararg_templates += "\ttemplate <class... Args> " + method_signature + "Args... args){\n\t\treturn " + method_name + "(" + method_arguments + "Array::make(args...));\n\t}\n"""
             method_signature += "const Array& __var_args = Array()"
             
         method_signature += ")" + (" const" if method["is_const"] and not c["singleton"] else "")
@@ -221,7 +229,7 @@ def generate_class_header(used_classes, c):
 
         source.append("\t" + method_signature + ";")
     
-    
+    source.append(vararg_templates)
     source.append("};")
     source.append("")
     

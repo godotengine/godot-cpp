@@ -484,6 +484,11 @@ void register_signal(String name, Dictionary args = Dictionary())
 	}
 }
 
+template<class T, class... Args>
+void register_signal(String name, Args... varargs)
+{
+	register_signal<T>(name, Dictionary::make(varargs...));
+}
 
 }
 

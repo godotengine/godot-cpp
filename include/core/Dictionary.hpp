@@ -16,6 +16,11 @@ public:
 	Dictionary(const Dictionary & other);
 	Dictionary & operator=(const Dictionary & other);
 
+	template <class... Args>
+	static Dictionary make(Args... args) {
+		return helpers::add_all(Dictionary(), args...);
+	}
+
 	void clear();
 
 	bool empty() const;
