@@ -78,6 +78,7 @@ public:
 
            /** For registering signal **/
            // register_signal<SimpleClass>("signal_name");
+           // register_signal<SimpleClass>("signal_name", "string_argument", GODOT_VARIANT_TYPE_STRING)
         }
 	
 	String _name;
