@@ -357,7 +357,7 @@ void register_property(const char *name, P (T::*var), P default_value, godot_met
 	usage = (godot_property_usage_flags) ((int) usage | GODOT_PROPERTY_USAGE_SCRIPT_VARIABLE);
 
 	if (def_val.get_type() == Variant::OBJECT) {
-		Object *o = P::___get_from_variant(def_val);
+		Object *o = get_wrapper<Object>(def_val.operator godot_object*());
 		if (o && o->is_class("Resource")) {
 			hint = (godot_property_hint) ((int) hint | GODOT_PROPERTY_HINT_RESOURCE_TYPE);
 			hint_string = o->get_class();
