@@ -30,6 +30,8 @@ const godot_gdnative_core_api_struct *api = nullptr;
 const godot_gdnative_ext_nativescript_api_struct *nativescript_api = nullptr;
 const godot_gdnative_ext_nativescript_1_1_api_struct *nativescript_1_1_api = nullptr;
 
+const void *gdnlib = NULL;
+
 void Godot::print(const String& message)
 {
 	godot::api->godot_print((godot_string *) &message);
@@ -72,6 +74,7 @@ void Godot::print_error(const String& description, const String& function, const
 void Godot::gdnative_init(godot_gdnative_init_options *options)
 {
 	godot::api = options->api_struct;
+	godot::gdnlib = options->gd_native_library;
 
 	// now find our extensions
 	for (int i = 0; i < godot::api->num_extensions; i++) {
@@ -105,8 +108,11 @@ void Godot::nativescript_init(void *handle)
 	godot::_RegisterState::nativescript_handle = handle;
 
 	godot_instance_binding_functions binding_funcs = {};
+	binding_funcs.alloc_instance_binding_data = wrapper_create;
+	binding_funcs.free_instance_binding_data = wrapper_destroy;
 
 	godot::_RegisterState::language_index = godot::nativescript_1_1_api->godot_nativescript_register_instance_binding_data_functions(binding_funcs);
+
 }
 
 void Godot::nativescript_terminate(void *handle)

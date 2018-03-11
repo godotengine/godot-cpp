@@ -81,7 +81,7 @@ elif target_platform == 'osx':
     env.Append(LINKFLAGS = [ '-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup' ])
 
 
-env.Append(CPPPATH=['.', godot_headers, 'include', 'include/core'])
+env.Append(CPPPATH=['.', godot_headers, 'include', 'include/gen', 'include/core'])
 
 # Generate bindings?
 json_api_file = ''
@@ -100,7 +100,7 @@ if ARGUMENTS.get('generate_bindings', 'no') == 'yes':
 
 sources = []
 add_sources(sources, 'src/core', 'cpp')
-add_sources(sources, 'src', 'cpp')
+add_sources(sources, 'src/gen', 'cpp')
 
 
 library = env.StaticLibrary(target=result_path + '/' + result_name, source=sources)

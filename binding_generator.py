@@ -21,17 +21,17 @@ def generate_bindings(path):
         
         impl = generate_class_implementation(icalls, used_classes, c)
         
-        header_file = open("include/" + strip_name(c["name"]) + ".hpp", "w+")
+        header_file = open("include/gen/" + strip_name(c["name"]) + ".hpp", "w+")
         header_file.write(header)
         
-        source_file = open("src/" + strip_name(c["name"]) + ".cpp", "w+")
+        source_file = open("src/gen/" + strip_name(c["name"]) + ".cpp", "w+")
         source_file.write(impl)
     
     
-    icall_header_file = open("src/__icalls.hpp", "w+")
+    icall_header_file = open("src/gen/__icalls.hpp", "w+")
     icall_header_file.write(generate_icall_header(icalls))
     
-    icall_source_file = open("src/__icalls.cpp", "w+")
+    icall_source_file = open("src/gen/__icalls.cpp", "w+")
     icall_source_file.write(generate_icall_implementation(icalls))
 
 
@@ -177,9 +177,7 @@ def generate_class_header(used_classes, c):
     if c["instanciable"]:
         source.append("")
         source.append("")
-        source.append("\tstatic void *operator new(size_t);")
-        
-        source.append("\tstatic void operator delete(void *);")
+        source.append("\tstatic " + class_name + " *_new();")
     
     source.append("\n\t// methods")
     
@@ -333,18 +331,14 @@ def generate_class_implementation(icalls, used_classes, c):
     
     
     if c["instanciable"]:
-        source.append("void *" + strip_name(c["name"]) + "::operator new(size_t)")
+        source.append(class_name + " *" + strip_name(c["name"]) + "::_new()")
         source.append("{")
-        source.append("\treturn godot::api->godot_get_class_constructor((char *)\"" + c["name"] + "\")();")
-        source.append("}")
-        
-        source.append("void " + strip_name(c["name"]) + "::operator delete(void *ptr)")
-        source.append("{")
-        source.append("\tgodot::api->godot_object_destroy(((Object *)ptr)->_owner);")
+        source.append("\treturn (" + class_name + " *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, godot::api->godot_get_class_constructor((char *)\"" + c["name"] + "\")());")
         source.append("}")
     
     for method in c["methods"]:
         method_signature = ""
+
         
         method_signature += make_gdnative_type(method["return_type"])
         method_signature += strip_name(c["name"]) + "::" + escape_cpp(method["name"]) + "("
@@ -364,11 +358,20 @@ def generate_class_implementation(icalls, used_classes, c):
         method_signature += ")" + (" const" if method["is_const"] else "")
     
         source.append(method_signature + " {")
+
+
+        if method["name"] == "free":
+            # dirty hack because Object::free is marked virtual but doesn't actually exist...
+            source.append("\tgodot::api->godot_object_destroy(_owner);")
+            source.append("}")
+            source.append("")
+            continue
+        else:
         
-	source.append("\tstatic godot_method_bind *mb = nullptr;")
-	source.append("\tif (mb == nullptr) {")
-        source.append("\t\tmb = godot::api->godot_method_bind_get_method(\"" + c["name"] +"\", \"" + method["name"] + "\");")
-        source.append("\t}")
+            source.append("\tstatic godot_method_bind *mb = nullptr;")
+	    source.append("\tif (mb == nullptr) {")
+            source.append("\t\tmb = godot::api->godot_method_bind_get_method(\"" + c["name"] +"\", \"" + method["name"] + "\");")
+            source.append("\t}")
         
         return_statement = ""
         
@@ -434,6 +437,13 @@ def generate_class_implementation(icalls, used_classes, c):
             source.append("\t*(godot_variant *) &__result = godot::api->godot_method_bind_call(mb, ((const Object *) " + core_object_name + ")->_owner, (const godot_variant **) __args, " + size + ", nullptr);")
             
             source.append("")
+            
+            if is_class_type(method["return_type"]):
+                source.append("\tObject *obj = Object::___get_from_variant(__result);")
+                source.append("\tif (obj->has_method(\"reference\"))")
+                source.append("\t\tobj->callv(\"reference\", Array());")
+
+                source.append("")
             
             
             for i, argument in enumerate(method["arguments"]):

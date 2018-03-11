@@ -3,7 +3,7 @@
 
 #include "Variant.hpp"
 #include "GodotGlobal.hpp"
-#include "../Reference.hpp"
+#include "Reference.hpp"
 
 namespace godot {
 
@@ -107,7 +107,7 @@ public:
 	void operator=(const Variant &p_variant) {
 
 		// TODO We need a safe cast
-		Reference *refb = (Reference *) (Object *) p_variant;
+		Reference *refb = (Reference *) Object::___get_from_variant(p_variant);
 		if (!refb) {
 			unref();
 			return;
@@ -156,7 +156,7 @@ public:
 
 		reference = nullptr;
 		// TODO We need a safe cast
-		Reference *refb = (Reference *) (Object *) p_variant;
+		Reference *refb = (Reference *) Object::___get_from_variant(p_variant);
 		if (!refb) {
 			unref();
 			return;
@@ -180,14 +180,14 @@ public:
 		if (reference && reference->unreference()) {
 
 			//memdelete(reference);
-			delete reference;
+			reference->free();
 		}
 		reference = nullptr;
 	}
 
 	void instance() {
 		//ref(memnew(T));
-		ref(new T);
+		ref(T::_new());
 	}
 
 	Ref() {
