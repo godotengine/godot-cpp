@@ -86,7 +86,7 @@ void PoolByteArray::set(const int idx, const uint8_t data)
 	godot::api->godot_pool_byte_array_set(&_godot_array, idx, data);
 }
 
-uint8_t PoolByteArray::operator [](const int idx)
+const uint8_t PoolByteArray::operator [](const int idx)
 {
 	return godot::api->godot_pool_byte_array_get(&_godot_array, idx);
 }
@@ -180,7 +180,7 @@ void PoolIntArray::set(const int idx, const int data)
 	godot::api->godot_pool_int_array_set(&_godot_array, idx, data);
 }
 
-int PoolIntArray::operator [](const int idx)
+const int PoolIntArray::operator [](const int idx)
 {
 	return godot::api->godot_pool_int_array_get(&_godot_array, idx);
 }
@@ -273,7 +273,7 @@ void PoolRealArray::set(const int idx, const real_t data)
 	godot::api->godot_pool_real_array_set(&_godot_array, idx, data);
 }
 
-real_t PoolRealArray::operator [](const int idx)
+const real_t PoolRealArray::operator [](const int idx)
 {
 	return godot::api->godot_pool_real_array_get(&_godot_array, idx);
 }
@@ -367,7 +367,7 @@ void PoolStringArray::set(const int idx, const String& data)
 	godot::api->godot_pool_string_array_set(&_godot_array, idx, (godot_string *) &data);
 }
 
-String PoolStringArray::operator [](const int idx)
+const String PoolStringArray::operator [](const int idx)
 {
 	String s;
 	godot_string str = godot::api->godot_pool_string_array_get(&_godot_array, idx);
@@ -465,7 +465,7 @@ void PoolVector2Array::set(const int idx, const Vector2& data)
 	godot::api->godot_pool_vector2_array_set(&_godot_array, idx, (godot_vector2 *) &data);
 }
 
-Vector2 PoolVector2Array::operator [](const int idx)
+const Vector2 PoolVector2Array::operator [](const int idx)
 {
 	Vector2 v;
 	*(godot_vector2 *) &v = godot::api->godot_pool_vector2_array_get(&_godot_array, idx);
@@ -561,7 +561,7 @@ void PoolVector3Array::set(const int idx, const Vector3& data)
 	godot::api->godot_pool_vector3_array_set(&_godot_array, idx, (godot_vector3 *) &data);
 }
 
-Vector3 PoolVector3Array::operator [](const int idx)
+const Vector3 PoolVector3Array::operator [](const int idx)
 {
 	Vector3 v;
 	*(godot_vector3 *) &v = godot::api->godot_pool_vector3_array_get(&_godot_array, idx);
@@ -656,7 +656,7 @@ void PoolColorArray::set(const int idx, const Color& data)
 	godot::api->godot_pool_color_array_set(&_godot_array, idx, (godot_color *) &data);
 }
 
-Color PoolColorArray::operator [](const int idx)
+const Color PoolColorArray::operator [](const int idx)
 {
 	Color v;
 	*(godot_color *) &v = godot::api->godot_pool_color_array_get(&_godot_array, idx);
