@@ -37,7 +37,7 @@ T *get_wrapper(godot_object *obj)
 
 #define GODOT_CLASS(Name, Base) \
 	public: inline static const char *___get_type_name() { return static_cast<const char *>(#Name); } \
-	inline static Name *_new() { godot::NativeScript *script = godot::NativeScript::_new(); script->set_library(godot::get_wrapper<godot::GDNativeLibrary>((godot_object *) godot::gdnlib)); script->set_class_name(#Name); Name *instance = godot::as<Name>(script->new_()); script->free(); return instance; } \
+	inline static Name *_new() { godot::NativeScript *script = godot::NativeScript::_new(); script->set_library(godot::get_wrapper<godot::GDNativeLibrary>((godot_object *) godot::gdnlib)); script->set_class_name(#Name); Name *instance = godot::as<Name>(script->new_()); return instance; } \
 	inline static const char *___get_base_type_name() { return Base::___get_class_name(); } \
 	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *) godot::as<Name>(godot::Object::___get_from_variant(a)); } \
 	private:
