@@ -2,18 +2,18 @@
 
 #include "String.hpp"
 
-static GDCALLINGCONV void *wrapper_create(void *data, godot_object *instance)
+#include "Wrapped.hpp"
+
+static GDCALLINGCONV void *wrapper_create(void *data, const void *type_tag, godot_object *instance)
 {
-	void *wrapper_memory = godot::api->godot_alloc(sizeof(instance));
+	godot::_Wrapped *wrapper_memory = (godot::_Wrapped *) godot::api->godot_alloc(sizeof(godot::_Wrapped));
 
 	if (!wrapper_memory)
 		return NULL;
+	wrapper_memory->_owner = instance;
+	wrapper_memory->_type_tag = type_tag;
 
-	godot_object **wrapper = (godot_object **) wrapper_memory;
-
-	*wrapper = instance;
-
-	return wrapper;
+	return (void *) wrapper_memory;
 }
 
 static GDCALLINGCONV void wrapper_destroy(void *data, void *wrapper)
@@ -71,6 +71,8 @@ void Godot::print_error(const String& description, const String& function, const
 	if (c_file != nullptr) godot::api->godot_free(c_file);
 }
 
+void ___register_types();
+
 void Godot::gdnative_init(godot_gdnative_init_options *options)
 {
 	godot::api = options->api_struct;
@@ -91,11 +93,12 @@ void Godot::gdnative_init(godot_gdnative_init_options *options)
 
 					extension = extension->next;
 				}
-		        } break;
-		        default: {
-		        }break;
-		};
-	};
+			} break;
+			default: break;
+		}
+	}
+
+	___register_types();
 }
 
 void Godot::gdnative_terminate(godot_gdnative_terminate_options *options)

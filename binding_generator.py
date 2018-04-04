@@ -34,6 +34,9 @@ def generate_bindings(path):
     icall_source_file = open("src/gen/__icalls.cpp", "w+")
     icall_source_file.write(generate_icall_implementation(icalls))
 
+    register_types_file = open("src/gen/__register_types.cpp", "w+")
+    register_types_file.write(generate_type_registry(classes))
+
 
 def is_reference_type(t):
     for c in classes:
@@ -79,6 +82,8 @@ def generate_class_header(used_classes, c):
     # so don't include it here because it's not needed
     if class_name != "Object" and class_name != "Reference":
         source.append("#include <core/Ref.hpp>")
+    else:
+        source.append("#include <TagDB.hpp>")
 
 
     included = []
@@ -100,7 +105,6 @@ def generate_class_header(used_classes, c):
     if c["base_class"] != "":
         source.append("#include \"" + strip_name(c["base_class"]) + ".hpp\"")
         
-        
     
     source.append("namespace godot {")
     source.append("")
@@ -118,18 +122,13 @@ def generate_class_header(used_classes, c):
     vararg_templates = ""
     
     # generate the class definition here
-    source.append("class " + class_name + ("" if c["base_class"] == "" else (" : public " + strip_name(c["base_class"])) ) + " {")
+    source.append("class " + class_name + (" : public _Wrapped" if c["base_class"] == "" else (" : public " + strip_name(c["base_class"])) ) + " {")
 
     if c["base_class"] == "":
-        # this is Object
+        source.append("public: enum { ___CLASS_IS_SCRIPT = 0, };")
+        source.append("private:")
         source.append("")
-        source.append("public:")
-        source.append("\tgodot_object *_owner;")
-        source.append("")
-        # TODO decide what to do about virtual methods
-        # source.append("static void _register_methods();")
-        # source.append("")
-    
+
     if c["singleton"]:
         source.append("\tstatic " + class_name + " *_singleton;")
         source.append("")
@@ -139,6 +138,10 @@ def generate_class_header(used_classes, c):
 
     source.append("public:")
     source.append("")
+
+    source.append("\tstatic void *___get_type_tag();")
+    source.append("\tstatic void *___get_base_type_tag();")
+
 
     if c["singleton"]:
         source.append("\tstatic inline " + class_name + " *get_singleton()")
@@ -180,6 +183,14 @@ def generate_class_header(used_classes, c):
         source.append("\tstatic " + class_name + " *_new();")
     
     source.append("\n\t// methods")
+
+
+    if class_name == "Object":
+        source.append("#ifndef GODOT_CPP_NO_OBJECT_CAST")
+        source.append("\ttemplate<class T>")
+        source.append("\tstatic T *cast_to(const Object *obj);")
+        source.append("#endif")
+        source.append("")
     
     for method in c["methods"]:
         
@@ -264,10 +275,9 @@ def generate_class_header(used_classes, c):
     source.append("")
     
     
+
     source.append("}")
     source.append("")
-    
-    
     
     source.append("#endif")
     
@@ -313,6 +323,21 @@ def generate_class_implementation(icalls, used_classes, c):
     
     
     source.append("")
+    source.append("")
+
+    source.append("void *" + class_name + "::___get_type_tag()")
+    source.append("{")
+    source.append("\treturn (void *) &" + class_name + "::___get_type_tag;")
+    source.append("}")
+    source.append("")
+
+    source.append("void *" + class_name + "::___get_base_type_tag()")
+    source.append("{")
+    if c["base_class"] != "":
+        source.append("\treturn (void *) &" + strip_name(c["base_class"]) + "::___get_type_tag;")
+    else:
+        source.append("\treturn (void *) nullptr;")
+    source.append("}")
     source.append("")
     
     if c["singleton"]:
@@ -640,8 +665,34 @@ def generate_icall_implementation(icalls):
 
 
 
+def generate_type_registry(classes):
+    source = []
+    
+    source.append("#include \"TagDB.hpp\"")
+    source.append("")
+
+    for c in classes:
+        source.append("#include <" + strip_name(c["name"]) + ".hpp>")
+
+    source.append("")
+    source.append("")
+
+    source.append("namespace godot {")
+
+    source.append("void ___register_types()")
+    source.append("{")
+
+    for c in classes:
+        class_name = strip_name(c["name"])
+        source.append("\tgodot::_TagDB::register_global_type(\"" + class_name + "\", " + class_name + "::___get_type_tag(), " + class_name + "::___get_base_type_tag());")
+
+    source.append("}")
+
+    source.append("")
+    source.append("}")
 
 
+    return "\n".join(source)
 
 
 

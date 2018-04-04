@@ -11,6 +11,7 @@
 #include "CoreTypes.hpp"
 #include "Variant.hpp"
 #include "Ref.hpp"
+#include "TagDB.hpp"
 
 #include "Object.hpp"
 
@@ -23,7 +24,7 @@ namespace godot {
 
 
 template<class T>
-T *as(Object *obj)
+T *as(const Object *obj)
 {
 	return (T *) godot::nativescript_api->godot_nativescript_get_userdata(obj->_owner);
 }
@@ -37,9 +38,12 @@ T *get_wrapper(godot_object *obj)
 
 #define GODOT_CLASS(Name, Base) \
 	public: inline static const char *___get_type_name() { return static_cast<const char *>(#Name); } \
+	enum { ___CLASS_IS_SCRIPT = 1, }; \
 	inline static Name *_new() { godot::NativeScript *script = godot::NativeScript::_new(); script->set_library(godot::get_wrapper<godot::GDNativeLibrary>((godot_object *) godot::gdnlib)); script->set_class_name(#Name); Name *instance = godot::as<Name>(script->new_()); return instance; } \
 	inline static const char *___get_base_type_name() { return Base::___get_class_name(); } \
 	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *) godot::as<Name>(godot::Object::___get_from_variant(a)); } \
+	inline static void *___get_type_tag() { return (void *) &Name::___get_type_tag; } \
+	inline static void *___get_base_type_tag() { return (void *) &Base::___get_type_tag; } \
 	private:
 
 #define GODOT_SUBCLASS(Name, Base) \
@@ -83,6 +87,7 @@ void *_godot_class_instance_func(godot_object *p, void *method_data)
 {
 	T *d = new T();
 	d->_owner = p;
+	d->_type_tag = T::___get_type_tag();
 	d->_init();
 	return d;
 }
@@ -104,8 +109,10 @@ void register_class()
 	godot_instance_destroy_func destroy = {};
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
+	_TagDB::register_type(T::___get_type_tag(), T::___get_base_type_tag());
 
 	godot::nativescript_api->godot_nativescript_register_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
+	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_type_tag());
 	T::_register_methods();
 }
 
@@ -118,8 +125,10 @@ void register_tool_class()
 	godot_instance_destroy_func destroy = {};
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
+	_TagDB::register_type(T::___get_type_tag(), T::___get_base_type_tag());
 
 	godot::nativescript_api->godot_nativescript_register_tool_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
+	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_type_tag());
 	T::_register_methods();
 }
 
@@ -477,6 +486,23 @@ void register_signal(String name, Args... varargs)
 {
 	register_signal<T>(name, Dictionary::make(varargs...));
 }
+
+
+
+
+
+#ifndef GODOT_CPP_NO_OBJECT_CAST
+template<class T>
+T *Object::cast_to(const Object *obj)
+{
+	if (godot::_TagDB::is_type_compatible(T::___get_type_tag(), obj->_type_tag)) {
+		return (T::___CLASS_IS_SCRIPT) ? godot::as<T>(obj) : (T *) obj;
+	} else {
+		return nullptr;
+	}
+}
+#endif
+
 
 }
 

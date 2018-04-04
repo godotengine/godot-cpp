@@ -107,7 +107,7 @@ public:
 	void operator=(const Variant &p_variant) {
 
 		// TODO We need a safe cast
-		Reference *refb = (Reference *) Object::___get_from_variant(p_variant);
+		Reference *refb = (Reference *) T::___get_from_variant(p_variant);
 		if (!refb) {
 			unref();
 			return;
@@ -156,7 +156,7 @@ public:
 
 		reference = nullptr;
 		// TODO We need a safe cast
-		Reference *refb = (Reference *) Object::___get_from_variant(p_variant);
+		Reference *refb = (Reference *) T::___get_from_variant(p_variant);
 		if (!refb) {
 			unref();
 			return;
