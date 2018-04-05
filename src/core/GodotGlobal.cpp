@@ -98,7 +98,6 @@ void Godot::gdnative_init(godot_gdnative_init_options *options)
 		}
 	}
 
-	___register_types();
 }
 
 void Godot::gdnative_terminate(godot_gdnative_terminate_options *options)
@@ -116,6 +115,7 @@ void Godot::nativescript_init(void *handle)
 
 	godot::_RegisterState::language_index = godot::nativescript_1_1_api->godot_nativescript_register_instance_binding_data_functions(binding_funcs);
 
+	___register_types();
 }
 
 void Godot::nativescript_terminate(void *handle)

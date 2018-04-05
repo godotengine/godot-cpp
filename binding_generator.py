@@ -83,7 +83,7 @@ def generate_class_header(used_classes, c):
     if class_name != "Object" and class_name != "Reference":
         source.append("#include <core/Ref.hpp>")
     else:
-        source.append("#include <TagDB.hpp>")
+        source.append("#include <core/TagDB.hpp>")
 
 
     included = []
