@@ -15,6 +15,11 @@ void register_type(const void *type_tag, const void *base_type_tag)
 	parent_to[type_tag] = base_type_tag;
 }
 
+bool is_type_known(const void *type_tag)
+{
+	return parent_to.find(type_tag) != parent_to.end();
+}
+
 void register_global_type(const char *name, const void *type_tag, const void *base_type_tag)
 {
 
@@ -23,24 +28,17 @@ void register_global_type(const char *name, const void *type_tag, const void *ba
 	register_type(type_tag, base_type_tag);
 }
 
-bool is_type_compatible(const void *type_tag, const void *base_type_tag)
+bool is_type_compatible(const void *ask_tag, const void *have_tag)
 {
-	if (type_tag == nullptr || base_type_tag == nullptr)
+
+	if (have_tag == nullptr)
 		return false;
 
-	if (type_tag == base_type_tag)
-		return true;
+	const void *tag = have_tag;
 
-	const void *tag = type_tag;
-
-	while (true) {
-		if (tag == base_type_tag) {
+	while (tag != nullptr) {
+		if (tag == ask_tag)
 			return true;
-		}
-
-		if (tag == nullptr) {
-			return false;
-		}
 
 		tag = parent_to[tag];
 	}

@@ -495,7 +495,19 @@ void register_signal(String name, Args... varargs)
 template<class T>
 T *Object::cast_to(const Object *obj)
 {
-	if (godot::_TagDB::is_type_compatible(T::___get_type_tag(), obj->_type_tag)) {
+	const void *have_tag = godot::nativescript_1_1_api->godot_nativescript_get_type_tag(obj->_owner);
+
+	if (have_tag) {
+		if (!godot::_TagDB::is_type_known(have_tag)) {
+			have_tag = nullptr;
+		}
+	}
+
+	if (!have_tag) {
+		have_tag = obj->_type_tag;
+	}
+
+	if (godot::_TagDB::is_type_compatible(T::___get_type_tag(), have_tag)) {
 		return (T::___CLASS_IS_SCRIPT) ? godot::as<T>(obj) : (T *) obj;
 	} else {
 		return nullptr;
