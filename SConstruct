@@ -70,6 +70,10 @@ elif target_platform == 'osx':
     if ARGUMENTS.get('use_llvm', 'no') == 'yes':
         env['CXX'] = 'clang++'
 
+    # Only 64-bits is supported for OS X
+    target_arch = '64'
+    result_name += '.osx.' + target_arch
+
     env.Append(CCFLAGS = [ '-g','-O3', '-std=c++14', '-arch', 'x86_64' ])
     env.Append(LINKFLAGS = [ '-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup' ])
 
