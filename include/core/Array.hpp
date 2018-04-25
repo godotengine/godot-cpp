@@ -3,6 +3,7 @@
 
 #include <gdnative/array.h>
 
+#include "Defs.hpp"
 #include "String.hpp"
 
 namespace godot {
@@ -38,6 +39,11 @@ public:
 	Array(const PoolVector3Array& a);
 
 	Array(const PoolColorArray& a);
+
+	template <class... Args>
+	static Array make(Args... args) {
+		return helpers::append_all(Array(), args...);
+	}
 
 	Variant& operator [](const int idx);
 

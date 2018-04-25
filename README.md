@@ -1,54 +1,45 @@
-# cpp_bindings
+# godot-cpp
 C++ bindings for the Godot script API
 
 # Creating a GDNative library (Linux)
 Create a directory named `SimpleLibrary` with subdirectories `lib, src`
 
-Getting latest `cpp_bindings` and `godot_headers`
+Getting latest `godot-cpp` and `godot_headers`
 ```
-$ cd SimpleLibrary
-$ git clone https://github.com/GodotNativeTools/cpp_bindings
+$ git clone https://github.com/GodotNativeTools/godot-cpp
 $ git clone https://github.com/GodotNativeTools/godot_headers
 ```
-right now our directory structure should look like this
+right now our directory structure should look like this:
 ```
-[SimpleLibrary]
-	├── cpp_bindings/
-	├── godot_headers/
-	├── lib/
-	└── src/
+godot-cpp
+godot_headers
+SimpleLibrary
+├── lib/
+└── src/
 ```
 
 Now to generate cpp bindings
 ```
-$ cd cpp_bindings
-```
-
-Edit `SConstruct` file and assign your godot executable path at line:7 `godot_bin_path = "../godot_fork/bin/"`,
-
-Building cpp_bindings
-```
-$ scons godotbinpath="../godot_fork/bin/godot_binary" headers="../godot_headers/" p=linux generate_bindings=yes
+$ cd godot-cpp
+$ scons godotbinpath="../godot_fork/bin/godot_binary" p=linux
+$ cd ..
 ```
 resulting libraries will be placed under `bin/` and the generated headers will be placed under `include/*`
 
 **Note:**
-> `generate_bindings=yes` is used to generate C++ bindings (`godot_api.json` - Godot API)
+> `regenerate_bindings=yes` is used to force regenerating C++ bindings (`godot_api.json` - Godot API)
+
 > Include `use_llvm=yes` for using clang++
 
-Copy binding libraries into the `SimpleLibrary/lib` folder
-```
-$ cd ..
-$ cp cpp_bindings/bin/libgodot_cpp_bindings.a lib/
-```
+
 And our directory structure will be
 ```
-[SimpleLibrary]
-  ├── cpp_bindings/
-  ├── godot_headers/
-  ├── lib/
-  │	  └──libgodot_cpp_bindings.a
-  └── src/
+godot-cpp
+└── bin/libgodot-cpp.a
+godot_headers
+SimpleLibrary
+├── lib/
+└── src/
 ```
 
 # Creating simple class
@@ -87,6 +78,7 @@ public:
 
            /** For registering signal **/
            // register_signal<SimpleClass>("signal_name");
+           // register_signal<SimpleClass>("signal_name", "string_argument", GODOT_VARIANT_TYPE_STRING)
         }
 	
 	String _name;
@@ -115,9 +107,9 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle)
 
 # Compiling
 ```
-$ cd ..
-$ clang -fPIC -o src/init.os -c src/init.cpp -g -O3 -std=c++14 -Icpp_bindings/include -Igodot_headers
-$ clang -o lib/libtest.so -shared src/init.os -Llib -lgodot_cpp_bindings
+$ cd SimpleLibrary
+$ clang -fPIC -o src/init.os -c src/init.cpp -g -O3 -std=c++14 -I../godot-cpp/include -Igodot_headers
+$ clang -o lib/libtest.so -shared src/init.os -L../godot-cpp/lib -lgodot-cpp
 ```
 This creates the file `libtest.so` in your `SimpleLibrary/lib` directory. For windows you need to find out what compiler flags need to be used.
 

@@ -104,7 +104,7 @@ public:
 
 	void set(const int idx, const uint8_t data);
 
-	uint8_t operator [](const int idx);
+	const uint8_t operator [](const int idx);
 
 	int size() const;
 
@@ -200,7 +200,7 @@ public:
 
 	void set(const int idx, const int data);
 
-	int operator [](const int idx);
+	const int operator [](const int idx);
 
 	int size() const;
 
@@ -296,7 +296,7 @@ public:
 
 	void set(const int idx, const real_t data);
 
-	real_t operator [](const int idx);
+	const real_t operator [](const int idx);
 
 	int size() const;
 
@@ -392,7 +392,7 @@ public:
 
 	void set(const int idx, const String& data);
 
-	String operator [](const int idx);
+	const String operator [](const int idx);
 
 	int size() const;
 
@@ -489,7 +489,7 @@ public:
 
 	void set(const int idx, const Vector2& data);
 
-	Vector2 operator [](const int idx);
+	const Vector2 operator [](const int idx);
 
 	int size() const;
 
@@ -585,7 +585,7 @@ public:
 
 	void set(const int idx, const Vector3& data);
 
-	Vector3 operator [](const int idx);
+	const Vector3 operator [](const int idx);
 
 	int size() const;
 
@@ -681,7 +681,7 @@ public:
 
 	void set(const int idx, const Color& data);
 
-	Color operator [](const int idx);
+	const Color operator [](const int idx);
 
 	int size() const;
 

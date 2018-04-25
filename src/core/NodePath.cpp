@@ -17,7 +17,6 @@ NodePath::NodePath(const NodePath &other)
 {
 	String from = other;
 	godot::api->godot_node_path_new(&_node_path, (godot_string *) &from);
-	godot::api->godot_node_path_operator_equal(&_node_path, &other._node_path);
 }
 
 NodePath::NodePath(const String &from)
@@ -71,9 +70,18 @@ NodePath::operator String() const
 	return *(String *) &str;
 }
 
+bool NodePath::operator ==(const NodePath& other)
+{
+	return godot::api->godot_node_path_operator_equal(&_node_path, &other._node_path);
+}
+
 void NodePath::operator =(const NodePath& other)
 {
-	godot::api->godot_node_path_operator_equal(&_node_path, &other._node_path);
+	godot::api->godot_node_path_destroy(&_node_path);
+
+	String other_string = (String) other;
+
+	godot::api->godot_node_path_new(&_node_path, (godot_string *) &other_string);
 }
 
 NodePath::~NodePath()

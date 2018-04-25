@@ -36,6 +36,8 @@ public:
 
 	void operator =(const NodePath& other);
 
+	bool operator ==(const NodePath& other);
+
 	~NodePath();
 };
 
