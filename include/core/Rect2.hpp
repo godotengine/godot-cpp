@@ -14,7 +14,7 @@ class String;
 typedef Vector2 Size2;
 typedef Vector2 Point2;
 
-class Transform2D;
+struct Transform2D;
 
 struct Rect2 {
 
@@ -45,7 +45,7 @@ struct Rect2 {
 
 	bool intersects_transformed(const Transform2D& p_xform, const Rect2& p_rect) const;
 
-	bool intersects_segment(const Point2& p_from, const Point2& p_to, Point2* r_pos=NULL, Point2* r_normal=NULL) const;
+	bool intersects_segment(const Point2& p_from, const Point2& p_to, Point2* r_pos=nullptr, Point2* r_normal=nullptr) const;
 
 	inline bool encloses(const Rect2& p_rect) const {
 

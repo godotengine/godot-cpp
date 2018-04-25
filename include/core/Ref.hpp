@@ -12,7 +12,7 @@ namespace godot {
 template <class T>
 class Ref {
 
-	T *reference = NULL;
+	T *reference = nullptr;
 
 	void ref(const Ref &p_from) {
 
@@ -101,7 +101,7 @@ public:
 		//r.reference = Object::cast_to<T>(refb);
 		r.reference = (T*)refb;
 		ref(r);
-		r.reference = NULL;
+		r.reference = nullptr;
 	}
 
 	void operator=(const Variant &p_variant) {
@@ -117,19 +117,19 @@ public:
 		//r.reference = Object::cast_to<T>(refb);
 		r.reference = (T *)refb;
 		ref(r);
-		r.reference = NULL;
+		r.reference = nullptr;
 	}
 
 	Ref(const Ref &p_from) {
 
-		reference = NULL;
+		reference = nullptr;
 		ref(p_from);
 	}
 
 	template <class T_Other>
 	Ref(const Ref<T_Other> &p_from) {
 
-		reference = NULL;
+		reference = nullptr;
 		// TODO We need a safe cast
 		Reference *refb = const_cast<Reference *>(static_cast<const Reference *>(p_from.ptr()));
 		if (!refb) {
@@ -141,7 +141,7 @@ public:
 		//r.reference = Object::cast_to<T>(refb);
 		r.reference = (T *)refb;
 		ref(r);
-		r.reference = NULL;
+		r.reference = nullptr;
 	}
 
 	Ref(T *p_reference) {
@@ -149,12 +149,12 @@ public:
 		if (p_reference)
 			ref_pointer(p_reference);
 		else
-			reference = NULL;
+			reference = nullptr;
 	}
 
 	Ref(const Variant &p_variant) {
 
-		reference = NULL;
+		reference = nullptr;
 		// TODO We need a safe cast
 		Reference *refb = (Reference *) (Object *) p_variant;
 		if (!refb) {
@@ -166,11 +166,11 @@ public:
 		//r.reference = Object::cast_to<T>(refb);
 		r.reference = (T *)refb;
 		ref(r);
-		r.reference = NULL;
+		r.reference = nullptr;
 	}
 
-	inline bool is_valid() const { return reference != NULL; }
-	inline bool is_null() const { return reference == NULL; }
+	inline bool is_valid() const { return reference != nullptr; }
+	inline bool is_null() const { return reference == nullptr; }
 
 	void unref() {
 		//TODO this should be moved to mutexes, since this engine does not really
@@ -182,7 +182,7 @@ public:
 			//memdelete(reference);
 			delete reference;
 		}
-		reference = NULL;
+		reference = nullptr;
 	}
 
 	void instance() {
@@ -192,7 +192,7 @@ public:
 
 	Ref() {
 
-		reference = NULL;
+		reference = nullptr;
 	}
 
 	~Ref() {
