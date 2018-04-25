@@ -131,7 +131,7 @@ def generate_class_header(used_classes, c):
 
     source.append("\n\t// enums")
     for enum in c["enums"]:
-        source.append("\tenum class " + strip_name(enum["name"]) + " {")
+        source.append("\tenum " + strip_name(enum["name"]) + " {")
         for value in enum["values"]:
             source.append("\t\t" + remove_nested_type_prefix(value) + " = " + str(enum["values"][value]) + ",")
             enum_values.append(value)
