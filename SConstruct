@@ -78,7 +78,7 @@ elif target_platform == 'osx':
     env.Append(LINKFLAGS = [ '-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup' ])
 
 
-env.Append(CPPPATH=['.', godot_headers, 'include', 'include/core'])
+env.Append(CPPPATH=['.', godot_headers, 'include', 'include/core', 'include/plugins'])
 
 
 # Generate bindings
