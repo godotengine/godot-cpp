@@ -122,3 +122,13 @@ var simpleclass = load("res://simpleclass.gdns").new();
 simpleclass.method("Test argument");
 ```
 
+# Creating native editor plugins
+
+Godot has a [way](http://docs.godotengine.org/en/stable/tutorials/plugins/editor/making_plugins.html) to create editor plugins with GDScript. 
+
+You can create native editor plugins the same way without recompiling godot source. To accomplish it, you must:
+
+* Create plugin folder with plugin.cfg, like in official demo
+* Generate 2 gdns files, one for wrapper class and one for node plugin class, and set wrapper class as plugin entry point in plugin.cfg
+* Create and register wrapper class in gdnative library.
+    * There is useful [wrapper class](https://github.com/GodotNativeTools/godot-cpp/blob/master/include/plugins/NodeWrapper.hpp) which simplifies creating editor plugin.
