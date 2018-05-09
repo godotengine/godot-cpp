@@ -501,6 +501,8 @@ def generate_icall_header(icalls):
             
             if is_core_type(arg):
                 method_signature += arg + "&"
+            elif arg == "float":
+                method_signature += "double "
             elif is_primitive(arg):
                 method_signature += arg
             else:
@@ -552,6 +554,8 @@ def generate_icall_implementation(icalls):
             
             if is_core_type(arg):
                 method_signature += arg + "& "
+            elif arg == "float":
+                method_signature += "double "
             elif is_primitive(arg):
                 method_signature += arg + " "
             else:
