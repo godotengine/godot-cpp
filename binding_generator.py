@@ -180,7 +180,7 @@ def generate_class_header(used_classes, c):
                     return default_value.lower()
                 if _type == "Array":
                     return "Array()"
-                if _type in ["PoolVector2Array", "PoolStringArray", "PoolVector3Array", "PoolColorArray"]:
+                if _type in ["PoolVector2Array", "PoolStringArray", "PoolVector3Array", "PoolColorArray", "PoolIntArray", "PoolRealArray"]:
                     return _type + "()"
                 if _type == "Vector2":
                     return "Vector2" + default_value
@@ -697,6 +697,8 @@ def is_core_type(name):
                   "PoolVector2Array",
                   "PoolVector3Array",
                   "PoolColorArray",
+                  "PoolIntArray",
+                  "PoolRealArray",
                   "Quat",
                   "Rect2",
                   "AABB",
