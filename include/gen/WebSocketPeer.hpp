@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <WebSocketPeer.hpp>
+#include "WebSocketPeer.hpp"
 
-#include <PacketPeer.hpp>
+#include "PacketPeer.hpp"
 namespace godot {
 
 
@@ -38,6 +38,8 @@ public:
 	bool is_connected_to_host() const;
 	bool was_string_packet() const;
 	void close();
+	String get_connected_host() const;
+	int64_t get_connected_port() const;
 
 };
 

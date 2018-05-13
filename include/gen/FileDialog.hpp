@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <FileDialog.hpp>
+#include "FileDialog.hpp"
 
-#include <ConfirmationDialog.hpp>
+#include "ConfirmationDialog.hpp"
 namespace godot {
 
 class InputEvent;

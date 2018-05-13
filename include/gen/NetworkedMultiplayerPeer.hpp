@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <NetworkedMultiplayerPeer.hpp>
+#include "NetworkedMultiplayerPeer.hpp"
 
-#include <PacketPeer.hpp>
+#include "PacketPeer.hpp"
 namespace godot {
 
 

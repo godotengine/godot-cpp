@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Control.hpp>
+#include "Control.hpp"
 namespace godot {
 
 

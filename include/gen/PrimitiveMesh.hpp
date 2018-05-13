@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Mesh.hpp>
+#include "Mesh.hpp"
 namespace godot {
 
 class Material;
@@ -30,6 +30,10 @@ public:
 	void set_material(const Ref<Material> material);
 	Ref<Material> get_material() const;
 	Array get_mesh_arrays() const;
+	void set_custom_aabb(const AABB aabb);
+	AABB get_custom_aabb() const;
+	void set_flip_faces(const bool flip_faces);
+	bool get_flip_faces() const;
 
 };
 

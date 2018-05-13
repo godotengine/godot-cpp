@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <DirectionalLight.hpp>
+#include "DirectionalLight.hpp"
 
-#include <Light.hpp>
+#include "Light.hpp"
 namespace godot {
 
 

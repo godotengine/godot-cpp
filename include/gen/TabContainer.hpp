@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <TabContainer.hpp>
+#include "TabContainer.hpp"
 
-#include <Control.hpp>
+#include "Control.hpp"
 namespace godot {
 
 class InputEvent;
@@ -58,6 +58,10 @@ public:
 	bool get_tab_disabled(const int64_t tab_idx) const;
 	void set_popup(const Object *popup);
 	Popup *get_popup() const;
+	void set_drag_to_rearrange_enabled(const bool enabled);
+	bool get_drag_to_rearrange_enabled() const;
+	void set_tabs_rearrange_group(const int64_t group_id);
+	int64_t get_tabs_rearrange_group() const;
 	void _child_renamed_callback();
 	void _on_theme_changed();
 	void _update_current_tab();

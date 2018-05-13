@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Texture.hpp>
+#include "Texture.hpp"
 namespace godot {
 
 class Texture;

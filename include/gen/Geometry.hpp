@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Object.hpp>
+#include "Object.hpp"
 namespace godot {
 
 
@@ -42,6 +42,7 @@ public:
 	Array build_capsule_planes(const double radius, const double height, const int64_t sides, const int64_t lats, const int64_t axis = 2);
 	double segment_intersects_circle(const Vector2 segment_from, const Vector2 segment_to, const Vector2 circle_position, const double circle_radius);
 	Variant segment_intersects_segment_2d(const Vector2 from_a, const Vector2 to_a, const Vector2 from_b, const Vector2 to_b);
+	Variant line_intersects_line_2d(const Vector2 from_a, const Vector2 dir_a, const Vector2 from_b, const Vector2 dir_b);
 	PoolVector2Array get_closest_points_between_segments_2d(const Vector2 p1, const Vector2 q1, const Vector2 p2, const Vector2 q2);
 	PoolVector3Array get_closest_points_between_segments(const Vector3 p1, const Vector3 p2, const Vector3 q1, const Vector3 q2);
 	Vector2 get_closest_point_to_segment_2d(const Vector2 point, const Vector2 s1, const Vector2 s2);

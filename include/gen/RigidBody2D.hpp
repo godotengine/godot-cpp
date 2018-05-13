@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <RigidBody2D.hpp>
+#include "RigidBody2D.hpp"
 
-#include <PhysicsBody2D.hpp>
+#include "PhysicsBody2D.hpp"
 namespace godot {
 
 class Physics2DDirectBodyState;

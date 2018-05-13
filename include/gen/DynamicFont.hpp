@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Font.hpp>
+#include "Font.hpp"
 namespace godot {
 
 class DynamicFontData;
@@ -39,6 +39,10 @@ public:
 	Ref<DynamicFontData> get_font_data() const;
 	void set_size(const int64_t data);
 	int64_t get_size() const;
+	void set_outline_size(const int64_t size);
+	int64_t get_outline_size() const;
+	void set_outline_color(const Color color);
+	Color get_outline_color() const;
 	void set_use_mipmaps(const bool enable);
 	bool get_use_mipmaps() const;
 	void set_use_filter(const bool enable);

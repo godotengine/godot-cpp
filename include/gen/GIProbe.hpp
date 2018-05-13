@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <GIProbe.hpp>
+#include "GIProbe.hpp"
 
-#include <VisualInstance.hpp>
+#include "VisualInstance.hpp"
 namespace godot {
 
 class GIProbeData;

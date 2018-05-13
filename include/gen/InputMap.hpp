@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Object.hpp>
+#include "Object.hpp"
 namespace godot {
 
 class InputEvent;
@@ -40,11 +40,13 @@ public:
 	// methods
 	bool has_action(const String action) const;
 	Array get_actions();
-	void add_action(const String action);
+	void add_action(const String action, const double deadzone = 0.5);
 	void erase_action(const String action);
+	void action_set_deadzone(const String deadzone, const double arg1);
 	void action_add_event(const String action, const Ref<InputEvent> event);
 	bool action_has_event(const String action, const Ref<InputEvent> event);
 	void action_erase_event(const String action, const Ref<InputEvent> event);
+	void action_erase_events(const String action);
 	Array get_action_list(const String action);
 	bool event_is_action(const Ref<InputEvent> event, const String action) const;
 	void load_from_globals();

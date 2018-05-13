@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <ReflectionProbe.hpp>
+#include "ReflectionProbe.hpp"
 
-#include <VisualInstance.hpp>
+#include "VisualInstance.hpp"
 namespace godot {
 
 

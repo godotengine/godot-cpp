@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Particles.hpp>
+#include "Particles.hpp"
 
-#include <GeometryInstance.hpp>
+#include "GeometryInstance.hpp"
 namespace godot {
 
 class Material;

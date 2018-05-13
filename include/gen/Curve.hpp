@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Curve.hpp>
+#include "Curve.hpp"
 
-#include <Resource.hpp>
+#include "Resource.hpp"
 namespace godot {
 
 

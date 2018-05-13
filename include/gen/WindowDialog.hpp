@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Popup.hpp>
+#include "Popup.hpp"
 namespace godot {
 
 class InputEvent;

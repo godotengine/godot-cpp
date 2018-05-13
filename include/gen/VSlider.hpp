@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Slider.hpp>
+#include "Slider.hpp"
 namespace godot {
 
 

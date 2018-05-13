@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <SpatialMaterial.hpp>
+#include "SpatialMaterial.hpp"
 
-#include <Material.hpp>
+#include "Material.hpp"
 namespace godot {
 
 class Texture;
@@ -61,9 +61,10 @@ public:
 		FLAG_UV1_USE_TRIPLANAR = 7,
 		FLAG_USE_VERTEX_LIGHTING = 1,
 		FLAG_USE_POINT_SIZE = 5,
+		FLAG_MAX = 15,
 		FLAG_ALBEDO_TEXTURE_FORCE_SRGB = 13,
 		FLAG_EMISSION_ON_UV2 = 11,
-		FLAG_MAX = 14,
+		FLAG_DONT_RECEIVE_SHADOWS = 14,
 		FLAG_FIXED_SIZE = 6,
 		FLAG_UV2_USE_TRIPLANAR = 8,
 		FLAG_ALBEDO_FROM_VERTEX_COLOR = 3,

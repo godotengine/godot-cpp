@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Object.hpp>
+#include "Object.hpp"
 namespace godot {
 
 class MainLoop;
@@ -41,6 +41,8 @@ public:
 	// methods
 	void set_iterations_per_second(const int64_t iterations_per_second);
 	int64_t get_iterations_per_second() const;
+	void set_physics_jitter_fix(const double physics_jitter_fix);
+	double get_physics_jitter_fix() const;
 	void set_target_fps(const int64_t target_fps);
 	int64_t get_target_fps() const;
 	void set_time_scale(const double time_scale);

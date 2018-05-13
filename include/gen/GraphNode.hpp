@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <GraphNode.hpp>
+#include "GraphNode.hpp"
 
-#include <Container.hpp>
+#include "Container.hpp"
 namespace godot {
 
 class InputEvent;

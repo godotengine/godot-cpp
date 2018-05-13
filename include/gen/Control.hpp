@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Control.hpp>
+#include "Control.hpp"
 
-#include <CanvasItem.hpp>
+#include "CanvasItem.hpp"
 namespace godot {
 
 class InputEvent;
@@ -71,6 +71,7 @@ public:
 	};
 	enum GrowDirection {
 		GROW_DIRECTION_END = 1,
+		GROW_DIRECTION_BOTH = 2,
 		GROW_DIRECTION_BEGIN = 0,
 	};
 	enum SizeFlags {
@@ -107,6 +108,8 @@ public:
 	const static int NOTIFICATION_FOCUS_EXIT = 44;
 	const static int NOTIFICATION_MODAL_CLOSE = 46;
 	const static int NOTIFICATION_RESIZED = 40;
+	const static int NOTIFICATION_SCROLL_END = 48;
+	const static int NOTIFICATION_SCROLL_BEGIN = 47;
 
 
 	static Control *_new();

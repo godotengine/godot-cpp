@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <TextureButton.hpp>
+#include "TextureButton.hpp"
 
-#include <BaseButton.hpp>
+#include "BaseButton.hpp"
 namespace godot {
 
 class Texture;

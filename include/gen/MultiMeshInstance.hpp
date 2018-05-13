@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <GeometryInstance.hpp>
+#include "GeometryInstance.hpp"
 namespace godot {
 
 class MultiMesh;

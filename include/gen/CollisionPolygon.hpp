@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Spatial.hpp>
+#include "Spatial.hpp"
 namespace godot {
 
 
@@ -34,6 +34,7 @@ public:
 	PoolVector2Array get_polygon() const;
 	void set_disabled(const bool disabled);
 	bool is_disabled() const;
+	bool _is_editable_3d_polygon() const;
 
 };
 

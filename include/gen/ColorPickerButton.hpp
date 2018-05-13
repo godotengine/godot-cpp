@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Button.hpp>
+#include "Button.hpp"
 namespace godot {
 
 class ColorPicker;
@@ -37,6 +37,7 @@ public:
 	void set_edit_alpha(const bool show);
 	bool is_editing_alpha() const;
 	void _color_changed(const Color arg0);
+	void _modal_closed();
 
 };
 

@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <ParticlesMaterial.hpp>
+#include "ParticlesMaterial.hpp"
 
-#include <Material.hpp>
+#include "Material.hpp"
 namespace godot {
 
 class Texture;

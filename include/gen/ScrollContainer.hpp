@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Container.hpp>
+#include "Container.hpp"
 namespace godot {
 
 class InputEvent;
@@ -40,6 +40,8 @@ public:
 	int64_t get_h_scroll() const;
 	void set_v_scroll(const int64_t value);
 	int64_t get_v_scroll() const;
+	void set_deadzone(const int64_t deadzone);
+	int64_t get_deadzone() const;
 
 };
 

@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Resource.hpp>
+#include "Resource.hpp"
 namespace godot {
 
 class InputEvent;
@@ -28,13 +28,13 @@ public:
 	// methods
 	void set_device(const int64_t device);
 	int64_t get_device() const;
-	bool is_pressed() const;
 	bool is_action(const String action) const;
 	bool is_action_pressed(const String action) const;
 	bool is_action_released(const String action) const;
+	double get_action_strength(const String action) const;
+	bool is_pressed() const;
 	bool is_echo() const;
 	String as_text() const;
-	bool action_match(const Ref<InputEvent> event) const;
 	bool shortcut_match(const Ref<InputEvent> event) const;
 	bool is_action_type() const;
 	Ref<InputEvent> xformed_by(const Transform2D xform, const Vector2 local_ofs = Vector2(0, 0)) const;

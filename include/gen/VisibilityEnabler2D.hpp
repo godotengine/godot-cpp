@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <VisibilityNotifier2D.hpp>
+#include "VisibilityNotifier2D.hpp"
 namespace godot {
 
 class Object;

@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <CanvasItem.hpp>
+#include "CanvasItem.hpp"
 namespace godot {
 
 class Object;

@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <LinkButton.hpp>
+#include "LinkButton.hpp"
 
-#include <BaseButton.hpp>
+#include "BaseButton.hpp"
 namespace godot {
 
 

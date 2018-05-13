@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <OS.hpp>
+#include "OS.hpp"
 
-#include <Object.hpp>
+#include "Object.hpp"
 namespace godot {
 
 class Image;
@@ -91,9 +91,9 @@ public:
 	void set_clipboard(const String clipboard);
 	String get_clipboard() const;
 	int64_t get_video_driver_count() const;
-	String get_video_driver_name(const int64_t arg0) const;
+	String get_video_driver_name(const int64_t driver) const;
 	int64_t get_audio_driver_count() const;
-	String get_audio_driver_name(const int64_t arg0) const;
+	String get_audio_driver_name(const int64_t driver) const;
 	int64_t get_screen_count() const;
 	int64_t get_current_screen() const;
 	void set_current_screen(const int64_t screen);
@@ -104,6 +104,7 @@ public:
 	void set_window_position(const Vector2 position);
 	Vector2 get_window_size() const;
 	void set_window_size(const Vector2 size);
+	Rect2 get_window_safe_area() const;
 	void set_window_fullscreen(const bool enabled);
 	bool is_window_fullscreen() const;
 	void set_window_resizable(const bool enabled);
@@ -119,6 +120,8 @@ public:
 	void center_window();
 	void set_borderless_window(const bool borderless);
 	bool get_borderless_window() const;
+	bool get_window_per_pixel_transparency_enabled() const;
+	void set_window_per_pixel_transparency_enabled(const bool enabled);
 	void set_ime_position(const Vector2 position);
 	void set_screen_orientation(const int64_t orientation);
 	OS::ScreenOrientation get_screen_orientation() const;

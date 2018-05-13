@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Popup.hpp>
+#include "Popup.hpp"
 namespace godot {
 
 class InputEvent;
@@ -36,11 +36,13 @@ public:
 	void add_item(const String label, const int64_t id = -1, const int64_t accel = 0);
 	void add_icon_check_item(const Ref<Texture> texture, const String label, const int64_t id = -1, const int64_t accel = 0);
 	void add_check_item(const String label, const int64_t id = -1, const int64_t accel = 0);
+	void add_radio_check_item(const String label, const int64_t id = -1, const int64_t accel = 0);
 	void add_submenu_item(const String label, const String submenu, const int64_t id = -1);
 	void add_icon_shortcut(const Ref<Texture> texture, const Ref<ShortCut> shortcut, const int64_t id = -1, const bool global = false);
 	void add_shortcut(const Ref<ShortCut> shortcut, const int64_t id = -1, const bool global = false);
 	void add_icon_check_shortcut(const Ref<Texture> texture, const Ref<ShortCut> shortcut, const int64_t id = -1, const bool global = false);
 	void add_check_shortcut(const Ref<ShortCut> shortcut, const int64_t id = -1, const bool global = false);
+	void add_radio_check_shortcut(const Ref<ShortCut> shortcut, const int64_t id = -1, const bool global = false);
 	void set_item_text(const int64_t idx, const String text);
 	void set_item_icon(const int64_t idx, const Ref<Texture> icon);
 	void set_item_checked(const int64_t idx, const bool checked);
@@ -51,6 +53,7 @@ public:
 	void set_item_submenu(const int64_t idx, const String submenu);
 	void set_item_as_separator(const int64_t idx, const bool enable);
 	void set_item_as_checkable(const int64_t idx, const bool enable);
+	void set_item_as_radio_checkable(const int64_t idx, const bool enable);
 	void set_item_tooltip(const int64_t idx, const String tooltip);
 	void set_item_shortcut(const int64_t idx, const Ref<ShortCut> shortcut, const bool global = false);
 	void set_item_multistate(const int64_t idx, const int64_t state);
@@ -67,6 +70,7 @@ public:
 	String get_item_submenu(const int64_t idx) const;
 	bool is_item_separator(const int64_t idx) const;
 	bool is_item_checkable(const int64_t idx) const;
+	bool is_item_radio_checkable(const int64_t idx) const;
 	String get_item_tooltip(const int64_t idx) const;
 	Ref<ShortCut> get_item_shortcut(const int64_t idx) const;
 	int64_t get_item_count() const;

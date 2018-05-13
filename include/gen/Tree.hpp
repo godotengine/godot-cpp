@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Tree.hpp>
+#include "Tree.hpp"
 
-#include <Control.hpp>
+#include "Control.hpp"
 namespace godot {
 
 class InputEvent;

@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <OmniLight.hpp>
+#include "OmniLight.hpp"
 
-#include <Light.hpp>
+#include "Light.hpp"
 namespace godot {
 
 

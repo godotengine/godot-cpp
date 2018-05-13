@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <HTTPClient.hpp>
+#include "HTTPClient.hpp"
 
-#include <Reference.hpp>
+#include "Reference.hpp"
 namespace godot {
 
 class StreamPeer;

@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Node2D.hpp>
+#include "Node2D.hpp"
 namespace godot {
 
 class Texture;
@@ -57,6 +57,18 @@ public:
 	double get_invert_border() const;
 	void set_offset(const Vector2 offset);
 	Vector2 get_offset() const;
+	void add_bone(const NodePath path, const PoolRealArray weights);
+	int64_t get_bone_count() const;
+	NodePath get_bone_path(const int64_t index) const;
+	PoolRealArray get_bone_weights(const int64_t index) const;
+	void erase_bone(const int64_t index);
+	void clear_bones();
+	void set_bone_path(const int64_t index, const NodePath path);
+	void set_bone_weights(const int64_t index, const PoolRealArray weights);
+	void set_skeleton(const NodePath skeleton);
+	NodePath get_skeleton() const;
+	void _set_bones(const Array bones);
+	Array _get_bones() const;
 
 };
 

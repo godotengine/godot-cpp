@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Node.hpp>
+#include "Node.hpp"
 namespace godot {
 
 class Texture;
@@ -29,18 +29,19 @@ public:
 
 	// enums
 	enum BlendMode {
+		BLEND_MODE_PREMULT_ALPHA = 4,
 		BLEND_MODE_SUB = 2,
+		BLEND_MODE_DISABLED = 5,
 		BLEND_MODE_MUL = 3,
 		BLEND_MODE_MIX = 0,
-		BLEND_MODE_PREMULT_ALPHA = 4,
 		BLEND_MODE_ADD = 1,
 	};
 
 	// constants
 	const static int NOTIFICATION_VISIBILITY_CHANGED = 31;
 	const static int NOTIFICATION_TRANSFORM_CHANGED = 29;
-	const static int NOTIFICATION_DRAW = 30;
 	const static int NOTIFICATION_EXIT_CANVAS = 33;
+	const static int NOTIFICATION_DRAW = 30;
 	const static int NOTIFICATION_ENTER_CANVAS = 32;
 
 	// methods
@@ -51,7 +52,8 @@ public:
 	Dictionary _edit_get_state() const;
 	void _edit_set_position(const Vector2 position);
 	Vector2 _edit_get_position() const;
-	bool _edit_use_position() const;
+	void _edit_set_scale(const Vector2 scale);
+	Vector2 _edit_get_scale() const;
 	void _edit_set_rect(const Rect2 rect);
 	Rect2 _edit_get_rect() const;
 	bool _edit_use_rect() const;

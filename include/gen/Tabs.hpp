@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Tabs.hpp>
+#include "Tabs.hpp"
 
-#include <Control.hpp>
+#include "Control.hpp"
 namespace godot {
 
 class InputEvent;
@@ -66,6 +66,10 @@ public:
 	Tabs::CloseButtonDisplayPolicy get_tab_close_display_policy() const;
 	void set_scrolling_enabled(const bool enabled);
 	bool get_scrolling_enabled() const;
+	void set_drag_to_rearrange_enabled(const bool enabled);
+	bool get_drag_to_rearrange_enabled() const;
+	void set_tabs_rearrange_group(const int64_t group_id);
+	int64_t get_tabs_rearrange_group() const;
 
 };
 

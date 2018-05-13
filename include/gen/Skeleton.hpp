@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Spatial.hpp>
+#include "Spatial.hpp"
 namespace godot {
 
 class Object;
@@ -52,6 +52,9 @@ public:
 	Transform get_bone_custom_pose(const int64_t bone_idx) const;
 	void set_bone_custom_pose(const int64_t bone_idx, const Transform custom_pose);
 	Transform get_bone_transform(const int64_t bone_idx) const;
+	void physical_bones_simulation(const bool start);
+	void physical_bones_add_collision_exception(const RID exception);
+	void physical_bones_remove_collision_exception(const RID exception);
 
 };
 

@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <ProceduralSky.hpp>
+#include "ProceduralSky.hpp"
 
-#include <Sky.hpp>
+#include "Sky.hpp"
 namespace godot {
 
 class Image;

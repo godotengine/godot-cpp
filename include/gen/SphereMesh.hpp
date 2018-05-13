@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <PrimitiveMesh.hpp>
+#include "PrimitiveMesh.hpp"
 namespace godot {
 
 

@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Animation.hpp>
+#include "Animation.hpp"
 
-#include <Resource.hpp>
+#include "Resource.hpp"
 namespace godot {
 
 class Animation;

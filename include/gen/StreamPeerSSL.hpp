@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <StreamPeerSSL.hpp>
+#include "StreamPeerSSL.hpp"
 
-#include <StreamPeer.hpp>
+#include "StreamPeer.hpp"
 namespace godot {
 
 class StreamPeer;

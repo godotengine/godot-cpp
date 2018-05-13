@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <CanvasItemMaterial.hpp>
+#include "CanvasItemMaterial.hpp"
 
-#include <Material.hpp>
+#include "Material.hpp"
 namespace godot {
 
 

@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <AnimationPlayer.hpp>
+#include "AnimationPlayer.hpp"
 
-#include <Node.hpp>
+#include "Node.hpp"
 namespace godot {
 
 class Object;
@@ -63,6 +63,7 @@ public:
 	bool is_active() const;
 	void set_speed_scale(const double speed);
 	double get_speed_scale() const;
+	double get_playing_speed() const;
 	void set_autoplay(const String name);
 	String get_autoplay() const;
 	void set_root(const NodePath path);

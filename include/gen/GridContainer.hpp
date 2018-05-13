@@ -8,9 +8,10 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Container.hpp>
+#include "Container.hpp"
 namespace godot {
 
+class Control;
 
 class GridContainer : public Container {
 public:
@@ -30,6 +31,7 @@ public:
 	// methods
 	void set_columns(const int64_t columns);
 	int64_t get_columns() const;
+	Control *get_child_control_at_cell(const int64_t row, const int64_t column);
 
 };
 

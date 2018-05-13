@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Control.hpp>
+#include "Control.hpp"
 namespace godot {
 
 class InputEvent;
@@ -104,6 +104,7 @@ public:
 	bool is_using_bbcode() const;
 	int64_t get_line_count() const;
 	int64_t get_visible_line_count() const;
+	int64_t get_content_height();
 
 };
 

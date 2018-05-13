@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Node.hpp>
+#include "Node.hpp"
 
-#include <Object.hpp>
+#include "Object.hpp"
 namespace godot {
 
 class InputEvent;
@@ -18,6 +18,7 @@ class Object;
 class Node;
 class SceneTree;
 class Viewport;
+class MultiplayerAPI;
 
 class Node : public Object {
 public:
@@ -108,6 +109,7 @@ public:
 	void remove_and_skip();
 	int64_t get_index() const;
 	void print_tree();
+	void print_tree_pretty();
 	void set_filename(const String filename);
 	String get_filename() const;
 	void propagate_notification(const int64_t what);
@@ -146,6 +148,9 @@ public:
 	void set_network_master(const int64_t id, const bool recursive = true);
 	int64_t get_network_master() const;
 	bool is_network_master() const;
+	Ref<MultiplayerAPI> get_multiplayer() const;
+	Ref<MultiplayerAPI> get_custom_multiplayer() const;
+	void set_custom_multiplayer(const Ref<MultiplayerAPI> api);
 	void rpc_config(const String method, const int64_t mode);
 	void rset_config(const String property, const int64_t mode);
 	void _set_import_path(const NodePath import_path);

@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Reference.hpp>
+#include "Reference.hpp"
 namespace godot {
 
 class Material;
@@ -45,7 +45,7 @@ public:
 	void add_index(const int64_t index);
 	void index();
 	void deindex();
-	void generate_normals();
+	void generate_normals(const bool flip = false);
 	void generate_tangents();
 	void add_to_format(const int64_t flags);
 	void set_material(const Ref<Material> material);

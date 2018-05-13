@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <TileSet.hpp>
+#include "TileSet.hpp"
 
-#include <Resource.hpp>
+#include "Resource.hpp"
 namespace godot {
 
 class Object;
@@ -28,6 +28,11 @@ public:
 	static inline Object *___get_from_variant(Variant a) { godot_object *o = (godot_object*) a; return (Object *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, o); }
 
 	// enums
+	enum TileMode {
+		SINGLE_TILE = 0,
+		AUTO_TILE = 1,
+		ANIMATED_TILE = 2,
+	};
 	enum AutotileBindings {
 		BIND_TOPRIGHT = 4,
 		BIND_TOPLEFT = 1,
@@ -76,6 +81,8 @@ public:
 	int64_t tile_get_shape_count(const int64_t id) const;
 	void tile_set_shapes(const int64_t id, const Array shapes);
 	Array tile_get_shapes(const int64_t id) const;
+	void tile_set_tile_mode(const int64_t id, const int64_t tilemode);
+	TileSet::TileMode tile_get_tile_mode(const int64_t id) const;
 	void tile_set_navigation_polygon(const int64_t id, const Ref<NavigationPolygon> navigation_polygon);
 	Ref<NavigationPolygon> tile_get_navigation_polygon(const int64_t id) const;
 	void tile_set_navigation_polygon_offset(const int64_t id, const Vector2 navigation_polygon_offset);
@@ -84,6 +91,8 @@ public:
 	Ref<OccluderPolygon2D> tile_get_light_occluder(const int64_t id) const;
 	void tile_set_occluder_offset(const int64_t id, const Vector2 occluder_offset);
 	Vector2 tile_get_occluder_offset(const int64_t id) const;
+	void tile_set_z_index(const int64_t id, const int64_t z_index);
+	int64_t tile_get_z_index(const int64_t id) const;
 	void remove_tile(const int64_t id);
 	void clear();
 	int64_t get_last_unused_tile_id() const;

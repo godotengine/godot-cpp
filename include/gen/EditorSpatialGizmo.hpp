@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <SpatialGizmo.hpp>
+#include "SpatialGizmo.hpp"
 namespace godot {
 
 class Camera;

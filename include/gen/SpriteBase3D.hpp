@@ -7,10 +7,10 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Vector3.hpp>
-#include <SpriteBase3D.hpp>
+#include "Vector3.hpp"
+#include "SpriteBase3D.hpp"
 
-#include <GeometryInstance.hpp>
+#include "GeometryInstance.hpp"
 namespace godot {
 
 

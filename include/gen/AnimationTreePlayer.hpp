@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <AnimationTreePlayer.hpp>
+#include "AnimationTreePlayer.hpp"
 
-#include <Node.hpp>
+#include "Node.hpp"
 namespace godot {
 
 class Animation;

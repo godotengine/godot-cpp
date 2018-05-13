@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <SplitContainer.hpp>
+#include "SplitContainer.hpp"
 
-#include <Container.hpp>
+#include "Container.hpp"
 namespace godot {
 
 class InputEvent;

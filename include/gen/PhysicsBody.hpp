@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <CollisionObject.hpp>
+#include "CollisionObject.hpp"
 namespace godot {
 
 class Object;

@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <TileMap.hpp>
+#include "TileMap.hpp"
 
-#include <Node2D.hpp>
+#include "Node2D.hpp"
 namespace godot {
 
 class TileSet;

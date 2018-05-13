@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <PacketPeer.hpp>
+#include "PacketPeer.hpp"
 namespace godot {
 
 class StreamPeer;

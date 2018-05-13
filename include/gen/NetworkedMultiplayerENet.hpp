@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <NetworkedMultiplayerENet.hpp>
+#include "NetworkedMultiplayerENet.hpp"
 
-#include <NetworkedMultiplayerPeer.hpp>
+#include "NetworkedMultiplayerPeer.hpp"
 namespace godot {
 
 
@@ -37,11 +37,22 @@ public:
 
 	// methods
 	Error create_server(const int64_t port, const int64_t max_clients = 32, const int64_t in_bandwidth = 0, const int64_t out_bandwidth = 0);
-	Error create_client(const String ip, const int64_t port, const int64_t in_bandwidth = 0, const int64_t out_bandwidth = 0);
-	void close_connection();
+	Error create_client(const String address, const int64_t port, const int64_t in_bandwidth = 0, const int64_t out_bandwidth = 0, const int64_t client_port = 0);
+	void close_connection(const int64_t wait_usec = 100);
+	void disconnect_peer(const int64_t id, const bool now = false);
 	void set_compression_mode(const int64_t mode);
 	NetworkedMultiplayerENet::CompressionMode get_compression_mode() const;
 	void set_bind_ip(const String ip);
+	String get_peer_address(const int64_t id) const;
+	int64_t get_peer_port(const int64_t id) const;
+	int64_t get_packet_channel() const;
+	int64_t get_last_packet_channel() const;
+	void set_transfer_channel(const int64_t channel);
+	int64_t get_transfer_channel() const;
+	void set_channel_count(const int64_t channels);
+	int64_t get_channel_count() const;
+	void set_always_ordered(const bool ordered);
+	bool is_always_ordered() const;
 
 };
 

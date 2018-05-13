@@ -8,9 +8,10 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Node.hpp>
+#include "Node.hpp"
 namespace godot {
 
+class Node;
 class PackedScene;
 
 class InstancePlaceholder : public Node {
@@ -27,6 +28,7 @@ public:
 
 	// methods
 	Dictionary get_stored_values(const bool with_order = false);
+	Node *create_instance(const bool replace = false, const Ref<PackedScene> custom_scene = nullptr);
 	void replace_by_instance(const Ref<PackedScene> custom_scene = nullptr);
 	String get_instance_path() const;
 

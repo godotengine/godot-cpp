@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <LineEdit.hpp>
+#include "LineEdit.hpp"
 
-#include <Control.hpp>
+#include "Control.hpp"
 namespace godot {
 
 class InputEvent;
@@ -78,6 +78,8 @@ public:
 	bool is_editable() const;
 	void set_secret(const bool enabled);
 	bool is_secret() const;
+	void set_secret_character(const String character);
+	String get_secret_character() const;
 	void menu_option(const int64_t option);
 	PopupMenu *get_menu() const;
 	void set_context_menu_enabled(const bool enable);

@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <SpriteBase3D.hpp>
+#include "SpriteBase3D.hpp"
 namespace godot {
 
 class SpriteFrames;

@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <StyleBoxTexture.hpp>
+#include "StyleBoxTexture.hpp"
 
-#include <StyleBox.hpp>
+#include "StyleBox.hpp"
 namespace godot {
 
 class Texture;

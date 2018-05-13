@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Viewport.hpp>
+#include "Viewport.hpp"
 
-#include <Node.hpp>
+#include "Node.hpp"
 namespace godot {
 
 class World2D;
@@ -147,14 +147,18 @@ public:
 	bool is_input_disabled() const;
 	void set_disable_3d(const bool disable);
 	bool is_3d_disabled() const;
+	void set_keep_3d_linear(const bool keep_3d_linear);
+	bool get_keep_3d_linear() const;
 	void _gui_show_tooltip();
 	void _gui_remove_focus();
+	void _post_gui_grab_click_focus();
 	void set_shadow_atlas_size(const int64_t size);
 	int64_t get_shadow_atlas_size() const;
 	void set_snap_controls_to_pixels(const bool enabled);
 	bool is_snap_controls_to_pixels_enabled() const;
 	void set_shadow_atlas_quadrant_subdiv(const int64_t quadrant, const int64_t subdiv);
 	Viewport::ShadowAtlasQuadrantSubdiv get_shadow_atlas_quadrant_subdiv(const int64_t quadrant) const;
+	void _subwindow_visibility_changed();
 
 };
 

@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <MainLoop.hpp>
+#include "MainLoop.hpp"
 namespace godot {
 
 class Viewport;
@@ -16,6 +16,7 @@ class Object;
 class Node;
 class SceneTreeTimer;
 class PackedScene;
+class MultiplayerAPI;
 class NetworkedMultiplayerPeer;
 
 class SceneTree : public MainLoop {
@@ -85,6 +86,8 @@ public:
 	Error change_scene_to(const Ref<PackedScene> packed_scene);
 	Error reload_current_scene();
 	void _change_scene(const Object *arg0);
+	void set_multiplayer(const Ref<MultiplayerAPI> multiplayer);
+	Ref<MultiplayerAPI> get_multiplayer() const;
 	void set_network_peer(const Ref<NetworkedMultiplayerPeer> peer);
 	Ref<NetworkedMultiplayerPeer> get_network_peer() const;
 	bool is_network_server() const;

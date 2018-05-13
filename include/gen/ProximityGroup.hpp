@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <ProximityGroup.hpp>
+#include "ProximityGroup.hpp"
 
-#include <Spatial.hpp>
+#include "Spatial.hpp"
 namespace godot {
 
 

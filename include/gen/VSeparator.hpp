@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Separator.hpp>
+#include "Separator.hpp"
 namespace godot {
 
 

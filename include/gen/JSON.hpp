@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Object.hpp>
+#include "Object.hpp"
 namespace godot {
 
 class JSONParseResult;

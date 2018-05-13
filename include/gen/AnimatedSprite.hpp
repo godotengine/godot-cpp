@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Node2D.hpp>
+#include "Node2D.hpp"
 namespace godot {
 
 class SpriteFrames;
@@ -48,6 +48,8 @@ public:
 	bool is_flipped_v() const;
 	void set_frame(const int64_t frame);
 	int64_t get_frame() const;
+	void set_speed_scale(const double speed_scale);
+	double get_speed_scale() const;
 	void _res_changed();
 
 };

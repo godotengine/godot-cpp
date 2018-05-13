@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <PhysicsBody2D.hpp>
+#include "PhysicsBody2D.hpp"
 namespace godot {
 
 class KinematicCollision2D;

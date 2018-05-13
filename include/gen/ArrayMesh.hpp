@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Mesh.hpp>
+#include "Mesh.hpp"
 
-#include <Mesh.hpp>
+#include "Mesh.hpp"
 namespace godot {
 
 class Material;

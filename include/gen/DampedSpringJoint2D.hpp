@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Joint2D.hpp>
+#include "Joint2D.hpp"
 namespace godot {
 
 

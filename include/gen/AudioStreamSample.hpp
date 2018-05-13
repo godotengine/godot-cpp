@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <AudioStreamSample.hpp>
+#include "AudioStreamSample.hpp"
 
-#include <AudioStream.hpp>
+#include "AudioStream.hpp"
 namespace godot {
 
 

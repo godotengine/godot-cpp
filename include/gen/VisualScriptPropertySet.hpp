@@ -7,10 +7,10 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Variant.hpp>
-#include <VisualScriptPropertySet.hpp>
+#include "Variant.hpp"
+#include "VisualScriptPropertySet.hpp"
 
-#include <VisualScriptNode.hpp>
+#include "VisualScriptNode.hpp"
 namespace godot {
 
 

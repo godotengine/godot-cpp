@@ -7,10 +7,10 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <BaseButton.hpp>
-#include <Control.hpp>
+#include "BaseButton.hpp"
+#include "Control.hpp"
 
-#include <Control.hpp>
+#include "Control.hpp"
 namespace godot {
 
 class InputEvent;
@@ -53,6 +53,8 @@ public:
 	bool is_disabled() const;
 	void set_action_mode(const int64_t mode);
 	BaseButton::ActionMode get_action_mode() const;
+	void set_button_mask(const int64_t mask);
+	int64_t get_button_mask() const;
 	BaseButton::DrawMode get_draw_mode() const;
 	void set_enabled_focus_mode(const int64_t mode);
 	Control::FocusMode get_enabled_focus_mode() const;

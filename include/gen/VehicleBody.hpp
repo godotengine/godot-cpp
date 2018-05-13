@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <RigidBody.hpp>
+#include "RigidBody.hpp"
 namespace godot {
 
 

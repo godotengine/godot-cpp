@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <AudioEffectEQ.hpp>
+#include "AudioEffectEQ.hpp"
 namespace godot {
 
 

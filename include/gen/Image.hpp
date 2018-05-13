@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Image.hpp>
+#include "Image.hpp"
 
-#include <Resource.hpp>
+#include "Resource.hpp"
 namespace godot {
 
 class Image;
@@ -107,7 +107,7 @@ public:
 	void crop(const int64_t width, const int64_t height);
 	void flip_x();
 	void flip_y();
-	Error generate_mipmaps();
+	Error generate_mipmaps(const bool renormalize = false);
 	void clear_mipmaps();
 	void create(const int64_t width, const int64_t height, const bool use_mipmaps, const int64_t format);
 	void create_from_data(const int64_t width, const int64_t height, const bool use_mipmaps, const int64_t format, const PoolByteArray data);
@@ -123,6 +123,7 @@ public:
 	void premultiply_alpha();
 	void srgb_to_linear();
 	void normalmap_to_xy();
+	void bumpmap_to_normalmap(const double bump_scale = 1);
 	void blit_rect(const Ref<Image> src, const Rect2 src_rect, const Vector2 dst);
 	void blit_rect_mask(const Ref<Image> src, const Ref<Image> mask, const Rect2 src_rect, const Vector2 dst);
 	void blend_rect(const Ref<Image> src, const Rect2 src_rect, const Vector2 dst);
@@ -135,8 +136,10 @@ public:
 	Dictionary _get_data() const;
 	void lock();
 	void unlock();
-	void set_pixel(const int64_t x, const int64_t y, const Color color);
+	Color get_pixelv(const Vector2 src) const;
 	Color get_pixel(const int64_t x, const int64_t y) const;
+	void set_pixelv(const Vector2 dst, const Color color);
+	void set_pixel(const int64_t x, const int64_t y, const Color color);
 	Error load_png_from_buffer(const PoolByteArray buffer);
 	Error load_jpg_from_buffer(const PoolByteArray buffer);
 

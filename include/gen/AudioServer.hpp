@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <AudioServer.hpp>
+#include "AudioServer.hpp"
 
-#include <Object.hpp>
+#include "Object.hpp"
 namespace godot {
 
 class AudioEffect;
@@ -76,6 +76,9 @@ public:
 	void unlock();
 	AudioServer::SpeakerMode get_speaker_mode() const;
 	double get_mix_rate() const;
+	Array get_device_list();
+	String get_device();
+	void set_device(const String arg0);
 	void set_bus_layout(const Ref<AudioBusLayout> bus_layout);
 	Ref<AudioBusLayout> generate_bus_layout() const;
 

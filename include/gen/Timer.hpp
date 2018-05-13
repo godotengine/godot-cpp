@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Timer.hpp>
+#include "Timer.hpp"
 
-#include <Node.hpp>
+#include "Node.hpp"
 namespace godot {
 
 
@@ -39,7 +39,7 @@ public:
 	bool is_one_shot() const;
 	void set_autostart(const bool enable);
 	bool has_autostart() const;
-	void start();
+	void start(const double time_sec = -1);
 	void stop();
 	void set_paused(const bool paused);
 	bool is_paused() const;

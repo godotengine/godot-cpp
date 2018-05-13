@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Input.hpp>
+#include "Input.hpp"
 
-#include <Object.hpp>
+#include "Object.hpp"
 namespace godot {
 
 class Resource;
@@ -71,6 +71,7 @@ public:
 	bool is_action_pressed(const String action) const;
 	bool is_action_just_pressed(const String action) const;
 	bool is_action_just_released(const String action) const;
+	double get_action_strength(const String action) const;
 	void add_joy_mapping(const String mapping, const bool update_existing = false);
 	void remove_joy_mapping(const String guid);
 	void joy_connection_changed(const int64_t device, const bool connected, const String name, const String guid);
@@ -98,6 +99,7 @@ public:
 	void warp_mouse_position(const Vector2 to);
 	void action_press(const String action);
 	void action_release(const String action);
+	void set_default_cursor_shape(const int64_t shape = 0);
 	void set_custom_mouse_cursor(const Ref<Resource> image, const int64_t shape = 0, const Vector2 hotspot = Vector2(0, 0));
 	void parse_input_event(const Ref<InputEvent> event);
 

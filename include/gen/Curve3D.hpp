@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Resource.hpp>
+#include "Resource.hpp"
 namespace godot {
 
 
@@ -48,6 +48,8 @@ public:
 	Vector3 interpolate_baked(const double offset, const bool cubic = false) const;
 	PoolVector3Array get_baked_points() const;
 	PoolRealArray get_baked_tilts() const;
+	Vector3 get_closest_point(const Vector3 to_point) const;
+	double get_closest_offset(const Vector3 to_point) const;
 	PoolVector3Array tessellate(const int64_t max_stages = 5, const double tolerance_degrees = 4) const;
 	Dictionary _get_data() const;
 	void _set_data(const Dictionary arg0);

@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <XMLParser.hpp>
+#include "XMLParser.hpp"
 
-#include <Reference.hpp>
+#include "Reference.hpp"
 namespace godot {
 
 

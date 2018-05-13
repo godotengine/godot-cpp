@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Tween.hpp>
+#include "Tween.hpp"
 
-#include <Node.hpp>
+#include "Node.hpp"
 namespace godot {
 
 class Object;

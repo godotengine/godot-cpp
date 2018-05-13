@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Button.hpp>
+#include "Button.hpp"
 namespace godot {
 
 class Texture;
@@ -33,7 +33,7 @@ public:
 	void _selected(const int64_t arg0);
 	void _focused(const int64_t arg0);
 	void add_item(const String label, const int64_t id = -1);
-	void add_icon_item(const Ref<Texture> texture, const String label, const int64_t id);
+	void add_icon_item(const Ref<Texture> texture, const String label, const int64_t id = -1);
 	void set_item_text(const int64_t idx, const String text);
 	void set_item_icon(const int64_t idx, const Ref<Texture> texture);
 	void set_item_disabled(const int64_t idx, const bool disabled);

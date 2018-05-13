@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <PanelContainer.hpp>
+#include "PanelContainer.hpp"
 namespace godot {
 
 class Object;
@@ -74,6 +74,10 @@ public:
 	void _script_list_gui_input(const Ref<InputEvent> arg0);
 	void _script_changed();
 	void _update_recent_scripts();
+	void _on_find_in_files_requested(const String arg0);
+	void _start_find_in_files(const bool arg0);
+	void _on_find_in_files_result_selected(const String arg0, const int64_t arg1, const int64_t arg2, const int64_t arg3);
+	void _on_find_in_files_modified_files(const PoolStringArray arg0);
 	Variant get_drag_data_fw(const Vector2 point, const Object *from);
 	bool can_drop_data_fw(const Vector2 point, const Variant data, const Object *from) const;
 	void drop_data_fw(const Vector2 point, const Variant data, const Object *from);

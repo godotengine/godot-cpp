@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <TreeItem.hpp>
+#include "TreeItem.hpp"
 
-#include <Object.hpp>
+#include "Object.hpp"
 namespace godot {
 
 class Texture;

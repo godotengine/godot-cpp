@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <ItemList.hpp>
+#include "ItemList.hpp"
 
-#include <Control.hpp>
+#include "Control.hpp"
 namespace godot {
 
 class Texture;
@@ -48,6 +48,8 @@ public:
 	Ref<Texture> get_item_icon(const int64_t idx) const;
 	void set_item_icon_region(const int64_t idx, const Rect2 rect);
 	Rect2 get_item_icon_region(const int64_t idx) const;
+	void set_item_icon_modulate(const int64_t idx, const Color modulate);
+	Color get_item_icon_modulate(const int64_t idx) const;
 	void set_item_selectable(const int64_t idx, const bool selectable);
 	bool is_item_selectable(const int64_t idx) const;
 	void set_item_disabled(const int64_t idx, const bool disabled);
@@ -65,7 +67,7 @@ public:
 	void unselect_all();
 	bool is_selected(const int64_t idx) const;
 	PoolIntArray get_selected_items();
-	void move_item(const int64_t p_from_idx, const int64_t p_to_idx);
+	void move_item(const int64_t from_idx, const int64_t to_idx);
 	int64_t get_item_count() const;
 	void remove_item(const int64_t idx);
 	void clear();

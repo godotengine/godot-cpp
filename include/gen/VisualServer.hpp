@@ -7,10 +7,10 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Image.hpp>
-#include <VisualServer.hpp>
+#include "Image.hpp"
+#include "VisualServer.hpp"
 
-#include <Object.hpp>
+#include "Object.hpp"
 namespace godot {
 
 class Image;
@@ -333,6 +333,7 @@ public:
 	RID texture_create_from_image(const Ref<Image> image, const int64_t flags = 7);
 	void texture_allocate(const RID texture, const int64_t width, const int64_t height, const int64_t format, const int64_t flags = 7);
 	void texture_set_data(const RID texture, const Ref<Image> image, const int64_t cube_side = 0);
+	void texture_set_data_partial(const RID texture, const Ref<Image> image, const int64_t src_x, const int64_t src_y, const int64_t src_w, const int64_t src_h, const int64_t dst_x, const int64_t dst_y, const int64_t dst_mip, const int64_t cube_side = 0);
 	Ref<Image> texture_get_data(const RID texture, const int64_t cube_side = 0) const;
 	void texture_set_flags(const RID texture, const int64_t flags);
 	int64_t texture_get_flags(const RID texture) const;
@@ -608,7 +609,7 @@ public:
 	void canvas_item_add_nine_patch(const RID item, const Rect2 rect, const Rect2 source, const RID texture, const Vector2 topleft, const Vector2 bottomright, const int64_t x_axis_mode = 0, const int64_t y_axis_mode = 0, const bool draw_center = true, const Color modulate = Color(1,1,1,1), const RID normal_map = RID());
 	void canvas_item_add_primitive(const RID item, const PoolVector2Array points, const PoolColorArray colors, const PoolVector2Array uvs, const RID texture, const double width = 1, const RID normal_map = RID());
 	void canvas_item_add_polygon(const RID item, const PoolVector2Array points, const PoolColorArray colors, const PoolVector2Array uvs = PoolVector2Array(), const RID texture = RID(), const RID normal_map = RID(), const bool antialiased = false);
-	void canvas_item_add_triangle_array(const RID item, const PoolIntArray indices, const PoolVector2Array points, const PoolColorArray colors, const PoolVector2Array uvs = PoolVector2Array(), const RID texture = RID(), const int64_t count = -1, const RID normal_map = RID());
+	void canvas_item_add_triangle_array(const RID item, const PoolIntArray indices, const PoolVector2Array points, const PoolColorArray colors, const PoolVector2Array uvs = PoolVector2Array(), const PoolIntArray bones = PoolIntArray(), const PoolRealArray weights = PoolRealArray(), const RID texture = RID(), const int64_t count = -1, const RID normal_map = RID());
 	void canvas_item_add_mesh(const RID item, const RID mesh, const RID texture, const RID normal_map = RID());
 	void canvas_item_add_multimesh(const RID item, const RID mesh, const RID texture, const RID normal_map = RID());
 	void canvas_item_add_particles(const RID item, const RID particles, const RID texture, const RID normal_map, const int64_t h_frames, const int64_t v_frames);

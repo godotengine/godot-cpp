@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <NinePatchRect.hpp>
+#include "NinePatchRect.hpp"
 
-#include <Control.hpp>
+#include "Control.hpp"
 namespace godot {
 
 class Texture;

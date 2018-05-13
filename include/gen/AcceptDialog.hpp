@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <WindowDialog.hpp>
+#include "WindowDialog.hpp"
 namespace godot {
 
 class Button;

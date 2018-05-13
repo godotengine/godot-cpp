@@ -8,12 +8,11 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Node.hpp>
+#include "Node.hpp"
 namespace godot {
 
 class Object;
 class Node;
-class World2D;
 
 class CanvasLayer : public Node {
 public:
@@ -45,7 +44,7 @@ public:
 	Vector2 get_scale() const;
 	void set_custom_viewport(const Object *viewport);
 	Node *get_custom_viewport() const;
-	Ref<World2D> get_world_2d() const;
+	RID get_canvas() const;
 
 };
 

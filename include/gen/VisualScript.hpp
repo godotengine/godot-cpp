@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <Variant.hpp>
+#include "Variant.hpp"
 
-#include <Script.hpp>
+#include "Script.hpp"
 namespace godot {
 
 class VisualScriptNode;

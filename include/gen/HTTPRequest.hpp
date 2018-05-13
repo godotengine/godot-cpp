@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <HTTPClient.hpp>
+#include "HTTPClient.hpp"
 
-#include <Node.hpp>
+#include "Node.hpp"
 namespace godot {
 
 

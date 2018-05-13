@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Range.hpp>
+#include "Range.hpp"
 namespace godot {
 
 class Texture;
@@ -45,6 +45,12 @@ public:
 	Ref<Texture> get_over_texture() const;
 	void set_fill_mode(const int64_t mode);
 	int64_t get_fill_mode();
+	void set_tint_under(const Color tint);
+	Color get_tint_under() const;
+	void set_tint_progress(const Color tint);
+	Color get_tint_progress() const;
+	void set_tint_over(const Color tint);
+	Color get_tint_over() const;
 	void set_radial_initial_angle(const double mode);
 	double get_radial_initial_angle();
 	void set_radial_center_offset(const Vector2 mode);

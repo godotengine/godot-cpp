@@ -7,9 +7,9 @@
 
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
-#include <BakedLightmap.hpp>
+#include "BakedLightmap.hpp"
 
-#include <VisualInstance.hpp>
+#include "VisualInstance.hpp"
 namespace godot {
 
 class BakedLightmapData;

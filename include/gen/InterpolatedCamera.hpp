@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Camera.hpp>
+#include "Camera.hpp"
 namespace godot {
 
 class Object;

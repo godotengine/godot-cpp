@@ -8,7 +8,7 @@
 #include <core/CoreTypes.hpp>
 #include <core/Ref.hpp>
 
-#include <Script.hpp>
+#include "Script.hpp"
 namespace godot {
 
 
