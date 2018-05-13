@@ -8,7 +8,7 @@ namespace godot {
 class _Wrapped {
 public:
 	godot_object *_owner;
-	const void *_type_tag;
+	size_t _type_tag;
 };
 
 }

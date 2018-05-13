@@ -139,9 +139,6 @@ def generate_class_header(used_classes, c):
     source.append("public:")
     source.append("")
 
-    source.append("\tstatic void *___get_type_tag();")
-    source.append("\tstatic void *___get_base_type_tag();")
-
 
     if c["singleton"]:
         source.append("\tstatic inline " + class_name + " *get_singleton()")
@@ -325,21 +322,6 @@ def generate_class_implementation(icalls, used_classes, c):
     source.append("")
     source.append("")
 
-    source.append("void *" + class_name + "::___get_type_tag()")
-    source.append("{")
-    source.append("\treturn (void *) &" + class_name + "::___get_type_tag;")
-    source.append("}")
-    source.append("")
-
-    source.append("void *" + class_name + "::___get_base_type_tag()")
-    source.append("{")
-    if c["base_class"] != "":
-        source.append("\treturn (void *) &" + strip_name(c["base_class"]) + "::___get_type_tag;")
-    else:
-        source.append("\treturn (void *) nullptr;")
-    source.append("}")
-    source.append("")
-    
     if c["singleton"]:
         source.append("" + class_name + " *" + class_name + "::_singleton = NULL;")
         source.append("")
@@ -669,7 +651,8 @@ def generate_type_registry(classes):
     source = []
     
     source.append("#include \"TagDB.hpp\"")
-    source.append("")
+    source.append("#include <typeinfo>")
+    source.append("\n")
 
     for c in classes:
         source.append("#include <" + strip_name(c["name"]) + ".hpp>")
@@ -684,7 +667,16 @@ def generate_type_registry(classes):
 
     for c in classes:
         class_name = strip_name(c["name"])
-        source.append("\tgodot::_TagDB::register_global_type(\"" + class_name + "\", " + class_name + "::___get_type_tag(), " + class_name + "::___get_base_type_tag());")
+	base_class_name = strip_name(c["base_class"])
+
+        class_type_hash = "typeid(" + class_name + ").hash_code()"
+
+        base_class_type_hash = "typeid(" + base_class_name + ").hash_code()"
+
+        if base_class_name == "":
+            base_class_type_hash = "0"
+
+        source.append("\tgodot::_TagDB::register_global_type(\"" + class_name + "\", " + class_type_hash + ", " + base_class_type_hash + ");")
 
     source.append("}")
 
@@ -751,6 +743,8 @@ def get_used_classes(c):
 
 
 def strip_name(name):
+    if len(name) == 0:
+        return name
     if name[0] == '_':
         return name[1:]
     return name

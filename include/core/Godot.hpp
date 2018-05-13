@@ -42,8 +42,6 @@ T *get_wrapper(godot_object *obj)
 	inline static Name *_new() { godot::NativeScript *script = godot::NativeScript::_new(); script->set_library(godot::get_wrapper<godot::GDNativeLibrary>((godot_object *) godot::gdnlib)); script->set_class_name(#Name); Name *instance = godot::as<Name>(script->new_()); return instance; } \
 	inline static const char *___get_base_type_name() { return Base::___get_class_name(); } \
 	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *) godot::as<Name>(godot::Object::___get_from_variant(a)); } \
-	inline static void *___get_type_tag() { return (void *) &Name::___get_type_tag; } \
-	inline static void *___get_base_type_tag() { return (void *) &Base::___get_type_tag; } \
 	private:
 
 #define GODOT_SUBCLASS(Name, Base) \
@@ -87,7 +85,7 @@ void *_godot_class_instance_func(godot_object *p, void *method_data)
 {
 	T *d = new T();
 	d->_owner = p;
-	d->_type_tag = T::___get_type_tag();
+	d->_type_tag = typeid(T).hash_code();
 	d->_init();
 	return d;
 }
@@ -109,10 +107,10 @@ void register_class()
 	godot_instance_destroy_func destroy = {};
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
-	_TagDB::register_type(T::___get_type_tag(), T::___get_base_type_tag());
+	_TagDB::register_type(typeid(T).hash_code(), typeid(T).hash_code());
 
 	godot::nativescript_api->godot_nativescript_register_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
-	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_type_tag());
+	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), (const void *) typeid(T).hash_code());
 	T::_register_methods();
 }
 
@@ -495,11 +493,11 @@ void register_signal(String name, Args... varargs)
 template<class T>
 T *Object::cast_to(const Object *obj)
 {
-	const void *have_tag = godot::nativescript_1_1_api->godot_nativescript_get_type_tag(obj->_owner);
+	size_t have_tag = (size_t) godot::nativescript_1_1_api->godot_nativescript_get_type_tag(obj->_owner);
 
 	if (have_tag) {
-		if (!godot::_TagDB::is_type_known(have_tag)) {
-			have_tag = nullptr;
+		if (!godot::_TagDB::is_type_known((size_t) have_tag)) {
+			have_tag = 0;
 		}
 	}
 
@@ -507,7 +505,7 @@ T *Object::cast_to(const Object *obj)
 		have_tag = obj->_type_tag;
 	}
 
-	if (godot::_TagDB::is_type_compatible(T::___get_type_tag(), have_tag)) {
+	if (godot::_TagDB::is_type_compatible(typeid(T).hash_code(), have_tag)) {
 		return (T::___CLASS_IS_SCRIPT) ? godot::as<T>(obj) : (T *) obj;
 	} else {
 		return nullptr;

@@ -11,7 +11,7 @@ static GDCALLINGCONV void *wrapper_create(void *data, const void *type_tag, godo
 	if (!wrapper_memory)
 		return NULL;
 	wrapper_memory->_owner = instance;
-	wrapper_memory->_type_tag = type_tag;
+	wrapper_memory->_type_tag = (size_t) type_tag;
 
 	return (void *) wrapper_memory;
 }
