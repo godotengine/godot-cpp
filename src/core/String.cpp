@@ -115,15 +115,15 @@ void String::operator=(const String &s) {
 	godot::api->godot_string_new_copy(&_godot_string, &s._godot_string);
 }
 
-bool String::operator==(const String &s) {
+bool String::operator==(const String &s) const {
 	return godot::api->godot_string_operator_equal(&_godot_string, &s._godot_string);
 }
 
-bool String::operator!=(const String &s) {
+bool String::operator!=(const String &s) const {
 	return !(*this == s);
 }
 
-String String::operator+(const String &s) {
+String String::operator+(const String &s) const {
 	String new_string = *this;
 	new_string._godot_string = godot::api->godot_string_operator_plus(&new_string._godot_string, &s._godot_string);
 
@@ -134,24 +134,24 @@ void String::operator+=(const String &s) {
 	_godot_string = godot::api->godot_string_operator_plus(&_godot_string, &s._godot_string);
 }
 
-void String::operator+=(const wchar_t c) {
+void String::operator+=(const wchar_t c) const {
 	// @Todo
 }
 
-bool String::operator<(const String &s) {
+bool String::operator<(const String &s) const {
 	return godot::api->godot_string_operator_less(&_godot_string, &s._godot_string);
 }
 
-bool String::operator<=(const String &s) {
+bool String::operator<=(const String &s) const {
 	return godot::api->godot_string_operator_less(&_godot_string, &s._godot_string) ||
 		   (*this == s);
 }
 
-bool String::operator>(const String &s) {
+bool String::operator>(const String &s) const {
 	return !(*this <= s);
 }
 
-bool String::operator>=(const String &s) {
+bool String::operator>=(const String &s) const {
 	return !(*this < s);
 }
 
