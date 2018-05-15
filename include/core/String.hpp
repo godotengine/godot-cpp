@@ -53,7 +53,7 @@ public:
 	bool operator!=(const String &s) const;
 	String operator+(const String &s) const;
 	void operator+=(const String &s);
-	void operator+=(const wchar_t c) const;
+	void operator+=(const wchar_t c);
 	bool operator<(const String &s) const;
 	bool operator<=(const String &s) const;
 	bool operator>(const String &s) const;

@@ -134,7 +134,7 @@ void String::operator+=(const String &s) {
 	_godot_string = godot::api->godot_string_operator_plus(&_godot_string, &s._godot_string);
 }
 
-void String::operator+=(const wchar_t c) const {
+void String::operator+=(const wchar_t c) {
 	// @Todo
 }
 
