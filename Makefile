@@ -1,12 +1,10 @@
-
-GODOT_BIN_PATH = ../godot_fork/bin/godot.x11.tools.64.llvm
-REGENERATE_BINDINGS = no
-HEADERS = ../godot_headers
+GENERATE_BINDINGS = no
+HEADERS = godot_headers
 TARGET = debug
 NAME = godot-cpp
 USE_CLANG = no
 
-BASE = scons n=$(NAME) use_llvm=$(USE_CLANG) regenerate_bindings=$(REGENERATE_BINDINGS) target=$(TARGET) headers=$(HEADERS) godotbinpath=$(GODOT_BIN_PATH) -j4
+BASE = scons n=$(NAME) use_llvm=$(USE_CLANG) generate_bindings=$(GENERATE_BINDINGS) target=$(TARGET) headers=$(HEADERS) -j4
 LINUX = $(BASE) p=linux
 WINDOWS = $(BASE) p=windows
 OSX = $(BASE) p=osx

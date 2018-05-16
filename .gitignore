@@ -2,7 +2,6 @@
 src/*.cpp
 src/*.hpp
 include/*.hpp
-*.json
 
 # Misc
 logs/*

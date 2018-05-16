@@ -16,8 +16,7 @@ target_arch = ARGUMENTS.get('a', ARGUMENTS.get('arch', '64'))
 # default to debug build, must be same setting as used for cpp_bindings
 target = ARGUMENTS.get('target', 'debug')
 # Local dependency paths, adapt them to your setup
-godot_headers = ARGUMENTS.get('headers', '../godot_headers')
-godot_bin_path = ARGUMENTS.get('godotbinpath', os.getenv('GODOT_BIN_PATH', '../godot_fork/bin/godot.x11.tools.64.llvm'))
+godot_headers = ARGUMENTS.get('headers', 'godot_headers')
 result_path = 'bin'
 result_name = ARGUMENTS.get('n', ARGUMENTS.get('name', os.path.relpath('.', '..')))
 
@@ -25,7 +24,6 @@ result_name = ARGUMENTS.get('n', ARGUMENTS.get('name', os.path.relpath('.', '..'
 if target_platform == 'linux':
     result_name += '.linux.' + target_arch
 
-    env['CXX']='gcc-5'
     if ARGUMENTS.get('use_llvm', 'no') == 'yes':
         env['CXX'] = 'clang++'
 
@@ -80,18 +78,20 @@ elif target_platform == 'osx':
 
 env.Append(CPPPATH=['.', godot_headers, 'include', 'include/core'])
 
+# Generate bindings?
+json_api_file = ''
 
-# Generate bindings
-json_api_file = os.path.join(os.getcwd(), 'godot_api.json')
-if os.path.exists(json_api_file) == False or ARGUMENTS.get('regenerate_bindings', 'no') == 'yes':
-    subprocess.call([os.path.expanduser(godot_bin_path), '--gdnative-generate-json-api', json_api_file])
+if ARGUMENTS.get('use_custom_api_file', 'no') == 'yes':
+    json_api_file = ARGUMENTS.get('custom_api_file', '')
+else:
+    json_api_file = os.path.join(os.getcwd(), 'godot_api.json')
 
+if ARGUMENTS.get('generate_bindings', 'no') == 'yes':
     # actually create the bindings here
     
     import binding_generator
 
     binding_generator.generate_bindings(json_api_file)
-
 
 sources = []
 add_sources(sources, 'src/core', 'cpp')
