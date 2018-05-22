@@ -21,10 +21,10 @@ SimpleLibrary
 Now to generate cpp bindings
 ```
 $ cd godot-cpp
-$ scons godotbinpath="../godot_fork/bin/godot_binary" p=linux
+$ scons godotbinpath="../godot_fork/bin/godot_binary" p=linux headers=../godot_headers
 $ cd ..
 ```
-resulting libraries will be placed under `bin/` and the generated headers will be placed under `include/*`
+resulting libraries will be placed under `godot-cpp/bin/` and the generated headers will be placed under `godot-cpp/include/*`
 
 **Note:**
 > `regenerate_bindings=yes` is used to force regenerating C++ bindings (`godot_api.json` - Godot API)
@@ -108,8 +108,8 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle)
 # Compiling
 ```
 $ cd SimpleLibrary
-$ clang -fPIC -o src/init.os -c src/init.cpp -g -O3 -std=c++14 -I../godot-cpp/include -Igodot_headers
-$ clang -o lib/libtest.so -shared src/init.os -L../godot-cpp/lib -lgodot-cpp
+$ clang -fPIC -o src/init.os -c src/init.cpp -g -O3 -std=c++14 -I../godot-cpp/include -I../godot_headers
+$ clang -o lib/libtest.so -shared src/init.os -L../godot-cpp/lib -Lgodot-cpp
 ```
 This creates the file `libtest.so` in your `SimpleLibrary/lib` directory. For windows you need to find out what compiler flags need to be used.
 
