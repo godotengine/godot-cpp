@@ -27,13 +27,13 @@ if target_platform == 'linux':
     if ARGUMENTS.get('use_llvm', 'no') == 'yes':
         env['CXX'] = 'clang++'
 
-    env.Append(CCFLAGS = [ '-fPIC', '-g', '-std=c++14', '-Wwrite-strings' ])
+    env.Append(CCFLAGS = [ '-fPIC', '-std=c++14', '-Wwrite-strings' ])
     env.Append(LINKFLAGS = [ '-Wl,-R,\'$$ORIGIN\'' ])
 
     if target == 'debug':
-        env.Append(CCFLAGS = ['-Og'])
+        env.Append(CCFLAGS = ['-Og', '-g'])
     else:
-        env.Append(CCFLAGS = ['-O3'])
+        env.Append(CCFLAGS = ['-O3', '-s'])
 
     if target_arch == '32':
         env.Append(CCFLAGS = [ '-m32' ])
