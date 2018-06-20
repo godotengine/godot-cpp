@@ -31,6 +31,7 @@ resulting libraries will be placed under `bin/` and the generated headers will b
 
 > Include `use_llvm=yes` for using clang++
 
+> You may need to specify `headers=../godot_headers` if you have compilation issues related to missing include files
 
 And our directory structure will be
 ```
