@@ -104,7 +104,7 @@ public:
 
 	void set(const int idx, const uint8_t data);
 
-	const uint8_t operator [](const int idx);
+	uint8_t operator [](const int idx);
 
 	int size() const;
 
@@ -200,7 +200,7 @@ public:
 
 	void set(const int idx, const int data);
 
-	const int operator [](const int idx);
+	int operator [](const int idx);
 
 	int size() const;
 
@@ -296,7 +296,7 @@ public:
 
 	void set(const int idx, const real_t data);
 
-	const real_t operator [](const int idx);
+	real_t operator [](const int idx);
 
 	int size() const;
 

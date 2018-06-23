@@ -86,7 +86,7 @@ void PoolByteArray::set(const int idx, const uint8_t data)
 	godot::api->godot_pool_byte_array_set(&_godot_array, idx, data);
 }
 
-const uint8_t PoolByteArray::operator [](const int idx)
+uint8_t PoolByteArray::operator [](const int idx)
 {
 	return godot::api->godot_pool_byte_array_get(&_godot_array, idx);
 }
@@ -180,7 +180,7 @@ void PoolIntArray::set(const int idx, const int data)
 	godot::api->godot_pool_int_array_set(&_godot_array, idx, data);
 }
 
-const int PoolIntArray::operator [](const int idx)
+int PoolIntArray::operator [](const int idx)
 {
 	return godot::api->godot_pool_int_array_get(&_godot_array, idx);
 }
@@ -273,7 +273,7 @@ void PoolRealArray::set(const int idx, const real_t data)
 	godot::api->godot_pool_real_array_set(&_godot_array, idx, data);
 }
 
-const real_t PoolRealArray::operator [](const int idx)
+real_t PoolRealArray::operator [](const int idx)
 {
 	return godot::api->godot_pool_real_array_get(&_godot_array, idx);
 }
