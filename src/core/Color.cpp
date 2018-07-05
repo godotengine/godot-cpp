@@ -269,7 +269,7 @@ Color Color::html(const String& p_color)
 	} else if (color.length()==6) {
 		alpha=false;
 	} else {
-		ERR_PRINT(String("Invalid Color Code: ") + p_color);
+		ERR_PRINTS(String("Invalid Color Code: ") + p_color);
 		ERR_FAIL_V(Color());
 	}
 
@@ -277,7 +277,7 @@ Color Color::html(const String& p_color)
 	if (alpha) {
 		a=_parse_col(color,0);
 		if (a<0) {
-			ERR_PRINT("Invalid Color Code: "+p_color);
+			ERR_PRINTS(String("Invalid Color Code: ") + p_color);
 			ERR_FAIL_V(Color());
 		}
 	}
@@ -286,17 +286,17 @@ Color Color::html(const String& p_color)
 
 	int r=_parse_col(color,from+0);
 	if (r<0) {
-		ERR_PRINT("Invalid Color Code: "+p_color);
+		ERR_PRINTS(String("Invalid Color Code: ") + p_color);
 		ERR_FAIL_V(Color());
 	}
 	int g=_parse_col(color,from+2);
 	if (g<0) {
-		ERR_PRINT("Invalid Color Code: "+p_color);
+		ERR_PRINTS(String("Invalid Color Code: ") + p_color);
 		ERR_FAIL_V(Color());
 	}
 	int b=_parse_col(color,from+4);
 	if (b<0) {
-		ERR_PRINT("Invalid Color Code: "+p_color);
+		ERR_PRINTS(String("Invalid Color Code: ") + p_color);
 		ERR_FAIL_V(Color());
 	}
 
