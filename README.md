@@ -27,7 +27,7 @@ $ cd ..
 resulting libraries will be placed under `bin/` and the generated headers will be placed under `include/*`
 
 **Note:**
-> `regenerate_bindings=yes` is used to force regenerating C++ bindings (`godot_api.json` - Godot API)
+> `generate_bindings=yes` is used to force regenerating C++ bindings (`godot_api.json` - Godot API)
 
 > Include `use_llvm=yes` for using clang++
 
