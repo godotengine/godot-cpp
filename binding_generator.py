@@ -376,7 +376,7 @@ def generate_class_implementation(icalls, used_classes, c):
         else:
         
             source.append("\tstatic godot_method_bind *mb = nullptr;")
-	    source.append("\tif (mb == nullptr) {")
+            source.append("\tif (mb == nullptr) {")
             source.append("\t\tmb = godot::api->godot_method_bind_get_method(\"" + c["name"] +"\", \"" + method["name"] + "\");")
             source.append("\t}")
         
@@ -667,7 +667,7 @@ def generate_type_registry(classes):
 
     for c in classes:
         class_name = strip_name(c["name"])
-	base_class_name = strip_name(c["base_class"])
+        base_class_name = strip_name(c["base_class"])
 
         class_type_hash = "typeid(" + class_name + ").hash_code()"
 
