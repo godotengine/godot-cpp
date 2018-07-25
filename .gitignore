@@ -1,6 +1,6 @@
 # Generated bindings
-src/gen/*.cpp
-include/gen/*.hpp
+src/gen/
+include/gen/
 
 # Misc
 logs/*
