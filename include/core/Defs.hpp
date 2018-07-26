@@ -107,32 +107,45 @@ typedef float real_t;
 #define _PLANE_EQ_DOT_EPSILON 0.999
 #define _PLANE_EQ_D_EPSILON 0.0001
 
-
-#ifndef ERR_FAIL_COND_V
-#define ERR_FAIL_COND_V(cond, ret) do { if (cond) { return ret; } } while(0)
+// ERR/WARN macros
+#ifndef WARN_PRINT
+#define WARN_PRINT(msg) fprintf(stdout, "ERROR: %s\n", msg); fflush(stdout)
 #endif
 
+#ifndef WARN_PRINTS
+#define WARN_PRINTS(msg) WARN_PRINT(msg.utf8().get_data())
+#endif
+
+#ifndef ERR_PRINT
+#define ERR_PRINT(x) fprintf(stderr, "ERROR: %s\n", x)
+#endif
+
+#ifndef ERR_PRINTS
+#define ERR_PRINTS(msg) ERR_PRINT(msg.utf8().get_data())
+#endif
+
+#ifndef ERR_FAIL
+#define ERR_FAIL() ERR_PRINT("Failed")
+#endif
 
 #ifndef ERR_FAIL_V
-#define ERR_FAIL_V(a) return a
+#define ERR_FAIL_V(a) { ERR_FAIL(); return a; }
+#endif
+
+#ifndef ERR_FAIL_COND
+#define ERR_FAIL_COND(a) do { if (a) { ERR_PRINT(#a); return; } } while(0)
+#endif
+
+#ifndef ERR_FAIL_COND_V
+#define ERR_FAIL_COND_V(cond, ret) do { if (cond) { ERR_PRINT(#cond); return ret; } } while(0)
 #endif
 
 #ifndef ERR_FAIL_INDEX
-#define ERR_FAIL_INDEX(a, b)
-#endif
-
-
-#ifndef ERR_PRINT
-#define ERR_PRINT(msg) fprintf(stderr, "ERROR: %S\n", (msg).unicode_str())
+#define ERR_FAIL_INDEX(a, b) do { if (a < 0 || a >= b) { ERR_FAIL(); return; } } while(0)
 #endif
 
 #ifndef ERR_FAIL_INDEX_V
-#define ERR_FAIL_INDEX_V(a, b, c)
-#endif
-
-
-#ifndef ERR_FAIL_COND
-#define ERR_FAIL_COND(a) do { if (a) { fprintf(stderr, #a); return; } } while(0)
+#define ERR_FAIL_INDEX_V(a, b, c) do { if (a < 0 || a >= b) { ERR_FAIL(); return c; } } while(0)
 #endif
 
 
