@@ -123,10 +123,10 @@ void register_tool_class()
 	godot_instance_destroy_func destroy = {};
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
-	_TagDB::register_type(T::___get_type_tag(), T::___get_base_type_tag());
+	_TagDB::register_type(typeid(T).hash_code(), typeid(T).hash_code());
 
 	godot::nativescript_api->godot_nativescript_register_tool_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
-	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_type_tag());
+	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), (const void *) typeid(T).hash_code());
 	T::_register_methods();
 }
 
