@@ -1,7 +1,3 @@
-# Generated bindings
-src/gen/
-include/gen/
-
 # Misc
 logs/*
 
