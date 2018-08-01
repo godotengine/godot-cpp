@@ -169,8 +169,14 @@ public:
 	Variant(const NodePath& p_path);
 
 	Variant(const RID& p_rid);
-
+	
 	Variant(const Object* p_object);
+	
+	
+	template <typename T, typename std::enable_if<!std::is_same<T,Object>::value && !std::is_base_of<Object,T>::value &&
+																								!std::is_same<T,Variant>::value && !std::is_base_of<Variant,T>::value,
+																								T>::type* = nullptr>
+	Variant(const T* p_object);
 
 	Variant(const Dictionary& p_dictionary);
 
@@ -260,12 +266,35 @@ public:
 	bool hash_compare(const Variant& b) const;
 
 	bool booleanize() const;
+	
+	
+	template <typename T, typename std::enable_if<!std::is_same<T,Object>::value && !std::is_base_of<Object,T>::value &&
+																								!std::is_same<T,Variant>::value && !std::is_base_of<Variant,T>::value,
+																								T>::type* = nullptr>
+	T* asPointer() const;
 
 	~Variant();
 
-
+protected:
+	void init_pointer(const void* ptr);
+	void* to_pointer() const;
 };
 
+template <typename T, typename std::enable_if<!std::is_same<T,Object>::value && !std::is_base_of<Object,T>::value &&
+																							!std::is_same<T,Variant>::value && !std::is_base_of<Variant,T>::value,
+																							T>::type* = nullptr>
+Variant::Variant(const T* p_ptr)
+{
+	init_pointer(p_ptr);
+}
+
+template <typename T, typename std::enable_if<!std::is_same<T,Object>::value && !std::is_base_of<Object,T>::value &&
+																							!std::is_same<T,Variant>::value && !std::is_base_of<Variant,T>::value,
+																							T>::type* = nullptr>
+T* Variant::asPointer() const
+{
+	return (T*)to_pointer();
+}
 }
 
 #endif // VARIANT_H

@@ -144,6 +144,16 @@ Variant::Variant(const Object* p_object)
 	godot::api->godot_variant_new_object(&_godot_variant, (godot_object *) p_object);
 }
 
+void Variant::init_pointer(const void *ptr)
+{
+	godot::api->godot_variant_new_pointer(&_godot_variant, (const godot_pointer *) ptr);
+}
+
+void *Variant::to_pointer() const
+{
+	return godot::api->godot_variant_as_pointer(&_godot_variant);
+}
+
 Variant::Variant(const Dictionary& p_dictionary)
 {
 	godot::api->godot_variant_new_dictionary(&_godot_variant, (godot_dictionary *) &p_dictionary);
