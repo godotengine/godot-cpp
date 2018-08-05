@@ -11,54 +11,46 @@
 #include "CoreTypes.hpp"
 #include "Variant.hpp"
 #include "Ref.hpp"
+#include "TagDB.hpp"
 
 #include "Object.hpp"
 
 #include "GodotGlobal.hpp"
 
+#include <NativeScript.hpp>
+#include <GDNativeLibrary.hpp>
 
 namespace godot {
 
 
 template<class T>
-T *as(Object *obj)
+T *as(const Object *obj)
 {
-	return (T *) godot::nativescript_api->godot_nativescript_get_userdata(obj);
+	return (T *) godot::nativescript_api->godot_nativescript_get_userdata(obj->_owner);
+}
+
+template<class T>
+T *get_wrapper(godot_object *obj)
+{
+	return (T *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, obj);
 }
 
 
-template<class T>
-class GodotScript {
-public:
-	T *owner;
-
-	// GodotScript() {}
-
-	void _init() {}
-	static const char *___get_base_type_name()
-	{
-		return T::___get_class_name();
-	}
-
-	static GodotScript<T> *___get_from_variant(Variant a)
-	{
-		return as<GodotScript<T> >((Object *) a);
-	}
-
-	static void _register_methods() {}
-};
-
-
-
-#define GODOT_CLASS(Name) \
+#define GODOT_CLASS(Name, Base) \
 	public: inline static const char *___get_type_name() { return static_cast<const char *>(#Name); } \
+	enum { ___CLASS_IS_SCRIPT = 1, }; \
+	inline static Name *_new() { godot::NativeScript *script = godot::NativeScript::_new(); script->set_library(godot::get_wrapper<godot::GDNativeLibrary>((godot_object *) godot::gdnlib)); script->set_class_name(#Name); Name *instance = godot::as<Name>(script->new_()); return instance; } \
+	inline static const char *___get_base_type_name() { return Base::___get_class_name(); } \
+	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *) godot::as<Name>(godot::Object::___get_from_variant(a)); } \
 	private:
 
 #define GODOT_SUBCLASS(Name, Base) \
 	public: inline static const char *___get_type_name() { return static_cast<const char *>(#Name); } \
-	inline static const char *___get_base_type_name() { return static_cast<const char *>(#Base); } \
+	enum { ___CLASS_IS_SCRIPT = 1, }; \
+	inline static Name *_new() { godot::NativeScript *script = godot::NativeScript::_new(); script->set_library(godot::get_wrapper<godot::GDNativeLibrary>((godot_object *) godot::gdnlib)); script->set_class_name(#Name); Name *instance = godot::as<Name>(script->new_()); return instance; } \
+	inline static const char *___get_base_type_name() { return #Base; } \
+	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *) godot::as<Name>(godot::Object::___get_from_variant(a)); } \
 	private:
-
 
 template<class T>
 struct _ArgCast {
@@ -94,7 +86,8 @@ template<class T>
 void *_godot_class_instance_func(godot_object *p, void *method_data)
 {
 	T *d = new T();
-	*(godot_object **) &d->owner = p;
+	d->_owner = p;
+	d->_type_tag = typeid(T).hash_code();
 	d->_init();
 	return d;
 }
@@ -116,8 +109,10 @@ void register_class()
 	godot_instance_destroy_func destroy = {};
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
+	_TagDB::register_type(typeid(T).hash_code(), typeid(T).hash_code());
 
 	godot::nativescript_api->godot_nativescript_register_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
+	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), (const void *) typeid(T).hash_code());
 	T::_register_methods();
 }
 
@@ -130,8 +125,10 @@ void register_tool_class()
 	godot_instance_destroy_func destroy = {};
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
+	_TagDB::register_type(typeid(T).hash_code(), typeid(T).hash_code());
 
 	godot::nativescript_api->godot_nativescript_register_tool_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
+	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), (const void *) typeid(T).hash_code());
 	T::_register_methods();
 }
 
@@ -369,7 +366,7 @@ void register_property(const char *name, P (T::*var), P default_value, godot_met
 	usage = (godot_property_usage_flags) ((int) usage | GODOT_PROPERTY_USAGE_SCRIPT_VARIABLE);
 
 	if (def_val.get_type() == Variant::OBJECT) {
-		Object *o = def_val;
+		Object *o = get_wrapper<Object>(def_val.operator godot_object*());
 		if (o && o->is_class("Resource")) {
 			hint = (godot_property_hint) ((int) hint | GODOT_PROPERTY_HINT_RESOURCE_TYPE);
 			hint_string = o->get_class();
@@ -489,6 +486,35 @@ void register_signal(String name, Args... varargs)
 {
 	register_signal<T>(name, Dictionary::make(varargs...));
 }
+
+
+
+
+
+#ifndef GODOT_CPP_NO_OBJECT_CAST
+template<class T>
+T *Object::cast_to(const Object *obj)
+{
+	size_t have_tag = (size_t) godot::nativescript_1_1_api->godot_nativescript_get_type_tag(obj->_owner);
+
+	if (have_tag) {
+		if (!godot::_TagDB::is_type_known((size_t) have_tag)) {
+			have_tag = 0;
+		}
+	}
+
+	if (!have_tag) {
+		have_tag = obj->_type_tag;
+	}
+
+	if (godot::_TagDB::is_type_compatible(typeid(T).hash_code(), have_tag)) {
+		return (T::___CLASS_IS_SCRIPT) ? godot::as<T>(obj) : (T *) obj;
+	} else {
+		return nullptr;
+	}
+}
+#endif
+
 
 }
 

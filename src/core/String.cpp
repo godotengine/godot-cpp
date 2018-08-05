@@ -219,7 +219,7 @@ bool String::begins_with_char_array(const char *p_char_array) const {
 PoolStringArray String::bigrams() const {
 	godot_array arr = godot::api->godot_string_bigrams(&_godot_string);
 
-	return *(PoolStringArray *)&arr;
+	return *(Array *)&arr;
 }
 
 String String::c_escape() const {
@@ -479,13 +479,19 @@ float String::similarity(String text) const {
 PoolStringArray String::split(String divisor, bool allow_empty) const {
 	godot_array arr = godot::api->godot_string_split(&_godot_string, &divisor._godot_string);
 
-	return *(PoolStringArray *)&arr;
+	return *(Array *)&arr;
+}
+
+PoolIntArray String::split_ints(String divisor, bool allow_empty) const {
+	godot_array arr = godot::api->godot_string_split_floats(&_godot_string, &divisor._godot_string);
+
+	return *(Array *)&arr;
 }
 
 PoolRealArray String::split_floats(String divisor, bool allow_empty) const {
 	godot_array arr = godot::api->godot_string_split_floats(&_godot_string, &divisor._godot_string);
 
-	return *(PoolRealArray *)&arr;
+	return *(Array *)&arr;
 }
 
 String String::strip_edges(bool left, bool right) const {
