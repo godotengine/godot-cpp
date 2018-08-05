@@ -633,7 +633,11 @@ def generate_icall_implementation(icalls):
         
         if ret_type != "void":
             if is_class_type(ret_type):
-                source.append("\treturn (Object *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, ret);")
+                source.append("\tif (ret) {")
+                source.append("\t\treturn (Object *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, ret);")
+                source.append("\t}")
+                source.append("")
+                source.append("\treturn (Object *) ret;")
             else:
                 source.append("\treturn ret;")
         
