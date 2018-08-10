@@ -47,14 +47,13 @@ static float _parse_col(const String& p_str, int p_ofs) {
 uint32_t Color::to_32() const
 {
 
-	uint32_t c=(uint8_t)(a*255);
-	c<<=8;
-	c|=(uint8_t)(r*255);
+	uint32_t c=(uint8_t)(r*255);
 	c<<=8;
 	c|=(uint8_t)(g*255);
 	c<<=8;
 	c|=(uint8_t)(b*255);
-
+	c<<=8;
+	c|=(uint8_t)(a*255);
 	return c;
 }
 
