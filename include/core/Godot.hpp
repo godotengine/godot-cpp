@@ -6,7 +6,7 @@
 
 #include <gdnative_api_struct.gen.h>
 #include <nativescript/godot_nativescript.h>
-
+#include <typeinfo>
 
 #include "CoreTypes.hpp"
 #include "Variant.hpp"
