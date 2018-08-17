@@ -1,6 +1,6 @@
 #!python
 
-import os, subprocess, platform
+import os, subprocess, platform, sys
 
 
 def add_sources(sources, dir, extension):
@@ -8,80 +8,95 @@ def add_sources(sources, dir, extension):
       if f.endswith('.' + extension):
           sources.append(dir + '/' + f)
 
+# Try to detect the host platform automatically
+# This is used if no `platform` argument is passed
+if sys.platform.startswith('linux'):
+    host_platform = 'linux'
+elif sys.platform == 'darwin':
+    host_platform = 'osx'
+elif sys.platform == 'win32':
+    host_platform = 'windows'
+else:
+    raise ValueError('Could not detect platform automatically, please specify with platform=<platform>')
+
+opts = Variables([], ARGUMENTS)
+
+opts.Add(EnumVariable('platform', 'Target platform', host_platform, ('linux', 'osx', 'windows')))
+opts.Add(EnumVariable('bits', 'Target platform bits', 'default', ('default', '32', '64')))
+opts.Add(BoolVariable('use_llvm', 'Use the LLVM compiler - only effective when targeting Linux', False))
+opts.Add(BoolVariable('use_mingw', 'Use the MinGW compiler - only effective on Windows', False))
+# Must be the same setting as used for cpp_bindings
+opts.Add(EnumVariable('target', 'Compilation target', 'debug', ('debug', 'release')))
+opts.Add(PathVariable('headers_dir', 'Path to the directory containing Godot headers', 'godot_headers'))
 
 env = Environment()
-host_platform = platform.system()
-target_platform = ARGUMENTS.get('p', ARGUMENTS.get('platform', 'linux'))
-target_arch = ARGUMENTS.get('a', ARGUMENTS.get('arch', '64'))
-# default to debug build, must be same setting as used for cpp_bindings
-target = ARGUMENTS.get('target', 'debug')
-# Local dependency paths, adapt them to your setup
-godot_headers = ARGUMENTS.get('headers', 'godot_headers')
-result_path = 'bin'
-result_name = ARGUMENTS.get('n', ARGUMENTS.get('name', os.path.relpath('.', '..')))
+opts.Update(env)
+Help(opts.GenerateHelpText(env))
 
+is64 = sys.maxsize > 2**32
+if env['bits'] == 'default':
+    env['bits'] = '64' if is64 else '32'
 
-if target_platform == 'linux':
-    result_name += '.linux.' + target_arch
-
-    if ARGUMENTS.get('use_llvm', 'no') == 'yes':
+if env['platform'] == 'linux':
+    if env['use_llvm']:
         env['CXX'] = 'clang++'
 
-    env.Append(CCFLAGS = [ '-fPIC', '-g', '-std=c++14', '-Wwrite-strings' ])
-    env.Append(LINKFLAGS = [ '-Wl,-R,\'$$ORIGIN\'' ])
+    env.Append(CCFLAGS=['-fPIC', '-g', '-std=c++14', '-Wwrite-strings'])
+    env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
 
-    if target == 'debug':
-        env.Append(CCFLAGS = ['-Og'])
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-Og'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
+
+    if env['bits'] == '64':
+        env.Append(CCFLAGS=['-m64'])
+        env.Append(LINKFLAGS=['-m64'])
+    elif env['bits'] == '32':
+        env.Append(CCFLAGS=['-m32'])
+        env.Append(LINKFLAGS=['-m32'])
+
+elif env['platform'] == 'osx':
+    if env['bits'] == '32':
+        raise ValueError('Only 64-bit builds are supported for the macOS target.')
+
+    env.Append(CCFLAGS=['-g', '-std=c++14', '-arch', 'x86_64'])
+    env.Append(LINKFLAGS=['-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup'])
+
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-Og'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
+
+elif env['platform'] == 'windows':
+    # This makes sure to keep the session environment variables on Windows
+    # This way, you can run SCons in a Visual Studio 2017 prompt and it will find all the required tools
+    if env['bits'] == '64':
+        env.Override(os.environ)
+        env.Append(TARGET_ARCH='amd64')
+    elif env['bits'] == '32':
+        env.Override(os.environ)
+        env.Append(TARGET_ARCH='x86')
+
+    if host_platform == 'windows' and not env['use_mingw']:
+        # MSVC
+        env.Append(LINKFLAGS=['/WX'])
+        if env['target'] == 'debug':
+            env.Append(CCFLAGS=['/EHsc', '/D_DEBUG', '/MDd'])
+        elif env['target'] == 'release':
+            env.Append(CCFLAGS=['/O2', '/EHsc', '/DNDEBUG', '/MD'])
     else:
-        env.Append(CCFLAGS = ['-O3'])
+        # MinGW
+        if env['bits'] == '64':
+            env['CXX'] = 'x86_64-w64-mingw32-g++'
+        elif env['bits'] == '32':
+            env['CXX'] = 'i686-w64-mingw32-g++'
 
-    if target_arch == '32':
-        env.Append(CCFLAGS = [ '-m32' ])
-        env.Append(LINKFLAGS = [ '-m32' ])
-    elif target_arch == '64':
-        env.Append(CCFLAGS = [ '-m64' ])
-        env.Append(LINKFLAGS = [ '-m64' ])
-
-elif target_platform == 'windows':
-    # This makes sure to keep the session environment variables on windows,
-    # that way you can run scons in a vs 2017 prompt and it will find all the required tools
-    if (target_arch == '64'):
-        env = Environment(ENV = os.environ, TARGET_ARCH='amd64')
-    else:
-        env = Environment(ENV = os.environ, TARGET_ARCH='x86')
-
-    result_name += '.windows.' + target_arch
-
-    if host_platform == 'Windows':
-        result_name += '.lib'
-
-        env.Append(LINKFLAGS = [ '/WX' ])
-        if target == 'debug':
-            env.Append(CCFLAGS = ['/EHsc', '/D_DEBUG', '/MDd' ])
-        else:
-            env.Append(CCFLAGS = ['/O2', '/EHsc', '/DNDEBUG', '/MD' ])
-    else:
-        if target_arch == '32':
-            env['CXX']='i686-w64-mingw32-g++'
-        elif target_arch == '64':
-            env['CXX']='x86_64-w64-mingw32-g++'
-
-        env.Append(CCFLAGS = [ '-g', '-O3', '-std=c++14', '-Wwrite-strings' ])
-        env.Append(LINKFLAGS = [ '--static', '-Wl,--no-undefined', '-static-libgcc', '-static-libstdc++' ])
-
-elif target_platform == 'osx':
-    if ARGUMENTS.get('use_llvm', 'no') == 'yes':
-        env['CXX'] = 'clang++'
-
-    # Only 64-bits is supported for OS X
-    target_arch = '64'
-    result_name += '.osx.' + target_arch
-
-    env.Append(CCFLAGS = [ '-g','-O3', '-std=c++14', '-arch', 'x86_64' ])
-    env.Append(LINKFLAGS = [ '-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup' ])
+        env.Append(CCFLAGS=['-g', '-O3', '-std=c++14', '-Wwrite-strings'])
+        env.Append(LINKFLAGS=['--static', '-Wl,--no-undefined', '-static-libgcc', '-static-libstdc++'])
 
 
-env.Append(CPPPATH=['.', godot_headers, 'include', 'include/core'])
+env.Append(CPPPATH=['.', env['headers_dir'], 'include', 'include/core'])
 
 # Generate bindings?
 json_api_file = ''
@@ -92,8 +107,8 @@ else:
     json_api_file = os.path.join(os.getcwd(), 'godot_api.json')
 
 if ARGUMENTS.get('generate_bindings', 'no') == 'yes':
-    # actually create the bindings here
-    
+    # Actually create the bindings here
+
     import binding_generator
 
     binding_generator.generate_bindings(json_api_file)
@@ -102,6 +117,7 @@ sources = []
 add_sources(sources, 'src/core', 'cpp')
 add_sources(sources, 'src', 'cpp')
 
-
-library = env.StaticLibrary(target=result_path + '/' + result_name, source=sources)
+library = env.StaticLibrary(
+    target='bin/' + 'libgodot-cpp.{}.{}.{}'.format(env['platform'], env['target'], env['bits']), source=sources
+)
 Default(library)
