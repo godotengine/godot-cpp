@@ -1,6 +1,6 @@
 #!python
 
-import os, subprocess, platform
+import os, subprocess, platform, sys
 
 
 def add_sources(sources, dir, extension):
@@ -21,7 +21,7 @@ result_path = 'bin'
 result_name = ARGUMENTS.get('n', ARGUMENTS.get('name', os.path.relpath('.', '..')))
 
 
-if target_platform == 'linux':
+if target_platform == 'linux' or platform == "x11":
     result_name += '.linux.' + target_arch
 
     env['CXX']='g++'
@@ -80,6 +80,9 @@ elif target_platform == 'osx':
 
     env.Append(CCFLAGS = [ '-g','-O3', '-std=c++14', '-arch', 'x86_64' ])
     env.Append(LINKFLAGS = [ '-arch', 'x86_64', '-framework', 'Cocoa', '-Wl,-undefined,dynamic_lookup' ])
+else:
+    print("The only supported targets are 'osx', 'linux' and 'windows'.")
+    sys.exit(255)    
 
 
 env.Append(CPPPATH=['.', godot_headers, 'include', 'include/gen', 'include/core'])
