@@ -81,7 +81,7 @@ void Vector2::normalize()
 {
 	real_t l = x*x + y*y;
 	if (l != 0) {
-		l = (l);
+		l = sqrt(l);
 		x /= l;
 		y /= l;
 	}
