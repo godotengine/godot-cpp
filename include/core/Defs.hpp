@@ -113,7 +113,7 @@ typedef float real_t;
 #endif
 
 #ifndef WARN_PRINTS
-#define WARN_PRINTS(msg) WARN_PRINT(msg.utf8().get_data())
+#define WARN_PRINTS(msg) WARN_PRINT((msg).utf8().get_data())
 #endif
 
 #ifndef ERR_PRINT
@@ -121,7 +121,7 @@ typedef float real_t;
 #endif
 
 #ifndef ERR_PRINTS
-#define ERR_PRINTS(msg) ERR_PRINT(msg.utf8().get_data())
+#define ERR_PRINTS(msg) ERR_PRINT((msg).utf8().get_data())
 #endif
 
 #ifndef ERR_FAIL
