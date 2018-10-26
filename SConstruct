@@ -33,6 +33,15 @@ env = Environment()
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
 
+# This makes sure to keep the session environment variables on Windows
+# This way, you can run SCons in a Visual Studio 2017 prompt and it will find all the required tools
+if env['platform'] == 'windows':
+    if env['bits'] == '64':
+        env = Environment(TARGET_ARCH='amd64')
+    elif env['bits'] == '32':
+        env = Environment(TARGET_ARCH='x86')
+    opts.Update(env)
+
 is64 = sys.maxsize > 2**32
 if env['bits'] == 'default':
     env['bits'] = '64' if is64 else '32'
@@ -69,15 +78,6 @@ elif env['platform'] == 'osx':
         env.Append(CCFLAGS=['-O3'])
 
 elif env['platform'] == 'windows':
-    # This makes sure to keep the session environment variables on Windows
-    # This way, you can run SCons in a Visual Studio 2017 prompt and it will find all the required tools
-    if env['bits'] == '64':
-        env.Override(os.environ)
-        env.Append(TARGET_ARCH='amd64')
-    elif env['bits'] == '32':
-        env.Override(os.environ)
-        env.Append(TARGET_ARCH='x86')
-
     if host_platform == 'windows' and not env['use_mingw']:
         # MSVC
         env.Append(LINKFLAGS=['/WX'])
