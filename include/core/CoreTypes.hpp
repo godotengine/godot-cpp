@@ -21,5 +21,7 @@
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 
+#include "Wrapped.hpp"
+
 
 #endif // CORETYPES_H
