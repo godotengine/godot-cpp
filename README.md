@@ -1,11 +1,14 @@
 # godot-cpp
 C++ bindings for the Godot script API
 
-Note that the master branch in this repository is for use with Godot build from its latest master.
-If you need to support older versions of Godot use the relevant branch for that version in this repository.
+The instructions below feature the new NativeScript 1.1 class structure and will only work for modules created for Godot 3.1 and later. Use the following branches for older implementations:
 
-The instructions below feature the new NativeScript 1.1 class structure and will only work for modules created for Godot 3.1 and later.
+Version | Branch
+--- | ---
+**Godot 3.0 Nativescript 1.0** | [3.0](https://github.com/GodotNativeTools/godot-cpp/tree/3.0)
+**Godot 3.1 Nativescript 1.0** | [nativescript-1.0](https://github.com/GodotNativeTools/godot-cpp/tree/nativescript-1.0)
 
+Index:
 -   [**Getting Started**](#getting-started)
 -   [**Creating a simple class**](#creating-a-simple-class)
 
@@ -43,13 +46,13 @@ SimpleLibrary/
 ### Updating the api.json
 Our api.json file contains meta data of all the classes that are part of the Godot core and are needed to generate the C++ binding classes for use in GDNative modules. 
 
-A file is supplied in our repository for your convinience but if you are running a custom build of Godot and need access to classes that have recent changes a new api.json file must be generated. You do this by starting your Godot executable with the following parameters:
+This file is supplied with our godot_headers repository for your convinience but if you are running a custom build of Godot and need access to classes that have recent changes a new api.json file must be generated. You do this by starting your Godot executable with the following parameters:
 
 ```
 $ godot --gdnative-generate-json-api api.json
 ```
 
-Now copy the api.json file into your folder structure so its easy to access.
+Now copy the api.json file into your folder structure so its easy to access. **Note** the remark below for the extra ```custom_api_file``` command line parameter needed to tell scons where to find your file.
 
 ### Compiling the cpp bindings library
 The final step is to compile our cpp bindings library:
