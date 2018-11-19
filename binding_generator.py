@@ -541,6 +541,8 @@ def generate_icall_header(icalls):
             
             if is_core_type(arg):
                 method_signature += arg + "&"
+            elif arg == "int":
+                method_signature += "int64_t "
             elif arg == "float":
                 method_signature += "double "
             elif is_primitive(arg):
@@ -594,6 +596,8 @@ def generate_icall_implementation(icalls):
             
             if is_core_type(arg):
                 method_signature += arg + "& "
+            elif arg == "int":
+                method_signature += "int64_t "
             elif arg == "float":
                 method_signature += "double "
             elif is_primitive(arg):
@@ -680,7 +684,7 @@ def generate_type_registry(classes):
         if base_class_name == "":
             base_class_type_hash = "0"
 
-        source.append("\tgodot::_TagDB::register_global_type(\"" + class_name + "\", " + class_type_hash + ", " + base_class_type_hash + ");")
+        source.append("\tgodot::_TagDB::register_global_type(\"" + c["name"] + "\", " + class_type_hash + ", " + base_class_type_hash + ");")
 
     source.append("}")
 
