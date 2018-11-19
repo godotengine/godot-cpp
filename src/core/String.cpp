@@ -256,15 +256,15 @@ void String::erase(int position, int chars) {
 }
 
 int String::find(String p_what, int p_from) const {
-	return godot::api->godot_string_find(&_godot_string, p_what._godot_string);
+	return godot::api->godot_string_find_from(&_godot_string, p_what._godot_string, p_from);
 }
 
-int String::find_last(String what) const {
-	return godot::api->godot_string_find_last(&_godot_string, what._godot_string);
+int String::find_last(String p_what) const {
+	return godot::api->godot_string_find_last(&_godot_string, p_what._godot_string);
 }
 
-int String::findn(String what, int from) const {
-	return godot::api->godot_string_findn(&_godot_string, what._godot_string);
+int String::findn(String p_what, int p_from) const {
+	return godot::api->godot_string_findn_from(&_godot_string, p_what._godot_string, p_from);
 }
 
 String String::format(Variant values) const {
@@ -443,13 +443,12 @@ String String::replacen(String what, String forwhat) const {
 	return new_string;
 }
 
-int String::rfind(String what, int from) const {
-	return godot::api->godot_string_rfind(&_godot_string, what._godot_string);
+int String::rfind(String p_what, int p_from) const {
+	return godot::api->godot_string_rfind_from(&_godot_string, p_what._godot_string, p_from);
 }
 
-int String::rfindn(String what, int from) const {
-	// From -1
-	return godot::api->godot_string_rfindn(&_godot_string, what._godot_string);
+int String::rfindn(String p_what, int p_from) const {
+	return godot::api->godot_string_rfindn_from(&_godot_string, p_what._godot_string, p_from);
 }
 
 String String::right(int position) const {
@@ -543,4 +542,18 @@ String String::xml_unescape() const {
 
 	return new_string;
 }
+
+signed char String::casecmp_to(String p_str) const {
+	return godot::api->godot_string_casecmp_to(&_godot_string, &p_str._godot_string);
+}
+
+signed char String::nocasecmp_to(String p_str) const {
+	return godot::api->godot_string_nocasecmp_to(&_godot_string, &p_str._godot_string);
+
+}
+
+signed char String::naturalnocasecmp_to(String p_str) const {
+	return godot::api->godot_string_naturalnocasecmp_to(&_godot_string, &p_str._godot_string);
+}
+
 }

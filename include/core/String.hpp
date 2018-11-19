@@ -68,8 +68,6 @@ public:
 	CharString utf8() const;
 	CharString ascii(bool p_extended = false) const;
 
-	int64_t find(String p_what) const;
-	int64_t find_from(String p_what, int64_t p_from) const;
 	bool begins_with(String &s) const;
 	bool begins_with_char_array(const char *p_char_array) const;
 	PoolStringArray bigrams() const;
@@ -131,6 +129,9 @@ public:
 	String to_upper() const;
 	String xml_escape() const;
 	String xml_unescape() const;
+	signed char casecmp_to(String p_str) const;
+	signed char nocasecmp_to(String p_str) const;
+	signed char naturalnocasecmp_to(String p_str) const;
 
 };
 
