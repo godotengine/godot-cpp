@@ -625,7 +625,7 @@ def generate_icall_implementation(icalls):
             if is_primitive(arg) or is_core_type(arg):
                 wrapped_argument += "(void *) &arg" + str(i)
             else:
-                wrapped_argument += "(void *) arg" + str(i) + "->_owner"
+                wrapped_argument += "(void *) (arg" + str(i) + ") ? arg" + str(i) + "->_owner : nullptr"
             
             wrapped_argument += ","
             source.append(wrapped_argument)
