@@ -2,11 +2,11 @@
 
 #include "String.hpp"
 
+#include "Basis.hpp"
+
 #include <stdlib.h>
 
 #include <cmath>
-
-#include "Basis.hpp"
 
 namespace godot {
 
@@ -209,6 +209,11 @@ Vector3 Vector3::cubic_interpolate(const Vector3& b, const Vector3& pre_a, const
 	return out;
 }
 
+Vector3 Vector3::bounce(const Vector3& p_normal) const
+{
+	return -reflect(p_normal);
+}
+
 real_t Vector3::length() const
 {
 	real_t x2=x*x;
@@ -242,6 +247,11 @@ real_t Vector3::dot(const Vector3& b) const
 	return x*b.x + y*b.y + z*b.z;
 }
 
+real_t Vector3::angle_to(const Vector3& b) const
+{
+	return std::atan2(cross(b).length(), dot(b));
+}
+
 Vector3 Vector3::floor() const
 {
 	return Vector3(::floor(x), ::floor(y), ::floor(z));
@@ -252,7 +262,19 @@ Vector3 Vector3::inverse() const
 	return Vector3( 1.0/x, 1.0/y, 1.0/z );
 }
 
+bool Vector3::is_normalized() const
+{
+	return std::abs(length_squared() - 1.0) < 0.00001;
+}
 
+Basis Vector3::outer(const Vector3& b) const
+{
+	Vector3 row0(x * b.x, x * b.y, x * b.z);
+	Vector3 row1(y * b.x, y * b.y, y * b.z);
+	Vector3 row2(z * b.x, z * b.y, z * b.z);
+
+	return Basis(row0, row1, row2);
+}
 
 
 int Vector3::max_axis() const
