@@ -7,6 +7,7 @@
 
 namespace godot {
 
+class Basis;
 
 struct Vector3 {
 
@@ -79,6 +80,8 @@ struct Vector3 {
 
 	Vector3 cubic_interpolate(const Vector3& b, const Vector3& pre_a, const Vector3& post_b, const real_t t) const;
 
+	Vector3 bounce(const Vector3& p_normal) const;
+
 	real_t length() const;
 
 	real_t length_squared() const;
@@ -89,10 +92,15 @@ struct Vector3 {
 
 	real_t dot(const Vector3& b) const;
 
+	real_t angle_to(const Vector3& b) const;
+
 	Vector3 floor() const;
 
 	Vector3 inverse() const;
 
+	bool is_normalized() const;
+
+	Basis outer(const Vector3& b) const;
 
 
 
