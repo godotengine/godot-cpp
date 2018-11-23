@@ -12,8 +12,8 @@
 #include "Plane.hpp"
 #include "PoolArrays.hpp"
 #include "Quat.hpp"
-#include "Rect2.hpp"
 #include "RID.hpp"
+#include "Rect2.hpp"
 #include "String.hpp"
 #include "Transform.hpp"
 #include "Transform2D.hpp"
@@ -22,6 +22,5 @@
 #include "Vector3.hpp"
 
 #include "Wrapped.hpp"
-
 
 #endif // CORETYPES_H

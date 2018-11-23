@@ -1,7 +1,6 @@
 #ifndef DEFS_H
 #define DEFS_H
 
-
 namespace godot {
 
 enum class Error {
@@ -15,7 +14,7 @@ enum class Error {
 	ERR_FILE_NOT_FOUND,
 	ERR_FILE_BAD_DRIVE,
 	ERR_FILE_BAD_PATH,
-	ERR_FILE_NO_PERMISSION,	// (10)
+	ERR_FILE_NO_PERMISSION, // (10)
 	ERR_FILE_ALREADY_IN_USE,
 	ERR_FILE_CANT_OPEN,
 	ERR_FILE_CANT_WRITE,
@@ -25,12 +24,12 @@ enum class Error {
 	ERR_FILE_MISSING_DEPENDENCIES,
 	ERR_FILE_EOF,
 	ERR_CANT_OPEN, ///< Can't open a resource/socket/file
-	ERR_CANT_CREATE,		// (20)
+	ERR_CANT_CREATE, // (20)
 	ERR_QUERY_FAILED,
 	ERR_ALREADY_IN_USE,
 	ERR_LOCKED, ///< resource is locked
 	ERR_TIMEOUT,
-	ERR_CANT_CONNECT,		// (25)
+	ERR_CANT_CONNECT, // (25)
 	ERR_CANT_RESOLVE,
 	ERR_CONNECTION_ERROR,
 	ERR_CANT_AQUIRE_RESOURCE,
@@ -45,12 +44,12 @@ enum class Error {
 	ERR_METHOD_NOT_FOUND,
 	ERR_LINK_FAILED,
 	ERR_SCRIPT_FAILED,
-	ERR_CYCLIC_LINK,		// (40)
+	ERR_CYCLIC_LINK, // (40)
 	ERR_INVALID_DECLARATION,
 	ERR_DUPLICATE_SYMBOL,
 	ERR_PARSE_ERROR,
 	ERR_BUSY,
-	ERR_SKIP,			// (45)
+	ERR_SKIP, // (45)
 	ERR_HELP, ///< user requested help!!
 	ERR_BUG, ///< a bug in the software certainly happened, due to a double check failing or unexpected behavior.
 	ERR_PRINTER_ON_FIRE, /// the parallel port printer is engulfed in flames
@@ -58,50 +57,50 @@ enum class Error {
 	ERR_WTF = ERR_OMFG_THIS_IS_VERY_VERY_BAD ///< short version of the above
 };
 
-	namespace helpers {
-		template <typename T, typename ValueT>
-		T append_all (T appendable, ValueT value) {
-			appendable.append(value);
-			return appendable;
-		}
-
-		template <typename T, typename ValueT, typename... Args>
-		T append_all (T appendable, ValueT value, Args... args) {
-			appendable.append(value);
-			return append_all(appendable, args...);
-		}
-
-		template <typename T>
-		T append_all (T appendable) {
-			return appendable;
-		}
-
-		template <typename KV, typename KeyT, typename ValueT>
-		KV add_all (KV kv, KeyT key, ValueT value) {
-			kv[key] = value;
-			return kv;
-		}
-
-		template <typename KV, typename KeyT, typename ValueT, typename... Args>
-		KV add_all (KV kv, KeyT key, ValueT value, Args... args) {
-			kv[key] = value;
-			return add_all(kv, args...);
-		}
-
-		template <typename KV>
-		KV add_all (KV kv) {
-			return kv;
-		}
-	}
-
+namespace helpers {
+template <typename T, typename ValueT>
+T append_all(T appendable, ValueT value) {
+	appendable.append(value);
+	return appendable;
 }
+
+template <typename T, typename ValueT, typename... Args>
+T append_all(T appendable, ValueT value, Args... args) {
+	appendable.append(value);
+	return append_all(appendable, args...);
+}
+
+template <typename T>
+T append_all(T appendable) {
+	return appendable;
+}
+
+template <typename KV, typename KeyT, typename ValueT>
+KV add_all(KV kv, KeyT key, ValueT value) {
+	kv[key] = value;
+	return kv;
+}
+
+template <typename KV, typename KeyT, typename ValueT, typename... Args>
+KV add_all(KV kv, KeyT key, ValueT value, Args... args) {
+	kv[key] = value;
+	return add_all(kv, args...);
+}
+
+template <typename KV>
+KV add_all(KV kv) {
+	return kv;
+}
+} // namespace helpers
+
+} // namespace godot
 
 #include <stdio.h>
 
 typedef float real_t;
 
 #define CMP_EPSILON 0.00001
-#define CMP_EPSILON2 (CMP_EPSILON*CMP_EPSILON)
+#define CMP_EPSILON2 (CMP_EPSILON * CMP_EPSILON)
 #define Math_PI 3.14159265358979323846
 
 #define _PLANE_EQ_DOT_EPSILON 0.999
@@ -109,7 +108,9 @@ typedef float real_t;
 
 // ERR/WARN macros
 #ifndef WARN_PRINT
-#define WARN_PRINT(msg) fprintf(stdout, "ERROR: %s\n", msg); fflush(stdout)
+#define WARN_PRINT(msg)                  \
+	fprintf(stdout, "ERROR: %s\n", msg); \
+	fflush(stdout)
 #endif
 
 #ifndef WARN_PRINTS
@@ -129,24 +130,51 @@ typedef float real_t;
 #endif
 
 #ifndef ERR_FAIL_V
-#define ERR_FAIL_V(a) { ERR_FAIL(); return a; }
+#define ERR_FAIL_V(a) \
+	{                 \
+		ERR_FAIL();   \
+		return a;     \
+	}
 #endif
 
 #ifndef ERR_FAIL_COND
-#define ERR_FAIL_COND(a) do { if (a) { ERR_PRINT(#a); return; } } while(0)
+#define ERR_FAIL_COND(a)   \
+	do {                   \
+		if (a) {           \
+			ERR_PRINT(#a); \
+			return;        \
+		}                  \
+	} while (0)
 #endif
 
 #ifndef ERR_FAIL_COND_V
-#define ERR_FAIL_COND_V(cond, ret) do { if (cond) { ERR_PRINT(#cond); return ret; } } while(0)
+#define ERR_FAIL_COND_V(cond, ret) \
+	do {                           \
+		if (cond) {                \
+			ERR_PRINT(#cond);      \
+			return ret;            \
+		}                          \
+	} while (0)
 #endif
 
 #ifndef ERR_FAIL_INDEX
-#define ERR_FAIL_INDEX(a, b) do { if (a < 0 || a >= b) { ERR_FAIL(); return; } } while(0)
+#define ERR_FAIL_INDEX(a, b)   \
+	do {                       \
+		if (a < 0 || a >= b) { \
+			ERR_FAIL();        \
+			return;            \
+		}                      \
+	} while (0)
 #endif
 
 #ifndef ERR_FAIL_INDEX_V
-#define ERR_FAIL_INDEX_V(a, b, c) do { if (a < 0 || a >= b) { ERR_FAIL(); return c; } } while(0)
+#define ERR_FAIL_INDEX_V(a, b, c) \
+	do {                          \
+		if (a < 0 || a >= b) {    \
+			ERR_FAIL();           \
+			return c;             \
+		}                         \
+	} while (0)
 #endif
-
 
 #endif // DEFS_H

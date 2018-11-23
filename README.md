@@ -9,8 +9,17 @@ Version | Branch
 **Godot 3.1 Nativescript 1.0** | [nativescript-1.0](https://github.com/GodotNativeTools/godot-cpp/tree/nativescript-1.0)
 
 Index:
+-   [**Contributing**](#contributing)
 -   [**Getting Started**](#getting-started)
 -   [**Creating a simple class**](#creating-a-simple-class)
+
+## Contributing
+We greatly appreciate help in maintaining and extending this project. 
+If you wish to help out ensure you have an account on Github and create a "fork" of the this repo.
+Rémi "Akien" Verschelde wrote an excellent bit of documentation for the main Godot project on this: 
+https://docs.godotengine.org/en/3.0/community/contributing/pr_workflow.html
+
+It is advisible to also install clang-format and copy the files in `misc/hooks` into `.git/hooks` so format checking is done before your changes are submitted.
 
 ## Getting Started
 

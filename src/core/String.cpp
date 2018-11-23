@@ -1,10 +1,10 @@
 #include "String.hpp"
 
 #include "Array.hpp"
+#include "GodotGlobal.hpp"
 #include "NodePath.hpp"
 #include "PoolArrays.hpp"
 #include "Variant.hpp"
-#include "GodotGlobal.hpp"
 
 #include <gdnative/string.h>
 
@@ -169,7 +169,7 @@ char *String::alloc_c_string() const {
 
 	int length = godot::api->godot_char_string_length(&contents);
 
-	char *result = (char *) godot::api->godot_alloc(length + 1);
+	char *result = (char *)godot::api->godot_alloc(length + 1);
 
 	if (result) {
 		memcpy(result, godot::api->godot_char_string_get_data(&contents), length + 1);
@@ -549,11 +549,10 @@ signed char String::casecmp_to(String p_str) const {
 
 signed char String::nocasecmp_to(String p_str) const {
 	return godot::api->godot_string_nocasecmp_to(&_godot_string, &p_str._godot_string);
-
 }
 
 signed char String::naturalnocasecmp_to(String p_str) const {
 	return godot::api->godot_string_naturalnocasecmp_to(&_godot_string, &p_str._godot_string);
 }
 
-}
+} // namespace godot
