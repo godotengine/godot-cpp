@@ -142,7 +142,10 @@ Variant::Variant(const RID& p_rid)
 
 Variant::Variant(const Object* p_object)
 {
-	godot::api->godot_variant_new_object(&_godot_variant, p_object->_owner);
+	if (p_object)
+		godot::api->godot_variant_new_object(&_godot_variant, p_object->_owner);
+	else
+		godot::api->godot_variant_new_nil(&_godot_variant);
 }
 
 Variant::Variant(const Dictionary& p_dictionary)
