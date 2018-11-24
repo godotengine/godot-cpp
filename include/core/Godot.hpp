@@ -24,7 +24,7 @@ namespace godot {
 
 template <class T>
 T *as(const Object *obj) {
-	return (T *)godot::nativescript_api->godot_nativescript_get_userdata(obj->_owner);
+	return (obj) ? (T *)godot::nativescript_api->godot_nativescript_get_userdata(obj->_owner) : nullptr;
 }
 
 template <class T>
@@ -428,6 +428,9 @@ void register_signal(String name, Args... varargs) {
 #ifndef GODOT_CPP_NO_OBJECT_CAST
 template <class T>
 T *Object::cast_to(const Object *obj) {
+	if (!obj)
+		return nullptr;
+
 	size_t have_tag = (size_t)godot::nativescript_1_1_api->godot_nativescript_get_type_tag(obj->_owner);
 
 	if (have_tag) {
