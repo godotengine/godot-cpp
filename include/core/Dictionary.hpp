@@ -11,10 +11,11 @@ namespace godot {
 
 class Dictionary {
 	godot_dictionary _godot_dictionary;
+
 public:
 	Dictionary();
-	Dictionary(const Dictionary & other);
-	Dictionary & operator=(const Dictionary & other);
+	Dictionary(const Dictionary &other);
+	Dictionary &operator=(const Dictionary &other);
 
 	template <class... Args>
 	static Dictionary make(Args... args) {
@@ -25,19 +26,19 @@ public:
 
 	bool empty() const;
 
-	void erase(const Variant& key);
+	void erase(const Variant &key);
 
-	bool has(const Variant& key) const;
+	bool has(const Variant &key) const;
 
-	bool has_all(const Array& keys) const;
+	bool has_all(const Array &keys) const;
 
 	uint32_t hash() const;
 
 	Array keys() const;
 
-	Variant &operator [](const Variant& key);
+	Variant &operator[](const Variant &key);
 
-	const Variant &operator [](const Variant& key) const;
+	const Variant &operator[](const Variant &key) const;
 
 	int size() const;
 
@@ -46,9 +47,8 @@ public:
 	Array values() const;
 
 	~Dictionary();
-
 };
 
-}
+} // namespace godot
 
 #endif // DICTIONARY_H

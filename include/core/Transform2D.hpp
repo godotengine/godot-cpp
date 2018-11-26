@@ -3,7 +3,6 @@
 
 #include "Vector2.hpp"
 
-
 namespace godot {
 
 typedef Vector2 Size2;
@@ -24,14 +23,20 @@ struct Transform2D {
 
 	Vector2 elements[3];
 
-	inline real_t tdotx(const Vector2& v) const { return elements[0][0] * v.x + elements[1][0] * v.y; }
-	inline real_t tdoty(const Vector2& v) const { return elements[0][1] * v.x + elements[1][1] * v.y; }
+	inline real_t tdotx(const Vector2 &v) const { return elements[0][0] * v.x + elements[1][0] * v.y; }
+	inline real_t tdoty(const Vector2 &v) const { return elements[0][1] * v.x + elements[1][1] * v.y; }
 
-	inline const Vector2& operator[](int p_idx) const { return elements[p_idx]; }
-	inline Vector2& operator[](int p_idx) { return elements[p_idx]; }
+	inline const Vector2 &operator[](int p_idx) const { return elements[p_idx]; }
+	inline Vector2 &operator[](int p_idx) { return elements[p_idx]; }
 
-	inline Vector2 get_axis(int p_axis) const { ERR_FAIL_INDEX_V(p_axis,3,Vector2()); return elements[p_axis]; }
-	inline void set_axis(int p_axis,const Vector2& p_vec) { ERR_FAIL_INDEX(p_axis,3); elements[p_axis]=p_vec; }
+	inline Vector2 get_axis(int p_axis) const {
+		ERR_FAIL_INDEX_V(p_axis, 3, Vector2());
+		return elements[p_axis];
+	}
+	inline void set_axis(int p_axis, const Vector2 &p_vec) {
+		ERR_FAIL_INDEX(p_axis, 3);
+		elements[p_axis] = p_vec;
+	}
 
 	void invert();
 	Transform2D inverse() const;
@@ -41,24 +46,24 @@ struct Transform2D {
 
 	void set_rotation(real_t p_phi);
 	real_t get_rotation() const;
-	void set_rotation_and_scale(real_t p_phi,const Size2& p_scale);
+	void set_rotation_and_scale(real_t p_phi, const Size2 &p_scale);
 	void rotate(real_t p_phi);
 
-	void scale(const Size2& p_scale);
-	void scale_basis(const Size2& p_scale);
-	void translate( real_t p_tx, real_t p_ty);
-	void translate( const Vector2& p_translation );
+	void scale(const Size2 &p_scale);
+	void scale_basis(const Size2 &p_scale);
+	void translate(real_t p_tx, real_t p_ty);
+	void translate(const Vector2 &p_translation);
 
 	real_t basis_determinant() const;
 
 	Size2 get_scale() const;
 
-	inline const Vector2& get_origin() const { return elements[2]; }
-	inline void set_origin(const Vector2& p_origin) { elements[2]=p_origin; }
+	inline const Vector2 &get_origin() const { return elements[2]; }
+	inline void set_origin(const Vector2 &p_origin) { elements[2] = p_origin; }
 
-	Transform2D scaled(const Size2& p_scale) const;
-	Transform2D basis_scaled(const Size2& p_scale) const;
-	Transform2D translated(const Vector2& p_offset) const;
+	Transform2D scaled(const Size2 &p_scale) const;
+	Transform2D basis_scaled(const Size2 &p_scale) const;
+	Transform2D translated(const Vector2 &p_offset) const;
 	Transform2D rotated(real_t p_phi) const;
 
 	Transform2D untranslated() const;
@@ -66,29 +71,32 @@ struct Transform2D {
 	void orthonormalize();
 	Transform2D orthonormalized() const;
 
-	bool operator==(const Transform2D& p_transform) const;
-	bool operator!=(const Transform2D& p_transform) const;
+	bool operator==(const Transform2D &p_transform) const;
+	bool operator!=(const Transform2D &p_transform) const;
 
-	void operator*=(const Transform2D& p_transform);
-	Transform2D operator*(const Transform2D& p_transform) const;
+	void operator*=(const Transform2D &p_transform);
+	Transform2D operator*(const Transform2D &p_transform) const;
 
-	Transform2D interpolate_with(const Transform2D& p_transform, real_t p_c) const;
+	Transform2D interpolate_with(const Transform2D &p_transform, real_t p_c) const;
 
-	Vector2 basis_xform(const Vector2& p_vec) const;
-	Vector2 basis_xform_inv(const Vector2& p_vec) const;
-	Vector2 xform(const Vector2& p_vec) const;
-	Vector2 xform_inv(const Vector2& p_vec) const;
-	Rect2 xform(const Rect2& p_vec) const;
-	Rect2 xform_inv(const Rect2& p_vec) const;
+	Vector2 basis_xform(const Vector2 &p_vec) const;
+	Vector2 basis_xform_inv(const Vector2 &p_vec) const;
+	Vector2 xform(const Vector2 &p_vec) const;
+	Vector2 xform_inv(const Vector2 &p_vec) const;
+	Rect2 xform(const Rect2 &p_vec) const;
+	Rect2 xform_inv(const Rect2 &p_vec) const;
 
 	operator String() const;
 
 	Transform2D(real_t xx, real_t xy, real_t yx, real_t yy, real_t ox, real_t oy);
 
-	Transform2D(real_t p_rot, const Vector2& p_pos);
-	inline Transform2D() { elements[0][0]=1.0; elements[1][1]=1.0; }
+	Transform2D(real_t p_rot, const Vector2 &p_pos);
+	inline Transform2D() {
+		elements[0][0] = 1.0;
+		elements[1][1] = 1.0;
+	}
 };
 
-}
+} // namespace godot
 
 #endif // TRANSFORM2D_H

@@ -132,12 +132,11 @@ public:
 	signed char casecmp_to(String p_str) const;
 	signed char nocasecmp_to(String p_str) const;
 	signed char naturalnocasecmp_to(String p_str) const;
-
 };
 
 String operator+(const char *a, const String &b);
 String operator+(const wchar_t *a, const String &b);
 
-}
+} // namespace godot
 
 #endif // STRING_H

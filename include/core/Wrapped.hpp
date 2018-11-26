@@ -11,6 +11,6 @@ public:
 	size_t _type_tag;
 };
 
-}
+} // namespace godot
 
 #endif // WRAPPED_HPP

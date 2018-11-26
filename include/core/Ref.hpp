@@ -1,9 +1,9 @@
 #ifndef REF_H
 #define REF_H
 
-#include "Variant.hpp"
 #include "GodotGlobal.hpp"
 #include "Reference.hpp"
+#include "Variant.hpp"
 
 namespace godot {
 
@@ -80,7 +80,7 @@ public:
 	operator Variant() const {
 		// Note: the C API handles the cases where the object is a Reference,
 		// so the Variant will be correctly constructed with a RefPtr engine-side
-		return Variant((Object*)reference);
+		return Variant((Object *)reference);
 	}
 
 	void operator=(const Ref &p_from) {
@@ -99,7 +99,7 @@ public:
 		}
 		Ref r;
 		//r.reference = Object::cast_to<T>(refb);
-		r.reference = (T*)refb;
+		r.reference = (T *)refb;
 		ref(r);
 		r.reference = nullptr;
 	}
@@ -107,7 +107,7 @@ public:
 	void operator=(const Variant &p_variant) {
 
 		// TODO We need a safe cast
-		Reference *refb = (Reference *) T::___get_from_variant(p_variant);
+		Reference *refb = (Reference *)T::___get_from_variant(p_variant);
 		if (!refb) {
 			unref();
 			return;
@@ -156,7 +156,7 @@ public:
 
 		reference = nullptr;
 		// TODO We need a safe cast
-		Reference *refb = (Reference *) T::___get_from_variant(p_variant);
+		Reference *refb = (Reference *)T::___get_from_variant(p_variant);
 		if (!refb) {
 			unref();
 			return;
@@ -202,14 +202,13 @@ public:
 
 	// Used exclusively in the bindings to recreate the Ref Godot encapsulates in return values,
 	// without adding to the refcount.
-	inline static Ref<T> __internal_constructor(Object *obj)
-	{
+	inline static Ref<T> __internal_constructor(Object *obj) {
 		Ref<T> r;
-		r.reference = (T*)obj;
+		r.reference = (T *)obj;
 		return r;
 	}
 };
 
-}
+} // namespace godot
 
 #endif

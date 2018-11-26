@@ -9,8 +9,8 @@ class Object;
 
 class RID {
 	godot_rid _godot_rid;
-public:
 
+public:
 	RID();
 
 	RID(Object *p);
@@ -22,15 +22,14 @@ public:
 		return *this != RID();
 	}
 
-	bool operator==(const RID & p_other) const;
-	bool operator!=(const RID & p_other) const;
-	bool operator<(const RID & p_other) const;
-	bool operator>(const RID & p_other) const;
-	bool operator<=(const RID & p_other) const;
-	bool operator>=(const RID & p_other) const;
-
+	bool operator==(const RID &p_other) const;
+	bool operator!=(const RID &p_other) const;
+	bool operator<(const RID &p_other) const;
+	bool operator>(const RID &p_other) const;
+	bool operator<=(const RID &p_other) const;
+	bool operator>=(const RID &p_other) const;
 };
 
-}
+} // namespace godot
 
 #endif // RID_H
