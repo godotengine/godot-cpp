@@ -33,7 +33,7 @@ T *get_wrapper(godot_object *obj) {
 }
 
 #define GODOT_CLASS(Name, Base)                                                                                                                     \
-	\
+                                                                                                                                                    \
 public:                                                                                                                                             \
 	inline static const char *___get_type_name() { return static_cast<const char *>(#Name); }                                                       \
 	enum { ___CLASS_IS_SCRIPT = 1,                                                                                                                  \
@@ -45,13 +45,15 @@ public:                                                                         
 		Name *instance = godot::as<Name>(script->new_());                                                                                           \
 		return instance;                                                                                                                            \
 	}                                                                                                                                               \
+	inline static size_t ___get_id() { return typeid(Name).hash_code(); };                                                                          \
+	inline static size_t ___get_base_id() { return typeid(Base).hash_code(); };                                                                     \
 	inline static const char *___get_base_type_name() { return Base::___get_class_name(); }                                                         \
 	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *)godot::as<Name>(godot::Object::___get_from_variant(a)); } \
-	\
+                                                                                                                                                    \
 private:
 
 #define GODOT_SUBCLASS(Name, Base)                                                                                                                  \
-	\
+                                                                                                                                                    \
 public:                                                                                                                                             \
 	inline static const char *___get_type_name() { return static_cast<const char *>(#Name); }                                                       \
 	enum { ___CLASS_IS_SCRIPT = 1,                                                                                                                  \
@@ -63,9 +65,11 @@ public:                                                                         
 		Name *instance = godot::as<Name>(script->new_());                                                                                           \
 		return instance;                                                                                                                            \
 	}                                                                                                                                               \
+	inline static size_t ___get_id() { return typeid(Name).hash_code(); };                                                                          \
+	inline static size_t ___get_base_id() { return typeid(Base).hash_code(); };                                                                     \
 	inline static const char *___get_base_type_name() { return #Base; }                                                                             \
 	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *)godot::as<Name>(godot::Object::___get_from_variant(a)); } \
-	\
+                                                                                                                                                    \
 private:
 
 template <class T>
@@ -114,7 +118,7 @@ void register_class() {
 	godot_instance_destroy_func destroy = {};
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
-	_TagDB::register_type(typeid(T).hash_code(), typeid(T).hash_code());
+	_TagDB::register_type(T::___get_id(), T::___get_base_id());
 
 	godot::nativescript_api->godot_nativescript_register_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
 	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), (const void *)typeid(T).hash_code());
@@ -129,7 +133,7 @@ void register_tool_class() {
 	godot_instance_destroy_func destroy = {};
 	destroy.destroy_func = _godot_class_destroy_func<T>;
 
-	_TagDB::register_type(typeid(T).hash_code(), typeid(T).hash_code());
+	_TagDB::register_type(T::___get_id(), T::___get_base_id());
 
 	godot::nativescript_api->godot_nativescript_register_tool_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
 	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), (const void *)typeid(T).hash_code());
