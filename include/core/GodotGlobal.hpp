@@ -25,6 +25,8 @@ public:
 	static void nativescript_init(void *handle);
 	static void nativescript_terminate(void *handle);
 
+	static void gdnative_profiling_add_data(const char *p_signature, uint64_t p_time);
+
 	template <class... Args>
 	static void print(const String &fmt, Args... values) {
 		print(fmt.format(Array::make(values...)));
