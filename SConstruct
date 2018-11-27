@@ -21,13 +21,25 @@ else:
 
 opts = Variables([], ARGUMENTS)
 
-opts.Add(EnumVariable('platform', 'Target platform', host_platform, ('linux', 'osx', 'windows')))
+opts.Add(EnumVariable('platform', 'Target platform', host_platform,
+                    allowed_values=('linux', 'osx', 'windows'),
+                    ignorecase=2))
 opts.Add(EnumVariable('bits', 'Target platform bits', 'default', ('default', '32', '64')))
 opts.Add(BoolVariable('use_llvm', 'Use the LLVM compiler - only effective when targeting Linux', False))
 opts.Add(BoolVariable('use_mingw', 'Use the MinGW compiler - only effective on Windows', False))
 # Must be the same setting as used for cpp_bindings
-opts.Add(EnumVariable('target', 'Compilation target', 'debug', ('debug', 'release')))
-opts.Add(PathVariable('headers_dir', 'Path to the directory containing Godot headers', 'godot_headers'))
+opts.Add(EnumVariable('target', 'Compilation target', 'debug',
+                    allowed_values=('debug', 'release'),
+                    ignorecase=2))
+opts.Add(PathVariable('headers_dir', 'Path to the directory containing Godot headers', 'godot_headers', PathVariable.PathisDir))
+opts.Add(BoolVariable('use_custom_api_file', 'Use a custom JSON API file', False))
+opts.Add(PathVariable('custom_api_file', 'Path to the custom JSON API file', '', PathVariable.PathIsFile))
+opts.Add(BoolVariable('generate_bindings', 'Generate GDNative API bindings', False))
+
+unknown = vars.UnknownVariables()
+if unknown:
+    print "Unknown variables:", unknown.keys()
+    Exit(1)
 
 env = Environment()
 opts.Update(env)
@@ -101,21 +113,17 @@ env.Append(CPPPATH=['.', env['headers_dir'], 'include', 'include/gen', 'include/
 # Generate bindings?
 json_api_file = ''
 
-# Generate bindings?
-json_api_file = ''
-
-if ARGUMENTS.get('use_custom_api_file', 'no') == 'yes':
-    json_api_file = ARGUMENTS.get('custom_api_file', '')
+if env['use_custom_api_file']:
+    json_api_file = env['custom_api_file']
 else:
     json_api_file = os.path.join(os.getcwd(), 'godot_headers', 'api.json')
 
-if ARGUMENTS.get('generate_bindings', 'no') == 'yes':
+if env['generate_bindings']:
     # Actually create the bindings here
 
     import binding_generator
 
     binding_generator.generate_bindings(json_api_file)
-
 
 # source to compile
 sources = []
