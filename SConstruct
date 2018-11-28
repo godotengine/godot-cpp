@@ -31,12 +31,12 @@ opts.Add(BoolVariable('use_mingw', 'Use the MinGW compiler - only effective on W
 opts.Add(EnumVariable('target', 'Compilation target', 'debug',
                     allowed_values=('debug', 'release'),
                     ignorecase=2))
-opts.Add(PathVariable('headers_dir', 'Path to the directory containing Godot headers', 'godot_headers', PathVariable.PathisDir))
+opts.Add(PathVariable('headers_dir', 'Path to the directory containing Godot headers', 'godot_headers', PathVariable.PathIsDir))
 opts.Add(BoolVariable('use_custom_api_file', 'Use a custom JSON API file', False))
-opts.Add(PathVariable('custom_api_file', 'Path to the custom JSON API file', '', PathVariable.PathIsFile))
+opts.Add(PathVariable('custom_api_file', 'Path to the custom JSON API file', None, PathVariable.PathIsFile))
 opts.Add(BoolVariable('generate_bindings', 'Generate GDNative API bindings', False))
 
-unknown = vars.UnknownVariables()
+unknown = opts.UnknownVariables()
 if unknown:
     print "Unknown variables:", unknown.keys()
     Exit(1)
