@@ -38,7 +38,7 @@ opts.Add(BoolVariable('generate_bindings', 'Generate GDNative API bindings', Fal
 
 unknown = opts.UnknownVariables()
 if unknown:
-    print "Unknown variables:", unknown.keys()
+    print("Unknown variables:" + unknown.keys())
     Exit(1)
 
 env = Environment()
@@ -52,9 +52,13 @@ if env['platform'] == 'windows':
         env = Environment(TARGET_ARCH='amd64')
     elif env['bits'] == '32':
         env = Environment(TARGET_ARCH='x86')
+    else:
+        print("Warning: bits argument not specified, target arch is=" + env['TARGET_ARCH'])
     opts.Update(env)
 
-is64 = sys.maxsize > 2**32
+is64 = False
+if (env['TARGET_ARCH'] == 'amd64' or env['TARGET_ARCH'] == 'emt64' or env['TARGET_ARCH'] == 'x86_64'):
+    is64 = True
 if env['bits'] == 'default':
     env['bits'] = '64' if is64 else '32'
 
