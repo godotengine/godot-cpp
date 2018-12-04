@@ -94,7 +94,7 @@ unknown = opts.UnknownVariables()
 if unknown:
     print("Unknown variables:" + unknown.keys())
     Exit(1)
-opts.Add(BoolVariable('use_osxcross', 'Use the OSX crosscompiler', False))
+opts.Add(BoolVariable('use_osxcross', 'OSXCross to compile for macOS from Linux', False))
 opts.Add(PathVariable('headers_dir', 'Path to the directory containing Godot headers', 'godot_headers'))
 
 opts.Update(env)
