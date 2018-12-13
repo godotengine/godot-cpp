@@ -50,13 +50,13 @@ Rect2 Transform2D::xform(const Rect2 &p_rect) const {
 
 	Vector2 x = elements[0] * p_rect.size.x;
 	Vector2 y = elements[1] * p_rect.size.y;
-	Vector2 pos = xform(p_rect.pos);
+	Vector2 position = xform(p_rect.position);
 
 	Rect2 new_rect;
-	new_rect.pos = pos;
-	new_rect.expand_to(pos + x);
-	new_rect.expand_to(pos + y);
-	new_rect.expand_to(pos + x + y);
+	new_rect.position = position;
+	new_rect.expand_to(position + x);
+	new_rect.expand_to(position + y);
+	new_rect.expand_to(position + x + y);
 	return new_rect;
 }
 
@@ -71,14 +71,14 @@ void Transform2D::set_rotation_and_scale(real_t p_rot, const Size2 &p_scale) {
 Rect2 Transform2D::xform_inv(const Rect2 &p_rect) const {
 
 	Vector2 ends[4] = {
-		xform_inv(p_rect.pos),
-		xform_inv(Vector2(p_rect.pos.x, p_rect.pos.y + p_rect.size.y)),
-		xform_inv(Vector2(p_rect.pos.x + p_rect.size.x, p_rect.pos.y + p_rect.size.y)),
-		xform_inv(Vector2(p_rect.pos.x + p_rect.size.x, p_rect.pos.y))
+		xform_inv(p_rect.position),
+		xform_inv(Vector2(p_rect.position.x, p_rect.position.y + p_rect.size.y)),
+		xform_inv(Vector2(p_rect.position.x + p_rect.size.x, p_rect.position.y + p_rect.size.y)),
+		xform_inv(Vector2(p_rect.position.x + p_rect.size.x, p_rect.position.y))
 	};
 
 	Rect2 new_rect;
-	new_rect.pos = ends[0];
+	new_rect.position = ends[0];
 	new_rect.expand_to(ends[1]);
 	new_rect.expand_to(ends[2]);
 	new_rect.expand_to(ends[3]);
@@ -143,7 +143,7 @@ void Transform2D::set_rotation(real_t p_rot) {
 	elements[1][1] = cr;
 }
 
-Transform2D::Transform2D(real_t p_rot, const Vector2 &p_pos) {
+Transform2D::Transform2D(real_t p_rot, const Vector2 &p_position) {
 
 	real_t cr = ::cos(p_rot);
 	real_t sr = ::sin(p_rot);
@@ -151,7 +151,7 @@ Transform2D::Transform2D(real_t p_rot, const Vector2 &p_pos) {
 	elements[0][1] = sr;
 	elements[1][0] = -sr;
 	elements[1][1] = cr;
-	elements[2] = p_pos;
+	elements[2] = p_position;
 }
 
 Size2 Transform2D::get_scale() const {

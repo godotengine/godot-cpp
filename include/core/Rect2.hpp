@@ -18,24 +18,24 @@ struct Transform2D;
 
 struct Rect2 {
 
-	Point2 pos;
+	Point2 position;
 	Size2 size;
 
-	inline const Vector2 &get_pos() const { return pos; }
-	inline void set_pos(const Vector2 &p_pos) { pos = p_pos; }
+	inline const Vector2 &get_position() const { return position; }
+	inline void set_position(const Vector2 &p_position) { position = p_position; }
 	inline const Vector2 &get_size() const { return size; }
 	inline void set_size(const Vector2 &p_size) { size = p_size; }
 
 	inline real_t get_area() const { return size.width * size.height; }
 
 	inline bool intersects(const Rect2 &p_rect) const {
-		if (pos.x >= (p_rect.pos.x + p_rect.size.width))
+		if (position.x >= (p_rect.position.x + p_rect.size.width))
 			return false;
-		if ((pos.x + size.width) <= p_rect.pos.x)
+		if ((position.x + size.width) <= p_rect.position.x)
 			return false;
-		if (pos.y >= (p_rect.pos.y + p_rect.size.height))
+		if (position.y >= (p_rect.position.y + p_rect.size.height))
 			return false;
-		if ((pos.y + size.height) <= p_rect.pos.y)
+		if ((position.y + size.height) <= p_rect.position.y)
 			return false;
 
 		return true;
@@ -45,13 +45,13 @@ struct Rect2 {
 
 	bool intersects_transformed(const Transform2D &p_xform, const Rect2 &p_rect) const;
 
-	bool intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 *r_pos = nullptr, Point2 *r_normal = nullptr) const;
+	bool intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 *r_position = nullptr, Point2 *r_normal = nullptr) const;
 
 	inline bool encloses(const Rect2 &p_rect) const {
 
-		return (p_rect.pos.x >= pos.x) && (p_rect.pos.y >= pos.y) &&
-			   ((p_rect.pos.x + p_rect.size.x) < (pos.x + size.x)) &&
-			   ((p_rect.pos.y + p_rect.size.y) < (pos.y + size.y));
+		return (p_rect.position.x >= position.x) && (p_rect.position.y >= position.y) &&
+			   ((p_rect.position.x + p_rect.size.x) < (position.x + size.x)) &&
+			   ((p_rect.position.y + p_rect.size.y) < (position.y + size.y));
 	}
 
 	inline bool has_no_area() const {
@@ -63,14 +63,14 @@ struct Rect2 {
 	Rect2 merge(const Rect2 &p_rect) const;
 
 	inline bool has_point(const Point2 &p_point) const {
-		if (p_point.x < pos.x)
+		if (p_point.x < position.x)
 			return false;
-		if (p_point.y < pos.y)
+		if (p_point.y < position.y)
 			return false;
 
-		if (p_point.x >= (pos.x + size.x))
+		if (p_point.x >= (position.x + size.x))
 			return false;
-		if (p_point.y >= (pos.y + size.y))
+		if (p_point.y >= (position.y + size.y))
 			return false;
 
 		return true;
@@ -78,14 +78,14 @@ struct Rect2 {
 
 	inline bool no_area() const { return (size.width <= 0 || size.height <= 0); }
 
-	inline bool operator==(const Rect2 &p_rect) const { return pos == p_rect.pos && size == p_rect.size; }
-	inline bool operator!=(const Rect2 &p_rect) const { return pos != p_rect.pos || size != p_rect.size; }
+	inline bool operator==(const Rect2 &p_rect) const { return position == p_rect.position && size == p_rect.size; }
+	inline bool operator!=(const Rect2 &p_rect) const { return position != p_rect.position || size != p_rect.size; }
 
 	inline Rect2 grow(real_t p_by) const {
 
 		Rect2 g = *this;
-		g.pos.x -= p_by;
-		g.pos.y -= p_by;
+		g.position.x -= p_by;
+		g.position.y -= p_by;
 		g.size.width += p_by * 2;
 		g.size.height += p_by * 2;
 		return g;
@@ -100,8 +100,8 @@ struct Rect2 {
 
 	inline void expand_to(const Vector2 &p_vector) { //in place function for speed
 
-		Vector2 begin = pos;
-		Vector2 end = pos + size;
+		Vector2 begin = position;
+		Vector2 end = position + size;
 
 		if (p_vector.x < begin.x)
 			begin.x = p_vector.x;
@@ -113,7 +113,7 @@ struct Rect2 {
 		if (p_vector.y > end.y)
 			end.y = p_vector.y;
 
-		pos = begin;
+		position = begin;
 		size = end - begin;
 	}
 
@@ -121,11 +121,11 @@ struct Rect2 {
 
 	inline Rect2() {}
 	inline Rect2(real_t p_x, real_t p_y, real_t p_width, real_t p_height) {
-		pos = Point2(p_x, p_y);
+		position = Point2(p_x, p_y);
 		size = Size2(p_width, p_height);
 	}
-	inline Rect2(const Point2 &p_pos, const Size2 &p_size) {
-		pos = p_pos;
+	inline Rect2(const Point2 &p_position, const Size2 &p_size) {
+		position = p_position;
 		size = p_size;
 	}
 };

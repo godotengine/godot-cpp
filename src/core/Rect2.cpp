@@ -19,17 +19,17 @@ real_t Rect2::distance_to(const Vector2 &p_point) const {
 
 	real_t dist = 1e20;
 
-	if (p_point.x < pos.x) {
-		dist = MIN(dist, pos.x - p_point.x);
+	if (p_point.x < position.x) {
+		dist = MIN(dist, position.x - p_point.x);
 	}
-	if (p_point.y < pos.y) {
-		dist = MIN(dist, pos.y - p_point.y);
+	if (p_point.y < position.y) {
+		dist = MIN(dist, position.y - p_point.y);
 	}
-	if (p_point.x >= (pos.x + size.x)) {
-		dist = MIN(p_point.x - (pos.x + size.x), dist);
+	if (p_point.x >= (position.x + size.x)) {
+		dist = MIN(p_point.x - (position.x + size.x), dist);
 	}
-	if (p_point.y >= (pos.y + size.y)) {
-		dist = MIN(p_point.y - (pos.y + size.y), dist);
+	if (p_point.y >= (position.y + size.y)) {
+		dist = MIN(p_point.y - (position.y + size.y), dist);
 	}
 
 	if (dist == 1e20)
@@ -45,14 +45,14 @@ Rect2 Rect2::clip(const Rect2 &p_rect) const { /// return a clipped rect
 	if (!intersects(new_rect))
 		return Rect2();
 
-	new_rect.pos.x = MAX(p_rect.pos.x, pos.x);
-	new_rect.pos.y = MAX(p_rect.pos.y, pos.y);
+	new_rect.position.x = MAX(p_rect.position.x, position.x);
+	new_rect.position.y = MAX(p_rect.position.y, position.y);
 
-	Point2 p_rect_end = p_rect.pos + p_rect.size;
-	Point2 end = pos + size;
+	Point2 p_rect_end = p_rect.position + p_rect.size;
+	Point2 end = position + size;
 
-	new_rect.size.x = MIN(p_rect_end.x, end.x) - new_rect.pos.x;
-	new_rect.size.y = MIN(p_rect_end.y, end.y) - new_rect.pos.y;
+	new_rect.size.x = MIN(p_rect_end.x, end.x) - new_rect.position.x;
+	new_rect.size.y = MIN(p_rect_end.y, end.y) - new_rect.position.y;
 
 	return new_rect;
 }
@@ -61,22 +61,22 @@ Rect2 Rect2::merge(const Rect2 &p_rect) const { ///< return a merged rect
 
 	Rect2 new_rect;
 
-	new_rect.pos.x = MIN(p_rect.pos.x, pos.x);
-	new_rect.pos.y = MIN(p_rect.pos.y, pos.y);
+	new_rect.position.x = MIN(p_rect.position.x, position.x);
+	new_rect.position.y = MIN(p_rect.position.y, position.y);
 
-	new_rect.size.x = MAX(p_rect.pos.x + p_rect.size.x, pos.x + size.x);
-	new_rect.size.y = MAX(p_rect.pos.y + p_rect.size.y, pos.y + size.y);
+	new_rect.size.x = MAX(p_rect.position.x + p_rect.size.x, position.x + size.x);
+	new_rect.size.y = MAX(p_rect.position.y + p_rect.size.y, position.y + size.y);
 
-	new_rect.size = new_rect.size - new_rect.pos; //make relative again
+	new_rect.size = new_rect.size - new_rect.position; //make relative again
 
 	return new_rect;
 }
 
 Rect2::operator String() const {
-	return String(pos) + ", " + String(size);
+	return String(position) + ", " + String(size);
 }
 
-bool Rect2::intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 *r_pos, Point2 *r_normal) const {
+bool Rect2::intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 *r_position, Point2 *r_normal) const {
 
 	real_t min = 0, max = 1;
 	int axis = 0;
@@ -85,7 +85,7 @@ bool Rect2::intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 
 	for (int i = 0; i < 2; i++) {
 		real_t seg_from = p_from[i];
 		real_t seg_to = p_to[i];
-		real_t box_begin = pos[i];
+		real_t box_begin = position[i];
 		real_t box_end = box_begin + size[i];
 		real_t cmin, cmax;
 		real_t csign;
@@ -128,8 +128,8 @@ bool Rect2::intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 
 		*r_normal = normal;
 	}
 
-	if (r_pos)
-		*r_pos = p_from + rel * min;
+	if (r_position)
+		*r_position = p_from + rel * min;
 
 	return true;
 }
@@ -139,30 +139,30 @@ bool Rect2::intersects_transformed(const Transform2D &p_xform, const Rect2 &p_re
 	//SAT intersection between local and transformed rect2
 
 	Vector2 xf_points[4] = {
-		p_xform.xform(p_rect.pos),
-		p_xform.xform(Vector2(p_rect.pos.x + p_rect.size.x, p_rect.pos.y)),
-		p_xform.xform(Vector2(p_rect.pos.x, p_rect.pos.y + p_rect.size.y)),
-		p_xform.xform(Vector2(p_rect.pos.x + p_rect.size.x, p_rect.pos.y + p_rect.size.y)),
+		p_xform.xform(p_rect.position),
+		p_xform.xform(Vector2(p_rect.position.x + p_rect.size.x, p_rect.position.y)),
+		p_xform.xform(Vector2(p_rect.position.x, p_rect.position.y + p_rect.size.y)),
+		p_xform.xform(Vector2(p_rect.position.x + p_rect.size.x, p_rect.position.y + p_rect.size.y)),
 	};
 
 	real_t low_limit;
 
 	//base rect2 first (faster)
 
-	if (xf_points[0].y > pos.y)
+	if (xf_points[0].y > position.y)
 		goto next1;
-	if (xf_points[1].y > pos.y)
+	if (xf_points[1].y > position.y)
 		goto next1;
-	if (xf_points[2].y > pos.y)
+	if (xf_points[2].y > position.y)
 		goto next1;
-	if (xf_points[3].y > pos.y)
+	if (xf_points[3].y > position.y)
 		goto next1;
 
 	return false;
 
 next1:
 
-	low_limit = pos.y + size.y;
+	low_limit = position.y + size.y;
 
 	if (xf_points[0].y < low_limit)
 		goto next2;
@@ -177,20 +177,20 @@ next1:
 
 next2:
 
-	if (xf_points[0].x > pos.x)
+	if (xf_points[0].x > position.x)
 		goto next3;
-	if (xf_points[1].x > pos.x)
+	if (xf_points[1].x > position.x)
 		goto next3;
-	if (xf_points[2].x > pos.x)
+	if (xf_points[2].x > position.x)
 		goto next3;
-	if (xf_points[3].x > pos.x)
+	if (xf_points[3].x > position.x)
 		goto next3;
 
 	return false;
 
 next3:
 
-	low_limit = pos.x + size.x;
+	low_limit = position.x + size.x;
 
 	if (xf_points[0].x < low_limit)
 		goto next4;
@@ -206,10 +206,10 @@ next3:
 next4:
 
 	Vector2 xf_points2[4] = {
-		pos,
-		Vector2(pos.x + size.x, pos.y),
-		Vector2(pos.x, pos.y + size.y),
-		Vector2(pos.x + size.x, pos.y + size.y),
+		position,
+		Vector2(position.x + size.x, position.y),
+		Vector2(position.x, position.y + size.y),
+		Vector2(position.x + size.x, position.y + size.y),
 	};
 
 	real_t maxa = p_xform.elements[0].dot(xf_points2[0]);
