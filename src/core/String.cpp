@@ -99,7 +99,7 @@ String::~String() {
 }
 
 wchar_t &String::operator[](const int idx) {
-	return *godot::api->godot_string_operator_index(&_godot_string, idx);
+	return *const_cast<wchar_t *>(godot::api->godot_string_operator_index(&_godot_string, idx));
 }
 
 wchar_t String::operator[](const int idx) const {
