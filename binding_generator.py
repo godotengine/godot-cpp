@@ -824,7 +824,8 @@ def escape_cpp(name):
         "export":   "_export",
         "template": "_template",
         "new":      "new_",
-        "operator": "_operator"
+        "operator": "_operator",
+        "typename": "_typename"
     }
     if name in escapes:
         return escapes[name]
