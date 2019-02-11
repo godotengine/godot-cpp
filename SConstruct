@@ -57,7 +57,7 @@ if env['platform'] == 'windows':
     opts.Update(env)
 
 is64 = False
-if (env['TARGET_ARCH'] == 'amd64' or env['TARGET_ARCH'] == 'emt64' or env['TARGET_ARCH'] == 'x86_64'):
+if (env['platform'] == 'osx' or env['TARGET_ARCH'] == 'amd64' or env['TARGET_ARCH'] == 'emt64' or env['TARGET_ARCH'] == 'x86_64'):
     is64 = True
 if env['bits'] == 'default':
     env['bits'] = '64' if is64 else '32'
