@@ -43,6 +43,12 @@ Note that if you wish to use a specific branch, add the -b option to the clone c
 $ git clone --recursive https://github.com/GodotNativeTools/godot-cpp -b 3.0
 ```
 
+If your project is an existing repository, use git submodule instead:
+```
+$ git submodule add https://github.com/GodotNativeTools/godot-cpp
+$ git submodule update --init --recursive
+```
+
 Right now our directory structure should look like this:
 ```
 SimpleLibrary/
