@@ -31,15 +31,6 @@ Basis::Basis() {
 	elements[2][2] = 1;
 }
 
-const Vector3 &Basis::operator[](int axis) const {
-
-	return elements[axis];
-}
-Vector3 &Basis::operator[](int axis) {
-
-	return elements[axis];
-}
-
 #define cofac(row1, col1, row2, col2) \
 	(elements[row1][col1] * elements[row2][col2] - elements[row1][col2] * elements[row2][col1])
 
