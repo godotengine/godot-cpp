@@ -147,7 +147,7 @@ elif env['platform'] == 'windows':
         # MSVC
         env.Append(LINKFLAGS=['/WX'])
         if env['target'] == 'debug':
-            env.Append(CCFLAGS=['/EHsc', '/D_DEBUG', '/MDd'])
+            env.Append(CCFLAGS=['/Z7', '/Od', '/EHsc', '/D_DEBUG', '/MDd'])
         elif env['target'] == 'release':
             env.Append(CCFLAGS=['/O2', '/EHsc', '/DNDEBUG', '/MD'])
 
