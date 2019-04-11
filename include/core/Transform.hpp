@@ -58,6 +58,13 @@ public:
 	void operator*=(const Transform &p_transform);
 	Transform operator*(const Transform &p_transform) const;
 
+	inline Vector3 operator*(const Vector3 &p_vector) const {
+		return Vector3(
+				basis.elements[0].dot(p_vector) + origin.x,
+				basis.elements[1].dot(p_vector) + origin.y,
+				basis.elements[2].dot(p_vector) + origin.z);
+	}
+
 	Transform interpolate_with(const Transform &p_transform, real_t p_c) const;
 
 	Transform inverse_xform(const Transform &t) const;
