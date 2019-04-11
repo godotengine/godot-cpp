@@ -133,7 +133,7 @@ endif()
 # Generate source from the bindings file
 message(STATUS "Generating Bindings")
 execute_process(COMMAND "python" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\")"
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	RESULT_VARIABLE GENERATION_RESULT
 	OUTPUT_VARIABLE GENERATION_OUTPUT)
 message(STATUS ${GENERATION_RESULT} ${GENERATION_OUTPUT})
@@ -145,7 +145,7 @@ file(GLOB_RECURSE HEADERS include/*.h**)
 # Define our godot-cpp library
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME}
-	PRIVATE
+	PUBLIC
 	include
 	include/core
 	include/gen
