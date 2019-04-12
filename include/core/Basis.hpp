@@ -271,7 +271,7 @@ private:
 		}
 
 		inline operator String() const {
-			return String(Vector3(*this))
+			return String(Vector3(*this));
 		}
 	};
 
