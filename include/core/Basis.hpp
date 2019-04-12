@@ -22,27 +22,27 @@ private:
 	template <int column>
 	class ColumnVector3 {
 	private:
-		template <int column, int component>
+		template <int column2, int component>
 		class ColumnVectorComponent {
 		private:
 			Vector3 elements[3];
 
 		protected:
-			inline ColumnVectorComponent<column, component> &operator=(const ColumnVectorComponent<column, component> &p_value) {
+			inline ColumnVectorComponent<column2, component> &operator=(const ColumnVectorComponent<column2, component> &p_value) {
 				return *this = real_t(p_value);
 			}
 			
-			inline ColumnVectorComponent(const ColumnVectorComponent<column, component> &p_value) {
+			inline ColumnVectorComponent(const ColumnVectorComponent<column2, component> &p_value) {
 				*this = real_t(p_value);
 			}
 
-			inline ColumnVectorComponent<column, component> &operator=(const real_t &p_value) {
-				element[component][column] = p_value;
+			inline ColumnVectorComponent<column2, component> &operator=(const real_t &p_value) {
+				elements[component][column2] = p_value;
 				return *this;
 			}
 
 			inline operator real_t() const {
-				return element[component][column];
+				return elements[component][column2];
 			}
 		};
 
