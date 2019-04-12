@@ -28,14 +28,14 @@ def generate_bindings(path):
         source_file.write(impl)
 
 
-    icall_header_file = open("src/gen/__icalls.hpp", "w+")
+    icall_header_file = open("include/gen/__icalls.hpp", "w+")
     icall_header_file.write(generate_icall_header(icalls))
-
-    icall_source_file = open("src/gen/__icalls.cpp", "w+")
-    icall_source_file.write(generate_icall_implementation(icalls))
 
     register_types_file = open("src/gen/__register_types.cpp", "w+")
     register_types_file.write(generate_type_registry(classes))
+
+    init_method_bindings_file = open("src/gen/__init_method_bindings.cpp", "w+")
+    init_method_bindings_file.write(generate_init_method_bindings(classes))
 
 
 def is_reference_type(t):
@@ -58,8 +58,9 @@ def make_gdnative_type(t):
         if t == "int":
             return "int64_t "
         if t == "float" or t == "real":
-            return "double "
+            return "real_t "
         return strip_name(t) + " "
+
 
 def generate_class_header(used_classes, c):
 
@@ -126,8 +127,8 @@ def generate_class_header(used_classes, c):
 
     if c["base_class"] == "":
         source.append("public: enum { ___CLASS_IS_SCRIPT = 0, };")
-        source.append("private:")
         source.append("")
+        source.append("private:")
 
     if c["singleton"]:
         source.append("\tstatic " + class_name + " *_singleton;")
@@ -135,8 +136,18 @@ def generate_class_header(used_classes, c):
         source.append("\t" + class_name + "();")
         source.append("")
 
+    # Generate method table
+    source.append("\tstruct ___method_bindings {")
 
+    for method in c["methods"]:
+        source.append("\t\tgodot_method_bind *mb_" + method["name"] + ";")
+
+    source.append("\t};")
+    source.append("\tstatic ___method_bindings ___mb;")
+    source.append("")
     source.append("public:")
+    source.append("\tstatic void ___init_method_bindings();")
+
     source.append("")
 
 
@@ -335,7 +346,17 @@ def generate_class_implementation(icalls, used_classes, c):
         source.append("")
         source.append("")
 
+    # Method table initialization
+    source.append(class_name + "::___method_bindings " + class_name + "::___mb = {};")
+    source.append("")
 
+    source.append("void " + class_name + "::___init_method_bindings() {")
+
+    for method in c["methods"]:
+        source.append("\t___mb.mb_" + method["name"] + " = godot::api->godot_method_bind_get_method(\"" + c["name"] + "\", \"" + method["name"] + "\");")
+
+    source.append("}")
+    source.append("")
 
     if c["instanciable"]:
         source.append(class_name + " *" + strip_name(c["name"]) + "::_new()")
@@ -373,12 +394,6 @@ def generate_class_implementation(icalls, used_classes, c):
             source.append("}")
             source.append("")
             continue
-        else:
-
-            source.append("\tstatic godot_method_bind *mb = nullptr;")
-            source.append("\tif (mb == nullptr) {")
-            source.append("\t\tmb = godot::api->godot_method_bind_get_method(\"" + c["name"] +"\", \"" + method["name"] + "\");")
-            source.append("\t}")
 
         return_statement = ""
 
@@ -441,7 +456,7 @@ def generate_class_implementation(icalls, used_classes, c):
             source.append("")
 
             source.append("\tVariant __result;")
-            source.append("\t*(godot_variant *) &__result = godot::api->godot_method_bind_call(mb, ((const Object *) " + core_object_name + ")->_owner, (const godot_variant **) __args, " + size + ", nullptr);")
+            source.append("\t*(godot_variant *) &__result = godot::api->godot_method_bind_call(___mb.mb_" + method["name"] + ", ((const Object *) " + core_object_name + ")->_owner, (const godot_variant **) __args, " + size + ", nullptr);")
 
             source.append("")
 
@@ -485,7 +500,7 @@ def generate_class_implementation(icalls, used_classes, c):
 
             icall_name = get_icall_name(icall_sig)
 
-            return_statement += icall_name + "(mb, (const Object *) " + core_object_name
+            return_statement += icall_name + "(___mb.mb_" + method["name"] + ", (const Object *) " + core_object_name
 
             for arg in method["arguments"]:
                 return_statement += ", " + escape_cpp(arg["name"]) + (".ptr()" if is_reference_type(arg["type"]) else "")
@@ -520,60 +535,6 @@ def generate_icall_header(icalls):
     source.append("#include <stdint.h>")
     source.append("")
 
-    source.append("#include <core/CoreTypes.hpp>")
-    source.append("#include \"Object.hpp\"")
-    source.append("")
-    source.append("")
-
-    source.append("namespace godot {")
-    source.append("")
-
-    for icall in icalls:
-        ret_type = icall[0]
-        args = icall[1]
-
-        method_signature = ""
-
-        method_signature += return_type(ret_type) + get_icall_name(icall) + "(godot_method_bind *mb, const Object *inst"
-
-        for arg in args:
-            method_signature += ", const "
-
-            if is_core_type(arg):
-                method_signature += arg + "&"
-            elif arg == "int":
-                method_signature += "int64_t "
-            elif arg == "float":
-                method_signature += "double "
-            elif is_primitive(arg):
-                method_signature += arg
-            else:
-                method_signature += "Object *"
-
-        method_signature += ");"
-
-        source.append(method_signature)
-
-    source.append("")
-
-    source.append("}")
-    source.append("")
-
-    source.append("#endif")
-
-    return "\n".join(source)
-
-
-def generate_icall_implementation(icalls):
-    source = []
-    source.append("#include \"__icalls.hpp\"")
-
-    source.append("")
-
-    source.append("#include <gdnative_api_struct.gen.h>")
-    source.append("#include <stdint.h>")
-    source.append("")
-
     source.append("#include <core/GodotGlobal.hpp>")
     source.append("#include <core/CoreTypes.hpp>")
     source.append("#include \"Object.hpp\"")
@@ -587,15 +548,15 @@ def generate_icall_implementation(icalls):
         ret_type = icall[0]
         args = icall[1]
 
-        method_signature = ""
+        method_signature = "static inline "
 
-        method_signature += return_type(ret_type) + get_icall_name(icall) + "(godot_method_bind *mb, const Object *inst"
+        method_signature += get_icall_return_type(ret_type) + get_icall_name(icall) + "(godot_method_bind *mb, const Object *inst"
 
         for i, arg in enumerate(args):
             method_signature += ", const "
 
             if is_core_type(arg):
-                method_signature += arg + "& "
+                method_signature += arg + "&"
             elif arg == "int":
                 method_signature += "int64_t "
             elif arg == "float":
@@ -612,7 +573,7 @@ def generate_icall_implementation(icalls):
         source.append(method_signature + " {")
 
         if ret_type != "void":
-            source.append("\t" + ("godot_object *" if is_class_type(ret_type) else return_type(ret_type)) + "ret;")
+            source.append("\t" + ("godot_object *" if is_class_type(ret_type) else get_icall_return_type(ret_type)) + "ret;")
             if is_class_type(ret_type):
                 source.append("\tret = nullptr;")
 
@@ -646,13 +607,14 @@ def generate_icall_implementation(icalls):
                 source.append("\treturn ret;")
 
         source.append("}")
+        source.append("")
 
     source.append("}")
     source.append("")
 
+    source.append("#endif")
+
     return "\n".join(source)
-
-
 
 
 def generate_type_registry(classes):
@@ -695,18 +657,34 @@ def generate_type_registry(classes):
     return "\n".join(source)
 
 
+def generate_init_method_bindings(classes):
+    source = []
+
+    for c in classes:
+        source.append("#include <" + strip_name(c["name"]) + ".hpp>")
+
+    source.append("")
+    source.append("")
+
+    source.append("namespace godot {")
+
+    source.append("void ___init_method_bindings()")
+    source.append("{")
+
+    for c in classes:
+        class_name = strip_name(c["name"])
+
+        source.append("\t" + strip_name(c["name"]) + "::___init_method_bindings();")
+
+    source.append("}")
+
+    source.append("")
+    source.append("}")
+
+    return "\n".join(source)
 
 
-
-
-
-
-
-
-
-
-
-def return_type(t):
+def get_icall_return_type(t):
     if is_class_type(t):
         return "Object *"
     if t == "int":
