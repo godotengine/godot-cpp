@@ -226,6 +226,7 @@ public:
 	operator NodePath() const;
 	operator RID() const;
 	operator godot_object *() const;
+	template <typename T> operator T*() const { return static_cast<T*>(T::___get_from_variant(*this)); }
 
 	operator Dictionary() const;
 	operator Array() const;
