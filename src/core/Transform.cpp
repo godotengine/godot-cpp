@@ -35,9 +35,9 @@ void Transform::set(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_
 Vector3 Transform::xform(const Vector3 &p_vector) const {
 
 	return Vector3(
-			basis[0].dot(p_vector) + origin.x,
-			basis[1].dot(p_vector) + origin.y,
-			basis[2].dot(p_vector) + origin.z);
+			basis.elements[0].dot(p_vector) + origin.x,
+			basis.elements[1].dot(p_vector) + origin.y,
+			basis.elements[2].dot(p_vector) + origin.z);
 }
 Vector3 Transform::xform_inv(const Vector3 &p_vector) const {
 
@@ -241,7 +241,7 @@ void Transform::translate(real_t p_tx, real_t p_ty, real_t p_tz) {
 void Transform::translate(const Vector3 &p_translation) {
 
 	for (int i = 0; i < 3; i++) {
-		origin[i] += basis[i].dot(p_translation);
+		origin[i] += basis.elements[i].dot(p_translation);
 	}
 }
 

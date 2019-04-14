@@ -307,7 +307,7 @@ public:
 
 	Basis();
 
-	const Vector3 &operator[](int axis) const {
+	const Vector3 operator[](int axis) const {
 		return get_axis(axis);
 	}
 
