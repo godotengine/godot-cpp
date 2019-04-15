@@ -300,6 +300,11 @@ Variant::operator godot_object *() const {
 	return godot::api->godot_variant_as_object(&_godot_variant);
 }
 
+Variant::operator Object *() const {
+	godot_object *o = godot::api->godot_variant_as_object(&_godot_variant);
+	return (o) ? (Object *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, o) : nullptr;
+}
+
 Variant::Type Variant::get_type() const {
 	return (Type)godot::api->godot_variant_get_type(&_godot_variant);
 }

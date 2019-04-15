@@ -226,6 +226,7 @@ public:
 	operator NodePath() const;
 	operator RID() const;
 	operator godot_object *() const;
+	operator Object *() const;
 
 	operator Dictionary() const;
 	operator Array() const;
