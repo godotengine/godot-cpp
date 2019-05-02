@@ -54,12 +54,6 @@ Vector2 Vector2::cubic_interpolate(const Vector2 &p_b, const Vector2 &p_pre_a, c
 	return out;
 }
 
-Vector2 Vector2::snapped(const Vector2 &p_by) const {
-	return Vector2(
-			p_by.x != 0 ? ::floor(x / p_by.x + 0.5) * p_by.x : x,
-			p_by.y != 0 ? ::floor(y / p_by.y + 0.5) * p_by.y : y);
-}
-
 Vector2::operator String() const {
 	return String::num(x) + ", " + String::num(y);
 }
