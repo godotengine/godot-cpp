@@ -208,7 +208,11 @@ struct Vector2 {
 		return Vector2(::floor(x), ::floor(y));
 	}
 
-	inline Vector2 snapped(const Vector2 &p_by) const;
+	inline Vector2 snapped(const Vector2 &p_by) const {
+		return Vector2(
+				p_by.x != 0 ? ::floor(x / p_by.x + 0.5) * p_by.x : x,
+				p_by.y != 0 ? ::floor(y / p_by.y + 0.5) * p_by.y : y);
+	}
 
 	inline real_t aspect() const { return width / height; }
 
