@@ -247,10 +247,10 @@ void Quat::operator-=(const Quat &q) {
 }
 
 void Quat::operator*=(const Quat &q) {
-	x *= q.x;
-	y *= q.y;
-	z *= q.z;
-	w *= q.w;
+	set(w * q.x + x * q.w + y * q.z - z * q.y,
+			w * q.y + y * q.w + z * q.x - x * q.z,
+			w * q.z + z * q.w + x * q.y - y * q.x,
+			w * q.w - x * q.x - y * q.y - z * q.z);
 }
 
 void Quat::operator*=(const real_t &s) {
