@@ -57,45 +57,9 @@ enum class Error {
 	ERR_WTF = ERR_OMFG_THIS_IS_VERY_VERY_BAD ///< short version of the above
 };
 
-namespace helpers {
-template <typename T, typename ValueT>
-T append_all(T appendable, ValueT value) {
-	appendable.append(value);
-	return appendable;
-}
-
-template <typename T, typename ValueT, typename... Args>
-T append_all(T appendable, ValueT value, Args... args) {
-	appendable.append(value);
-	return append_all(appendable, args...);
-}
-
-template <typename T>
-T append_all(T appendable) {
-	return appendable;
-}
-
-template <typename KV, typename KeyT, typename ValueT>
-KV add_all(KV kv, KeyT key, ValueT value) {
-	kv[key] = value;
-	return kv;
-}
-
-template <typename KV, typename KeyT, typename ValueT, typename... Args>
-KV add_all(KV kv, KeyT key, ValueT value, Args... args) {
-	kv[key] = value;
-	return add_all(kv, args...);
-}
-
-template <typename KV>
-KV add_all(KV kv) {
-	return kv;
-}
-} // namespace helpers
-
 } // namespace godot
 
-#include <stdio.h>
+#include <GodotGlobal.hpp>
 
 typedef float real_t;
 
@@ -106,11 +70,28 @@ typedef float real_t;
 #define _PLANE_EQ_DOT_EPSILON 0.999
 #define _PLANE_EQ_D_EPSILON 0.0001
 
+#ifdef __GNUC__
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+#else
+#define likely(x) x
+#define unlikely(x) x
+#endif
+
+// Don't use this directly; instead, use any of the CRASH_* macros
+#ifdef _MSC_VER
+#define GENERATE_TRAP                       \
+	__debugbreak();                         \
+	/* Avoid warning about control paths */ \
+	for (;;) {                              \
+	}
+#else
+#define GENERATE_TRAP __builtin_trap();
+#endif
+
 // ERR/WARN macros
 #ifndef WARN_PRINT
-#define WARN_PRINT(msg)                  \
-	fprintf(stdout, "ERROR: %s\n", msg); \
-	fflush(stdout)
+#define WARN_PRINT(msg) Godot::print_warning(msg, __func__, __FILE__, __LINE__)
 #endif
 
 #ifndef WARN_PRINTS
@@ -118,62 +99,160 @@ typedef float real_t;
 #endif
 
 #ifndef ERR_PRINT
-#define ERR_PRINT(x) fprintf(stderr, "ERROR: %s\n", x)
+#define ERR_PRINT(msg) Godot::print_error(msg, __func__, __FILE__, __LINE__)
 #endif
 
 #ifndef ERR_PRINTS
 #define ERR_PRINTS(msg) ERR_PRINT((msg).utf8().get_data())
 #endif
 
-#ifndef ERR_FAIL
-#define ERR_FAIL() ERR_PRINT("Failed")
+#ifndef FATAL_PRINT
+#define FATAL_PRINT(msg) ERR_PRINT(String("FATAL: ") + (msg))
 #endif
 
-#ifndef ERR_FAIL_V
-#define ERR_FAIL_V(a) \
-	{                 \
-		ERR_FAIL();   \
-		return a;     \
-	}
+#ifndef ERR_MSG_INDEX
+#define ERR_MSG_INDEX(index, size) (String("Index ") + #index + "=" + String::num_int64(index) + " out of size (" + #size + "=" + String::num_int64(size) + ")")
 #endif
 
-#ifndef ERR_FAIL_COND
-#define ERR_FAIL_COND(a)   \
-	do {                   \
-		if (a) {           \
-			ERR_PRINT(#a); \
-			return;        \
-		}                  \
-	} while (0)
+#ifndef ERR_MSG_NULL
+#define ERR_MSG_NULL(param) (String("Parameter '") + #param + "' is null.")
 #endif
 
-#ifndef ERR_FAIL_COND_V
-#define ERR_FAIL_COND_V(cond, ret) \
-	do {                           \
-		if (cond) {                \
-			ERR_PRINT(#cond);      \
-			return ret;            \
-		}                          \
-	} while (0)
+#ifndef ERR_MSG_COND
+#define ERR_MSG_COND(cond) (String("Condition '") + #cond + "' is true.")
 #endif
 
 #ifndef ERR_FAIL_INDEX
-#define ERR_FAIL_INDEX(a, b)   \
-	do {                       \
-		if (a < 0 || a >= b) { \
-			ERR_FAIL();        \
-			return;            \
-		}                      \
+#define ERR_FAIL_INDEX(index, size)                       \
+	do {                                                  \
+		if (unlikely((index) < 0 || (index) >= (size))) { \
+			ERR_PRINT(ERR_MSG_INDEX(index, size));        \
+			return;                                       \
+		}                                                 \
 	} while (0)
 #endif
 
 #ifndef ERR_FAIL_INDEX_V
-#define ERR_FAIL_INDEX_V(a, b, c) \
-	do {                          \
-		if (a < 0 || a >= b) {    \
-			ERR_FAIL();           \
-			return c;             \
-		}                         \
+#define ERR_FAIL_INDEX_V(index, size, ret)                \
+	do {                                                  \
+		if (unlikely((index) < 0 || (index) >= (size))) { \
+			ERR_PRINT(ERR_MSG_INDEX(index, size));        \
+			return ret;                                   \
+		}                                                 \
+	} while (0)
+#endif
+
+#ifndef ERR_FAIL_UNSIGNED_INDEX_V
+#define ERR_FAIL_UNSIGNED_INDEX_V(index, size, ret) \
+	do {                                            \
+		if (unlikely((index) >= (size))) {          \
+			ERR_PRINT(ERR_MSG_INDEX(index, size));  \
+			return ret;                             \
+		}                                           \
+	} while (0)
+#endif
+
+#ifndef CRASH_BAD_INDEX
+#define CRASH_BAD_INDEX(index, size)                      \
+	do {                                                  \
+		if (unlikely((index) < 0 || (index) >= (size))) { \
+			FATAL_PRINT(ERR_MSG_INDEX(index, size));      \
+			GENERATE_TRAP;                                \
+		}                                                 \
+	} while (0)
+#endif
+
+#ifndef ERR_FAIL_NULL
+#define ERR_FAIL_NULL(param)                \
+	do {                                    \
+		if (unlikely(!param)) {             \
+			ERR_PRINT(ERR_MSG_NULL(param)); \
+			return;                         \
+		}                                   \
+	} while (0)
+#endif
+
+#ifndef ERR_FAIL_NULL_V
+#define ERR_FAIL_NULL_V(param, ret)         \
+	do {                                    \
+		if (unlikely(!param)) {             \
+			ERR_PRINT(ERR_MSG_NULL(param)); \
+			return ret;                     \
+		}                                   \
+	} while (0)
+#endif
+
+#ifndef ERR_FAIL_COND
+#define ERR_FAIL_COND(cond)                \
+	do {                                   \
+		if (unlikely(cond)) {              \
+			ERR_PRINT(ERR_MSG_COND(cond)); \
+			return;                        \
+		}                                  \
+	} while (0)
+#endif
+
+#ifndef CRASH_COND
+#define CRASH_COND(cond)                     \
+	do {                                     \
+		if (unlikely(cond)) {                \
+			FATAL_PRINT(ERR_MSG_COND(cond)); \
+			return;                          \
+		}                                    \
+	} while (0)
+#endif
+
+#ifndef ERR_FAIL_COND_V
+#define ERR_FAIL_COND_V(cond, ret)         \
+	do {                                   \
+		if (unlikely(cond)) {              \
+			ERR_PRINT(ERR_MSG_COND(cond)); \
+			return ret;                    \
+		}                                  \
+	} while (0)
+#endif
+
+#ifndef ERR_CONTINUE
+#define ERR_CONTINUE(cond)                 \
+	{                                      \
+		if (unlikely(cond)) {              \
+			ERR_PRINT(ERR_MSG_COND(cond)); \
+			continue;                      \
+		}                                  \
+	}
+#endif
+
+#ifndef ERR_BREAK
+#define ERR_BREAK(cond)                    \
+	{                                      \
+		if (unlikely(cond)) {              \
+			ERR_PRINT(ERR_MSG_COND(cond)); \
+			break;                         \
+		}                                  \
+	}
+#endif
+
+#ifndef ERR_FAIL
+#define ERR_FAIL()                            \
+	do {                                      \
+		ERR_PRINT("Method/Function Failed."); \
+		return;                               \
+	} while (0)
+#endif
+
+#ifndef ERR_FAIL_V
+#define ERR_FAIL_V(ret)                       \
+	do {                                      \
+		ERR_PRINT("Method/Function Failed."); \
+		return ret;                           \
+	} while (0)
+#endif
+
+#ifndef CRASH_NOW
+#define CRASH_NOW()                             \
+	do {                                        \
+		FATAL_PRINT("Method/Function Failed."); \
+		GENERATE_TRAP;                          \
 	} while (0)
 #endif
 
