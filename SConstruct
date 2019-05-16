@@ -16,7 +16,7 @@ if sys.platform.startswith('linux'):
     host_platform = 'linux'
 elif sys.platform == 'darwin':
     host_platform = 'osx'
-elif sys.platform == 'win32':
+elif sys.platform == 'win32' or sys.platform == 'msys':
     host_platform = 'windows'
 else:
     raise ValueError(
