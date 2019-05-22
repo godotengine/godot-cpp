@@ -32,7 +32,25 @@ public:
 
 	uint32_t to_ARGB32() const;
 
+	uint32_t to_ABGR32() const;
+
+	uint64_t to_ABGR64() const;
+
+	uint64_t to_ARGB64() const;
+
+	uint32_t to_RGBA32() const;
+
+	uint64_t to_RGBA64() const;
+
 	float gray() const;
+
+	uint8_t get_r8() const;
+
+	uint8_t get_g8() const;
+
+	uint8_t get_b8() const;
+
+	uint8_t get_a8() const;
 
 	float get_h() const;
 
@@ -41,6 +59,12 @@ public:
 	float get_v() const;
 
 	void set_hsv(float p_h, float p_s, float p_v, float p_alpha = 1.0);
+
+	Color darkened(const float amount) const;
+
+	Color lightened(const float amount) const;
+
+	Color from_hsv(float p_h, float p_s, float p_v, float p_a = 1.0) const;
 
 	inline float &operator[](int idx) {
 		return components[idx];

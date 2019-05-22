@@ -20,6 +20,8 @@ public:
 
 	Quat normalized() const;
 
+	bool is_normalized() const;
+
 	Quat inverse() const;
 
 	void set_euler_xyz(const Vector3 &p_euler);
@@ -39,6 +41,8 @@ public:
 	Quat cubic_slerp(const Quat &q, const Quat &prep, const Quat &postq, const real_t &t) const;
 
 	void get_axis_and_angle(Vector3 &r_axis, real_t &r_angle) const;
+
+	void set_axis_angle(const Vector3 &axis, const float angle);
 
 	void operator*=(const Quat &q);
 	Quat operator*(const Quat &q) const;

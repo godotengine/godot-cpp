@@ -52,6 +52,15 @@ bool NodePath::is_empty() const {
 	return godot::api->godot_node_path_is_empty(&_node_path);
 }
 
+NodePath NodePath::get_as_property_path() const {
+	godot_node_path path = godot::core_1_1_api->godot_node_path_get_as_property_path(&_node_path);
+	return *(NodePath *)&path;
+}
+String NodePath::get_concatenated_subnames() const {
+	godot_string str = godot::api->godot_node_path_get_concatenated_subnames(&_node_path);
+	return *(String *)&str;
+}
+
 NodePath::operator String() const {
 	godot_string str = godot::api->godot_node_path_as_string(&_node_path);
 

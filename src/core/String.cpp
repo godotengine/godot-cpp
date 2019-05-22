@@ -555,4 +555,34 @@ signed char String::naturalnocasecmp_to(String p_str) const {
 	return godot::api->godot_string_naturalnocasecmp_to(&_godot_string, &p_str._godot_string);
 }
 
+String String::dedent() const {
+	String new_string;
+	new_string._godot_string = godot::core_1_1_api->godot_string_dedent(&_godot_string);
+	return new_string;
+}
+
+PoolStringArray String::rsplit(const String &divisor, const bool allow_empty,
+		const int maxsplit) const {
+	godot_pool_string_array arr = godot::core_1_1_api->godot_string_rsplit(&_godot_string, &divisor._godot_string, allow_empty, maxsplit);
+	return *(PoolStringArray *)&arr;
+}
+
+String String::rstrip(const String &chars) const {
+	String new_string;
+	new_string._godot_string = godot::core_1_1_api->godot_string_rstrip(&_godot_string, &chars._godot_string);
+	return new_string;
+}
+
+String String::trim_prefix(const String &prefix) const {
+	String new_string;
+	new_string._godot_string = godot::core_1_1_api->godot_string_trim_prefix(&_godot_string, &prefix._godot_string);
+	return new_string;
+}
+
+String String::trim_suffix(const String &suffix) const {
+	String new_string;
+	new_string._godot_string = godot::core_1_1_api->godot_string_trim_suffix(&_godot_string, &suffix._godot_string);
+	return new_string;
+}
+
 } // namespace godot
