@@ -54,18 +54,42 @@ matrix:
     - name: Android ARM Release
       os: linux
       env: TARGET=release ADDITIONAL_FLAGS="platform=android android-abi=arm"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-xenial-6.0
+          packages:
+            [scons, pkg-config, build-essential, p7zip-full, clang-format-6.0]
 
     - name: Android ARM64 Release
       os: linux
       env: TARGET=release ADDITIONAL_FLAGS="platform=android android-abi=arm64"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-xenial-6.0
+          packages:
+            [scons, pkg-config, build-essential, p7zip-full, clang-format-6.0]
 
     - name: Android ARM Debug
       os: linux
       env: TARGET=debug ADDITIONAL_FLAGS="platform=android android-abi=arm"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-xenial-6.0
+          packages:
+            [scons, pkg-config, build-essential, p7zip-full, clang-format-6.0]
 
     - name: Android ARM64 Debug
       os: linux
       env: TARGET=debug ADDITIONAL_FLAGS="platform=android android-abi=arm64"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-xenial-6.0
+          packages:
+            [scons, pkg-config, build-essential, p7zip-full, clang-format-6.0]
 
     - name: iOS Debug
       os: osx
