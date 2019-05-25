@@ -77,7 +77,7 @@ $ scons platform=<your platform> generate_bindings=yes
 $ cd ..
 ```
 
-> Replace `<your platform>` with either `windows`, `linux` or `osx`.
+> Replace `<your platform>` with either `windows`, `linux`, `osx`, `android` or `ios`.
 
 > Include `use_llvm=yes` for using clang++
 
@@ -86,6 +86,10 @@ $ cd ..
 > The resulting library will be created in `godot-cpp/bin/`, take note of its name as it will be different depending on platform.
 
 > If you want to use an alternative api.json file add `use_custom_api_file=yes custom_api_file=../api.json`, be sure to specify the correct location of where you placed your file.
+
+> On android first export your ndk path using `export ANDROID_NDK_ROOT=pathToYourNDK`.
+
+> On android specify target abi with `android-abi=arm/arm64`.
 
 ## Creating a simple class
 
