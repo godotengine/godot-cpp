@@ -69,11 +69,13 @@ matrix:
 
     - name: iOS Debug
       os: osx
+      osx_image: xcode10.2
       compiler: clang
       env: TARGET=debug ADDITIONAL_FLAGS="platform=ios"
 
     - name: iOS Release
       os: osx
+      osx_image: xcode10.2
       compiler: clang
       env: TARGET=release ADDITIONAL_FLAGS="platform=ios"
 
