@@ -42,7 +42,7 @@ opts.Add(EnumVariable(
     'platform',
     'Target platform',
     host_platform,
-    allowed_values=('linux', 'osx', 'windows', 'android'),
+    allowed_values=('linux', 'osx', 'windows', 'android', 'ios'),
     ignorecase=2
 ))
 opts.Add(EnumVariable(
@@ -136,6 +136,15 @@ if env['platform'] == 'linux':
     elif env['bits'] == '32':
         env.Append(CCFLAGS=['-m32'])
         env.Append(LINKFLAGS=['-m32'])
+
+elif env['platform'] == "ios":
+    SDK_MIN_VERSION = "8.0"
+    # we could do better to automatically find the right sdk version
+    SDK_VERSION = "12.2"
+    IOS_PLATFORM_SDK = sys_exec(["xcode-select", "-p"]) + "/Platforms"
+    env["CXX"] = sys_exec(["xcrun", "-sdk", "iphoneos", "-find", "clang++"])
+    env.Append(CCFLAGS = ['-g','-O3', '-std=c++11', '-arch', 'arm64', '-arch', 'armv7', '-arch', 'armv7s', '-isysroot', '%s/iPhoneOS.platform/Developer/SDKs/iPhoneOS%s.sdk' % (IOS_PLATFORM_SDK, SDK_VERSION) , '-miphoneos-version-min=%s' % SDK_MIN_VERSION])
+    env.Append(LINKFLAGS = ['-arch', 'arm64', '-arch', 'armv7', '-arch', 'armv7s', '-isysroot', '%s/iPhoneOS.platform/Developer/SDKs/iPhoneOS%s.sdk' % (IOS_PLATFORM_SDK, SDK_VERSION) , '-miphoneos-version-min=%s' % SDK_MIN_VERSION, '-Wl,-undefined,dynamic_lookup'])
 
 elif env['platform'] == "android":
     sys_exec(["python", ndk_path + "/build/tools/make_standalone_toolchain.py", "--arch", android_abi, "--api", "21", "--install-dir", "/tmp/android-21-" + android_abi + "-toolchain"])
@@ -239,11 +248,19 @@ sources = []
 add_sources(sources, 'src/core', 'cpp')
 add_sources(sources, 'src/gen', 'cpp')
 
-library = env.StaticLibrary(
-    target='bin/' + 'libgodot-cpp.{}.{}.{}'.format(
+if env['platform'] == 'ios':
+    target = 'bin/' + 'libgodot-cpp.{}.{}'.format(
+        env['platform'],
+        env['target'],
+    )
+else:
+    target = 'bin/' + 'libgodot-cpp.{}.{}.{}'.format(
         env['platform'],
         env['target'],
         env['bits'] if env['platform'] != 'android' else march_android_switcher.get(android_abi, "Invalid android architecture") + '.a',
-    ), source=sources
+    )
+
+library = env.StaticLibrary(
+    target=target, source=sources
 )
 Default(library)

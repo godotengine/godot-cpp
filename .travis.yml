@@ -53,19 +53,29 @@ matrix:
 
     - name: Android ARM Release
       os: linux
-      env: TARGET=release ADDITIONAL_FLAGS="android-abi=arm"
+      env: TARGET=release ADDITIONAL_FLAGS="platform=android android-abi=arm"
 
     - name: Android ARM64 Release
       os: linux
-      env: TARGET=release ADDITIONAL_FLAGS="android-abi=arm64"
+      env: TARGET=release ADDITIONAL_FLAGS="platform=android android-abi=arm64"
 
     - name: Android ARM Debug
       os: linux
-      env: TARGET=debug ADDITIONAL_FLAGS="android-abi=arm"
+      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android-abi=arm"
 
     - name: Android ARM64 Debug
       os: linux
-      env: TARGET=debug ADDITIONAL_FLAGS="android-abi=arm64"
+      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android-abi=arm64"
+
+    - name: iOS Debug
+      os: osx
+      compiler: clang
+      env: TARGET=debug ADDITIONAL_FLAGS="platform=ios"
+
+    - name: iOS Release
+      os: osx
+      compiler: clang
+      env: TARGET=release ADDITIONAL_FLAGS="platform=ios"
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
