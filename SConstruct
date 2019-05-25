@@ -2,12 +2,25 @@
 
 import os
 import sys
+import subprocess
 
 
 def add_sources(sources, dir, extension):
     for f in os.listdir(dir):
         if f.endswith('.' + extension):
             sources.append(dir + '/' + f)
+
+def sys_exec(args):
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+    (out, err) = proc.communicate()
+    return out.rstrip("\r\n").lstrip()
+
+march_android_switcher = {
+    "arm": "armv7-a",
+    "arm64": "armv8-a",
+    "x86": "i686",
+    "x86_64": "x86-64"
+}
 
 
 # Try to detect the host platform automatically.
@@ -29,7 +42,7 @@ opts.Add(EnumVariable(
     'platform',
     'Target platform',
     host_platform,
-    allowed_values=('linux', 'osx', 'windows'),
+    allowed_values=('linux', 'osx', 'windows', 'android'),
     ignorecase=2
 ))
 opts.Add(EnumVariable(
@@ -73,6 +86,11 @@ opts.Add(BoolVariable(
     'Generate GDNative API bindings',
     False
 ))
+
+ndk_path = ARGUMENTS.get("ndk-path", os.getenv('ANDROID_NDK_ROOT', "../NDK"))
+android_api = ARGUMENTS.get("android-api", "21")
+android_abi = ARGUMENTS.get("android-abi", "arm")
+ndk_toolchain = ARGUMENTS.get("ndk-toolchain", "/tmp/android-" + android_api + "-" + android_abi + "-toolchain")
 
 env = Environment()
 opts.Update(env)
@@ -118,6 +136,32 @@ if env['platform'] == 'linux':
     elif env['bits'] == '32':
         env.Append(CCFLAGS=['-m32'])
         env.Append(LINKFLAGS=['-m32'])
+
+elif env['platform'] == "android":
+    sys_exec(["python", ndk_path + "/build/tools/make_standalone_toolchain.py", "--arch", android_abi, "--api", "21", "--install-dir", "/tmp/android-21-" + android_abi + "-toolchain"])
+    suffix = "/bin/"
+    if android_abi == "arm":
+        suffix += "arm-linux-androideabi"
+        ranlib = ndk_toolchain + "/arm-linux-androideabi/bin/ranlib"
+    elif android_abi == "arm64":
+        suffix += "aarch64-linux-android"
+        ranlib = ndk_toolchain + "/aarch64-linux-android/bin/ranlib"
+    elif android_abi == "x86":
+        suffix += "i686-linux-android"
+        ranlib = ndk_toolchain + "/i686-linux-android/bin/ranlib"
+    elif android_abi == "x86_64":
+        suffix += "x86_64-linux-android"
+        ranlib = ndk_toolchain + "/x86_64-linux-android/bin/ranlib"
+    env["AR"] = ndk_toolchain + suffix + "-ar"
+    env["AS"] = ndk_toolchain + suffix + "-as"
+    env["CC"] = ndk_toolchain + suffix + "-clang"
+    env["CXX"] = ndk_toolchain + suffix + "-clang++"
+    env["LD"] = ndk_toolchain + suffix + "-ld"
+    env["STRIP"] = ndk_toolchain + suffix + "-strip"
+    env["RANLIB"] = ranlib
+    march = march_android_switcher.get(android_abi, "Invalid android architecture")
+    env.Append(CCFLAGS = ['-fPIE', '-fPIC', '-mfpu=neon', '-march=' + march])
+    env.Append(LDFLAGS = ['-pie', '-Wl'])
 
 elif env['platform'] == 'osx':
     # Use Clang on macOS by default
@@ -199,7 +243,7 @@ library = env.StaticLibrary(
     target='bin/' + 'libgodot-cpp.{}.{}.{}'.format(
         env['platform'],
         env['target'],
-        env['bits'],
+        env['bits'] if env['platform'] != 'android' else march_android_switcher.get(android_abi, "Invalid android architecture") + '.a',
     ), source=sources
 )
 Default(library)

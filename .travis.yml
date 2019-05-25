@@ -16,7 +16,7 @@ matrix:
     - name: Linux Debug + Static Checks
       os: linux
       compiler: gcc
-      env: TARGET=debug STATIC_CHECKS=yes
+      env: TARGET=debug STATIC_CHECKS=yes ADDITIONAL_FLAGS=""
       addons:
         apt:
           sources:
@@ -31,25 +31,41 @@ matrix:
         apt:
           packages:
             [scons, pkg-config, build-essential, p7zip-full]
-      env: TARGET=release
+      env: TARGET=release ADDITIONAL_FLAGS=""
 
     - name: macOS Debug
       os: osx
       compiler: clang
-      env: TARGET=debug
+      env: TARGET=debug ADDITIONAL_FLAGS=""
 
     - name: macOS Release
       os: osx
       compiler: clang
-      env: TARGET=release
+      env: TARGET=release ADDITIONAL_FLAGS=""
 
     - name: Windows MSVC Debug
       os: windows
-      env: TARGET=debug
+      env: TARGET=debug ADDITIONAL_FLAGS=""
 
     - name: Windows MSVC Release
       os: windows
-      env: TARGET=release
+      env: TARGET=release ADDITIONAL_FLAGS=""
+
+    - name: Android ARM Release
+      os: linux
+      env: TARGET=release ADDITIONAL_FLAGS="android-abi=arm"
+
+    - name: Android ARM64 Release
+      os: linux
+      env: TARGET=release ADDITIONAL_FLAGS="android-abi=arm64"
+
+    - name: Android ARM Debug
+      os: linux
+      env: TARGET=debug ADDITIONAL_FLAGS="android-abi=arm"
+
+    - name: Android ARM64 Debug
+      os: linux
+      env: TARGET=debug ADDITIONAL_FLAGS="android-abi=arm64"
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -69,7 +85,7 @@ script:
       export SCONS="scons";
     fi
 
-  - $SCONS target="$TARGET" bits=64 generate_bindings=yes $SCONS_FLAGS;
+  - $SCONS target="$TARGET" bits=64 generate_bindings=yes $SCONS_FLAGS $ADDITIONAL_FLAGS;
 
   - if [[ "$STATIC_CHECKS" == "yes" ]]; then
       sh ./misc/travis/clang-format.sh;
