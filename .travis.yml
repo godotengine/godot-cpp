@@ -53,7 +53,7 @@ matrix:
 
     - name: Android ARM Release
       os: linux
-      env: TARGET=release ADDITIONAL_FLAGS="platform=android android-abi=arm"
+      env: TARGET=release ADDITIONAL_FLAGS="platform=android android-abi=arm" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
       addons:
         apt:
           sources:
@@ -63,7 +63,7 @@ matrix:
 
     - name: Android ARM64 Release
       os: linux
-      env: TARGET=release ADDITIONAL_FLAGS="platform=android android-abi=arm64"
+      env: TARGET=release ADDITIONAL_FLAGS="platform=android android-abi=arm64" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
       addons:
         apt:
           sources:
@@ -73,7 +73,7 @@ matrix:
 
     - name: Android ARM Debug
       os: linux
-      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android-abi=arm"
+      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android-abi=arm" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
       addons:
         apt:
           sources:
@@ -83,7 +83,7 @@ matrix:
 
     - name: Android ARM64 Debug
       os: linux
-      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android-abi=arm64"
+      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android-abi=arm64" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
       addons:
         apt:
           sources:
@@ -112,6 +112,10 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
       curl -LO https://downloads.sourceforge.net/project/scons/scons-local/3.0.5/scons-local-3.0.5.zip;
       unzip scons-local-3.0.5.zip;
+    fi
+
+  - if [[ "$PLATFORM" == "android" ]]; then
+      sh .travis/download_android_sdk.sh;
     fi
 
 script:
