@@ -86,14 +86,37 @@ opts.Add(BoolVariable(
     'Generate GDNative API bindings',
     False
 ))
-
-ndk_path = ARGUMENTS.get("ndk-path", os.getenv('ANDROID_NDK_ROOT', "../NDK"))
-android_api = ARGUMENTS.get("android-api", "21")
-android_abi = ARGUMENTS.get("android-abi", "arm")
-ndk_toolchain = ARGUMENTS.get("ndk-toolchain", "/tmp/android-" + android_api + "-" + android_abi + "-toolchain")
+opts.Add(EnumVariable(
+    'ios_sdk',
+    'iOS SDK version',
+    '12.2',
+    ('12.1', '12.2')
+))
+opts.Add((
+    'ndk_path',
+    'Path to Android NDK',
+    os.getenv('ANDROID_NDK_ROOT', '../NDK')
+))
+opts.Add(EnumVariable(
+    'android_api',
+    'Target Android API',
+    '21',
+    ('21', '22', '23', '24', '25', '26', '27', '28')
+))
+opts.Add(EnumVariable(
+    'android_abi',
+    'Target Android ABI',
+    'arm',
+    ('arm', 'arm64', 'x86', 'x86_64')
+))
 
 env = Environment()
 opts.Update(env)
+
+opts.Add(('ndk_toolchain', 'Path where the ndk toolchain will be created', "/tmp/android-" + env['android_api'] + "-" + env['android_abi'] + "-toolchain"))
+
+opts.Update(env)
+
 Help(opts.GenerateHelpText(env))
 
 is64 = sys.maxsize > 2**32
@@ -140,35 +163,35 @@ if env['platform'] == 'linux':
 elif env['platform'] == "ios":
     SDK_MIN_VERSION = "8.0"
     # we could do better to automatically find the right sdk version
-    SDK_VERSION = "12.2"
+    SDK_VERSION = env['ios_sdk']
     IOS_PLATFORM_SDK = sys_exec(["xcode-select", "-p"]) + "/Platforms"
     env["CXX"] = sys_exec(["xcrun", "-sdk", "iphoneos", "-find", "clang++"])
     env.Append(CCFLAGS = ['-g','-O3', '-std=c++11', '-arch', 'arm64', '-arch', 'armv7', '-arch', 'armv7s', '-isysroot', '%s/iPhoneOS.platform/Developer/SDKs/iPhoneOS%s.sdk' % (IOS_PLATFORM_SDK, SDK_VERSION) , '-miphoneos-version-min=%s' % SDK_MIN_VERSION])
     env.Append(LINKFLAGS = ['-arch', 'arm64', '-arch', 'armv7', '-arch', 'armv7s', '-isysroot', '%s/iPhoneOS.platform/Developer/SDKs/iPhoneOS%s.sdk' % (IOS_PLATFORM_SDK, SDK_VERSION) , '-miphoneos-version-min=%s' % SDK_MIN_VERSION, '-Wl,-undefined,dynamic_lookup'])
 
 elif env['platform'] == "android":
-    sys_exec(["python", ndk_path + "/build/tools/make_standalone_toolchain.py", "--arch", android_abi, "--api", "21", "--install-dir", "/tmp/android-21-" + android_abi + "-toolchain"])
+    sys_exec(["python", env['ndk_path'] + "/build/tools/make_standalone_toolchain.py", "--arch", env['android_abi'], "--api", env['android_api'], "--install-dir", env['ndk_toolchain']])
     suffix = "/bin/"
-    if android_abi == "arm":
+    if env['android_abi'] == "arm":
         suffix += "arm-linux-androideabi"
-        ranlib = ndk_toolchain + "/arm-linux-androideabi/bin/ranlib"
-    elif android_abi == "arm64":
+        ranlib = env['ndk_toolchain'] + "/arm-linux-androideabi/bin/ranlib"
+    elif env['android_abi'] == "arm64":
         suffix += "aarch64-linux-android"
-        ranlib = ndk_toolchain + "/aarch64-linux-android/bin/ranlib"
-    elif android_abi == "x86":
+        ranlib = env['ndk_toolchain'] + "/aarch64-linux-android/bin/ranlib"
+    elif env['android_abi'] == "x86":
         suffix += "i686-linux-android"
-        ranlib = ndk_toolchain + "/i686-linux-android/bin/ranlib"
-    elif android_abi == "x86_64":
+        ranlib = env['ndk_toolchain'] + "/i686-linux-android/bin/ranlib"
+    elif env['android_abi'] == "x86_64":
         suffix += "x86_64-linux-android"
-        ranlib = ndk_toolchain + "/x86_64-linux-android/bin/ranlib"
-    env["AR"] = ndk_toolchain + suffix + "-ar"
-    env["AS"] = ndk_toolchain + suffix + "-as"
-    env["CC"] = ndk_toolchain + suffix + "-clang"
-    env["CXX"] = ndk_toolchain + suffix + "-clang++"
-    env["LD"] = ndk_toolchain + suffix + "-ld"
-    env["STRIP"] = ndk_toolchain + suffix + "-strip"
+        ranlib = env['ndk_toolchain'] + "/x86_64-linux-android/bin/ranlib"
+    env["AR"] = env['ndk_toolchain'] + suffix + "-ar"
+    env["AS"] = env['ndk_toolchain'] + suffix + "-as"
+    env["CC"] = env['ndk_toolchain'] + suffix + "-clang"
+    env["CXX"] = env['ndk_toolchain'] + suffix + "-clang++"
+    env["LD"] = env['ndk_toolchain'] + suffix + "-ld"
+    env["STRIP"] = env['ndk_toolchain'] + suffix + "-strip"
     env["RANLIB"] = ranlib
-    march = march_android_switcher.get(android_abi, "Invalid android architecture")
+    march = march_android_switcher.get(env['android_abi'], "Invalid android architecture")
     env.Append(CCFLAGS = ['-fPIE', '-fPIC', '-mfpu=neon', '-march=' + march])
     env.Append(LDFLAGS = ['-pie', '-Wl'])
 
@@ -257,7 +280,7 @@ else:
     target = 'bin/' + 'libgodot-cpp.{}.{}.{}'.format(
         env['platform'],
         env['target'],
-        env['bits'] if env['platform'] != 'android' else march_android_switcher.get(android_abi, "Invalid android architecture") + '.a',
+        env['bits'] if env['platform'] != 'android' else march_android_switcher.get(env['android_abi'], "Invalid android architecture") + '.a',
     )
 
 library = env.StaticLibrary(
