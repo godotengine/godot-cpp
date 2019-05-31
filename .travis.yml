@@ -13,18 +13,6 @@ cache:
 
 matrix:
   include:
-    - name: iOS Debug
-      os: osx
-      osx_image: xcode10.2
-      compiler: clang
-      env: TARGET=debug ADDITIONAL_FLAGS="platform=ios"
-
-    - name: iOS Release
-      os: osx
-      osx_image: xcode10.2
-      compiler: clang
-      env: TARGET=release ADDITIONAL_FLAGS="platform=ios"
-
     - name: Linux Debug + Static Checks
       os: linux
       compiler: gcc
@@ -102,6 +90,18 @@ matrix:
             - llvm-toolchain-xenial-6.0
           packages:
             [scons, pkg-config, build-essential, p7zip-full, clang-format-6.0]
+
+    - name: iOS Debug
+      os: osx
+      osx_image: xcode10.2
+      compiler: clang
+      env: TARGET=debug ADDITIONAL_FLAGS="platform=ios"
+
+    - name: iOS Release
+      os: osx
+      osx_image: xcode10.2
+      compiler: clang
+      env: TARGET=release ADDITIONAL_FLAGS="platform=ios"
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
