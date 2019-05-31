@@ -286,7 +286,7 @@ add_sources(sources, 'src/core', 'cpp')
 add_sources(sources, 'src/gen', 'cpp')
 
 if env['platform'] == 'ios':
-    target = 'bin/' + 'libgodot-cpp.{}.{}'.format(
+    target = 'bin/' + 'libgodot-cpp.{}.{}.a'.format(
         env['platform'],
         env['target'],
     )
