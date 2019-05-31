@@ -16,7 +16,7 @@ matrix:
     - name: Linux Debug + Static Checks
       os: linux
       compiler: gcc
-      env: TARGET=debug STATIC_CHECKS=yes ADDITIONAL_FLAGS=""
+      env: TARGET=debug STATIC_CHECKS=yes ADDITIONAL_FLAGS="bits=64"
       addons:
         apt:
           sources:
@@ -31,29 +31,29 @@ matrix:
         apt:
           packages:
             [scons, pkg-config, build-essential, p7zip-full]
-      env: TARGET=release ADDITIONAL_FLAGS=""
+      env: TARGET=release ADDITIONAL_FLAGS="bits=64"
 
     - name: macOS Debug
       os: osx
       compiler: clang
-      env: TARGET=debug ADDITIONAL_FLAGS=""
+      env: TARGET=debug ADDITIONAL_FLAGS="bits=64"
 
     - name: macOS Release
       os: osx
       compiler: clang
-      env: TARGET=release ADDITIONAL_FLAGS=""
+      env: TARGET=release ADDITIONAL_FLAGS="bits=64"
 
     - name: Windows MSVC Debug
       os: windows
-      env: TARGET=debug ADDITIONAL_FLAGS=""
+      env: TARGET=debug ADDITIONAL_FLAGS="bits=64"
 
     - name: Windows MSVC Release
       os: windows
-      env: TARGET=release ADDITIONAL_FLAGS=""
+      env: TARGET=release ADDITIONAL_FLAGS="bits=64"
 
     - name: Android ARM Release
       os: linux
-      env: TARGET=release ADDITIONAL_FLAGS="platform=android android_abi=arm" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
+      env: TARGET=release ADDITIONAL_FLAGS="platform=android arch=arm bits=32" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
       addons:
         apt:
           sources:
@@ -63,7 +63,7 @@ matrix:
 
     - name: Android ARM64 Release
       os: linux
-      env: TARGET=release ADDITIONAL_FLAGS="platform=android android_abi=arm64" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
+      env: TARGET=release ADDITIONAL_FLAGS="platform=android arch=arm bits=64" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
       addons:
         apt:
           sources:
@@ -73,7 +73,7 @@ matrix:
 
     - name: Android ARM Debug
       os: linux
-      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android_abi=arm" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
+      env: TARGET=debug ADDITIONAL_FLAGS="platform=android arch=arm bits=32" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
       addons:
         apt:
           sources:
@@ -83,7 +83,7 @@ matrix:
 
     - name: Android ARM64 Debug
       os: linux
-      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android_abi=arm64" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
+      env: TARGET=debug ADDITIONAL_FLAGS="platform=android arch=arm bits=64" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/android-sdk/ndk-bundle"
       addons:
         apt:
           sources:
@@ -125,7 +125,7 @@ script:
       export SCONS="scons";
     fi
 
-  - $SCONS target="$TARGET" bits=64 generate_bindings=yes $SCONS_FLAGS $ADDITIONAL_FLAGS;
+  - $SCONS target="$TARGET" generate_bindings=yes $SCONS_FLAGS $ADDITIONAL_FLAGS;
 
   - if [[ "$STATIC_CHECKS" == "yes" ]]; then
       sh ./misc/travis/clang-format.sh;

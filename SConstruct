@@ -104,17 +104,13 @@ opts.Add(EnumVariable(
     ('21', '22', '23', '24', '25', '26', '27', '28')
 ))
 opts.Add(EnumVariable(
-    'android_abi',
+    'arch',
     'Target Android ABI',
-    'arm',
-    ('arm', 'arm64', 'x86', 'x86_64')
+    'default',
+    ('default', 'arm', 'x86')
 ))
 
 env = Environment()
-opts.Update(env)
-
-opts.Add(('ndk_toolchain', 'Path where the ndk toolchain will be created', "/tmp/android-" + env['android_api'] + "-" + env['android_abi'] + "-toolchain"))
-
 opts.Update(env)
 
 Help(opts.GenerateHelpText(env))
@@ -129,6 +125,24 @@ if (
 
 if env['bits'] == 'default':
     env['bits'] = '64' if is64 else '32'
+
+if env['arch'] == 'default':
+    if env['platform'] == 'windows' or env['platform'] == 'linux' or env['platform'] == 'osx':
+        env['arch'] = 'x86'
+if env['platform'] == 'android' or env['platform'] == 'ios':
+    env['arch'] = 'arm'
+
+if env['platform'] == 'android':
+    android_abi = env['arch']
+    if env['arch'] == 'arm':
+        if env['bits'] == '64':
+            android_abi += "64"
+    elif env['arch'] == 'x86':
+        if env['bits'] == '64':
+            android_abi += "_64"
+    opts.Add(('ndk_toolchain', 'Path where the ndk toolchain will be created', "/tmp/android-" + env['android_api'] + "-" + android_abi + "-toolchain"))
+    opts.Update(env)
+    print("Android abi is " + android_abi)
 
 # This makes sure to keep the session environment variables on Windows.
 # This way, you can run SCons in a Visual Studio 2017 prompt and it will find
@@ -170,18 +184,18 @@ elif env['platform'] == "ios":
     env.Append(LINKFLAGS = ['-arch', 'arm64', '-arch', 'armv7', '-arch', 'armv7s', '-isysroot', '%s/iPhoneOS.platform/Developer/SDKs/iPhoneOS%s.sdk' % (IOS_PLATFORM_SDK, SDK_VERSION) , '-miphoneos-version-min=%s' % SDK_MIN_VERSION, '-Wl,-undefined,dynamic_lookup'])
 
 elif env['platform'] == "android":
-    sys_exec(["python", env['ndk_path'] + "/build/tools/make_standalone_toolchain.py", "--arch", env['android_abi'], "--api", env['android_api'], "--install-dir", env['ndk_toolchain']])
+    sys_exec(["python", env['ndk_path'] + "/build/tools/make_standalone_toolchain.py", "--arch", android_abi, "--api", env['android_api'], "--install-dir", env['ndk_toolchain']])
     suffix = "/bin/"
-    if env['android_abi'] == "arm":
+    if android_abi == "arm":
         suffix += "arm-linux-androideabi"
         ranlib = env['ndk_toolchain'] + "/arm-linux-androideabi/bin/ranlib"
-    elif env['android_abi'] == "arm64":
+    elif android_abi == "arm64":
         suffix += "aarch64-linux-android"
         ranlib = env['ndk_toolchain'] + "/aarch64-linux-android/bin/ranlib"
-    elif env['android_abi'] == "x86":
+    elif android_abi == "x86":
         suffix += "i686-linux-android"
         ranlib = env['ndk_toolchain'] + "/i686-linux-android/bin/ranlib"
-    elif env['android_abi'] == "x86_64":
+    elif android_abi == "x86_64":
         suffix += "x86_64-linux-android"
         ranlib = env['ndk_toolchain'] + "/x86_64-linux-android/bin/ranlib"
     env["AR"] = env['ndk_toolchain'] + suffix + "-ar"
@@ -191,7 +205,7 @@ elif env['platform'] == "android":
     env["LD"] = env['ndk_toolchain'] + suffix + "-ld"
     env["STRIP"] = env['ndk_toolchain'] + suffix + "-strip"
     env["RANLIB"] = ranlib
-    march = march_android_switcher.get(env['android_abi'], "Invalid android architecture")
+    march = march_android_switcher.get(android_abi, "Invalid android architecture")
     env.Append(CCFLAGS = ['-fPIE', '-fPIC', '-mfpu=neon', '-march=' + march])
     env.Append(LDFLAGS = ['-pie', '-Wl'])
 
@@ -280,7 +294,7 @@ else:
     target = 'bin/' + 'libgodot-cpp.{}.{}.{}'.format(
         env['platform'],
         env['target'],
-        env['bits'] if env['platform'] != 'android' else march_android_switcher.get(env['android_abi'], "Invalid android architecture") + '.a',
+        (env['arch'] + '.' + env['bits']) if env['platform'] != 'android' else march_android_switcher.get(android_abi, "Invalid android architecture") + '.a',
     )
 
 library = env.StaticLibrary(

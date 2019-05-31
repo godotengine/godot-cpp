@@ -89,7 +89,7 @@ $ cd ..
 
 > On android first export your ndk path using `export ANDROID_NDK_ROOT=pathToYourNDK`.
 
-> On android specify target abi with `android-abi=arm/arm64`.
+> On android specify architexture with `arch=arm/x86` and select bits (32 or 64) to get wanted ABI.
 
 ## Creating a simple class
 
