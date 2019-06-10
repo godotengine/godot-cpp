@@ -305,6 +305,13 @@ void register_method(const char *name, M method_ptr, godot_method_rpc_mode rpc_t
 	godot::nativescript_api->godot_nativescript_register_method(godot::_RegisterState::nativescript_handle, ___get_method_class_name(method_ptr), name, attr, method);
 }
 
+// User can specify a derived class D to register the method for, instead of it being inferred.
+template <class D, class B, class R, class... As>
+void register_method_explicit(const char *name, R (B::*method_ptr)(As...), godot_method_rpc_mode rpc_type = GODOT_METHOD_RPC_MODE_DISABLED) {
+	static_assert(std::is_base_of<B, D>::value, "Explicit class must derive from method class");
+	register_method(name, static_cast<R (D::*)(As...)>(method_ptr), rpc_type);
+}
+
 template <class T, class P>
 struct _PropertySetFunc {
 	void (T::*f)(P);
