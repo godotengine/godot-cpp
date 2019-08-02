@@ -186,7 +186,7 @@ Vector3 Quat::xform(const Vector3 &v) const {
 }
 
 Quat::operator String() const {
-	return String(); // @Todo
+	return "[ " + String::num(x) + ", " + String::num(y) + ", " + String::num(z) + ", " + String::num(w) + " ]";
 }
 
 Quat::Quat(const Vector3 &axis, const real_t &angle) {
