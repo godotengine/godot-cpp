@@ -348,6 +348,8 @@ public:
 
 	Vector3 get_scale() const;
 
+	Basis slerp(Basis b, float t) const;
+
 	Vector3 get_euler_xyz() const;
 	void set_euler_xyz(const Vector3 &p_euler);
 	Vector3 get_euler_yxz() const;

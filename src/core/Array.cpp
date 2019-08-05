@@ -158,6 +158,35 @@ void Array::sort_custom(Object *obj, const String &func) {
 	godot::api->godot_array_sort_custom(&_godot_array, (godot_object *)obj, (godot_string *)&func);
 }
 
+int Array::bsearch(const Variant &value, const bool before) {
+	return godot::api->godot_array_bsearch(&_godot_array, (godot_variant *)&value, before);
+}
+
+int Array::bsearch_custom(const Variant &value, const Object *obj,
+		const String &func, const bool before) {
+	return godot::api->godot_array_bsearch_custom(&_godot_array, (godot_variant *)&value,
+			(godot_object *)obj, (godot_string *)&func, before);
+}
+
+Array Array::duplicate(const bool deep) const {
+	godot_array arr = godot::core_1_1_api->godot_array_duplicate(&_godot_array, deep);
+	return *(Array *)&arr;
+}
+
+Variant Array::max() const {
+	godot_variant v = godot::core_1_1_api->godot_array_max(&_godot_array);
+	return *(Variant *)&v;
+}
+
+Variant Array::min() const {
+	godot_variant v = godot::core_1_1_api->godot_array_min(&_godot_array);
+	return *(Variant *)&v;
+}
+
+void Array::shuffle() {
+	godot::core_1_1_api->godot_array_shuffle(&_godot_array);
+}
+
 Array::~Array() {
 	godot::api->godot_array_destroy(&_godot_array);
 }

@@ -8,6 +8,7 @@
 namespace godot {
 
 extern "C" const godot_gdnative_core_api_struct *api;
+extern "C" const godot_gdnative_core_1_1_api_struct *core_1_1_api;
 extern "C" const godot_gdnative_ext_nativescript_api_struct *nativescript_api;
 extern "C" const godot_gdnative_ext_nativescript_1_1_api_struct *nativescript_1_1_api;
 

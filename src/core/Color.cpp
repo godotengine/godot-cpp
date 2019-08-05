@@ -67,8 +67,84 @@ uint32_t Color::to_ARGB32() const {
 	return c;
 }
 
+uint32_t Color::to_ABGR32() const {
+	uint32_t c = (uint8_t)(a * 255);
+	c <<= 8;
+	c |= (uint8_t)(b * 255);
+	c <<= 8;
+	c |= (uint8_t)(g * 255);
+	c <<= 8;
+	c |= (uint8_t)(r * 255);
+
+	return c;
+}
+
+uint64_t Color::to_ABGR64() const {
+	uint64_t c = (uint16_t)(a * 65535);
+	c <<= 16;
+	c |= (uint16_t)(b * 65535);
+	c <<= 16;
+	c |= (uint16_t)(g * 65535);
+	c <<= 16;
+	c |= (uint16_t)(r * 65535);
+
+	return c;
+}
+
+uint64_t Color::to_ARGB64() const {
+	uint64_t c = (uint16_t)(a * 65535);
+	c <<= 16;
+	c |= (uint16_t)(r * 65535);
+	c <<= 16;
+	c |= (uint16_t)(g * 65535);
+	c <<= 16;
+	c |= (uint16_t)(b * 65535);
+
+	return c;
+}
+
+uint32_t Color::to_RGBA32() const {
+	uint32_t c = (uint8_t)(r * 255);
+	c <<= 8;
+	c |= (uint8_t)(g * 255);
+	c <<= 8;
+	c |= (uint8_t)(b * 255);
+	c <<= 8;
+	c |= (uint8_t)(a * 255);
+
+	return c;
+}
+
+uint64_t Color::to_RGBA64() const {
+	uint64_t c = (uint16_t)(r * 65535);
+	c <<= 16;
+	c |= (uint16_t)(g * 65535);
+	c <<= 16;
+	c |= (uint16_t)(b * 65535);
+	c <<= 16;
+	c |= (uint16_t)(a * 65535);
+
+	return c;
+}
+
 float Color::gray() const {
 	return (r + g + b) / 3.0;
+}
+
+uint8_t Color::get_r8() const {
+	return (uint8_t)(r * 255.0);
+}
+
+uint8_t Color::get_g8() const {
+	return (uint8_t)(g * 255.0);
+}
+
+uint8_t Color::get_b8() const {
+	return (uint8_t)(b * 255.0);
+}
+
+uint8_t Color::get_a8() const {
+	return (uint8_t)(a * 255.0);
 }
 
 float Color::get_h() const {
@@ -165,6 +241,74 @@ void Color::set_hsv(float p_h, float p_s, float p_v, float p_alpha) {
 			b = q;
 			break;
 	}
+}
+
+Color Color::darkened(const float p_amount) const {
+	Color res = *this;
+	res.r = res.r * (1.0f - p_amount);
+	res.g = res.g * (1.0f - p_amount);
+	res.b = res.b * (1.0f - p_amount);
+	return res;
+}
+
+Color Color::lightened(const float p_amount) const {
+	Color res = *this;
+	res.r = res.r + (1.0f - res.r) * p_amount;
+	res.g = res.g + (1.0f - res.g) * p_amount;
+	res.b = res.b + (1.0f - res.b) * p_amount;
+	return res;
+}
+
+Color Color::from_hsv(float p_h, float p_s, float p_v, float p_a) const {
+	p_h = ::fmod(p_h * 360.0f, 360.0f);
+	if (p_h < 0.0)
+		p_h += 360.0f;
+
+	const float h_ = p_h / 60.0f;
+	const float c = p_v * p_s;
+	const float x = c * (1.0f - ::fabs(::fmod(h_, 2.0f) - 1.0f));
+	float r, g, b;
+
+	switch ((int)h_) {
+		case 0: {
+			r = c;
+			g = x;
+			b = 0;
+		} break;
+		case 1: {
+			r = x;
+			g = c;
+			b = 0;
+		} break;
+		case 2: {
+			r = 0;
+			g = c;
+			b = x;
+		} break;
+		case 3: {
+			r = 0;
+			g = x;
+			b = c;
+		} break;
+		case 4: {
+			r = x;
+			g = 0;
+			b = c;
+		} break;
+		case 5: {
+			r = c;
+			g = 0;
+			b = x;
+		} break;
+		default: {
+			r = 0;
+			g = 0;
+			b = 0;
+		} break;
+	}
+
+	const float m = p_v - c;
+	return Color(m + r, m + g, m + b, p_a);
 }
 
 void Color::invert() {

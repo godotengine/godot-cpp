@@ -133,6 +133,19 @@ public:
 
 	void sort_custom(Object *obj, const String &func);
 
+	int bsearch(const Variant &value, const bool before = true);
+
+	int bsearch_custom(const Variant &value, const Object *obj,
+			const String &func, const bool before = true);
+
+	Array duplicate(const bool deep = false) const;
+
+	Variant max() const;
+
+	Variant min() const;
+
+	void shuffle();
+
 	~Array();
 };
 

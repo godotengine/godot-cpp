@@ -132,6 +132,11 @@ public:
 	signed char casecmp_to(String p_str) const;
 	signed char nocasecmp_to(String p_str) const;
 	signed char naturalnocasecmp_to(String p_str) const;
+	String dedent() const;
+	PoolStringArray rsplit(const String &divisor, const bool allow_empty = true, const int maxsplit = 0) const;
+	String rstrip(const String &chars) const;
+	String trim_prefix(const String &prefix) const;
+	String trim_suffix(const String &suffix) const;
 };
 
 String operator+(const char *a, const String &b);

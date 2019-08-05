@@ -149,6 +149,15 @@ Vector3 Basis::get_scale() const {
 							  Vector3(elements[0][2], elements[1][2], elements[2][2]).length());
 }
 
+// TODO: implement this directly without using quaternions to make it more efficient
+Basis Basis::slerp(Basis b, float t) const {
+	ERR_FAIL_COND_V(!is_rotation(), Basis());
+	ERR_FAIL_COND_V(!b.is_rotation(), Basis());
+	Quat from(*this);
+	Quat to(b);
+	return Basis(from.slerp(to, t));
+}
+
 // get_euler_xyz returns a vector containing the Euler angles in the format
 // (a1,a2,a3), where a3 is the angle of the first rotation, and a1 is the last
 // (following the convention they are commonly defined in the literature).
