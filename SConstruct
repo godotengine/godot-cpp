@@ -29,7 +29,7 @@ opts.Add(EnumVariable(
     'platform',
     'Target platform',
     host_platform,
-    allowed_values=('linux', 'osx', 'windows'),
+    allowed_values=('linux', 'osx', 'windows', 'android'),
     ignorecase=2
 ))
 opts.Add(EnumVariable(
@@ -73,8 +73,14 @@ opts.Add(BoolVariable(
     'Generate GDNative API bindings',
     False
 ))
+opts.Add(EnumVariable(
+    'android_api_level',
+    'Target Android API Level',
+    '29',
+    ('29', '28', '27', '26')
+))
 
-env = Environment()
+env = Environment(ENV = os.environ)
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
 
@@ -82,7 +88,8 @@ is64 = sys.maxsize > 2**32
 if (
     env['TARGET_ARCH'] == 'amd64' or
     env['TARGET_ARCH'] == 'emt64' or
-    env['TARGET_ARCH'] == 'x86_64'
+    env['TARGET_ARCH'] == 'x86_64' or
+    env['TARGET_ARCH'] == 'arm64-v8a'
 ):
     is64 = True
 
@@ -103,6 +110,31 @@ if host_platform == 'windows':
 if env['platform'] == 'linux':
     if env['use_llvm']:
         env['CXX'] = 'clang++'
+
+    env.Append(CCFLAGS=['-fPIC', '-g', '-std=c++14', '-Wwrite-strings'])
+    env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
+
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-Og'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
+
+    if env['bits'] == '64':
+        env.Append(CCFLAGS=['-m64'])
+        env.Append(LINKFLAGS=['-m64'])
+    elif env['bits'] == '32':
+        env.Append(CCFLAGS=['-m32'])
+        env.Append(LINKFLAGS=['-m32'])
+
+# Add android target as it works for both armeabi-v7a and arm64-v8a architectures
+elif env['platform'] == 'android':
+    # Use clang by default on android(NDK provides only clang)
+    env['use_llvm'] = 'yes'
+    if env['use_llvm']:
+        if(env['bits'] == '64'):
+            env['CXX'] = 'aarch64-linux-android' + env['android_api_level'] + '-clang++'
+        elif(env['bits'] == '32'):
+            env['CXX'] = 'armv7a-linux-androideabi' + env['android_api_level'] +'-clang++'
 
     env.Append(CCFLAGS=['-fPIC', '-g', '-std=c++14', '-Wwrite-strings'])
     env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
