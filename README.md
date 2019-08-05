@@ -76,8 +76,16 @@ $ cd godot-cpp
 $ scons platform=<your platform> generate_bindings=yes
 $ cd ..
 ```
+For android:
+Download latest Android NDK from official website and set NDK path.
+```
+$ export PATH="$PATH:/PATH-TO-ANDROID-NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/"
+$ scons platform=android generate_bindings=yes
+```
+you can also specify architecture by enabling bits=64 (or 32) default is 64
 
-> Replace `<your platform>` with either `windows`, `linux` or `osx`.
+
+> Replace `<your platform>` with either `windows`, `linux`, `osx` or `android`.
 
 > Include `use_llvm=yes` for using clang++
 
@@ -188,6 +196,19 @@ $ link /nologo /dll /out:bin\libtest.dll /implib:bin\libsimple.lib src\init.obj 
 
 *macOS*
 For OSX you need to find out what compiler flags need to be used.
+
+*Android*
+```
+$ cd SimpleLibrary
+$ aarch64-linux-android29-clang -fPIC -o src/init.os -c src/init.cpp -g -O3 -std=c++14 -Igodot-cpp/include -Igodot-cpp/include/core -Igodot-cpp/include/gen -Igodot-cpp/godot_headers
+$ aarch64-linux-android29-clang -o bin/libtest.so -shared src/init.os -Lgodot-cpp/bin -l<name of the godot-cpp>
+```
+> use `armv7a-linux-androideabi29-clang` for 32 bit armeabi-v7a library
+
+> This creates the file `libtest.so` in your `SimpleLibrary/bin` directory.
+
+> You will need to replace `<name of the godot-cpp>` with the file that was created in [**Compiling the cpp bindings library**](#compiling-the-cpp-bindings-library)
+
 
 ### Creating `.gdnlib` and `.gdns` files
 follow [godot_header/README.md](https://github.com/GodotNativeTools/godot_headers/blob/master/README.md#how-do-i-use-native-scripts-from-the-editor) to create the `.gdns` 
