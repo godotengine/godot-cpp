@@ -3,6 +3,41 @@
 import os
 import sys
 
+# Workaround for MinGW. See:
+# http://www.scons.org/wiki/LongCmdLinesOnWin32
+if (os.name=="nt"):
+    import subprocess
+    
+    def mySubProcess(cmdline,env):
+        #print "SPAWNED : " + cmdline
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, startupinfo=startupinfo, shell = False, env = env)
+        data, err = proc.communicate()
+        rv = proc.wait()
+        if rv:
+            print("=====")
+            print(err.decode("utf-8"))
+            print("=====")
+        return rv
+        
+    def mySpawn(sh, escape, cmd, args, env):
+                        
+        newargs = ' '.join(args[1:])
+        cmdline = cmd + " " + newargs
+        
+        rv=0
+        if len(cmdline) > 32000 and cmd.endswith("ar") :
+            cmdline = cmd + " " + args[1] + " " + args[2] + " "
+            for i in range(3,len(args)) :
+                rv = mySubProcess( cmdline + args[i], env )
+                if rv :
+                    break	
+        else:				
+            rv = mySubProcess( cmdline, env )
+            
+        return rv
 
 def add_sources(sources, dir, extension):
     for f in os.listdir(dir):
@@ -74,11 +109,21 @@ opts.Add(BoolVariable(
     False
 ))
 opts.Add(EnumVariable(
-    'android_api_level',
-    'Target Android API Level',
-    '29',
-    ('29', '28', '27', '26')
+    'android_arch',
+    'Target Android architecture',
+    'armv7',
+    ['armv7','arm64v8','x86','x86_64']
 ))
+opts.Add(
+    'android_api_level',
+    'Target Android API level',
+    '18' if ARGUMENTS.get("android_arch", 'armv7') in ['armv7', 'x86'] else '21'
+)
+opts.Add(
+    'ANDROID_NDK_ROOT',
+    'Path to your Android NDK installation. By default, uses ANDROID_NDK_ROOT from your defined environment variables.',
+    os.environ.get("ANDROID_NDK_ROOT", None)
+)
 
 env = Environment(ENV = os.environ)
 opts.Update(env)
@@ -99,7 +144,7 @@ if env['bits'] == 'default':
 # This makes sure to keep the session environment variables on Windows.
 # This way, you can run SCons in a Visual Studio 2017 prompt and it will find
 # all the required tools
-if host_platform == 'windows':
+if host_platform == 'windows' and env['platform'] != 'android':
     if env['bits'] == '64':
         env = Environment(TARGET_ARCH='amd64')
     elif env['bits'] == '32':
@@ -110,31 +155,6 @@ if host_platform == 'windows':
 if env['platform'] == 'linux':
     if env['use_llvm']:
         env['CXX'] = 'clang++'
-
-    env.Append(CCFLAGS=['-fPIC', '-g', '-std=c++14', '-Wwrite-strings'])
-    env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
-
-    if env['target'] == 'debug':
-        env.Append(CCFLAGS=['-Og'])
-    elif env['target'] == 'release':
-        env.Append(CCFLAGS=['-O3'])
-
-    if env['bits'] == '64':
-        env.Append(CCFLAGS=['-m64'])
-        env.Append(LINKFLAGS=['-m64'])
-    elif env['bits'] == '32':
-        env.Append(CCFLAGS=['-m32'])
-        env.Append(LINKFLAGS=['-m32'])
-
-# Add android target as it works for both armeabi-v7a and arm64-v8a architectures
-elif env['platform'] == 'android':
-    # Use clang by default on android(NDK provides only clang)
-    env['use_llvm'] = 'yes'
-    if env['use_llvm']:
-        if(env['bits'] == '64'):
-            env['CXX'] = 'aarch64-linux-android' + env['android_api_level'] + '-clang++'
-        elif(env['bits'] == '32'):
-            env['CXX'] = 'armv7a-linux-androideabi' + env['android_api_level'] +'-clang++'
 
     env.Append(CCFLAGS=['-fPIC', '-g', '-std=c++14', '-Wwrite-strings'])
     env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
@@ -205,6 +225,62 @@ elif env['platform'] == 'windows':
             '-static-libgcc',
             '-static-libstdc++',
         ])
+elif env['platform'] == 'android':
+    if host_platform == 'windows':
+        env = env.Clone(tools=['mingw'])
+        env["SPAWN"] = mySpawn
+    
+    # Verify NDK root
+    if not 'ANDROID_NDK_ROOT' in env:
+        raise ValueError("To build for Android, ANDROID_NDK_ROOT must be defined. Please set ANDROID_NDK_ROOT to the root folder of your Android NDK installation.")
+    
+    # Validate API level
+    api_level = int(env['android_api_level'])
+    if env['android_arch'] in ['x86_64', 'arm64v8'] and api_level < 21:
+        print("WARN: 64-bit Android architectures require an API level of at least 21; setting android_api_level=21")
+        env['android_api_level'] = '21'
+        api_level = 21
+    
+    # Setup toolchain
+    toolchain = env['ANDROID_NDK_ROOT'] + "/toolchains/llvm/prebuilt/"
+    if host_platform == "windows":
+        toolchain += "windows"
+        import platform as pltfm
+        if pltfm.machine().endswith("64"):
+            toolchain += "-x86_64"
+    elif host_platform == "linux":
+        toolchain += "linux-x86_64"
+    elif host_platform == "osx":
+        toolchain += "darwin-x86_64"
+    env.PrependENVPath('PATH', toolchain + "/bin") # This does nothing half of the time, but we'll put it here anyways
+
+    # Get architecture info
+    arch_info_table = {
+        "armv7" : {
+            "march":"armv7-a", "target":"armv7a-linux-androideabi", "tool_path":"arm-linux-androideabi", "compiler_path":"armv7a-linux-androideabi",
+            "ccflags" : ['-mfpu=neon']
+            },
+        "arm64v8" : {
+            "march":"armv8-a", "target":"aarch64-linux-android", "tool_path":"aarch64-linux-android", "compiler_path":"aarch64-linux-android",
+            "ccflags" : []
+            },
+        "x86" : {
+            "march":"i686", "target":"i686-linux-android", "tool_path":"i686-linux-android", "compiler_path":"i686-linux-android",
+            "ccflags" : ['-mstackrealign']
+            },
+        "x86_64" : {"march":"x86-64", "target":"x86_64-linux-android", "tool_path":"x86_64-linux-android", "compiler_path":"x86_64-linux-android",
+            "ccflags" : []
+        }
+    }
+    arch_info = arch_info_table[env['android_arch']]
+
+    # Setup tools
+    env['CC'] = toolchain + "/bin/clang"
+    env['CXX'] = toolchain + "/bin/clang++"
+    env['AR'] = toolchain + "/bin/" + arch_info['tool_path'] + "-ar"
+
+    env.Append(CCFLAGS=['--target=' + arch_info['target'] + env['android_api_level'], '-march=' + arch_info['march'], '-fPIC'])#, '-fPIE', '-fno-addrsig', '-Oz'])
+    env.Append(CCFLAGS=arch_info['ccflags'])
 
 env.Append(CPPPATH=[
     '.',
@@ -234,10 +310,11 @@ add_sources(sources, 'src/core', 'cpp')
 add_sources(sources, 'src/gen', 'cpp')
 
 library = env.StaticLibrary(
-    target='bin/' + 'libgodot-cpp.{}.{}.{}'.format(
+    target='bin/' + 'libgodot-cpp.{}.{}.{}{}'.format(
         env['platform'],
         env['target'],
-        env['bits'],
+        env['bits'] if env['platform'] != 'android' else env['android_arch'],
+        env['LIBSUFFIX']
     ), source=sources
 )
 Default(library)
