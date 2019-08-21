@@ -77,12 +77,12 @@ $ scons platform=<your platform> generate_bindings=yes
 $ cd ..
 ```
 For android:
-Download latest Android NDK from official website and set NDK path.
+Download the latest [Android NDK](https://developer.android.com/ndk/downloads) from the official website and set NDK path.
 ```
-$ export PATH="$PATH:/PATH-TO-ANDROID-NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/"
-$ scons platform=android generate_bindings=yes
+$ scons platform=android generate_bindings=yes ANDROID_NDK_ROOT="/PATH-TO-ANDROID-NDK/" android_arch=<  >
 ```
-you can also specify architecture by enabling bits=64 (or 32) default is 64
+`android_arch` can be `armv7, arm64v8, x86, x86_64`.
+`ANDROID_NDK_ROOT` can also be set in the environment variables of your computer if you do not want to include it in your Scons call.
 
 
 > Replace `<your platform>` with either `windows`, `linux`, `osx` or `android`.
