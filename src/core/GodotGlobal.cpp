@@ -139,6 +139,10 @@ void Godot::gdnative_init(godot_gdnative_init_options *options) {
 			default: break;
 		}
 	}
+
+	// register these now
+	___register_types();
+	___init_method_bindings();
 }
 
 void Godot::gdnative_terminate(godot_gdnative_terminate_options *options) {
@@ -157,9 +161,6 @@ void Godot::nativescript_init(void *handle) {
 	binding_funcs.free_instance_binding_data = wrapper_destroy;
 
 	godot::_RegisterState::language_index = godot::nativescript_1_1_api->godot_nativescript_register_instance_binding_data_functions(binding_funcs);
-
-	___register_types();
-	___init_method_bindings();
 }
 
 void Godot::nativescript_terminate(void *handle) {
