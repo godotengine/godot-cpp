@@ -5,7 +5,7 @@ import sys
 
 # Workaround for MinGW. See:
 # http://www.scons.org/wiki/LongCmdLinesOnWin32
-if (os.name=="nt"):
+if os.name == "nt":
     import subprocess
     
     def mySubProcess(cmdline,env):
@@ -278,8 +278,12 @@ elif env['platform'] == 'android':
     env['CC'] = toolchain + "/bin/clang"
     env['CXX'] = toolchain + "/bin/clang++"
     env['AR'] = toolchain + "/bin/" + arch_info['tool_path'] + "-ar"
+    env["AS"] = toolchain + arch_info['tool_path'] + "-as"
+    env["LD"] = toolchain + arch_info['tool_path'] + "-ld"
+    env["STRIP"] = toolchain + arch_info['tool_path'] + "-strip"
+    env["RANLIB"] = toolchain + arch_info['tool_path'] + "ranlib"
 
-    env.Append(CCFLAGS=['--target=' + arch_info['target'] + env['android_api_level'], '-march=' + arch_info['march'], '-fPIC'])#, '-fPIE', '-fno-addrsig', '-Oz'])
+    env.Append(CCFLAGS=['--target=' + arch_info['target'] + env['android_api_level'], '-march=' + arch_info['march'], '-fPIC'])
     env.Append(CCFLAGS=arch_info['ccflags'])
 
 env.Append(CPPPATH=[
