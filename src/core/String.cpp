@@ -124,8 +124,8 @@ bool String::operator!=(const String &s) const {
 }
 
 String String::operator+(const String &s) const {
-	String new_string = *this;
-	new_string._godot_string = godot::api->godot_string_operator_plus(&new_string._godot_string, &s._godot_string);
+	String new_string;
+	new_string._godot_string = godot::api->godot_string_operator_plus(&_godot_string, &s._godot_string);
 
 	return new_string;
 }
