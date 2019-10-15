@@ -165,7 +165,7 @@ int Array::bsearch(const Variant &value, const bool before) {
 int Array::bsearch_custom(const Variant &value, const Object *obj,
 		const String &func, const bool before) {
 	return godot::api->godot_array_bsearch_custom(&_godot_array, reinterpret_cast<const godot_variant *>(&value),
-			const_cast<godot_object*>(static_cast<const godot_object *>(obj)), reinterpret_cast<const godot_string *>(&func), before);
+			const_cast<godot_object *>(static_cast<const godot_object *>(obj)), reinterpret_cast<const godot_string *>(&func), before);
 }
 
 Array Array::duplicate(const bool deep) const {

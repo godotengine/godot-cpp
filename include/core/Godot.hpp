@@ -32,24 +32,24 @@ T *get_wrapper(godot_object *obj) {
 	return static_cast<T *>(godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, obj));
 }
 
-#define GODOT_CLASS(Name, Base)                                                                                                                     \
-                                                                                                                                                    \
-public:                                                                                                                                             \
-	inline static const char *___get_type_name() { return static_cast<const char *>(#Name); }                                                       \
-	enum { ___CLASS_IS_SCRIPT = 1,                                                                                                                  \
-	};                                                                                                                                              \
-	inline static Name *_new() {                                                                                                                    \
-		godot::NativeScript *script = godot::NativeScript::_new();                                                                                  \
-		script->set_library(godot::get_wrapper<godot::GDNativeLibrary>(const_cast<godot_object *>(static_cast<const godot_object *>(godot::gdnlib))));\
-		script->set_class_name(#Name);                                                                                                              \
-		Name *instance = godot::as<Name>(script->new_());                                                                                           \
-		return instance;                                                                                                                            \
-	}                                                                                                                                               \
-	inline static size_t ___get_id() { return typeid(Name).hash_code(); }                                                                          \
-	inline static size_t ___get_base_id() { return typeid(Base).hash_code(); }                                                                     \
-	inline static const char *___get_base_type_name() { return Base::___get_class_name(); }                                                         \
-	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *)godot::as<Name>(godot::Object::___get_from_variant(a)); } \
-                                                                                                                                                    \
+#define GODOT_CLASS(Name, Base)                                                                                                                        \
+                                                                                                                                                       \
+public:                                                                                                                                                \
+	inline static const char *___get_type_name() { return static_cast<const char *>(#Name); }                                                          \
+	enum { ___CLASS_IS_SCRIPT = 1,                                                                                                                     \
+	};                                                                                                                                                 \
+	inline static Name *_new() {                                                                                                                       \
+		godot::NativeScript *script = godot::NativeScript::_new();                                                                                     \
+		script->set_library(godot::get_wrapper<godot::GDNativeLibrary>(const_cast<godot_object *>(static_cast<const godot_object *>(godot::gdnlib)))); \
+		script->set_class_name(#Name);                                                                                                                 \
+		Name *instance = godot::as<Name>(script->new_());                                                                                              \
+		return instance;                                                                                                                               \
+	}                                                                                                                                                  \
+	inline static size_t ___get_id() { return typeid(Name).hash_code(); }                                                                              \
+	inline static size_t ___get_base_id() { return typeid(Base).hash_code(); }                                                                         \
+	inline static const char *___get_base_type_name() { return Base::___get_class_name(); }                                                            \
+	inline static Object *___get_from_variant(godot::Variant a) { return (godot::Object *)godot::as<Name>(godot::Object::___get_from_variant(a)); }    \
+                                                                                                                                                       \
 private:
 
 #define GODOT_SUBCLASS(Name, Base)                                                                                                                  \
@@ -225,12 +225,12 @@ __godot_wrapper_method ___get_wrapper_function(R (T::*f)(As...)) {
 
 template <class T, class R, class... A>
 void *___make_wrapper_function(R (T::*f)(A...) const) {
-	return ___make_wrapper_function(reinterpret_cast<R(T::*)(A...)>(f));
+	return ___make_wrapper_function(reinterpret_cast<R (T::*)(A...)>(f));
 }
 
 template <class T, class R, class... A>
 __godot_wrapper_method ___get_wrapper_function(R (T::*f)(A...) const) {
-	return ___get_wrapper_function(reinterpret_cast<R(T::*)(A...)>(f));
+	return ___get_wrapper_function(reinterpret_cast<R (T::*)(A...)>(f));
 }
 
 template <class M>
@@ -396,7 +396,7 @@ void register_property(const char *name, void (T::*setter)(P), P (T::*getter)(),
 
 template <class T, class P>
 void register_property(const char *name, void (T::*setter)(P), P (T::*getter)() const, P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED, godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
-	register_property(name, setter, static_cast<P(T::*)()>(getter), default_value, rpc_mode, usage, hint, hint_string);
+	register_property(name, setter, static_cast<P (T::*)()>(getter), default_value, rpc_mode, usage, hint, hint_string);
 }
 
 template <class T>
@@ -447,7 +447,7 @@ T *Object::cast_to(const Object *obj) {
 	if (!obj)
 		return nullptr;
 
-	size_t have_tag = static_cast<size_t>(godot::nativescript_1_1_api->godot_nativescript_get_type_tag(obj->_owner));
+	size_t have_tag = reinterpret_cast<size_t>(godot::nativescript_1_1_api->godot_nativescript_get_type_tag(obj->_owner));
 
 	if (have_tag) {
 		if (!godot::_TagDB::is_type_known(static_cast<size_t>(have_tag))) {
