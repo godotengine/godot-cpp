@@ -564,7 +564,7 @@ String String::dedent() const {
 PoolStringArray String::rsplit(const String &divisor, const bool allow_empty,
 		const int maxsplit) const {
 	godot_pool_string_array arr = godot::core_1_1_api->godot_string_rsplit(&_godot_string, &divisor._godot_string, allow_empty, maxsplit);
-	return *(PoolStringArray *)&arr;
+	return *reinterpret_cast<PoolStringArray *>(&arr);
 }
 
 String String::rstrip(const String &chars) const {

@@ -87,9 +87,9 @@ void Godot::gdnative_init(godot_gdnative_init_options *options) {
 
 	while (core_extension) {
 		if (core_extension->version.major == 1 && core_extension->version.minor == 1) {
-			godot::core_1_1_api = (const godot_gdnative_core_1_1_api_struct *)core_extension;
+			godot::core_1_1_api = reinterpret_cast<const godot_gdnative_core_1_1_api_struct *>(core_extension);
 		} else if (core_extension->version.major == 1 && core_extension->version.minor == 2) {
-			godot::core_1_2_api = (const godot_gdnative_core_1_2_api_struct *)core_extension;
+			godot::core_1_2_api = reinterpret_cast<const godot_gdnative_core_1_2_api_struct *>(core_extension);
 		}
 		core_extension = core_extension->next;
 	}
@@ -111,25 +111,25 @@ void Godot::gdnative_init(godot_gdnative_init_options *options) {
 				}
 			} break;
 			case GDNATIVE_EXT_PLUGINSCRIPT: {
-				godot::pluginscript_api = (const godot_gdnative_ext_pluginscript_api_struct *)godot::api->extensions[i];
+				godot::pluginscript_api = reinterpret_cast<const godot_gdnative_ext_pluginscript_api_struct *>(godot::api->extensions[i]);
 			} break;
 			case GDNATIVE_EXT_ANDROID: {
-				godot::android_api = (const godot_gdnative_ext_android_api_struct *)godot::api->extensions[i];
+				godot::android_api = reinterpret_cast<const godot_gdnative_ext_android_api_struct *>(godot::api->extensions[i]);
 			} break;
 			case GDNATIVE_EXT_ARVR: {
-				godot::arvr_api = (const godot_gdnative_ext_arvr_api_struct *)godot::api->extensions[i];
+				godot::arvr_api = reinterpret_cast<const godot_gdnative_ext_arvr_api_struct *>(godot::api->extensions[i]);
 			} break;
 			case GDNATIVE_EXT_VIDEODECODER: {
-				godot::videodecoder_api = (const godot_gdnative_ext_videodecoder_api_struct *)godot::api->extensions[i];
+				godot::videodecoder_api = reinterpret_cast<const godot_gdnative_ext_videodecoder_api_struct *>(godot::api->extensions[i]);
 			} break;
 			case GDNATIVE_EXT_NET: {
-				godot::net_api = (const godot_gdnative_ext_net_api_struct *)godot::api->extensions[i];
+				godot::net_api = reinterpret_cast<const godot_gdnative_ext_net_api_struct *>(godot::api->extensions[i]);
 
 				const godot_gdnative_api_struct *extension = godot::net_api->next;
 
 				while (extension) {
 					if (extension->version.major == 3 && extension->version.minor == 2) {
-						godot::net_3_2_api = (const godot_gdnative_ext_net_3_2_api_struct *)extension;
+						godot::net_3_2_api = reinterpret_cast<const godot_gdnative_ext_net_3_2_api_struct *>(extension);
 					}
 
 					extension = extension->next;

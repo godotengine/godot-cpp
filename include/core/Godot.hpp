@@ -361,7 +361,7 @@ template <class T, class P>
 void register_property(const char *name, void (T::*setter)(P), P (T::*getter)(), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED, godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
 	Variant def_val = default_value;
 
-	godot_string *_hint_string = (godot_string *)&hint_string;
+	godot_string *_hint_string = reinterpret_cast<godot_string *>(&hint_string);
 
 	godot_property_attributes attr = {};
 	if (def_val.get_type() == Variant::NIL) {

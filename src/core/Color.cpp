@@ -68,61 +68,61 @@ uint32_t Color::to_ARGB32() const {
 }
 
 uint32_t Color::to_ABGR32() const {
-	uint32_t c = (uint8_t)(a * 255);
+	uint32_t c = static_cast<uint8_t>(a * 255);
 	c <<= 8;
-	c |= (uint8_t)(b * 255);
+	c |= static_cast<uint8_t>(b * 255);
 	c <<= 8;
-	c |= (uint8_t)(g * 255);
+	c |= static_cast<uint8_t>(g * 255);
 	c <<= 8;
-	c |= (uint8_t)(r * 255);
+	c |= static_cast<uint8_t>(r * 255);
 
 	return c;
 }
 
 uint64_t Color::to_ABGR64() const {
-	uint64_t c = (uint16_t)(a * 65535);
+	uint64_t c = static_cast<uint16_t>(a * 65535);
 	c <<= 16;
-	c |= (uint16_t)(b * 65535);
+	c |= static_cast<uint16_t>(b * 65535);
 	c <<= 16;
-	c |= (uint16_t)(g * 65535);
+	c |= static_cast<uint16_t>(g * 65535);
 	c <<= 16;
-	c |= (uint16_t)(r * 65535);
+	c |= static_cast<uint16_t>(r * 65535);
 
 	return c;
 }
 
 uint64_t Color::to_ARGB64() const {
-	uint64_t c = (uint16_t)(a * 65535);
+	uint64_t c = static_cast<uint16_t>(a * 65535);
 	c <<= 16;
-	c |= (uint16_t)(r * 65535);
+	c |= static_cast<uint16_t>(r * 65535);
 	c <<= 16;
-	c |= (uint16_t)(g * 65535);
+	c |= static_cast<uint16_t>(g * 65535);
 	c <<= 16;
-	c |= (uint16_t)(b * 65535);
+	c |= static_cast<uint16_t>(b * 65535);
 
 	return c;
 }
 
 uint32_t Color::to_RGBA32() const {
-	uint32_t c = (uint8_t)(r * 255);
+	uint32_t c = static_cast<uint8_t>(r * 255);
 	c <<= 8;
-	c |= (uint8_t)(g * 255);
+	c |= static_cast<uint8_t>(g * 255);
 	c <<= 8;
-	c |= (uint8_t)(b * 255);
+	c |= static_cast<uint8_t>(b * 255);
 	c <<= 8;
-	c |= (uint8_t)(a * 255);
+	c |= static_cast<uint8_t>(a * 255);
 
 	return c;
 }
 
 uint64_t Color::to_RGBA64() const {
-	uint64_t c = (uint16_t)(r * 65535);
+	uint64_t c = static_cast<uint16_t>(r * 65535);
 	c <<= 16;
-	c |= (uint16_t)(g * 65535);
+	c |= static_cast<uint16_t>(g * 65535);
 	c <<= 16;
-	c |= (uint16_t)(b * 65535);
+	c |= static_cast<uint16_t>(b * 65535);
 	c <<= 16;
-	c |= (uint16_t)(a * 65535);
+	c |= static_cast<uint16_t>(a * 65535);
 
 	return c;
 }
@@ -132,19 +132,19 @@ float Color::gray() const {
 }
 
 uint8_t Color::get_r8() const {
-	return (uint8_t)(r * 255.0);
+	return static_cast<uint8_t>(r * 255.0);
 }
 
 uint8_t Color::get_g8() const {
-	return (uint8_t)(g * 255.0);
+	return static_cast<uint8_t>(g * 255.0);
 }
 
 uint8_t Color::get_b8() const {
-	return (uint8_t)(b * 255.0);
+	return static_cast<uint8_t>(b * 255.0);
 }
 
 uint8_t Color::get_a8() const {
-	return (uint8_t)(a * 255.0);
+	return static_cast<uint8_t>(a * 255.0);
 }
 
 float Color::get_h() const {
@@ -269,7 +269,7 @@ Color Color::from_hsv(float p_h, float p_s, float p_v, float p_a) const {
 	const float x = c * (1.0f - ::fabs(::fmod(h_, 2.0f) - 1.0f));
 	float r, g, b;
 
-	switch ((int)h_) {
+	switch (static_cast<int>(h_)) {
 		case 0: {
 			r = c;
 			g = x;
