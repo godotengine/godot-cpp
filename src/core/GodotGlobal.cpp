@@ -5,14 +5,14 @@
 #include "Wrapped.hpp"
 
 static GDCALLINGCONV void *wrapper_create(void *data, const void *type_tag, godot_object *instance) {
-	godot::_Wrapped *wrapper_memory = (godot::_Wrapped *)godot::api->godot_alloc(sizeof(godot::_Wrapped));
+	godot::_Wrapped *wrapper_memory = static_cast<godot::_Wrapped *>(godot::api->godot_alloc(sizeof(godot::_Wrapped)));
 
 	if (!wrapper_memory)
 		return NULL;
 	wrapper_memory->_owner = instance;
-	wrapper_memory->_type_tag = (size_t)type_tag;
+	wrapper_memory->_type_tag = reinterpret_cast<size_t>(type_tag);
 
-	return (void *)wrapper_memory;
+	return static_cast<void *>(wrapper_memory);
 }
 
 static GDCALLINGCONV void wrapper_destroy(void *data, void *wrapper) {
@@ -41,7 +41,7 @@ const godot_gdnative_ext_net_3_2_api_struct *net_3_2_api = nullptr;
 const void *gdnlib = NULL;
 
 void Godot::print(const String &message) {
-	godot::api->godot_print((godot_string *)&message);
+	godot::api->godot_print(reinterpret_cast<const godot_string *>(&message));
 }
 
 void Godot::print_warning(const String &description, const String &function, const String &file, int line) {
@@ -98,13 +98,13 @@ void Godot::gdnative_init(godot_gdnative_init_options *options) {
 	for (int i = 0; i < godot::api->num_extensions; i++) {
 		switch (godot::api->extensions[i]->type) {
 			case GDNATIVE_EXT_NATIVESCRIPT: {
-				godot::nativescript_api = (const godot_gdnative_ext_nativescript_api_struct *)godot::api->extensions[i];
+				godot::nativescript_api = reinterpret_cast<const godot_gdnative_ext_nativescript_api_struct *>(godot::api->extensions[i]);
 
 				const godot_gdnative_api_struct *extension = godot::nativescript_api->next;
 
 				while (extension) {
 					if (extension->version.major == 1 && extension->version.minor == 1) {
-						godot::nativescript_1_1_api = (const godot_gdnative_ext_nativescript_1_1_api_struct *)extension;
+						godot::nativescript_1_1_api = reinterpret_cast<const godot_gdnative_ext_nativescript_1_1_api_struct *>(extension);
 					}
 
 					extension = extension->next;
