@@ -18,7 +18,7 @@ static float _parse_col(const String &p_str, int p_ofs) {
 
 	for (int i = 0; i < 2; i++) {
 
-		int c = (int)(wchar_t)p_str[i + p_ofs];
+		int c = static_cast<int>(p_str[i + p_ofs]);
 		int v = 0;
 
 		if (c >= '0' && c <= '9') {
@@ -44,25 +44,25 @@ static float _parse_col(const String &p_str, int p_ofs) {
 
 uint32_t Color::to_32() const {
 
-	uint32_t c = (uint8_t)(a * 255);
+	uint32_t c = static_cast<uint8_t>(a * 255);
 	c <<= 8;
-	c |= (uint8_t)(r * 255);
+	c |= static_cast<uint8_t>(r * 255);
 	c <<= 8;
-	c |= (uint8_t)(g * 255);
+	c |= static_cast<uint8_t>(g * 255);
 	c <<= 8;
-	c |= (uint8_t)(b * 255);
+	c |= static_cast<uint8_t>(b * 255);
 
 	return c;
 }
 
 uint32_t Color::to_ARGB32() const {
-	uint32_t c = (uint8_t)(a * 255);
+	uint32_t c = static_cast<uint8_t>(a * 255);
 	c <<= 8;
-	c |= (uint8_t)(r * 255);
+	c |= static_cast<uint8_t>(r * 255);
 	c <<= 8;
-	c |= (uint8_t)(g * 255);
+	c |= static_cast<uint8_t>(g * 255);
 	c <<= 8;
-	c |= (uint8_t)(b * 255);
+	c |= static_cast<uint8_t>(b * 255);
 
 	return c;
 }
@@ -348,7 +348,7 @@ static String _to_hex(float p_val) {
 			c[0] = 'a' + lv - 10;
 
 		v >>= 4;
-		String cs = (const wchar_t *)c;
+		String cs = const_cast<const wchar_t *>(c);
 		ret = cs + ret;
 	}
 

@@ -8,27 +8,27 @@ namespace godot {
 
 NodePath::NodePath() {
 	String from = "";
-	godot::api->godot_node_path_new(&_node_path, (godot_string *)&from);
+	godot::api->godot_node_path_new(&_node_path, reinterpret_cast<godot_string *>(&from));
 }
 
 NodePath::NodePath(const NodePath &other) {
 	String from = other;
-	godot::api->godot_node_path_new(&_node_path, (godot_string *)&from);
+	godot::api->godot_node_path_new(&_node_path, reinterpret_cast<godot_string *>(&from));
 }
 
 NodePath::NodePath(const String &from) {
-	godot::api->godot_node_path_new(&_node_path, (godot_string *)&from);
+	godot::api->godot_node_path_new(&_node_path, reinterpret_cast<const godot_string *>(&from));
 }
 
 NodePath::NodePath(const char *contents) {
 	String from = contents;
-	godot::api->godot_node_path_new(&_node_path, (godot_string *)&from);
+	godot::api->godot_node_path_new(&_node_path, reinterpret_cast<godot_string *>(&from));
 }
 
 String NodePath::get_name(const int idx) const {
 	godot_string str = godot::api->godot_node_path_get_name(&_node_path, idx);
 
-	return *(String *)&str;
+	return *reinterpret_cast<String *>(&str);
 }
 
 int NodePath::get_name_count() const {
@@ -37,7 +37,7 @@ int NodePath::get_name_count() const {
 
 String NodePath::get_subname(const int idx) const {
 	godot_string str = godot::api->godot_node_path_get_subname(&_node_path, idx);
-	return *(String *)&str;
+	return *reinterpret_cast<String *>(&str);
 }
 
 int NodePath::get_subname_count() const {
@@ -55,7 +55,7 @@ bool NodePath::is_empty() const {
 NodePath::operator String() const {
 	godot_string str = godot::api->godot_node_path_as_string(&_node_path);
 
-	return *(String *)&str;
+	return *reinterpret_cast<String *>(&str);
 }
 
 bool NodePath::operator==(const NodePath &other) {
@@ -65,9 +65,9 @@ bool NodePath::operator==(const NodePath &other) {
 void NodePath::operator=(const NodePath &other) {
 	godot::api->godot_node_path_destroy(&_node_path);
 
-	String other_string = (String)other;
+	String other_string = static_cast<String>(other);
 
-	godot::api->godot_node_path_new(&_node_path, (godot_string *)&other_string);
+	godot::api->godot_node_path_new(&_node_path, reinterpret_cast<godot_string *>(&other_string));
 }
 
 NodePath::~NodePath() {
