@@ -187,7 +187,8 @@ public:
 
 	void instance() {
 		//ref(memnew(T));
-		ref(T::_new());
+		unref();
+		reference = T::_new();
 	}
 
 	Ref() {
