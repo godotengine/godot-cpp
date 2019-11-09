@@ -460,7 +460,7 @@ def generate_class_implementation(icalls, used_classes, c):
 
             source.append("")
 
-            if is_class_type(method["return_type"]):
+            if method["name"] == "new":
                 source.append("\tObject *obj = Object::___get_from_variant(__result);")
                 source.append("\tif (obj->has_method(\"reference\"))")
                 source.append("\t\tobj->callv(\"reference\", Array());")
