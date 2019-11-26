@@ -2,6 +2,15 @@
 
 import os
 import sys
+import subprocess
+
+if sys.version_info < (3,):
+    def decode_utf8(x):
+        return x
+else:
+    import codecs
+    def decode_utf8(x):
+        return codecs.utf_8_decode(x)[0]
 
 # Workaround for MinGW. See:
 # http://www.scons.org/wiki/LongCmdLinesOnWin32
@@ -64,7 +73,7 @@ opts.Add(EnumVariable(
     'platform',
     'Target platform',
     host_platform,
-    allowed_values=('linux', 'osx', 'windows', 'android'),
+    allowed_values=('linux', 'osx', 'windows', 'android', 'ios'),
     ignorecase=2
 ))
 opts.Add(EnumVariable(
@@ -114,6 +123,17 @@ opts.Add(EnumVariable(
     'armv7',
     ['armv7','arm64v8','x86','x86_64']
 ))
+opts.Add(EnumVariable(
+    'ios_arch',
+    'Target iOS architecture',
+    'arm64',
+    ['armv7', 'arm64', 'x86_64']
+))
+opts.Add(
+    'IPHONEPATH',
+    'Path to iPhone toolchain',
+    '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+)
 opts.Add(
     'android_api_level',
     'Target Android API level',
@@ -187,6 +207,43 @@ elif env['platform'] == 'osx':
         '-framework',
         'Cocoa',
         '-Wl,-undefined,dynamic_lookup',
+    ])
+
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-Og'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
+
+elif env['platform'] == 'ios':
+    if env['ios_arch'] == 'x86_64':
+        sdk_name = 'iphonesimulator'
+        env.Append(CCFLAGS=['-mios-simulator-version-min=10.0'])
+    else:
+        sdk_name = 'iphoneos'
+        env.Append(CCFLAGS=['-miphoneos-version-min=10.0'])
+
+    try:
+        sdk_path = decode_utf8(subprocess.check_output(['xcrun', '--sdk', sdk_name, '--show-sdk-path']).strip())
+    except (subprocess.CalledProcessError, OSError):
+        raise ValueError("Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name))
+
+    compiler_path = env['IPHONEPATH'] + '/usr/bin/'
+    env['ENV']['PATH'] = env['IPHONEPATH'] + "/Developer/usr/bin/:" + env['ENV']['PATH']
+
+    env['CC'] = compiler_path + 'clang'
+    env['CXX'] = compiler_path + 'clang++'
+    env['AR'] = compiler_path + 'ar'
+    env['RANLIB'] = compiler_path + 'ranlib'
+
+    env.Append(CCFLAGS=['-g', '-std=c++14', '-arch', env['ios_arch'], '-isysroot', sdk_path])
+    env.Append(LINKFLAGS=[
+        '-arch',
+        env['ios_arch'],
+        '-framework',
+        'Cocoa',
+        '-Wl,-undefined,dynamic_lookup',
+        '-isysroot', sdk_path,
+        '-F' + sdk_path
     ])
 
     if env['target'] == 'debug':
@@ -309,11 +366,17 @@ sources = []
 add_sources(sources, 'src/core', 'cpp')
 add_sources(sources, 'src/gen', 'cpp')
 
+arch_suffix = env['bits']
+if env['platform'] == 'android':
+    arch_suffix = env['android_arch']
+if env['platform'] == 'ios':
+    arch_suffix = env['ios_arch']
+
 library = env.StaticLibrary(
     target='bin/' + 'libgodot-cpp.{}.{}.{}{}'.format(
         env['platform'],
         env['target'],
-        env['bits'] if env['platform'] != 'android' else env['android_arch'],
+        arch_suffix,
         env['LIBSUFFIX']
     ), source=sources
 )
