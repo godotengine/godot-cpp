@@ -205,8 +205,9 @@ Variant::operator double() const {
 	return godot::api->godot_variant_as_real(&_godot_variant);
 }
 Variant::operator String() const {
-	godot_string s = godot::api->godot_variant_as_string(&_godot_variant);
-	return *(String *)&s;
+	String ret;
+	*(godot_string *)&ret = godot::api->godot_variant_as_string(&_godot_variant);
+	return ret;
 }
 Variant::operator Vector2() const {
 	godot_vector2 s = godot::api->godot_variant_as_vector2(&_godot_variant);
@@ -250,8 +251,9 @@ Variant::operator Color() const {
 	return *(Color *)&s;
 }
 Variant::operator NodePath() const {
-	godot_node_path s = godot::api->godot_variant_as_node_path(&_godot_variant);
-	return *(NodePath *)&s;
+	NodePath ret;
+	*(godot_node_path *)&ret = godot::api->godot_variant_as_node_path(&_godot_variant);
+	return ret;
 }
 Variant::operator RID() const {
 	godot_rid s = godot::api->godot_variant_as_rid(&_godot_variant);
@@ -259,42 +261,51 @@ Variant::operator RID() const {
 }
 
 Variant::operator Dictionary() const {
-	godot_dictionary d = godot::api->godot_variant_as_dictionary(&_godot_variant);
-	return *(Dictionary *)&d;
+	Dictionary ret;
+	*(godot_dictionary *)&ret = godot::api->godot_variant_as_dictionary(&_godot_variant);
+	return ret;
 }
 
 Variant::operator Array() const {
-	godot_array s = godot::api->godot_variant_as_array(&_godot_variant);
-	return *(Array *)&s;
+	Array ret;
+	*(godot_array *)&ret = godot::api->godot_variant_as_array(&_godot_variant);
+	return ret;
 }
 
 Variant::operator PoolByteArray() const {
-	godot_pool_byte_array s = godot::api->godot_variant_as_pool_byte_array(&_godot_variant);
-	return *(PoolByteArray *)&s;
+	PoolByteArray ret;
+	*(godot_pool_byte_array *)&ret = godot::api->godot_variant_as_pool_byte_array(&_godot_variant);
+	return ret;
 }
 Variant::operator PoolIntArray() const {
-	godot_pool_int_array s = godot::api->godot_variant_as_pool_int_array(&_godot_variant);
-	return *(PoolIntArray *)&s;
+	PoolIntArray ret;
+	*(godot_pool_int_array *)&ret = godot::api->godot_variant_as_pool_int_array(&_godot_variant);
+	return ret;
 }
 Variant::operator PoolRealArray() const {
-	godot_pool_real_array s = godot::api->godot_variant_as_pool_real_array(&_godot_variant);
-	return *(PoolRealArray *)&s;
+	PoolRealArray ret;
+	*(godot_pool_real_array *)&ret = godot::api->godot_variant_as_pool_real_array(&_godot_variant);
+	return ret;
 }
 Variant::operator PoolStringArray() const {
-	godot_pool_string_array s = godot::api->godot_variant_as_pool_string_array(&_godot_variant);
-	return *(PoolStringArray *)&s;
+	PoolStringArray ret;
+	*(godot_pool_string_array *)&ret = godot::api->godot_variant_as_pool_string_array(&_godot_variant);
+	return ret;
 }
 Variant::operator PoolVector2Array() const {
-	godot_pool_vector2_array s = godot::api->godot_variant_as_pool_vector2_array(&_godot_variant);
-	return *(PoolVector2Array *)&s;
+	PoolVector2Array ret;
+	*(godot_pool_vector2_array *)&ret = godot::api->godot_variant_as_pool_vector2_array(&_godot_variant);
+	return ret;
 }
 Variant::operator PoolVector3Array() const {
-	godot_pool_vector3_array s = godot::api->godot_variant_as_pool_vector3_array(&_godot_variant);
-	return *(PoolVector3Array *)&s;
+	PoolVector3Array ret;
+	*(godot_pool_vector3_array *)&ret = godot::api->godot_variant_as_pool_vector3_array(&_godot_variant);
+	return ret;
 }
 Variant::operator PoolColorArray() const {
-	godot_pool_color_array s = godot::api->godot_variant_as_pool_color_array(&_godot_variant);
-	return *(PoolColorArray *)&s;
+	PoolColorArray ret;
+	*(godot_pool_color_array *)&ret = godot::api->godot_variant_as_pool_color_array(&_godot_variant);
+	return ret;
 }
 Variant::operator godot_object *() const {
 	return godot::api->godot_variant_as_object(&_godot_variant);
