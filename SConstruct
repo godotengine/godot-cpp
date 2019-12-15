@@ -7,7 +7,7 @@ import sys
 # http://www.scons.org/wiki/LongCmdLinesOnWin32
 if (os.name=="nt"):
     import subprocess
-    
+
     def mySubProcess(cmdline,env):
         #print "SPAWNED : " + cmdline
         startupinfo = subprocess.STARTUPINFO()
@@ -21,22 +21,22 @@ if (os.name=="nt"):
             print(err.decode("utf-8"))
             print("=====")
         return rv
-        
+
     def mySpawn(sh, escape, cmd, args, env):
-                        
+
         newargs = ' '.join(args[1:])
         cmdline = cmd + " " + newargs
-        
+
         rv=0
         if len(cmdline) > 32000 and cmd.endswith("ar") :
             cmdline = cmd + " " + args[1] + " " + args[2] + " "
             for i in range(3,len(args)) :
                 rv = mySubProcess( cmdline + args[i], env )
                 if rv :
-                    break	
-        else:				
+                    break
+        else:
             rv = mySubProcess( cmdline, env )
-            
+
         return rv
 
 def add_sources(sources, dir, extension):
@@ -215,6 +215,9 @@ elif env['platform'] == 'windows':
             env['AR'] = "i686-w64-mingw32-ar"
             env['RANLIB'] = "i686-w64-mingw32-ranlib"
             env['LINK'] = "i686-w64-mingw32-g++"
+    elif host_platform == 'windows' and env['use_mingw']:
+        env = env.Clone(tools=['mingw'])
+        env["SPAWN"] = mySpawn
 
     # Native or cross-compilation using MinGW
     if host_platform == 'linux' or host_platform == 'osx' or env['use_mingw']:
@@ -229,18 +232,18 @@ elif env['platform'] == 'android':
     if host_platform == 'windows':
         env = env.Clone(tools=['mingw'])
         env["SPAWN"] = mySpawn
-    
+
     # Verify NDK root
     if not 'ANDROID_NDK_ROOT' in env:
         raise ValueError("To build for Android, ANDROID_NDK_ROOT must be defined. Please set ANDROID_NDK_ROOT to the root folder of your Android NDK installation.")
-    
+
     # Validate API level
     api_level = int(env['android_api_level'])
     if env['android_arch'] in ['x86_64', 'arm64v8'] and api_level < 21:
         print("WARN: 64-bit Android architectures require an API level of at least 21; setting android_api_level=21")
         env['android_api_level'] = '21'
         api_level = 21
-    
+
     # Setup toolchain
     toolchain = env['ANDROID_NDK_ROOT'] + "/toolchains/llvm/prebuilt/"
     if host_platform == "windows":
