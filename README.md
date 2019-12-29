@@ -219,3 +219,42 @@ var simpleclass = load("res://simpleclass.gdns").new();
 simpleclass.method("Test argument");
 ```
 
+### Using Godot classes in C++
+Godot expects you to manage its classes the same way the engine does. These rules apply to all Godot classes, including your NativeScripts, but not to any normal C++ classes used in your library.
+
+- Instantiate Objects using `_new()`, not C++'s `new` operator.
+```cpp
+Sprite *sprite = Sprite::_new();
+```
+- Destroy Nodes using `queue_free()`, not C++'s `delete` operator.
+```cpp
+some_old_node->queue_free();
+```
+- Wrap References in `Ref` instead of passing around raw pointers. They are ref-counted and do not need to be freed manually.
+```cpp
+Ref<Texture> texture = resource_loader->load("res://icon.png");
+```
+- Pass core types that do *not* inherit Object by value. The containers (Array, Dictionary, PoolArray, String) manage their own memory and do not need to be explicitly initialized or freed.
+```cpp
+Array ints;
+ints.append(123);
+return ints;
+```
+- Initialize your NativeScript classes in their `_init()` method, not their constructor. The constructor can't access the base class's methods.
+- Cast objects using `Object::cast_to`, not unsafe C-style casts or `static_cast`.
+```cpp
+MeshInstance *m = Object::cast_to<MeshInstance>(get_node("ChildNode"));
+// m will be null if it's not a MeshInstance
+if (m) { ... }
+```
+- Never use Godot types in static or global variables. The Godot API is not loaded until after their constructors are called.
+```cpp
+String s; // crashes
+class SomeClass {
+    static Dictionary d; // crashes
+
+    static Node *node_a = NULL; // fine, it's just a pointer
+    static Node *node_b = Node::_new(); // crashes
+};
+```
+
