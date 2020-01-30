@@ -176,6 +176,10 @@ struct Vector2 {
 		return p_vec - *this * this->dot(p_vec);
 	}
 
+	inline Vector2 bounce(const Vector2 &p_normal) const {
+		return -reflect(p_normal);
+	}
+
 	inline Vector2 reflect(const Vector2 &p_vec) const {
 		return p_vec - *this * this->dot(p_vec) * 2.0;
 	}
