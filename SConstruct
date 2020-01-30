@@ -2,12 +2,21 @@
 
 import os
 import sys
+import subprocess
+
+if sys.version_info < (3,):
+    def decode_utf8(x):
+        return x
+else:
+    import codecs
+    def decode_utf8(x):
+        return codecs.utf_8_decode(x)[0]
 
 # Workaround for MinGW. See:
 # http://www.scons.org/wiki/LongCmdLinesOnWin32
 if (os.name=="nt"):
     import subprocess
-    
+
     def mySubProcess(cmdline,env):
         #print "SPAWNED : " + cmdline
         startupinfo = subprocess.STARTUPINFO()
@@ -21,22 +30,22 @@ if (os.name=="nt"):
             print(err.decode("utf-8"))
             print("=====")
         return rv
-        
+
     def mySpawn(sh, escape, cmd, args, env):
-                        
+
         newargs = ' '.join(args[1:])
         cmdline = cmd + " " + newargs
-        
+
         rv=0
         if len(cmdline) > 32000 and cmd.endswith("ar") :
             cmdline = cmd + " " + args[1] + " " + args[2] + " "
             for i in range(3,len(args)) :
                 rv = mySubProcess( cmdline + args[i], env )
                 if rv :
-                    break	
-        else:				
+                    break
+        else:
             rv = mySubProcess( cmdline, env )
-            
+
         return rv
 
 def add_sources(sources, dir, extension):
@@ -64,7 +73,7 @@ opts.Add(EnumVariable(
     'platform',
     'Target platform',
     host_platform,
-    allowed_values=('linux', 'osx', 'windows', 'android'),
+    allowed_values=('linux', 'osx', 'windows', 'android', 'ios'),
     ignorecase=2
 ))
 opts.Add(EnumVariable(
@@ -114,6 +123,17 @@ opts.Add(EnumVariable(
     'armv7',
     ['armv7','arm64v8','x86','x86_64']
 ))
+opts.Add(EnumVariable(
+    'ios_arch',
+    'Target iOS architecture',
+    'arm64',
+    ['armv7', 'arm64', 'x86_64']
+))
+opts.Add(
+    'IPHONEPATH',
+    'Path to iPhone toolchain',
+    '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+)
 opts.Add(
     'android_api_level',
     'Target Android API level',
@@ -199,6 +219,43 @@ elif env['platform'] == 'osx':
     elif env['target'] == 'release':
         env.Append(CCFLAGS=['-O3'])
 
+elif env['platform'] == 'ios':
+    if env['ios_arch'] == 'x86_64':
+        sdk_name = 'iphonesimulator'
+        env.Append(CCFLAGS=['-mios-simulator-version-min=10.0'])
+    else:
+        sdk_name = 'iphoneos'
+        env.Append(CCFLAGS=['-miphoneos-version-min=10.0'])
+
+    try:
+        sdk_path = decode_utf8(subprocess.check_output(['xcrun', '--sdk', sdk_name, '--show-sdk-path']).strip())
+    except (subprocess.CalledProcessError, OSError):
+        raise ValueError("Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name))
+
+    compiler_path = env['IPHONEPATH'] + '/usr/bin/'
+    env['ENV']['PATH'] = env['IPHONEPATH'] + "/Developer/usr/bin/:" + env['ENV']['PATH']
+
+    env['CC'] = compiler_path + 'clang'
+    env['CXX'] = compiler_path + 'clang++'
+    env['AR'] = compiler_path + 'ar'
+    env['RANLIB'] = compiler_path + 'ranlib'
+
+    env.Append(CCFLAGS=['-g', '-std=c++14', '-arch', env['ios_arch'], '-isysroot', sdk_path])
+    env.Append(LINKFLAGS=[
+        '-arch',
+        env['ios_arch'],
+        '-framework',
+        'Cocoa',
+        '-Wl,-undefined,dynamic_lookup',
+        '-isysroot', sdk_path,
+        '-F' + sdk_path
+    ])
+
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-Og'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
+
 elif env['platform'] == 'windows':
     if host_platform == 'windows' and not env['use_mingw']:
         # MSVC
@@ -220,6 +277,9 @@ elif env['platform'] == 'windows':
             env['AR'] = "i686-w64-mingw32-ar"
             env['RANLIB'] = "i686-w64-mingw32-ranlib"
             env['LINK'] = "i686-w64-mingw32-g++"
+    elif host_platform == 'windows' and env['use_mingw']:
+        env = env.Clone(tools=['mingw'])
+        env["SPAWN"] = mySpawn
 
     # Native or cross-compilation using MinGW
     if host_platform == 'linux' or host_platform == 'osx' or env['use_mingw']:
@@ -234,7 +294,7 @@ elif env['platform'] == 'android':
     if host_platform == 'windows':
         env = env.Clone(tools=['mingw'])
         env["SPAWN"] = mySpawn
-    
+
     standalone = False
     # Check if standalone toolchain is present
     if env['ndk_toolchain']:
@@ -404,11 +464,17 @@ sources = []
 add_sources(sources, 'src/core', 'cpp')
 add_sources(sources, 'src/gen', 'cpp')
 
+arch_suffix = env['bits']
+if env['platform'] == 'android':
+    arch_suffix = env['android_arch']
+if env['platform'] == 'ios':
+    arch_suffix = env['ios_arch']
+
 library = env.StaticLibrary(
     target='bin/' + 'libgodot-cpp.{}.{}.{}{}'.format(
         env['platform'],
         env['target'],
-        env['bits'] if env['platform'] != 'android' else env['android_arch'],
+        arch_suffix,
         env['LIBSUFFIX']
     ), source=sources
 )
