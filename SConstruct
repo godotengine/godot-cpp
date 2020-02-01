@@ -309,7 +309,7 @@ elif env['platform'] == 'android':
         # Get NDK version
         # If it can't auto-detect the version, it will be set to the lowest version
         # supported and try to construct a toolchain as best as it can
-        ndk_version = 10 if host_platform != "windows" else 12
+        ndk_version = 17
         if os.path.exists(env['ANDROID_NDK_ROOT'] + "/source.properties"):
             version_line = ""
             with open(env['ANDROID_NDK_ROOT'] + "/source.properties", "r") as props:
@@ -328,6 +328,8 @@ elif env['platform'] == 'android':
                 print("Android NDK Version: " + str(ndk_version))
             else:
                 print("Could not detect NDK version, assuming ndk_version <= " + str(ndk_version))
+            if ndk_version < 17:
+                raise ValueError("Only NDK revisions 17c and up are supported. Please download the latest NDK revision and set ANDROID_NDK_ROOT to it.")
         else:
             print("Could not detect NDK version, assuming ndk_version <= " + str(ndk_version))
         
@@ -339,7 +341,7 @@ elif env['platform'] == 'android':
             api_level = 21
         
         # Setup toolchain
-        if ndk_version >= 19:
+        if ndk_version >= 19: # In-place toolchain usage available for revision 19 and up
             toolchain = env['ANDROID_NDK_ROOT'] + "/toolchains/llvm/prebuilt/"
             if host_platform == "windows":
                 toolchain += "windows"
@@ -351,7 +353,7 @@ elif env['platform'] == 'android':
             elif host_platform == "osx":
                 toolchain += "darwin-x86_64"
             env.PrependENVPath('PATH', toolchain + "/bin") # This does nothing half of the time, but we'll put it here anyways
-        else: # make_standalone_toolchain.py introduced to replace make_standalone_toolchain.sh
+        else:
             standalone = True
             toolchain = "./tempchain/" "ndk" + str(ndk_version) + "-" + env['android_arch'] + "-" + env['android_api_level']
             # Gotta run make_standalone_toolchain.py
@@ -368,15 +370,7 @@ elif env['platform'] == 'android':
             initial_call = []
 
             if not os.path.exists(toolchain):
-                if ndk_version < 12:
-                    if host_platform == "windows":
-                        print("ERR: Cannot generate standalone toolchain for Windows when NDK version is below 12. Please upgrade your NDK, or define 'ndk_toolchain' with a manually built NDK toolchain.")
-                        Exit(1)
-                    initial_call = ["bash", env['ANDROID_NDK_ROOT'] + "/build/tools/make-standalone-toolchain.sh", "--platform=android-" + env['android_api_level']]
-                else:
-                    initial_call = ["python", env['ANDROID_NDK_ROOT'] + "/build/tools/make_standalone_toolchain.py", "--api=" + env['android_api_level'], "-v"]
-                
-                
+                initial_call = ["python", env['ANDROID_NDK_ROOT'] + "/build/tools/make_standalone_toolchain.py", "--api=" + env['android_api_level'], "-v"]
 
                 err = subprocess.call(initial_call + [
                 "--arch=" + standalone_arch[env['android_arch']],
@@ -432,6 +426,7 @@ elif env['platform'] == 'android':
         env['CC'] = '"' + toolchain + "/bin/clang" + '"'
         env['CXX'] = '"' + toolchain + "/bin/clang++" + '"'
     env['AR'] = '"' + toolchain + "/bin/" + arch_info['tool_path'] + "-ar" + '"'
+    env["RANLIB"] = '"' + toolchain + "/bin/" + arch_info['tool_path'] + "-ranlib" + '"'
 
     if not standalone:
         env.Append(CCFLAGS=['--target=' + arch_info['target'] + env['android_api_level'], '-march=' + arch_info['march']])
