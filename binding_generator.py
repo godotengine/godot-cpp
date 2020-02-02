@@ -1,41 +1,68 @@
 #!/usr/bin/env python
-
 import json
-
-# comment.
+import os
 
 classes = []
 
-def generate_bindings(path):
 
+def print_file_list(api_filepath: str, output_dir: str, headers=False, sources=False):
     global classes
-    classes = json.load(open(path))
+    end = ';'
+    with open(api_filepath) as api_file:
+        classes = json.load(api_file)
+    include_gen_folder = os.path.join(output_dir, 'include', 'gen')
+    source_gen_folder = os.path.join(output_dir, 'src', 'gen')
+    for _class in classes:
+        header_filename = os.path.join(include_gen_folder, strip_name(_class["name"]) + ".hpp")
+        source_filename = os.path.join(source_gen_folder, strip_name(_class["name"]) + ".cpp")
+        headers and print(header_filename, end=end)
+        sources and print(source_filename, end=end)
+    icall_header_filename = os.path.join(include_gen_folder, '__icalls.hpp')
+    register_types_filename = os.path.join(source_gen_folder, '__register_types.cpp')
+    init_method_bindings_filename = os.path.join(source_gen_folder, '__init_method_bindings.cpp')
+    headers and print(icall_header_filename, end=end)
+    sources and print(register_types_filename, end=end)
+    sources and print(init_method_bindings_filename, end=end)
+
+
+def generate_bindings(api_filepath: str, output_dir: str):
+    global classes
+    with open(api_filepath) as api_file:
+        classes = json.load(api_file)
 
     icalls = set()
+    include_gen_folder = os.path.join(output_dir, 'include', 'gen')
+    source_gen_folder = os.path.join(output_dir, 'src', 'gen')
+    os.makedirs(include_gen_folder, exist_ok=True)
+    os.makedirs(source_gen_folder, exist_ok=True)
 
     for c in classes:
-        # print c['name']
+        # print(c['name'])
         used_classes = get_used_classes(c)
 
         header = generate_class_header(used_classes, c)
 
         impl = generate_class_implementation(icalls, used_classes, c)
 
-        header_file = open("include/gen/" + strip_name(c["name"]) + ".hpp", "w+")
-        header_file.write(header)
+        header_filename = os.path.join(include_gen_folder, strip_name(c["name"]) + ".hpp")
+        with open(header_filename, "w+") as header_file:
+            header_file.write(header)
 
-        source_file = open("src/gen/" + strip_name(c["name"]) + ".cpp", "w+")
-        source_file.write(impl)
+        source_filename = os.path.join(source_gen_folder, strip_name(c["name"]) + ".cpp")
+        with open(source_filename, "w+") as source_file:
+            source_file.write(impl)
 
+    icall_header_filename = os.path.join(include_gen_folder, '__icalls.hpp')
+    with open(icall_header_filename, "w+") as icall_header_file:
+        icall_header_file.write(generate_icall_header(icalls))
 
-    icall_header_file = open("include/gen/__icalls.hpp", "w+")
-    icall_header_file.write(generate_icall_header(icalls))
+    register_types_filename = os.path.join(source_gen_folder, '__register_types.cpp')
+    with open(register_types_filename, "w+") as register_types_file:
+        register_types_file.write(generate_type_registry(classes))
 
-    register_types_file = open("src/gen/__register_types.cpp", "w+")
-    register_types_file.write(generate_type_registry(classes))
-
-    init_method_bindings_file = open("src/gen/__init_method_bindings.cpp", "w+")
-    init_method_bindings_file.write(generate_init_method_bindings(classes))
+    init_method_bindings_filename = os.path.join(source_gen_folder, '__init_method_bindings.cpp')
+    with open(init_method_bindings_filename, "w+") as init_method_bindings_file:
+        init_method_bindings_file.write(generate_init_method_bindings(classes))
 
 
 def is_reference_type(t):
