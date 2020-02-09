@@ -102,7 +102,7 @@ def generate_class_header(used_classes, c):
     source.append("")
 
     source.append("#include <gdnative_api_struct.gen.h>")
-    source.append("#include <stdint.h>")
+    source.append("#include <cstdint>")
     source.append("")
 
 
