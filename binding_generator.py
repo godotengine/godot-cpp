@@ -5,7 +5,7 @@ import os
 classes = []
 
 
-def print_file_list(api_filepath: str, output_dir: str, headers=False, sources=False):
+def print_file_list(api_filepath, output_dir, headers=False, sources=False):
     global classes
     end = ';'
     with open(api_filepath) as api_file:
@@ -25,7 +25,7 @@ def print_file_list(api_filepath: str, output_dir: str, headers=False, sources=F
     sources and print(init_method_bindings_filename, end=end)
 
 
-def generate_bindings(api_filepath: str, output_dir: str):
+def generate_bindings(api_filepath, output_dir):
     global classes
     with open(api_filepath) as api_file:
         classes = json.load(api_file)
