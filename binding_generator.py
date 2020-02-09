@@ -15,14 +15,18 @@ def print_file_list(api_filepath, output_dir, headers=False, sources=False):
     for _class in classes:
         header_filename = os.path.join(include_gen_folder, strip_name(_class["name"]) + ".hpp")
         source_filename = os.path.join(source_gen_folder, strip_name(_class["name"]) + ".cpp")
-        headers and print(header_filename, end=end)
-        sources and print(source_filename, end=end)
+        if headers:
+            print(header_filename, end=end)
+        if sources:
+            print(source_filename, end=end)
     icall_header_filename = os.path.join(include_gen_folder, '__icalls.hpp')
     register_types_filename = os.path.join(source_gen_folder, '__register_types.cpp')
     init_method_bindings_filename = os.path.join(source_gen_folder, '__init_method_bindings.cpp')
-    headers and print(icall_header_filename, end=end)
-    sources and print(register_types_filename, end=end)
-    sources and print(init_method_bindings_filename, end=end)
+    if headers:
+        print(icall_header_filename, end=end)
+    if sources:
+        print(register_types_filename, end=end)
+        print(init_method_bindings_filename, end=end)
 
 
 def generate_bindings(api_filepath, output_dir):
