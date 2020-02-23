@@ -134,7 +134,7 @@ void String::operator+=(const String &s) {
 	_godot_string = godot::api->godot_string_operator_plus(&_godot_string, &s._godot_string);
 }
 
-void String::operator+=(const wchar_t c) {
+void String::operator+=(const wchar_t /*c*/) {
 	// @Todo
 }
 
@@ -475,19 +475,19 @@ float String::similarity(String text) const {
 	return godot::api->godot_string_similarity(&_godot_string, &text._godot_string);
 }
 
-PoolStringArray String::split(String divisor, bool allow_empty) const {
+PoolStringArray String::split(String divisor, bool /*allow_empty*/) const {
 	godot_array arr = godot::api->godot_string_split(&_godot_string, &divisor._godot_string);
 
 	return *(Array *)&arr;
 }
 
-PoolIntArray String::split_ints(String divisor, bool allow_empty) const {
+PoolIntArray String::split_ints(String divisor, bool /*allow_empty*/) const {
 	godot_array arr = godot::api->godot_string_split_floats(&_godot_string, &divisor._godot_string);
 
 	return *(Array *)&arr;
 }
 
-PoolRealArray String::split_floats(String divisor, bool allow_empty) const {
+PoolRealArray String::split_floats(String divisor, bool /*allow_empty*/) const {
 	godot_array arr = godot::api->godot_string_split_floats(&_godot_string, &divisor._godot_string);
 
 	return *(Array *)&arr;
