@@ -140,6 +140,13 @@ void Godot::gdnative_init(godot_gdnative_init_options *options) {
 		}
 	}
 
+	// Initialize the `language_index` here since `__register_types()` makes use of it.
+	godot_instance_binding_functions binding_funcs = {};
+	binding_funcs.alloc_instance_binding_data = wrapper_create;
+	binding_funcs.free_instance_binding_data = wrapper_destroy;
+
+	godot::_RegisterState::language_index = godot::nativescript_1_1_api->godot_nativescript_register_instance_binding_data_functions(binding_funcs);
+
 	// register these now
 	___register_types();
 	___init_method_bindings();
@@ -155,12 +162,6 @@ void Godot::gdnative_profiling_add_data(const char *p_signature, uint64_t p_time
 
 void Godot::nativescript_init(void *handle) {
 	godot::_RegisterState::nativescript_handle = handle;
-
-	godot_instance_binding_functions binding_funcs = {};
-	binding_funcs.alloc_instance_binding_data = wrapper_create;
-	binding_funcs.free_instance_binding_data = wrapper_destroy;
-
-	godot::_RegisterState::language_index = godot::nativescript_1_1_api->godot_nativescript_register_instance_binding_data_functions(binding_funcs);
 }
 
 void Godot::nativescript_terminate(void *handle) {
