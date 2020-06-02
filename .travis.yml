@@ -57,8 +57,8 @@ install:
     fi
 
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-      curl -LO https://downloads.sourceforge.net/project/scons/scons-local/3.0.5/scons-local-3.0.5.zip;
-      unzip scons-local-3.0.5.zip;
+      curl -LO https://downloads.sourceforge.net/project/scons/scons-local/3.1.2/scons-local-3.1.2.zip;
+      unzip scons-local-3.1.2.zip;
     fi
 
 script:
