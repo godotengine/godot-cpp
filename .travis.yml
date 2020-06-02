@@ -19,10 +19,9 @@ matrix:
       env: TARGET=debug STATIC_CHECKS=yes ADDITIONAL_FLAGS="bits=64"
       addons:
         apt:
-          sources:
-            - llvm-toolchain-xenial-6.0
           packages:
-            [scons, pkg-config, build-essential, p7zip-full, clang-format-6.0]
+            - clang-format-8
+            - [scons, pkg-config, build-essential, p7zip-full]
 
     - name: Linux Release
       os: linux
@@ -30,7 +29,7 @@ matrix:
       addons:
         apt:
           packages:
-            [scons, pkg-config, build-essential, p7zip-full]
+            - [scons, pkg-config, build-essential, p7zip-full]
       env: TARGET=release ADDITIONAL_FLAGS="bits=64"
 
     - name: macOS Debug

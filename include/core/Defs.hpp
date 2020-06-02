@@ -61,6 +61,11 @@ enum class Error {
 
 #include <GodotGlobal.hpp>
 
+// alloca() is non-standard. When using MSVC, it's in malloc.h.
+#if defined(__linux__) || defined(__APPLE__) || defined(__MINGW32__)
+#include <alloca.h>
+#endif
+
 typedef float real_t;
 
 #define CMP_EPSILON 0.00001
@@ -91,7 +96,7 @@ typedef float real_t;
 
 // ERR/WARN macros
 #ifndef WARN_PRINT
-#define WARN_PRINT(msg) Godot::print_warning(msg, __func__, __FILE__, __LINE__)
+#define WARN_PRINT(msg) godot::Godot::print_warning(msg, __func__, __FILE__, __LINE__)
 #endif
 
 #ifndef WARN_PRINTS
@@ -99,7 +104,7 @@ typedef float real_t;
 #endif
 
 #ifndef ERR_PRINT
-#define ERR_PRINT(msg) Godot::print_error(msg, __func__, __FILE__, __LINE__)
+#define ERR_PRINT(msg) godot::Godot::print_error(msg, __func__, __FILE__, __LINE__)
 #endif
 
 #ifndef ERR_PRINTS
@@ -107,19 +112,19 @@ typedef float real_t;
 #endif
 
 #ifndef FATAL_PRINT
-#define FATAL_PRINT(msg) ERR_PRINT(String("FATAL: ") + (msg))
+#define FATAL_PRINT(msg) ERR_PRINT(godot::String("FATAL: ") + (msg))
 #endif
 
 #ifndef ERR_MSG_INDEX
-#define ERR_MSG_INDEX(index, size) (String("Index ") + #index + "=" + String::num_int64(index) + " out of size (" + #size + "=" + String::num_int64(size) + ")")
+#define ERR_MSG_INDEX(index, size) (godot::String("Index ") + #index + "=" + godot::String::num_int64(index) + " out of size (" + #size + "=" + godot::String::num_int64(size) + ")")
 #endif
 
 #ifndef ERR_MSG_NULL
-#define ERR_MSG_NULL(param) (String("Parameter '") + #param + "' is null.")
+#define ERR_MSG_NULL(param) (godot::String("Parameter '") + #param + "' is null.")
 #endif
 
 #ifndef ERR_MSG_COND
-#define ERR_MSG_COND(cond) (String("Condition '") + #cond + "' is true.")
+#define ERR_MSG_COND(cond) (godot::String("Condition '") + #cond + "' is true.")
 #endif
 
 #ifndef ERR_FAIL_INDEX
