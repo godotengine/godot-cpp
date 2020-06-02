@@ -5,6 +5,7 @@
 
 #include <cmath>
 
+#include "Defs.hpp"
 #include "String.hpp"
 
 namespace godot {
@@ -72,6 +73,23 @@ public:
 	inline const float &operator[](int idx) const {
 		return components[idx];
 	}
+
+	Color operator+(const Color &p_color) const;
+	void operator+=(const Color &p_color);
+
+	Color operator-() const;
+	Color operator-(const Color &p_color) const;
+	void operator-=(const Color &p_color);
+
+	Color operator*(const Color &p_color) const;
+	Color operator*(const real_t &rvalue) const;
+	void operator*=(const Color &p_color);
+	void operator*=(const real_t &rvalue);
+
+	Color operator/(const Color &p_color) const;
+	Color operator/(const real_t &rvalue) const;
+	void operator/=(const Color &p_color);
+	void operator/=(const real_t &rvalue);
 
 	void invert();
 
