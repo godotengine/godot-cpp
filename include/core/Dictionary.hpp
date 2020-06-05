@@ -12,6 +12,11 @@ namespace godot {
 class Dictionary {
 	godot_dictionary _godot_dictionary;
 
+	friend Variant::operator Dictionary() const;
+	inline explicit Dictionary(const godot_dictionary &other) {
+		_godot_dictionary = other;
+	}
+
 public:
 	Dictionary();
 	Dictionary(const Dictionary &other);

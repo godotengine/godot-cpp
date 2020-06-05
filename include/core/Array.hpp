@@ -57,6 +57,11 @@ class Object;
 class Array {
 	godot_array _godot_array;
 
+	friend class Variant;
+	inline explicit Array(const godot_array &other) {
+		_godot_array = other;
+	}
+
 public:
 	Array();
 	Array(const Array &other);
