@@ -203,6 +203,12 @@ struct Vector3 {
 		return std::atan2(cross(b).length(), dot(b));
 	}
 
+	inline Vector3 direction_to(const Vector3 &p_b) const {
+		Vector3 ret(p_b.x - x, p_b.y - y, p_b.z - z);
+		ret.normalize();
+		return ret;
+	}
+
 	inline Vector3 floor() const {
 		return Vector3(::floor(x), ::floor(y), ::floor(z));
 	}
