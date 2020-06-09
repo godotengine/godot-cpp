@@ -138,6 +138,12 @@ struct Vector2 {
 		return atan2(y - p_vector2.y, x - p_vector2.x);
 	}
 
+	inline Vector2 direction_to(const Vector2 &p_b) const {
+		Vector2 ret(p_b.x - x, p_b.y - y);
+		ret.normalize();
+		return ret;
+	}
+
 	inline real_t dot(const Vector2 &p_other) const {
 		return x * p_other.x + y * p_other.y;
 	}
