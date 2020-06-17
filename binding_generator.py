@@ -4,9 +4,15 @@ import json
 
 # comment.
 
+# Convenience function for using template get_node
+def correct_method_name(class_name, method):
+    if method["name"] == "get_node" and class_name == "Node":
+        method["name"] = "get_node_internal"
+
+
 classes = []
 
-def generate_bindings(path):
+def generate_bindings(path, use_template_get_node):
 
     global classes
     classes = json.load(open(path))
@@ -15,11 +21,11 @@ def generate_bindings(path):
 
     for c in classes:
         # print c['name']
-        used_classes = get_used_classes(c)
+        used_classes = get_used_classes(c, use_template_get_node)
 
-        header = generate_class_header(used_classes, c)
+        header = generate_class_header(used_classes, c, use_template_get_node)
 
-        impl = generate_class_implementation(icalls, used_classes, c)
+        impl = generate_class_implementation(icalls, used_classes, c, use_template_get_node)
 
         header_file = open("include/gen/" + strip_name(c["name"]) + ".hpp", "w+")
         header_file.write(header)
@@ -62,7 +68,7 @@ def make_gdnative_type(t):
         return strip_name(t) + " "
 
 
-def generate_class_header(used_classes, c):
+def generate_class_header(used_classes, c, use_template_get_node):
 
     source = []
     source.append("#ifndef GODOT_CPP_" + strip_name(c["name"]).upper() + "_HPP")
@@ -140,6 +146,8 @@ def generate_class_header(used_classes, c):
     source.append("\tstruct ___method_bindings {")
 
     for method in c["methods"]:
+        if use_template_get_node:
+            correct_method_name(class_name, method)
         source.append("\t\tgodot_method_bind *mb_" + method["name"] + ";")
 
     source.append("\t};")
@@ -201,7 +209,8 @@ def generate_class_header(used_classes, c):
         source.append("")
 
     for method in c["methods"]:
-
+        if use_template_get_node:
+            correct_method_name(class_name, method)
         method_signature = ""
 
         # TODO decide what to do about virtual methods
@@ -279,10 +288,28 @@ def generate_class_header(used_classes, c):
         source.append("\t" + method_signature + ";")
 
     source.append(vararg_templates)
-    source.append("};")
-    source.append("")
 
+    if use_template_get_node:
+        # Extra definition for template get_node that calls the renamed get_node_internal; has a default template parameter for backwards compatibility.
+        if class_name == "Node":
+            source.append("\ttemplate <class T = Node>")
+            source.append("\tT *get_node(const NodePath path) const {")
+            source.append("\t\treturn Object::cast_to<T>(get_node_internal(path));")
+            source.append("\t}")
 
+        source.append("};")
+        source.append("")
+
+        # ...And a specialized version so we don't unnecessarily cast when using the default.
+        if class_name == "Node":
+            source.append("template <>")
+            source.append("inline Node *Node::get_node<Node>(const NodePath path) const {")
+            source.append("\treturn get_node_internal(path);")
+            source.append("}")
+            source.append("")
+    else:
+        source.append("};")
+        source.append("")
 
     source.append("}")
     source.append("")
@@ -296,7 +323,7 @@ def generate_class_header(used_classes, c):
 
 
 
-def generate_class_implementation(icalls, used_classes, c):
+def generate_class_implementation(icalls, used_classes, c, use_template_get_node):
     class_name = strip_name(c["name"])
     source = []
     source.append("#include \"" + class_name + ".hpp\"")
@@ -353,7 +380,9 @@ def generate_class_implementation(icalls, used_classes, c):
     source.append("void " + class_name + "::___init_method_bindings() {")
 
     for method in c["methods"]:
-        source.append("\t___mb.mb_" + method["name"] + " = godot::api->godot_method_bind_get_method(\"" + c["name"] + "\", \"" + method["name"] + "\");")
+        if use_template_get_node:
+            correct_method_name(class_name, method)
+        source.append("\t___mb.mb_" + method["name"] + " = godot::api->godot_method_bind_get_method(\"" + c["name"] + "\", \"" + ("get_node" if use_template_get_node and method["name"] == "get_node_internal" else method["name"]) + "\");")
 
     source.append("}")
     source.append("")
@@ -365,6 +394,8 @@ def generate_class_implementation(icalls, used_classes, c):
         source.append("}")
 
     for method in c["methods"]:
+        if use_template_get_node:
+            correct_method_name(class_name, method)
         method_signature = ""
 
 
@@ -710,9 +741,11 @@ def get_icall_name(sig):
 
 
 
-def get_used_classes(c):
+def get_used_classes(c, use_template_get_node):
     classes = []
     for method in c["methods"]:
+        if use_template_get_node:
+            correct_method_name(strip_name(c["name"]), method)
         if is_class_type(method["return_type"]) and not (method["return_type"] in classes):
             classes.append(method["return_type"])
 

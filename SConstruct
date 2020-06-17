@@ -144,6 +144,11 @@ opts.Add(
     'Path to your Android NDK installation. By default, uses ANDROID_NDK_ROOT from your defined environment variables.',
     os.environ.get("ANDROID_NDK_ROOT", None)
 )
+opts.Add(BoolVariable(
+	'generate_template_get_node',
+	"Generate a template version of the Node class's get_node.",
+	False
+))
 
 env = Environment(ENV = os.environ)
 opts.Update(env)
@@ -362,7 +367,7 @@ if env['generate_bindings']:
     # Actually create the bindings here
     import binding_generator
 
-    binding_generator.generate_bindings(json_api_file)
+    binding_generator.generate_bindings(json_api_file, env['generate_template_get_node'])
 
 # Sources to compile
 sources = []
