@@ -46,11 +46,11 @@ def is_reference_type(t):
             return True
     return False
 
-def make_gdnative_type(t):
+def make_gdnative_type(t, ref_allowed):
     if is_enum(t):
         return remove_enum_prefix(t) + " "
     elif is_class_type(t):
-        if is_reference_type(t):
+        if is_reference_type(t) and ref_allowed:
             return "Ref<" + strip_name(t) + "> "
         else:
             return strip_name(t) + " *"
@@ -83,8 +83,10 @@ def generate_class_header(used_classes, c):
     # so don't include it here because it's not needed
     if class_name != "Object" and class_name != "Reference":
         source.append("#include <core/Ref.hpp>")
+        ref_allowed = True
     else:
         source.append("#include <core/TagDB.hpp>")
+        ref_allowed = False
 
 
     included = []
@@ -206,7 +208,7 @@ def generate_class_header(used_classes, c):
 
         # TODO decide what to do about virtual methods
         # method_signature += "virtual " if method["is_virtual"] else ""
-        method_signature += make_gdnative_type(method["return_type"])
+        method_signature += make_gdnative_type(method["return_type"], ref_allowed)
         method_name = escape_cpp(method["name"])
         method_signature +=  method_name + "("
 
@@ -215,7 +217,7 @@ def generate_class_header(used_classes, c):
         method_arguments = ""
 
         for i, argument in enumerate(method["arguments"]):
-            method_signature += "const " + make_gdnative_type(argument["type"])
+            method_signature += "const " + make_gdnative_type(argument["type"], ref_allowed)
             argument_name = escape_cpp(argument["name"])
             method_signature += argument_name
             method_arguments += argument_name
@@ -298,6 +300,9 @@ def generate_class_header(used_classes, c):
 
 def generate_class_implementation(icalls, used_classes, c):
     class_name = strip_name(c["name"])
+
+    ref_allowed = class_name != "Object" and class_name != "Reference"
+
     source = []
     source.append("#include \"" + class_name + ".hpp\"")
     source.append("")
@@ -367,12 +372,11 @@ def generate_class_implementation(icalls, used_classes, c):
     for method in c["methods"]:
         method_signature = ""
 
-
-        method_signature += make_gdnative_type(method["return_type"])
+        method_signature += make_gdnative_type(method["return_type"], ref_allowed)
         method_signature += strip_name(c["name"]) + "::" + escape_cpp(method["name"]) + "("
 
         for i, argument in enumerate(method["arguments"]):
-            method_signature += "const " + make_gdnative_type(argument["type"])
+            method_signature += "const " + make_gdnative_type(argument["type"], ref_allowed)
             method_signature += escape_cpp(argument["name"])
 
             if i != len(method["arguments"]) - 1:
@@ -396,12 +400,13 @@ def generate_class_implementation(icalls, used_classes, c):
             continue
 
         return_statement = ""
+        return_type_is_ref = is_reference_type(method["return_type"]) and ref_allowed
 
         if method["return_type"] != "void":
             if is_class_type(method["return_type"]):
                 if is_enum(method["return_type"]):
                     return_statement += "return (" + remove_enum_prefix(method["return_type"]) + ") "
-                elif is_reference_type(method["return_type"]):
+                elif return_type_is_ref:
                     return_statement += "return Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor(";
                 else:
                     return_statement += "return " + ("(" + strip_name(method["return_type"]) + " *) " if is_class_type(method["return_type"]) else "")
@@ -476,14 +481,13 @@ def generate_class_implementation(icalls, used_classes, c):
             if method["return_type"] != "void":
                 cast = ""
                 if is_class_type(method["return_type"]):
-                    if is_reference_type(method["return_type"]):
+                    if return_type_is_ref:
                         cast += "Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor(__result);"
                     else:
                         cast += "(" + strip_name(method["return_type"]) + " *) " + strip_name(method["return_type"] + "::___get_from_variant(") + "__result);"
                 else:
                     cast += "__result;"
                 source.append("\treturn " + cast)
-
 
 
         else:
@@ -503,11 +507,15 @@ def generate_class_implementation(icalls, used_classes, c):
             return_statement += icall_name + "(___mb.mb_" + method["name"] + ", (const Object *) " + core_object_name
 
             for arg in method["arguments"]:
-                return_statement += ", " + escape_cpp(arg["name"]) + (".ptr()" if is_reference_type(arg["type"]) else "")
+                arg_is_ref = is_reference_type(arg["type"]) and ref_allowed
+                return_statement += ", " + escape_cpp(arg["name"]) + (".ptr()" if arg_is_ref else "")
 
             return_statement += ")"
 
-            source.append("\t" + return_statement + (")" if is_reference_type(method["return_type"]) else "") + ";")
+            if return_type_is_ref:
+                return_statement += ")"
+
+            source.append("\t" + return_statement + ";")
 
         source.append("}")
         source.append("")
@@ -709,7 +717,6 @@ def get_icall_name(sig):
 
 
 
-
 def get_used_classes(c):
     classes = []
     for method in c["methods"]:
@@ -720,9 +727,6 @@ def get_used_classes(c):
             if is_class_type(arg["type"]) and not (arg["type"] in classes):
                 classes.append(arg["type"])
     return classes
-
-
-
 
 
 
