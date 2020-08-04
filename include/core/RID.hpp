@@ -15,7 +15,9 @@ public:
 
 	RID(Object *p);
 
-	int32_t get_rid() const;
+	godot_rid _get_godot_rid() const;
+
+	int32_t get_id() const;
 
 	inline bool is_valid() const {
 		// is_valid() is not available in the C API...
