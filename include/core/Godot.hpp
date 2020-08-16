@@ -100,7 +100,7 @@ public:                                                                         
 		return godot::detail::create_custom_class_instance<Name>();                         \
 	}                                                                                       \
 	inline static size_t ___get_id() { return typeid(Name).hash_code(); }                   \
-	inline static size_t ___get_base_id() { return typeid(Base).hash_code(); }              \
+	inline static size_t ___get_base_id() { return Base::___get_id(); }                     \
 	inline static const char *___get_base_type_name() { return Base::___get_class_name(); } \
 	inline static godot::Object *___get_from_variant(godot::Variant a) {                    \
 		return (godot::Object *)godot::detail::get_custom_class_instance<Name>(             \
@@ -513,23 +513,28 @@ T *Object::cast_to(const Object *obj) {
 	if (!obj)
 		return nullptr;
 
-	size_t have_tag = (size_t)godot::nativescript_1_1_api->godot_nativescript_get_type_tag(obj->_owner);
+	if (T::___CLASS_IS_SCRIPT) {
+		size_t have_tag = (size_t)godot::nativescript_1_1_api->godot_nativescript_get_type_tag(obj->_owner);
+		if (have_tag) {
+			if (!godot::_TagDB::is_type_known((size_t)have_tag)) {
+				have_tag = 0;
+			}
+		}
 
-	if (have_tag) {
-		if (!godot::_TagDB::is_type_known((size_t)have_tag)) {
-			have_tag = 0;
+		if (!have_tag) {
+			have_tag = obj->_type_tag;
+		}
+
+		if (godot::_TagDB::is_type_compatible(T::___get_id(), have_tag)) {
+			return detail::get_custom_class_instance<T>(obj);
+		}
+	} else {
+		if (godot::core_1_2_api->godot_object_cast_to(obj->_owner, (void *)T::___get_id())) {
+			return (T *)obj;
 		}
 	}
 
-	if (!have_tag) {
-		have_tag = obj->_type_tag;
-	}
-
-	if (godot::_TagDB::is_type_compatible(typeid(T).hash_code(), have_tag)) {
-		return (T::___CLASS_IS_SCRIPT) ? detail::get_custom_class_instance<T>(obj) : (T *)obj;
-	} else {
-		return nullptr;
-	}
+	return nullptr;
 }
 #endif
 

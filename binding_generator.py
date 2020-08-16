@@ -146,9 +146,13 @@ def generate_class_header(used_classes, c):
 
     source.append("\t};")
     source.append("\tstatic ___method_bindings ___mb;")
+    source.append("\tstatic void *_detail_class_tag;")
     source.append("")
     source.append("public:")
     source.append("\tstatic void ___init_method_bindings();")
+
+    # class id from core engine for casting
+    source.append("\tinline static size_t ___get_id() { return (size_t)_detail_class_tag; }")
 
     source.append("")
 
@@ -355,10 +359,18 @@ def generate_class_implementation(icalls, used_classes, c):
     source.append(class_name + "::___method_bindings " + class_name + "::___mb = {};")
     source.append("")
 
+    source.append("void *" + class_name + "::_detail_class_tag = nullptr;")
+    source.append("")
+
     source.append("void " + class_name + "::___init_method_bindings() {")
 
     for method in c["methods"]:
         source.append("\t___mb.mb_" + method["name"] + " = godot::api->godot_method_bind_get_method(\"" + c["name"] + "\", \"" + method["name"] + "\");")
+
+    source.append("\tgodot_string_name class_name;")
+    source.append("\tgodot::api->godot_string_name_new_data(&class_name, \"" + c["name"] + "\");")
+    source.append("\t_detail_class_tag = godot::core_1_2_api->godot_get_class_tag(&class_name);")
+    source.append("\tgodot::api->godot_string_name_destroy(&class_name);")
 
     source.append("}")
     source.append("")
