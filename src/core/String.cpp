@@ -111,7 +111,8 @@ void String::operator+=(const String &s) {
 }
 
 void String::operator+=(const wchar_t c) {
-	// @Todo
+	String _to_be_added = String(c);
+	*this = String(godot::api->godot_string_operator_plus(&_godot_string, &_to_be_added._godot_string));
 }
 
 bool String::operator<(const String &s) const {
