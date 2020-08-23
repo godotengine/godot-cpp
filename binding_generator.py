@@ -5,9 +5,10 @@ import json
 # comment.
 
 # Convenience function for using template get_node
-def correct_method_name(class_name, method):
-    if method["name"] == "get_node" and class_name == "Node":
-        method["name"] = "get_node_internal"
+def correct_method_name(method_list):
+    for method in method_list:
+        if method["name"] == "get_node":
+            method["name"] = "get_node_internal"
 
 
 classes = []
@@ -21,7 +22,9 @@ def generate_bindings(path, use_template_get_node):
 
     for c in classes:
         # print c['name']
-        used_classes = get_used_classes(c, use_template_get_node)
+        used_classes = get_used_classes(c)
+        if use_template_get_node and c["name"] == "Node":
+            correct_method_name(c["methods"])
 
         header = generate_class_header(used_classes, c, use_template_get_node)
 
@@ -148,8 +151,6 @@ def generate_class_header(used_classes, c, use_template_get_node):
     source.append("\tstruct ___method_bindings {")
 
     for method in c["methods"]:
-        if use_template_get_node:
-            correct_method_name(class_name, method)
         source.append("\t\tgodot_method_bind *mb_" + method["name"] + ";")
 
     source.append("\t};")
@@ -211,8 +212,6 @@ def generate_class_header(used_classes, c, use_template_get_node):
         source.append("")
 
     for method in c["methods"]:
-        if use_template_get_node:
-            correct_method_name(class_name, method)
         method_signature = ""
 
         # TODO decide what to do about virtual methods
@@ -383,8 +382,6 @@ def generate_class_implementation(icalls, used_classes, c, use_template_get_node
     source.append("void " + class_name + "::___init_method_bindings() {")
 
     for method in c["methods"]:
-        if use_template_get_node:
-            correct_method_name(class_name, method)
         source.append("\t___mb.mb_" + method["name"] + " = godot::api->godot_method_bind_get_method(\"" + c["name"] + "\", \"" + ("get_node" if use_template_get_node and method["name"] == "get_node_internal" else method["name"]) + "\");")
 
     source.append("}")
@@ -397,8 +394,6 @@ def generate_class_implementation(icalls, used_classes, c, use_template_get_node
         source.append("}")
 
     for method in c["methods"]:
-        if use_template_get_node:
-            correct_method_name(class_name, method)
         method_signature = ""
 
         method_signature += make_gdnative_type(method["return_type"], ref_allowed)
@@ -746,11 +741,9 @@ def get_icall_name(sig):
 
 
 
-def get_used_classes(c, use_template_get_node):
+def get_used_classes(c):
     classes = []
     for method in c["methods"]:
-        if use_template_get_node:
-            correct_method_name(strip_name(c["name"]), method)
         if is_class_type(method["return_type"]) and not (method["return_type"] in classes):
             classes.append(method["return_type"])
 
