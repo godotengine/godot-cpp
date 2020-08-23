@@ -160,7 +160,10 @@ if (
 
 if env['bits'] == 'default':
     env['bits'] = '64' if is64 else '32'
-
+    
+if env['target'] == 'debug':
+    env.Append(CPPDEFINES=["DEBUG_ENABLED"])
+    
 # This makes sure to keep the session environment variables on Windows.
 # This way, you can run SCons in a Visual Studio 2017 prompt and it will find
 # all the required tools
