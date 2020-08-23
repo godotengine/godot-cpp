@@ -291,24 +291,22 @@ def generate_class_header(used_classes, c, use_template_get_node):
 
     source.append(vararg_templates)
 
-    if use_template_get_node:
+    if use_template_get_node and class_name == "Node":
         # Extra definition for template get_node that calls the renamed get_node_internal; has a default template parameter for backwards compatibility.
-        if class_name == "Node":
-            source.append("\ttemplate <class T = Node>")
-            source.append("\tT *get_node(const NodePath path) const {")
-            source.append("\t\treturn Object::cast_to<T>(get_node_internal(path));")
-            source.append("\t}")
+        source.append("\ttemplate <class T = Node>")
+        source.append("\tT *get_node(const NodePath path) const {")
+        source.append("\t\treturn Object::cast_to<T>(get_node_internal(path));")
+        source.append("\t}")
 
         source.append("};")
         source.append("")
 
         # ...And a specialized version so we don't unnecessarily cast when using the default.
-        if class_name == "Node":
-            source.append("template <>")
-            source.append("inline Node *Node::get_node<Node>(const NodePath path) const {")
-            source.append("\treturn get_node_internal(path);")
-            source.append("}")
-            source.append("")
+        source.append("template <>")
+        source.append("inline Node *Node::get_node<Node>(const NodePath path) const {")
+        source.append("\treturn get_node_internal(path);")
+        source.append("}")
+        source.append("")
     else:
         source.append("};")
         source.append("")
