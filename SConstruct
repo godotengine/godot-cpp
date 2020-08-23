@@ -147,7 +147,7 @@ opts.Add(
 opts.Add(BoolVariable(
 	'generate_template_get_node',
 	"Generate a template version of the Node class's get_node.",
-	False
+	True
 ))
 
 env = Environment(ENV = os.environ)
