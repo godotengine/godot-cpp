@@ -14,7 +14,7 @@ RID::RID(Object *p) {
 	godot::api->godot_rid_new_with_resource(&_godot_rid, (const godot_object *)p);
 }
 
-int32_t RID::get_rid() const {
+int32_t RID::get_id() const {
 	return godot::api->godot_rid_get_id(&_godot_rid);
 }
 
