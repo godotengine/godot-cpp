@@ -361,7 +361,7 @@ json_api_file = ''
 if 'custom_api_file' in env:
     json_api_file = env['custom_api_file']
 else:
-    json_api_file = os.path.join(os.getcwd(), 'godot_headers', 'api.json')
+    json_api_file = os.path.join(os.getcwd(), env['headers_dir'], 'api.json')
 
 if env['generate_bindings']:
     # Actually create the bindings here
