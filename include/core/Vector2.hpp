@@ -178,6 +178,13 @@ struct Vector2 {
 
 	Vector2 cubic_interpolate(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, real_t p_t) const;
 
+	Vector2 move_toward(const Vector2 &p_to, const real_t p_delta) const {
+		Vector2 v = *this;
+		Vector2 vd = p_to - v;
+		real_t len = vd.length();
+		return len <= p_delta || len < CMP_EPSILON ? p_to : v + vd / len * p_delta;
+	}
+
 	inline Vector2 slide(const Vector2 &p_vec) const {
 		return p_vec - *this * this->dot(p_vec);
 	}
@@ -186,8 +193,8 @@ struct Vector2 {
 		return -reflect(p_normal);
 	}
 
-	inline Vector2 reflect(const Vector2 &p_vec) const {
-		return p_vec - *this * this->dot(p_vec) * 2.0;
+	inline Vector2 reflect(const Vector2 &p_normal) const {
+		return -(*this - p_normal * this->dot(p_normal) * 2.0);
 	}
 
 	inline real_t angle() const {

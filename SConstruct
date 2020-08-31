@@ -68,6 +68,17 @@ else:
         'platform=<platform>'
     )
 
+env = Environment(ENV = os.environ)
+
+is64 = sys.maxsize > 2**32
+if (
+    env['TARGET_ARCH'] == 'amd64' or
+    env['TARGET_ARCH'] == 'emt64' or
+    env['TARGET_ARCH'] == 'x86_64' or
+    env['TARGET_ARCH'] == 'arm64-v8a'
+):
+    is64 = True
+
 opts = Variables([], ARGUMENTS)
 opts.Add(EnumVariable(
     'platform',
@@ -79,8 +90,8 @@ opts.Add(EnumVariable(
 opts.Add(EnumVariable(
     'bits',
     'Target platform bits',
-    'default',
-    ('default', '32', '64')
+    '64' if is64 else '32',
+    ('32', '64')
 ))
 opts.Add(BoolVariable(
     'use_llvm',
@@ -144,22 +155,14 @@ opts.Add(
     'Path to your Android NDK installation. By default, uses ANDROID_NDK_ROOT from your defined environment variables.',
     os.environ.get("ANDROID_NDK_ROOT", None)
 )
+opts.Add(BoolVariable(
+	'generate_template_get_node',
+	"Generate a template version of the Node class's get_node.",
+	True
+))
 
-env = Environment(ENV = os.environ)
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
-
-is64 = sys.maxsize > 2**32
-if (
-    env['TARGET_ARCH'] == 'amd64' or
-    env['TARGET_ARCH'] == 'emt64' or
-    env['TARGET_ARCH'] == 'x86_64' or
-    env['TARGET_ARCH'] == 'arm64-v8a'
-):
-    is64 = True
-
-if env['bits'] == 'default':
-    env['bits'] = '64' if is64 else '32'
 
 # This makes sure to keep the session environment variables on Windows.
 # This way, you can run SCons in a Visual Studio 2017 prompt and it will find
@@ -356,13 +359,13 @@ json_api_file = ''
 if 'custom_api_file' in env:
     json_api_file = env['custom_api_file']
 else:
-    json_api_file = os.path.join(os.getcwd(), 'godot_headers', 'api.json')
+    json_api_file = os.path.join(os.getcwd(), env['headers_dir'], 'api.json')
 
 if env['generate_bindings']:
     # Actually create the bindings here
     import binding_generator
 
-    binding_generator.generate_bindings(json_api_file)
+    binding_generator.generate_bindings(json_api_file, env['generate_template_get_node'])
 
 # Sources to compile
 sources = []
