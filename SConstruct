@@ -179,11 +179,11 @@ if env['platform'] == 'linux':
     if env['use_llvm']:
         env['CXX'] = 'clang++'
 
-    env.Append(CCFLAGS=['-fPIC', '-g', '-std=c++14', '-Wwrite-strings'])
+    env.Append(CCFLAGS=['-fPIC', '-std=c++14', '-Wwrite-strings'])
     env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
 
     if env['target'] == 'debug':
-        env.Append(CCFLAGS=['-Og'])
+        env.Append(CCFLAGS=['-Og', '-g'])
     elif env['target'] == 'release':
         env.Append(CCFLAGS=['-O3'])
 
@@ -203,7 +203,7 @@ elif env['platform'] == 'osx':
             'Only 64-bit builds are supported for the macOS target.'
         )
 
-    env.Append(CCFLAGS=['-g', '-std=c++14', '-arch', 'x86_64'])
+    env.Append(CCFLAGS=['-std=c++14', '-arch', 'x86_64'])
     env.Append(LINKFLAGS=[
         '-arch',
         'x86_64',
@@ -213,7 +213,7 @@ elif env['platform'] == 'osx':
     ])
 
     if env['target'] == 'debug':
-        env.Append(CCFLAGS=['-Og'])
+        env.Append(CCFLAGS=['-Og', '-g'])
     elif env['target'] == 'release':
         env.Append(CCFLAGS=['-O3'])
 
@@ -238,7 +238,7 @@ elif env['platform'] == 'ios':
     env['AR'] = compiler_path + 'ar'
     env['RANLIB'] = compiler_path + 'ranlib'
 
-    env.Append(CCFLAGS=['-g', '-std=c++14', '-arch', env['ios_arch'], '-isysroot', sdk_path])
+    env.Append(CCFLAGS=['-std=c++14', '-arch', env['ios_arch'], '-isysroot', sdk_path])
     env.Append(LINKFLAGS=[
         '-arch',
         env['ios_arch'],
@@ -250,7 +250,7 @@ elif env['platform'] == 'ios':
     ])
 
     if env['target'] == 'debug':
-        env.Append(CCFLAGS=['-Og'])
+        env.Append(CCFLAGS=['-Og', '-g'])
     elif env['target'] == 'release':
         env.Append(CCFLAGS=['-O3'])
 
@@ -281,13 +281,15 @@ elif env['platform'] == 'windows':
 
     # Native or cross-compilation using MinGW
     if host_platform == 'linux' or host_platform == 'osx' or env['use_mingw']:
-        env.Append(CCFLAGS=['-g', '-O3', '-std=c++14', '-Wwrite-strings'])
+        # These options are for a release build even using target=debug
+        env.Append(CCFLAGS=['-O3', '-std=c++14', '-Wwrite-strings'])
         env.Append(LINKFLAGS=[
             '--static',
             '-Wl,--no-undefined',
             '-static-libgcc',
             '-static-libstdc++',
         ])
+
 elif env['platform'] == 'android':
     if host_platform == 'windows':
         env = env.Clone(tools=['mingw'])
