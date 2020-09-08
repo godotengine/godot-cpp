@@ -7,7 +7,7 @@
 
 #include "String.hpp"
 
-#include <cmath>
+#include <Math.hpp>
 
 namespace godot {
 

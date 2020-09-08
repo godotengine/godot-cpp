@@ -5,7 +5,7 @@
 
 #include "Defs.hpp"
 
-#include <cmath>
+#include <Math.hpp>
 
 namespace godot {
 
@@ -222,13 +222,13 @@ struct Vector2 {
 	}
 
 	inline Vector2 floor() const {
-		return Vector2(::floor(x), ::floor(y));
+		return Vector2(Math::floor(x), Math::floor(y));
 	}
 
 	inline Vector2 snapped(const Vector2 &p_by) const {
 		return Vector2(
-				p_by.x != 0 ? ::floor(x / p_by.x + 0.5) * p_by.x : x,
-				p_by.y != 0 ? ::floor(y / p_by.y + 0.5) * p_by.y : y);
+				Math::stepify(x, p_by.x),
+				Math::stepify(y, p_by.y));
 	}
 
 	inline real_t aspect() const { return width / height; }
@@ -239,6 +239,22 @@ struct Vector2 {
 inline Vector2 operator*(real_t p_scalar, const Vector2 &p_vec) {
 	return p_vec * p_scalar;
 }
+
+namespace Math {
+
+// Convenience, since they exist in GDScript
+
+inline Vector2 cartesian2polar(Vector2 v) {
+	return Vector2(Math::sqrt(v.x * v.x + v.y * v.y), Math::atan2(v.y, v.x));
+}
+
+inline Vector2 polar2cartesian(Vector2 v) {
+	// x == radius
+	// y == angle
+	return Vector2(v.x * Math::cos(v.y), v.x * Math::sin(v.y));
+}
+
+} // namespace Math
 
 } // namespace godot
 
