@@ -37,6 +37,8 @@
 project(godot-cpp)
 cmake_minimum_required(VERSION 3.6)
 
+option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
+
 # Change the output directory to the bin directory
 set(BUILD_PATH ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${BUILD_PATH}")
@@ -131,8 +133,14 @@ else()
 endif()
 
 # Generate source from the bindings file
+if(GENERATE_TEMPLATE_GET_NODE)
+	set(GENERATE_BINDING_PARAMETERS "True")
+else()
+	set(GENERATE_BINDING_PARAMETERS "False")
+endif()
+
 message(STATUS "Generating Bindings")
-execute_process(COMMAND "python" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", True)"
+execute_process(COMMAND "python" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", ${GENERATE_BINDING_PARAMETERS})"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	RESULT_VARIABLE GENERATION_RESULT
 	OUTPUT_VARIABLE GENERATION_OUTPUT)
