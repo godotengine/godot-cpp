@@ -264,7 +264,7 @@ struct Vector3 {
 	void rotate(const Vector3 &p_axis, real_t p_phi);
 
 	inline Vector3 slide(const Vector3 &by) const {
-		return by - *this * this->dot(by);
+		return *this - by * this->dot(by);
 	}
 
 	void snap(real_t p_val);
