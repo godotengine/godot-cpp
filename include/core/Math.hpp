@@ -107,21 +107,21 @@ inline T max(T a, T b) {
 
 template <typename T>
 inline T sign(T x) {
-	return x < 0 ? -1 : 1;
+	return (T)(x < 0 ? -1 : 1);
 }
 
 inline double deg2rad(double p_y) {
-	return p_y * Math_PI / 180.0;
+	return (float)(p_y * Math_PI / (float) 180.0);
 }
 inline float deg2rad(float p_y) {
-	return p_y * Math_PI / 180.0;
+	return (float)(p_y * Math_PI / 180.0);
 }
 
 inline double rad2deg(double p_y) {
-	return p_y * 180.0 / Math_PI;
+	return (float)(p_y * 180.0 / Math_PI);
 }
 inline float rad2deg(float p_y) {
-	return p_y * 180.0 / Math_PI;
+	return (float)(p_y * 180.0 / Math_PI);
 }
 
 inline double inverse_lerp(double p_from, double p_to, double p_value) {
@@ -144,9 +144,9 @@ inline bool is_equal_approx(real_t a, real_t b) {
 		return true;
 	}
 	// Then check for approximate equality.
-	real_t tolerance = CMP_EPSILON * std::abs(a);
-	if (tolerance < CMP_EPSILON) {
-		tolerance = CMP_EPSILON;
+	real_t tolerance = (real_t)(CMP_EPSILON * std::abs(a));
+	if (tolerance < (real_t)CMP_EPSILON) {
+		tolerance = (real_t)CMP_EPSILON;
 	}
 	return std::abs(a - b) < tolerance;
 }
@@ -165,14 +165,14 @@ inline bool is_zero_approx(real_t s) {
 }
 
 inline double smoothstep(double p_from, double p_to, double p_weight) {
-	if (is_equal_approx(p_from, p_to)) {
+	if (is_equal_approx((real_t)p_from, (real_t)p_to)) {
 		return p_from;
 	}
 	double x = clamp((p_weight - p_from) / (p_to - p_from), 0.0, 1.0);
 	return x * x * (3.0 - 2.0 * x);
 }
 inline float smoothstep(float p_from, float p_to, float p_weight) {
-	if (is_equal_approx(p_from, p_to)) {
+	if (is_equal_approx((real_t)p_from, (real_t)p_to)) {
 		return p_from;
 	}
 	float x = clamp((p_weight - p_from) / (p_to - p_from), 0.0f, 1.0f);
@@ -205,7 +205,7 @@ inline double round(double p_val) {
 	return (p_val >= 0) ? floor(p_val + 0.5) : -floor(-p_val + 0.5);
 }
 inline float round(float p_val) {
-	return (p_val >= 0) ? floor(p_val + 0.5) : -floor(-p_val + 0.5);
+	return (float)((p_val >= 0) ? floor(p_val + 0.5) : -floor(-p_val + 0.5));
 }
 
 inline int64_t wrapi(int64_t value, int64_t min, int64_t max) {
@@ -215,16 +215,16 @@ inline int64_t wrapi(int64_t value, int64_t min, int64_t max) {
 
 inline double wrapf(double value, double min, double max) {
 	double range = max - min;
-	return is_zero_approx(range) ? min : value - (range * floor((value - min) / range));
+	return is_zero_approx((real_t)range) ? min : value - (range * floor((value - min) / range));
 }
 inline float wrapf(float value, float min, float max) {
 	float range = max - min;
-	return is_zero_approx(range) ? min : value - (range * floor((value - min) / range));
+	return is_zero_approx((real_t)range) ? min : value - (range * floor((value - min) / range));
 }
 
 inline real_t stepify(real_t p_value, real_t p_step) {
 	if (p_step != 0) {
-		p_value = floor(p_value / p_step + 0.5) * p_step;
+		p_value = (real_t)(floor(p_value / p_step + 0.5) * p_step);
 	}
 	return p_value;
 }
