@@ -111,7 +111,7 @@ inline T sign(T x) {
 }
 
 inline double deg2rad(double p_y) {
-	return (float)(p_y * Math_PI / (float) 180.0);
+	return (float)(p_y * Math_PI / 180.0);
 }
 inline float deg2rad(float p_y) {
 	return (float)(p_y * Math_PI / 180.0);
