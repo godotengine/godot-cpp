@@ -21,7 +21,7 @@ class Ref {
 
 		unref();
 
-		reference = p_from.reference;
+		reference = Object::cast_to<T>(p_from.reference);
 		if (reference)
 			reference->reference();
 	}
