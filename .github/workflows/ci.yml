@@ -33,6 +33,10 @@ jobs:
           path: bin/libgodot-cpp.linux.release.64.a
           if-no-files-found: error
 
+      - name: Build test GDNative library
+        run: |
+          scons target=release platform=linux bits=64 -j $(nproc) -C test;
+
   windows-msvc:
     name: Build (Windows, MSVC)
     runs-on: windows-2019
@@ -61,6 +65,10 @@ jobs:
           name: godot-cpp-windows-msvc2019-x86_64-release
           path: bin/libgodot-cpp.windows.release.64.lib
           if-no-files-found: error
+
+      - name: Build test GDNative library
+        run: |
+          scons target=release platform=windows bits=64 -j $env:NUMBER_OF_PROCESSORS -C test;
 
   windows-mingw:
     name: Build (Windows, MinGW)
@@ -96,6 +104,10 @@ jobs:
           path: bin/libgodot-cpp.windows.release.64.a
           if-no-files-found: error
 
+      - name: Build test GDNative library
+        run: |
+          scons target=release platform=windows bits=64 -j $env:NUMBER_OF_PROCESSORS -C test;
+
   macos:
     name: Build (macOS, Clang)
     runs-on: macos-10.15
@@ -124,6 +136,10 @@ jobs:
           name: godot-cpp-macos-x86_64-release
           path: bin/libgodot-cpp.osx.release.64.a
           if-no-files-found: error
+
+      - name: Build test GDNative library
+        run: |
+          scons target=release platform=osx bits=64 -j $(sysctl -n hw.logicalcpu) -C test;
 
   static-checks:
     name: Static Checks (clang-format)
