@@ -10,7 +10,10 @@ public:
 	SimpleClass() {}
 
 	/** `_init` must exist as it is called by Godot. */
-	void _init() {}
+	void _init() {
+		_name = String("SimpleClass");
+		_value = 0;
+	}
 
 	void test_void_method() {
 		Godot::print("This is test");
@@ -30,10 +33,10 @@ public:
 		 * The line below is equivalent to the following GDScript export:
 		 *	 export var _name = "SimpleClass"
 		 **/
-		register_property<SimpleClass, String>("base/name", &SimpleClass::_name, String("SimpleClass"));
+		register_property<SimpleClass, String>("name", &SimpleClass::_name, String("SimpleClass"));
 
 		/** Alternatively, with getter and setter methods: */
-		register_property<SimpleClass, int>("base/value", &SimpleClass::set_value, &SimpleClass::get_value, 0);
+		register_property<SimpleClass, int>("value", &SimpleClass::set_value, &SimpleClass::get_value, 0);
 
 		/** Registering a signal: **/
 		register_signal<SimpleClass>("signal_name0"); // windows: error C2668: 'godot::register_signal': ambiguous call to overloaded function
