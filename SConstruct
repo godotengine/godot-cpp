@@ -134,6 +134,11 @@ opts.Add(EnumVariable(
     'armv7',
     ['armv7','arm64v8','x86','x86_64']
 ))
+opts.Add(
+    'macos_deployment_target',
+    'macOS deployment target',
+    'default'
+)
 opts.Add(EnumVariable(
     'ios_arch',
     'Target iOS architecture',
@@ -204,6 +209,10 @@ elif env['platform'] == 'osx':
         )
 
     env.Append(CCFLAGS=['-std=c++14', '-arch', 'x86_64'])
+
+    if env['macos_deployment_target'] != 'default':
+        env.Append(CCFLAGS=['-mmacosx-version-min=' + env['macos_deployment_target']])
+
     env.Append(LINKFLAGS=[
         '-arch',
         'x86_64',
