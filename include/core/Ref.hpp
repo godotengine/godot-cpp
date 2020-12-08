@@ -11,6 +11,10 @@ namespace godot {
 // Rewritten from f5234e70be7dec4930c2d5a0e829ff480d044b1d.
 template <class T>
 class Ref {
+	// TODO For this nice check to work, each class must actually #include Reference classes mentionned in its methods,
+	// which might be annoying for coders who prefer to forward-declare to reduce compile times
+	// static_assert(std::is_base_of<Reference, T>::value,
+	// 		"Ref<T> can only be used with classes deriving from Reference");
 
 	T *reference = nullptr;
 
@@ -28,7 +32,7 @@ class Ref {
 
 	void ref_pointer(T *p_ref) {
 
-		ERR_FAIL_COND(!p_ref);
+		ERR_FAIL_COND(p_ref == nullptr);
 
 		if (p_ref->init_ref())
 			reference = p_ref;
@@ -90,32 +94,25 @@ public:
 
 	template <class T_Other>
 	void operator=(const Ref<T_Other> &p_from) {
-
-		// TODO We need a safe cast
 		Reference *refb = const_cast<Reference *>(static_cast<const Reference *>(p_from.ptr()));
-		if (!refb) {
+		if (refb == nullptr) {
 			unref();
 			return;
 		}
 		Ref r;
-		//r.reference = Object::cast_to<T>(refb);
-		r.reference = (T *)refb;
+		r.reference = Object::cast_to<T>(refb);
 		ref(r);
 		r.reference = nullptr;
 	}
 
 	void operator=(const Variant &p_variant) {
-
-		// TODO We need a safe cast
-		Reference *refb = (Reference *)T::___get_from_variant(p_variant);
-		if (!refb) {
+		Object *refb = T::___get_from_variant(p_variant);
+		if (refb == nullptr) {
 			unref();
 			return;
 		}
 		Ref r;
-		// TODO We need a safe cast
-		//r.reference = Object::cast_to<T>(refb);
-		r.reference = (T *)refb;
+		r.reference = Object::cast_to<T>(refb);
 		ref(r);
 		r.reference = nullptr;
 	}
@@ -128,18 +125,14 @@ public:
 
 	template <class T_Other>
 	Ref(const Ref<T_Other> &p_from) {
-
 		reference = nullptr;
-		// TODO We need a safe cast
 		Reference *refb = const_cast<Reference *>(static_cast<const Reference *>(p_from.ptr()));
-		if (!refb) {
+		if (refb == nullptr) {
 			unref();
 			return;
 		}
 		Ref r;
-		// TODO We need a safe cast
-		//r.reference = Object::cast_to<T>(refb);
-		r.reference = (T *)refb;
+		r.reference = Object::cast_to<T>(refb);
 		ref(r);
 		r.reference = nullptr;
 	}
@@ -155,16 +148,13 @@ public:
 	Ref(const Variant &p_variant) {
 
 		reference = nullptr;
-		// TODO We need a safe cast
-		Reference *refb = (Reference *)T::___get_from_variant(p_variant);
-		if (!refb) {
+		Object *refb = T::___get_from_variant(p_variant);
+		if (refb == nullptr) {
 			unref();
 			return;
 		}
 		Ref r;
-		// TODO We need a safe cast
-		//r.reference = Object::cast_to<T>(refb);
-		r.reference = (T *)refb;
+		r.reference = Object::cast_to<T>(refb);
 		ref(r);
 		r.reference = nullptr;
 	}
