@@ -165,6 +165,11 @@ struct Vector3 {
 				z + (p_t * (p_b.z - z)));
 	}
 
+	inline Vector3 slerp(const Vector3 &p_b, real_t p_t) const {
+		real_t theta = angle_to(p_b);
+		return rotated(cross(p_b).normalized(), theta * p_t);
+	}
+
 	Vector3 cubic_interpolate(const Vector3 &b, const Vector3 &pre_a, const Vector3 &post_b, const real_t t) const;
 
 	Vector3 move_toward(const Vector3 &p_to, const real_t p_delta) const {
@@ -204,6 +209,10 @@ struct Vector3 {
 
 	inline real_t dot(const Vector3 &b) const {
 		return x * b.x + y * b.y + z * b.z;
+	}
+
+	inline Vector3 project(const Vector3 &p_b) const {
+		return p_b * (dot(p_b) / p_b.length_squared());
 	}
 
 	inline real_t angle_to(const Vector3 &b) const {
@@ -264,7 +273,7 @@ struct Vector3 {
 	void rotate(const Vector3 &p_axis, real_t p_phi);
 
 	inline Vector3 slide(const Vector3 &by) const {
-		return by - *this * this->dot(by);
+		return *this - by * this->dot(by);
 	}
 
 	void snap(real_t p_val);
