@@ -46,7 +46,9 @@ inline T *create_custom_class_instance() {
 	// We cannot use wrappers because of https://github.com/godotengine/godot/issues/39181
 	//	godot::NativeScript *script = godot::NativeScript::_new();
 	//	script->set_library(get_wrapper<godot::GDNativeLibrary>((godot_object *)godot::gdnlib));
-	//	script->set_class_name(T::___get_type_name());
+	//	script->set_class_name(T::___get_class_name());
+
+	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
 
 	// So we use the C API directly.
 	static godot_class_constructor script_constructor = godot::api->godot_get_class_constructor("NativeScript");
@@ -58,7 +60,7 @@ inline T *create_custom_class_instance() {
 		godot::api->godot_method_bind_ptrcall(mb_set_library, script, args, nullptr);
 	}
 	{
-		const String class_name = T::___get_type_name();
+		const String class_name = T::___get_class_name();
 		const void *args[] = { &class_name };
 		godot::api->godot_method_bind_ptrcall(mb_set_class_name, script, args, nullptr);
 	}
@@ -74,7 +76,7 @@ inline T *create_custom_class_instance() {
 	//	return get_custom_class_instance<T>(base_obj);
 
 	// Again using the C API to do exactly what we have to do.
-	static godot_class_constructor base_constructor = godot::api->godot_get_class_constructor(T::___get_godot_base_class_name());
+	static godot_class_constructor base_constructor = godot::api->godot_get_class_constructor(T::___get_godot_class_name());
 	static godot_method_bind *mb_set_script = godot::api->godot_method_bind_get_method("Object", "set_script");
 	godot_object *base_obj = base_constructor();
 	{
@@ -87,49 +89,41 @@ inline T *create_custom_class_instance() {
 
 } // namespace detail
 
-// Used in the definition of a custom class where the base is a Godot class
-#define GODOT_CLASS(Name, Base)                                                             \
-                                                                                            \
-public:                                                                                     \
-	inline static const char *___get_type_name() { return #Name; }                          \
-	enum { ___CLASS_IS_SCRIPT = 1 };                                                        \
-	inline static const char *___get_godot_base_class_name() {                              \
-		return Base::___get_class_name();                                                   \
-	}                                                                                       \
-	inline static Name *_new() {                                                            \
-		return godot::detail::create_custom_class_instance<Name>();                         \
-	}                                                                                       \
-	inline static size_t ___get_id() { return typeid(Name).hash_code(); }                   \
-	inline static size_t ___get_base_id() { return Base::___get_id(); }                     \
-	inline static const char *___get_base_type_name() { return Base::___get_class_name(); } \
-	inline static godot::Object *___get_from_variant(godot::Variant a) {                    \
-		return (godot::Object *)godot::detail::get_custom_class_instance<Name>(             \
-				godot::Object::___get_from_variant(a));                                     \
-	}                                                                                       \
-                                                                                            \
+// Used in the definition of a custom class.
+//
+// Name:                       Name of your class, without namespace
+// Base:                       Name of the direct base class, with namespace if necessary
+//
+// ___get_class_name:          Name of the class
+// ___get_godot_class_name:    Name of the Godot base class this class inherits from (i.e not direct)
+// _new:                       Creates a new instance of the class
+// ___get_id:                  Gets the unique ID of the class. Godot and custom classes are both within that set.
+// ___get_base_id:             Gets the ID of the direct base class, as returned by ___get_id
+// ___get_base_class_name:     Name of the direct base class
+// ___get_from_variant:        Converts a Variant into an Object*. Will be non-null if the class matches.
+#define GODOT_CLASS(Name, Base)                                                              \
+                                                                                             \
+public:                                                                                      \
+	inline static const char *___get_class_name() { return #Name; }                          \
+	enum { ___CLASS_IS_SCRIPT = 1 };                                                         \
+	inline static const char *___get_godot_class_name() {                                    \
+		return Base::___get_godot_class_name();                                              \
+	}                                                                                        \
+	inline static Name *_new() {                                                             \
+		return godot::detail::create_custom_class_instance<Name>();                          \
+	}                                                                                        \
+	inline static size_t ___get_id() { return typeid(Name).hash_code(); }                    \
+	inline static size_t ___get_base_id() { return Base::___get_id(); }                      \
+	inline static const char *___get_base_class_name() { return Base::___get_class_name(); } \
+	inline static godot::Object *___get_from_variant(godot::Variant a) {                     \
+		return (godot::Object *)godot::detail::get_custom_class_instance<Name>(              \
+				godot::Object::___get_from_variant(a));                                      \
+	}                                                                                        \
+                                                                                             \
 private:
 
-// Used in the definition of a custom class where the base is another custom class
-#define GODOT_SUBCLASS(Name, Base)                                                         \
-                                                                                           \
-public:                                                                                    \
-	inline static const char *___get_type_name() { return #Name; }                         \
-	enum { ___CLASS_IS_SCRIPT = 1 };                                                       \
-	inline static const char *___get_godot_base_class_name() {                             \
-		return Base::___get_godot_base_class_name();                                       \
-	}                                                                                      \
-	inline static Name *_new() {                                                           \
-		return godot::detail::create_custom_class_instance<Name>();                        \
-	}                                                                                      \
-	inline static size_t ___get_id() { return typeid(Name).hash_code(); };                 \
-	inline static size_t ___get_base_id() { return typeid(Base).hash_code(); };            \
-	inline static const char *___get_base_type_name() { return Base::___get_type_name(); } \
-	inline static godot::Object *___get_from_variant(godot::Variant a) {                   \
-		return (godot::Object *)godot::detail::get_custom_class_instance<Name>(            \
-				godot::Object::___get_from_variant(a));                                    \
-	}                                                                                      \
-                                                                                           \
-private:
+// Legacy compatibility
+#define GODOT_SUBCLASS(Name, Base) GODOT_CLASS(Name, Base)
 
 template <class T>
 struct _ArgCast {
@@ -171,6 +165,8 @@ void _godot_class_destroy_func(godot_object *p, void *method_data, void *data) {
 
 template <class T>
 void register_class() {
+	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
+
 	godot_instance_create_func create = {};
 	create.create_func = _godot_class_instance_func<T>;
 
@@ -179,13 +175,19 @@ void register_class() {
 
 	_TagDB::register_type(T::___get_id(), T::___get_base_id());
 
-	godot::nativescript_api->godot_nativescript_register_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
-	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), (const void *)typeid(T).hash_code());
+	godot::nativescript_api->godot_nativescript_register_class(godot::_RegisterState::nativescript_handle,
+			T::___get_class_name(), T::___get_base_class_name(), create, destroy);
+
+	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle,
+			T::___get_class_name(), (const void *)T::___get_id());
+
 	T::_register_methods();
 }
 
 template <class T>
 void register_tool_class() {
+	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
+
 	godot_instance_create_func create = {};
 	create.create_func = _godot_class_instance_func<T>;
 
@@ -194,8 +196,12 @@ void register_tool_class() {
 
 	_TagDB::register_type(T::___get_id(), T::___get_base_id());
 
-	godot::nativescript_api->godot_nativescript_register_tool_class(godot::_RegisterState::nativescript_handle, T::___get_type_name(), T::___get_base_type_name(), create, destroy);
-	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle, T::___get_type_name(), (const void *)typeid(T).hash_code());
+	godot::nativescript_api->godot_nativescript_register_tool_class(godot::_RegisterState::nativescript_handle,
+			T::___get_class_name(), T::___get_base_class_name(), create, destroy);
+
+	godot::nativescript_1_1_api->godot_nativescript_set_type_tag(godot::_RegisterState::nativescript_handle,
+			T::___get_class_name(), (const void *)T::___get_id());
+
 	T::_register_methods();
 }
 
@@ -205,12 +211,14 @@ typedef godot_variant (*__godot_wrapper_method)(godot_object *, void *, void *, 
 
 template <class T, class R, class... args>
 const char *___get_method_class_name(R (T::*p)(args... a)) {
-	return T::___get_type_name();
+	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
+	return T::___get_class_name();
 }
 
 template <class T, class R, class... args>
 const char *___get_method_class_name(R (T::*p)(args... a) const) {
-	return T::___get_type_name();
+	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
+	return T::___get_class_name();
 }
 
 // Okay, time for some template magic.
@@ -302,12 +310,15 @@ void register_method(const char *name, M method_ptr, godot_method_rpc_mode rpc_t
 	godot_method_attributes attr = {};
 	attr.rpc_type = rpc_type;
 
-	godot::nativescript_api->godot_nativescript_register_method(godot::_RegisterState::nativescript_handle, ___get_method_class_name(method_ptr), name, attr, method);
+	godot::nativescript_api->godot_nativescript_register_method(godot::_RegisterState::nativescript_handle,
+			___get_method_class_name(method_ptr), name, attr, method);
 }
 
 // User can specify a derived class D to register the method for, instead of it being inferred.
 template <class D, class B, class R, class... As>
-void register_method_explicit(const char *name, R (B::*method_ptr)(As...), godot_method_rpc_mode rpc_type = GODOT_METHOD_RPC_MODE_DISABLED) {
+void register_method_explicit(const char *name, R (B::*method_ptr)(As...),
+		godot_method_rpc_mode rpc_type = GODOT_METHOD_RPC_MODE_DISABLED) {
+
 	static_assert(std::is_base_of<B, D>::value, "Explicit class must derive from method class");
 	register_method(name, static_cast<R (D::*)(As...)>(method_ptr), rpc_type);
 }
@@ -376,7 +387,13 @@ struct _PropertyDefaultGetFunc {
 };
 
 template <class T, class P>
-void register_property(const char *name, P(T::*var), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED, godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
+void register_property(const char *name, P(T::*var), P default_value,
+		godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,
+		godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT,
+		godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
+
+	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
+
 	Variant def_val = default_value;
 
 	usage = (godot_property_usage_flags)((int)usage | GODOT_PROPERTY_USAGE_SCRIPT_VARIABLE);
@@ -404,10 +421,12 @@ void register_property(const char *name, P(T::*var), P default_value, godot_meth
 	attr.usage = usage;
 	attr.hint_string = *_hint_string;
 
-	_PropertyDefaultSetFunc<T, P> *wrapped_set = (_PropertyDefaultSetFunc<T, P> *)godot::api->godot_alloc(sizeof(_PropertyDefaultSetFunc<T, P>));
+	_PropertyDefaultSetFunc<T, P> *wrapped_set =
+			(_PropertyDefaultSetFunc<T, P> *)godot::api->godot_alloc(sizeof(_PropertyDefaultSetFunc<T, P>));
 	wrapped_set->f = var;
 
-	_PropertyDefaultGetFunc<T, P> *wrapped_get = (_PropertyDefaultGetFunc<T, P> *)godot::api->godot_alloc(sizeof(_PropertyDefaultGetFunc<T, P>));
+	_PropertyDefaultGetFunc<T, P> *wrapped_get =
+			(_PropertyDefaultGetFunc<T, P> *)godot::api->godot_alloc(sizeof(_PropertyDefaultGetFunc<T, P>));
 	wrapped_get->f = var;
 
 	godot_property_set_func set_func = {};
@@ -420,11 +439,18 @@ void register_property(const char *name, P(T::*var), P default_value, godot_meth
 	get_func.free_func = godot::api->godot_free;
 	get_func.get_func = &_PropertyDefaultGetFunc<T, P>::_wrapped_getter;
 
-	godot::nativescript_api->godot_nativescript_register_property(godot::_RegisterState::nativescript_handle, T::___get_type_name(), name, &attr, set_func, get_func);
+	godot::nativescript_api->godot_nativescript_register_property(godot::_RegisterState::nativescript_handle,
+			T::___get_class_name(), name, &attr, set_func, get_func);
 }
 
 template <class T, class P>
-void register_property(const char *name, void (T::*setter)(P), P (T::*getter)(), P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED, godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
+void register_property(const char *name, void (T::*setter)(P), P (T::*getter)(), P default_value,
+		godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,
+		godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT,
+		godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
+
+	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
+
 	Variant def_val = default_value;
 
 	godot_string *_hint_string = (godot_string *)&hint_string;
@@ -457,16 +483,23 @@ void register_property(const char *name, void (T::*setter)(P), P (T::*getter)(),
 	get_func.free_func = godot::api->godot_free;
 	get_func.get_func = &_PropertyGetFunc<T, P>::_wrapped_getter;
 
-	godot::nativescript_api->godot_nativescript_register_property(godot::_RegisterState::nativescript_handle, T::___get_type_name(), name, &attr, set_func, get_func);
+	godot::nativescript_api->godot_nativescript_register_property(godot::_RegisterState::nativescript_handle,
+			T::___get_class_name(), name, &attr, set_func, get_func);
 }
 
 template <class T, class P>
-void register_property(const char *name, void (T::*setter)(P), P (T::*getter)() const, P default_value, godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED, godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT, godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
+void register_property(const char *name, void (T::*setter)(P), P (T::*getter)() const, P default_value,
+		godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,
+		godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT,
+		godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
+
 	register_property(name, setter, (P(T::*)())getter, default_value, rpc_mode, usage, hint, hint_string);
 }
 
 template <class T>
 void register_signal(String name, Dictionary args = Dictionary()) {
+	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
+
 	godot_signal signal = {};
 	signal.name = *(godot_string *)&name;
 	signal.num_args = args.size();
@@ -491,7 +524,8 @@ void register_signal(String name, Dictionary args = Dictionary()) {
 		signal.args[i].type = args.values()[i];
 	}
 
-	godot::nativescript_api->godot_nativescript_register_signal(godot::_RegisterState::nativescript_handle, T::___get_type_name(), &signal);
+	godot::nativescript_api->godot_nativescript_register_signal(godot::_RegisterState::nativescript_handle,
+			T::___get_class_name(), &signal);
 
 	for (int i = 0; i < signal.num_args; i++) {
 		godot::api->godot_string_destroy(&signal.args[i].name);
@@ -540,4 +574,4 @@ T *Object::cast_to(const Object *obj) {
 
 } // namespace godot
 
-#endif // GODOT_H
+#endif // GODOT_HPP

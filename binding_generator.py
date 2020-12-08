@@ -178,8 +178,11 @@ def generate_class_header(used_classes, c, use_template_get_node):
 
         # godot::api->godot_global_get_singleton((char *) \"" + strip_name(c["name"]) + "\");"
 
-    # ___get_class_name
+    # class name:
+    # Two versions needed needed because when the user implements a custom class,
+    # we want to override `___get_class_name` while `___get_godot_class_name` can keep returning the base name
     source.append("\tstatic inline const char *___get_class_name() { return (const char *) \"" + strip_name(c["name"]) + "\"; }")
+    source.append("\tstatic inline const char *___get_godot_class_name() { return (const char *) \"" + strip_name(c["name"]) + "\"; }")
 
     source.append("\tstatic inline Object *___get_from_variant(Variant a) { godot_object *o = (godot_object*) a; return (o) ? (Object *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, o) : nullptr; }")
 
@@ -443,7 +446,7 @@ def generate_class_implementation(icalls, used_classes, c, use_template_get_node
                 if is_enum(method["return_type"]):
                     return_statement += "return (" + remove_enum_prefix(method["return_type"]) + ") "
                 elif return_type_is_ref:
-                    return_statement += "return Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor(";
+                    return_statement += "return Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor("
                 else:
                     return_statement += "return " + ("(" + strip_name(method["return_type"]) + " *) " if is_class_type(method["return_type"]) else "")
             else:
@@ -716,8 +719,6 @@ def generate_init_method_bindings(classes):
     source.append("{")
 
     for c in classes:
-        class_name = strip_name(c["name"])
-
         source.append("\t" + strip_name(c["name"]) + "::___init_method_bindings();")
 
     source.append("}")
