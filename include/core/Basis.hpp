@@ -13,6 +13,11 @@ class Quat;
 
 class Basis {
 private:
+	static const Basis IDENTITY;
+	static const Basis FLIP_X;
+	static const Basis FLIP_Y;
+	static const Basis FLIP_Z;
+
 	// This helper template is for mimicking the behavior difference between the engine
 	// and script interfaces that logically script sees matrices as column major, while
 	// the engine stores them in row major to efficiently take advantage of SIMD

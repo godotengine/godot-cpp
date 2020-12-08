@@ -7,6 +7,8 @@
 
 namespace godot {
 
+const Quat Quat::IDENTITY = Quat();
+
 // set_euler_xyz expects a vector containing the Euler angles in the format
 // (ax,ay,az), where ax is the angle of rotation around x axis,
 // and similar for other axes.
