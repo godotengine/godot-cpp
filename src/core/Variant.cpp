@@ -261,14 +261,12 @@ Variant::operator RID() const {
 }
 
 Variant::operator Dictionary() const {
-	Dictionary ret;
-	*(godot_dictionary *)&ret = godot::api->godot_variant_as_dictionary(&_godot_variant);
+	Dictionary ret(godot::api->godot_variant_as_dictionary(&_godot_variant));
 	return ret;
 }
 
 Variant::operator Array() const {
-	Array ret;
-	*(godot_array *)&ret = godot::api->godot_variant_as_array(&_godot_variant);
+	Array ret(godot::api->godot_variant_as_array(&_godot_variant));
 	return ret;
 }
 

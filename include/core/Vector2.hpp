@@ -5,7 +5,7 @@
 
 #include "Defs.hpp"
 
-#include <cmath>
+#include <Math.hpp>
 
 namespace godot {
 
@@ -138,6 +138,12 @@ struct Vector2 {
 		return atan2(y - p_vector2.y, x - p_vector2.x);
 	}
 
+	inline Vector2 direction_to(const Vector2 &p_b) const {
+		Vector2 ret(p_b.x - x, p_b.y - y);
+		ret.normalize();
+		return ret;
+	}
+
 	inline real_t dot(const Vector2 &p_other) const {
 		return x * p_other.x + y * p_other.y;
 	}
@@ -172,6 +178,13 @@ struct Vector2 {
 
 	Vector2 cubic_interpolate(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, real_t p_t) const;
 
+	Vector2 move_toward(const Vector2 &p_to, const real_t p_delta) const {
+		Vector2 v = *this;
+		Vector2 vd = p_to - v;
+		real_t len = vd.length();
+		return len <= p_delta || len < CMP_EPSILON ? p_to : v + vd / len * p_delta;
+	}
+
 	inline Vector2 slide(const Vector2 &p_vec) const {
 		return p_vec - *this * this->dot(p_vec);
 	}
@@ -180,8 +193,8 @@ struct Vector2 {
 		return -reflect(p_normal);
 	}
 
-	inline Vector2 reflect(const Vector2 &p_vec) const {
-		return p_vec - *this * this->dot(p_vec) * 2.0;
+	inline Vector2 reflect(const Vector2 &p_normal) const {
+		return -(*this - p_normal * this->dot(p_normal) * 2.0);
 	}
 
 	inline real_t angle() const {
@@ -209,13 +222,13 @@ struct Vector2 {
 	}
 
 	inline Vector2 floor() const {
-		return Vector2(::floor(x), ::floor(y));
+		return Vector2(Math::floor(x), Math::floor(y));
 	}
 
 	inline Vector2 snapped(const Vector2 &p_by) const {
 		return Vector2(
-				p_by.x != 0 ? ::floor(x / p_by.x + 0.5) * p_by.x : x,
-				p_by.y != 0 ? ::floor(y / p_by.y + 0.5) * p_by.y : y);
+				Math::stepify(x, p_by.x),
+				Math::stepify(y, p_by.y));
 	}
 
 	inline real_t aspect() const { return width / height; }
@@ -226,6 +239,22 @@ struct Vector2 {
 inline Vector2 operator*(real_t p_scalar, const Vector2 &p_vec) {
 	return p_vec * p_scalar;
 }
+
+namespace Math {
+
+// Convenience, since they exist in GDScript
+
+inline Vector2 cartesian2polar(Vector2 v) {
+	return Vector2(Math::sqrt(v.x * v.x + v.y * v.y), Math::atan2(v.y, v.x));
+}
+
+inline Vector2 polar2cartesian(Vector2 v) {
+	// x == radius
+	// y == angle
+	return Vector2(v.x * Math::cos(v.y), v.x * Math::sin(v.y));
+}
+
+} // namespace Math
 
 } // namespace godot
 

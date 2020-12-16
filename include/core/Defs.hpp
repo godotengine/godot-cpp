@@ -62,8 +62,10 @@ enum class Error {
 #include <GodotGlobal.hpp>
 
 // alloca() is non-standard. When using MSVC, it's in malloc.h.
-#if defined(__linux__) || defined(__APPLE__) || defined(__MINGW32__)
+#if defined(__linux__) || defined(__APPLE__)
 #include <alloca.h>
+#else
+#include <malloc.h>
 #endif
 
 typedef float real_t;
@@ -71,6 +73,7 @@ typedef float real_t;
 #define CMP_EPSILON 0.00001
 #define CMP_EPSILON2 (CMP_EPSILON * CMP_EPSILON)
 #define Math_PI 3.14159265358979323846
+#define Math_TAU 6.2831853071795864769252867666
 
 #define _PLANE_EQ_DOT_EPSILON 0.999
 #define _PLANE_EQ_D_EPSILON 0.0001
