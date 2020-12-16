@@ -52,7 +52,7 @@ matrix:
 
     - name: Android ARM Release
       os: linux
-      env: TARGET=release ADDITIONAL_FLAGS="platform=android android_arch=armv7" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/ndk-bundle"
+      env: TARGET=release ADDITIONAL_FLAGS="platform=android android_arch=armv7" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/godotengine/godot-cpp/ndk-bundle"
       addons:
         apt:
           sources:
@@ -62,7 +62,7 @@ matrix:
 
     - name: Android ARM64 Release
       os: linux
-      env: TARGET=release ADDITIONAL_FLAGS="platform=android android_arch=arm64v8" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/ndk-bundle"
+      env: TARGET=release ADDITIONAL_FLAGS="platform=android android_arch=arm64v8" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/godotengine/godot-cpp/ndk-bundle"
       addons:
         apt:
           sources:
@@ -72,7 +72,7 @@ matrix:
 
     - name: Android ARM Debug
       os: linux
-      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android_arch=armv7" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/ndk-bundle"
+      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android_arch=armv7" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/godotengine/godot-cpp/ndk-bundle"
       addons:
         apt:
           sources:
@@ -82,7 +82,7 @@ matrix:
 
     - name: Android ARM64 Debug
       os: linux
-      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android_arch=arm64v8" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/GodotNativeTools/godot-cpp/ndk-bundle"
+      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android_arch=arm64v8" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/godotengine/godot-cpp/ndk-bundle"
       addons:
         apt:
           sources:
