@@ -92,11 +92,11 @@ Variant Array::back() const {
 	return *(Variant *)&v;
 }
 
-int Array::find(const Variant &what, const int from) {
+int Array::find(const Variant &what, const int from) const {
 	return godot::api->godot_array_find(&_godot_array, (godot_variant *)&what, from);
 }
 
-int Array::find_last(const Variant &what) {
+int Array::find_last(const Variant &what) const {
 	return godot::api->godot_array_find_last(&_godot_array, (godot_variant *)&what);
 }
 
@@ -146,7 +146,7 @@ void Array::resize(const int size) {
 	godot::api->godot_array_resize(&_godot_array, size);
 }
 
-int Array::rfind(const Variant &what, const int from) {
+int Array::rfind(const Variant &what, const int from) const {
 	return godot::api->godot_array_rfind(&_godot_array, (godot_variant *)&what, from);
 }
 
