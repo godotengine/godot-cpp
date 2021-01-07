@@ -45,16 +45,18 @@ uint32_t Dictionary::hash() const {
 
 Array Dictionary::keys() const {
 	godot_array a = godot::api->godot_dictionary_keys(&_godot_dictionary);
-	return *(Array *)&a;
+	return Array(a);
 }
 
 Variant &Dictionary::operator[](const Variant &key) {
-	return *(Variant *)godot::api->godot_dictionary_operator_index(&_godot_dictionary, (godot_variant *)&key);
+	godot_variant *v = godot::api->godot_dictionary_operator_index(&_godot_dictionary, (godot_variant *)&key);
+	return *reinterpret_cast<Variant *>(v);
 }
 
 const Variant &Dictionary::operator[](const Variant &key) const {
 	// oops I did it again
-	return *(Variant *)godot::api->godot_dictionary_operator_index((godot_dictionary *)&_godot_dictionary, (godot_variant *)&key);
+	godot_variant *v = godot::api->godot_dictionary_operator_index((godot_dictionary *)&_godot_dictionary, (godot_variant *)&key);
+	return *reinterpret_cast<Variant *>(v);
 }
 
 int Dictionary::size() const {
@@ -63,12 +65,12 @@ int Dictionary::size() const {
 
 String Dictionary::to_json() const {
 	godot_string s = godot::api->godot_dictionary_to_json(&_godot_dictionary);
-	return *(String *)&s;
+	return String(s);
 }
 
 Array Dictionary::values() const {
 	godot_array a = godot::api->godot_dictionary_values(&_godot_dictionary);
-	return *(Array *)&a;
+	return Array(a);
 }
 
 Dictionary::~Dictionary() {

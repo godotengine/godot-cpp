@@ -29,7 +29,10 @@ public:
 class String {
 	godot_string _godot_string;
 
-	String(godot_string contents) :
+	friend class Dictionary;
+	friend class NodePath;
+	friend class Variant;
+	explicit inline String(godot_string contents) :
 			_godot_string(contents) {}
 
 public:

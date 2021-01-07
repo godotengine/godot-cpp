@@ -5,6 +5,7 @@
 
 namespace godot {
 
+// This is an internal base class used by the bindings. You should not need to access its members.
 class _Wrapped {
 public:
 	godot_object *_owner;

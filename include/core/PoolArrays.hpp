@@ -18,6 +18,12 @@ class Array;
 class PoolByteArray {
 	godot_pool_byte_array _godot_array;
 
+	friend class String;
+	friend class Variant;
+	inline explicit PoolByteArray(godot_pool_byte_array a) {
+		_godot_array = a;
+	}
+
 public:
 	class Read {
 
@@ -116,6 +122,11 @@ public:
 class PoolIntArray {
 	godot_pool_int_array _godot_array;
 
+	friend class Variant;
+	explicit inline PoolIntArray(godot_pool_int_array a) {
+		_godot_array = a;
+	}
+
 public:
 	class Read {
 		friend class PoolIntArray;
@@ -212,6 +223,11 @@ public:
 
 class PoolRealArray {
 	godot_pool_real_array _godot_array;
+
+	friend class Variant;
+	explicit inline PoolRealArray(godot_pool_real_array a) {
+		_godot_array = a;
+	}
 
 public:
 	class Read {
@@ -310,6 +326,12 @@ public:
 class PoolStringArray {
 	godot_pool_string_array _godot_array;
 
+	friend class String;
+	friend class Variant;
+	explicit inline PoolStringArray(godot_pool_string_array a) {
+		_godot_array = a;
+	}
+
 public:
 	class Read {
 		friend class PoolStringArray;
@@ -406,6 +428,11 @@ public:
 
 class PoolVector2Array {
 	godot_pool_vector2_array _godot_array;
+
+	friend class Variant;
+	explicit inline PoolVector2Array(godot_pool_vector2_array a) {
+		_godot_array = a;
+	}
 
 public:
 	class Read {
@@ -504,6 +531,11 @@ public:
 class PoolVector3Array {
 	godot_pool_vector3_array _godot_array;
 
+	friend class Variant;
+	explicit inline PoolVector3Array(godot_pool_vector3_array a) {
+		_godot_array = a;
+	}
+
 public:
 	class Read {
 		friend class PoolVector3Array;
@@ -600,6 +632,11 @@ public:
 
 class PoolColorArray {
 	godot_pool_color_array _godot_array;
+
+	friend class Variant;
+	explicit inline PoolColorArray(godot_pool_color_array a) {
+		_godot_array = a;
+	}
 
 public:
 	class Read {

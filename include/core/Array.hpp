@@ -58,6 +58,8 @@ class Array {
 	godot_array _godot_array;
 
 	friend class Variant;
+	friend class Dictionary;
+	friend class String;
 	inline explicit Array(const godot_array &other) {
 		_godot_array = other;
 	}
@@ -88,7 +90,7 @@ public:
 
 	Variant &operator[](const int idx);
 
-	Variant operator[](const int idx) const;
+	const Variant &operator[](const int idx) const;
 
 	void append(const Variant &v);
 

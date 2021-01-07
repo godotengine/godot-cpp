@@ -52,14 +52,16 @@ Array::Array(const PoolColorArray &a) {
 
 Variant &Array::operator[](const int idx) {
 	godot_variant *v = godot::api->godot_array_operator_index(&_godot_array, idx);
-	return *(Variant *)v;
+	// We assume it's ok to reinterpret because the value is a pointer whose data is already owned by the array,
+	// so can return a reference without constructing a Variant
+	return *reinterpret_cast<Variant *>(v);
 }
 
-Variant Array::operator[](const int idx) const {
+const Variant &Array::operator[](const int idx) const {
 	// Yes, I'm casting away the const... you can hate me now.
 	// since the result is
 	godot_variant *v = godot::api->godot_array_operator_index((godot_array *)&_godot_array, idx);
-	return *(Variant *)v;
+	return *reinterpret_cast<const Variant *>(v);
 }
 
 void Array::append(const Variant &v) {
@@ -84,12 +86,12 @@ void Array::erase(const Variant &v) {
 
 Variant Array::front() const {
 	godot_variant v = godot::api->godot_array_front(&_godot_array);
-	return *(Variant *)&v;
+	return Variant(v);
 }
 
 Variant Array::back() const {
 	godot_variant v = godot::api->godot_array_back(&_godot_array);
-	return *(Variant *)&v;
+	return Variant(v);
 }
 
 int Array::find(const Variant &what, const int from) {
@@ -118,12 +120,12 @@ void Array::invert() {
 
 Variant Array::pop_back() {
 	godot_variant v = godot::api->godot_array_pop_back(&_godot_array);
-	return *(Variant *)&v;
+	return Variant(v);
 }
 
 Variant Array::pop_front() {
 	godot_variant v = godot::api->godot_array_pop_front(&_godot_array);
-	return *(Variant *)&v;
+	return Variant(v);
 }
 
 void Array::push_back(const Variant &v) {
@@ -170,17 +172,17 @@ int Array::bsearch_custom(const Variant &value, const Object *obj,
 
 Array Array::duplicate(const bool deep) const {
 	godot_array arr = godot::core_1_1_api->godot_array_duplicate(&_godot_array, deep);
-	return *(Array *)&arr;
+	return Array(arr);
 }
 
 Variant Array::max() const {
 	godot_variant v = godot::core_1_1_api->godot_array_max(&_godot_array);
-	return *(Variant *)&v;
+	return Variant(v);
 }
 
 Variant Array::min() const {
 	godot_variant v = godot::core_1_1_api->godot_array_min(&_godot_array);
-	return *(Variant *)&v;
+	return Variant(v);
 }
 
 void Array::shuffle() {

@@ -195,8 +195,7 @@ bool String::begins_with_char_array(const char *p_char_array) const {
 
 PoolStringArray String::bigrams() const {
 	godot_array arr = godot::api->godot_string_bigrams(&_godot_string);
-
-	return *(Array *)&arr;
+	return Array(arr);
 }
 
 String String::c_escape() const {
@@ -329,7 +328,7 @@ bool String::matchn(String expr) const {
 
 PoolByteArray String::md5_buffer() const {
 	godot_pool_byte_array arr = godot::api->godot_string_md5_buffer(&_godot_string);
-	return *(PoolByteArray *)&arr;
+	return PoolByteArray(arr);
 }
 
 String String::md5_text() const {
@@ -382,8 +381,7 @@ String String::right(int position) const {
 
 PoolByteArray String::sha256_buffer() const {
 	godot_pool_byte_array arr = godot::api->godot_string_sha256_buffer(&_godot_string);
-
-	return *(PoolByteArray *)&arr;
+	return PoolByteArray(arr);
 }
 
 String String::sha256_text() const {
@@ -396,20 +394,19 @@ float String::similarity(String text) const {
 
 PoolStringArray String::split(String divisor, bool allow_empty) const {
 	godot_array arr = godot::api->godot_string_split(&_godot_string, &divisor._godot_string);
-
-	return *(Array *)&arr;
+	return Array(arr);
 }
 
 PoolIntArray String::split_ints(String divisor, bool allow_empty) const {
 	godot_array arr = godot::api->godot_string_split_floats(&_godot_string, &divisor._godot_string);
-
-	return *(Array *)&arr;
+	return Array(arr);
 }
 
 PoolRealArray String::split_floats(String divisor, bool allow_empty) const {
+	// TODO The GDNative API returns godot_array, when according to the doc, it should have been godot_pool_real_array
 	godot_array arr = godot::api->godot_string_split_floats(&_godot_string, &divisor._godot_string);
-
-	return *(Array *)&arr;
+	Array wrapped_array(arr);
+	return PoolRealArray(wrapped_array);
 }
 
 String String::strip_edges(bool left, bool right) const {
@@ -457,33 +454,29 @@ signed char String::naturalnocasecmp_to(String p_str) const {
 }
 
 String String::dedent() const {
-	String new_string;
-	new_string._godot_string = godot::core_1_1_api->godot_string_dedent(&_godot_string);
-	return new_string;
+	godot_string s = godot::core_1_1_api->godot_string_dedent(&_godot_string);
+	return String(s);
 }
 
-PoolStringArray String::rsplit(const String &divisor, const bool allow_empty,
-		const int maxsplit) const {
-	godot_pool_string_array arr = godot::core_1_1_api->godot_string_rsplit(&_godot_string, &divisor._godot_string, allow_empty, maxsplit);
-	return *(PoolStringArray *)&arr;
+PoolStringArray String::rsplit(const String &divisor, const bool allow_empty, const int maxsplit) const {
+	godot_pool_string_array arr =
+			godot::core_1_1_api->godot_string_rsplit(&_godot_string, &divisor._godot_string, allow_empty, maxsplit);
+	return PoolStringArray(arr);
 }
 
 String String::rstrip(const String &chars) const {
-	String new_string;
-	new_string._godot_string = godot::core_1_1_api->godot_string_rstrip(&_godot_string, &chars._godot_string);
-	return new_string;
+	godot_string s = godot::core_1_1_api->godot_string_rstrip(&_godot_string, &chars._godot_string);
+	return String(s);
 }
 
 String String::trim_prefix(const String &prefix) const {
-	String new_string;
-	new_string._godot_string = godot::core_1_1_api->godot_string_trim_prefix(&_godot_string, &prefix._godot_string);
-	return new_string;
+	godot_string s = godot::core_1_1_api->godot_string_trim_prefix(&_godot_string, &prefix._godot_string);
+	return String(s);
 }
 
 String String::trim_suffix(const String &suffix) const {
-	String new_string;
-	new_string._godot_string = godot::core_1_1_api->godot_string_trim_suffix(&_godot_string, &suffix._godot_string);
-	return new_string;
+	godot_string s = godot::core_1_1_api->godot_string_trim_suffix(&_godot_string, &suffix._godot_string);
+	return String(s);
 }
 
 } // namespace godot
