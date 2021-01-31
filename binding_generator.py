@@ -4,9 +4,16 @@ import json
 
 # comment.
 
+# Convenience function for using template get_node
+def correct_method_name(method_list):
+    for method in method_list:
+        if method["name"] == "get_node":
+            method["name"] = "get_node_internal"
+
+
 classes = []
 
-def generate_bindings(path):
+def generate_bindings(path, use_template_get_node):
 
     global classes
     classes = json.load(open(path))
@@ -16,10 +23,12 @@ def generate_bindings(path):
     for c in classes:
         # print c['name']
         used_classes = get_used_classes(c)
+        if use_template_get_node and c["name"] == "Node":
+            correct_method_name(c["methods"])
 
-        header = generate_class_header(used_classes, c)
+        header = generate_class_header(used_classes, c, use_template_get_node)
 
-        impl = generate_class_implementation(icalls, used_classes, c)
+        impl = generate_class_implementation(icalls, used_classes, c, use_template_get_node)
 
         header_file = open("include/gen/" + strip_name(c["name"]) + ".hpp", "w+")
         header_file.write(header)
@@ -46,11 +55,11 @@ def is_reference_type(t):
             return True
     return False
 
-def make_gdnative_type(t):
+def make_gdnative_type(t, ref_allowed):
     if is_enum(t):
         return remove_enum_prefix(t) + " "
     elif is_class_type(t):
-        if is_reference_type(t):
+        if is_reference_type(t) and ref_allowed:
             return "Ref<" + strip_name(t) + "> "
         else:
             return strip_name(t) + " *"
@@ -62,7 +71,7 @@ def make_gdnative_type(t):
         return strip_name(t) + " "
 
 
-def generate_class_header(used_classes, c):
+def generate_class_header(used_classes, c, use_template_get_node):
 
     source = []
     source.append("#ifndef GODOT_CPP_" + strip_name(c["name"]).upper() + "_HPP")
@@ -83,8 +92,10 @@ def generate_class_header(used_classes, c):
     # so don't include it here because it's not needed
     if class_name != "Object" and class_name != "Reference":
         source.append("#include <core/Ref.hpp>")
+        ref_allowed = True
     else:
         source.append("#include <core/TagDB.hpp>")
+        ref_allowed = False
 
 
     included = []
@@ -144,9 +155,13 @@ def generate_class_header(used_classes, c):
 
     source.append("\t};")
     source.append("\tstatic ___method_bindings ___mb;")
+    source.append("\tstatic void *_detail_class_tag;")
     source.append("")
     source.append("public:")
     source.append("\tstatic void ___init_method_bindings();")
+
+    # class id from core engine for casting
+    source.append("\tinline static size_t ___get_id() { return (size_t)_detail_class_tag; }")
 
     source.append("")
 
@@ -163,8 +178,11 @@ def generate_class_header(used_classes, c):
 
         # godot::api->godot_global_get_singleton((char *) \"" + strip_name(c["name"]) + "\");"
 
-    # ___get_class_name
+    # class name:
+    # Two versions needed needed because when the user implements a custom class,
+    # we want to override `___get_class_name` while `___get_godot_class_name` can keep returning the base name
     source.append("\tstatic inline const char *___get_class_name() { return (const char *) \"" + strip_name(c["name"]) + "\"; }")
+    source.append("\tstatic inline const char *___get_godot_class_name() { return (const char *) \"" + strip_name(c["name"]) + "\"; }")
 
     source.append("\tstatic inline Object *___get_from_variant(Variant a) { godot_object *o = (godot_object*) a; return (o) ? (Object *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, o) : nullptr; }")
 
@@ -201,12 +219,11 @@ def generate_class_header(used_classes, c):
         source.append("")
 
     for method in c["methods"]:
-
         method_signature = ""
 
         # TODO decide what to do about virtual methods
         # method_signature += "virtual " if method["is_virtual"] else ""
-        method_signature += make_gdnative_type(method["return_type"])
+        method_signature += make_gdnative_type(method["return_type"], ref_allowed)
         method_name = escape_cpp(method["name"])
         method_signature +=  method_name + "("
 
@@ -215,7 +232,7 @@ def generate_class_header(used_classes, c):
         method_arguments = ""
 
         for i, argument in enumerate(method["arguments"]):
-            method_signature += "const " + make_gdnative_type(argument["type"])
+            method_signature += "const " + make_gdnative_type(argument["type"], ref_allowed)
             argument_name = escape_cpp(argument["name"])
             method_signature += argument_name
             method_arguments += argument_name
@@ -279,10 +296,26 @@ def generate_class_header(used_classes, c):
         source.append("\t" + method_signature + ";")
 
     source.append(vararg_templates)
-    source.append("};")
-    source.append("")
 
+    if use_template_get_node and class_name == "Node":
+        # Extra definition for template get_node that calls the renamed get_node_internal; has a default template parameter for backwards compatibility.
+        source.append("\ttemplate <class T = Node>")
+        source.append("\tT *get_node(const NodePath path) const {")
+        source.append("\t\treturn Object::cast_to<T>(get_node_internal(path));")
+        source.append("\t}")
 
+        source.append("};")
+        source.append("")
+
+        # ...And a specialized version so we don't unnecessarily cast when using the default.
+        source.append("template <>")
+        source.append("inline Node *Node::get_node<Node>(const NodePath path) const {")
+        source.append("\treturn get_node_internal(path);")
+        source.append("}")
+        source.append("")
+    else:
+        source.append("};")
+        source.append("")
 
     source.append("}")
     source.append("")
@@ -296,8 +329,11 @@ def generate_class_header(used_classes, c):
 
 
 
-def generate_class_implementation(icalls, used_classes, c):
+def generate_class_implementation(icalls, used_classes, c, use_template_get_node):
     class_name = strip_name(c["name"])
+
+    ref_allowed = class_name != "Object" and class_name != "Reference"
+
     source = []
     source.append("#include \"" + class_name + ".hpp\"")
     source.append("")
@@ -350,10 +386,18 @@ def generate_class_implementation(icalls, used_classes, c):
     source.append(class_name + "::___method_bindings " + class_name + "::___mb = {};")
     source.append("")
 
+    source.append("void *" + class_name + "::_detail_class_tag = nullptr;")
+    source.append("")
+
     source.append("void " + class_name + "::___init_method_bindings() {")
 
     for method in c["methods"]:
-        source.append("\t___mb.mb_" + method["name"] + " = godot::api->godot_method_bind_get_method(\"" + c["name"] + "\", \"" + method["name"] + "\");")
+        source.append("\t___mb.mb_" + method["name"] + " = godot::api->godot_method_bind_get_method(\"" + c["name"] + "\", \"" + ("get_node" if use_template_get_node and method["name"] == "get_node_internal" else method["name"]) + "\");")
+
+    source.append("\tgodot_string_name class_name;")
+    source.append("\tgodot::api->godot_string_name_new_data(&class_name, \"" + c["name"] + "\");")
+    source.append("\t_detail_class_tag = godot::core_1_2_api->godot_get_class_tag(&class_name);")
+    source.append("\tgodot::api->godot_string_name_destroy(&class_name);")
 
     source.append("}")
     source.append("")
@@ -367,12 +411,11 @@ def generate_class_implementation(icalls, used_classes, c):
     for method in c["methods"]:
         method_signature = ""
 
-
-        method_signature += make_gdnative_type(method["return_type"])
+        method_signature += make_gdnative_type(method["return_type"], ref_allowed)
         method_signature += strip_name(c["name"]) + "::" + escape_cpp(method["name"]) + "("
 
         for i, argument in enumerate(method["arguments"]):
-            method_signature += "const " + make_gdnative_type(argument["type"])
+            method_signature += "const " + make_gdnative_type(argument["type"], ref_allowed)
             method_signature += escape_cpp(argument["name"])
 
             if i != len(method["arguments"]) - 1:
@@ -396,13 +439,14 @@ def generate_class_implementation(icalls, used_classes, c):
             continue
 
         return_statement = ""
+        return_type_is_ref = is_reference_type(method["return_type"]) and ref_allowed
 
         if method["return_type"] != "void":
             if is_class_type(method["return_type"]):
                 if is_enum(method["return_type"]):
                     return_statement += "return (" + remove_enum_prefix(method["return_type"]) + ") "
-                elif is_reference_type(method["return_type"]):
-                    return_statement += "return Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor(";
+                elif return_type_is_ref:
+                    return_statement += "return Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor("
                 else:
                     return_statement += "return " + ("(" + strip_name(method["return_type"]) + " *) " if is_class_type(method["return_type"]) else "")
             else:
@@ -476,14 +520,13 @@ def generate_class_implementation(icalls, used_classes, c):
             if method["return_type"] != "void":
                 cast = ""
                 if is_class_type(method["return_type"]):
-                    if is_reference_type(method["return_type"]):
+                    if return_type_is_ref:
                         cast += "Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor(__result);"
                     else:
                         cast += "(" + strip_name(method["return_type"]) + " *) " + strip_name(method["return_type"] + "::___get_from_variant(") + "__result);"
                 else:
                     cast += "__result;"
                 source.append("\treturn " + cast)
-
 
 
         else:
@@ -503,11 +546,15 @@ def generate_class_implementation(icalls, used_classes, c):
             return_statement += icall_name + "(___mb.mb_" + method["name"] + ", (const Object *) " + core_object_name
 
             for arg in method["arguments"]:
-                return_statement += ", " + escape_cpp(arg["name"]) + (".ptr()" if is_reference_type(arg["type"]) else "")
+                arg_is_ref = is_reference_type(arg["type"]) and ref_allowed
+                return_statement += ", " + escape_cpp(arg["name"]) + (".ptr()" if arg_is_ref else "")
 
             return_statement += ")"
 
-            source.append("\t" + return_statement + (")" if is_reference_type(method["return_type"]) else "") + ";")
+            if return_type_is_ref:
+                return_statement += ")"
+
+            source.append("\t" + return_statement + ";")
 
         source.append("}")
         source.append("")
@@ -672,8 +719,6 @@ def generate_init_method_bindings(classes):
     source.append("{")
 
     for c in classes:
-        class_name = strip_name(c["name"])
-
         source.append("\t" + strip_name(c["name"]) + "::___init_method_bindings();")
 
     source.append("}")
@@ -709,7 +754,6 @@ def get_icall_name(sig):
 
 
 
-
 def get_used_classes(c):
     classes = []
     for method in c["methods"]:
@@ -720,9 +764,6 @@ def get_used_classes(c):
             if is_class_type(arg["type"]) and not (arg["type"] in classes):
                 classes.append(arg["type"])
     return classes
-
-
-
 
 
 

@@ -67,16 +67,11 @@ void Vector3::rotate(const Vector3 &p_axis, real_t p_phi) {
 	*this = Basis(p_axis, p_phi).xform(*this);
 }
 
-// this is ugly as well, but hey, I'm a simple man
-#define _ugly_stepify(val, step) (step != 0 ? ::floor(val / step + 0.5) * step : val)
-
 void Vector3::snap(real_t p_val) {
-	x = _ugly_stepify(x, p_val);
-	y = _ugly_stepify(y, p_val);
-	z = _ugly_stepify(z, p_val);
+	x = Math::stepify(x, p_val);
+	y = Math::stepify(y, p_val);
+	z = Math::stepify(z, p_val);
 }
-
-#undef _ugly_stepify
 
 Vector3::operator String() const {
 	return String::num(x) + ", " + String::num(y) + ", " + String::num(z);

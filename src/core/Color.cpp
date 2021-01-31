@@ -527,4 +527,122 @@ bool Color::operator<(const Color &p_color) const {
 		return r < p_color.r;
 }
 
+Color Color::operator+(const Color &p_color) const {
+
+	return Color(
+			r + p_color.r,
+			g + p_color.g,
+			b + p_color.b,
+			a + p_color.a);
+}
+
+void Color::operator+=(const Color &p_color) {
+
+	r = r + p_color.r;
+	g = g + p_color.g;
+	b = b + p_color.b;
+	a = a + p_color.a;
+}
+
+Color Color::operator-(const Color &p_color) const {
+
+	return Color(
+			r - p_color.r,
+			g - p_color.g,
+			b - p_color.b,
+			a - p_color.a);
+}
+
+void Color::operator-=(const Color &p_color) {
+
+	r = r - p_color.r;
+	g = g - p_color.g;
+	b = b - p_color.b;
+	a = a - p_color.a;
+}
+
+Color Color::operator*(const Color &p_color) const {
+
+	return Color(
+			r * p_color.r,
+			g * p_color.g,
+			b * p_color.b,
+			a * p_color.a);
+}
+
+Color Color::operator*(const real_t &rvalue) const {
+
+	return Color(
+			r * rvalue,
+			g * rvalue,
+			b * rvalue,
+			a * rvalue);
+}
+
+void Color::operator*=(const Color &p_color) {
+
+	r = r * p_color.r;
+	g = g * p_color.g;
+	b = b * p_color.b;
+	a = a * p_color.a;
+}
+
+void Color::operator*=(const real_t &rvalue) {
+
+	r = r * rvalue;
+	g = g * rvalue;
+	b = b * rvalue;
+	a = a * rvalue;
+}
+
+Color Color::operator/(const Color &p_color) const {
+
+	return Color(
+			r / p_color.r,
+			g / p_color.g,
+			b / p_color.b,
+			a / p_color.a);
+}
+
+Color Color::operator/(const real_t &rvalue) const {
+
+	return Color(
+			r / rvalue,
+			g / rvalue,
+			b / rvalue,
+			a / rvalue);
+}
+
+void Color::operator/=(const Color &p_color) {
+
+	r = r / p_color.r;
+	g = g / p_color.g;
+	b = b / p_color.b;
+	a = a / p_color.a;
+}
+
+void Color::operator/=(const real_t &rvalue) {
+
+	if (rvalue == 0) {
+		r = 1.0;
+		g = 1.0;
+		b = 1.0;
+		a = 1.0;
+	} else {
+		r = r / rvalue;
+		g = g / rvalue;
+		b = b / rvalue;
+		a = a / rvalue;
+	}
+}
+
+Color Color::operator-() const {
+
+	return Color(
+			1.0 - r,
+			1.0 - g,
+			1.0 - b,
+			1.0 - a);
+}
+
 } // namespace godot
