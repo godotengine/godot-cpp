@@ -9,6 +9,11 @@
 
 namespace godot {
 
+const Transform Transform::IDENTITY = Transform();
+const Transform Transform::FLIP_X = Transform(-1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0);
+const Transform Transform::FLIP_Y = Transform(1, 0, 0, 0, -1, 0, 0, 0, 1, 0, 0, 0);
+const Transform Transform::FLIP_Z = Transform(1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0);
+
 Transform Transform::inverse_xform(const Transform &t) const {
 
 	Vector3 v = t.origin - origin;

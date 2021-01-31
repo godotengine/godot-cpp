@@ -12,6 +12,21 @@ namespace godot {
 class String;
 
 struct Vector2 {
+	enum Axis {
+		AXIS_X = 0,
+		AXIS_Y,
+		AXIS_COUNT
+	};
+
+	static const Vector2 ZERO;
+	static const Vector2 ONE;
+	static const Vector2 INF;
+
+	// Coordinate system of the 2D engine
+	static const Vector2 LEFT;
+	static const Vector2 RIGHT;
+	static const Vector2 UP;
+	static const Vector2 DOWN;
 
 	union {
 		real_t x;

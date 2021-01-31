@@ -392,17 +392,20 @@ float String::similarity(String text) const {
 	return godot::api->godot_string_similarity(&_godot_string, &text._godot_string);
 }
 
-PoolStringArray String::split(String divisor, bool allow_empty) const {
+// TODO Suport allow_empty
+PoolStringArray String::split(String divisor, bool /*allow_empty*/) const {
 	godot_array arr = godot::api->godot_string_split(&_godot_string, &divisor._godot_string);
 	return Array(arr);
 }
 
-PoolIntArray String::split_ints(String divisor, bool allow_empty) const {
+// TODO Suport allow_empty
+PoolIntArray String::split_ints(String divisor, bool /*allow_empty*/) const {
 	godot_array arr = godot::api->godot_string_split_floats(&_godot_string, &divisor._godot_string);
 	return Array(arr);
 }
 
-PoolRealArray String::split_floats(String divisor, bool allow_empty) const {
+// TODO Suport allow_empty
+PoolRealArray String::split_floats(String divisor, bool /*allow_empty*/) const {
 	// TODO The GDNative API returns godot_array, when according to the doc, it should have been godot_pool_real_array
 	godot_array arr = godot::api->godot_string_split_floats(&_godot_string, &divisor._godot_string);
 	Array wrapped_array(arr);

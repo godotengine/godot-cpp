@@ -292,8 +292,8 @@ platform-independent manner.
 Once your GDNative library is compiled and referenced in a `.gdns` file, you can use it in GDScript or C#. Here's an example with GDScript:
 
 ```gdscript
-var simpleclass = load("res://simpleclass.gdns").new();
-simpleclass.method("Test argument");
+var simpleclass = load("res://simpleclass.gdns").new()
+simpleclass.method("Test argument")
 ```
 
 ### Using Godot classes in C++

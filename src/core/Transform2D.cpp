@@ -7,6 +7,10 @@
 
 namespace godot {
 
+const Transform2D Transform2D::IDENTITY;
+const Transform2D Transform2D::FLIP_X = Transform2D(-1, 0, 0, 1, 0, 0);
+const Transform2D Transform2D::FLIP_Y = Transform2D(1, 0, 0, -1, 0, 0);
+
 Transform2D::Transform2D(real_t xx, real_t xy, real_t yx, real_t yy, real_t ox, real_t oy) {
 
 	elements[0][0] = xx;

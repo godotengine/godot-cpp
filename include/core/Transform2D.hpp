@@ -10,6 +10,10 @@ typedef Vector2 Size2;
 struct Rect2;
 
 struct Transform2D {
+	static const Transform2D IDENTITY;
+	static const Transform2D FLIP_X;
+	static const Transform2D FLIP_Y;
+
 	// Warning #1: basis of Transform2D is stored differently from Basis. In terms of elements array, the basis matrix looks like "on paper":
 	// M = (elements[0][0] elements[1][0])
 	//     (elements[0][1] elements[1][1])

@@ -6,6 +6,15 @@
 
 namespace godot {
 
+const Vector2 Vector2::ZERO;
+const Vector2 Vector2::ONE;
+const Vector2 Vector2::INF;
+
+const Vector2 Vector2::LEFT = Vector2(-1, 0);
+const Vector2 Vector2::RIGHT = Vector2(1, 0);
+const Vector2 Vector2::UP = Vector2(0, -1);
+const Vector2 Vector2::DOWN = Vector2(0, 1);
+
 bool Vector2::operator==(const Vector2 &p_vec2) const {
 	return x == p_vec2.x && y == p_vec2.y;
 }

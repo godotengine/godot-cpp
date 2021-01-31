@@ -10,6 +10,11 @@ namespace godot {
 
 class Transform {
 public:
+	static const Transform IDENTITY;
+	static const Transform FLIP_X;
+	static const Transform FLIP_Y;
+	static const Transform FLIP_Z;
+
 	Basis basis;
 	Vector3 origin;
 
