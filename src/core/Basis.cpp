@@ -7,6 +7,11 @@
 
 namespace godot {
 
+const Basis Basis::IDENTITY = Basis();
+const Basis Basis::FLIP_X = Basis(-1, 0, 0, 0, 1, 0, 0, 0, 1);
+const Basis Basis::FLIP_Y = Basis(1, 0, 0, 0, -1, 0, 0, 0, 1);
+const Basis Basis::FLIP_Z = Basis(1, 0, 0, 0, 1, 0, 0, 0, -1);
+
 Basis::Basis(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2) {
 	elements[0] = row0;
 	elements[1] = row1;

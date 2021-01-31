@@ -11,6 +11,8 @@ namespace godot {
 
 class Quat {
 public:
+	static const Quat IDENTITY;
+
 	real_t x, y, z, w;
 
 	real_t length_squared() const;
