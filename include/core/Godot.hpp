@@ -210,14 +210,17 @@ void register_tool_class() {
 typedef godot_variant (*__godot_wrapper_method)(godot_object *, void *, void *, int, godot_variant **);
 
 template <class T, class R, class... args>
-const char *___get_method_class_name(R (T::*/*p*/)(args... a)) {
+const char *___get_method_class_name(R (T::*p)(args... a)) {
 	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
+	(void)p; // To avoid "unused parameter" warnings. `p` is required for template matching.
 	return T::___get_class_name();
 }
 
+// This second version is also required to match constant functions
 template <class T, class R, class... args>
-const char *___get_method_class_name(R (T::*/*p*/)(args... a) const) {
+const char *___get_method_class_name(R (T::*p)(args... a) const) {
 	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
+	(void)p; // To avoid "unused parameter" warnings. `p` is required for template matching.
 	return T::___get_class_name();
 }
 
