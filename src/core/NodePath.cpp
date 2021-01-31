@@ -27,8 +27,7 @@ NodePath::NodePath(const char *contents) {
 
 String NodePath::get_name(const int idx) const {
 	godot_string str = godot::api->godot_node_path_get_name(&_node_path, idx);
-
-	return *(String *)&str;
+	return String(str);
 }
 
 int NodePath::get_name_count() const {
@@ -37,7 +36,7 @@ int NodePath::get_name_count() const {
 
 String NodePath::get_subname(const int idx) const {
 	godot_string str = godot::api->godot_node_path_get_subname(&_node_path, idx);
-	return *(String *)&str;
+	return String(str);
 }
 
 int NodePath::get_subname_count() const {
@@ -54,17 +53,16 @@ bool NodePath::is_empty() const {
 
 NodePath NodePath::get_as_property_path() const {
 	godot_node_path path = godot::core_1_1_api->godot_node_path_get_as_property_path(&_node_path);
-	return *(NodePath *)&path;
+	return NodePath(path);
 }
 String NodePath::get_concatenated_subnames() const {
 	godot_string str = godot::api->godot_node_path_get_concatenated_subnames(&_node_path);
-	return *(String *)&str;
+	return String(str);
 }
 
 NodePath::operator String() const {
 	godot_string str = godot::api->godot_node_path_as_string(&_node_path);
-
-	return *(String *)&str;
+	return String(str);
 }
 
 bool NodePath::operator==(const NodePath &other) {
