@@ -70,9 +70,12 @@ enum class Error {
 
 typedef float real_t;
 
-#define CMP_EPSILON 0.00001
+// This epsilon should match the one used by Godot for consistency.
+// Using `f` when `real_t` is float.
+#define CMP_EPSILON 0.00001f
 #define CMP_EPSILON2 (CMP_EPSILON * CMP_EPSILON)
-#define Math_PI 3.14159265358979323846
+
+#define Math_PI 3.1415926535897932384626433833
 #define Math_TAU 6.2831853071795864769252867666
 
 #define _PLANE_EQ_DOT_EPSILON 0.999
