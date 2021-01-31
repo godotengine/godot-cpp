@@ -202,12 +202,6 @@ def generate_class_header(used_classes, c, use_template_get_node):
         if name not in enum_values:
             source.append("\tconst static int " + name + " = " + str(c["constants"][name]) + ";")
 
-
-    if c["instanciable"]:
-        source.append("")
-        source.append("")
-        source.append("\tstatic " + class_name + " *_new();")
-
     source.append("\n\t// methods")
 
 
@@ -294,6 +288,16 @@ def generate_class_header(used_classes, c, use_template_get_node):
 
 
         source.append("\t" + method_signature + ";")
+
+    if c["instanciable"]:
+        source.append("")
+        source.append("\t// object lifetime management")
+        source.append("")
+        source.append("\tstatic " + class_name + " *_new();")
+        source.append("\tinline static void *operator new(size_t _size) { return (void *) " + class_name + "::_new(); }")
+        source.append("\tinline static void operator delete(void *obj) { ((" + class_name + " *)obj)->free(); }")
+        source.append("")
+        source.append("")
 
     source.append(vararg_templates)
 

@@ -112,6 +112,8 @@ public:                                                                         
 	inline static Name *_new() {                                                             \
 		return godot::detail::create_custom_class_instance<Name>();                          \
 	}                                                                                        \
+	inline static void *operator new(size_t _size) { return (void *)Name::_new(); }          \
+	inline static void operator delete(void *obj) { ((Name *)obj)->free(); }                 \
 	inline static size_t ___get_id() { return typeid(Name).hash_code(); }                    \
 	inline static size_t ___get_base_id() { return Base::___get_id(); }                      \
 	inline static const char *___get_base_class_name() { return Base::___get_class_name(); } \
@@ -150,7 +152,8 @@ struct _ArgCast<Variant> {
 
 template <class T>
 void *_godot_class_instance_func(godot_object *p, void * /*method_data*/) {
-	T *d = new T();
+	void *buf = godot::api->godot_alloc(sizeof(T));
+	T *d = new (buf) T();
 	d->_owner = p;
 	d->_type_tag = typeid(T).hash_code();
 	d->_init();
@@ -160,7 +163,8 @@ void *_godot_class_instance_func(godot_object *p, void * /*method_data*/) {
 template <class T>
 void _godot_class_destroy_func(godot_object * /*p*/, void * /*method_data*/, void *data) {
 	T *d = (T *)data;
-	delete d;
+	d.~T();
+	godot::api->godot_free(data);
 }
 
 template <class T>
