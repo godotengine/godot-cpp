@@ -5,6 +5,7 @@
 #include "Plane.hpp"
 #include "Rect2.hpp"
 #include "Transform.hpp"
+#include "Math.hpp"
 
 #include <vector>
 
@@ -41,12 +42,6 @@ struct CameraMatrix {
 
 		return rad2deg(atan(p_aspect * tan(deg2rad(p_fovx) * 0.5)) * 2.0);
 	}
-
-	static inline double deg2rad(double p_y) { return p_y * Math_PI / 180.0; }
-	static inline float deg2rad(float p_y) { return p_y * Math_PI / 180.0; }
-
-	static inline double rad2deg(double p_y) { return p_y * 180.0 / Math_PI; }
-	static inline float rad2deg(float p_y) { return p_y * 180.0 / Math_PI; }
 
 	static inline double absd(double g) {
 
