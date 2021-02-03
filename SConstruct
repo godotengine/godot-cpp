@@ -145,6 +145,11 @@ opts.Add(EnumVariable(
     'arm64',
     ['armv7', 'arm64', 'x86_64']
 ))
+opts.Add(BoolVariable(
+    'ios_simulator',
+    'Target iOS Simulator',
+    False
+))
 opts.Add(
     'IPHONEPATH',
     'Path to iPhone toolchain',
@@ -227,9 +232,10 @@ elif env['platform'] == 'osx':
         env.Append(CCFLAGS=['-O3'])
 
 elif env['platform'] == 'ios':
-    if env['ios_arch'] == 'x86_64':
+    if env['ios_simulator']:
         sdk_name = 'iphonesimulator'
         env.Append(CCFLAGS=['-mios-simulator-version-min=10.0'])
+        env['LIBSUFFIX'] = ".simulator" + env['LIBSUFFIX']
     else:
         sdk_name = 'iphoneos'
         env.Append(CCFLAGS=['-miphoneos-version-min=10.0'])
@@ -284,8 +290,13 @@ elif env['platform'] == 'windows':
             env['AR'] = "i686-w64-mingw32-ar"
             env['RANLIB'] = "i686-w64-mingw32-ranlib"
             env['LINK'] = "i686-w64-mingw32-g++"
+    
     elif host_platform == 'windows' and env['use_mingw']:
-        env = env.Clone(tools=['mingw'])
+        # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
+        env = Environment(ENV = os.environ, tools=["mingw"])
+        opts.Update(env)
+        #env = env.Clone(tools=['mingw'])
+
         env["SPAWN"] = mySpawn
 
     # Native or cross-compilation using MinGW
@@ -301,7 +312,11 @@ elif env['platform'] == 'windows':
 
 elif env['platform'] == 'android':
     if host_platform == 'windows':
-        env = env.Clone(tools=['mingw'])
+        # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
+        env = Environment(ENV = os.environ, tools=["mingw"])
+        opts.Update(env)
+        #env = env.Clone(tools=['mingw'])
+
         env["SPAWN"] = mySpawn
 
     # Verify NDK root

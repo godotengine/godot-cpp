@@ -3,7 +3,6 @@
 
 #include "OS.hpp"
 
-
 namespace godot {
 
 class FunctionProfiling {
@@ -23,7 +22,7 @@ public:
 	}
 };
 
-}
+} // namespace godot
 
 #ifdef DEBUG_ENABLED
 #define GODOT_PROFILING_FUNCTION FunctionProfiling __function_profiling(__FUNCTION__, __LINE__);
