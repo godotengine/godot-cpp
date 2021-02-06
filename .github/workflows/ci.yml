@@ -35,7 +35,7 @@ jobs:
 
       - name: Build test GDNative library
         run: |
-          scons target=release platform=linux bits=64 -j $(nproc) -C test;
+          scons target=release platform=linux bits=64 -j $(nproc) -C test
 
   windows-msvc:
     name: Build (Windows, MSVC)
@@ -131,7 +131,7 @@ jobs:
 
       - name: Build test GDNative library
         run: |
-          scons target=release platform=osx bits=64 -j $(sysctl -n hw.logicalcpu) -C test;
+          scons target=release platform=osx bits=64 -j $(sysctl -n hw.logicalcpu) -C test
 
   static-checks:
     name: Static Checks (clang-format)
