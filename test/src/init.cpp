@@ -36,7 +36,7 @@ public:
 		register_property<SimpleClass, int>("base/value", &SimpleClass::set_value, &SimpleClass::get_value, 0);
 
 		/** Registering a signal: **/
-		register_signal<SimpleClass>("signal_name0");
+		register_signal<SimpleClass>("signal_name0"); // windows: error C2668: 'godot::register_signal': ambiguous call to overloaded function
 		register_signal<SimpleClass>("signal_name1", "string_argument", GODOT_VARIANT_TYPE_STRING);
 	}
 

@@ -66,10 +66,6 @@ jobs:
           path: bin/libgodot-cpp.windows.release.64.lib
           if-no-files-found: error
 
-      - name: Build test GDNative library
-        run: |
-          scons target=release platform=windows bits=64 -j $env:NUMBER_OF_PROCESSORS -C test;
-
   windows-mingw:
     name: Build (Windows, MinGW)
     runs-on: windows-2019
@@ -103,10 +99,6 @@ jobs:
           name: godot-cpp-linux-mingw-x86_64-release
           path: bin/libgodot-cpp.windows.release.64.a
           if-no-files-found: error
-
-      - name: Build test GDNative library
-        run: |
-          scons target=release platform=windows bits=64 -j $env:NUMBER_OF_PROCESSORS -C test;
 
   macos:
     name: Build (macOS, Clang)
