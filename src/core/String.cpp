@@ -398,7 +398,7 @@ PoolStringArray String::split(String divisor, bool /*allow_empty*/) const {
 	return Array(arr);
 }
 
-PoolIntArray String::split_ints(String divisor) const {
+PoolIntArray String::split_ints(String divisor, bool allow_empty) const {
 	godot_array arr;
 	if (allow_empty)
 		arr = godot::api->godot_string_split_ints_allows_empty(&_godot_string, &divisor._godot_string);
@@ -407,7 +407,7 @@ PoolIntArray String::split_ints(String divisor) const {
 	return Array(arr);
 }
 
-PoolRealArray String::split_floats(String divisor) const {
+PoolRealArray String::split_floats(String divisor, bool allow_empty) const {
 	godot_array arr;
 	// TODO The GDNative API returns godot_array, when according to the doc, it should have been godot_pool_real_array
 	if (allow_empty)
