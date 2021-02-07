@@ -125,8 +125,8 @@ public:
 	String sha256_text() const;
 	float similarity(String text) const;
 	PoolStringArray split(String divisor, bool allow_empty = true) const;
-	PoolIntArray split_ints(String divisor) const;
-	PoolRealArray split_floats(String divisor) const;
+	PoolIntArray split_ints(String divisor, bool allow_empty = true) const;
+	PoolRealArray split_floats(String divisor, bool allow_empty = true) const;
 	String strip_edges(bool left = true, bool right = true) const;
 	String substr(int from, int len) const;
 	float to_float() const;
