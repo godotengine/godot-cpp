@@ -58,6 +58,8 @@ def add_sources(sources, dir, extension):
 # This is used if no `platform` argument is passed
 if sys.platform.startswith('linux'):
     host_platform = 'linux'
+elif sys.platform.startswith('freebsd'):
+    host_platform = 'freebsd'
 elif sys.platform == 'darwin':
     host_platform = 'osx'
 elif sys.platform == 'win32' or sys.platform == 'msys':
@@ -84,7 +86,7 @@ opts.Add(EnumVariable(
     'platform',
     'Target platform',
     host_platform,
-    allowed_values=('linux', 'osx', 'windows', 'android', 'ios'),
+    allowed_values=('linux', 'freebsd', 'osx', 'windows', 'android', 'ios'),
     ignorecase=2
 ))
 opts.Add(EnumVariable(
@@ -95,7 +97,7 @@ opts.Add(EnumVariable(
 ))
 opts.Add(BoolVariable(
     'use_llvm',
-    'Use the LLVM compiler - only effective when targeting Linux',
+    'Use the LLVM compiler - only effective when targeting Linux or FreeBSD',
     False
 ))
 opts.Add(BoolVariable(
@@ -185,7 +187,7 @@ if host_platform == 'windows' and env['platform'] != 'android':
 
     opts.Update(env)
 
-if env['platform'] == 'linux':
+if env['platform'] == 'linux' or env['platform'] == 'freebsd':
     if env['use_llvm']:
         env['CXX'] = 'clang++'
 
@@ -278,7 +280,7 @@ elif env['platform'] == 'windows':
         elif env['target'] == 'release':
             env.Append(CCFLAGS=['/O2', '/EHsc', '/DNDEBUG', '/MD'])
 
-    elif host_platform == 'linux' or host_platform == 'osx':
+    elif host_platform == 'linux' or host_platform == 'freebsd' or host_platform == 'osx':
         # Cross-compilation using MinGW
         if env['bits'] == '64':
             env['CXX'] = 'x86_64-w64-mingw32-g++'
@@ -300,7 +302,7 @@ elif env['platform'] == 'windows':
         env["SPAWN"] = mySpawn
 
     # Native or cross-compilation using MinGW
-    if host_platform == 'linux' or host_platform == 'osx' or env['use_mingw']:
+    if host_platform == 'linux' or host_platform == 'freebsd' or host_platform == 'osx' or env['use_mingw']:
         # These options are for a release build even using target=debug
         env.Append(CCFLAGS=['-O3', '-std=c++14', '-Wwrite-strings'])
         env.Append(LINKFLAGS=[
