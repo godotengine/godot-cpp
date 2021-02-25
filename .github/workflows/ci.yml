@@ -38,6 +38,41 @@ jobs:
           path: bin/libgodot-cpp.linux.release.64.a
           if-no-files-found: error
 
+  linux-cmake:
+    name: Build (Linux, GCC, CMake)
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          submodules: recursive
+
+      - name: Set up Python (for SCons)
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.1'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qqq build-essential pkg-config cmake
+          python -m pip install scons
+          curl -LO https://downloads.tuxfamily.org/godotengine/3.2.3/Godot_v3.2.3-stable_linux_server.64.zip
+          unzip Godot_v3.2.3-stable_linux_server.64.zip
+
+      - name: Build godot-cpp
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release .
+          make -j $(nproc)
+
+      - name: Build test GDNative library
+        run: |
+          scons target=release platform=linux bits=64 -j $(nproc) -C test
+
+      - name: Run test GDNative library
+        run: |
+          ./Godot_v3.2.3-stable_linux_server.64 --path test -s script.gd
+
   windows-msvc:
     name: Build (Windows, MSVC)
     runs-on: windows-2019
