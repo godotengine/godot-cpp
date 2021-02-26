@@ -30,7 +30,7 @@ opts.Add(PathVariable('target_path', 'The path where the lib is installed.', 'bi
 opts.Add(PathVariable('target_name', 'The library name.', 'libgdexample', PathVariable.PathAccept))
 
 # Local dependency paths, adapt them to your setup
-godot_headers_path = "../godot_headers/"
+godot_headers_path = "../godot-headers/"
 cpp_bindings_path = "../"
 cpp_library = "libgodot-cpp"
 

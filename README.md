@@ -6,8 +6,8 @@ The instructions below feature the new NativeScript 1.1 class structure and will
 
 Version | Branch
 --- | ---
-**Godot 3.0 Nativescript 1.0** | [3.0](https://github.com/GodotNativeTools/godot-cpp/tree/3.0)
-**Godot 3.1 Nativescript 1.0** | [nativescript-1.0](https://github.com/GodotNativeTools/godot-cpp/tree/nativescript-1.0)
+**Godot 3.0 Nativescript 1.0** | [3.0](https://github.com/godotengine/godot-cpp/tree/3.0)
+**Godot 3.1 Nativescript 1.0** | [nativescript-1.0](https://github.com/godotengine/godot-cpp/tree/nativescript-1.0)
 
 ## Table of contents
 
@@ -36,27 +36,27 @@ so formatting is done before your changes are submitted.
 We recommend using Git for managing your project. The instructions below assume
 you're using Git. Alternatively, you can download the source code directly from
 GitHub. In this case, you need to download both
-[godot-cpp](https://github.com/GodotNativeTools/godot-cpp) and
-[godot_headers](https://github.com/GodotNativeTools/godot_headers).
+[godot-cpp](https://github.com/godotengine/godot-cpp) and
+[godot-headers](https://github.com/godotengine/godot-headers).
 
 ```bash
 mkdir SimpleLibrary
 cd SimpleLibrary
 mkdir bin
 mkdir src
-git clone --recursive https://github.com/GodotNativeTools/godot-cpp
+git clone --recursive https://github.com/godotengine/godot-cpp
 ```
 
 If you wish to use a specific branch, add the -b option to the clone command:
 
 ```bash
-git clone --recursive https://github.com/GodotNativeTools/godot-cpp -b 3.0
+git clone --recursive https://github.com/godotengine/godot-cpp -b 3.0
 ```
 
 If your project is an existing repository, use a Git submodule instead:
 
 ```bash
-git submodule add https://github.com/GodotNativeTools/godot-cpp
+git submodule add https://github.com/godotengine/godot-cpp
 git submodule update --init --recursive
 ```
 
@@ -65,7 +65,7 @@ Right now, our directory structure should look like this:
 ```text
 SimpleLibrary/
 ├─godot-cpp/
-| └─godot_headers/
+| └─godot-headers/
 ├─bin/
 └─src/
 ```
@@ -77,7 +77,7 @@ Godot core. This metadata is required to generate the C++ binding classes for
 use in GDNative modules.
 
 This file is supplied with our
-[godot_headers](https://github.com/GodotNativeTools/godot_headers) repository
+[godot-headers](https://github.com/godotengine/godot-headers) repository
 for your convenience. However, if you're running a custom build of Godot and
 need access to classes that have recent changes, you must generate a new
 `api.json` file. You do this by starting your Godot executable with the
@@ -221,7 +221,7 @@ Once you've compiled the GDNative C++ bindings (see above), you can compile the 
 
 ```bash
 cd SimpleLibrary
-clang++ -fPIC -o src/init.o -c src/init.cpp -g -O3 -std=c++14 -Igodot-cpp/include -Igodot-cpp/include/core -Igodot-cpp/include/gen -Igodot-cpp/godot_headers
+clang++ -fPIC -o src/init.o -c src/init.cpp -g -O3 -std=c++14 -Igodot-cpp/include -Igodot-cpp/include/core -Igodot-cpp/include/gen -Igodot-cpp/godot-headers
 clang++ -o bin/libtest.so -shared src/init.o -Lgodot-cpp/bin -l<name of the godot-cpp>
 ```
 
@@ -233,7 +233,7 @@ This creates the file `libtest.so` in your `SimpleLibrary/bin` directory.
 
 ```bash
 cd SimpleLibrary
-cl /Fosrc/init.obj /c src/init.cpp /nologo -EHsc -DNDEBUG /MDd /Igodot-cpp\include /Igodot-cpp\include\core /Igodot-cpp\include\gen /Igodot-cpp\godot_headers
+cl /Fosrc/init.obj /c src/init.cpp /nologo -EHsc -DNDEBUG /MDd /Igodot-cpp\include /Igodot-cpp\include\core /Igodot-cpp\include\gen /Igodot-cpp\godot-headers
 link /nologo /dll /out:bin\libtest.dll /implib:bin\libsimple.lib src\init.obj godot-cpp\bin\<name of the godot-cpp>
 ```
 
@@ -256,7 +256,7 @@ submit a pull request :slightly_smiling_face:
 
 ```bash
 cd SimpleLibrary
-aarch64-linux-android29-clang++ -fPIC -o src/init.o -c src/init.cpp -g -O3 -std=c++14 -Igodot-cpp/include -Igodot-cpp/include/core -Igodot-cpp/include/gen -Igodot-cpp/godot_headers
+aarch64-linux-android29-clang++ -fPIC -o src/init.o -c src/init.cpp -g -O3 -std=c++14 -Igodot-cpp/include -Igodot-cpp/include/core -Igodot-cpp/include/gen -Igodot-cpp/godot-headers
 aarch64-linux-android29-clang++ -o bin/libtest.so -shared src/init.o -Lgodot-cpp/bin -l<name of the godot-cpp>
 ```
 
@@ -270,7 +270,7 @@ GDNative isn't supported on iOS yet. This is because iOS only allows linking
 static libraries, not dynamic libraries. In theory, it would be possible to link
 a GDNative library statically, but some of GDNative's convenience would be lost
 in the process as one would have to recompile the engine on every change. See
-[issue #30](https://github.com/GodotNativeTools/godot_headers/issues/30) in the
+[issue #30](https://github.com/godotengine/godot-headers/issues/30) in the
 Godot headers repository for more information.
 
 #### HTML5
@@ -282,7 +282,7 @@ Godot repository.
 ### Creating `.gdnlib` and `.gdns` files
 
 Follow the instructions in
-[godot_header/README.md](https://github.com/GodotNativeTools/godot_headers/blob/master/README.md#how-do-i-use-native-scripts-from-the-editor)
+[godot-headers/README.md](https://github.com/godotengine/godot-headers/blob/master/README.md#how-do-i-use-native-scripts-from-the-editor)
 to create the `.gdns` file. This file contains paths to GDNative libraries for
 various platforms. This makes the library usable from Godot in a
 platform-independent manner.

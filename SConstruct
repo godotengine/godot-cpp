@@ -114,7 +114,7 @@ opts.Add(EnumVariable(
 opts.Add(PathVariable(
     'headers_dir',
     'Path to the directory containing Godot headers',
-    'godot_headers',
+    'godot-headers',
     PathVariable.PathIsDir
 ))
 opts.Add(PathVariable(
