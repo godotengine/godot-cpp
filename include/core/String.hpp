@@ -14,7 +14,6 @@ class PoolStringArray;
 class String;
 
 class CharString {
-
 	friend class String;
 
 	godot_char_string _char_string;

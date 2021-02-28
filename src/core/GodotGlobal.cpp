@@ -55,9 +55,12 @@ void Godot::print_warning(const String &description, const String &function, con
 		godot::api->godot_print_warning(c_desc, c_func, c_file, line);
 	};
 
-	if (c_desc != nullptr) godot::api->godot_free(c_desc);
-	if (c_func != nullptr) godot::api->godot_free(c_func);
-	if (c_file != nullptr) godot::api->godot_free(c_file);
+	if (c_desc != nullptr)
+		godot::api->godot_free(c_desc);
+	if (c_func != nullptr)
+		godot::api->godot_free(c_func);
+	if (c_file != nullptr)
+		godot::api->godot_free(c_file);
 }
 
 void Godot::print_error(const String &description, const String &function, const String &file, int line) {
@@ -71,9 +74,12 @@ void Godot::print_error(const String &description, const String &function, const
 		godot::api->godot_print_error(c_desc, c_func, c_file, line);
 	};
 
-	if (c_desc != nullptr) godot::api->godot_free(c_desc);
-	if (c_func != nullptr) godot::api->godot_free(c_func);
-	if (c_file != nullptr) godot::api->godot_free(c_file);
+	if (c_desc != nullptr)
+		godot::api->godot_free(c_desc);
+	if (c_func != nullptr)
+		godot::api->godot_free(c_func);
+	if (c_file != nullptr)
+		godot::api->godot_free(c_file);
 }
 
 void ___register_types();
@@ -136,7 +142,8 @@ void Godot::gdnative_init(godot_gdnative_init_options *options) {
 				}
 			} break;
 
-			default: break;
+			default:
+				break;
 		}
 	}
 

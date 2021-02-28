@@ -19,12 +19,10 @@ Basis::Basis(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2) {
 }
 
 Basis::Basis(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz) {
-
 	set(xx, xy, xz, yx, yy, yz, zx, zy, zz);
 }
 
 Basis::Basis() {
-
 	elements[0][0] = 1;
 	elements[0][1] = 0;
 	elements[0][2] = 0;
@@ -58,7 +56,6 @@ void Basis::invert() {
 #undef cofac
 
 bool Basis::isequal_approx(const Basis &a, const Basis &b) const {
-
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
 			if ((::fabs(a.elements[i][j] - b.elements[i][j]) < CMP_EPSILON) == false)
@@ -174,7 +171,6 @@ Basis Basis::slerp(Basis b, float t) const {
 // the angles in the decomposition R = X(a1).Y(a2).Z(a3) where Z(a) rotates
 // around the z-axis by a and so on.
 Vector3 Basis::get_euler_xyz() const {
-
 	// Euler angles in XYZ convention.
 	// See https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
 	//
@@ -218,7 +214,6 @@ Vector3 Basis::get_euler_xyz() const {
 // and similar for other axes.
 // The current implementation uses XYZ convention (Z is the first rotation).
 void Basis::set_euler_xyz(const Vector3 &p_euler) {
-
 	real_t c, s;
 
 	c = ::cos(p_euler.x);
@@ -241,7 +236,6 @@ void Basis::set_euler_xyz(const Vector3 &p_euler) {
 // as in first-Z, then-X, last-Y. The angles for X, Y, and Z rotations are returned
 // as the x, y, and z components of a Vector3 respectively.
 Vector3 Basis::get_euler_yxz() const {
-
 	// Euler angles in YXZ convention.
 	// See https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
 	//
@@ -287,7 +281,6 @@ Vector3 Basis::get_euler_yxz() const {
 // and similar for other axes.
 // The current implementation uses YXZ convention (Z is the first rotation).
 void Basis::set_euler_yxz(const Vector3 &p_euler) {
-
 	real_t c, s;
 
 	c = ::cos(p_euler.x);
@@ -333,7 +326,6 @@ bool Basis::operator!=(const Basis &p_matrix) const {
 }
 
 Vector3 Basis::xform(const Vector3 &p_vector) const {
-
 	return Vector3(
 			elements[0].dot(p_vector),
 			elements[1].dot(p_vector),
@@ -341,7 +333,6 @@ Vector3 Basis::xform(const Vector3 &p_vector) const {
 }
 
 Vector3 Basis::xform_inv(const Vector3 &p_vector) const {
-
 	return Vector3(
 			(elements[0][0] * p_vector.x) + (elements[1][0] * p_vector.y) + (elements[2][0] * p_vector.z),
 			(elements[0][1] * p_vector.x) + (elements[1][1] * p_vector.y) + (elements[2][1] * p_vector.z),
@@ -362,42 +353,36 @@ Basis Basis::operator*(const Basis &p_matrix) const {
 }
 
 void Basis::operator+=(const Basis &p_matrix) {
-
 	elements[0] += p_matrix.elements[0];
 	elements[1] += p_matrix.elements[1];
 	elements[2] += p_matrix.elements[2];
 }
 
 Basis Basis::operator+(const Basis &p_matrix) const {
-
 	Basis ret(*this);
 	ret += p_matrix;
 	return ret;
 }
 
 void Basis::operator-=(const Basis &p_matrix) {
-
 	elements[0] -= p_matrix.elements[0];
 	elements[1] -= p_matrix.elements[1];
 	elements[2] -= p_matrix.elements[2];
 }
 
 Basis Basis::operator-(const Basis &p_matrix) const {
-
 	Basis ret(*this);
 	ret -= p_matrix;
 	return ret;
 }
 
 void Basis::operator*=(real_t p_val) {
-
 	elements[0] *= p_val;
 	elements[1] *= p_val;
 	elements[2] *= p_val;
 }
 
 Basis Basis::operator*(real_t p_val) const {
-
 	Basis ret(*this);
 	ret *= p_val;
 	return ret;
@@ -406,9 +391,7 @@ Basis Basis::operator*(real_t p_val) const {
 Basis::operator String() const {
 	String s;
 	for (int i = 0; i < 3; i++) {
-
 		for (int j = 0; j < 3; j++) {
-
 			if (i != 0 || j != 0)
 				s += ", ";
 
@@ -421,7 +404,6 @@ Basis::operator String() const {
 /* create / set */
 
 void Basis::set(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz) {
-
 	elements[0][0] = xx;
 	elements[0][1] = xy;
 	elements[0][2] = xz;
@@ -433,12 +415,10 @@ void Basis::set(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz
 	elements[2][2] = zz;
 }
 Vector3 Basis::get_column(int i) const {
-
 	return Vector3(elements[0][i], elements[1][i], elements[2][i]);
 }
 
 Vector3 Basis::get_row(int i) const {
-
 	return Vector3(elements[i][0], elements[i][1], elements[i][2]);
 }
 Vector3 Basis::get_main_diagonal() const {
@@ -593,7 +573,6 @@ int Basis::get_orthogonal_index() const {
 	Basis orth = *this;
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-
 			real_t v = orth[i][j];
 			if (v > 0.5)
 				v = 1.0;
@@ -607,7 +586,6 @@ int Basis::get_orthogonal_index() const {
 	}
 
 	for (int i = 0; i < 24; i++) {
-
 		if (_ortho_bases[i] == orth)
 			return i;
 	}
@@ -616,7 +594,6 @@ int Basis::get_orthogonal_index() const {
 }
 
 void Basis::set_orthogonal_index(int p_index) {
-
 	//there only exist 24 orthogonal bases in r3
 	ERR_FAIL_COND(p_index >= 24);
 
@@ -624,7 +601,6 @@ void Basis::set_orthogonal_index(int p_index) {
 }
 
 Basis::Basis(const Vector3 &p_euler) {
-
 	set_euler(p_euler);
 }
 
@@ -635,7 +611,6 @@ Basis::Basis(const Vector3 &p_euler) {
 namespace godot {
 
 Basis::Basis(const Quat &p_quat) {
-
 	real_t d = p_quat.length_squared();
 	real_t s = 2.0 / d;
 	real_t xs = p_quat.x * s, ys = p_quat.y * s, zs = p_quat.z * s;
@@ -685,8 +660,8 @@ Basis::operator Quat() const {
 		temp[2] = ((elements[1][0] - elements[0][1]) * s);
 	} else {
 		int i = elements[0][0] < elements[1][1] ?
-						(elements[1][1] < elements[2][2] ? 2 : 1) :
-						(elements[0][0] < elements[2][2] ? 2 : 0);
+						  (elements[1][1] < elements[2][2] ? 2 : 1) :
+						  (elements[0][0] < elements[2][2] ? 2 : 0);
 		int j = (i + 1) % 3;
 		int k = (i + 2) % 3;
 

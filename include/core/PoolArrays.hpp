@@ -26,7 +26,6 @@ class PoolByteArray {
 
 public:
 	class Read {
-
 		friend class PoolByteArray;
 		godot_pool_byte_array_read_access *_read_access;
 

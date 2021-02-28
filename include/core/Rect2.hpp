@@ -17,7 +17,6 @@ typedef Vector2 Point2;
 struct Transform2D;
 
 struct Rect2 {
-
 	Point2 position;
 	Size2 size;
 
@@ -48,14 +47,12 @@ struct Rect2 {
 	bool intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 *r_position = nullptr, Point2 *r_normal = nullptr) const;
 
 	inline bool encloses(const Rect2 &p_rect) const {
-
 		return (p_rect.position.x >= position.x) && (p_rect.position.y >= position.y) &&
 			   ((p_rect.position.x + p_rect.size.x) < (position.x + size.x)) &&
 			   ((p_rect.position.y + p_rect.size.y) < (position.y + size.y));
 	}
 
 	inline bool has_no_area() const {
-
 		return (size.x <= 0 || size.y <= 0);
 	}
 	Rect2 clip(const Rect2 &p_rect) const;
@@ -82,7 +79,6 @@ struct Rect2 {
 	inline bool operator!=(const Rect2 &p_rect) const { return position != p_rect.position || size != p_rect.size; }
 
 	inline Rect2 grow(real_t p_by) const {
-
 		Rect2 g = *this;
 		g.position.x -= p_by;
 		g.position.y -= p_by;
@@ -92,7 +88,6 @@ struct Rect2 {
 	}
 
 	inline Rect2 expand(const Vector2 &p_vector) const {
-
 		Rect2 r = *this;
 		r.expand_to(p_vector);
 		return r;

@@ -16,12 +16,10 @@ public:
 
 	real_t get_area() const; /// get area
 	inline bool has_no_area() const {
-
 		return (size.x <= CMP_EPSILON || size.y <= CMP_EPSILON || size.z <= CMP_EPSILON);
 	}
 
 	inline bool has_no_surface() const {
-
 		return (size.x <= CMP_EPSILON && size.y <= CMP_EPSILON && size.z <= CMP_EPSILON);
 	}
 

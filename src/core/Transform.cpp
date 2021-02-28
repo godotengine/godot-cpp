@@ -15,14 +15,12 @@ const Transform Transform::FLIP_Y = Transform(1, 0, 0, 0, -1, 0, 0, 0, 1, 0, 0, 
 const Transform Transform::FLIP_Z = Transform(1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0);
 
 Transform Transform::inverse_xform(const Transform &t) const {
-
 	Vector3 v = t.origin - origin;
 	return Transform(basis.transpose_xform(t.basis),
 			basis.xform(v));
 }
 
 void Transform::set(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz, real_t tx, real_t ty, real_t tz) {
-
 	basis.elements[0][0] = xx;
 	basis.elements[0][1] = xy;
 	basis.elements[0][2] = xz;
@@ -38,14 +36,12 @@ void Transform::set(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_
 }
 
 Vector3 Transform::xform(const Vector3 &p_vector) const {
-
 	return Vector3(
 			basis.elements[0].dot(p_vector) + origin.x,
 			basis.elements[1].dot(p_vector) + origin.y,
 			basis.elements[2].dot(p_vector) + origin.z);
 }
 Vector3 Transform::xform_inv(const Vector3 &p_vector) const {
-
 	Vector3 v = p_vector - origin;
 
 	return Vector3(
@@ -55,7 +51,6 @@ Vector3 Transform::xform_inv(const Vector3 &p_vector) const {
 }
 
 Plane Transform::xform(const Plane &p_plane) const {
-
 	Vector3 point = p_plane.normal * p_plane.d;
 	Vector3 point_dir = point + p_plane.normal;
 	point = xform(point);
@@ -68,7 +63,6 @@ Plane Transform::xform(const Plane &p_plane) const {
 	return Plane(normal, d);
 }
 Plane Transform::xform_inv(const Plane &p_plane) const {
-
 	Vector3 point = p_plane.normal * p_plane.d;
 	Vector3 point_dir = point + p_plane.normal;
 	point = xform_inv(point);
@@ -100,7 +94,6 @@ AABB Transform::xform(const AABB &p_aabb) const {
 	return new_aabb;
 }
 AABB Transform::xform_inv(const AABB &p_aabb) const {
-
 	/* define vertices */
 	Vector3 vertices[8] = {
 		Vector3(p_aabb.position.x + p_aabb.size.x, p_aabb.position.y + p_aabb.size.y, p_aabb.position.z + p_aabb.size.z),
@@ -118,7 +111,6 @@ AABB Transform::xform_inv(const AABB &p_aabb) const {
 	ret.position = xform_inv(vertices[0]);
 
 	for (int i = 1; i < 8; i++) {
-
 		ret.expand_to(xform_inv(vertices[i]));
 	}
 
@@ -126,20 +118,17 @@ AABB Transform::xform_inv(const AABB &p_aabb) const {
 }
 
 void Transform::affine_invert() {
-
 	basis.invert();
 	origin = basis.xform(-origin);
 }
 
 Transform Transform::affine_inverse() const {
-
 	Transform ret = *this;
 	ret.affine_invert();
 	return ret;
 }
 
 void Transform::invert() {
-
 	basis.transpose();
 	origin = basis.xform(-origin);
 }
@@ -153,29 +142,24 @@ Transform Transform::inverse() const {
 }
 
 void Transform::rotate(const Vector3 &p_axis, real_t p_phi) {
-
 	*this = rotated(p_axis, p_phi);
 }
 
 Transform Transform::rotated(const Vector3 &p_axis, real_t p_phi) const {
-
 	return Transform(Basis(p_axis, p_phi), Vector3()) * (*this);
 }
 
 void Transform::rotate_basis(const Vector3 &p_axis, real_t p_phi) {
-
 	basis.rotate(p_axis, p_phi);
 }
 
 Transform Transform::looking_at(const Vector3 &p_target, const Vector3 &p_up) const {
-
 	Transform t = *this;
 	t.set_look_at(origin, p_target, p_up);
 	return t;
 }
 
 void Transform::set_look_at(const Vector3 &p_eye, const Vector3 &p_target, const Vector3 &p_up) {
-
 	// Reference: MESA source code
 	Vector3 v_x, v_y, v_z;
 
@@ -203,7 +187,6 @@ void Transform::set_look_at(const Vector3 &p_eye, const Vector3 &p_target, const
 }
 
 Transform Transform::interpolate_with(const Transform &p_transform, real_t p_c) const {
-
 	/* not sure if very "efficient" but good enough? */
 
 	Vector3 src_scale = basis.get_scale();
@@ -223,20 +206,17 @@ Transform Transform::interpolate_with(const Transform &p_transform, real_t p_c) 
 }
 
 void Transform::scale(const Vector3 &p_scale) {
-
 	basis.scale(p_scale);
 	origin *= p_scale;
 }
 
 Transform Transform::scaled(const Vector3 &p_scale) const {
-
 	Transform t = *this;
 	t.scale(p_scale);
 	return t;
 }
 
 void Transform::scale_basis(const Vector3 &p_scale) {
-
 	basis.scale(p_scale);
 }
 
@@ -244,60 +224,50 @@ void Transform::translate(real_t p_tx, real_t p_ty, real_t p_tz) {
 	translate(Vector3(p_tx, p_ty, p_tz));
 }
 void Transform::translate(const Vector3 &p_translation) {
-
 	for (int i = 0; i < 3; i++) {
 		origin[i] += basis.elements[i].dot(p_translation);
 	}
 }
 
 Transform Transform::translated(const Vector3 &p_translation) const {
-
 	Transform t = *this;
 	t.translate(p_translation);
 	return t;
 }
 
 void Transform::orthonormalize() {
-
 	basis.orthonormalize();
 }
 
 Transform Transform::orthonormalized() const {
-
 	Transform _copy = *this;
 	_copy.orthonormalize();
 	return _copy;
 }
 
 bool Transform::operator==(const Transform &p_transform) const {
-
 	return (basis == p_transform.basis && origin == p_transform.origin);
 }
 bool Transform::operator!=(const Transform &p_transform) const {
-
 	return (basis != p_transform.basis || origin != p_transform.origin);
 }
 
 void Transform::operator*=(const Transform &p_transform) {
-
 	origin = xform(p_transform.origin);
 	basis *= p_transform.basis;
 }
 
 Transform Transform::operator*(const Transform &p_transform) const {
-
 	Transform t = *this;
 	t *= p_transform;
 	return t;
 }
 
 Transform::operator String() const {
-
 	return basis.operator String() + " - " + origin.operator String();
 }
 
 Transform::Transform(const Basis &p_basis, const Vector3 &p_origin) {
-
 	basis = p_basis;
 	origin = p_origin;
 }

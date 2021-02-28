@@ -232,7 +232,6 @@ inline double stepify(double p_value, double p_step) {
 }
 
 inline unsigned int next_power_of_2(unsigned int x) {
-
 	if (x == 0)
 		return 0;
 
