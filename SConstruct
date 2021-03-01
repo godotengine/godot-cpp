@@ -84,7 +84,7 @@ opts.Add(EnumVariable(
     'platform',
     'Target platform',
     host_platform,
-    allowed_values=('linux', 'osx', 'windows', 'android', 'ios'),
+    allowed_values=('linux', 'osx', 'windows', 'android', 'ios', 'tvos'),
     ignorecase=2
 ))
 opts.Add(EnumVariable(
@@ -147,9 +147,20 @@ opts.Add(EnumVariable(
     'arm64',
     ['armv7', 'arm64', 'x86_64']
 ))
+opts.Add(EnumVariable(
+    'tvos_arch',
+    'Target tvOS architecture',
+    'arm64',
+    ['arm64', 'x86_64']
+))
 opts.Add(BoolVariable(
     'ios_simulator',
     'Target iOS Simulator',
+    False
+))
+opts.Add(BoolVariable(
+    'tvos_simulator',
+    'Target tvOS Simulator',
     False
 ))
 opts.Add(
@@ -233,6 +244,47 @@ elif env['platform'] == 'osx':
     elif env['target'] == 'release':
         env.Append(CCFLAGS=['-O3'])
 
+elif env['platform'] == 'tvos':
+    if env['tvos_simulator']:
+        sdk_name = 'appletvsimulator'
+
+        env.Append(CCFLAGS=['-mappletvsimulator-version-min=10.0'])
+        env.Append(LINKFLAGS=["-mappletvsimulator-version-min=10.0"])
+        env['LIBSUFFIX'] = ".simulator" + env['LIBSUFFIX']
+    else:
+        sdk_name = 'appletvos'
+
+        env.Append(CCFLAGS=['-mappletvos-version-min=10.0'])
+        env.Append(LINKFLAGS=["-mappletvos-version-min=10.0"])
+
+    try:
+        sdk_path = decode_utf8(subprocess.check_output(['xcrun', '--sdk', sdk_name, '--show-sdk-path']).strip())
+    except (subprocess.CalledProcessError, OSError):
+        raise ValueError("Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name))
+
+    compiler_path = env['IPHONEPATH'] + '/usr/bin/'
+    env['ENV']['PATH'] = env['IPHONEPATH'] + "/Developer/usr/bin/:" + env['ENV']['PATH']
+
+    env['CC'] = compiler_path + 'clang'
+    env['CXX'] = compiler_path + 'clang++'
+    env['AR'] = compiler_path + 'ar'
+    env['RANLIB'] = compiler_path + 'ranlib'
+
+    env.Append(CCFLAGS=['-std=c++14', '-arch', env['tvos_arch'], '-isysroot', sdk_path])
+    env.Append(LINKFLAGS=[
+        '-arch',
+        env['tvos_arch'],
+        '-framework',
+        'Cocoa',
+        '-Wl,-undefined,dynamic_lookup',
+        '-isysroot', sdk_path,
+        '-F' + sdk_path
+    ])
+
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-Og', '-g'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
 elif env['platform'] == 'ios':
     if env['ios_simulator']:
         sdk_name = 'iphonesimulator'
@@ -411,6 +463,8 @@ if env['platform'] == 'android':
     arch_suffix = env['android_arch']
 if env['platform'] == 'ios':
     arch_suffix = env['ios_arch']
+if env['platform'] == 'tvos':
+    arch_suffix = env['tvos_arch']
 
 library = env.StaticLibrary(
     target='bin/' + 'libgodot-cpp.{}.{}.{}{}'.format(
