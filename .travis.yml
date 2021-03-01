@@ -16,7 +16,7 @@ matrix:
     - name: Linux Debug + Static Checks
       os: linux
       compiler: gcc
-      env: TARGET=debug STATIC_CHECKS=yes ADDITIONAL_FLAGS="bits=64"
+      env: TARGET=debug STATIC_CHECKS=yes
       addons:
         apt:
           packages:
@@ -30,65 +30,25 @@ matrix:
         apt:
           packages:
             - [scons, pkg-config, build-essential, p7zip-full]
-      env: TARGET=release ADDITIONAL_FLAGS="bits=64"
+      env: TARGET=release
 
     - name: macOS Debug
       os: osx
       compiler: clang
-      env: TARGET=debug ADDITIONAL_FLAGS="bits=64"
+      env: TARGET=debug
 
     - name: macOS Release
       os: osx
       compiler: clang
-      env: TARGET=release ADDITIONAL_FLAGS="bits=64"
+      env: TARGET=release
 
     - name: Windows MSVC Debug
       os: windows
-      env: TARGET=debug ADDITIONAL_FLAGS="bits=64"
+      env: TARGET=debug
 
     - name: Windows MSVC Release
       os: windows
-      env: TARGET=release ADDITIONAL_FLAGS="bits=64"
-
-    - name: Android ARM Release
-      os: linux
-      env: TARGET=release ADDITIONAL_FLAGS="platform=android android_arch=armv7" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/godotengine/godot-cpp/ndk-bundle"
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-xenial-6.0
-          packages:
-            [scons, pkg-config, build-essential, p7zip-full, clang-format-6.0]
-
-    - name: Android ARM64 Release
-      os: linux
-      env: TARGET=release ADDITIONAL_FLAGS="platform=android android_arch=arm64v8" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/godotengine/godot-cpp/ndk-bundle"
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-xenial-6.0
-          packages:
-            [scons, pkg-config, build-essential, p7zip-full, clang-format-6.0]
-
-    - name: Android ARM Debug
-      os: linux
-      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android_arch=armv7" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/godotengine/godot-cpp/ndk-bundle"
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-xenial-6.0
-          packages:
-            [scons, pkg-config, build-essential, p7zip-full, clang-format-6.0]
-
-    - name: Android ARM64 Debug
-      os: linux
-      env: TARGET=debug ADDITIONAL_FLAGS="platform=android android_arch=arm64v8" PLATFORM="android" ANDROID_NDK_ROOT="/home/travis/build/godotengine/godot-cpp/ndk-bundle"
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-xenial-6.0
-          packages:
-            [scons, pkg-config, build-essential, p7zip-full, clang-format-6.0]
+      env: TARGET=release
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -101,10 +61,6 @@ install:
       unzip scons-local-3.1.2.zip;
     fi
 
-  - if [[ "$PLATFORM" == "android" ]]; then
-      sh .travis/download_android_ndk.sh;
-    fi
-
 script:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
       export SCONS="./scons.bat";
@@ -112,7 +68,7 @@ script:
       export SCONS="scons";
     fi
 
-  - $SCONS target="$TARGET" generate_bindings=yes $SCONS_FLAGS $ADDITIONAL_FLAGS;
+  - $SCONS target="$TARGET" bits=64 generate_bindings=yes $SCONS_FLAGS;
 
   - if [[ "$STATIC_CHECKS" == "yes" ]]; then
       sh ./misc/travis/clang-format.sh;
