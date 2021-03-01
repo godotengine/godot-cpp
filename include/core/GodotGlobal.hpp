@@ -23,7 +23,6 @@ extern "C" const godot_gdnative_ext_net_3_2_api_struct *net_3_2_api;
 extern "C" const void *gdnlib;
 
 class Godot {
-
 public:
 	static void print(const String &message);
 	static void print_warning(const String &description, const String &function, const String &file, int line);

@@ -19,7 +19,6 @@ class Ref {
 	T *reference = nullptr;
 
 	void ref(const Ref &p_from) {
-
 		if (p_from.reference == reference)
 			return;
 
@@ -31,7 +30,6 @@ class Ref {
 	}
 
 	void ref_pointer(T *p_ref) {
-
 		ERR_FAIL_COND(p_ref == nullptr);
 
 		if (p_ref->init_ref())
@@ -40,44 +38,35 @@ class Ref {
 
 public:
 	inline bool operator<(const Ref<T> &p_r) const {
-
 		return reference < p_r.reference;
 	}
 	inline bool operator==(const Ref<T> &p_r) const {
-
 		return reference == p_r.reference;
 	}
 	inline bool operator!=(const Ref<T> &p_r) const {
-
 		return reference != p_r.reference;
 	}
 
 	inline T *operator->() {
-
 		return reference;
 	}
 
 	inline T *operator*() {
-
 		return reference;
 	}
 
 	inline const T *operator->() const {
-
 		return reference;
 	}
 
 	inline const T *ptr() const {
-
 		return reference;
 	}
 	inline T *ptr() {
-
 		return reference;
 	}
 
 	inline const T *operator*() const {
-
 		return reference;
 	}
 
@@ -88,7 +77,6 @@ public:
 	}
 
 	void operator=(const Ref &p_from) {
-
 		ref(p_from);
 	}
 
@@ -118,7 +106,6 @@ public:
 	}
 
 	Ref(const Ref &p_from) {
-
 		reference = nullptr;
 		ref(p_from);
 	}
@@ -138,7 +125,6 @@ public:
 	}
 
 	Ref(T *p_reference) {
-
 		if (p_reference)
 			ref_pointer(p_reference);
 		else
@@ -146,7 +132,6 @@ public:
 	}
 
 	Ref(const Variant &p_variant) {
-
 		reference = nullptr;
 		Object *refb = T::___get_from_variant(p_variant);
 		if (refb == nullptr) {
@@ -168,7 +153,6 @@ public:
 		// mutexes will avoid more crashes?
 
 		if (reference && reference->unreference()) {
-
 			//memdelete(reference);
 			reference->free();
 		}
@@ -181,12 +165,10 @@ public:
 	}
 
 	Ref() {
-
 		reference = nullptr;
 	}
 
 	~Ref() {
-
 		unref();
 	}
 

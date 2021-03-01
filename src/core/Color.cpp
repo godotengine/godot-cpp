@@ -13,11 +13,9 @@ namespace godot {
 static String _to_hex(float p_val);
 
 static float _parse_col(const String &p_str, int p_ofs) {
-
 	int ig = 0;
 
 	for (int i = 0; i < 2; i++) {
-
 		int c = (int)(wchar_t)p_str[i + p_ofs];
 		int v = 0;
 
@@ -43,7 +41,6 @@ static float _parse_col(const String &p_str, int p_ofs) {
 }
 
 uint32_t Color::to_32() const {
-
 	uint32_t c = (uint8_t)(a * 255);
 	c <<= 8;
 	c |= (uint8_t)(r * 255);
@@ -148,7 +145,6 @@ uint8_t Color::get_a8() const {
 }
 
 float Color::get_h() const {
-
 	float min = MIN(r, g);
 	min = MIN(min, b);
 	float max = MAX(r, g);
@@ -334,7 +330,6 @@ Color Color::contrasted() const {
 }
 
 Color Color::linear_interpolate(const Color &p_b, float p_t) const {
-
 	Color res = *this;
 
 	res.r += (p_t * (p_b.r - r));
@@ -346,7 +341,6 @@ Color Color::linear_interpolate(const Color &p_b, float p_t) const {
 }
 
 Color Color::blend(const Color &p_over) const {
-
 	Color res;
 	float sa = 1.0 - p_over.a;
 	res.a = a * sa + p_over.a;
@@ -361,7 +355,6 @@ Color Color::blend(const Color &p_over) const {
 }
 
 Color Color::to_linear() const {
-
 	return Color(
 			r < 0.04045 ? r * (1.0 / 12.92) : ::pow((r + 0.055) * (1.0 / (1 + 0.055)), 2.4),
 			g < 0.04045 ? g * (1.0 / 12.92) : ::pow((g + 0.055) * (1.0 / (1 + 0.055)), 2.4),
@@ -477,13 +470,11 @@ bool Color::html_is_valid(const String &p_color) {
 #define CLAMP(m_a, m_min, m_max) (((m_a) < (m_min)) ? (m_min) : (((m_a) > (m_max)) ? m_max : m_a))
 #endif
 static String _to_hex(float p_val) {
-
 	int v = p_val * 255;
 	v = CLAMP(v, 0, 255);
 	String ret;
 
 	for (int i = 0; i < 2; i++) {
-
 		wchar_t c[2] = { 0, 0 };
 		int lv = v & 0xF;
 		if (lv < 10)
@@ -514,7 +505,6 @@ Color::operator String() const {
 }
 
 bool Color::operator<(const Color &p_color) const {
-
 	if (r == p_color.r) {
 		if (g == p_color.g) {
 			if (b == p_color.b) {
@@ -528,7 +518,6 @@ bool Color::operator<(const Color &p_color) const {
 }
 
 Color Color::operator+(const Color &p_color) const {
-
 	return Color(
 			r + p_color.r,
 			g + p_color.g,
@@ -537,7 +526,6 @@ Color Color::operator+(const Color &p_color) const {
 }
 
 void Color::operator+=(const Color &p_color) {
-
 	r = r + p_color.r;
 	g = g + p_color.g;
 	b = b + p_color.b;
@@ -545,7 +533,6 @@ void Color::operator+=(const Color &p_color) {
 }
 
 Color Color::operator-(const Color &p_color) const {
-
 	return Color(
 			r - p_color.r,
 			g - p_color.g,
@@ -554,7 +541,6 @@ Color Color::operator-(const Color &p_color) const {
 }
 
 void Color::operator-=(const Color &p_color) {
-
 	r = r - p_color.r;
 	g = g - p_color.g;
 	b = b - p_color.b;
@@ -562,7 +548,6 @@ void Color::operator-=(const Color &p_color) {
 }
 
 Color Color::operator*(const Color &p_color) const {
-
 	return Color(
 			r * p_color.r,
 			g * p_color.g,
@@ -571,7 +556,6 @@ Color Color::operator*(const Color &p_color) const {
 }
 
 Color Color::operator*(const real_t &rvalue) const {
-
 	return Color(
 			r * rvalue,
 			g * rvalue,
@@ -580,7 +564,6 @@ Color Color::operator*(const real_t &rvalue) const {
 }
 
 void Color::operator*=(const Color &p_color) {
-
 	r = r * p_color.r;
 	g = g * p_color.g;
 	b = b * p_color.b;
@@ -588,7 +571,6 @@ void Color::operator*=(const Color &p_color) {
 }
 
 void Color::operator*=(const real_t &rvalue) {
-
 	r = r * rvalue;
 	g = g * rvalue;
 	b = b * rvalue;
@@ -596,7 +578,6 @@ void Color::operator*=(const real_t &rvalue) {
 }
 
 Color Color::operator/(const Color &p_color) const {
-
 	return Color(
 			r / p_color.r,
 			g / p_color.g,
@@ -605,7 +586,6 @@ Color Color::operator/(const Color &p_color) const {
 }
 
 Color Color::operator/(const real_t &rvalue) const {
-
 	return Color(
 			r / rvalue,
 			g / rvalue,
@@ -614,7 +594,6 @@ Color Color::operator/(const real_t &rvalue) const {
 }
 
 void Color::operator/=(const Color &p_color) {
-
 	r = r / p_color.r;
 	g = g / p_color.g;
 	b = b / p_color.b;
@@ -622,7 +601,6 @@ void Color::operator/=(const Color &p_color) {
 }
 
 void Color::operator/=(const real_t &rvalue) {
-
 	if (rvalue == 0) {
 		r = 1.0;
 		g = 1.0;
@@ -637,7 +615,6 @@ void Color::operator/=(const real_t &rvalue) {
 }
 
 Color Color::operator-() const {
-
 	return Color(
 			1.0 - r,
 			1.0 - g,

@@ -11,12 +11,10 @@
 namespace godot {
 
 struct Color {
-
 private:
 	// static float _parse_col(const String& p_str, int p_ofs);
 public:
 	union {
-
 		struct {
 			float r;
 			float g;

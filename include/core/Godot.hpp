@@ -321,7 +321,6 @@ void register_method(const char *name, M method_ptr, godot_method_rpc_mode rpc_t
 template <class D, class B, class R, class... As>
 void register_method_explicit(const char *name, R (B::*method_ptr)(As...),
 		godot_method_rpc_mode rpc_type = GODOT_METHOD_RPC_MODE_DISABLED) {
-
 	static_assert(std::is_base_of<B, D>::value, "Explicit class must derive from method class");
 	register_method(name, static_cast<R (D::*)(As...)>(method_ptr), rpc_type);
 }
@@ -394,7 +393,6 @@ void register_property(const char *name, P(T::*var), P default_value,
 		godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,
 		godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT,
 		godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
-
 	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
 
 	Variant def_val = default_value;
@@ -451,7 +449,6 @@ void register_property(const char *name, void (T::*setter)(P), P (T::*getter)(),
 		godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,
 		godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT,
 		godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
-
 	static_assert(T::___CLASS_IS_SCRIPT, "This function must only be used on custom classes");
 
 	Variant def_val = default_value;
@@ -495,7 +492,6 @@ void register_property(const char *name, void (T::*setter)(P), P (T::*getter)() 
 		godot_method_rpc_mode rpc_mode = GODOT_METHOD_RPC_MODE_DISABLED,
 		godot_property_usage_flags usage = GODOT_PROPERTY_USAGE_DEFAULT,
 		godot_property_hint hint = GODOT_PROPERTY_HINT_NONE, String hint_string = "") {
-
 	register_property(name, setter, (P(T::*)())getter, default_value, rpc_mode, usage, hint, hint_string);
 }
 

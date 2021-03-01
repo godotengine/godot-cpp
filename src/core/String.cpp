@@ -141,7 +141,6 @@ const wchar_t *String::unicode_str() const {
 }
 
 char *String::alloc_c_string() const {
-
 	godot_char_string contents = godot::api->godot_string_utf8(&_godot_string);
 
 	int length = godot::api->godot_char_string_length(&contents);
@@ -166,7 +165,6 @@ CharString String::utf8() const {
 }
 
 CharString String::ascii(bool p_extended) const {
-
 	CharString ret;
 
 	if (p_extended)

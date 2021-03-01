@@ -14,7 +14,6 @@ namespace godot {
 class Basis;
 
 struct Vector3 {
-
 	enum Axis {
 		AXIS_X,
 		AXIS_Y,
@@ -305,7 +304,6 @@ inline Vector3 operator*(real_t p_scalar, const Vector3 &p_vec) {
 }
 
 inline Vector3 vec3_cross(const Vector3 &p_a, const Vector3 &p_b) {
-
 	return p_a.cross(p_b);
 }
 
