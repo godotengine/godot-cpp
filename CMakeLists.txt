@@ -37,6 +37,8 @@
 project(godot-cpp)
 cmake_minimum_required(VERSION 3.6)
 
+option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
+
 # Change the output directory to the bin directory
 set(BUILD_PATH ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${BUILD_PATH}")
@@ -109,7 +111,7 @@ else()
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wchar-subscripts -Wcomment -Wdisabled-optimization")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wformat -Wformat=2 -Wformat-security -Wformat-y2k")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wimport -Winit-self -Winline -Winvalid-pch -Werror")
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wlong-long -Wmissing-braces -Wmissing-format-attribute")
+	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wmissing-braces -Wmissing-format-attribute")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wmissing-include-dirs -Wmissing-noreturn -Wpacked -Wpointer-arith")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wredundant-decls -Wreturn-type -Wsequence-point")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wswitch -Wswitch-enum -Wtrigraphs")
@@ -131,8 +133,14 @@ else()
 endif()
 
 # Generate source from the bindings file
+if(GENERATE_TEMPLATE_GET_NODE)
+	set(GENERATE_BINDING_PARAMETERS "True")
+else()
+	set(GENERATE_BINDING_PARAMETERS "False")
+endif()
+
 message(STATUS "Generating Bindings")
-execute_process(COMMAND "python" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\")"
+execute_process(COMMAND "python" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", ${GENERATE_BINDING_PARAMETERS})"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	RESULT_VARIABLE GENERATION_RESULT
 	OUTPUT_VARIABLE GENERATION_OUTPUT)
