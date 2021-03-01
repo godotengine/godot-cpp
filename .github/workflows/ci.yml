@@ -47,16 +47,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9.1'
-
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qqq build-essential pkg-config cmake
-          python -m pip install scons
           curl -LO https://downloads.tuxfamily.org/godotengine/3.2.3/Godot_v3.2.3-stable_linux_server.64.zip
           unzip Godot_v3.2.3-stable_linux_server.64.zip
 
@@ -67,7 +61,8 @@ jobs:
 
       - name: Build test GDNative library
         run: |
-          scons target=release platform=linux bits=64 -j $(nproc) -C test
+          cd test && cmake -DCMAKE_BUILD_TYPE=Release .
+          make -j $(nproc)
 
       - name: Run test GDNative library
         run: |
