@@ -123,10 +123,12 @@ opts.Add(PathVariable(
     None,
     PathVariable.PathIsFile
 ))
-opts.Add(BoolVariable(
+opts.Add(EnumVariable(
     'generate_bindings',
     'Generate GDNative API bindings',
-    False
+    'auto',
+    allowed_values = ['yes', 'no', 'auto', 'true'],
+    ignorecase = 2
 ))
 opts.Add(EnumVariable(
     'android_arch',
@@ -387,7 +389,13 @@ if 'custom_api_file' in env:
 else:
     json_api_file = os.path.join(os.getcwd(), env['headers_dir'], 'api.json')
 
-if env['generate_bindings']:
+if env['generate_bindings'] == 'auto':
+    # Check if generated files exist
+    should_generate_bindings = not os.path.isfile(os.path.join(os.getcwd(), 'src', 'gen', 'Object.cpp'))
+else:
+    should_generate_bindings = env['generate_bindings'] in ['yes', 'true']
+
+if should_generate_bindings:
     # Actually create the bindings here
     import binding_generator
 
