@@ -133,6 +133,7 @@ else()
 endif()
 
 # Generate source from the bindings file
+find_package(PythonInterp REQUIRED)
 if(GENERATE_TEMPLATE_GET_NODE)
 	set(GENERATE_BINDING_PARAMETERS "True")
 else()
@@ -140,7 +141,7 @@ else()
 endif()
 
 message(STATUS "Generating Bindings")
-execute_process(COMMAND "python" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", ${GENERATE_BINDING_PARAMETERS})"
+execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", ${GENERATE_BINDING_PARAMETERS})"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	RESULT_VARIABLE GENERATION_RESULT
 	OUTPUT_VARIABLE GENERATION_OUTPUT)
