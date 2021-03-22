@@ -275,9 +275,18 @@ Godot headers repository for more information.
 
 #### HTML5
 
-GDNative isn't supported on the HTML5 platform yet. Support is being tracked on
-[issue #12243](https://github.com/godotengine/godot/issues/12243) in the main
-Godot repository.
+GDNative is supported on [specific exports](https://docs.godotengine.org/en/latest/tutorials/export/exporting_for_web.html#export-options) for the HTML5 platform since Godot `3.2.4`. Linking webassembly modules is currently underspecified in the standard, but [emscripten](https://emscripten.org/), which Godot uses to build the HTML5 version, implements its own linking system.
+
+To build GDNative libraries you wwill need a recent version of [emscripten](https://emscripten.org/).
+
+```bash
+cd SimpleLibrary
+emcc  -o bin/libtest.wasm -g -O3 -s SIDE_MODULE=1 src/init.cpp godot-cpp/bin/<name of the godot-cpp> -Igodot-cpp/include -Igodot-cpp/include/core -Igodot-cpp/include/gen -Igodot-cpp/godot-headers
+```
+
+You'll need to replace `<name of the godot-cpp>` with the file that was created in [**Compiling the cpp bindings library**](#compiling-the-cpp-bindings-library).
+
+This creates the file `libtest.so` in your `SimpleLibrary/bin` directory.
 
 ### Creating `.gdnlib` and `.gdns` files
 
