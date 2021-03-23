@@ -25,17 +25,17 @@ def print_file_list(api_filepath, output_dir, headers=False, sources=False):
         header_filename = os.path.join(include_gen_folder, strip_name(_class["name"]) + ".hpp")
         source_filename = os.path.join(source_gen_folder, strip_name(_class["name"]) + ".cpp")
         if headers:
-            print(header_filename, end=end)
+            print(header_filename.replace("\\", "/"), end=end)
         if sources:
-            print(source_filename, end=end)
+            print(source_filename.replace("\\", "/"), end=end)
     icall_header_filename = os.path.join(include_gen_folder, '__icalls.hpp')
     register_types_filename = os.path.join(source_gen_folder, '__register_types.cpp')
     init_method_bindings_filename = os.path.join(source_gen_folder, '__init_method_bindings.cpp')
     if headers:
-        print(icall_header_filename, end=end)
+        print(icall_header_filename.replace("\\", "/"), end=end)
     if sources:
-        print(register_types_filename, end=end)
-        print(init_method_bindings_filename, end=end)
+        print(register_types_filename.replace("\\", "/"), end=end)
+        print(init_method_bindings_filename.replace("\\", "/"), end=end)
 
 
 def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
