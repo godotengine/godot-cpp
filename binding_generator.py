@@ -2,7 +2,7 @@
 from __future__ import print_function
 import json
 import os
-from pathlib import PosixPath
+from pathlib import Path
 
 # Convenience function for using template get_node
 def correct_method_name(method_list):
@@ -19,23 +19,23 @@ def print_file_list(api_filepath, output_dir, headers=False, sources=False):
     end = ';'
     with open(api_filepath) as api_file:
         classes = json.load(api_file)
-    include_gen_folder = PosixPath(output_dir) / 'include' / 'gen'
-    source_gen_folder = PosixPath(output_dir) / 'src' / 'gen'
+    include_gen_folder = Path(output_dir) / 'include' / 'gen'
+    source_gen_folder = Path(output_dir) / 'src' / 'gen'
     for _class in classes:
         header_filename = include_gen_folder / (strip_name(_class["name"]) + ".hpp")
         source_filename = source_gen_folder / (strip_name(_class["name"]) + ".cpp")
         if headers:
-            print(str(header_filename), end=end)
+            print(str(header_filename.as_posix()), end=end)
         if sources:
-            print(str(source_filename), end=end)
+            print(str(source_filename.as_posix()), end=end)
     icall_header_filename = include_gen_folder / '__icalls.hpp'
     register_types_filename = source_gen_folder / '__register_types.cpp'
     init_method_bindings_filename = source_gen_folder / '__init_method_bindings.cpp'
     if headers:
-        print(str(icall_header_filename), end=end)
+        print(str(icall_header_filename.as_posix()), end=end)
     if sources:
-        print(str(register_types_filename), end=end)
-        print(str(init_method_bindings_filename), end=end)
+        print(str(register_types_filename.as_posix()), end=end)
+        print(str(init_method_bindings_filename.as_posix()), end=end)
 
 
 def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
@@ -44,8 +44,8 @@ def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
         classes = json.load(api_file)
 
     icalls = set()
-    include_gen_folder = PosixPath(output_dir) / 'include' / 'gen'
-    source_gen_folder = PosixPath(output_dir) / 'src' / 'gen'
+    include_gen_folder = Path(output_dir) / 'include' / 'gen'
+    source_gen_folder = Path(output_dir) / 'src' / 'gen'
 
     try:
         include_gen_folder.mkdir(parents=True, exist_ok=True)
