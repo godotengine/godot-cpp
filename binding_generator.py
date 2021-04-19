@@ -2,6 +2,7 @@
 from __future__ import print_function
 import json
 import os
+import errno
 from pathlib import Path
 
 # Convenience function for using template get_node
@@ -48,14 +49,20 @@ def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
     source_gen_folder = Path(output_dir) / 'src' / 'gen'
 
     try:
-        include_gen_folder.mkdir(parents=True, exist_ok=True)
+        include_gen_folder.mkdir(parents=True)
     except os.error as e:
-        exit(1)
+        if e.errno == errno.EEXIST:
+            print(str(source_gen_folder) + ": " + os.strerror(e.errno))
+        else:
+            exit(1)
 
     try:
-        source_gen_folder.mkdir(parents=True, exist_ok=True)
+        source_gen_folder.mkdir(parents=True)
     except os.error as e:
-        exit(1)
+        if e.errno == errno.EEXIST:
+            print(str(source_gen_folder) + ": " + os.strerror(e.errno))
+        else:
+            exit(1)
 
     for c in classes:
         # print(c['name'])
@@ -68,23 +75,23 @@ def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
         impl = generate_class_implementation(icalls, used_classes, c, use_template_get_node)
 
         header_filename = include_gen_folder / (strip_name(c["name"]) + ".hpp")
-        with open(header_filename, "w+") as header_file:
+        with header_filename.open("w+") as header_file:
             header_file.write(header)
 
         source_filename = source_gen_folder / (strip_name(c["name"]) + ".cpp")
-        with open(source_filename, "w+") as source_file:
+        with source_filename.open("w+") as source_file:
             source_file.write(impl)
 
     icall_header_filename = include_gen_folder / '__icalls.hpp'
-    with open(icall_header_filename, "w+") as icall_header_file:
+    with icall_header_filename.open("w+") as icall_header_file:
         icall_header_file.write(generate_icall_header(icalls))
 
     register_types_filename = source_gen_folder / '__register_types.cpp'
-    with open(register_types_filename, "w+") as register_types_file:
+    with register_types_filename.open("w+") as register_types_file:
         register_types_file.write(generate_type_registry(classes))
 
     init_method_bindings_filename = source_gen_folder / '__init_method_bindings.cpp'
-    with open(init_method_bindings_filename, "w+") as init_method_bindings_file:
+    with init_method_bindings_filename.open("w+") as init_method_bindings_file:
         init_method_bindings_file.write(generate_init_method_bindings(classes))
 
 
