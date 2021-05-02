@@ -9,7 +9,7 @@
 namespace godot {
 
 const Vector3 Vector3::ZERO = Vector3();
-const Vector3 Vector3::ONE = Vector3();
+const Vector3 Vector3::ONE = Vector3(1, 1, 1);
 const Vector3 Vector3::INF = Vector3(INFINITY, INFINITY, INFINITY);
 
 const Vector3 Vector3::LEFT = Vector3(-1, 0, 0);
