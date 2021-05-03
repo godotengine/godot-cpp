@@ -6,9 +6,9 @@
 
 namespace godot {
 
-const Vector2 Vector2::ZERO;
-const Vector2 Vector2::ONE;
-const Vector2 Vector2::INF;
+const Vector2 Vector2::ZERO = Vector2();
+const Vector2 Vector2::ONE = Vector2(1, 1);
+const Vector2 Vector2::INF = Vector2(INFINITY, INFINITY);
 
 const Vector2 Vector2::LEFT = Vector2(-1, 0);
 const Vector2 Vector2::RIGHT = Vector2(1, 0);
