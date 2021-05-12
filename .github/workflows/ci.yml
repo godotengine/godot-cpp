@@ -12,7 +12,7 @@ jobs:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v2.2.2
         with:
           python-version: '3.9.1'
 
@@ -53,7 +53,7 @@ jobs:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v2.2.2
         with:
           python-version: '3.9.1'
 
@@ -82,7 +82,7 @@ jobs:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v2.2.2
         with:
           python-version: '3.9.1'
 
@@ -116,7 +116,7 @@ jobs:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v2.2.2
         with:
           python-version: '3.9.1'
 
