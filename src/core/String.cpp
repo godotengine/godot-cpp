@@ -99,6 +99,12 @@ void String::operator=(const String &s) {
 	godot::api->godot_string_new_copy(&_godot_string, &s._godot_string);
 }
 
+void String::operator=(String&& s) {
+	godot::api->godot_string_destroy(&_godot_string);
+	godot::api->godot_string_new_copy(&_godot_string, &s._godot_string);
+	godot::api->godot_string_destroy(&s._godot_string);
+}
+
 bool String::operator==(const String &s) const {
 	return godot::api->godot_string_operator_equal(&_godot_string, &s._godot_string);
 }

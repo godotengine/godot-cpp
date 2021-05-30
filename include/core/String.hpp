@@ -56,6 +56,7 @@ public:
 	wchar_t operator[](const int idx) const;
 
 	void operator=(const String &s);
+	void operator=(String&& s);
 	bool operator==(const String &s) const;
 	bool operator!=(const String &s) const;
 	String operator+(const String &s) const;
