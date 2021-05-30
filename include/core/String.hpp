@@ -40,7 +40,7 @@ public:
 	String(const wchar_t *contents);
 	String(const wchar_t c);
 	String(const String &other);
-    String(String&& other);
+	String(String&& other);
 
 	~String();
 

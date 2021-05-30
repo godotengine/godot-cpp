@@ -74,8 +74,8 @@ String::String(const String &other) {
 }
 
 String::String(String&& other) {
-    godot::api->godot_string_new_copy(&_godot_string, &other._godot_string);
-    godot::api->godot_string_destroy(&_godot_string);
+	godot::api->godot_string_new_copy(&_godot_string, &other._godot_string);
+	godot::api->godot_string_destroy(&_godot_string);
 }
 
 String::~String() {
