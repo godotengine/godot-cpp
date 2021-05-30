@@ -53,24 +53,24 @@ inline float tan(float p_x) {
 }
 
 inline double asin(double p_x) {
-    return ::asin(p_x);
+	return ::asin(p_x);
 }
 inline float asin(float p_x) {
-    return ::asinf(p_x);
+	return ::asinf(p_x);
 }
 
 inline double acos(double p_x) {
-    return ::acos(p_x);
+	return ::acos(p_x);
 }
 inline float acos(float p_x) {
-    return ::acosf(p_x);
+	return ::acosf(p_x);
 }
 
 inline double atan(double p_x) {
-    return ::atan(p_x);
+	return ::atan(p_x);
 }
 inline float atan(float p_x) {
-    return ::atanf(p_x);
+	return ::atanf(p_x);
 }
 
 inline double atan2(double p_y, double p_x) {
