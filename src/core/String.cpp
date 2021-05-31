@@ -75,14 +75,10 @@ String::String(const String &other) {
 
 String::String(String&& other) {
 	_godot_string = other._godot_string;
-	other._deleted = true;
 }
 
 String::~String() {
-	if (!_deleted) {
-		godot::api->godot_string_destroy(&_godot_string);
-		_deleted = true;
-	}
+	godot::api->godot_string_destroy(&_godot_string);
 }
 
 wchar_t &String::operator[](const int idx) {
@@ -105,7 +101,6 @@ void String::operator=(const String &s) {
 void String::operator=(String&& s) {
 	godot::api->godot_string_destroy(&_godot_string);
 	_godot_string = s._godot_string;
-	s._deleted = true;
 }
 
 bool String::operator==(const String &s) const {

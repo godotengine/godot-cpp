@@ -17,7 +17,6 @@ class CharString {
 	friend class String;
 
 	godot_char_string _char_string;
-	bool _deleted = false;
 
 public:
 	~CharString();
