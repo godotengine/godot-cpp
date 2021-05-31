@@ -74,7 +74,7 @@ String::String(const String &other) {
 }
 
 String::String(String&& other) {
-	_godot_string = other._godot_string;
+	godot::api->godot_string_new_copy(&_godot_string, &other._godot_string);
 }
 
 String::~String() {
@@ -100,7 +100,7 @@ void String::operator=(const String &s) {
 
 void String::operator=(String&& s) {
 	godot::api->godot_string_destroy(&_godot_string);
-	_godot_string = s._godot_string;
+	godot::api->godot_string_new_copy(&_godot_string, &s._godot_string);
 }
 
 bool String::operator==(const String &s) const {
