@@ -7,7 +7,8 @@ namespace godot {
 
 class String;
 
-struct Color {
+class Color {
+public:
 	union {
 		struct {
 			float r;

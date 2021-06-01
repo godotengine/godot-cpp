@@ -7,9 +7,10 @@
 
 namespace godot {
 
-struct Vector2i;
+class Vector2i;
 
-struct Vector2 {
+class Vector2 {
+public:
 	enum Axis {
 		AXIS_X,
 		AXIS_Y,

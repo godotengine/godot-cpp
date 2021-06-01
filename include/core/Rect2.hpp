@@ -14,7 +14,8 @@ namespace godot {
 
 struct Transform2D;
 
-struct Rect2 {
+class Rect2 {
+public:
 	Point2 position;
 	Size2 size;
 
