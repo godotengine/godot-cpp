@@ -40,6 +40,7 @@ public:
 	String(const wchar_t *contents);
 	String(const wchar_t c);
 	String(const String &other);
+	String(String &&other);
 
 	~String();
 
@@ -55,6 +56,7 @@ public:
 	wchar_t operator[](const int idx) const;
 
 	void operator=(const String &s);
+	void operator=(String &&s);
 	bool operator==(const String &s) const;
 	bool operator!=(const String &s) const;
 	String operator+(const String &s) const;
