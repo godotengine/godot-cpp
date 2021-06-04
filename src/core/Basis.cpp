@@ -289,7 +289,7 @@ Vector3 Basis::rotref_posscale_decomposition(Basis &rotref) const {
 // Multiplies the matrix from left by the rotation matrix: M -> R.M
 // Note that this does *not* rotate the matrix itself.
 //
-// The main use of Basis is as Transform.basis, which is used a the transformation matrix
+// The main use of Basis is as Transform3D.basis, which is used a the transformation matrix
 // of 3D object. Rotate here refers to rotation of the object (which is R * (*this)),
 // not the matrix itself (which is R * (*this) * R.transposed()).
 Basis Basis::rotated(const Vector3 &p_axis, real_t p_phi) const {

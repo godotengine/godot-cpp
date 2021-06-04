@@ -34,7 +34,7 @@ class Rect2i;
 class Signal;
 class String;
 class StringName;
-class Transform;
+class Transform3D;
 class Transform2D;
 class Variant;
 class Vector2;
@@ -191,7 +191,7 @@ public:
 
 	Variant(const Transform2D &p_transform);
 
-	Variant(const Transform &p_transform);
+	Variant(const Transform3D &p_transform);
 
 	Variant(const Color &p_color);
 
@@ -255,7 +255,7 @@ public:
 	operator godot::AABB() const;
 	operator Quat() const;
 	operator Basis() const;
-	operator Transform() const;
+	operator Transform3D() const;
 	operator Transform2D() const;
 
 	operator Color() const;

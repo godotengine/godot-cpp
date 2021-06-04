@@ -325,8 +325,8 @@ def generate_class_header(used_classes, c, use_template_get_node):
                     return "Vector3" + default_value
                 if _type == "Vector3i":
                     return "Vector3i" + default_value
-                if _type == "Transform":
-                    return "Transform()"
+                if _type == "Transform3D":
+                    return "Transform3D()"
                 if _type == "Transform2D":
                     return "Transform2D()"
                 if _type == "Rect2":
@@ -1818,7 +1818,7 @@ def get_stringifiable_types():
         "Quat",
         "AABB",
         "Basis",
-        "Transform",
+        "Transform3D",
         "Color",
         "RID",
         "Callable",
@@ -1889,7 +1889,7 @@ def is_core_type(name):
                   "Quat",
                   "AABB",
                   "Basis",
-                  "Transform",
+                  "Transform3D",
                   "Color",
                   "StringName",
                   "NodePath",
@@ -1928,7 +1928,7 @@ def is_inlined_type(name):
         "Quat",
         "AABB",
         "Basis",
-        "Transform",
+        "Transform3D",
         "Color",
     ]
     return name in inlined

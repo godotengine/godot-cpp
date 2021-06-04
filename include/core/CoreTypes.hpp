@@ -28,7 +28,7 @@
 #include "Signal.hpp"
 #include "String.hpp"
 #include "StringName.hpp"
-#include "Transform.hpp"
+#include "Transform3D.hpp"
 #include "Transform2D.hpp"
 #include "Vector2.hpp"
 #include "Vector2i.hpp"

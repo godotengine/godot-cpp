@@ -94,8 +94,8 @@ Variant::Variant(const Transform2D &p_transform) {
 	godot::api->godot_variant_new_transform2d(&_godot_variant, (godot_transform2d *)&p_transform);
 }
 
-Variant::Variant(const Transform &p_transform) {
-	godot::api->godot_variant_new_transform(&_godot_variant, (godot_transform *)&p_transform);
+Variant::Variant(const Transform3D &p_transform) {
+	godot::api->godot_variant_new_transform3d(&_godot_variant, (godot_transform3d *)&p_transform);
 }
 
 Variant::Variant(const Color &p_color) {
@@ -258,9 +258,9 @@ Variant::operator Basis() const {
 	godot_basis s = godot::api->godot_variant_as_basis(&_godot_variant);
 	return Basis(s);
 }
-Variant::operator Transform() const {
-	godot_transform s = godot::api->godot_variant_as_transform(&_godot_variant);
-	return Transform(s);
+Variant::operator Transform3D() const {
+	godot_transform3d s = godot::api->godot_variant_as_transform3d(&_godot_variant);
+	return Transform3D(s);
 }
 Variant::operator Transform2D() const {
 	godot_transform2d s = godot::api->godot_variant_as_transform2d(&_godot_variant);
