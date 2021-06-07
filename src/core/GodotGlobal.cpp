@@ -102,13 +102,13 @@ void Godot::nativescript_terminate(void *handle) {
 	godot::nativescript_api->godot_nativescript_unregister_instance_binding_data_functions(godot::_RegisterState::language_index);
 }
 
-static void print_warning(const char *description, const char *function, const char *file, int line) {
+void Godot::print_warning(const char *description, const char *function, const char *file, int line) {
 	godot::api->godot_print_warning(description, function, file, line);
 }
-static void print_error(const char *description, const char *function, const char *file, int line) {
+void Godot::print_error(const char *description, const char *function, const char *file, int line) {
 	godot::api->godot_print_error(description, function, file, line);
 }
-static void print_script_error(const char *description, const char *function, const char *file, int line) {
+void Godot::print_script_error(const char *description, const char *function, const char *file, int line) {
 	godot::api->godot_print_script_error(description, function, file, line);
 }
 

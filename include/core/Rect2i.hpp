@@ -6,7 +6,8 @@
 
 namespace godot {
 
-struct Rect2i {
+class Rect2i {
+public:
 	Point2i position;
 	Size2i size;
 

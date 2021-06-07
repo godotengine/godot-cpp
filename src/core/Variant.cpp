@@ -217,6 +217,7 @@ Variant::operator String() const {
 	godot_string s = godot::api->godot_variant_as_string(&_godot_variant);
 	return String(s);
 }
+
 Variant::operator Vector2() const {
 	godot_vector2 s = godot::api->godot_variant_as_vector2(&_godot_variant);
 	return Vector2(s);
@@ -345,7 +346,7 @@ bool Variant::operator==(const Variant &b) const {
 		return false;
 	}
 	valid = godot::api->godot_variant_as_bool(&result);
-	godot_variant_destroy(&result);
+	godot::api->godot_variant_destroy(&result);
 	return valid;
 }
 
@@ -361,7 +362,7 @@ bool Variant::operator<(const Variant &b) const {
 		return false;
 	}
 	valid = godot::api->godot_variant_as_bool(&result);
-	godot_variant_destroy(&result);
+	godot::api->godot_variant_destroy(&result);
 	return valid;
 }
 
@@ -373,7 +374,7 @@ bool Variant::operator<=(const Variant &b) const {
 		return false;
 	}
 	valid = godot::api->godot_variant_as_bool(&result);
-	godot_variant_destroy(&result);
+	godot::api->godot_variant_destroy(&result);
 	return valid;
 }
 
