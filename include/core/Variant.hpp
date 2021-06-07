@@ -28,7 +28,7 @@ class PackedStringArray;
 class PackedVector2Array;
 class PackedVector3Array;
 class Plane;
-class Quat;
+class Quaternion;
 class Rect2;
 class Rect2i;
 class Signal;
@@ -185,7 +185,7 @@ public:
 
 	Variant(const godot::AABB &p_aabb);
 
-	Variant(const Quat &p_quat);
+	Variant(const Quaternion &p_quat);
 
 	Variant(const Basis &p_transform);
 
@@ -253,7 +253,7 @@ public:
 	operator Vector3i() const;
 	operator Plane() const;
 	operator godot::AABB() const;
-	operator Quat() const;
+	operator Quaternion() const;
 	operator Basis() const;
 	operator Transform3D() const;
 	operator Transform2D() const;

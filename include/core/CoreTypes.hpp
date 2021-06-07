@@ -21,7 +21,7 @@
 #include "PackedVector2Array.hpp"
 #include "PackedVector3Array.hpp"
 #include "Plane.hpp"
-#include "Quat.hpp"
+#include "Quaternion.hpp"
 #include "RID.hpp"
 #include "Rect2.hpp"
 #include "Rect2i.hpp"

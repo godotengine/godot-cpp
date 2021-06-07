@@ -82,8 +82,8 @@ Variant::Variant(const godot::AABB &p_aabb) {
 	godot::api->godot_variant_new_aabb(&_godot_variant, (godot_aabb *)&p_aabb);
 }
 
-Variant::Variant(const Quat &p_quat) {
-	godot::api->godot_variant_new_quat(&_godot_variant, (godot_quat *)&p_quat);
+Variant::Variant(const Quaternion &p_quat) {
+	godot::api->godot_variant_new_quaternion(&_godot_variant, (godot_quaternion *)&p_quat);
 }
 
 Variant::Variant(const Basis &p_transform) {
@@ -250,9 +250,9 @@ Variant::operator godot::AABB() const {
 	godot_aabb s = godot::api->godot_variant_as_aabb(&_godot_variant);
 	return godot::AABB(s);
 }
-Variant::operator Quat() const {
-	godot_quat s = godot::api->godot_variant_as_quat(&_godot_variant);
-	return Quat(s);
+Variant::operator Quaternion() const {
+	godot_quaternion s = godot::api->godot_variant_as_quaternion(&_godot_variant);
+	return Quaternion(s);
 }
 Variant::operator Basis() const {
 	godot_basis s = godot::api->godot_variant_as_basis(&_godot_variant);
