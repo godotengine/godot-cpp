@@ -306,53 +306,9 @@ def generate_class_header(used_classes, c, use_template_get_node):
             method_signature += argument_name
             method_arguments += argument_name
 
-
-            # default arguments
-            def escape_default_arg(_type, default_value):
-                if _type == "Color":
-                    return "Color(" + default_value + ")"
-                if _type == "bool" or _type == "int":
-                    return default_value.lower()
-                if _type == "Array":
-                    return "Array()"
-                if _type in ["PackedByteArray", "PackedInt32Array", "PackedInt64Array", "PackedFloat32Array", "PackedFloat64Array", "PackedStringArray", "PackedVector2Array", "PackedVector3Array", "PackedColorArray"]:
-                    return _type + "()"
-                if _type == "Vector2":
-                    return "Vector2" + default_value
-                if _type == "Vector2i":
-                    return "Vector2i" + default_value
-                if _type == "Vector3":
-                    return "Vector3" + default_value
-                if _type == "Vector3i":
-                    return "Vector3i" + default_value
-                if _type == "Transform3D":
-                    return "Transform3D()"
-                if _type == "Transform2D":
-                    return "Transform2D()"
-                if _type == "Rect2":
-                    return "Rect2" + default_value
-                if _type == "Rect2i":
-                    return "Rect2i" + default_value
-                if _type == "Variant":
-                    return "Variant()" if default_value == "Null" else default_value
-                if _type == "String" or _type == "StringName":
-                    return "\"" + default_value + "\""
-                if _type == "RID":
-                    return "RID()"
-
-                if default_value == "Null" or default_value == "[Object:null]":
-                    return "nullptr"
-
-                return default_value
-
-
-
-
             if argument["has_default_value"] or has_default_argument:
-                method_signature += " = " + escape_default_arg(argument["type"], argument["default_value"])
+                method_signature += " = " + parse_default_value(argument["type"], argument["default_value"])
                 has_default_argument = True
-
-
 
             if i != len(method["arguments"]) - 1:
                 method_signature += ", "
@@ -1994,15 +1950,22 @@ def parse_default_value(type_name, value):
         return value
     elif type_name == "float":
         return value
-    elif type_name == "String":
-        return f'"{value}"'
+    elif type_name == "StringName":
+        construct_string = value[1:] if value[0:1] == "&" else value
+        return f"StringName({construct_string})"
     elif type_name == "Array":
-        if value == "[]":
+        if value == "[  ]":
             return "Array()"
         else:
             raise Exception(f"Array default value not implemented: type: {type_name}, value: {value}")
+    elif type_name == "RID":
+        return f"RID({value})"
     elif type_name == "Variant":
-        if value == "Null":
+        if value == "null":
             return "Variant()"
         else:
-            raise Exception(f"Can't parse Variant default value: type: {type_name}, value: {value}")
+            return f"Variant({value})"
+    elif value == "null":
+        return "nullptr"
+    else:
+        return value
