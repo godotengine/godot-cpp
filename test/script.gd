@@ -13,21 +13,21 @@ func _initialize():
         print("Library invalid")
         return
     var ref = native_script.new()
-    print("Reference ", ref)
+    print("RefCounted ", ref)
     if ref == null || !is_instance_valid(ref):
-        print("Reference invalid")
+        print("RefCounted invalid")
         return
-    print("Reference value ", ref.value)
+    print("RefCounted value ", ref.value)
     if ref.value != 50:
-        print("Reference value mismatch")
+        print("RefCounted value mismatch")
         return
-    print("Reference vec ", ref.vec)
+    print("RefCounted vec ", ref.vec)
     if ref.vec != Vector2(10, 20):
-        print("Reference vec mismatch")
+        print("RefCounted vec mismatch")
         return
-    print("Reference name ", ref.name)
+    print("RefCounted name ", ref.name)
     if ref.name != "SimpleClass":
-        print("Reference name mismatch")
+        print("RefCounted name mismatch")
         return
     print("Call method ", ref.method(1))
     if ref.method(1) != 1:

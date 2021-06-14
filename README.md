@@ -143,12 +143,12 @@ Create `init.cpp` under `SimpleLibrary/src/` and add the following code:
 
 ```cpp
 #include <Godot.hpp>
-#include <Reference.hpp>
+#include <RefCounted.hpp>
 
 using namespace godot;
 
-class SimpleClass : public Reference {
-    GODOT_CLASS(SimpleClass, Reference);
+class SimpleClass : public RefCounted {
+    GODOT_CLASS(SimpleClass, RefCounted);
 public:
     SimpleClass() { }
 

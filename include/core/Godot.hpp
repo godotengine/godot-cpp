@@ -65,7 +65,7 @@ inline T *create_custom_class_instance() {
 		godot::api->godot_method_bind_ptrcall(mb_set_class_name, script, args, nullptr);
 	}
 
-	// Now to instanciate T, we initially did this, however in case of Reference it returns a variant with refcount
+	// Now to instanciate T, we initially did this, however in case of RefCounted it returns a variant with refcount
 	// already initialized, which woud cause inconsistent behavior compared to other classes (we still have to return a pointer).
 	//Variant instance_variant = script->new_();
 	//T *instance = godot::get_custom_class_instance<T>(instance_variant);

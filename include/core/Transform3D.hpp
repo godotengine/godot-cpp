@@ -1,5 +1,5 @@
-#ifndef GODOT_TRANSFORM_HPP
-#define GODOT_TRANSFORM_HPP
+#ifndef GODOT_TRANSFORM3D_HPP
+#define GODOT_TRANSFORM3D_HPP
 
 #include <AABB.hpp>
 #include <Basis.hpp>
@@ -9,31 +9,31 @@
 
 namespace godot {
 
-class Transform {
+class Transform3D {
 public:
 	Basis basis;
 	Vector3 origin;
 
 	void invert();
-	Transform inverse() const;
+	Transform3D inverse() const;
 
 	void affine_invert();
-	Transform affine_inverse() const;
+	Transform3D affine_inverse() const;
 
-	Transform rotated(const Vector3 &p_axis, real_t p_phi) const;
+	Transform3D rotated(const Vector3 &p_axis, real_t p_phi) const;
 
 	void rotate(const Vector3 &p_axis, real_t p_phi);
 	void rotate_basis(const Vector3 &p_axis, real_t p_phi);
 
 	void set_look_at(const Vector3 &p_eye, const Vector3 &p_target, const Vector3 &p_up = Vector3(0, 1, 0));
-	Transform looking_at(const Vector3 &p_target, const Vector3 &p_up = Vector3(0, 1, 0)) const;
+	Transform3D looking_at(const Vector3 &p_target, const Vector3 &p_up = Vector3(0, 1, 0)) const;
 
 	void scale(const Vector3 &p_scale);
-	Transform scaled(const Vector3 &p_scale) const;
+	Transform3D scaled(const Vector3 &p_scale) const;
 	void scale_basis(const Vector3 &p_scale);
 	void translate(real_t p_tx, real_t p_ty, real_t p_tz);
 	void translate(const Vector3 &p_translation);
-	Transform translated(const Vector3 &p_translation) const;
+	Transform3D translated(const Vector3 &p_translation) const;
 
 	const Basis &get_basis() const { return basis; }
 	void set_basis(const Basis &p_basis) { basis = p_basis; }
@@ -42,11 +42,11 @@ public:
 	void set_origin(const Vector3 &p_origin) { origin = p_origin; }
 
 	void orthonormalize();
-	Transform orthonormalized() const;
-	bool is_equal_approx(const Transform &p_transform) const;
+	Transform3D orthonormalized() const;
+	bool is_equal_approx(const Transform3D &p_transform) const;
 
-	bool operator==(const Transform &p_transform) const;
-	bool operator!=(const Transform &p_transform) const;
+	bool operator==(const Transform3D &p_transform) const;
+	bool operator!=(const Transform3D &p_transform) const;
 
 	inline Vector3 xform(const Vector3 &p_vector) const;
 	inline Vector3 xform_inv(const Vector3 &p_vector) const;
@@ -60,14 +60,14 @@ public:
 	inline PackedVector3Array xform(const PackedVector3Array &p_array) const;
 	inline PackedVector3Array xform_inv(const PackedVector3Array &p_array) const;
 
-	void operator*=(const Transform &p_transform);
-	Transform operator*(const Transform &p_transform) const;
+	void operator*=(const Transform3D &p_transform);
+	Transform3D operator*(const Transform3D &p_transform) const;
 
-	Transform interpolate_with(const Transform &p_transform, real_t p_c) const;
+	Transform3D interpolate_with(const Transform3D &p_transform, real_t p_c) const;
 
-	inline Transform inverse_xform(const Transform &t) const {
+	inline Transform3D inverse_xform(const Transform3D &t) const {
 		Vector3 v = t.origin - origin;
-		return Transform(basis.transpose_xform(t.basis),
+		return Transform3D(basis.transpose_xform(t.basis),
 				basis.xform(v));
 	}
 
@@ -80,23 +80,23 @@ public:
 
 	operator String() const;
 
-	Transform() {}
-	Transform(const Basis &p_basis, const Vector3 &p_origin = Vector3());
-	Transform(const Vector3 &p_x, const Vector3 &p_y, const Vector3 &p_z, const Vector3 &p_origin);
-	Transform(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz, real_t ox, real_t oy, real_t oz);
-	inline explicit Transform(const godot_transform &p_godot_transform) {
-		*this = *((Transform *)&p_godot_transform);
+	Transform3D() {}
+	Transform3D(const Basis &p_basis, const Vector3 &p_origin = Vector3());
+	Transform3D(const Vector3 &p_x, const Vector3 &p_y, const Vector3 &p_z, const Vector3 &p_origin);
+	Transform3D(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz, real_t ox, real_t oy, real_t oz);
+	inline explicit Transform3D(const godot_transform3d &p_godot_transform) {
+		*this = *((Transform3D *)&p_godot_transform);
 	}
 };
 
-inline Vector3 Transform::xform(const Vector3 &p_vector) const {
+inline Vector3 Transform3D::xform(const Vector3 &p_vector) const {
 	return Vector3(
 			basis[0].dot(p_vector) + origin.x,
 			basis[1].dot(p_vector) + origin.y,
 			basis[2].dot(p_vector) + origin.z);
 }
 
-inline Vector3 Transform::xform_inv(const Vector3 &p_vector) const {
+inline Vector3 Transform3D::xform_inv(const Vector3 &p_vector) const {
 	Vector3 v = p_vector - origin;
 
 	return Vector3(
@@ -105,7 +105,7 @@ inline Vector3 Transform::xform_inv(const Vector3 &p_vector) const {
 			(basis.elements[0][2] * v.x) + (basis.elements[1][2] * v.y) + (basis.elements[2][2] * v.z));
 }
 
-inline Plane Transform::xform(const Plane &p_plane) const {
+inline Plane Transform3D::xform(const Plane &p_plane) const {
 	Vector3 point = p_plane.normal * p_plane.d;
 	Vector3 point_dir = point + p_plane.normal;
 	point = xform(point);
@@ -118,7 +118,7 @@ inline Plane Transform::xform(const Plane &p_plane) const {
 	return Plane(normal, d);
 }
 
-inline Plane Transform::xform_inv(const Plane &p_plane) const {
+inline Plane Transform3D::xform_inv(const Plane &p_plane) const {
 	Vector3 point = p_plane.normal * p_plane.d;
 	Vector3 point_dir = point + p_plane.normal;
 	point = xform_inv(point);
@@ -131,7 +131,7 @@ inline Plane Transform::xform_inv(const Plane &p_plane) const {
 	return Plane(normal, d);
 }
 
-inline AABB Transform::xform(const AABB &p_aabb) const {
+inline AABB Transform3D::xform(const AABB &p_aabb) const {
 	/* http://dev.theomader.com/transform-bounding-boxes/ */
 	Vector3 min = p_aabb.position;
 	Vector3 max = p_aabb.position + p_aabb.size;
@@ -156,7 +156,7 @@ inline AABB Transform::xform(const AABB &p_aabb) const {
 	return r_aabb;
 }
 
-inline AABB Transform::xform_inv(const AABB &p_aabb) const {
+inline AABB Transform3D::xform_inv(const AABB &p_aabb) const {
 	/* define vertices */
 	Vector3 vertices[8] = {
 		Vector3(p_aabb.position.x + p_aabb.size.x, p_aabb.position.y + p_aabb.size.y, p_aabb.position.z + p_aabb.size.z),
@@ -180,7 +180,7 @@ inline AABB Transform::xform_inv(const AABB &p_aabb) const {
 	return ret;
 }
 
-PackedVector3Array Transform::xform(const PackedVector3Array &p_array) const {
+PackedVector3Array Transform3D::xform(const PackedVector3Array &p_array) const {
 	PackedVector3Array array;
 	array.resize(p_array.size());
 
@@ -190,7 +190,7 @@ PackedVector3Array Transform::xform(const PackedVector3Array &p_array) const {
 	return array;
 }
 
-PackedVector3Array Transform::xform_inv(const PackedVector3Array &p_array) const {
+PackedVector3Array Transform3D::xform_inv(const PackedVector3Array &p_array) const {
 	PackedVector3Array array;
 	array.resize(p_array.size());
 

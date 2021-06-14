@@ -289,7 +289,7 @@ Vector3 Basis::rotref_posscale_decomposition(Basis &rotref) const {
 // Multiplies the matrix from left by the rotation matrix: M -> R.M
 // Note that this does *not* rotate the matrix itself.
 //
-// The main use of Basis is as Transform.basis, which is used a the transformation matrix
+// The main use of Basis is as Transform3D.basis, which is used a the transformation matrix
 // of 3D object. Rotate here refers to rotation of the object (which is R * (*this)),
 // not the matrix itself (which is R * (*this) * R.transposed()).
 Basis Basis::rotated(const Vector3 &p_axis, real_t p_phi) const {
@@ -318,11 +318,11 @@ void Basis::rotate(const Vector3 &p_euler) {
 	*this = rotated(p_euler);
 }
 
-Basis Basis::rotated(const Quat &p_quat) const {
+Basis Basis::rotated(const Quaternion &p_quat) const {
 	return Basis(p_quat) * (*this);
 }
 
-void Basis::rotate(const Quat &p_quat) {
+void Basis::rotate(const Quaternion &p_quat) {
 	*this = rotated(p_quat);
 }
 
@@ -340,7 +340,7 @@ Vector3 Basis::get_rotation_euler() const {
 	return m.get_euler();
 }
 
-Quat Basis::get_rotation_quat() const {
+Quaternion Basis::get_rotation_quat() const {
 	// Assumes that the matrix can be decomposed into a proper rotation and scaling matrix as M = R.S,
 	// and returns the Euler angles corresponding to the rotation part, complementing get_scale().
 	// See the comment in get_scale() for further information.
@@ -743,9 +743,9 @@ Basis::operator String() const {
 	return mtx;
 }
 
-Quat Basis::get_quat() const {
+Quaternion Basis::get_quat() const {
 #ifdef MATH_CHECKS
-	ERR_FAIL_COND_V(!is_rotation(), Quat());
+	ERR_FAIL_COND_V(!is_rotation(), Quaternion());
 #endif
 	/* Allow getting a quaternion from an unnormalized transform */
 	Basis m = *this;
@@ -776,7 +776,7 @@ Quat Basis::get_quat() const {
 		temp[k] = (m.elements[k][i] + m.elements[i][k]) * s;
 	}
 
-	return Quat(temp[0], temp[1], temp[2], temp[3]);
+	return Quaternion(temp[0], temp[1], temp[2], temp[3]);
 }
 
 static const Basis _ortho_bases[24] = {
@@ -918,7 +918,7 @@ void Basis::get_axis_angle(Vector3 &r_axis, real_t &r_angle) const {
 	r_angle = angle;
 }
 
-void Basis::set_quat(const Quat &p_quat) {
+void Basis::set_quat(const Quaternion &p_quat) {
 	real_t d = p_quat.length_squared();
 	real_t s = 2.0 / d;
 	real_t xs = p_quat.x * s, ys = p_quat.y * s, zs = p_quat.z * s;
@@ -970,7 +970,7 @@ void Basis::set_euler_scale(const Vector3 &p_euler, const Vector3 &p_scale) {
 	rotate(p_euler);
 }
 
-void Basis::set_quat_scale(const Quat &p_quat, const Vector3 &p_scale) {
+void Basis::set_quat_scale(const Quaternion &p_quat, const Vector3 &p_scale) {
 	set_diagonal(p_scale);
 	rotate(p_quat);
 }
@@ -991,8 +991,8 @@ void Basis::set_diagonal(const Vector3 &p_diag) {
 
 Basis Basis::slerp(const Basis &p_to, const real_t &p_weight) const {
 	//consider scale
-	Quat from(*this);
-	Quat to(p_to);
+	Quaternion from(*this);
+	Quaternion to(p_to);
 
 	Basis b(from.slerp(to, p_weight));
 	b.elements[0] *= Math::lerp(elements[0].length(), p_to.elements[0].length(), p_weight);
