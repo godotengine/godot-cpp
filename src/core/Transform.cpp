@@ -52,7 +52,7 @@ void Transform3D::set_look_at(const Vector3 &p_eye, const Vector3 &p_target, con
 	ERR_FAIL_COND(p_eye == p_target);
 	ERR_FAIL_COND(p_up.length() == 0);
 #endif
-	// Reference: MESA source code
+	// RefCounted: MESA source code
 	Vector3 v_x, v_y, v_z;
 
 	/* Make rotation matrix */

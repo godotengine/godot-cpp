@@ -95,11 +95,11 @@ def generate_builtin_bindings(path):
     init_method_bindings_file.write(generate_init_core_bindings(builtin_types))
 
 
-def is_reference_type(t):
+def is_ref_counted_type(t):
     for c in classes:
         if c['name'] != t:
             continue
-        if c['is_reference']:
+        if c['is_ref_counted']:
             return True
     return False
 
@@ -116,7 +116,7 @@ def make_gdnative_type(t, ref_allowed, is_return):
         else:
             return "CoreConstants::" + enum_name + " "
     elif is_class_type(t):
-        if is_reference_type(t) and ref_allowed:
+        if is_ref_counted_type(t) and ref_allowed:
             return "Ref<" + strip_name(t) + "> "
         else:
             return strip_name(t) + " *"
@@ -149,7 +149,7 @@ def generate_class_header(used_classes, c, use_template_get_node):
 
     # Ref<T> is not included in object.h in Godot either,
     # so don't include it here because it's not needed
-    if class_name != "Object" and class_name != "Reference":
+    if class_name != "Object" and class_name != "RefCounted":
         source.append("#include <core/Ref.hpp>")
         ref_allowed = True
     else:
@@ -445,7 +445,7 @@ def generate_core_constants_header(used_classes, c, use_template_get_node):
 def generate_class_implementation(icalls, used_classes, c, use_template_get_node):
     class_name = strip_name(c["name"])
 
-    ref_allowed = class_name != "Object" and class_name != "Reference"
+    ref_allowed = class_name != "Object" and class_name != "RefCounted"
 
     source = []
     source.append("#include \"" + class_name + ".hpp\"")
@@ -552,7 +552,7 @@ def generate_class_implementation(icalls, used_classes, c, use_template_get_node
             continue
 
         return_statement = ""
-        return_type_is_ref = is_reference_type(method["return_type"]) and ref_allowed
+        return_type_is_ref = is_ref_counted_type(method["return_type"]) and ref_allowed
 
         if method["return_type"] != "void":
             if is_class_type(method["return_type"]):
@@ -668,7 +668,7 @@ def generate_class_implementation(icalls, used_classes, c, use_template_get_node
             return_statement += icall_name + "(___mb.mb_" + method["name"] + ", (const Object *) " + core_object_name
 
             for arg in method["arguments"]:
-                arg_is_ref = is_reference_type(arg["type"]) and ref_allowed
+                arg_is_ref = is_ref_counted_type(arg["type"]) and ref_allowed
                 return_statement += ", " + escape_cpp(arg["name"]) + (".ptr()" if arg_is_ref else "")
 
             return_statement += ")"

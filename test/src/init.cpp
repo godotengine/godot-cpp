@@ -1,11 +1,11 @@
 #include <Godot.hpp>
-#include <Reference.hpp>
+#include <RefCounted.hpp>
 #include <Utilities.hpp>
 
 using namespace godot;
 
-class SimpleClass : public Reference {
-	GODOT_CLASS(SimpleClass, Reference);
+class SimpleClass : public RefCounted {
+	GODOT_CLASS(SimpleClass, RefCounted);
 
 public:
 	String _name;

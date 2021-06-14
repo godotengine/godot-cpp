@@ -2,7 +2,7 @@
 #define REF_H
 
 #include "GodotGlobal.hpp"
-#include "Reference.hpp"
+#include "RefCounted.hpp"
 #include "Variant.hpp"
 
 namespace godot {
@@ -11,10 +11,10 @@ namespace godot {
 // Rewritten from f5234e70be7dec4930c2d5a0e829ff480d044b1d.
 template <class T>
 class Ref {
-	// TODO For this nice check to work, each class must actually #include Reference classes mentionned in its methods,
+	// TODO For this nice check to work, each class must actually #include RefCounted classes mentionned in its methods,
 	// which might be annoying for coders who prefer to forward-declare to reduce compile times
-	// static_assert(std::is_base_of<Reference, T>::value,
-	// 		"Ref<T> can only be used with classes deriving from Reference");
+	// static_assert(std::is_base_of<RefCounted, T>::value,
+	// 		"Ref<T> can only be used with classes deriving from RefCounted");
 
 	T *reference = nullptr;
 
@@ -82,7 +82,7 @@ public:
 	}
 
 	operator Variant() const {
-		// Note: the C API handles the cases where the object is a Reference,
+		// Note: the C API handles the cases where the object is a RefCounted,
 		// so the Variant will be correctly constructed with a RefPtr engine-side
 		return Variant((Object *)reference);
 	}
@@ -94,7 +94,7 @@ public:
 
 	template <class T_Other>
 	void operator=(const Ref<T_Other> &p_from) {
-		Reference *refb = const_cast<Reference *>(static_cast<const Reference *>(p_from.ptr()));
+		RefCounted *refb = const_cast<RefCounted *>(static_cast<const RefCounted *>(p_from.ptr()));
 		if (refb == nullptr) {
 			unref();
 			return;
@@ -126,7 +126,7 @@ public:
 	template <class T_Other>
 	Ref(const Ref<T_Other> &p_from) {
 		reference = nullptr;
-		Reference *refb = const_cast<Reference *>(static_cast<const Reference *>(p_from.ptr()));
+		RefCounted *refb = const_cast<RefCounted *>(static_cast<const RefCounted *>(p_from.ptr()));
 		if (refb == nullptr) {
 			unref();
 			return;
