@@ -375,6 +375,11 @@ elif env['platform'] == 'android':
     env.Append(CCFLAGS=['--target=' + arch_info['target'] + env['android_api_level'], '-march=' + arch_info['march'], '-fPIC'])#, '-fPIE', '-fno-addrsig', '-Oz'])
     env.Append(CCFLAGS=arch_info['ccflags'])
 
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-Og', '-g'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
+
 elif env["platform"] == "javascript":
     env["ENV"] = os.environ
     env["CC"] = "emcc"
@@ -402,6 +407,11 @@ elif env["platform"] == "javascript":
     env["LIBSUFFIXES"] = ["$LIBSUFFIX"]
     env.Replace(SHLINKFLAGS='$LINKFLAGS')
     env.Replace(SHLINKFLAGS='$LINKFLAGS')
+
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-O0', '-g'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
 
 env.Append(CPPPATH=[
     '.',
