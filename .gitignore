@@ -6,6 +6,7 @@ logs/*
 *.os
 *.so
 *.obj
+*.bc
 *.pyc
 *.dblite
 *.pdb
