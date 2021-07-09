@@ -143,6 +143,17 @@ opts.Add(
     'macOS deployment target',
     'default'
 )
+opts.Add(
+    'macos_sdk_path',
+    'macOS SDK path',
+    ''
+)
+opts.Add(EnumVariable(
+    'macos_arch',
+    'Target macOS architecture',
+    'x86_64',
+    ['x86_64', 'arm64']
+))
 opts.Add(EnumVariable(
     'ios_arch',
     'Target iOS architecture',
@@ -217,14 +228,19 @@ elif env['platform'] == 'osx':
             'Only 64-bit builds are supported for the macOS target.'
         )
 
-    env.Append(CCFLAGS=['-std=c++14', '-arch', 'x86_64'])
+    env.Append(CCFLAGS=['-std=c++14', '-arch', env['macos_arch']])
 
     if env['macos_deployment_target'] != 'default':
         env.Append(CCFLAGS=['-mmacosx-version-min=' + env['macos_deployment_target']])
+        env.Append(LINKFLAGS=['-mmacosx-version-min=' + env['macos_deployment_target']])
+
+    if env['macos_sdk_path']:
+        env.Append(CCFLAGS=['-isysroot', env['macos_sdk_path']])
+        env.Append(LINKFLAGS=['-isysroot', env['macos_sdk_path']])
 
     env.Append(LINKFLAGS=[
         '-arch',
-        'x86_64',
+        env['macos_arch'],
         '-framework',
         'Cocoa',
         '-Wl,-undefined,dynamic_lookup',
