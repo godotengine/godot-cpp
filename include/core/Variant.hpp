@@ -20,6 +20,7 @@
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 
+#include <climits>
 #include <iostream>
 
 namespace godot {
@@ -140,9 +141,18 @@ public:
 
 	inline Variant(unsigned char p_char) :
 			Variant((unsigned int)p_char) {}
+
 	Variant(int64_t p_char);
 
 	Variant(uint64_t p_char);
+
+#if LONG_MAX == INT_MAX
+	inline Variant(signed long p_long) :
+			Variant((signed int)p_long) {}
+
+	inline Variant(unsigned long p_long) :
+			Variant((unsigned int)p_long) {}
+#endif
 
 	Variant(float p_float);
 
@@ -209,6 +219,10 @@ public:
 	operator unsigned char() const;
 	operator int64_t() const;
 	operator uint64_t() const;
+#if LONG_MAX == INT_MAX
+	operator signed long() const;
+	operator unsigned long() const;
+#endif
 
 	operator wchar_t() const;
 

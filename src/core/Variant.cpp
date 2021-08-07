@@ -7,6 +7,7 @@
 #include "GodotGlobal.hpp"
 #include "Object.hpp"
 
+#include <climits>
 #include <iostream>
 
 namespace godot {
@@ -192,6 +193,14 @@ Variant::operator int64_t() const {
 Variant::operator uint64_t() const {
 	return godot::api->godot_variant_as_uint(&_godot_variant);
 }
+#if LONG_MAX == INT_MAX
+Variant::operator signed long() const {
+	return godot::api->godot_variant_as_int(&_godot_variant);
+}
+Variant::operator unsigned long() const {
+	return godot::api->godot_variant_as_uint(&_godot_variant);
+}
+#endif
 
 Variant::operator wchar_t() const {
 	return godot::api->godot_variant_as_int(&_godot_variant);
