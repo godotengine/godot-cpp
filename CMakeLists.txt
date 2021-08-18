@@ -1,36 +1,36 @@
 # cmake arguments
 # CMAKE_BUILD_TYPE:			Compilation target (Debug or Release defaults to Debug)
-# 
+#
 # godot-cpp cmake arguments
 # GODOT_HEADERS_DIR:		This is where the gdnative include folder is (godot_source/modules/gdnative/include)
 # GODOT_CUSTOM_API_FILE:	This is if you have another path for the godot_api.json
-# 
+#
 # Android cmake arguments
 # CMAKE_TOOLCHAIN_FILE:		The path to the android cmake toolchain ($ANDROID_NDK/build/cmake/android.toolchain.cmake)
 # ANDROID_NDK:				The path to the android ndk root folder
 # ANDROID_TOOLCHAIN_NAME:	The android toolchain (arm-linux-androideabi-4.9 or aarch64-linux-android-4.9 or x86-4.9 or x86_64-4.9)
 # ANDROID_PLATFORM:			The android platform version (android-23)
 # More info here: https://godot.readthedocs.io/en/latest/development/compiling/compiling_for_android.html
-# 
+#
 # Examples
-# 
+#
 # Builds a debug version:
 # cmake .
 # cmake --build .
-# 
+#
 # Builds a release version with clang
 # CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" .
 # cmake --build .
-# 
+#
 # Builds an android armeabi-v7a debug version:
 # cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_NDK=$ANDROID_NDK \
 #		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 -DANDROID_PLATFORM=android-23 -DCMAKE_BUILD_TYPE=Debug .
 # cmake --build .
-# 
+#
 # Protip
 # Generate the buildfiles in a sub directory to not clutter the root directory with build files:
 # mkdir build && cd build && cmake -G "Unix Makefiles" .. && cmake --build .
-# 
+#
 # Todo
 # Test build for Windows, Mac and mingw.
 
@@ -62,14 +62,14 @@ else()
 	add_definitions(-DNDEBUG)
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
-# Set the c++ standard to c++14
-set(CMAKE_CXX_STANDARD 14)
+# Set the c++ standard to c++17
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Input from user for godot headers and the api file
-set(GODOT_HEADERS_DIR "godot-headers" CACHE STRING "")
-set(GODOT_CUSTOM_API_FILE "godot-headers/api.json" CACHE STRING "")
+set(GODOT_HEADERS_DIR "godot-headers-temp" CACHE STRING "")
+set(GODOT_CUSTOM_API_FILE "godot-headers-temp/extension_api.json" CACHE STRING "")
 
 set(GODOT_COMPILE_FLAGS )
 set(GODOT_LINKER_FLAGS )
@@ -178,8 +178,7 @@ add_library(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
 	include
-	include/core
-	${CMAKE_CURRENT_BINARY_DIR}/include/gen/
+	${CMAKE_CURRENT_BINARY_DIR}/gen/include
 )
 
 # Put godot headers as SYSTEM PUBLIC to exclude warnings from irrelevant headers

@@ -1,900 +1,1612 @@
 #!/usr/bin/env python
-from __future__ import print_function
+
 import json
-import os
-import errno
+import re
+import shutil
 from pathlib import Path
-
-# Convenience function for using template get_node
-def correct_method_name(method_list):
-    for method in method_list:
-        if method["name"] == "get_node":
-            method["name"] = "get_node_internal"
-
-
-classes = []
 
 
 def print_file_list(api_filepath, output_dir, headers=False, sources=False):
-    global classes
-    end = ';'
+    api = {}
+    end = ";"
     with open(api_filepath) as api_file:
-        classes = json.load(api_file)
-    include_gen_folder = Path(output_dir) / 'include' / 'gen'
-    source_gen_folder = Path(output_dir) / 'src' / 'gen'
-    for _class in classes:
-        header_filename = include_gen_folder / (strip_name(_class["name"]) + ".hpp")
-        source_filename = source_gen_folder / (strip_name(_class["name"]) + ".cpp")
+        api = json.load(api_file)
+
+    include_gen_folder = Path(output_dir) / "gen" / "include" / "godot_cpp"
+    source_gen_folder = Path(output_dir) / "gen" / "src"
+
+    for builtin_class in api["builtin_classes"]:
+        if is_pod_type(builtin_class["name"]):
+            continue
+
+        header_filename = include_gen_folder / "variant" / (camel_to_snake(builtin_class["name"]) + ".hpp")
+        source_filename = source_gen_folder / "variant" / (camel_to_snake(builtin_class["name"]) + ".cpp")
         if headers:
             print(str(header_filename.as_posix()), end=end)
         if sources:
             print(str(source_filename.as_posix()), end=end)
-    icall_header_filename = include_gen_folder / '__icalls.hpp'
-    register_types_filename = source_gen_folder / '__register_types.cpp'
-    init_method_bindings_filename = source_gen_folder / '__init_method_bindings.cpp'
+
+    for engine_class in api["classes"]:
+        header_filename = include_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".hpp")
+        source_filename = source_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".cpp")
+        if headers:
+            print(str(header_filename.as_posix()), end=end)
+        if sources:
+            print(str(source_filename.as_posix()), end=end)
+
+    utility_functions_header_path = include_gen_folder / "variant" / "utility_functions.hpp"
+    utility_functions_source_path = source_gen_folder / "variant" / "utility_functions.cpp"
+    global_constants_header_path = include_gen_folder / "classes" / "global_constants.hpp"
     if headers:
-        print(str(icall_header_filename.as_posix()), end=end)
+        print(str(utility_functions_header_path.as_posix()), end=end)
+        print(str(global_constants_header_path.as_posix()), end=end)
     if sources:
-        print(str(register_types_filename.as_posix()), end=end)
-        print(str(init_method_bindings_filename.as_posix()), end=end)
+        print(str(utility_functions_source_path.as_posix()), end=end)
 
 
 def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
-    global classes
+    api = None
+
+    target_dir = Path(output_dir) / "gen"
+
     with open(api_filepath) as api_file:
-        classes = json.load(api_file)
+        api = json.load(api_file)
 
-    icalls = set()
-    include_gen_folder = Path(output_dir) / 'include' / 'gen'
-    source_gen_folder = Path(output_dir) / 'src' / 'gen'
+    shutil.rmtree(target_dir, ignore_errors=True)
+    target_dir.mkdir(parents=True)
 
-    try:
-        include_gen_folder.mkdir(parents=True)
-    except os.error as e:
-        if e.errno == errno.EEXIST:
-            print(str(source_gen_folder) + ": " + os.strerror(e.errno))
-        else:
-            exit(1)
+    generate_global_constants(api, target_dir)
+    generate_builtin_bindings(api, target_dir, "float_64")
+    generate_engine_classes_bindings(api, target_dir, use_template_get_node)
+    generate_utility_functions(api, target_dir)
 
-    try:
-        source_gen_folder.mkdir(parents=True)
-    except os.error as e:
-        if e.errno == errno.EEXIST:
-            print(str(source_gen_folder) + ": " + os.strerror(e.errno))
-        else:
-            exit(1)
 
-    for c in classes:
-        # print(c['name'])
-        used_classes = get_used_classes(c)
-        if use_template_get_node and c["name"] == "Node":
-            correct_method_name(c["methods"])
+builtin_classes = []
 
-        header = generate_class_header(used_classes, c, use_template_get_node)
+# Key is class name, value is boolean where True means the class is refcounted.
+engine_classes = {}
 
-        impl = generate_class_implementation(icalls, used_classes, c, use_template_get_node)
 
-        header_filename = include_gen_folder / (strip_name(c["name"]) + ".hpp")
+def generate_builtin_bindings(api, output_dir, build_config):
+    global builtin_classes
+
+    include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "variant"
+    source_gen_folder = Path(output_dir) / "src" / "variant"
+
+    include_gen_folder.mkdir(parents=True, exist_ok=True)
+    source_gen_folder.mkdir(parents=True, exist_ok=True)
+
+    # Store types beforehand.
+    for builtin_api in api["builtin_classes"]:
+        if is_pod_type(builtin_api["name"]):
+            continue
+        builtin_classes.append(builtin_api["name"])
+
+    builtin_sizes = {}
+
+    for size_list in api["builtin_class_sizes"]:
+        if size_list["build_configuration"] == build_config:
+            for size in size_list["sizes"]:
+                builtin_sizes[size["name"]] = size["size"]
+            break
+
+    # Create a file for Variant size, since that class isn't generated.
+    variant_size_filename = include_gen_folder / "variant_size.hpp"
+    with variant_size_filename.open("+w") as variant_size_file:
+        variant_size_source = []
+        add_header("variant_size.hpp", variant_size_source)
+
+        header_guard = "GODOT_CPP_VARIANT_SIZE_HPP"
+        variant_size_source.append(f"#ifndef {header_guard}")
+        variant_size_source.append(f"#define {header_guard}")
+        variant_size_source.append(f'#define GODOT_CPP_VARIANT_SIZE {builtin_sizes["Variant"]}')
+        variant_size_source.append(f"#endif // ! {header_guard}")
+
+        variant_size_file.write("\n".join(variant_size_source))
+
+    for builtin_api in api["builtin_classes"]:
+        if is_pod_type(builtin_api["name"]):
+            continue
+
+        size = builtin_sizes[builtin_api["name"]]
+
+        header_filename = include_gen_folder / (camel_to_snake(builtin_api["name"]) + ".hpp")
+        source_filename = source_gen_folder / (camel_to_snake(builtin_api["name"]) + ".cpp")
+
+        # Check used classes for header include
+        used_classes = set()
+        fully_used_classes = set()
+
+        class_name = builtin_api["name"]
+
+        if "constructors" in builtin_api:
+            for constructor in builtin_api["constructors"]:
+                if "arguments" in constructor:
+                    for argument in constructor["arguments"]:
+                        if is_included(argument["type"], class_name):
+                            if "default_value" in argument and argument["type"] != "Variant":
+                                fully_used_classes.add(argument["type"])
+                            else:
+                                used_classes.add(argument["type"])
+
+        if "methods" in builtin_api:
+            for method in builtin_api["methods"]:
+                if "arguments" in method:
+                    for argument in method["arguments"]:
+                        if is_included(argument["type"], class_name):
+                            if "default_value" in argument and argument["type"] != "Variant":
+                                fully_used_classes.add(argument["type"])
+                            else:
+                                used_classes.add(argument["type"])
+                if "return_type" in method:
+                    if is_included(method["return_type"], class_name):
+                        used_classes.add(method["return_type"])
+
+        if "members" in builtin_api:
+            for member in builtin_api["members"]:
+                if is_included(member["type"], class_name):
+                    used_classes.add(member["type"])
+
+        if "indexing_return_type" in builtin_api:
+            if is_included(builtin_api["indexing_return_type"], class_name):
+                used_classes.add(builtin_api["indexing_return_type"])
+
+        if "operators" in builtin_api:
+            for operator in builtin_api["operators"]:
+                if "right_type" in operator:
+                    if is_included(operator["right_type"], class_name):
+                        used_classes.add(operator["right_type"])
+
+        for type_name in fully_used_classes:
+            if type_name in used_classes:
+                used_classes.remove(type_name)
+
         with header_filename.open("w+") as header_file:
-            header_file.write(header)
+            header_file.write(generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes))
 
-        source_filename = source_gen_folder / (strip_name(c["name"]) + ".cpp")
         with source_filename.open("w+") as source_file:
-            source_file.write(impl)
+            source_file.write(generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes))
 
-    icall_header_filename = include_gen_folder / '__icalls.hpp'
-    with icall_header_filename.open("w+") as icall_header_file:
-        icall_header_file.write(generate_icall_header(icalls))
+    # Create a header with all builtin types for convenience.
+    builtin_header_filename = include_gen_folder / "builtin_types.hpp"
+    with builtin_header_filename.open("w+") as builtin_header_file:
+        builtin_header = []
+        add_header("builtin_types.hpp", builtin_header)
 
-    register_types_filename = source_gen_folder / '__register_types.cpp'
-    with register_types_filename.open("w+") as register_types_file:
-        register_types_file.write(generate_type_registry(classes))
+        builtin_header.append("#ifndef GODOT_CPP_BUILTIN_TYPES_HPP")
+        builtin_header.append("#define GODOT_CPP_BUILTIN_TYPES_HPP")
 
-    init_method_bindings_filename = source_gen_folder / '__init_method_bindings.cpp'
-    with init_method_bindings_filename.open("w+") as init_method_bindings_file:
-        init_method_bindings_file.write(generate_init_method_bindings(classes))
+        builtin_header.append("")
 
+        for builtin in builtin_classes:
+            builtin_header.append(f'#include <godot_cpp/variant/{camel_to_snake(builtin)}.hpp>')
 
-def is_reference_type(t):
-    for c in classes:
-        if c['name'] != t:
-            continue
-        if c['is_reference']:
-            return True
-    return False
+        builtin_header.append("")
 
-def make_gdnative_type(t, ref_allowed):
-    if is_enum(t):
-        return remove_enum_prefix(t) + " "
-    elif is_class_type(t):
-        if is_reference_type(t) and ref_allowed:
-            return "Ref<" + strip_name(t) + "> "
-        else:
-            return strip_name(t) + " *"
-    else:
-        if t == "int":
-            return "int64_t "
-        if t == "float" or t == "real":
-            return "real_t "
-        return strip_name(t) + " "
+        builtin_header.append("#endif // ! GODOT_CPP_BUILTIN_TYPES_HPP")
 
+        builtin_header_file.write("\n".join(builtin_header))
 
-def generate_class_header(used_classes, c, use_template_get_node):
 
-    source = []
-    source.append("#ifndef GODOT_CPP_" + strip_name(c["name"]).upper() + "_HPP")
-    source.append("#define GODOT_CPP_" + strip_name(c["name"]).upper() + "_HPP")
-    source.append("")
-    source.append("")
+def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes):
+    result = []
 
-    source.append("#include <gdnative_api_struct.gen.h>")
-    source.append("#include <cstdint>")
-    source.append("")
+    class_name = builtin_api["name"]
+    snake_class_name = camel_to_snake(class_name).upper()
 
+    header_guard = f"GODOT_CPP_{snake_class_name}_HPP"
 
-    source.append("#include <core/CoreTypes.hpp>")
+    add_header(f"{snake_class_name.lower()}.hpp", result)
 
-    class_name = strip_name(c["name"])
+    result.append(f"#ifndef {header_guard}")
+    result.append(f"#define {header_guard}")
 
-    # Ref<T> is not included in object.h in Godot either,
-    # so don't include it here because it's not needed
-    if class_name != "Object" and class_name != "Reference":
-        source.append("#include <core/Ref.hpp>")
-        ref_allowed = True
-    else:
-        source.append("#include <core/TagDB.hpp>")
-        ref_allowed = False
+    result.append("")
+    result.append("#include <godot_cpp/core/defs.hpp>")
+    result.append("")
 
+    # Special cases.
+    if class_name == "String":
+        result.append("#include <godot_cpp/variant/char_string.hpp>")
 
-    included = []
+    for include in fully_used_classes:
+        result.append(f"#include <godot_cpp/{get_include_path(include)}>")
 
-    for used_class in used_classes:
-        if is_enum(used_class) and is_nested_type(used_class):
-            used_class_name = remove_enum_prefix(extract_nested_type(used_class))
-            if used_class_name not in included:
-                included.append(used_class_name)
-                source.append("#include \"" + used_class_name + ".hpp\"")
-        elif is_enum(used_class) and is_nested_type(used_class) and not is_nested_type(used_class, class_name):
-            used_class_name = remove_enum_prefix(used_class)
-            if used_class_name not in included:
-                included.append(used_class_name)
-                source.append("#include \"" + used_class_name + ".hpp\"")
+    if len(fully_used_classes) > 0:
+        result.append("")
 
-    source.append("")
+    result.append(f"#include <godot/gdnative_interface.h>")
+    result.append("")
+    result.append("namespace godot {")
+    result.append("")
 
-    if c["base_class"] != "":
-        source.append("#include \"" + strip_name(c["base_class"]) + ".hpp\"")
+    for type_name in used_classes:
+        result.append(f"class {type_name};")
 
+    if len(used_classes) > 0:
+        result.append("")
 
-    source.append("namespace godot {")
-    source.append("")
+    result.append(f"class {class_name} {{")
+    result.append(f"\tstatic constexpr size_t {snake_class_name}_SIZE = {size};")
+    result.append(f"\tuint8_t opaque[{snake_class_name}_SIZE] {{ 0 }};")
+    result.append(f"\tGDNativeTypePtr ptr = const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque);")
 
+    result.append("")
+    result.append("\tfriend class Variant;")
 
-    for used_type in used_classes:
-        if is_enum(used_type) or is_nested_type(used_type, class_name):
-            continue
-        else:
-            source.append("class " + strip_name(used_type) + ";")
+    result.append("")
+    result.append("\tstatic struct _MethodBindings {")
 
+    if "constructors" in builtin_api:
+        for constructor in builtin_api["constructors"]:
+            result.append(f'\t\tGDNativePtrConstructor constructor_{constructor["index"]};')
 
-    source.append("")
+    if builtin_api["has_destructor"]:
+        result.append("\t\tGDNativePtrDestructor destructor;")
 
-    vararg_templates = ""
+    if "methods" in builtin_api:
+        for method in builtin_api["methods"]:
+            result.append(f'\t\tGDNativePtrBuiltInMethod method_{method["name"]};')
 
-    # generate the class definition here
-    source.append("class " + class_name + (" : public _Wrapped" if c["base_class"] == "" else (" : public " + strip_name(c["base_class"])) ) + " {")
+    if "members" in builtin_api:
+        for member in builtin_api["members"]:
+            result.append(f'\t\tGDNativePtrSetter member_{member["name"]}_setter;')
+            result.append(f'\t\tGDNativePtrGetter member_{member["name"]}_getter;')
 
-    if c["base_class"] == "":
-        source.append("public: enum { ___CLASS_IS_SCRIPT = 0, };")
-        source.append("")
-        source.append("private:")
+    if "indexing_return_type" in builtin_api:
+        result.append(f"\t\tGDNativePtrIndexedSetter indexed_setter;")
+        result.append(f"\t\tGDNativePtrIndexedGetter indexed_getter;")
 
-    if c["singleton"]:
-        source.append("\tstatic " + class_name + " *_singleton;")
-        source.append("")
-        source.append("\t" + class_name + "();")
-        source.append("")
+    if "is_keyed" in builtin_api and builtin_api["is_keyed"]:
+        result.append(f"\t\tGDNativePtrKeyedSetter keyed_setter;")
+        result.append(f"\t\tGDNativePtrKeyedGetter keyed_getter;")
+        result.append(f"\t\tGDNativePtrKeyedChecker keyed_checker;")
 
-    # Generate method table
-    source.append("\tstruct ___method_bindings {")
-
-    for method in c["methods"]:
-        source.append("\t\tgodot_method_bind *mb_" + method["name"] + ";")
-
-    source.append("\t};")
-    source.append("\tstatic ___method_bindings ___mb;")
-    source.append("\tstatic void *_detail_class_tag;")
-    source.append("")
-    source.append("public:")
-    source.append("\tstatic void ___init_method_bindings();")
-
-    # class id from core engine for casting
-    source.append("\tinline static size_t ___get_id() { return (size_t)_detail_class_tag; }")
-
-    source.append("")
-
-
-    if c["singleton"]:
-        source.append("\tstatic inline " + class_name + " *get_singleton()")
-        source.append("\t{")
-        source.append("\t\tif (!" + class_name + "::_singleton) {")
-        source.append("\t\t\t" + class_name + "::_singleton = new " + class_name + ";")
-        source.append("\t\t}")
-        source.append("\t\treturn " + class_name + "::_singleton;")
-        source.append("\t}")
-        source.append("")
-
-        # godot::api->godot_global_get_singleton((char *) \"" + strip_name(c["name"]) + "\");"
-
-    # class name:
-    # Two versions needed needed because when the user implements a custom class,
-    # we want to override `___get_class_name` while `___get_godot_class_name` can keep returning the base name
-    source.append("\tstatic inline const char *___get_class_name() { return (const char *) \"" + strip_name(c["name"]) + "\"; }")
-    source.append("\tstatic inline const char *___get_godot_class_name() { return (const char *) \"" + strip_name(c["name"]) + "\"; }")
-
-    source.append("\tstatic inline Object *___get_from_variant(Variant a) { godot_object *o = (godot_object*) a; return (o) ? (Object *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, o) : nullptr; }")
-
-    enum_values = []
-
-    source.append("\n\t// enums")
-    for enum in c["enums"]:
-        source.append("\tenum " + strip_name(enum["name"]) + " {")
-        for value in enum["values"]:
-            source.append("\t\t" + remove_nested_type_prefix(value) + " = " + str(enum["values"][value]) + ",")
-            enum_values.append(value)
-        source.append("\t};")
-
-    source.append("\n\t// constants")
-
-    for name in c["constants"]:
-        if name not in enum_values:
-            source.append("\tconst static int " + name + " = " + str(c["constants"][name]) + ";")
-
-
-    if c["instanciable"]:
-        source.append("")
-        source.append("")
-        source.append("\tstatic " + class_name + " *_new();")
-
-    source.append("\n\t// methods")
-
-
-    if class_name == "Object":
-        source.append("#ifndef GODOT_CPP_NO_OBJECT_CAST")
-        source.append("\ttemplate<class T>")
-        source.append("\tstatic T *cast_to(const Object *obj);")
-        source.append("#endif")
-        source.append("")
-
-    for method in c["methods"]:
-        method_signature = ""
-
-        # TODO decide what to do about virtual methods
-        # method_signature += "virtual " if method["is_virtual"] else ""
-        method_signature += make_gdnative_type(method["return_type"], ref_allowed)
-        method_name = escape_cpp(method["name"])
-        method_signature +=  method_name + "("
-
-
-        has_default_argument = False
-        method_arguments = ""
-
-        for i, argument in enumerate(method["arguments"]):
-            method_signature += "const " + make_gdnative_type(argument["type"], ref_allowed)
-            argument_name = escape_cpp(argument["name"])
-            method_signature += argument_name
-            method_arguments += argument_name
-
-
-            # default arguments
-            def escape_default_arg(_type, default_value):
-                if _type == "Color":
-                    return "Color(" + default_value + ")"
-                if _type == "bool" or _type == "int":
-                    return default_value.lower()
-                if _type == "Array":
-                    return "Array()"
-                if _type in ["PoolVector2Array", "PoolStringArray", "PoolVector3Array", "PoolColorArray", "PoolIntArray", "PoolRealArray", "PoolByteArray"]:
-                    return _type + "()"
-                if _type == "Vector2":
-                    return "Vector2" + default_value
-                if _type == "Vector3":
-                    return "Vector3" + default_value
-                if _type == "Transform":
-                    return "Transform()"
-                if _type == "Transform2D":
-                    return "Transform2D()"
-                if _type == "Rect2":
-                    return "Rect2" + default_value
-                if _type == "Variant":
-                    return "Variant()" if default_value == "Null" else default_value
-                if _type == "String" or _type == "NodePath":
-                    return "\"" + default_value + "\""
-                if _type == "RID":
-                    return "RID()"
-
-                if default_value == "Null" or default_value == "[Object:null]":
-                    return "nullptr"
-
-                return default_value
-
-
-
-
-            if argument["has_default_value"] or has_default_argument:
-                method_signature += " = " + escape_default_arg(argument["type"], argument["default_value"])
-                has_default_argument = True
-
-
-
-            if i != len(method["arguments"]) - 1:
-                method_signature += ", "
-                method_arguments += ","
-
-        if method["has_varargs"]:
-            if len(method["arguments"]) > 0:
-                method_signature += ", "
-                method_arguments += ", "
-            vararg_templates += "\ttemplate <class... Args> " + method_signature + "Args... args){\n\t\treturn " + method_name + "(" + method_arguments + "Array::make(args...));\n\t}\n"""
-            method_signature += "const Array& __var_args = Array()"
-
-        method_signature += ")" + (" const" if method["is_const"] else "")
-
-
-        source.append("\t" + method_signature + ";")
-
-    source.append(vararg_templates)
-
-    if use_template_get_node and class_name == "Node":
-        # Extra definition for template get_node that calls the renamed get_node_internal; has a default template parameter for backwards compatibility.
-        source.append("\ttemplate <class T = Node>")
-        source.append("\tT *get_node(const NodePath path) const {")
-        source.append("\t\treturn Object::cast_to<T>(get_node_internal(path));")
-        source.append("\t}")
-
-        source.append("};")
-        source.append("")
-
-        # ...And a specialized version so we don't unnecessarily cast when using the default.
-        source.append("template <>")
-        source.append("inline Node *Node::get_node<Node>(const NodePath path) const {")
-        source.append("\treturn get_node_internal(path);")
-        source.append("}")
-        source.append("")
-    else:
-        source.append("};")
-        source.append("")
-
-    source.append("}")
-    source.append("")
-
-    source.append("#endif")
-
-
-    return "\n".join(source)
-
-
-
-
-
-def generate_class_implementation(icalls, used_classes, c, use_template_get_node):
-    class_name = strip_name(c["name"])
-
-    ref_allowed = class_name != "Object" and class_name != "Reference"
-
-    source = []
-    source.append("#include \"" + class_name + ".hpp\"")
-    source.append("")
-    source.append("")
-
-    source.append("#include <core/GodotGlobal.hpp>")
-    source.append("#include <core/CoreTypes.hpp>")
-    source.append("#include <core/Ref.hpp>")
-
-    source.append("#include <core/Godot.hpp>")
-    source.append("")
-
-
-    source.append("#include \"__icalls.hpp\"")
-    source.append("")
-    source.append("")
-
-    for used_class in used_classes:
-        if is_enum(used_class):
-            continue
-        else:
-            source.append("#include \"" + strip_name(used_class) + ".hpp\"")
-
-    source.append("")
-    source.append("")
-
-    source.append("namespace godot {")
-
-
-    core_object_name = "this"
-
-
-    source.append("")
-    source.append("")
-
-    if c["singleton"]:
-        source.append("" + class_name + " *" + class_name + "::_singleton = NULL;")
-        source.append("")
-        source.append("")
-
-        # FIXME Test if inlining has a huge impact on binary size
-        source.append(class_name + "::" + class_name + "() {")
-        source.append("\t_owner = godot::api->godot_global_get_singleton((char *) \"" + strip_name(c["name"]) + "\");")
-        source.append("}")
-
-        source.append("")
-        source.append("")
-
-    # Method table initialization
-    source.append(class_name + "::___method_bindings " + class_name + "::___mb = {};")
-    source.append("")
-
-    source.append("void *" + class_name + "::_detail_class_tag = nullptr;")
-    source.append("")
-
-    source.append("void " + class_name + "::___init_method_bindings() {")
-
-    for method in c["methods"]:
-        source.append("\t___mb.mb_" + method["name"] + " = godot::api->godot_method_bind_get_method(\"" + c["name"] + "\", \"" + ("get_node" if use_template_get_node and method["name"] == "get_node_internal" else method["name"]) + "\");")
-
-    source.append("\tgodot_string_name class_name;")
-    source.append("\tgodot::api->godot_string_name_new_data(&class_name, \"" + c["name"] + "\");")
-    source.append("\t_detail_class_tag = godot::core_1_2_api->godot_get_class_tag(&class_name);")
-    source.append("\tgodot::api->godot_string_name_destroy(&class_name);")
-
-    source.append("}")
-    source.append("")
-
-    if c["instanciable"]:
-        source.append(class_name + " *" + strip_name(c["name"]) + "::_new()")
-        source.append("{")
-        source.append("\treturn (" + class_name + " *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, godot::api->godot_get_class_constructor((char *)\"" + c["name"] + "\")());")
-        source.append("}")
-
-    for method in c["methods"]:
-        method_signature = ""
-
-        method_signature += make_gdnative_type(method["return_type"], ref_allowed)
-        method_signature += strip_name(c["name"]) + "::" + escape_cpp(method["name"]) + "("
-
-        for i, argument in enumerate(method["arguments"]):
-            method_signature += "const " + make_gdnative_type(argument["type"], ref_allowed)
-            method_signature += escape_cpp(argument["name"])
-
-            if i != len(method["arguments"]) - 1:
-                method_signature += ", "
-
-        if method["has_varargs"]:
-            if len(method["arguments"]) > 0:
-                method_signature += ", "
-            method_signature += "const Array& __var_args"
-
-        method_signature += ")" + (" const" if method["is_const"] else "")
-
-        source.append(method_signature + " {")
-
-
-        if method["name"] == "free":
-            # dirty hack because Object::free is marked virtual but doesn't actually exist...
-            source.append("\tgodot::api->godot_object_destroy(_owner);")
-            source.append("}")
-            source.append("")
-            continue
-
-        return_statement = ""
-        return_type_is_ref = is_reference_type(method["return_type"]) and ref_allowed
-
-        if method["return_type"] != "void":
-            if is_class_type(method["return_type"]):
-                if is_enum(method["return_type"]):
-                    return_statement += "return (" + remove_enum_prefix(method["return_type"]) + ") "
-                elif return_type_is_ref:
-                    return_statement += "return Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor("
+    if "operators" in builtin_api:
+        for operator in builtin_api["operators"]:
+            if "right_type" in operator:
+                result.append(
+                    f'\t\tGDNativePtrOperatorEvaluator operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]};'
+                )
+            else:
+                result.append(f'\t\tGDNativePtrOperatorEvaluator operator_{get_operator_id_name(operator["name"])};')
+
+    result.append("\t} _method_bindings;")
+
+    result.append("")
+    result.append("\tstatic void init_bindings();")
+
+    result.append("")
+    result.append("public:")
+
+    if "constructors" in builtin_api:
+        for constructor in builtin_api["constructors"]:
+            method_signature = f"\t{class_name}("
+            if "arguments" in constructor:
+                method_signature += make_function_parameters(
+                    constructor["arguments"], include_default=True, for_builtin=True
+                )
+            method_signature += ");"
+
+            result.append(method_signature)
+
+    # Special cases.
+    if class_name == "String" or class_name == "StringName" or class_name == "NodePath":
+        result.append(f"\t{class_name}(const char *from);")
+        result.append(f"\t{class_name}(const wchar_t *from);")
+        result.append(f"\t{class_name}(const char16_t *from);")
+        result.append(f"\t{class_name}(const char32_t *from);")
+
+    if "constants" in builtin_api:
+        axis_constants_count = 0
+        for constant in builtin_api["constants"]:
+            # Special case: Vector3.Axis is the only enum in the bindings.
+            # It's technically not supported by Variant but works for direct access.
+            if class_name == "Vector3" and constant["name"].startswith("AXIS"):
+                if axis_constants_count == 0:
+                    result.append("\tenum Axis {")
+                result.append(f'\t\t{constant["name"]} = {constant["value"]},')
+                axis_constants_count += 1
+                if axis_constants_count == 3:
+                    result.append("\t};")
+            else:
+                result.append(f'\tstatic const {correct_type(constant["type"])} {constant["name"]};')
+
+    if builtin_api["has_destructor"]:
+        result.append(f"\t~{class_name}();")
+
+    method_list = []
+
+    if "methods" in builtin_api:
+        for method in builtin_api["methods"]:
+            method_list.append(method["name"])
+
+            vararg = method["is_vararg"]
+            if vararg:
+                result.append("\ttemplate<class... Args>")
+
+            method_signature = "\t"
+            if "is_static" in method and method["is_static"]:
+                method_signature += "static "
+
+            if "return_type" in method:
+                method_signature += f'{correct_type(method["return_type"])} '
+            else:
+                method_signature += "void "
+
+            method_signature += f'{method["name"]}('
+
+            method_arguments = []
+            if "arguments" in method:
+                method_arguments = method["arguments"]
+
+            method_signature += make_function_parameters(
+                method_arguments, include_default=True, for_builtin=True, is_vararg=vararg
+            )
+
+            method_signature += ")"
+            if method["is_const"]:
+                method_signature += " const"
+            method_signature += ";"
+
+            result.append(method_signature)
+
+    # Special cases.
+    if class_name == "String":
+        result.append("\tCharString utf8() const;")
+        result.append("\tCharString ascii() const;")
+        result.append("\tChar16String utf16() const;")
+        result.append("\tChar32String utf32() const;")
+        result.append("\tCharWideString wide_string() const;")
+
+    if "members" in builtin_api:
+        for member in builtin_api["members"]:
+            if f'get_{member["name"]}' not in method_list:
+                result.append(f'\t{correct_type(member["type"])} get_{member["name"]}() const;')
+            if f'set_{member["name"]}' not in method_list:
+                result.append(f'\tvoid set_{member["name"]}({type_for_parameter(member["type"])}value);')
+
+    if "operators" in builtin_api:
+        for operator in builtin_api["operators"]:
+            if operator["name"] not in ["in", "xor"]:
+                if "right_type" in operator:
+                    result.append(
+                        f'\t{correct_type(operator["return_type"])} operator{operator["name"]}({type_for_parameter(operator["right_type"])}other) const;'
+                    )
                 else:
-                    return_statement += "return " + ("(" + strip_name(method["return_type"]) + " *) " if is_class_type(method["return_type"]) else "")
+                    result.append(
+                        f'\t{correct_type(operator["return_type"])} operator{operator["name"].replace("unary", "")}() const;'
+                    )
+
+    # Special cases.
+    if class_name == "String":
+        result.append("String &operator=(const char *p_str);")
+        result.append("String &operator=(const wchar_t *p_str);")
+        result.append("String &operator=(const char16_t *p_str);")
+        result.append("String &operator=(const char32_t *p_str);")
+        result.append("bool operator==(const char *p_str) const;")
+        result.append("bool operator==(const wchar_t *p_str) const;")
+        result.append("bool operator==(const char16_t *p_str) const;")
+        result.append("bool operator==(const char32_t *p_str) const;")
+        result.append("bool operator!=(const char *p_str) const;")
+        result.append("bool operator!=(const wchar_t *p_str) const;")
+        result.append("bool operator!=(const char16_t *p_str) const;")
+        result.append("bool operator!=(const char32_t *p_str) const;")
+
+    result.append("};")
+
+    if class_name == "String":
+        result.append("")
+        result.append("bool operator==(const char *p_chr, const String &p_str);")
+        result.append("bool operator==(const wchar_t *p_chr, const String &p_str);")
+        result.append("bool operator==(const char16_t *p_chr, const String &p_str);")
+        result.append("bool operator==(const char32_t *p_chr, const String &p_str);")
+        result.append("bool operator!=(const char *p_chr, const String &p_str);")
+        result.append("bool operator!=(const wchar_t *p_chr, const String &p_str);")
+        result.append("bool operator!=(const char16_t *p_chr, const String &p_str);")
+        result.append("bool operator!=(const char32_t *p_chr, const String &p_str);")
+        result.append("String operator+(const char *p_chr, const String &p_str);")
+        result.append("String operator+(const wchar_t *p_chr, const String &p_str);")
+        result.append("String operator+(const char16_t *p_chr, const String &p_str);")
+        result.append("String operator+(const char32_t *p_chr, const String &p_str);")
+
+    result.append("")
+    result.append("} // namespace godot")
+
+    result.append(f"#endif // ! {header_guard}")
+
+    return "\n".join(result)
+
+
+def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes):
+    result = []
+
+    class_name = builtin_api["name"]
+    snake_class_name = camel_to_snake(class_name)
+    enum_type_name = f"GDNATIVE_VARIANT_TYPE_{snake_class_name.upper()}"
+
+    add_header(f"{snake_class_name}.cpp", result)
+
+    result.append("")
+    result.append(f"#include <godot_cpp/variant/{snake_class_name}.hpp>")
+    result.append("")
+    result.append("#include <godot_cpp/core/binder_common.hpp>")
+    result.append("")
+    result.append("#include <godot_cpp/godot.hpp>")
+    result.append("")
+
+    # Only used since the "fully used" is included in header already.
+    for include in used_classes:
+        result.append(f"#include <godot_cpp/{get_include_path(include)}>")
+
+    if len(used_classes) > 0:
+        result.append("")
+
+    result.append("#include <godot_cpp/core/builtin_ptrcall.hpp>")
+    result.append("")
+    result.append("namespace godot {")
+    result.append("")
+
+    result.append(f"{class_name}::_MethodBindings {class_name}::_method_bindings;")
+    result.append("")
+
+    result.append(f"void {class_name}::init_bindings() {{")
+
+    if "constructors" in builtin_api:
+        for constructor in builtin_api["constructors"]:
+            result.append(
+                f'\t_method_bindings.constructor_{constructor["index"]} = internal::interface->variant_get_ptr_constructor({enum_type_name}, {constructor["index"]});'
+            )
+
+    if builtin_api["has_destructor"]:
+        result.append(
+            f"\t_method_bindings.destructor = internal::interface->variant_get_ptr_destructor({enum_type_name});"
+        )
+
+    if "methods" in builtin_api:
+        for method in builtin_api["methods"]:
+            # TODO: Add error check for hash mismatch.
+            result.append(
+                f'\t_method_bindings.method_{method["name"]} = internal::interface->variant_get_ptr_builtin_method({enum_type_name}, "{method["name"]}", {method["hash"]});'
+            )
+
+    if "members" in builtin_api:
+        for member in builtin_api["members"]:
+            result.append(
+                f'\t_method_bindings.member_{member["name"]}_setter = internal::interface->variant_get_ptr_setter({enum_type_name}, "{member["name"]}");'
+            )
+            result.append(
+                f'\t_method_bindings.member_{member["name"]}_getter = internal::interface->variant_get_ptr_getter({enum_type_name}, "{member["name"]}");'
+            )
+
+    if "indexing_return_type" in builtin_api:
+        result.append(
+            f"\t_method_bindings.indexed_setter = internal::interface->variant_get_ptr_indexed_setter({enum_type_name});"
+        )
+        result.append(
+            f"\t_method_bindings.indexed_getter = internal::interface->variant_get_ptr_indexed_getter({enum_type_name});"
+        )
+
+    if "is_keyed" in builtin_api and builtin_api["is_keyed"]:
+        result.append(
+            f"\t_method_bindings.keyed_setter = internal::interface->variant_get_ptr_keyed_setter({enum_type_name});"
+        )
+        result.append(
+            f"\t_method_bindings.keyed_getter = internal::interface->variant_get_ptr_keyed_getter({enum_type_name});"
+        )
+        result.append(
+            f"\t_method_bindings.keyed_checker = internal::interface->variant_get_ptr_keyed_checker({enum_type_name});"
+        )
+
+    if "operators" in builtin_api:
+        for operator in builtin_api["operators"]:
+            if "right_type" in operator:
+                result.append(
+                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]} = internal::interface->variant_get_ptr_operator_evaluator(GDNATIVE_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, GDNATIVE_VARIANT_TYPE_{camel_to_snake(operator["right_type"]).upper()});'
+                )
             else:
-                return_statement += "return "
+                result.append(
+                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])} = internal::interface->variant_get_ptr_operator_evaluator(GDNATIVE_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, GDNATIVE_VARIANT_TYPE_NIL);'
+                )
 
-        def get_icall_type_name(name):
-            if is_enum(name):
-                return "int"
-            if is_class_type(name):
-                return "Object"
-            return name
+    result.append("}")
+    result.append("")
 
+    if "constructors" in builtin_api:
+        for constructor in builtin_api["constructors"]:
+            method_signature = f"{class_name}::{class_name}("
+            if "arguments" in constructor:
+                method_signature += make_function_parameters(
+                    constructor["arguments"], include_default=False, for_builtin=True
+                )
+            method_signature += ") {"
 
+            result.append(method_signature)
 
-        if method["has_varargs"]:
+            method_call = (
+                f'\tinternal::_call_builtin_constructor(_method_bindings.constructor_{constructor["index"]}, &opaque'
+            )
+            if "arguments" in constructor:
+                method_call += ", "
+                arguments = []
+                for argument in constructor["arguments"]:
+                    (encode, arg_name) = get_encoded_arg(
+                        argument["name"],
+                        argument["type"],
+                        argument["meta"] if "meta" in argument else None,
+                    )
+                    result += encode
+                    arguments.append(arg_name)
+                method_call += ", ".join(arguments)
+            method_call += ");"
 
-            if len(method["arguments"]) != 0:
-                source.append("\tVariant __given_args[" + str(len(method["arguments"])) + "];")
+            result.append(method_call)
+            result.append("}")
+            result.append("")
 
-            for i, argument in enumerate(method["arguments"]):
-                source.append("\tgodot::api->godot_variant_new_nil((godot_variant *) &__given_args[" + str(i) + "]);")
+    if builtin_api["has_destructor"]:
+        result.append(f"{class_name}::~{class_name}() {{")
+        result.append("\t_method_bindings.destructor(&opaque);")
+        result.append("}")
+        result.append("")
 
-            source.append("")
+    method_list = []
 
+    if "methods" in builtin_api:
+        for method in builtin_api["methods"]:
+            method_list.append(method["name"])
 
-            for i, argument in enumerate(method["arguments"]):
-                source.append("\t__given_args[" + str(i) + "] = " + escape_cpp(argument["name"]) + ";")
+            if "is_vararg" in method and method["is_vararg"]:
+                # Done in the header because of the template.
+                continue
 
-            source.append("")
-
-            size = ""
-            if method["has_varargs"]:
-                size = "(__var_args.size() + " + str(len(method["arguments"])) + ")"
+            method_signature = ""
+            if "return_type" in method:
+                method_signature += f'{correct_type(method["return_type"])} '
             else:
-                size = "(" + str(len(method["arguments"])) + ")"
+                method_signature += "void "
 
-            source.append("\tgodot_variant **__args = (godot_variant **) alloca(sizeof(godot_variant *) * " + size + ");")
+            method_signature += f'{class_name}::{method["name"]}('
+            if "arguments" in method:
+                method_signature += make_function_parameters(
+                    method["arguments"], include_default=False, for_builtin=True
+                )
+            method_signature += ")"
+            if method["is_const"]:
+                method_signature += " const"
+            method_signature += " {"
 
-            source.append("")
+            result.append(method_signature)
 
-            for i, argument in enumerate(method["arguments"]):
-                source.append("\t__args[" + str(i) + "] = (godot_variant *) &__given_args[" + str(i) + "];")
+            method_call = "\t"
+            if "return_type" in method:
+                method_call += f'return internal::_call_builtin_method_ptr_ret<{correct_type(method["return_type"])}>('
+            else:
+                method_call += f"internal::_call_builtin_method_ptr_no_ret("
+            method_call += f'_method_bindings.method_{method["name"]}, '
+            if "is_static" in method and method["is_static"]:
+                method_call += "nullptr"
+            else:
+                method_call += "(GDNativeTypePtr)&opaque"
 
-            source.append("")
+            if "arguments" in method:
+                arguments = []
+                method_call += ", "
+                for argument in method["arguments"]:
+                    (encode, arg_name) = get_encoded_arg(
+                        argument["name"],
+                        argument["type"],
+                        argument["meta"] if "meta" in argument else None,
+                    )
+                    result += encode
+                    arguments.append(arg_name)
+                method_call += ", ".join(arguments)
+            method_call += ");"
 
-            if method["has_varargs"]:
-                source.append("\tfor (int i = 0; i < __var_args.size(); i++) {")
-                source.append("\t\t__args[i + " + str(len(method["arguments"])) + "] = (godot_variant *) &((Array &) __var_args)[i];")
-                source.append("\t}")
+            result.append(method_call)
+            result.append("}")
+            result.append("")
 
-            source.append("")
+    if "members" in builtin_api:
+        for member in builtin_api["members"]:
+            if f'get_{member["name"]}' not in method_list:
+                result.append(f'{correct_type(member["type"])} {class_name}::get_{member["name"]}() const {{')
+                result.append(
+                    f'\treturn internal::_call_builtin_ptr_getter<{correct_type(member["type"])}>(_method_bindings.member_{member["name"]}_getter, (const GDNativeTypePtr)&opaque);'
+                )
+                result.append("}")
 
-            source.append("\tVariant __result;")
-            source.append("\t*(godot_variant *) &__result = godot::api->godot_method_bind_call(___mb.mb_" + method["name"] + ", ((const Object *) " + core_object_name + ")->_owner, (const godot_variant **) __args, " + size + ", nullptr);")
+            if f'set_{member["name"]}' not in method_list:
+                result.append(f'void {class_name}::set_{member["name"]}({type_for_parameter(member["type"])}value) {{')
+                (encode, arg_name) = get_encoded_arg("value", member["type"], None)
+                result += encode
+                result.append(
+                    f'\t_method_bindings.member_{member["name"]}_setter((const GDNativeTypePtr)&opaque, (const GDNativeTypePtr){arg_name});'
+                )
 
-            source.append("")
+                result.append("}")
+            result.append("")
 
-            if is_class_type(method["return_type"]):
-                source.append("\tObject *obj = Object::___get_from_variant(__result);")
-                source.append("\tif (obj->has_method(\"reference\"))")
-                source.append("\t\tobj->callv(\"reference\", Array());")
+    if "operators" in builtin_api:
+        for operator in builtin_api["operators"]:
+            if operator["name"] not in ["in", "xor"]:
+                if "right_type" in operator:
+                    result.append(
+                        f'{correct_type(operator["return_type"])} {class_name}::operator{operator["name"]}({type_for_parameter(operator["right_type"])}other) const {{'
+                    )
+                    (encode, arg_name) = get_encoded_arg("other", operator["right_type"], None)
+                    result += encode
+                    result.append(
+                        f'\treturn internal::_call_builtin_operator_ptr<{correct_type(operator["return_type"])}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]}, (const GDNativeTypePtr)&opaque, (const GDNativeTypePtr){arg_name});'
+                    )
+                    result.append("}")
+                else:
+                    result.append(
+                        f'{correct_type(operator["return_type"])} {class_name}::operator{operator["name"].replace("unary", "")}() const {{'
+                    )
+                    result.append(
+                        f'\treturn internal::_call_builtin_operator_ptr<{correct_type(operator["return_type"])}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}, (const GDNativeTypePtr)&opaque, (const GDNativeTypePtr)nullptr);'
+                    )
+                    result.append("}")
+            result.append("")
 
-                source.append("")
+    result.append("} //namespace godot")
+
+    return "\n".join(result)
 
 
-            for i, argument in enumerate(method["arguments"]):
-                source.append("\tgodot::api->godot_variant_destroy((godot_variant *) &__given_args[" + str(i) + "]);")
+def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
+    global engine_classes
 
-            source.append("")
+    include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
+    source_gen_folder = Path(output_dir) / "src" / "classes"
 
-            if method["return_type"] != "void":
-                cast = ""
-                if is_class_type(method["return_type"]):
-                    if return_type_is_ref:
-                        cast += "Ref<" + strip_name(method["return_type"]) + ">::__internal_constructor(__result);"
+    include_gen_folder.mkdir(parents=True, exist_ok=True)
+    source_gen_folder.mkdir(parents=True, exist_ok=True)
+
+    # First create map of classes.
+    for class_api in api["classes"]:
+        engine_classes[class_api["name"]] = class_api["is_refcounted"]
+
+    for class_api in api["classes"]:
+        # Check used classes for header include.
+        used_classes = set()
+        fully_used_classes = set()
+
+        class_name = class_api["name"]
+
+        header_filename = include_gen_folder / (camel_to_snake(class_api["name"]) + ".hpp")
+        source_filename = source_gen_folder / (camel_to_snake(class_api["name"]) + ".cpp")
+
+        if "methods" in class_api:
+            for method in class_api["methods"]:
+                if "arguments" in method:
+                    for argument in method["arguments"]:
+                        if is_included(argument["type"], class_name):
+                            if is_enum(argument["type"]):
+                                fully_used_classes.add(get_enum_class(argument["type"]))
+                            elif "default_value" in argument:
+                                fully_used_classes.add(argument["type"])
+                            else:
+                                used_classes.add(argument["type"])
+                            if is_refcounted(argument["type"]):
+                                fully_used_classes.add("Ref")
+                if "return_value" in method:
+                    if is_included(method["return_value"]["type"], class_name):
+                        if is_enum(method["return_value"]["type"]):
+                            fully_used_classes.add(get_enum_class(method["return_value"]["type"]))
+                        elif is_variant(method["return_value"]["type"]):
+                            fully_used_classes.add(method["return_value"]["type"])
+                        else:
+                            used_classes.add(method["return_value"]["type"])
+                        if is_refcounted(method["return_value"]["type"]):
+                            fully_used_classes.add("Ref")
+
+        if "members" in class_api:
+            for member in class_api["members"]:
+                if is_included(member["type"], class_name):
+                    if is_enum(member["type"]):
+                        fully_used_classes.add(get_enum_class(member["type"]))
                     else:
-                        cast += "(" + strip_name(method["return_type"]) + " *) " + strip_name(method["return_type"] + "::___get_from_variant(") + "__result);"
-                else:
-                    cast += "__result;"
-                source.append("\treturn " + cast)
+                        used_classes.add(member["type"])
+                    if is_refcounted(member["type"]):
+                        fully_used_classes.add("Ref")
 
-
+        if "inherits" in class_api:
+            if is_included(class_api["inherits"], class_name):
+                fully_used_classes.add(class_api["inherits"])
+            if is_refcounted(class_api["name"]):
+                fully_used_classes.add("Ref")
         else:
+            fully_used_classes.add("Wrapped")
 
-            args = []
-            for arg in method["arguments"]:
-                args.append(get_icall_type_name(arg["type"]))
+        for type_name in fully_used_classes:
+            if type_name in used_classes:
+                used_classes.remove(type_name)
 
-            icall_ret_type = get_icall_type_name(method["return_type"])
+        with header_filename.open("w+") as header_file:
+            header_file.write(
+                generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node)
+            )
 
-            icall_sig = tuple((icall_ret_type, tuple(args)))
+        with source_filename.open("w+") as source_file:
+            source_file.write(
+                generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node)
+            )
 
-            icalls.add(icall_sig)
 
-            icall_name = get_icall_name(icall_sig)
+def generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node):
+    result = []
 
-            return_statement += icall_name + "(___mb.mb_" + method["name"] + ", (const Object *) " + core_object_name
+    class_name = class_api["name"]
+    snake_class_name = camel_to_snake(class_name).upper()
 
-            for arg in method["arguments"]:
-                arg_is_ref = is_reference_type(arg["type"]) and ref_allowed
-                return_statement += ", " + escape_cpp(arg["name"]) + (".ptr()" if arg_is_ref else "")
+    add_header(f"{snake_class_name.lower()}.hpp", result)
 
-            return_statement += ")"
+    header_guard = f"GODOT_CPP_{snake_class_name}_HPP"
 
-            if return_type_is_ref:
-                return_statement += ")"
+    result.append(f"#ifndef {header_guard}")
+    result.append(f"#define {header_guard}")
 
-            source.append("\t" + return_statement + ";")
+    result.append("")
+
+    for included in fully_used_classes:
+        result.append(f"#include <godot_cpp/{get_include_path(included)}>")
+
+    if len(fully_used_classes) > 0:
+        result.append("")
+
+    result.append("namespace godot {")
+    result.append("")
+
+    for type_name in used_classes:
+        result.append(f"class {type_name};")
+
+    if len(used_classes) > 0:
+        result.append("")
+
+    inherits = class_api["inherits"] if "inherits" in class_api else "Wrapped"
+    result.append(f"class {class_name} : public {inherits} {{")
+
+    result.append(f"\tGDNATIVE_CLASS({class_name}, {inherits})")
+    result.append("")
+
+    result.append("public:")
+
+    if "enums" in class_api:
+        for enum_api in class_api["enums"]:
+            result.append(f'\tenum {enum_api["name"]} {{')
+            for value in enum_api["values"]:
+                result.append(f'\t\t{value["name"]} = {value["value"]},')
+            result.append("\t};")
+            result.append("")
+
+    has_vararg_method = False
+
+    if "methods" in class_api:
+        for method in class_api["methods"]:
+            if method["is_virtual"]:
+                # TODO: See how to bind virtual methods (if they are even needed).
+                continue
+
+            method_signature = "\t"
+
+            vararg = "is_vararg" in method and method["is_vararg"]
+            if vararg:
+                has_vararg_method = True
+                method_signature += "private: "
+
+            if "return_value" in method:
+                method_signature += correct_type(
+                    method["return_value"]["type"],
+                    method["return_value"]["meta"] if "meta" in method["return_value"] else None,
+                )
+            else:
+                method_signature += "void"
+
+            if not method_signature.endswith("*"):
+                method_signature += " "
+
+            method_signature += f'{escape_identifier(method["name"])}'
+
+            if vararg or (use_template_get_node and class_name == "Node" and method["name"] == "get_node"):
+                method_signature += "_internal"
+
+            method_signature += "("
+
+            method_arguments = []
+            if "arguments" in method:
+                method_arguments = method["arguments"]
+
+            if not vararg:
+                method_signature += make_function_parameters(
+                    method_arguments, include_default=True, is_vararg=vararg, for_builtin=False
+                )
+            else:
+                method_signature += "const Variant **args, GDNativeInt arg_count"
+
+            method_signature += ")"
+
+            if method["is_const"]:
+                method_signature += " const"
+
+            method_signature += ";"
+            result.append(method_signature)
+
+            if vararg:
+                # Add templated version.
+                method_signature = "\tpublic: template<class... Args> "
+
+                if "return_value" in method:
+                    method_signature += correct_type(
+                        method["return_value"]["type"],
+                        method["return_value"]["meta"] if "meta" in method["return_value"] else None,
+                    )
+                else:
+                    method_signature += "void"
+
+                if not method_signature.endswith("*"):
+                    method_signature += " "
+
+                method_signature += f'{escape_identifier(method["name"])}'
+
+                method_arguments = []
+                if "arguments" in method:
+                    method_arguments = method["arguments"]
+
+                method_signature += "("
+
+                method_signature += make_function_parameters(method_arguments, include_default=True, is_vararg=vararg)
+
+                method_signature += ")"
+
+                if method["is_const"]:
+                    method_signature += " const"
+
+                method_signature += " {"
+                result.append(method_signature)
+
+                args_array = f"\t\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args {{ "
+                for argument in method_arguments:
+                    if argument["type"] == "Variant":
+                        args_array += argument["name"]
+                    else:
+                        args_array += f'Variant({argument["name"]})'
+                    args_array += ", "
+
+                args_array += "Variant(args)... };"
+                result.append(args_array)
+                result.append(f"\t\tstd::array<const Variant *, {len(method_arguments)} + sizeof...(Args)> call_args;")
+                result.append("\t\tfor(size_t i = 0; i < variant_args.size(); i++) {")
+                result.append("\t\t\tcall_args[i] = &variant_args[i];")
+                result.append("\t\t}")
+
+                call_line = "\t\t"
+
+                if "return_value" in method and method["return_value"]["type"] != "void":
+                    call_line += "return "
+
+                call_line += f'{escape_identifier(method["name"])}_internal(call_args.data(), variant_args.size());'
+                result.append(call_line)
+                result.append("\t}")
+
+    # Special cases.
+    if class_name == "Object":
+        result.append("")
+        result.append("\ttemplate<class T>")
+        result.append("\tstatic T *cast_to(Object *p_object);")
+    elif use_template_get_node and class_name == "Node":
+        result.append("\ttemplate<class T>")
+        result.append("\tT *get_node(const NodePath &p_path) { return Object::cast_to<T>(get_node_internal(p_path)); }")
+
+    # Constructor.
+    result.append("")
+    result.append(f"\t{class_name}();")
+
+    result.append("")
+    result.append("};")
+    result.append("")
+
+    result.append("} // namespace godot")
+
+    result.append(f"#endif // ! {header_guard}")
+
+    return "\n".join(result)
+
+
+def generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node):
+    result = []
+
+    class_name = class_api["name"]
+    snake_class_name = camel_to_snake(class_name)
+    inherits = class_api["inherits"] if "inherits" in class_api else "Wrapped"
+
+    add_header(f"{snake_class_name}.cpp", result)
+
+    result.append(f"#include <godot_cpp/classes/{snake_class_name}.hpp>")
+    result.append("")
+    result.append(f"#include <godot_cpp/core/engine_ptrcall.hpp>")
+    result.append(f"#include <godot_cpp/core/error_macros.hpp>")
+    result.append("")
+
+    for included in used_classes:
+        result.append(f"#include <godot_cpp/{get_include_path(included)}>")
+
+    if len(used_classes) > 0:
+        result.append(f"")
+
+    result.append("namespace godot {")
+    result.append("")
+
+    if "methods" in class_api:
+        for method in class_api["methods"]:
+            if method["is_virtual"]:
+                # TODO: See how to bind virtual methods (if they are even needed).
+                continue
+
+            vararg = "is_vararg" in method and method["is_vararg"]
+
+            # Method signature.
+            method_signature = ""
+            if "return_value" in method:
+                method_signature += correct_type(
+                    method["return_value"]["type"],
+                    method["return_value"]["meta"] if "meta" in method["return_value"] else None,
+                )
+            else:
+                method_signature += "void"
+
+            if not method_signature.endswith("*"):
+                method_signature += " "
+
+            method_signature += f'{class_name}::{escape_identifier(method["name"])}'
+
+            if vararg or (use_template_get_node and class_name == "Node" and method["name"] == "get_node"):
+                method_signature += "_internal"
+
+            method_signature += "("
+
+            method_arguments = []
+            if "arguments" in method:
+                method_arguments = method["arguments"]
+
+            if not vararg:
+                method_signature += make_function_parameters(
+                    method_arguments, include_default=False, is_vararg=vararg, for_builtin=False
+                )
+            else:
+                method_signature += "const Variant **args, GDNativeInt arg_count"
+
+            method_signature += ")"
+
+            if method["is_const"]:
+                method_signature += " const"
+
+            method_signature += " {"
+            result.append(method_signature)
+
+            # Method body.
+            result.append(
+                f'\tstatic GDNativeMethodBindPtr ___method_bind = internal::interface->classdb_get_method_bind("{class_name}", "{method["name"]}", {method["hash"]});'
+            )
+            method_call = "\t"
+            has_return = "return_value" in method and method["return_value"]["type"] != "void"
+
+            if has_return:
+                result.append(
+                    f'\tCHECK_METHOD_BIND_RET(___method_bind, {get_default_value_for_type(method["return_value"]["type"])});'
+                )
+            else:
+                result.append(f"\tCHECK_METHOD_BIND(___method_bind);")
+
+            is_ref = False
+            if not vararg:
+                if has_return:
+                    return_type = method["return_value"]["type"]
+                    meta_type = method["return_value"]["meta"] if "meta" in method["return_value"] else None
+                    if is_pod_type(return_type) or is_variant(return_type) or is_enum(return_type):
+                        method_call += f"return internal::_call_native_mb_ret<{correct_type(return_type, meta_type)}>(___method_bind, _owner"
+                    elif is_refcounted(return_type):
+                        method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{class_name}>(___method_bind, _owner"
+                        is_ref = True
+                    else:
+                        method_call += f"return ({correct_type(return_type)})internal::_call_native_mb_ret_obj<{class_name}>(___method_bind, _owner"
+                else:
+                    method_call += f"internal::_call_native_mb_no_ret(___method_bind, _owner"
+
+                if "arguments" in method:
+                    method_call += ", "
+                    arguments = []
+                    for argument in method["arguments"]:
+                        (encode, arg_name) = get_encoded_arg(
+                            argument["name"],
+                            argument["type"],
+                            argument["meta"] if "meta" in argument else None,
+                        )
+                        result += encode
+                        arguments.append(arg_name)
+                    method_call += ", ".join(arguments)
+            else:  # vararg.
+                result.append("\tGDNativeCallError error;")
+                result.append("\tVariant ret;")
+                method_call += "internal::interface->object_method_bind_call(___method_bind, _owner, (const GDNativeVariantPtr *)args, arg_count, ret, &error"
+
+            if is_ref:
+                method_call += ")"  # Close Ref<> constructor.
+            method_call += ");"
+            result.append(method_call)
+
+            if vararg and ("return_value" in method and method["return_value"]["type"] != "void"):
+                result.append("\treturn ret;")
+
+            result.append("}")
+            result.append("")
+
+    # Constructor.
+    result.append(f"{class_name}::{class_name}() : {inherits}(godot::internal::empty_constructor()) {{")
+    result.append(
+        f'\tstatic GDNativeClassConstructor constructor = internal::interface->classdb_get_constructor("{class_name}");'
+    )
+    result.append("\t_owner = (GodotObject *)constructor();")
+    result.append(
+        f"\tinternal::interface->object_set_instance_binding((GDNativeObjectPtr)_owner, internal::token, this, &{class_name}::___binding_callbacks);"
+    )
+    result.append("}")
+
+    result.append("")
+    result.append("} // namespace godot ")
+
+    return "\n".join(result)
+
+
+def generate_global_constants(api, output_dir):
+    include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
+    source_gen_folder = Path(output_dir) / "src" / "classes"
+
+    include_gen_folder.mkdir(parents=True, exist_ok=True)
+    source_gen_folder.mkdir(parents=True, exist_ok=True)
+
+    # Generate header
+
+    header = []
+    add_header("global_constants.hpp", header)
+
+    header_filename = include_gen_folder / "global_constants.hpp"
+
+    header_guard = "GODOT_CPP_GLOBAL_CONSTANTS_HPP"
+    header.append(f"#ifndef {header_guard}")
+    header.append(f"#define {header_guard}")
+    header.append("")
+    header.append("namespace godot {")
+    header.append("")
+
+    for constant in api["global_constants"]:
+        header.append(f'\tconst int {escape_identifier(constant["name"])} = {constant["value"]};')
+
+    header.append("")
+
+    for enum_def in api["global_enums"]:
+        if enum_def["name"].startswith("Variant."):
+            continue
+
+        header.append(f'\tenum {enum_def["name"]} {{')
+        for value in enum_def["values"]:
+            header.append(f'\t\t{value["name"]} = {value["value"]},')
+        header.append("\t};")
+        header.append("")
+
+    header.append("} // namespace godot")
+
+    header.append("")
+    header.append(f"#endif // ! {header_guard}")
+
+    with header_filename.open("w+") as header_file:
+        header_file.write("\n".join(header))
+
+
+def generate_utility_functions(api, output_dir):
+    include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "variant"
+    source_gen_folder = Path(output_dir) / "src" / "variant"
+
+    include_gen_folder.mkdir(parents=True, exist_ok=True)
+    source_gen_folder.mkdir(parents=True, exist_ok=True)
+
+    # Generate header.
+
+    header = []
+    add_header("utility_functions.hpp", header)
+
+    header_filename = include_gen_folder / "utility_functions.hpp"
+
+    header_guard = "GODOT_CPP_UTILITY_FUNCTIONS_HPP"
+    header.append(f"#ifndef {header_guard}")
+    header.append(f"#define {header_guard}")
+    header.append("")
+    header.append("#include <godot_cpp/variant/builtin_types.hpp>")
+    header.append("#include <godot_cpp/variant/variant.hpp>")
+    header.append("")
+    header.append("#include <array>")
+    header.append("")
+    header.append("namespace godot {")
+    header.append("")
+    header.append("class UtilityFunctions {")
+    header.append("public:")
+
+    for function in api["utility_functions"]:
+        vararg = "is_vararg" in function and function["is_vararg"]
+
+        function_signature = "\t"
+        if vararg:
+            function_signature += "private: "
+        function_signature += "static "
+
+        if "return_type" in function:
+            if not vararg:
+                function_signature += f'{correct_type(function["return_type"])} '
+            else:
+                function_signature += "Variant "
+        else:
+            function_signature += "void "
+
+        function_signature += f'{escape_identifier(function["name"])}'
+
+        if vararg:
+            function_signature += "_internal"
+
+        function_signature += "("
+
+        function_arguments = []
+        if "arguments" in function:
+            function_arguments = function["arguments"]
+
+        if not vararg:
+            function_signature += make_function_parameters(function_arguments, include_default=False)
+        else:
+            function_signature += "const Variant **args, GDNativeInt arg_count"
+        function_signature += ");"
+
+        header.append(function_signature)
+
+        if vararg:
+            # Add templated version.
+            method_signature = "\tpublic: template<class... Args> static "
+
+            if "return_type" in function:
+                method_signature += correct_type(function["return_type"])
+            else:
+                method_signature += "void"
+
+            if not method_signature.endswith("*"):
+                method_signature += " "
+
+            method_signature += f'{escape_identifier(function["name"])}'
+
+            method_arguments = []
+            if "arguments" in function:
+                method_arguments = function["arguments"]
+
+            method_signature += "("
+            method_signature += make_function_parameters(method_arguments, include_default=True, is_vararg=vararg)
+            method_signature += ")"
+
+            method_signature += " {"
+            header.append(method_signature)
+
+            args_array = f"\t\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args {{ "
+            for argument in method_arguments:
+                if argument["type"] == "Variant":
+                    args_array += argument["name"]
+                else:
+                    args_array += f'Variant({argument["name"]})'
+                args_array += ", "
+
+            args_array += "Variant(args)... };"
+            header.append(args_array)
+            header.append(f"\t\tstd::array<const Variant *, {len(method_arguments)} + sizeof...(Args)> call_args;")
+            header.append("\t\tfor(size_t i = 0; i < variant_args.size(); i++) {")
+            header.append("\t\t\tcall_args[i] = &variant_args[i];")
+            header.append("\t\t}")
+
+            call_line = "\t\t"
+
+            if "return_type" in function and function["return_type"] != "void":
+                call_line += "return "
+
+            call_line += f'{escape_identifier(function["name"])}_internal(call_args.data(), variant_args.size());'
+            header.append(call_line)
+            header.append("\t}")
+
+    header.append("};")
+    header.append("")
+    header.append("} // namespace godot")
+    header.append("")
+    header.append(f"#endif // ! {header_guard}")
+
+    with header_filename.open("w+") as header_file:
+        header_file.write("\n".join(header))
+
+    # Generate source.
+
+    source = []
+    add_header("utility_functions.cpp", source)
+    source_filename = source_gen_folder / "utility_functions.cpp"
+
+    source.append("#include <godot_cpp/variant/utility_functions.hpp>")
+    source.append("")
+    source.append("#include <godot_cpp/core/error_macros.hpp>")
+    source.append("#include <godot_cpp/core/engine_ptrcall.hpp>")
+    source.append("")
+    source.append("namespace godot {")
+    source.append("")
+
+    for function in api["utility_functions"]:
+        vararg = "is_vararg" in function and function["is_vararg"]
+
+        function_signature = ""
+        if "return_type" in function:
+            if not vararg:
+                function_signature += f'{correct_type(function["return_type"])}'
+            else:
+                function_signature += "Variant"
+        else:
+            function_signature += "void"
+
+        if not function_signature.endswith("*"):
+            function_signature += " "
+
+        function_signature += f'UtilityFunctions::{escape_identifier(function["name"])}'
+        if vararg:
+            function_signature += "_internal"
+        function_signature += "("
+
+        function_arguments = []
+        if "arguments" in function:
+            function_arguments = function["arguments"]
+
+        if not vararg:
+            function_signature += make_function_parameters(function_arguments, include_default=False)
+        else:
+            function_signature += "const Variant **args, GDNativeInt arg_count"
+        function_signature += ") {"
+
+        source.append(function_signature)
+
+        # Function body.
+
+        source.append(
+            f'\tstatic GDNativePtrUtilityFunction ___function = internal::interface->variant_get_ptr_utility_function("{function["name"]}", {function["hash"]});'
+        )
+        has_return = "return_type" in function and function["return_type"] != "void"
+        if has_return:
+            source.append(
+                f'\tCHECK_METHOD_BIND_RET(___function, {get_default_value_for_type(function["return_type"])});'
+            )
+        else:
+            source.append(f"\tCHECK_METHOD_BIND(___function);")
+
+        function_call = "\t"
+        if not vararg:
+            if has_return:
+                function_call += "return "
+                if function["return_type"] == "Object":
+                    function_call += "internal::_call_utility_ret_obj(___function"
+                else:
+                    function_call += f'internal::_call_utility_ret<{correct_type(function["return_type"])}>(___function'
+            else:
+                function_call += "internal::_call_utility_no_ret(___function"
+
+            if "arguments" in function:
+                function_call += ", "
+                arguments = []
+                for argument in function["arguments"]:
+                    (encode, arg_name) = get_encoded_arg(
+                        argument["name"],
+                        argument["type"],
+                        argument["meta"] if "meta" in argument else None,
+                    )
+                    source += encode
+                    arguments.append(arg_name)
+                function_call += ", ".join(arguments)
+        else:
+            source.append("\tVariant ret;")
+            function_call += "___function(&ret, (const GDNativeVariantPtr *)args, arg_count"
+
+        function_call += ");"
+        source.append(function_call)
+
+        if vararg and has_return:
+            source.append("\treturn ret;")
 
         source.append("}")
         source.append("")
 
+    source.append("} // namespace godot")
 
+    with source_filename.open("w+") as source_file:
+        source_file.write("\n".join(source))
 
-    source.append("}")
 
+# Helper functions.
 
-    return "\n".join(source)
 
+def camel_to_snake(name):
+    name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    name = re.sub("([a-z0-9])([A-Z])", r"\1_\2", name)
+    return name.replace("2_D", "2D").replace("3_D", "3D").lower()
 
 
+def make_function_parameters(parameters, include_default=False, for_builtin=False, is_vararg=False):
+    signature = []
 
+    for par in parameters:
+        parameter = type_for_parameter(par["type"], par["meta"] if "meta" in par else None)
+        parameter += escape_identifier(par["name"])
 
-def generate_icall_header(icalls):
+        if include_default and "default_value" in par and (not for_builtin or par["type"] != "Variant"):
+            parameter += " = "
+            if is_enum(par["type"]):
+                parameter += f'({correct_type(par["type"])})'
+            parameter += correct_default_value(par["default_value"], par["type"])
+        signature.append(parameter)
 
-    source = []
-    source.append("#ifndef GODOT_CPP__ICALLS_HPP")
-    source.append("#define GODOT_CPP__ICALLS_HPP")
+    if is_vararg:
+        signature.append("const Args&... args")
 
-    source.append("")
+    return ", ".join(signature)
 
-    source.append("#include <gdnative_api_struct.gen.h>")
-    source.append("#include <stdint.h>")
-    source.append("")
 
-    source.append("#include <core/GodotGlobal.hpp>")
-    source.append("#include <core/CoreTypes.hpp>")
-    source.append("#include \"Object.hpp\"")
-    source.append("")
-    source.append("")
+def type_for_parameter(type_name, meta=None):
+    if is_pod_type(type_name) and type_name != "Nil" or is_enum(type_name):
+        return f"{correct_type(type_name, meta)} "
+    elif is_variant(type_name) or is_refcounted(type_name):
+        return f"const {correct_type(type_name)} &"
+    else:
+        return f"{correct_type(type_name)}"
 
-    source.append("namespace godot {")
-    source.append("")
 
-    for icall in icalls:
-        ret_type = icall[0]
-        args = icall[1]
+def get_include_path(type_name):
+    base_dir = ""
+    if type_name == "Object":
+        base_dir = "core"
+    elif is_variant(type_name):
+        base_dir = "variant"
+    else:
+        base_dir = "classes"
 
-        method_signature = "static inline "
+    return f"{base_dir}/{camel_to_snake(type_name)}.hpp"
 
-        method_signature += get_icall_return_type(ret_type) + get_icall_name(icall) + "(godot_method_bind *mb, const Object *inst"
 
-        for i, arg in enumerate(args):
-            method_signature += ", const "
+def get_encoded_arg(arg_name, type_name, type_meta):
+    result = []
 
-            if is_core_type(arg):
-                method_signature += arg + "&"
-            elif arg == "int":
-                method_signature += "int64_t "
-            elif arg == "float":
-                method_signature += "double "
-            elif is_primitive(arg):
-                method_signature += arg + " "
-            else:
-                method_signature += "Object *"
+    name = escape_identifier(arg_name)
+    arg_type = correct_type(type_name)
+    if is_pod_type(arg_type):
+        result.append(f"\t{get_gdnative_type(arg_type)} {name}_encoded;")
+        result.append(f"\tPtrToArg<{correct_type(type_name, type_meta)}>::encode({name}, &{name}_encoded);")
+        name = f"&{name}_encoded"
+    elif is_engine_class(type_name):
+        name = f"{name}->_owner"
+    else:
+        name = f"&{name}"
 
-            method_signature += "arg" + str(i)
+    return (result, name)
 
-        method_signature += ")"
 
-        source.append(method_signature + " {")
+# Engine idiosyncrasies.
 
-        if ret_type != "void":
-            source.append("\t" + ("godot_object *" if is_class_type(ret_type) else get_icall_return_type(ret_type)) + "ret;")
-            if is_class_type(ret_type):
-                source.append("\tret = nullptr;")
 
+def is_pod_type(type_name):
+    """
+    Those are types for which no class should be generated.
+    """
+    return type_name in [
+        "Nil",
+        "void",
+        "int",
+        "float",
+        "bool",
+    ]
 
-        source.append("\tconst void *args[" + ("1" if len(args) == 0 else "") + "] = {")
 
-        for i, arg in enumerate(args):
+def is_enum(type_name):
+    return type_name.startswith("enum::")
 
-            wrapped_argument = "\t\t"
-            if is_primitive(arg) or is_core_type(arg):
-                wrapped_argument += "(void *) &arg" + str(i)
-            else:
-                wrapped_argument += "(void *) (arg" + str(i) + ") ? arg" + str(i) + "->_owner : nullptr"
 
-            wrapped_argument += ","
-            source.append(wrapped_argument)
+def get_enum_class(enum_name: str):
+    if "." in enum_name:
+        return enum_name.replace("enum::", "").split(".")[0]
+    else:
+        return "GlobalConstants"
 
-        source.append("\t};")
-        source.append("")
 
-        source.append("\tgodot::api->godot_method_bind_ptrcall(mb, inst->_owner, args, " + ("nullptr" if ret_type == "void" else "&ret") + ");")
+def get_enum_name(enum_name: str):
+    return enum_name.replace("enum::", "").split(".")[-1]
 
-        if ret_type != "void":
-            if is_class_type(ret_type):
-                source.append("\tif (ret) {")
-                source.append("\t\treturn (Object *) godot::nativescript_1_1_api->godot_nativescript_get_instance_binding_data(godot::_RegisterState::language_index, ret);")
-                source.append("\t}")
-                source.append("")
-                source.append("\treturn (Object *) ret;")
-            else:
-                source.append("\treturn ret;")
 
-        source.append("}")
-        source.append("")
+def is_variant(type_name):
+    return type_name == "Variant" or type_name in builtin_classes or type_name == "Nil"
 
-    source.append("}")
-    source.append("")
 
-    source.append("#endif")
+def is_engine_class(type_name):
+    return type_name in engine_classes
 
-    return "\n".join(source)
 
+def is_refcounted(type_name):
+    return type_name in engine_classes and engine_classes[type_name]
 
-def generate_type_registry(classes):
-    source = []
 
-    source.append("#include \"TagDB.hpp\"")
-    source.append("#include <typeinfo>")
-    source.append("\n")
+def is_included(type_name, current_type):
+    """
+    Check if a builtin type should be included.
+    This removes Variant and POD types from inclusion, and the current type.
+    """
+    to_include = get_enum_class(type_name) if is_enum(type_name) else type_name
+    return to_include != current_type and not is_pod_type(to_include)
 
-    for c in classes:
-        source.append("#include <" + strip_name(c["name"]) + ".hpp>")
 
-    source.append("")
-    source.append("")
-
-    source.append("namespace godot {")
-
-    source.append("void ___register_types()")
-    source.append("{")
-
-    for c in classes:
-        class_name = strip_name(c["name"])
-        base_class_name = strip_name(c["base_class"])
-
-        class_type_hash = "typeid(" + class_name + ").hash_code()"
-
-        base_class_type_hash = "typeid(" + base_class_name + ").hash_code()"
-
-        if base_class_name == "":
-            base_class_type_hash = "0"
-
-        source.append("\tgodot::_TagDB::register_global_type(\"" + c["name"] + "\", " + class_type_hash + ", " + base_class_type_hash + ");")
-
-    source.append("}")
-
-    source.append("")
-    source.append("}")
-
-
-    return "\n".join(source)
-
-
-def generate_init_method_bindings(classes):
-    source = []
-
-    for c in classes:
-        source.append("#include <" + strip_name(c["name"]) + ".hpp>")
-
-    source.append("")
-    source.append("")
-
-    source.append("namespace godot {")
-
-    source.append("void ___init_method_bindings()")
-    source.append("{")
-
-    for c in classes:
-        source.append("\t" + strip_name(c["name"]) + "::___init_method_bindings();")
-
-    source.append("}")
-
-    source.append("")
-    source.append("}")
-
-    return "\n".join(source)
-
-
-def get_icall_return_type(t):
-    if is_class_type(t):
-        return "Object *"
-    if t == "int":
-        return "int64_t "
-    if t == "float" or t == "real":
-        return "double "
-    return t + " "
-
-
-def get_icall_name(sig):
-    ret_type = sig[0]
-    args = sig[1]
-
-    name = "___godot_icall_"
-    name += strip_name(ret_type)
-    for arg in args:
-        name += "_" + strip_name(arg)
-
-    return name
-
-
-
-
-
-def get_used_classes(c):
-    classes = []
-    for method in c["methods"]:
-        if is_class_type(method["return_type"]) and not (method["return_type"] in classes):
-            classes.append(method["return_type"])
-
-        for arg in method["arguments"]:
-            if is_class_type(arg["type"]) and not (arg["type"] in classes):
-                classes.append(arg["type"])
-    return classes
-
-
-
-
-
-def strip_name(name):
-    if len(name) == 0:
-        return name
-    if name[0] == '_':
-        return name[1:]
-    return name
-
-def extract_nested_type(nested_type):
-    return strip_name(nested_type[:nested_type.find("::")])
-
-def remove_nested_type_prefix(name):
-    return name if name.find("::") == -1 else strip_name(name[name.find("::") + 2:])
-
-def remove_enum_prefix(name):
-    return strip_name(name[name.find("enum.") + 5:])
-
-def is_nested_type(name, type = ""):
-    return name.find(type + "::") != -1
-
-def is_enum(name):
-    return name.find("enum.") == 0
-
-def is_class_type(name):
-    return not is_core_type(name) and not is_primitive(name)
-
-def is_core_type(name):
-    core_types = ["Array",
-                  "Basis",
-                  "Color",
-                  "Dictionary",
-                  "Error",
-                  "NodePath",
-                  "Plane",
-                  "PoolByteArray",
-                  "PoolIntArray",
-                  "PoolRealArray",
-                  "PoolStringArray",
-                  "PoolVector2Array",
-                  "PoolVector3Array",
-                  "PoolColorArray",
-                  "PoolIntArray",
-                  "PoolRealArray",
-                  "Quat",
-                  "Rect2",
-                  "AABB",
-                  "RID",
-                  "String",
-                  "Transform",
-                  "Transform2D",
-                  "Variant",
-                  "Vector2",
-                  "Vector3"]
-    return name in core_types
-
-
-
-
-def is_primitive(name):
-    core_types = ["int", "bool", "real", "float", "void"]
-    return name in core_types
-
-def escape_cpp(name):
-    escapes = {
-        "class":    "_class",
-        "enum":     "_enum",
-        "char":     "_char",
-        "short":    "_short",
-        "bool":     "_bool",
-        "int":      "_int",
-        "default":  "_default",
-        "case":     "_case",
-        "switch":   "_switch",
-        "export":   "_export",
-        "template": "_template",
-        "new":      "new_",
-        "operator": "_operator",
-        "typename": "_typename"
+def correct_default_value(value, type_name):
+    value_map = {
+        "null": "nullptr",
+        '""': "String()",
+        '&""': "StringName()",
+        "[]": "Array()",
+        "{}": "Dictionary()",
+        "Transform2D(1, 0, 0, 1, 0, 0)": "Transform2D()",  # Default transform.
+        "Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)": "Transform3D()",  # Default transform.
     }
-    if name in escapes:
-        return escapes[name]
-    return name
+    if value in value_map:
+        return value_map[value]
+    if value == "":
+        return f"{type_name}()"
+    return value
+
+
+def correct_type(type_name, meta=None):
+    type_conversion = {"float": "double", "int": "int64_t", "Nil": "Variant"}
+    if meta != None:
+        if "int" in meta:
+            return f"{meta}_t"
+        else:
+            return meta
+    if type_name in type_conversion:
+        return type_conversion[type_name]
+    if is_enum(type_name):
+        base_class = get_enum_class(type_name)
+        if base_class == "GlobalConstants":
+            return f"{get_enum_name(type_name)}"
+        return f"{base_class}::{get_enum_name(type_name)}"
+    if is_refcounted(type_name):
+        return f"Ref<{type_name}>"
+    if type_name == "Object" or is_engine_class(type_name):
+        return f"{type_name} *"
+    return type_name
+
+
+def get_gdnative_type(type_name):
+    type_conversion_map = {
+        "bool": "uint32_t",
+        "int": "int64_t",
+        "float": "double",
+    }
+
+    if type_name in type_conversion_map:
+        return type_conversion_map[type_name]
+    return type_name
+
+
+def escape_identifier(id):
+    cpp_keywords_map = {
+        "class": "_class",
+        "char": "_char",
+        "short": "_short",
+        "bool": "_bool",
+        "int": "_int",
+        "default": "_default",
+        "case": "_case",
+        "switch": "_switch",
+        "export": "_export",
+        "template": "_template",
+        "new": "new_",
+        "operator": "_operator",
+        "typeof": "type_of",
+        "typename": "type_name",
+    }
+    if id in cpp_keywords_map:
+        return cpp_keywords_map[id]
+    return id
+
+
+def get_operator_id_name(op):
+    op_id_map = {
+        "==": "equal",
+        "!=": "not_equal",
+        "<": "less",
+        "<=": "less_equal",
+        ">": "greater",
+        ">=": "greater_equal",
+        "+": "add",
+        "-": "subtract",
+        "*": "multiply",
+        "/": "divide",
+        "unary-": "negate",
+        "unary+": "positive",
+        "%": "module",
+        "<<": "shift_left",
+        ">>": "shift_right",
+        "&": "bit_and",
+        "|": "bit_or",
+        "^": "bit_xor",
+        "~": "bit_negate",
+        "and": "and",
+        "or": "or",
+        "xor": "xor",
+        "not": "not",
+        "and": "and",
+        "in": "in",
+    }
+    return op_id_map[op]
+
+
+def get_default_value_for_type(type_name):
+    if type_name == "int":
+        return "0"
+    if type_name == "float":
+        return "0.0"
+    if type_name == "bool":
+        return "false"
+    if is_enum(type_name):
+        return f"{correct_type(type_name)}(0)"
+    if is_variant(type_name):
+        return f"{type_name}()"
+    if is_refcounted(type_name):
+        return f"Ref<{type_name}>()"
+    return "nullptr"
+
+
+header = """\
+/*************************************************************************/
+/*  $filename                                                            */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
+/*************************************************************************/
+/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
+"""
+
+
+def add_header(filename, lines):
+    desired_length = len(header.split("\n")[0])
+    pad_spaces = desired_length - 6 - len(filename)
+
+    for num, line in enumerate(header.split("\n")):
+        if num == 1:
+            new_line = f"/*  {filename}{' ' * pad_spaces}*/"
+            lines.append(new_line)
+        else:
+            lines.append(line)
+
+    lines.append("// THIS FILE IS GENERATED. EDITS WILL BE LOST.")
+    lines.append("")

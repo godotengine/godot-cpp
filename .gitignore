@@ -1,3 +1,8 @@
+# Godot auto generated files
+*.gen.*
+.import/
+/gen/
+
 # Misc
 logs/*
 
