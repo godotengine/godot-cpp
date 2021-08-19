@@ -123,12 +123,12 @@ public:
 #define BIND_ENUM_CONSTANT(m_constant) \
 	ClassDB::bind_integer_constant(get_class_static(), __constant_get_enum_name(m_constant, #m_constant), #m_constant, m_constant);
 
-#define BIND_VIRTUAL_METHOD(m_method)                                                                                             \
+#define BIND_VIRTUAL_METHOD(m_class, m_method)                                                                                    \
 	{                                                                                                                             \
 		auto ___call##m_method = [](GDNativeObjectPtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr p_ret) -> void { \
-			call_with_ptr_args(reinterpret_cast<SelfType *>(p_instance), &SelfType::m_method, p_args, p_ret);                     \
+			call_with_ptr_args(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret);                       \
 		};                                                                                                                        \
-		ClassDB::bind_virtual_method(get_class_static(), #m_method, ___call##m_method);                                           \
+		ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, ___call##m_method);                                  \
 	}
 
 template <class T>

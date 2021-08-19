@@ -36,9 +36,6 @@ void Example::_bind_methods() {
 	BIND_ENUM_CONSTANT(ANSWER_TO_EVERYTHING);
 
 	BIND_CONSTANT(CONSTANT_WITHOUT_ENUM);
-
-	// Virtual function override.
-	BIND_VIRTUAL_METHOD(_has_point);
 }
 
 // Methods.
@@ -83,7 +80,7 @@ Vector2 Example::get_custom_position() const {
 }
 
 // Virtual function override.
-bool Example::_has_point(const Vector2 &point) {
+bool Example::_has_point(const Vector2 &point) const {
 	Label *label = get_node<Label>("Label");
 	label->set_text("Got point: " + Variant(point).stringify());
 

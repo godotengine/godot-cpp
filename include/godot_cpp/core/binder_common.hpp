@@ -168,12 +168,12 @@ void call_with_ptr_args_retc_helper(T *p_instance, R (T::*p_method)(P...) const,
 }
 
 template <class T, class... P>
-void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...), const GDNativeTypePtr *p_args) {
+void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...), const GDNativeTypePtr *p_args, void * /*ret*/) {
 	call_with_ptr_args_helper<T, P...>(p_instance, p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 
 template <class T, class... P>
-void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...) const, const GDNativeTypePtr *p_args) {
+void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...) const, const GDNativeTypePtr *p_args, void * /*ret*/) {
 	call_with_ptr_argsc_helper<T, P...>(p_instance, p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 

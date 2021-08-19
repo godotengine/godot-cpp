@@ -562,23 +562,8 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                 # Done in the header because of the template.
                 continue
 
-            method_signature = ""
-            if "return_type" in method:
-                method_signature += f'{correct_type(method["return_type"])} '
-            else:
-                method_signature += "void "
-
-            method_signature += f'{class_name}::{method["name"]}('
-            if "arguments" in method:
-                method_signature += make_function_parameters(
-                    method["arguments"], include_default=False, for_builtin=True
-                )
-            method_signature += ")"
-            if method["is_const"]:
-                method_signature += " const"
-            method_signature += " {"
-
-            result.append(method_signature)
+            method_signature = make_signature(class_name, method, for_builtin=True)
+            result.append(method_signature + "{")
 
             method_call = "\t"
             if "return_type" in method:
@@ -758,6 +743,12 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     if len(fully_used_classes) > 0:
         result.append("")
 
+    if class_name != "Object":
+        result.append("#include <godot_cpp/core/class_db.hpp>")
+        result.append("")
+        result.append("#include <type_traits>")
+        result.append("")
+
     result.append("namespace godot {")
     result.append("")
 
@@ -783,114 +774,52 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
             result.append("\t};")
             result.append("")
 
-    has_vararg_method = False
-
     if "methods" in class_api:
         for method in class_api["methods"]:
             if method["is_virtual"]:
-                # TODO: See how to bind virtual methods (if they are even needed).
+                # Will be done later.
                 continue
 
-            method_signature = "\t"
-
             vararg = "is_vararg" in method and method["is_vararg"]
+
+            method_signature = "\t"
             if vararg:
-                has_vararg_method = True
                 method_signature += "private: "
-
-            if "return_value" in method:
-                method_signature += correct_type(
-                    method["return_value"]["type"],
-                    method["return_value"]["meta"] if "meta" in method["return_value"] else None,
-                )
-            else:
-                method_signature += "void"
-
-            if not method_signature.endswith("*"):
-                method_signature += " "
-
-            method_signature += f'{escape_identifier(method["name"])}'
-
-            if vararg or (use_template_get_node and class_name == "Node" and method["name"] == "get_node"):
-                method_signature += "_internal"
-
-            method_signature += "("
-
-            method_arguments = []
-            if "arguments" in method:
-                method_arguments = method["arguments"]
-
-            if not vararg:
-                method_signature += make_function_parameters(
-                    method_arguments, include_default=True, is_vararg=vararg, for_builtin=False
-                )
-            else:
-                method_signature += "const Variant **args, GDNativeInt arg_count"
-
-            method_signature += ")"
-
-            if method["is_const"]:
-                method_signature += " const"
-
-            method_signature += ";"
-            result.append(method_signature)
+            method_signature += make_signature(
+                class_name, method, for_header=True, use_template_get_node=use_template_get_node
+            )
+            result.append(method_signature + ";")
 
             if vararg:
                 # Add templated version.
-                method_signature = "\tpublic: template<class... Args> "
+                result += make_varargs_template(method)
 
-                if "return_value" in method:
-                    method_signature += correct_type(
-                        method["return_value"]["type"],
-                        method["return_value"]["meta"] if "meta" in method["return_value"] else None,
-                    )
-                else:
-                    method_signature += "void"
+        # Virtuals now.
+        for method in class_api["methods"]:
+            if not method["is_virtual"]:
+                continue
 
-                if not method_signature.endswith("*"):
-                    method_signature += " "
+            method_signature = "\t"
+            method_signature += make_signature(class_name, method, for_header=True, use_template_get_node=use_template_get_node)
+            result.append(method_signature + ";")
 
-                method_signature += f'{escape_identifier(method["name"])}'
-
-                method_arguments = []
-                if "arguments" in method:
-                    method_arguments = method["arguments"]
-
-                method_signature += "("
-
-                method_signature += make_function_parameters(method_arguments, include_default=True, is_vararg=vararg)
-
-                method_signature += ")"
-
-                if method["is_const"]:
-                    method_signature += " const"
-
-                method_signature += " {"
-                result.append(method_signature)
-
-                args_array = f"\t\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args {{ "
-                for argument in method_arguments:
-                    if argument["type"] == "Variant":
-                        args_array += argument["name"]
-                    else:
-                        args_array += f'Variant({argument["name"]})'
-                    args_array += ", "
-
-                args_array += "Variant(args)... };"
-                result.append(args_array)
-                result.append(f"\t\tstd::array<const Variant *, {len(method_arguments)} + sizeof...(Args)> call_args;")
-                result.append("\t\tfor(size_t i = 0; i < variant_args.size(); i++) {")
-                result.append("\t\t\tcall_args[i] = &variant_args[i];")
+    result.append("protected:")
+    result.append("\ttemplate <class T>")
+    result.append("\tstatic void register_virtuals() {")
+    if class_name != "Object":
+        result.append(f"\t\t{inherits}::register_virtuals<T>();")
+        if "methods" in class_api:
+            for method in class_api["methods"]:
+                if not method["is_virtual"]:
+                    continue
+                method_name = escape_identifier(method["name"])
+                result.append(f"\t\tif constexpr (!std::is_same_v<decltype(&{class_name}::{method_name}),decltype(&T::{method_name})>) {{")
+                result.append(f"\t\t\tBIND_VIRTUAL_METHOD(T, {method_name});")
                 result.append("\t\t}")
 
-                call_line = "\t\t"
-
-                if "return_value" in method and method["return_value"]["type"] != "void":
-                    call_line += "return "
-
-                call_line += f'{escape_identifier(method["name"])}_internal(call_args.data(), variant_args.size());'
-                result.append(call_line)
-                result.append("\t}")
+    result.append("\t}")
+    result.append("")
+    result.append("public:")
 
     # Special cases.
     if class_name == "Object":
@@ -899,7 +828,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append("\tstatic T *cast_to(Object *p_object);")
     elif use_template_get_node and class_name == "Node":
         result.append("\ttemplate<class T>")
-        result.append("\tT *get_node(const NodePath &p_path) { return Object::cast_to<T>(get_node_internal(p_path)); }")
+        result.append("\tT *get_node(const NodePath &p_path) const { return Object::cast_to<T>(get_node_internal(p_path)); }")
 
     # Constructor.
     result.append("")
@@ -943,49 +872,14 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
     if "methods" in class_api:
         for method in class_api["methods"]:
             if method["is_virtual"]:
-                # TODO: See how to bind virtual methods (if they are even needed).
+                # Will be done later
                 continue
 
             vararg = "is_vararg" in method and method["is_vararg"]
 
             # Method signature.
-            method_signature = ""
-            if "return_value" in method:
-                method_signature += correct_type(
-                    method["return_value"]["type"],
-                    method["return_value"]["meta"] if "meta" in method["return_value"] else None,
-                )
-            else:
-                method_signature += "void"
-
-            if not method_signature.endswith("*"):
-                method_signature += " "
-
-            method_signature += f'{class_name}::{escape_identifier(method["name"])}'
-
-            if vararg or (use_template_get_node and class_name == "Node" and method["name"] == "get_node"):
-                method_signature += "_internal"
-
-            method_signature += "("
-
-            method_arguments = []
-            if "arguments" in method:
-                method_arguments = method["arguments"]
-
-            if not vararg:
-                method_signature += make_function_parameters(
-                    method_arguments, include_default=False, is_vararg=vararg, for_builtin=False
-                )
-            else:
-                method_signature += "const Variant **args, GDNativeInt arg_count"
-
-            method_signature += ")"
-
-            if method["is_const"]:
-                method_signature += " const"
-
-            method_signature += " {"
-            result.append(method_signature)
+            method_signature = make_signature(class_name, method, use_template_get_node=use_template_get_node)
+            result.append(method_signature + " {")
 
             # Method body.
             result.append(
@@ -1042,6 +936,22 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                 result.append("\treturn ret;")
 
             result.append("}")
+            result.append("")
+
+        # Virtuals now.
+        for method in class_api["methods"]:
+            if not method["is_virtual"]:
+                continue
+
+            method_signature = make_signature(class_name, method, use_template_get_node=use_template_get_node)
+            method_signature += " {"
+            if "return_value" in method and correct_type(method["return_value"]["type"]) != "void":
+                result.append(method_signature)
+                result.append(f'\treturn {get_default_value_for_type(method["return_value"]["type"])};')
+                result.append("}")
+            else:
+                method_signature += "}"
+                result.append(method_signature)
             result.append("")
 
     # Constructor.
@@ -1138,85 +1048,12 @@ def generate_utility_functions(api, output_dir):
         vararg = "is_vararg" in function and function["is_vararg"]
 
         function_signature = "\t"
-        if vararg:
-            function_signature += "private: "
-        function_signature += "static "
-
-        if "return_type" in function:
-            if not vararg:
-                function_signature += f'{correct_type(function["return_type"])} '
-            else:
-                function_signature += "Variant "
-        else:
-            function_signature += "void "
-
-        function_signature += f'{escape_identifier(function["name"])}'
-
-        if vararg:
-            function_signature += "_internal"
-
-        function_signature += "("
-
-        function_arguments = []
-        if "arguments" in function:
-            function_arguments = function["arguments"]
-
-        if not vararg:
-            function_signature += make_function_parameters(function_arguments, include_default=False)
-        else:
-            function_signature += "const Variant **args, GDNativeInt arg_count"
-        function_signature += ");"
-
-        header.append(function_signature)
+        function_signature += make_signature("UtilityFunctions", function, for_header=True, static=True)
+        header.append(function_signature + ";")
 
         if vararg:
             # Add templated version.
-            method_signature = "\tpublic: template<class... Args> static "
-
-            if "return_type" in function:
-                method_signature += correct_type(function["return_type"])
-            else:
-                method_signature += "void"
-
-            if not method_signature.endswith("*"):
-                method_signature += " "
-
-            method_signature += f'{escape_identifier(function["name"])}'
-
-            method_arguments = []
-            if "arguments" in function:
-                method_arguments = function["arguments"]
-
-            method_signature += "("
-            method_signature += make_function_parameters(method_arguments, include_default=True, is_vararg=vararg)
-            method_signature += ")"
-
-            method_signature += " {"
-            header.append(method_signature)
-
-            args_array = f"\t\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args {{ "
-            for argument in method_arguments:
-                if argument["type"] == "Variant":
-                    args_array += argument["name"]
-                else:
-                    args_array += f'Variant({argument["name"]})'
-                args_array += ", "
-
-            args_array += "Variant(args)... };"
-            header.append(args_array)
-            header.append(f"\t\tstd::array<const Variant *, {len(method_arguments)} + sizeof...(Args)> call_args;")
-            header.append("\t\tfor(size_t i = 0; i < variant_args.size(); i++) {")
-            header.append("\t\t\tcall_args[i] = &variant_args[i];")
-            header.append("\t\t}")
-
-            call_line = "\t\t"
-
-            if "return_type" in function and function["return_type"] != "void":
-                call_line += "return "
-
-            call_line += f'{escape_identifier(function["name"])}_internal(call_args.data(), variant_args.size());'
-            header.append(call_line)
-            header.append("\t}")
+            header += make_varargs_template(function, static=True)
 
     header.append("};")
     header.append("")
@@ -1244,34 +1081,8 @@ def generate_utility_functions(api, output_dir):
     for function in api["utility_functions"]:
         vararg = "is_vararg" in function and function["is_vararg"]
 
-        function_signature = ""
-        if "return_type" in function:
-            if not vararg:
-                function_signature += f'{correct_type(function["return_type"])}'
-            else:
-                function_signature += "Variant"
-        else:
-            function_signature += "void"
-
-        if not function_signature.endswith("*"):
-            function_signature += " "
-
-        function_signature += f'UtilityFunctions::{escape_identifier(function["name"])}'
-        if vararg:
-            function_signature += "_internal"
-        function_signature += "("
-
-        function_arguments = []
-        if "arguments" in function:
-            function_arguments = function["arguments"]
-
-        if not vararg:
-            function_signature += make_function_parameters(function_arguments, include_default=False)
-        else:
-            function_signature += "const Variant **args, GDNativeInt arg_count"
-        function_signature += ") {"
-
-        source.append(function_signature)
+        function_signature = make_signature("UtilityFunctions", function)
+        source.append(function_signature + " {")
 
         # Function body.
 
@@ -1340,14 +1151,20 @@ def camel_to_snake(name):
 def make_function_parameters(parameters, include_default=False, for_builtin=False, is_vararg=False):
     signature = []
 
-    for par in parameters:
+    for index, par in enumerate(parameters):
         parameter = type_for_parameter(par["type"], par["meta"] if "meta" in par else None)
-        parameter += escape_identifier(par["name"])
+        parameter_name = escape_identifier(par["name"])
+        if len(parameter_name) == 0:
+            parameter_name = "arg_" + str(index + 1)
+        parameter += parameter_name
 
         if include_default and "default_value" in par and (not for_builtin or par["type"] != "Variant"):
             parameter += " = "
             if is_enum(par["type"]):
-                parameter += f'({correct_type(par["type"])})'
+                parameter_type = correct_type(par["type"])
+                if parameter_type == "void":
+                    parameter_type = "Variant"
+                parameter += f'({parameter_type})'
             parameter += correct_default_value(par["default_value"], par["type"])
         signature.append(parameter)
 
@@ -1358,7 +1175,9 @@ def make_function_parameters(parameters, include_default=False, for_builtin=Fals
 
 
 def type_for_parameter(type_name, meta=None):
-    if is_pod_type(type_name) and type_name != "Nil" or is_enum(type_name):
+    if type_name == "void":
+        return "Variant "
+    elif is_pod_type(type_name) and type_name != "Nil" or is_enum(type_name):
         return f"{correct_type(type_name, meta)} "
     elif is_variant(type_name) or is_refcounted(type_name):
         return f"const {correct_type(type_name)} &"
@@ -1393,6 +1212,135 @@ def get_encoded_arg(arg_name, type_name, type_meta):
         name = f"&{name}"
 
     return (result, name)
+
+
+def make_signature(class_name, function_data, for_header=False, use_template_get_node=True, for_builtin=False, static=False):
+    function_signature = ""
+
+    is_vararg = "is_vararg" in function_data and function_data["is_vararg"]
+
+    if for_header:
+        if "is_virtual" in function_data and function_data["is_virtual"]:
+            function_signature += "virtual "
+
+        if is_vararg:
+            function_signature += "private: "
+
+        if static:
+            function_signature += "static "
+
+    return_type = "void"
+    return_meta = None
+    if "return_type" in function_data:
+        return_type = correct_type(function_data["return_type"])
+    elif "return_value" in function_data:
+        return_type = function_data["return_value"]["type"]
+        return_meta = function_data["return_value"]["meta"] if "meta" in function_data["return_value"] else None
+
+    function_signature += correct_type(
+        return_type,
+        return_meta,
+    )
+
+    if not function_signature.endswith("*"):
+        function_signature += " "
+
+    if not for_header:
+        function_signature += f"{class_name}::"
+
+    function_signature += escape_identifier(function_data["name"])
+
+    if is_vararg or (
+        not for_builtin and use_template_get_node and class_name == "Node" and function_data["name"] == "get_node"
+    ):
+        function_signature += "_internal"
+
+    function_signature += "("
+
+    arguments = function_data["arguments"] if "arguments" in function_data else []
+
+    if not is_vararg:
+        function_signature += make_function_parameters(arguments, for_header, for_builtin, is_vararg)
+    else:
+        function_signature += "const Variant **args, GDNativeInt arg_count"
+
+    function_signature += ")"
+
+    if "is_const" in function_data and function_data["is_const"]:
+        function_signature += " const"
+
+    return function_signature
+
+
+def make_varargs_template(function_data, static=False):
+    result = []
+
+    function_signature = "\tpublic: template<class... Args> "
+
+    if static:
+        function_signature += "static "
+
+    return_type = "void"
+    return_meta = None
+    if "return_type" in function_data:
+        return_type = correct_type(function_data["return_type"])
+    elif "return_value" in function_data:
+        return_type = function_data["return_value"]["type"]
+        return_meta = function_data["return_value"]["meta"] if "meta" in function_data["return_value"] else None
+
+    function_signature += correct_type(
+        return_type,
+        return_meta,
+    )
+
+    if not function_signature.endswith("*"):
+        function_signature += " "
+
+    function_signature += f'{escape_identifier(function_data["name"])}'
+
+    method_arguments = []
+    if "arguments" in function_data:
+        method_arguments = function_data["arguments"]
+
+    function_signature += "("
+
+    is_vararg = "is_vararg" in function_data and function_data["is_vararg"]
+
+    function_signature += make_function_parameters(method_arguments, include_default=True, is_vararg=is_vararg)
+
+    function_signature += ")"
+
+    if "is_const" in function_data and function_data["is_const"]:
+        function_signature += " const"
+
+    function_signature += " {"
+    result.append(function_signature)
+
+    args_array = f"\t\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args {{ "
+    for argument in method_arguments:
+        if argument["type"] == "Variant":
+            args_array += argument["name"]
+        else:
+            args_array += f'Variant({argument["name"]})'
+        args_array += ", "
+
+    args_array += "Variant(args)... };"
+    result.append(args_array)
+    result.append(f"\t\tstd::array<const Variant *, {len(method_arguments)} + sizeof...(Args)> call_args;")
+    result.append("\t\tfor(size_t i = 0; i < variant_args.size(); i++) {")
+    result.append("\t\t\tcall_args[i] = &variant_args[i];")
+    result.append("\t\t}")
+
+    call_line = "\t\t"
+
+    if "return_value" in function_data and function_data["return_value"]["type"] != "void":
+        call_line += "return "
+
+    call_line += f'{escape_identifier(function_data["name"])}_internal(call_args.data(), variant_args.size());'
+    result.append(call_line)
+    result.append("\t}")
+
+    return result
 
 
 # Engine idiosyncrasies.

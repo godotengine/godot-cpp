@@ -76,6 +76,11 @@ protected:                                                                      
                                                                                                                    \
 	m_class(godot::internal::empty_constructor empty) : m_inherits(empty) {}                                       \
                                                                                                                    \
+	template <class T>                                                                                             \
+	static void register_virtuals() {                                                                              \
+		m_inherits::register_virtuals<T>();                                                                        \
+	}                                                                                                              \
+                                                                                                                   \
 public:                                                                                                            \
 	static void initialize_class() {                                                                               \
 		static bool initialized = false;                                                                           \
@@ -85,6 +90,7 @@ public:                                                                         
 		m_inherits::initialize_class();                                                                            \
 		if (m_class::_get_bind_methods() != m_inherits::_get_bind_methods()) {                                     \
 			_bind_methods();                                                                                       \
+			m_inherits::register_virtuals<m_class>();                                                              \
 		}                                                                                                          \
 		initialized = true;                                                                                        \
 	}                                                                                                              \

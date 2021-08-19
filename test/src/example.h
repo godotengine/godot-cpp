@@ -29,7 +29,7 @@ public:
 		CONSTANT_WITHOUT_ENUM = 314,
 	};
 
-	// Functions
+	// Functions.
 	void simple_func();
 	void simple_const_func() const;
 	String return_something(const String &base);
@@ -37,12 +37,12 @@ public:
 	Variant varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
 	void emit_custom_signal(const String &name, int value);
 
-	// Property
+	// Property.
 	void set_custom_position(const Vector2 &pos);
 	Vector2 get_custom_position() const;
 
-	// Virtual function override
-	virtual bool _has_point(const Vector2 &point);
+	// Virtual function override (no need to bind manually).
+	virtual bool _has_point(const Vector2 &point) const override;
 };
 
 VARIANT_ENUM_CAST(Example, Constants);

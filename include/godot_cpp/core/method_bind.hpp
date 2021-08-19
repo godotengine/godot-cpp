@@ -260,9 +260,9 @@ public:
 	}
 	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_ret) const {
 #ifdef TYPED_METHOD_BIND
-		call_with_ptr_args<T, P...>(static_cast<T *>(p_instance), method, p_args);
+		call_with_ptr_args<T, P...>(static_cast<T *>(p_instance), method, p_args, nullptr);
 #else
-		call_with_ptr_args<MB_T, P...>(reinterpret_cast<MB_T *>(p_instance), method, p_args);
+		call_with_ptr_args<MB_T, P...>(reinterpret_cast<MB_T *>(p_instance), method, p_args, nullptr);
 #endif // TYPED_METHOD_BIND
 	}
 
@@ -338,9 +338,9 @@ public:
 	}
 	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_ret) const {
 #ifdef TYPED_METHOD_BIND
-		call_with_ptr_args<T, P...>(static_cast<T *>(p_instance), method, p_args);
+		call_with_ptr_args<T, P...>(static_cast<T *>(p_instance), method, p_args, nullptr);
 #else
-		call_with_ptr_args<MB_T, P...>(reinterpret_cast<MB_T *>(p_instance), method, p_args);
+		call_with_ptr_args<MB_T, P...>(reinterpret_cast<MB_T *>(p_instance), method, p_args, nullptr);
 #endif // TYPED_METHOD_BIND
 	}
 
