@@ -29,12 +29,4 @@ GDNativeBool GDN_EXPORT example_library_init(const GDNativeInterface *p_interfac
 
 	return result;
 }
-
-void GDN_EXPORT initialize_level(void *userdata, GDNativeInitializationLevel p_level) {
-	godot::GDExtensionBinding::initialize_level(userdata, p_level);
-}
-
-void GDN_EXPORT deinitialize_level(void *userdata, GDNativeInitializationLevel p_level) {
-	godot::GDExtensionBinding::deinitialize_level(userdata, p_level);
-}
 }

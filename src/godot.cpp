@@ -80,3 +80,14 @@ void GDExtensionBinding::free_instance_callback(void *p_token, void *p_instance,
 }
 
 } // namespace godot
+
+extern "C" {
+
+void GDN_EXPORT initialize_level(void *userdata, GDNativeInitializationLevel p_level) {
+	godot::GDExtensionBinding::initialize_level(userdata, p_level);
+}
+
+void GDN_EXPORT deinitialize_level(void *userdata, GDNativeInitializationLevel p_level) {
+	godot::GDExtensionBinding::deinitialize_level(userdata, p_level);
+}
+}
