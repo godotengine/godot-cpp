@@ -1,6 +1,7 @@
 # Godot auto generated files
 *.gen.*
 .import/
+.godot/
 /gen/
 
 # Misc

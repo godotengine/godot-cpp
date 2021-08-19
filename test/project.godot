@@ -1,0 +1,23 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+[application]
+
+config/name="GDExtension Test Project"
+run/main_scene="res://main.tscn"
+config/icon="res://icon.png"
+
+[native_extensions]
+
+paths=["res://example.gdextension"]
+
+[rendering]
+
+environment/defaults/default_environment="res://default_env.tres"
