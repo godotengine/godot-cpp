@@ -44,7 +44,8 @@ namespace godot {
 
 class Variant {
 	uint8_t opaque[GODOT_CPP_VARIANT_SIZE]{ 0 };
-	GDNativeVariantPtr ptr = const_cast<uint8_t (*)[GODOT_CPP_VARIANT_SIZE]>(&opaque);
+
+	_FORCE_INLINE_ GDNativeVariantPtr ptr() const { return const_cast<uint8_t(*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
 
 	friend class GDExtensionBinding;
 	friend class MethodBind;
@@ -141,7 +142,7 @@ public:
 	Variant();
 	Variant(std::nullptr_t n) :
 			Variant() {}
-	Variant(const GDNativeVariantPtr native_ptr);
+	explicit Variant(const GDNativeVariantPtr native_ptr);
 	Variant(const Variant &other);
 	Variant(Variant &&other);
 	Variant(bool v);
@@ -235,16 +236,11 @@ public:
 	operator PackedVector3Array() const;
 	operator PackedColorArray() const;
 
-	operator const GDNativeVariantPtr() const;
-	operator GDNativeVariantPtr();
-
 	Variant &operator=(const Variant &other);
 	Variant &operator=(Variant &&other);
 	bool operator==(const Variant &other) const;
 	bool operator!=(const Variant &other) const;
 	bool operator<(const Variant &other) const;
-
-	void operator=(const GDNativeVariantPtr other_ptr);
 
 	void call(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDNativeCallError &r_error);
 

@@ -58,6 +58,8 @@ endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
 	add_definitions(-D_DEBUG)
+	add_definitions(-DDEBUG_ENABLED)
+	add_definitions(-DDEBUG_METHODS_ENABLED)
 else()
 	add_definitions(-DNDEBUG)
 endif(CMAKE_BUILD_TYPE MATCHES Debug)

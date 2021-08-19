@@ -259,7 +259,7 @@ void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const G
 	std::array<const Variant *, sizeof...(P)> argsp;
 	for (int32_t i = 0; i < (int32_t)sizeof...(P); i++) {
 		if (i < p_argcount) {
-			args[i] = p_args[i];
+			args[i] = Variant(p_args[i]);
 		} else {
 			args[i] = default_values[i - p_argcount + (dvs - missing)];
 		}
@@ -294,7 +294,7 @@ void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, 
 	std::array<const Variant *, sizeof...(P)> argsp;
 	for (int32_t i = 0; i < (int32_t)sizeof...(P); i++) {
 		if (i < p_argcount) {
-			args[i] = p_args[i];
+			args[i] = Variant(p_args[i]);
 		} else {
 			args[i] = default_values[i - p_argcount + (dvs - missing)];
 		}
@@ -329,7 +329,7 @@ void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), const 
 	std::array<const Variant *, sizeof...(P)> argsp;
 	for (int32_t i = 0; i < (int32_t)sizeof...(P); i++) {
 		if (i < p_argcount) {
-			args[i] = p_args[i];
+			args[i] = Variant(p_args[i]);
 		} else {
 			args[i] = default_values[i - p_argcount + (dvs - missing)];
 		}
@@ -364,7 +364,7 @@ void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const,
 	std::array<const Variant *, sizeof...(P)> argsp;
 	for (int32_t i = 0; i < (int32_t)sizeof...(P); i++) {
 		if (i < p_argcount) {
-			args[i] = p_args[i];
+			args[i] = Variant(p_args[i]);
 		} else {
 			args[i] = default_values[i - p_argcount + (dvs - missing)];
 		}

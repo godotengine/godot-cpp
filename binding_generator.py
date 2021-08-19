@@ -179,7 +179,7 @@ def generate_builtin_bindings(api, output_dir, build_config):
         builtin_header.append("")
 
         for builtin in builtin_classes:
-            builtin_header.append(f'#include <godot_cpp/variant/{camel_to_snake(builtin)}.hpp>')
+            builtin_header.append(f"#include <godot_cpp/variant/{camel_to_snake(builtin)}.hpp>")
 
         builtin_header.append("")
 
@@ -229,7 +229,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append(f"class {class_name} {{")
     result.append(f"\tstatic constexpr size_t {snake_class_name}_SIZE = {size};")
     result.append(f"\tuint8_t opaque[{snake_class_name}_SIZE] {{ 0 }};")
-    result.append(f"\tGDNativeTypePtr ptr = const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque);")
+    result.append(
+        f"\t_FORCE_INLINE_ GDNativeTypePtr ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
+    )
 
     result.append("")
     result.append("\tfriend class Variant;")
@@ -1007,10 +1009,10 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                     if is_pod_type(return_type) or is_variant(return_type) or is_enum(return_type):
                         method_call += f"return internal::_call_native_mb_ret<{correct_type(return_type, meta_type)}>(___method_bind, _owner"
                     elif is_refcounted(return_type):
-                        method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{class_name}>(___method_bind, _owner"
+                        method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
                         is_ref = True
                     else:
-                        method_call += f"return ({correct_type(return_type)})internal::_call_native_mb_ret_obj<{class_name}>(___method_bind, _owner"
+                        method_call += f"return ({correct_type(return_type)})internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
                 else:
                     method_call += f"internal::_call_native_mb_no_ret(___method_bind, _owner"
 
@@ -1029,7 +1031,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             else:  # vararg.
                 result.append("\tGDNativeCallError error;")
                 result.append("\tVariant ret;")
-                method_call += "internal::interface->object_method_bind_call(___method_bind, _owner, (const GDNativeVariantPtr *)args, arg_count, ret, &error"
+                method_call += "internal::interface->object_method_bind_call(___method_bind, _owner, (const GDNativeVariantPtr *)args, arg_count, &ret, &error"
 
             if is_ref:
                 method_call += ")"  # Close Ref<> constructor.

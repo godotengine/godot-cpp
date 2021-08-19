@@ -158,11 +158,14 @@ if host_platform == "windows" and env["platform"] != "android":
 
     opts.Update(env)
 
+if env["target"] == "debug":
+    env.Append(CPPDEFINES=["DEBUG_ENABLED", "DEBUG_METHODS_ENABLED"])
+
 if env["platform"] == "linux" or env["platform"] == "freebsd":
     if env["use_llvm"]:
         env["CXX"] = "clang++"
 
-    env.Append(CCFLAGS=["-fPIC", "-std=c++14", "-Wwrite-strings"])
+    env.Append(CCFLAGS=["-fPIC", "-std=c++17", "-Wwrite-strings"])
     env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
 
     if env["target"] == "debug":
@@ -184,7 +187,7 @@ elif env["platform"] == "osx":
     if env["bits"] == "32":
         raise ValueError("Only 64-bit builds are supported for the macOS target.")
 
-    env.Append(CCFLAGS=["-std=c++14", "-arch", env["macos_arch"]])
+    env.Append(CCFLAGS=["-std=c++17", "-arch", env["macos_arch"]])
 
     if env["macos_deployment_target"] != "default":
         env.Append(CCFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
@@ -231,7 +234,7 @@ elif env["platform"] == "ios":
     env["AR"] = compiler_path + "ar"
     env["RANLIB"] = compiler_path + "ranlib"
 
-    env.Append(CCFLAGS=["-std=c++14", "-arch", env["ios_arch"], "-isysroot", sdk_path])
+    env.Append(CCFLAGS=["-std=c++17", "-arch", env["ios_arch"], "-isysroot", sdk_path])
     env.Append(
         LINKFLAGS=[
             "-arch",
@@ -283,7 +286,7 @@ elif env["platform"] == "windows":
     # Native or cross-compilation using MinGW
     if host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx" or env["use_mingw"]:
         # These options are for a release build even using target=debug
-        env.Append(CCFLAGS=["-O3", "-std=c++14", "-Wwrite-strings"])
+        env.Append(CCFLAGS=["-O3", "-std=c++17", "-Wwrite-strings"])
         env.Append(
             LINKFLAGS=[
                 "--static",
@@ -429,7 +432,7 @@ else:
 
 if env["generate_bindings"] == "auto":
     # Check if generated files exist
-    should_generate_bindings = not os.path.isfile(os.path.join(os.getcwd(), "src", "gen", "object.cpp"))
+    should_generate_bindings = not os.path.isfile(os.path.join(os.getcwd(), "gen", "src", "classes", "object.cpp"))
 else:
     should_generate_bindings = env["generate_bindings"] in ["yes", "true"]
 
@@ -441,6 +444,7 @@ if should_generate_bindings:
 
 # Sources to compile
 sources = []
+add_sources(sources, "src", "cpp")
 add_sources(sources, "src/core", "cpp")
 add_sources(sources, "src/variant", "cpp")
 add_sources(sources, "gen/src/variant", "cpp")

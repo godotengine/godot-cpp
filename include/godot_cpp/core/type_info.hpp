@@ -38,6 +38,36 @@
 
 namespace godot {
 
+template <bool C, typename T = void>
+struct EnableIf {
+	typedef T type;
+};
+
+template <typename T>
+struct EnableIf<false, T> {
+};
+
+template <typename, typename>
+struct TypesAreSame {
+	static bool const value = false;
+};
+
+template <typename A>
+struct TypesAreSame<A, A> {
+	static bool const value = true;
+};
+
+template <typename B, typename D>
+struct TypeInherits {
+	static D *get_d();
+
+	static char (&test(B *))[1];
+	static char (&test(...))[2];
+
+	static bool const value = sizeof(test(get_d())) == sizeof(char) &&
+							  !TypesAreSame<B volatile const, void volatile const>::value;
+};
+
 // If the compiler fails because it's trying to instantiate the primary 'GetTypeInfo' template
 // instead of one of the specializations, it's most likely because the type 'T' is not supported.
 // If 'T' is a class that inherits 'Object', make sure it can see the actual class declaration
@@ -144,6 +174,24 @@ struct GetTypeInfo<const Variant &> {
 	static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline GDNativePropertyInfo get_class_info() {
 		return PropertyInfo(GDNATIVE_VARIANT_TYPE_NIL, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
+	}
+};
+
+template <typename T>
+struct GetTypeInfo<T *, typename EnableIf<TypeInherits<Object, T>::value>::type> {
+	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
+	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static inline PropertyInfo get_class_info() {
+		return PropertyInfo(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+	}
+};
+
+template <typename T>
+struct GetTypeInfo<const T *, typename EnableIf<TypeInherits<Object, T>::value>::type> {
+	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
+	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static inline PropertyInfo get_class_info() {
+		return PropertyInfo(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
 	}
 };
 
