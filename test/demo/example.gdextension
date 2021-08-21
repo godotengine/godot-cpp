@@ -5,3 +5,4 @@ entry_symbol = "example_library_init"
 [libraries]
 
 Linux.64 = "bin/x11/libgdexample.so"
+Windows.64 = "bin/win64/libgdexample.dll"

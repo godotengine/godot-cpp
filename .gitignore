@@ -23,6 +23,7 @@ bin
 *.creator.user
 *.files
 *.includes
+*.idb
 
 # Gprof output
 gmon.out

@@ -256,6 +256,7 @@ elif env["platform"] == "ios":
 elif env["platform"] == "windows":
     if host_platform == "windows" and not env["use_mingw"]:
         # MSVC
+        env.Append(CPPDEFINES=["TYPED_METHOD_BIND"])
         env.Append(LINKFLAGS=["/WX"])
         if env["target"] == "debug":
             env.Append(CCFLAGS=["/Z7", "/Od", "/EHsc", "/D_DEBUG", "/MDd"])

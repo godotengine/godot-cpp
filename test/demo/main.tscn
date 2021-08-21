@@ -6,8 +6,6 @@
 script = ExtResource( "1_c326s" )
 
 [node name="Example" type="Example" parent="."]
-offset_right = 40.0
-offset_bottom = 40.0
 script = null
 __meta__ = {
 "_edit_use_anchors_": false
