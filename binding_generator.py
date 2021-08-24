@@ -653,9 +653,17 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
     # First create map of classes.
     for class_api in api["classes"]:
+        # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
+        if class_api["name"] == "ClassDB":
+            continue
         engine_classes[class_api["name"]] = class_api["is_refcounted"]
+    for native_struct in api["native_structures"]:
+        engine_classes[native_struct["name"]] = False
 
     for class_api in api["classes"]:
+        # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
+        if class_api["name"] == "ClassDB":
+            continue
         # Check used classes for header include.
         used_classes = set()
         fully_used_classes = set()
@@ -669,24 +677,31 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
             for method in class_api["methods"]:
                 if "arguments" in method:
                     for argument in method["arguments"]:
-                        if is_included(argument["type"], class_name):
-                            if is_enum(argument["type"]):
-                                fully_used_classes.add(get_enum_class(argument["type"]))
+                        type_name = argument["type"]
+                        if type_name.endswith("*"):
+                            type_name = type_name[:-1]
+                        if is_included(type_name, class_name):
+                            if is_enum(type_name):
+                                fully_used_classes.add(get_enum_class(type_name))
                             elif "default_value" in argument:
-                                fully_used_classes.add(argument["type"])
+                                fully_used_classes.add(type_name)
                             else:
-                                used_classes.add(argument["type"])
-                            if is_refcounted(argument["type"]):
+                                used_classes.add(type_name)
+                            if is_refcounted(type_name):
                                 fully_used_classes.add("Ref")
                 if "return_value" in method:
-                    if is_included(method["return_value"]["type"], class_name):
-                        if is_enum(method["return_value"]["type"]):
-                            fully_used_classes.add(get_enum_class(method["return_value"]["type"]))
-                        elif is_variant(method["return_value"]["type"]):
-                            fully_used_classes.add(method["return_value"]["type"])
+                    type_name = method["return_value"]["type"]
+                    if type_name.endswith("*"):
+                        type_name = type_name[:-1]
+                        print("New type name ", type_name)
+                    if is_included(type_name, class_name):
+                        if is_enum(type_name):
+                            fully_used_classes.add(get_enum_class(type_name))
+                        elif is_variant(type_name):
+                            fully_used_classes.add(type_name)
                         else:
-                            used_classes.add(method["return_value"]["type"])
-                        if is_refcounted(method["return_value"]["type"]):
+                            used_classes.add(type_name)
+                        if is_refcounted(type_name):
                             fully_used_classes.add("Ref")
 
         if "members" in class_api:
@@ -720,6 +735,36 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
             source_file.write(
                 generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node)
             )
+
+    for native_struct in api["native_structures"]:
+        struct_name = native_struct["name"]
+        snake_struct_name = camel_to_snake(struct_name)
+
+        header_filename = include_gen_folder / (snake_struct_name + ".hpp")
+
+        result = []
+        add_header(f"{snake_struct_name}.hpp", result)
+
+        header_guard = f"GODOT_CPP_{snake_struct_name.upper()}_HPP"
+        result.append(f"#ifndef {header_guard}")
+        result.append(f"#define {header_guard}")
+
+        result.append("")
+        result.append("namespace godot {")
+        result.append("")
+
+        result.append(f"struct {struct_name} {{")
+        for field in native_struct["format"].split(","):
+            result.append(f"\t{field};")
+        result.append("};")
+
+        result.append("")
+        result.append("} // namespace godot")
+        result.append("")
+        result.append(f"#endif // ! {header_guard}")
+
+        with header_filename.open("w+") as header_file:
+            header_file.write("\n".join(result))
 
 
 def generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node):
@@ -800,7 +845,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 continue
 
             method_signature = "\t"
-            method_signature += make_signature(class_name, method, for_header=True, use_template_get_node=use_template_get_node)
+            method_signature += make_signature(
+                class_name, method, for_header=True, use_template_get_node=use_template_get_node
+            )
             result.append(method_signature + ";")
 
     result.append("protected:")
@@ -813,7 +860,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 if not method["is_virtual"]:
                     continue
                 method_name = escape_identifier(method["name"])
-                result.append(f"\t\tif constexpr (!std::is_same_v<decltype(&{class_name}::{method_name}),decltype(&T::{method_name})>) {{")
+                result.append(
+                    f"\t\tif constexpr (!std::is_same_v<decltype(&{class_name}::{method_name}),decltype(&T::{method_name})>) {{"
+                )
                 result.append(f"\t\t\tBIND_VIRTUAL_METHOD(T, {method_name});")
                 result.append("\t\t}")
 
@@ -828,7 +877,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append("\tstatic T *cast_to(Object *p_object);")
     elif use_template_get_node and class_name == "Node":
         result.append("\ttemplate<class T>")
-        result.append("\tT *get_node(const NodePath &p_path) const { return Object::cast_to<T>(get_node_internal(p_path)); }")
+        result.append(
+            "\tT *get_node(const NodePath &p_path) const { return Object::cast_to<T>(get_node_internal(p_path)); }"
+        )
 
     # Constructor.
     result.append("")
@@ -1164,7 +1215,7 @@ def make_function_parameters(parameters, include_default=False, for_builtin=Fals
                 parameter_type = correct_type(par["type"])
                 if parameter_type == "void":
                     parameter_type = "Variant"
-                parameter += f'({parameter_type})'
+                parameter += f"({parameter_type})"
             parameter += correct_default_value(par["default_value"], par["type"])
         signature.append(parameter)
 
@@ -1214,7 +1265,9 @@ def get_encoded_arg(arg_name, type_name, type_meta):
     return (result, name)
 
 
-def make_signature(class_name, function_data, for_header=False, use_template_get_node=True, for_builtin=False, static=False):
+def make_signature(
+    class_name, function_data, for_header=False, use_template_get_node=True, for_builtin=False, static=False
+):
     function_signature = ""
 
     is_vararg = "is_vararg" in function_data and function_data["is_vararg"]
@@ -1379,7 +1432,8 @@ def is_variant(type_name):
 
 
 def is_engine_class(type_name):
-    return type_name in engine_classes
+    global engine_classes
+    return type_name == "Object" or type_name in engine_classes
 
 
 def is_refcounted(type_name):
@@ -1392,7 +1446,11 @@ def is_included(type_name, current_type):
     This removes Variant and POD types from inclusion, and the current type.
     """
     to_include = get_enum_class(type_name) if is_enum(type_name) else type_name
-    return to_include != current_type and not is_pod_type(to_include)
+    if to_include == current_type or is_pod_type(to_include):
+        return False
+    if to_include == "GlobalConstants" or to_include == "UtilityFunctions":
+        return True
+    return is_engine_class(to_include) or is_variant(to_include)
 
 
 def correct_default_value(value, type_name):
@@ -1430,6 +1488,8 @@ def correct_type(type_name, meta=None):
         return f"Ref<{type_name}>"
     if type_name == "Object" or is_engine_class(type_name):
         return f"{type_name} *"
+    if type_name.endswith("*"):
+        return f"{type_name[:-1]} *"
     return type_name
 
 
