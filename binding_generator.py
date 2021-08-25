@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import json
+from os import set_blocking
 import re
 import shutil
 from pathlib import Path
@@ -65,6 +66,8 @@ builtin_classes = []
 
 # Key is class name, value is boolean where True means the class is refcounted.
 engine_classes = {}
+
+singletons = []
 
 
 def generate_builtin_bindings(api, output_dir, build_config):
@@ -644,6 +647,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 
 def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
     global engine_classes
+    global singletons
 
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
     source_gen_folder = Path(output_dir) / "src" / "classes"
@@ -651,7 +655,7 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
     include_gen_folder.mkdir(parents=True, exist_ok=True)
     source_gen_folder.mkdir(parents=True, exist_ok=True)
 
-    # First create map of classes.
+    # First create map of classes and singletons.
     for class_api in api["classes"]:
         # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
         if class_api["name"] == "ClassDB":
@@ -659,6 +663,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         engine_classes[class_api["name"]] = class_api["is_refcounted"]
     for native_struct in api["native_structures"]:
         engine_classes[native_struct["name"]] = False
+    for singleton in api["singletons"]:
+        singletons.append(singleton["name"])
 
     for class_api in api["classes"]:
         # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
@@ -768,10 +774,12 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
 
 def generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node):
+    global singletons
     result = []
 
     class_name = class_api["name"]
     snake_class_name = camel_to_snake(class_name).upper()
+    is_singleton = class_name in singletons
 
     add_header(f"{snake_class_name.lower()}.hpp", result)
 
@@ -818,6 +826,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 result.append(f'\t\t{value["name"]} = {value["value"]},')
             result.append("\t};")
             result.append("")
+
+    if is_singleton:
+        result.append(f"\tstatic {class_name} *get_singleton();")
+        result.append("")
 
     if "methods" in class_api:
         for method in class_api["methods"]:
@@ -897,11 +909,13 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
 
 def generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node):
+    global singletons
     result = []
 
     class_name = class_api["name"]
     snake_class_name = camel_to_snake(class_name)
     inherits = class_api["inherits"] if "inherits" in class_api else "Wrapped"
+    is_singleton = class_name in singletons
 
     add_header(f"{snake_class_name}.cpp", result)
 
@@ -919,6 +933,17 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
 
     result.append("namespace godot {")
     result.append("")
+
+    if is_singleton:
+        result.append(f"{class_name} *{class_name}::get_singleton() {{")
+        result.append(f'\tstatic GDNativeObjectPtr singleton_obj = internal::interface->global_get_singleton("{class_name}");')
+        result.append("#ifdef DEBUG_ENABLED")
+        result.append('\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);')
+        result.append("#endif // DEBUG_ENABLED")
+        result.append(f'\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::interface->object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));')
+        result.append("\treturn singleton;")
+        result.append("}")
+        result.append("")
 
     if "methods" in class_api:
         for method in class_api["methods"]:
