@@ -284,6 +284,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("")
     result.append("public:")
 
+    copy_constructor_index = -1
+
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
             method_signature = f"\t{class_name}("
@@ -291,9 +293,14 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
                 method_signature += make_function_parameters(
                     constructor["arguments"], include_default=True, for_builtin=True
                 )
+                if len(constructor["arguments"]) == 1 and constructor["arguments"][0]["type"] == class_name:
+                    copy_constructor_index = constructor["index"]
             method_signature += ");"
 
             result.append(method_signature)
+
+    # Move constructor.
+    result.append(f'\t{class_name}({class_name} &&other);')
 
     # Special cases.
     if class_name == "String" or class_name == "StringName" or class_name == "NodePath":
@@ -383,6 +390,13 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
                         f'\t{correct_type(operator["return_type"])} operator{operator["name"].replace("unary", "")}() const;'
                     )
 
+    # Copy assignment.
+    if copy_constructor_index >= 0:
+        result.append(f"\t{class_name} &operator=(const {class_name} &other);")
+
+    # Move assignment.
+    result.append(f"\t{class_name} &operator=({class_name} &&other);")
+
     # Special cases.
     if class_name == "String":
         result.append("String &operator=(const char *p_str);")
@@ -448,6 +462,8 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
         result.append("")
 
     result.append("#include <godot_cpp/core/builtin_ptrcall.hpp>")
+    result.append("")
+    result.append("#include <utility>")
     result.append("")
     result.append("namespace godot {")
     result.append("")
@@ -517,6 +533,8 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     result.append("}")
     result.append("")
 
+    copy_constructor_index = -1
+
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
             method_signature = f"{class_name}::{class_name}("
@@ -532,6 +550,8 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                 f'\tinternal::_call_builtin_constructor(_method_bindings.constructor_{constructor["index"]}, &opaque'
             )
             if "arguments" in constructor:
+                if len(constructor["arguments"]) == 1 and constructor["arguments"][0]["type"] == class_name:
+                    copy_constructor_index = constructor["index"]
                 method_call += ", "
                 arguments = []
                 for argument in constructor["arguments"]:
@@ -548,6 +568,12 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             result.append(method_call)
             result.append("}")
             result.append("")
+
+    # Move constructor.
+    result.append(f'{class_name}::{class_name}({class_name} &&other) {{')
+    result.append("\tstd::swap(opaque, other.opaque);")
+    result.append("}")
+    result.append("")
 
     if builtin_api["has_destructor"]:
         result.append(f"{class_name}::~{class_name}() {{")
@@ -638,8 +664,33 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                         f'\treturn internal::_call_builtin_operator_ptr<{correct_type(operator["return_type"])}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}, (const GDNativeTypePtr)&opaque, (const GDNativeTypePtr)nullptr);'
                     )
                     result.append("}")
-            result.append("")
+                result.append("")
 
+    # Copy assignment.
+    if copy_constructor_index >= 0:
+        result.append(f"{class_name} &{class_name}::operator=(const {class_name} &other) {{")
+        if builtin_api["has_destructor"]:
+            result.append("\t_method_bindings.destructor(&opaque);")
+        (encode, arg_name) = get_encoded_arg(
+            "other",
+            class_name,
+            None,
+        )
+        result += encode
+        result.append(
+            f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, {arg_name});"
+        )
+        result.append("\treturn *this;")
+        result.append("}")
+        result.append("")
+
+    # Move assignment.
+    result.append(f"{class_name} &{class_name}::operator=({class_name} &&other) {{")
+    result.append("\tstd::swap(opaque, other.opaque);")
+    result.append("\treturn *this;")
+    result.append("}")
+
+    result.append("")
     result.append("} //namespace godot")
 
     return "\n".join(result)
@@ -699,7 +750,6 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                     type_name = method["return_value"]["type"]
                     if type_name.endswith("*"):
                         type_name = type_name[:-1]
-                        print("New type name ", type_name)
                     if is_included(type_name, class_name):
                         if is_enum(type_name):
                             fully_used_classes.add(get_enum_class(type_name))
@@ -936,11 +986,15 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
 
     if is_singleton:
         result.append(f"{class_name} *{class_name}::get_singleton() {{")
-        result.append(f'\tstatic GDNativeObjectPtr singleton_obj = internal::interface->global_get_singleton("{class_name}");')
+        result.append(
+            f'\tstatic GDNativeObjectPtr singleton_obj = internal::interface->global_get_singleton("{class_name}");'
+        )
         result.append("#ifdef DEBUG_ENABLED")
-        result.append('\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);')
+        result.append("\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
         result.append("#endif // DEBUG_ENABLED")
-        result.append(f'\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::interface->object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));')
+        result.append(
+            f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::interface->object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));"
+        )
         result.append("\treturn singleton;")
         result.append("}")
         result.append("")
