@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import json
-from os import set_blocking
 import re
 import shutil
 from pathlib import Path
