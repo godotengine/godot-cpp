@@ -143,21 +143,12 @@ else()
 endif()
 
 message(STATUS "Generating Bindings")
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_CUSTOM_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True)"
+execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_CUSTOM_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True, sources=True)"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	RESULT_VARIABLE HEADERS_FILE_LIST_RESULT
-	OUTPUT_VARIABLE HEADERS_FILE_LIST
+	OUTPUT_VARIABLE GENERATED_FILES_LIST
 )
-set(HEADERS_FILE_LIST ${HEADERS_FILE_LIST})
 
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_CUSTOM_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", sources=True)"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	RESULT_VARIABLE SOURCES_FILE_LIST_RESULT
-	OUTPUT_VARIABLE SOURCES_FILE_LIST
-)
-set(SOURCES_FILE_LIST ${SOURCES_FILE_LIST})
-
-add_custom_command(OUTPUT ${HEADERS_FILE_LIST} ${SOURCES_FILE_LIST}
+add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
 		COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
 		VERBATIM
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -173,9 +164,8 @@ file(GLOB_RECURSE HEADERS include/*.h**)
 # Define our godot-cpp library
 add_library(${PROJECT_NAME}
 		${SOURCES}
-		${SOURCES_FILE_LIST}
 		${HEADERS}
-		${HEADERS_FILE_LIST}
+		${GENERATED_FILES_LIST}
 )
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
