@@ -51,3 +51,22 @@ void Memory::free_static(void *p_ptr) {
 void *operator new(size_t p_size, const char *p_description) {
 	return godot::Memory::alloc_static(p_size);
 }
+
+using namespace godot;
+
+#ifdef _MSC_VER
+void operator delete(void *p_mem, const char *p_description) {
+	ERR_PRINT("Call to placement delete should not happen.");
+	CRASH_NOW();
+}
+
+void operator delete(void *p_mem, void *(*p_allocfunc)(size_t p_size)) {
+	ERR_PRINT("Call to placement delete should not happen.");
+	CRASH_NOW();
+}
+
+void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_description) {
+	ERR_PRINT("Call to placement delete should not happen.");
+	CRASH_NOW();
+}
+#endif
