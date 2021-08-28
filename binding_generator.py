@@ -1334,7 +1334,7 @@ def get_encoded_arg(arg_name, type_name, type_meta):
     arg_type = correct_type(type_name)
     if is_pod_type(arg_type):
         result.append(f"\t{get_gdnative_type(arg_type)} {name}_encoded;")
-        result.append(f"\tPtrToArg<{correct_type(type_name, type_meta)}>::encode({name}, &{name}_encoded);")
+        result.append(f"\tPtrToArg<{correct_type(type_name)}>::encode({name}, &{name}_encoded);")
         name = f"&{name}_encoded"
     elif is_engine_class(type_name):
         name = f"{name}->_owner"
@@ -1488,6 +1488,11 @@ def is_pod_type(type_name):
         "int",
         "float",
         "bool",
+        "double",
+        "int32_t",
+        "int64_t",
+        "uint32_t",
+        "uint64_t",
     ]
 
 
