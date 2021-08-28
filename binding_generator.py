@@ -1464,7 +1464,7 @@ def make_varargs_template(function_data, static=False):
 
     call_line = "\t\t"
 
-    if "return_value" in function_data and function_data["return_value"]["type"] != "void":
+    if return_type != "void":
         call_line += "return "
 
     call_line += f'{escape_identifier(function_data["name"])}_internal(call_args.data(), variant_args.size());'
