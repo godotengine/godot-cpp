@@ -27,6 +27,9 @@ def print_file_list(api_filepath, output_dir, headers=False, sources=False):
             print(str(source_filename.as_posix()), end=end)
 
     for engine_class in api["classes"]:
+        # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
+        if engine_class["name"] == "ClassDB":
+            continue
         header_filename = include_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".hpp")
         source_filename = source_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".cpp")
         if headers:
