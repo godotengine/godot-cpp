@@ -19,6 +19,9 @@ def print_file_list(api_filepath, output_dir, headers=False, sources=False):
         if is_pod_type(builtin_class["name"]):
             continue
 
+        if is_included_type(builtin_class["name"]):
+            continue
+
         header_filename = include_gen_folder / "variant" / (camel_to_snake(builtin_class["name"]) + ".hpp")
         source_filename = source_gen_folder / "variant" / (camel_to_snake(builtin_class["name"]) + ".cpp")
         if headers:
@@ -111,6 +114,8 @@ def generate_builtin_bindings(api, output_dir, build_config):
 
     for builtin_api in api["builtin_classes"]:
         if is_pod_type(builtin_api["name"]):
+            continue
+        if is_included_type(builtin_api["name"]):
             continue
 
         size = builtin_sizes[builtin_api["name"]]
@@ -413,6 +418,19 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("bool operator!=(const wchar_t *p_str) const;")
         result.append("bool operator!=(const char16_t *p_str) const;")
         result.append("bool operator!=(const char32_t *p_str) const;")
+        result.append(f'\tconst char32_t &operator[](int p_index) const;')
+        result.append(f'\tchar32_t &operator[](int p_index);')
+
+    if is_packed_array(class_name):
+        return_type = correct_type(builtin_api["indexing_return_type"])
+        if class_name == "PackedByteArray":
+            return_type = 'uint8_t'
+        elif class_name == "PackedInt32Array":
+            return_type = 'int32_t'
+        elif class_name == "PackedFloat32Array":
+            return_type = 'float'
+        result.append(f'\tconst ' + return_type + f' &operator[](int p_index) const;')
+        result.append(f'\t' + return_type + f' &operator[](int p_index);')
 
     result.append("};")
 
@@ -430,7 +448,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("String operator+(const wchar_t *p_chr, const String &p_str);")
         result.append("String operator+(const char16_t *p_chr, const String &p_str);")
         result.append("String operator+(const char32_t *p_chr, const String &p_str);")
-
+    
     result.append("")
     result.append("} // namespace godot")
 
@@ -1495,6 +1513,42 @@ def is_pod_type(type_name):
         "int64_t",
         "uint32_t",
         "uint64_t",
+    ]
+
+def is_included_type(type_name):
+    """
+    Those are types for which we already have a class file implemented.
+    """
+    return type_name in [
+        "AABB",
+        "Basis",
+        "Color",
+        "Plane",
+        "Quaternion",
+        "Rect2",
+        "Rect2i",
+        "Transform2D",
+        "Transform3D",
+        "Vector2",
+        "Vector2i",
+        "Vector3",
+        "Vector3i",
+    ]
+
+def is_packed_array(type_name):
+    """
+    Those are types for which we add our extra packed array functions.
+    """
+    return type_name in [
+        "PackedByteArray",
+        "PackedColorArray",
+        "PackedFloat32Array",
+        "PackedFloat64Array",
+        "PackedInt32Array",
+        "PackedInt64Array",
+        "PackedStringArray",
+        "PackedVector2Array",
+        "PackedVector3Array",
     ]
 
 

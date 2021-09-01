@@ -50,19 +50,6 @@ void Variant::init_bindings() {
 	}
 
 	String::init_bindings();
-	Vector2::init_bindings();
-	Vector2i::init_bindings();
-	Rect2::init_bindings();
-	Rect2i::init_bindings();
-	Vector3::init_bindings();
-	Vector3i::init_bindings();
-	Transform2D::init_bindings();
-	Plane::init_bindings();
-	Quaternion::init_bindings();
-	AABB::init_bindings();
-	Basis::init_bindings();
-	Transform3D::init_bindings();
-	Color::init_bindings();
 	StringName::init_bindings();
 	NodePath::init_bindings();
 	RID::init_bindings();

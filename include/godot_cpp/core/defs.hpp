@@ -92,6 +92,23 @@
 #define unlikely(x) x
 #endif
 
+#ifdef REAL_T_IS_DOUBLE
+typedef double real_t;
+#else
+typedef float real_t;
+#endif
+
+// Generic swap template.
+#ifndef SWAP
+#define SWAP(m_x, m_y) __swap_tmpl((m_x), (m_y))
+template <class T>
+inline void __swap_tmpl(T &x, T &y) {
+	T aux = x;
+	x = y;
+	y = aux;
+}
+#endif // SWAP
+
 // Home-made index sequence trick, so it can be used everywhere without the costly include of std::tuple.
 // https://stackoverflow.com/questions/15014096/c-index-of-type-during-variadic-template-expansion
 template <size_t... Is>

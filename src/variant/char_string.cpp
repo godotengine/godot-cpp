@@ -192,6 +192,14 @@ bool String::operator!=(const char32_t *p_str) const {
 	return *this != String(p_str);
 }
 
+const char32_t &String::operator[](int p_index) const {
+	return *internal::interface->string_operator_index_const((GDNativeStringPtr) this, p_index);
+}
+
+char32_t &String::operator[](int p_index) {
+	return *internal::interface->string_operator_index((GDNativeStringPtr) this, p_index);
+}
+
 bool operator==(const char *p_chr, const String &p_str) {
 	return p_str == String(p_chr);
 }
