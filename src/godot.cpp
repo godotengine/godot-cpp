@@ -54,6 +54,7 @@ GDNativeBool GDExtensionBinding::init(const GDNativeInterface *p_interface, cons
 
 	r_initialization->initialize = initialize_level;
 	r_initialization->deinitialize = deinitialize_level;
+	r_initialization->minimum_initialization_level = GDNATIVE_INITIALIZATION_CORE;
 
 	Variant::init_bindings();
 

@@ -4308,40 +4308,6 @@
 			]
 		},
 		{
-			"name": "polar2cartesian",
-			"return_type": "Vector2",
-			"category": "math",
-			"is_vararg": false,
-			"hash": 133424147,
-			"arguments": [
-				{
-					"name": "r",
-					"type": "float"
-				},
-				{
-					"name": "th",
-					"type": "float"
-				}
-			]
-		},
-		{
-			"name": "cartesian2polar",
-			"return_type": "Vector2",
-			"category": "math",
-			"is_vararg": false,
-			"hash": 133424147,
-			"arguments": [
-				{
-					"name": "x",
-					"type": "float"
-				},
-				{
-					"name": "y",
-					"type": "float"
-				}
-			]
-		},
-		{
 			"name": "wrapi",
 			"return_type": "int",
 			"category": "math",
@@ -6758,7 +6724,7 @@
 					"hash": 171192776
 				},
 				{
-					"name": "is_rel_path",
+					"name": "is_relative_path",
 					"return_type": "bool",
 					"is_vararg": false,
 					"is_const": true,
@@ -7769,6 +7735,20 @@
 						{
 							"name": "step",
 							"type": "Vector2"
+						}
+					]
+				},
+				{
+					"name": "from_angle",
+					"return_type": "Vector2",
+					"is_vararg": false,
+					"is_const": false,
+					"is_static": true,
+					"hash": 3,
+					"arguments": [
+						{
+							"name": "angle",
+							"type": "float"
 						}
 					]
 				}
@@ -52134,7 +52114,7 @@
 					}
 				},
 				{
-					"name": "set_moving_platform_ignore_layers",
+					"name": "set_moving_platform_floor_layers",
 					"is_const": false,
 					"is_vararg": false,
 					"is_virtual": false,
@@ -52148,7 +52128,32 @@
 					]
 				},
 				{
-					"name": "get_moving_platform_ignore_layers",
+					"name": "get_moving_platform_floor_layers",
+					"is_const": true,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 135338183,
+					"return_value": {
+						"type": "int",
+						"meta": "uint32"
+					}
+				},
+				{
+					"name": "set_moving_platform_wall_layers",
+					"is_const": false,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 134188166,
+					"arguments": [
+						{
+							"name": "exclude_layer",
+							"type": "int",
+							"meta": "uint32"
+						}
+					]
+				},
+				{
+					"name": "get_moving_platform_wall_layers",
 					"is_const": true,
 					"is_vararg": false,
 					"is_virtual": false,
@@ -52521,9 +52526,16 @@
 				},
 				{
 					"type": "int",
-					"name": "moving_platform_ignore_layers",
-					"setter": "set_moving_platform_ignore_layers",
-					"getter": "get_moving_platform_ignore_layers",
+					"name": "moving_platform_floor_layers",
+					"setter": "set_moving_platform_floor_layers",
+					"getter": "get_moving_platform_floor_layers",
+					"index": -1
+				},
+				{
+					"type": "int",
+					"name": "moving_platform_wall_layers",
+					"setter": "set_moving_platform_wall_layers",
+					"getter": "get_moving_platform_wall_layers",
 					"index": -1
 				},
 				{
@@ -106734,16 +106746,12 @@
 							"value": 0
 						},
 						{
-							"name": "RPC_MODE_REMOTE",
+							"name": "RPC_MODE_ANY",
 							"value": 1
 						},
 						{
-							"name": "RPC_MODE_MASTER",
+							"name": "RPC_MODE_AUTHORITY",
 							"value": 2
-						},
-						{
-							"name": "RPC_MODE_PUPPET",
-							"value": 3
 						}
 					]
 				}
@@ -107343,6 +107351,43 @@
 					]
 				},
 				{
+					"name": "sync_config",
+					"is_const": false,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 4217273203,
+					"return_value": {
+						"type": "enum::Error"
+					},
+					"arguments": [
+						{
+							"name": "scene_id",
+							"type": "int",
+							"meta": "int64"
+						},
+						{
+							"name": "interval",
+							"type": "int",
+							"meta": "uint64"
+						},
+						{
+							"name": "properties",
+							"type": "Array",
+							"default_value": "[]"
+						},
+						{
+							"name": "custom_send",
+							"type": "Callable",
+							"default_value": ""
+						},
+						{
+							"name": "custom_receive",
+							"type": "Callable",
+							"default_value": ""
+						}
+					]
+				},
+				{
 					"name": "despawn",
 					"is_const": false,
 					"is_vararg": false,
@@ -107461,14 +107506,71 @@
 					]
 				},
 				{
-					"name": "encode_state",
+					"name": "send_sync",
 					"is_const": false,
 					"is_vararg": false,
 					"is_virtual": false,
-					"hash": 135410024,
+					"hash": 1552406093,
 					"return_value": {
-						"type": "PackedByteArray"
+						"type": "enum::Error"
 					},
+					"arguments": [
+						{
+							"name": "peer_id",
+							"type": "int",
+							"meta": "int32"
+						},
+						{
+							"name": "scene_id",
+							"type": "int",
+							"meta": "int64"
+						},
+						{
+							"name": "data",
+							"type": "PackedByteArray"
+						},
+						{
+							"name": "transfer_mode",
+							"type": "enum::MultiplayerPeer.TransferMode",
+							"default_value": "2"
+						},
+						{
+							"name": "channel",
+							"type": "int",
+							"meta": "int32",
+							"default_value": "0"
+						}
+					]
+				},
+				{
+					"name": "sync_all",
+					"is_const": false,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 173599433,
+					"return_value": {
+						"type": "enum::Error"
+					},
+					"arguments": [
+						{
+							"name": "scene_id",
+							"type": "int",
+							"meta": "int64"
+						},
+						{
+							"name": "peer_id",
+							"type": "int",
+							"meta": "int32",
+							"default_value": "0"
+						}
+					]
+				},
+				{
+					"name": "track",
+					"is_const": false,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 134224103,
 					"arguments": [
 						{
 							"name": "scene_id",
@@ -107482,11 +107584,55 @@
 					]
 				},
 				{
+					"name": "untrack",
+					"is_const": false,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 134224103,
+					"arguments": [
+						{
+							"name": "scene_id",
+							"type": "int",
+							"meta": "int64"
+						},
+						{
+							"name": "object",
+							"type": "Object"
+						}
+					]
+				},
+				{
+					"name": "encode_state",
+					"is_const": false,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 174785354,
+					"return_value": {
+						"type": "PackedByteArray"
+					},
+					"arguments": [
+						{
+							"name": "scene_id",
+							"type": "int",
+							"meta": "int64"
+						},
+						{
+							"name": "object",
+							"type": "Object"
+						},
+						{
+							"name": "initial",
+							"type": "bool",
+							"default_value": "true"
+						}
+					]
+				},
+				{
 					"name": "decode_state",
 					"is_const": false,
 					"is_vararg": false,
 					"is_virtual": false,
-					"hash": 135445961,
+					"hash": 175971275,
 					"return_value": {
 						"type": "enum::Error"
 					},
@@ -107503,6 +107649,11 @@
 						{
 							"name": "data",
 							"type": "PackedByteArray"
+						},
+						{
+							"name": "initial",
+							"type": "bool",
+							"default_value": "true"
 						}
 					]
 				}
@@ -111989,6 +112140,23 @@
 							"value": 8
 						}
 					]
+				},
+				{
+					"name": "InternalMode",
+					"values": [
+						{
+							"name": "INTERNAL_MODE_DISABLED",
+							"value": 0
+						},
+						{
+							"name": "INTERNAL_MODE_FRONT",
+							"value": 1
+						},
+						{
+							"name": "INTERNAL_MODE_BACK",
+							"value": 2
+						}
+					]
 				}
 			],
 			"methods": [
@@ -112125,7 +112293,7 @@
 					"is_const": false,
 					"is_vararg": false,
 					"is_virtual": false,
-					"hash": 134464040,
+					"hash": 182667338,
 					"arguments": [
 						{
 							"name": "node",
@@ -112135,6 +112303,11 @@
 							"name": "legible_unique_name",
 							"type": "bool",
 							"default_value": "false"
+						},
+						{
+							"name": "internal",
+							"type": "enum::Node.InternalMode",
+							"default_value": "0"
 						}
 					]
 				},
@@ -112156,28 +112329,42 @@
 					"is_const": true,
 					"is_vararg": false,
 					"is_virtual": false,
-					"hash": 135338183,
+					"hash": 172413545,
 					"return_value": {
 						"type": "int",
 						"meta": "int32"
-					}
+					},
+					"arguments": [
+						{
+							"name": "include_internal",
+							"type": "bool",
+							"default_value": "false"
+						}
+					]
 				},
 				{
 					"name": "get_children",
 					"is_const": true,
 					"is_vararg": false,
 					"is_virtual": false,
-					"hash": 135338183,
+					"hash": 172413545,
 					"return_value": {
 						"type": "Array"
-					}
+					},
+					"arguments": [
+						{
+							"name": "include_internal",
+							"type": "bool",
+							"default_value": "false"
+						}
+					]
 				},
 				{
 					"name": "get_child",
 					"is_const": true,
 					"is_vararg": false,
 					"is_virtual": false,
-					"hash": 135374120,
+					"hash": 173599466,
 					"return_value": {
 						"type": "Node"
 					},
@@ -112186,6 +112373,11 @@
 							"name": "idx",
 							"type": "int",
 							"meta": "int32"
+						},
+						{
+							"name": "include_internal",
+							"type": "bool",
+							"default_value": "false"
 						}
 					]
 				},
@@ -112506,11 +112698,18 @@
 					"is_const": true,
 					"is_vararg": false,
 					"is_virtual": false,
-					"hash": 135338183,
+					"hash": 172413545,
 					"return_value": {
 						"type": "int",
 						"meta": "int32"
-					}
+					},
+					"arguments": [
+						{
+							"name": "include_internal",
+							"type": "bool",
+							"default_value": "false"
+						}
+					]
 				},
 				{
 					"name": "print_tree",
@@ -112994,7 +113193,7 @@
 					"hash": 134152229
 				},
 				{
-					"name": "set_network_master",
+					"name": "set_network_authority",
 					"is_const": false,
 					"is_vararg": false,
 					"is_virtual": false,
@@ -113013,7 +113212,7 @@
 					]
 				},
 				{
-					"name": "get_network_master",
+					"name": "get_network_authority",
 					"is_const": true,
 					"is_vararg": false,
 					"is_virtual": false,
@@ -113024,7 +113223,7 @@
 					}
 				},
 				{
-					"name": "is_network_master",
+					"name": "is_network_authority",
 					"is_const": true,
 					"is_vararg": false,
 					"is_virtual": false,
@@ -122583,13 +122782,6 @@
 			]
 		},
 		{
-			"name": "PhysicsDirectBodyState2DSW",
-			"is_refcounted": false,
-			"is_instantiable": false,
-			"inherits": "PhysicsDirectBodyState2D",
-			"api_type": "core"
-		},
-		{
 			"name": "PhysicsDirectBodyState3D",
 			"is_refcounted": false,
 			"is_instantiable": false,
@@ -123167,13 +123359,6 @@
 					"index": -1
 				}
 			]
-		},
-		{
-			"name": "PhysicsDirectBodyState3DSW",
-			"is_refcounted": false,
-			"is_instantiable": false,
-			"inherits": "PhysicsDirectBodyState3D",
-			"api_type": "core"
 		},
 		{
 			"name": "PhysicsDirectSpaceState2D",
@@ -167316,6 +167501,63 @@
 					}
 				},
 				{
+					"name": "get_point_transform",
+					"is_const": false,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 135374087,
+					"return_value": {
+						"type": "Vector3"
+					},
+					"arguments": [
+						{
+							"name": "point_index",
+							"type": "int",
+							"meta": "int32"
+						}
+					]
+				},
+				{
+					"name": "set_point_pinned",
+					"is_const": false,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 135649961,
+					"arguments": [
+						{
+							"name": "point_index",
+							"type": "int",
+							"meta": "int32"
+						},
+						{
+							"name": "pinned",
+							"type": "bool"
+						},
+						{
+							"name": "attachment_path",
+							"type": "NodePath",
+							"default_value": "NodePath(\"\")"
+						}
+					]
+				},
+				{
+					"name": "is_point_pinned",
+					"is_const": true,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 135374120,
+					"return_value": {
+						"type": "bool"
+					},
+					"arguments": [
+						{
+							"name": "point_index",
+							"type": "int",
+							"meta": "int32"
+						}
+					]
+				},
+				{
 					"name": "set_ray_pickable",
 					"is_const": false,
 					"is_vararg": false,
@@ -182929,6 +183171,29 @@
 					}
 				},
 				{
+					"name": "set_texture_progress_offset",
+					"is_const": false,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 134188166,
+					"arguments": [
+						{
+							"name": "offset",
+							"type": "Vector2"
+						}
+					]
+				},
+				{
+					"name": "get_texture_progress_offset",
+					"is_const": true,
+					"is_vararg": false,
+					"is_virtual": false,
+					"hash": 135338183,
+					"return_value": {
+						"type": "Vector2"
+					}
+				},
+				{
 					"name": "set_radial_initial_angle",
 					"is_const": false,
 					"is_vararg": false,
@@ -183080,6 +183345,13 @@
 					"name": "texture_progress",
 					"setter": "set_progress_texture",
 					"getter": "get_progress_texture",
+					"index": -1
+				},
+				{
+					"type": "Vector2",
+					"name": "texture_progress_offset",
+					"setter": "set_texture_progress_offset",
+					"getter": "get_texture_progress_offset",
 					"index": -1
 				},
 				{
@@ -198099,108 +198371,100 @@
 							"value": 40
 						},
 						{
-							"name": "MATH_POLAR2CARTESIAN",
+							"name": "MATH_WRAP",
 							"value": 41
 						},
 						{
-							"name": "MATH_CARTESIAN2POLAR",
+							"name": "MATH_WRAPF",
 							"value": 42
 						},
 						{
-							"name": "MATH_WRAP",
+							"name": "LOGIC_MAX",
 							"value": 43
 						},
 						{
-							"name": "MATH_WRAPF",
+							"name": "LOGIC_MIN",
 							"value": 44
 						},
 						{
-							"name": "LOGIC_MAX",
+							"name": "LOGIC_CLAMP",
 							"value": 45
 						},
 						{
-							"name": "LOGIC_MIN",
+							"name": "LOGIC_NEAREST_PO2",
 							"value": 46
 						},
 						{
-							"name": "LOGIC_CLAMP",
+							"name": "OBJ_WEAKREF",
 							"value": 47
 						},
 						{
-							"name": "LOGIC_NEAREST_PO2",
+							"name": "TYPE_CONVERT",
 							"value": 48
 						},
 						{
-							"name": "OBJ_WEAKREF",
+							"name": "TYPE_OF",
 							"value": 49
 						},
 						{
-							"name": "TYPE_CONVERT",
+							"name": "TYPE_EXISTS",
 							"value": 50
 						},
 						{
-							"name": "TYPE_OF",
+							"name": "TEXT_CHAR",
 							"value": 51
 						},
 						{
-							"name": "TYPE_EXISTS",
+							"name": "TEXT_STR",
 							"value": 52
 						},
 						{
-							"name": "TEXT_CHAR",
+							"name": "TEXT_PRINT",
 							"value": 53
 						},
 						{
-							"name": "TEXT_STR",
+							"name": "TEXT_PRINTERR",
 							"value": 54
 						},
 						{
-							"name": "TEXT_PRINT",
+							"name": "TEXT_PRINTRAW",
 							"value": 55
 						},
 						{
-							"name": "TEXT_PRINTERR",
+							"name": "VAR_TO_STR",
 							"value": 56
 						},
 						{
-							"name": "TEXT_PRINTRAW",
+							"name": "STR_TO_VAR",
 							"value": 57
 						},
 						{
-							"name": "VAR_TO_STR",
+							"name": "VAR_TO_BYTES",
 							"value": 58
 						},
 						{
-							"name": "STR_TO_VAR",
+							"name": "BYTES_TO_VAR",
 							"value": 59
 						},
 						{
-							"name": "VAR_TO_BYTES",
+							"name": "MATH_SMOOTHSTEP",
 							"value": 60
 						},
 						{
-							"name": "BYTES_TO_VAR",
+							"name": "MATH_POSMOD",
 							"value": 61
 						},
 						{
-							"name": "MATH_SMOOTHSTEP",
+							"name": "MATH_LERP_ANGLE",
 							"value": 62
 						},
 						{
-							"name": "MATH_POSMOD",
+							"name": "TEXT_ORD",
 							"value": 63
 						},
 						{
-							"name": "MATH_LERP_ANGLE",
-							"value": 64
-						},
-						{
-							"name": "TEXT_ORD",
-							"value": 65
-						},
-						{
 							"name": "FUNC_MAX",
-							"value": 66
+							"value": 64
 						}
 					]
 				}
