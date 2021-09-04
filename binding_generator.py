@@ -1561,6 +1561,8 @@ def correct_type(type_name, meta=None):
     if meta != None:
         if "int" in meta:
             return f"{meta}_t"
+        elif meta in type_conversion:
+            return type_conversion[type_name]
         else:
             return meta
     if type_name in type_conversion:
