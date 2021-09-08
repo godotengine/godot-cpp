@@ -307,7 +307,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
             result.append(method_signature)
 
     # Move constructor.
-    result.append(f'\t{class_name}({class_name} &&other);')
+    result.append(f"\t{class_name}({class_name} &&other);")
 
     # Special cases.
     if class_name == "String" or class_name == "StringName" or class_name == "NodePath":
@@ -418,19 +418,19 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("bool operator!=(const wchar_t *p_str) const;")
         result.append("bool operator!=(const char16_t *p_str) const;")
         result.append("bool operator!=(const char32_t *p_str) const;")
-        result.append(f'\tconst char32_t &operator[](int p_index) const;')
-        result.append(f'\tchar32_t &operator[](int p_index);')
+        result.append(f"\tconst char32_t &operator[](int p_index) const;")
+        result.append(f"\tchar32_t &operator[](int p_index);")
 
     if is_packed_array(class_name):
         return_type = correct_type(builtin_api["indexing_return_type"])
         if class_name == "PackedByteArray":
-            return_type = 'uint8_t'
+            return_type = "uint8_t"
         elif class_name == "PackedInt32Array":
-            return_type = 'int32_t'
+            return_type = "int32_t"
         elif class_name == "PackedFloat32Array":
-            return_type = 'float'
-        result.append(f'\tconst ' + return_type + f' &operator[](int p_index) const;')
-        result.append(f'\t' + return_type + f' &operator[](int p_index);')
+            return_type = "float"
+        result.append(f"\tconst " + return_type + f" &operator[](int p_index) const;")
+        result.append(f"\t" + return_type + f" &operator[](int p_index);")
 
     result.append("};")
 
@@ -590,7 +590,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             result.append("")
 
     # Move constructor.
-    result.append(f'{class_name}::{class_name}({class_name} &&other) {{')
+    result.append(f"{class_name}::{class_name}({class_name} &&other) {{")
     result.append("\tstd::swap(opaque, other.opaque);")
     result.append("}")
     result.append("")
@@ -1515,6 +1515,7 @@ def is_pod_type(type_name):
         "uint64_t",
     ]
 
+
 def is_included_type(type_name):
     """
     Those are types for which we already have a class file implemented.
@@ -1534,6 +1535,7 @@ def is_included_type(type_name):
         "Vector3",
         "Vector3i",
     ]
+
 
 def is_packed_array(type_name):
     """

@@ -1,3 +1,33 @@
+/*************************************************************************/
+/*  packed_arrays.cpp                                                    */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
+/*************************************************************************/
+/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
+
 // extra functions for packed arrays
 
 #include <godot_cpp/godot.hpp>
@@ -23,12 +53,12 @@ uint8_t &PackedByteArray::operator[](int p_index) {
 }
 
 const Color &PackedColorArray::operator[](int p_index) const {
-	const Color *color = (const Color *) internal::interface->packed_color_array_operator_index_const((GDNativeTypePtr *)this, p_index);
+	const Color *color = (const Color *)internal::interface->packed_color_array_operator_index_const((GDNativeTypePtr *)this, p_index);
 	return *color;
 }
 
 Color &PackedColorArray::operator[](int p_index) {
-	Color *color = (Color *) internal::interface->packed_color_array_operator_index((GDNativeTypePtr *)this, p_index);
+	Color *color = (Color *)internal::interface->packed_color_array_operator_index((GDNativeTypePtr *)this, p_index);
 	return *color;
 }
 
@@ -65,32 +95,32 @@ int64_t &PackedInt64Array::operator[](int p_index) {
 }
 
 const String &PackedStringArray::operator[](int p_index) const {
-	const String *string = (const String *) internal::interface->packed_string_array_operator_index_const((GDNativeTypePtr *)this, p_index);
+	const String *string = (const String *)internal::interface->packed_string_array_operator_index_const((GDNativeTypePtr *)this, p_index);
 	return *string;
 }
 
 String &PackedStringArray::operator[](int p_index) {
-	String *string = (String *) internal::interface->packed_string_array_operator_index((GDNativeTypePtr *)this, p_index);
+	String *string = (String *)internal::interface->packed_string_array_operator_index((GDNativeTypePtr *)this, p_index);
 	return *string;
 }
 
 const Vector2 &PackedVector2Array::operator[](int p_index) const {
-	const Vector2 *vec = (const Vector2 *) internal::interface->packed_vector2_array_operator_index_const((GDNativeTypePtr *)this, p_index);
+	const Vector2 *vec = (const Vector2 *)internal::interface->packed_vector2_array_operator_index_const((GDNativeTypePtr *)this, p_index);
 	return *vec;
 }
 
 Vector2 &PackedVector2Array::operator[](int p_index) {
-	Vector2 *vec = (Vector2 *) internal::interface->packed_vector2_array_operator_index((GDNativeTypePtr *)this, p_index);
+	Vector2 *vec = (Vector2 *)internal::interface->packed_vector2_array_operator_index((GDNativeTypePtr *)this, p_index);
 	return *vec;
 }
 
 const Vector3 &PackedVector3Array::operator[](int p_index) const {
-	const Vector3 *vec = (const Vector3 *) internal::interface->packed_vector3_array_operator_index_const((GDNativeTypePtr *)this, p_index);
+	const Vector3 *vec = (const Vector3 *)internal::interface->packed_vector3_array_operator_index_const((GDNativeTypePtr *)this, p_index);
 	return *vec;
 }
 
 Vector3 &PackedVector3Array::operator[](int p_index) {
-	Vector3 *vec = (Vector3 *) internal::interface->packed_vector3_array_operator_index((GDNativeTypePtr *)this, p_index);
+	Vector3 *vec = (Vector3 *)internal::interface->packed_vector3_array_operator_index((GDNativeTypePtr *)this, p_index);
 	return *vec;
 }
 
