@@ -44,11 +44,11 @@ namespace godot {
 namespace internal {
 
 template <class O, class... Args>
-Object *_call_native_mb_ret_obj(const GDNativeMethodBindPtr mb, void *instance, const Args &...args) {
+O *_call_native_mb_ret_obj(const GDNativeMethodBindPtr mb, void *instance, const Args &...args) {
 	GodotObject *ret = nullptr;
 	std::array<const GDNativeTypePtr, sizeof...(Args)> mb_args = { { (const GDNativeTypePtr)args... } };
 	internal::interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), &ret);
-	return (Object *)internal::interface->object_get_instance_binding(ret, internal::token, &O::___binding_callbacks);
+	return reinterpret_cast<O *>(internal::interface->object_get_instance_binding(ret, internal::token, &O::___binding_callbacks));
 }
 
 template <class R, class... Args>

@@ -448,7 +448,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("String operator+(const wchar_t *p_chr, const String &p_str);")
         result.append("String operator+(const char16_t *p_chr, const String &p_str);")
         result.append("String operator+(const char32_t *p_chr, const String &p_str);")
-    
+
     result.append("")
     result.append("} // namespace godot")
 
@@ -1056,7 +1056,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                         method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
                         is_ref = True
                     else:
-                        method_call += f"return ({correct_type(return_type)})internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
+                        method_call += f"return internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
                 else:
                     method_call += f"internal::_call_native_mb_no_ret(___method_bind, _owner"
 
