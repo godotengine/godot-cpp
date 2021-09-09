@@ -199,7 +199,7 @@ public:
 	}
 
 	void instantiate() {
-		ref(memnew(T));
+		ref(memnew(T()));
 	}
 
 	Ref() {}

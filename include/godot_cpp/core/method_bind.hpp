@@ -194,7 +194,7 @@ public:
 
 template <class T>
 MethodBind *create_vararg_method_bind(Variant (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
-	MethodBindVarArg<T> *a = memnew((MethodBindVarArg<T>));
+	MethodBindVarArg<T> *a = memnew(MethodBindVarArg<T>());
 	a->set_method(p_method);
 	a->set_method_info(p_info, p_return_nil_is_variant);
 	a->set_instance_class(T::get_class_static());

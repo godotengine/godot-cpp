@@ -36,6 +36,9 @@
 
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/core/error_macros.hpp>
+#include <godot_cpp/godot.hpp>
+
+#include <type_traits>
 
 void *operator new(size_t p_size, const char *p_description); ///< operator new that takes a description and uses MemoryStaticPool
 void *operator new(size_t p_size, void *p_pointer, size_t check, const char *p_description); ///< operator new that takes a description and uses a pointer to the preallocated memory
@@ -54,6 +57,8 @@ void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_d
 
 namespace godot {
 
+class Wrapped;
+
 class Memory {
 	Memory();
 
@@ -63,16 +68,29 @@ public:
 	static void free_static(void *p_ptr);
 };
 
-#define memnew(m_v) (new ("") m_v)
+#define memnew(m_v)                                                           \
+	([&]() {                                                                  \
+		if constexpr (std::is_base_of<godot::Object, decltype(m_v)>::value) { \
+			return godot::internal::Creator<decltype(m_v)>::_new();           \
+		} else {                                                              \
+			return new ("") m_v;                                              \
+		}                                                                     \
+	}())
+
 #define memnew_placement(m_placement, m_class) (new (m_placement, sizeof(m_class), "") m_class)
 
 template <class T>
-void memdelete(T *p_class) {
+void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wrapped, T>>::type * = 0) {
 	if (!__has_trivial_destructor(T)) {
 		p_class->~T();
 	}
 
 	Memory::free_static(p_class);
+}
+
+template <class T, std::enable_if_t<std::is_base_of_v<godot::Wrapped, T>, bool> = true>
+void memdelete(T *p_class) {
+	godot::internal::interface->object_destroy(p_class->_owner);
 }
 
 #define memnew_arr(m_class, m_count) memnew_arr_template<m_class>(m_count)

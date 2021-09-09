@@ -889,6 +889,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     result.append("public:")
 
+    # Constructor override, since parent Wrapped has protected constructor.
+    result.append(f"\t{class_name}() = default;")
+    result.append("")
+
     if "enums" in class_api:
         for enum_api in class_api["enums"]:
             result.append(f'\tenum {enum_api["name"]} {{')
@@ -962,10 +966,6 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append(
             "\tT *get_node(const NodePath &p_path) const { return Object::cast_to<T>(get_node_internal(p_path)); }"
         )
-
-    # Constructor.
-    result.append("")
-    result.append(f"\t{class_name}();")
 
     result.append("")
     result.append("};")
@@ -1103,17 +1103,6 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                 method_signature += "}"
                 result.append(method_signature)
             result.append("")
-
-    # Constructor.
-    result.append(f"{class_name}::{class_name}() : {inherits}(godot::internal::empty_constructor()) {{")
-    result.append(
-        f'\tstatic GDNativeClassConstructor constructor = internal::interface->classdb_get_constructor("{class_name}");'
-    )
-    result.append("\t_owner = (GodotObject *)constructor();")
-    result.append(
-        f"\tinternal::interface->object_set_instance_binding((GDNativeObjectPtr)_owner, internal::token, this, &{class_name}::___binding_callbacks);"
-    )
-    result.append("}")
 
     result.append("")
     result.append("} // namespace godot ")
