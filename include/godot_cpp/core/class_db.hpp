@@ -63,6 +63,10 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, Args... args) 
 }
 
 class ClassDB {
+	static GDNativeInitializationLevel current_level;
+
+	friend class godot::GDExtensionBinding;
+
 public:
 	struct PropertySetGet {
 		int index;
@@ -98,7 +102,7 @@ private:
 
 public:
 	template <class T>
-	static void register_class(GDNativeInitializationLevel p_level = GDNATIVE_INITIALIZATION_SCENE);
+	static void register_class();
 
 	template <class N, class M>
 	static MethodBind *bind_method(N p_method_name, M p_method);
@@ -132,11 +136,11 @@ public:
 	}
 
 template <class T>
-void ClassDB::register_class(GDNativeInitializationLevel p_level) {
+void ClassDB::register_class() {
 	ClassInfo cl;
 	cl.name = T::get_class_static();
 	cl.parent_name = T::get_parent_class_static();
-	cl.level = p_level;
+	cl.level = current_level;
 	cl.constructor = T::create;
 	cl.destructor = T::free;
 	cl.object_instance = T::set_object_instance;

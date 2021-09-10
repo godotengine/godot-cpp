@@ -40,6 +40,7 @@
 namespace godot {
 
 std::unordered_map<std::string, ClassDB::ClassInfo> ClassDB::classes;
+GDNativeInitializationLevel ClassDB::current_level = GDNATIVE_INITIALIZATION_CORE;
 
 MethodDefinition D_METHOD(const char *p_name) {
 	return MethodDefinition(p_name);
