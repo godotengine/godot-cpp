@@ -47,14 +47,8 @@ class GDExtensionBinding {
 public:
 	using Callback = void (*)();
 
-	static Callback core_init;
-	static Callback server_init;
-	static Callback scene_init;
-	static Callback editor_init;
-	static Callback core_terminate;
-	static Callback server_terminate;
-	static Callback scene_terminate;
-	static Callback editor_terminate;
+	static Callback init_callbacks[GDNATIVE_MAX_INITIALIZATION_LEVEL];
+	static Callback terminate_callbacks[GDNATIVE_MAX_INITIALIZATION_LEVEL];
 	static GDNativeBool init(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization);
 
 public:
@@ -73,16 +67,18 @@ public:
 		InitObject(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) :
 				interface(p_interface),
 				library(p_library),
-				initialization(r_initialization) {}
+				initialization(r_initialization) {};
 
 		void register_core_initializer(Callback p_core_init) const;
 		void register_server_initializer(Callback p_server_init) const;
 		void register_scene_initializer(Callback p_scene_init) const;
 		void register_editor_initializer(Callback p_editor_init) const;
+		void register_driver_initializer(Callback p_driver_init) const;
 		void register_core_terminator(Callback p_core_terminate) const;
 		void register_server_terminator(Callback p_server_terminate) const;
 		void register_scene_terminator(Callback p_scene_terminate) const;
 		void register_editor_terminator(Callback p_editor_terminate) const;
+		void register_driver_terminator(Callback p_driver_terminate) const;
 
 		GDNativeBool init() const;
 	};
