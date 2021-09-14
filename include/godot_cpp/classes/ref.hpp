@@ -125,6 +125,7 @@ public:
 			unref();
 			return;
 		}
+
 		Ref r;
 		r.reference = Object::cast_to<T>(refb);
 		ref(r);
@@ -132,23 +133,25 @@ public:
 	}
 
 	void operator=(const Variant &p_variant) {
-		// FIXME
+		// Needs testing, Variant has a cast to Object * here.
+
 		// Object *object = p_variant.get_validated_object();
+		Object *object = p_variant;
 
-		// if (object == reference) {
-		// 	return;
-		// }
+		if (object == reference) {
+			return;
+		}
 
-		// unref();
+		unref();
 
-		// if (!object) {
-		// 	return;
-		// }
+		if (!object) {
+			return;
+		}
 
-		// T *r = Object::cast_to<T>(object);
-		// if (r && r->reference()) {
-		// 	reference = r;
-		// }
+		T *r = Object::cast_to<T>(object);
+		if (r && r->reference()) {
+			reference = r;
+		}
 	}
 
 	template <class T_Other>
@@ -168,6 +171,20 @@ public:
 		ref(p_from);
 	}
 
+	template <class T_Other>
+	Ref(const Ref<T_Other> &p_from) {
+		RefCounted *refb = const_cast<RefCounted *>(static_cast<const RefCounted *>(p_from.ptr()));
+		if (!refb) {
+			unref();
+			return;
+		}
+
+		Ref r;
+		r.reference = Object::cast_to<T>(refb);
+		ref(r);
+		r.reference = nullptr;
+	}
+
 	Ref(T *p_reference) {
 		if (p_reference) {
 			ref_pointer(p_reference);
@@ -175,17 +192,19 @@ public:
 	}
 
 	Ref(const Variant &p_variant) {
-		// FIXME
+		// Needs testing, Variant has a cast to Object * here.
+
 		// Object *object = p_variant.get_validated_object();
+		Object *object = p_variant;
 
-		// if (!object) {
-		// 	return;
-		// }
+		if (!object) {
+			return;
+		}
 
-		// T *r = Object::cast_to<T>(object);
-		// if (r && r->reference()) {
-		// 	reference = r;
-		// }
+		T *r = Object::cast_to<T>(object);
+		if (r && r->reference()) {
+			reference = r;
+		}
 	}
 
 	inline bool is_valid() const { return reference != nullptr; }
