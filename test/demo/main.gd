@@ -13,9 +13,9 @@ func _ready():
 	prints("vararg args", $Example.varargs_func("some", "arguments", "to", "test"))
 
 	# Use properties.
-	prints("custom postion is", $Example.custom_position)
-	$Example.custom_position = Vector2(50, 50)
-	prints("custom postion now is", $Example.custom_position)
+	prints("custom position is", $Example.group_subgroup_custom_position)
+	$Example.group_subgroup_custom_position = Vector2(50, 50)
+	prints("custom position now is", $Example.group_subgroup_custom_position)
 
 	# Get constants
 	prints("FIRST", $Example.FIRST)

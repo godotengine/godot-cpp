@@ -52,6 +52,22 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1) {
 	return method;
 }
 
+void ClassDB::add_property_group(const char *p_class, const char *p_name, const char *p_prefix) {
+	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), "Trying to add property to non-existing class.");
+
+	ClassInfo &info = classes[p_class];
+
+	info.property_list.push_back(PropertyInfo(Variant::NIL, p_name, PROPERTY_HINT_NONE, p_prefix, PROPERTY_USAGE_GROUP));
+}
+
+void ClassDB::add_property_subgroup(const char *p_class, const char *p_name, const char *p_prefix) {
+	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), "Trying to add property to non-existing class.");
+
+	ClassInfo &info = classes[p_class];
+
+	info.property_list.push_back(PropertyInfo(Variant::NIL, p_name, PROPERTY_HINT_NONE, p_prefix, PROPERTY_USAGE_SUBGROUP));
+}
+
 void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, const char *p_setter, const char *p_getter, int p_index) {
 	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), "Trying to add property to non-existing class.");
 
@@ -262,9 +278,15 @@ void ClassDB::initialize(GDNativeInitializationLevel p_level) {
 				property.usage, // DEFAULT //uint32_t usage;
 			};
 
-			const PropertySetGet &setget = cl.property_setget.find(property.name)->second;
+			if (info.usage == PROPERTY_USAGE_GROUP) {
+				internal::interface->classdb_register_extension_class_property_group(internal::library, cl.name, info.name, info.hint_string);
+			} else if (info.usage == PROPERTY_USAGE_SUBGROUP) {
+				internal::interface->classdb_register_extension_class_property_subgroup(internal::library, cl.name, info.name, info.hint_string);
+			} else {
+				const PropertySetGet &setget = cl.property_setget.find(property.name)->second;
 
-			internal::interface->classdb_register_extension_class_property(internal::library, cl.name, &info, setget.setter, setget.getter);
+				internal::interface->classdb_register_extension_class_property(internal::library, cl.name, &info, setget.setter, setget.getter);
+			}
 		}
 
 		for (const std::pair<std::string, MethodInfo> pair : cl.signal_map) {

@@ -108,6 +108,8 @@ public:
 	static MethodBind *bind_method(N p_method_name, M p_method);
 	template <class M>
 	static MethodBind *bind_vararg_method(uint32_t p_flags, const char *p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const std::vector<Variant> &p_default_args = std::vector<Variant>{}, bool p_return_nil_is_variant = true);
+	static void add_property_group(const char *p_class, const char *p_name, const char *p_prefix);
+	static void add_property_subgroup(const char *p_class, const char *p_name, const char *p_prefix);
 	static void add_property(const char *p_class, const PropertyInfo &p_pinfo, const char *p_setter, const char *p_getter, int p_index = -1);
 	static void add_signal(const char *p_class, const MethodInfo &p_signal);
 	static void bind_integer_constant(const char *p_class, const char *p_enum, const char *p_name, GDNativeInt p_constant);

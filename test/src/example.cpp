@@ -53,9 +53,12 @@ void Example::_bind_methods() {
 	}
 
 	// Properties.
+	ADD_GROUP("Test group","group_");
+	ADD_SUBGROUP("Test subgroup","group_subgroup_");
+
 	ClassDB::bind_method(D_METHOD("get_custom_position"), &Example::get_custom_position);
 	ClassDB::bind_method(D_METHOD("set_custom_position", "position"), &Example::set_custom_position);
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "custom_position"), "set_custom_position", "get_custom_position");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "group_subgroup_custom_position"), "set_custom_position", "get_custom_position");
 
 	// Signals.
 	ADD_SIGNAL(MethodInfo("custom_signal", PropertyInfo(Variant::STRING, "name"), PropertyInfo(Variant::INT, "value")));

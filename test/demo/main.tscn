@@ -7,9 +7,6 @@ script = ExtResource( "1_c326s" )
 
 [node name="Example" type="Example" parent="."]
 script = null
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Label" type="Label" parent="Example"]
 offset_left = 194.0
