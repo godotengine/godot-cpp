@@ -54,6 +54,7 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("return_something_const"), &Example::return_something_const);
 	ClassDB::bind_method(D_METHOD("return_extended_ref"), &Example::return_extended_ref);
 	ClassDB::bind_method(D_METHOD("extended_ref_checks"), &Example::extended_ref_checks);
+	ClassDB::bind_method(D_METHOD("test_array"), &Example::test_array);
 
 	{
 		MethodInfo mi;
@@ -79,6 +80,14 @@ void Example::_bind_methods() {
 	BIND_ENUM_CONSTANT(ANSWER_TO_EVERYTHING);
 
 	BIND_CONSTANT(CONSTANT_WITHOUT_ENUM);
+}
+
+Example::Example() {
+	UtilityFunctions::print("Constructor.");
+}
+
+Example::~Example() {
+	UtilityFunctions::print("Destructor.");
 }
 
 // Methods.
@@ -124,6 +133,16 @@ Variant Example::varargs_func(const Variant **args, GDNativeInt arg_count, GDNat
 
 void Example::emit_custom_signal(const String &name, int value) {
 	emit_signal("custom_signal", name, value);
+}
+
+Array Example::test_array() const {
+	Array arr;
+
+	arr.resize(2);
+	arr[0] = Variant(1);
+	arr[1] = Variant(2);
+
+	return arr;
 }
 
 // Properties.

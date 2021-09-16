@@ -32,6 +32,7 @@
 
 #include <godot_cpp/godot.hpp>
 
+#include <godot_cpp/variant/array.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/packed_color_array.hpp>
 #include <godot_cpp/variant/packed_float32_array.hpp>
@@ -122,6 +123,16 @@ const Vector3 &PackedVector3Array::operator[](int p_index) const {
 Vector3 &PackedVector3Array::operator[](int p_index) {
 	Vector3 *vec = (Vector3 *)internal::gdn_interface->packed_vector3_array_operator_index((GDNativeTypePtr *)this, p_index);
 	return *vec;
+}
+
+const Variant &Array::operator[](int p_index) const {
+	const Variant *var = (const Variant *)internal::gdn_interface->array_operator_index_const((GDNativeTypePtr *)this, p_index);
+	return *var;
+}
+
+Variant &Array::operator[](int p_index) {
+	Variant *var = (Variant *)internal::gdn_interface->array_operator_index((GDNativeTypePtr *)this, p_index);
+	return *var;
 }
 
 } // namespace godot

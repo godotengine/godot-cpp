@@ -76,6 +76,9 @@ public:
 		CONSTANT_WITHOUT_ENUM = 314,
 	};
 
+	Example();
+	~Example();
+
 	// Functions.
 	void simple_func();
 	void simple_const_func() const;
@@ -85,6 +88,7 @@ public:
 	Ref<ExampleRef> extended_ref_checks(Ref<ExampleRef> p_ref) const;
 	Variant varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
 	void emit_custom_signal(const String &name, int value);
+	Array test_array() const;
 
 	// Property.
 	void set_custom_position(const Vector2 &pos);
