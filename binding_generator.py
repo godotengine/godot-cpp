@@ -238,7 +238,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     result.append(f"class {class_name} {{")
     result.append(f"\tstatic constexpr size_t {snake_class_name}_SIZE = {size};")
-    result.append(f"\tuint8_t opaque[{snake_class_name}_SIZE] {{ 0 }};")
+    result.append(f"\tuint8_t opaque[{snake_class_name}_SIZE] = {{}};")
     result.append(
         f"\t_FORCE_INLINE_ GDNativeTypePtr ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
     )
