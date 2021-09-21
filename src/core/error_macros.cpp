@@ -45,7 +45,7 @@ void _err_print_error(const char *p_function, const char *p_file, int p_line, co
 }
 
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, bool p_is_warning) {
-	_err_print_error(p_function, p_file, p_line, p_error, "", p_is_warning);
+	_err_print_error(p_function, p_file, p_line, "", p_error, p_is_warning);
 }
 
 void _err_print_index_error(const char *p_function, const char *p_file, int p_line, int64_t p_index, int64_t p_size, const char *p_index_str, const char *p_size_str, const char *p_message, bool fatal) {
