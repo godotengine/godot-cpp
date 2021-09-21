@@ -961,6 +961,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append("")
         result.append("\ttemplate<class T>")
         result.append("\tstatic T *cast_to(Object *p_object);")
+
+        result.append("\tvirtual ~Object() {};")
     elif use_template_get_node and class_name == "Node":
         result.append("\ttemplate<class T>")
         result.append(
