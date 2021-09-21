@@ -53,8 +53,8 @@ void Example::_bind_methods() {
 	}
 
 	// Properties.
-	ADD_GROUP("Test group","group_");
-	ADD_SUBGROUP("Test subgroup","group_subgroup_");
+	ADD_GROUP("Test group", "group_");
+	ADD_SUBGROUP("Test subgroup", "group_subgroup_");
 
 	ClassDB::bind_method(D_METHOD("get_custom_position"), &Example::get_custom_position);
 	ClassDB::bind_method(D_METHOD("set_custom_position", "position"), &Example::set_custom_position);
