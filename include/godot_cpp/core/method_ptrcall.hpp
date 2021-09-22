@@ -169,7 +169,7 @@ struct PtrToArg<T *> {
 	}
 	typedef Object *EncodeT;
 	_FORCE_INLINE_ static void encode(T *p_var, void *p_ptr) {
-		p_ptr = p_var->_owner;
+		*((void **)p_ptr) = p_var->_owner;
 	}
 };
 
@@ -180,7 +180,7 @@ struct PtrToArg<const T *> {
 	}
 	typedef const Object *EncodeT;
 	_FORCE_INLINE_ static void encode(T *p_var, void *p_ptr) {
-		p_ptr = p_var->_owner;
+		*((void **)p_ptr) = p_var->_owner;
 	}
 };
 
