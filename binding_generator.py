@@ -881,6 +881,7 @@ def is_primitive(name):
 def escape_cpp(name):
     escapes = {
         "class":    "_class",
+        "enum":     "_enum",
         "char":     "_char",
         "short":    "_short",
         "bool":     "_bool",
