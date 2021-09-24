@@ -41,6 +41,7 @@
 using namespace godot;
 
 void register_example_types() {
+	ClassDB::register_class<ExampleRef>();
 	ClassDB::register_class<Example>();
 }
 

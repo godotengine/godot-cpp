@@ -38,12 +38,21 @@
 
 using namespace godot;
 
+ExampleRef::ExampleRef() {
+	UtilityFunctions::print("ExampleRef created.");
+}
+
+ExampleRef::~ExampleRef() {
+	UtilityFunctions::print("ExampleRef destroyed.");
+}
+
 void Example::_bind_methods() {
 	// Methods.
 	ClassDB::bind_method(D_METHOD("simple_func"), &Example::simple_func);
 	ClassDB::bind_method(D_METHOD("simple_const_func"), &Example::simple_const_func);
 	ClassDB::bind_method(D_METHOD("return_something"), &Example::return_something);
 	ClassDB::bind_method(D_METHOD("return_something_const"), &Example::return_something_const);
+	ClassDB::bind_method(D_METHOD("return_extended_ref"), &Example::return_extended_ref);
 
 	{
 		MethodInfo mi;
@@ -92,6 +101,10 @@ Viewport *Example::return_something_const() const {
 		return result;
 	}
 	return nullptr;
+}
+
+ExampleRef *Example::return_extended_ref() const {
+	return memnew(ExampleRef());
 }
 
 Variant Example::varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {

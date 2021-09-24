@@ -39,6 +39,17 @@
 
 using namespace godot;
 
+class ExampleRef : public RefCounted {
+	GDCLASS(ExampleRef, RefCounted);
+
+protected:
+	static void _bind_methods() {}
+
+public:
+	ExampleRef();
+	~ExampleRef();
+};
+
 class Example : public Control {
 	GDCLASS(Example, Control);
 
@@ -64,6 +75,7 @@ public:
 	void simple_const_func() const;
 	String return_something(const String &base);
 	Viewport *return_something_const() const;
+	ExampleRef *return_extended_ref() const;
 	Variant varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
 	void emit_custom_signal(const String &name, int value);
 
