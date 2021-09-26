@@ -4,17 +4,17 @@ on: [push, pull_request]
 jobs:
   linux:
     name: Build (Linux, GCC)
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
         with:
           submodules: recursive
 
       - name: Set up Python (for SCons)
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9.1'
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
@@ -29,9 +29,9 @@ jobs:
           scons target=release generate_bindings=yes -j $(nproc)
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2
         with:
-          name: godot-cpp-linux-glibc2.23-x86_64-release
+          name: godot-cpp-linux-glibc2.27-x86_64-release
           path: bin/libgodot-cpp.linux.release.64.a
           if-no-files-found: error
 
@@ -48,14 +48,14 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
         with:
           submodules: recursive
 
       - name: Set up Python (for SCons)
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9.1'
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
@@ -66,7 +66,7 @@ jobs:
           scons target=release generate_bindings=yes -j $env:NUMBER_OF_PROCESSORS
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2
         with:
           name: godot-cpp-windows-msvc2019-x86_64-release
           path: bin/libgodot-cpp.windows.release.64.lib
@@ -77,14 +77,14 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
         with:
           submodules: recursive
 
       - name: Set up Python (for SCons)
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9.1'
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
@@ -100,7 +100,7 @@ jobs:
           scons target=release generate_bindings=yes use_mingw=yes -j $env:NUMBER_OF_PROCESSORS
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2
         with:
           name: godot-cpp-linux-mingw-x86_64-release
           path: bin/libgodot-cpp.windows.release.64.a
@@ -111,14 +111,14 @@ jobs:
     runs-on: macos-10.15
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
         with:
           submodules: recursive
 
       - name: Set up Python (for SCons)
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9.1'
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
@@ -131,7 +131,7 @@ jobs:
           scons target=release generate_bindings=yes -j $(sysctl -n hw.logicalcpu)
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2
         with:
           name: godot-cpp-macos-x86_64-release
           path: bin/libgodot-cpp.osx.release.64.a
@@ -150,14 +150,14 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
         with:
           submodules: recursive
 
       - name: Set up Python (for SCons)
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9.1'
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
