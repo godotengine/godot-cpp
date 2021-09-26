@@ -15,6 +15,9 @@ offset_right = 234.0
 offset_bottom = 21.0
 structured_text_bidi_override_options = []
 script = null
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Button" type="Button" parent="."]
 offset_right = 79.0
@@ -24,3 +27,5 @@ script = null
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[connection signal="custom_signal" from="Example" to="." method="_on_Example_custom_signal"]

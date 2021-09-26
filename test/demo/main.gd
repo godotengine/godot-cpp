@@ -1,10 +1,9 @@
 extends Node
 
 func _ready():
-	# Connect signals.
-	$Button.button_up.connect($Example.emit_custom_signal, ["Button", 42])
-	$Example.custom_signal.connect(on_signal)
-
+	# Bind signals
+	$Button.button_up.connect($Example.emit_custom_signal.bind("Button", 42))
+	
 	# Call methods.
 	$Example.simple_func()
 	($Example as Example).simple_const_func() # Force use of ptrcall
@@ -23,5 +22,5 @@ func _ready():
 	prints("ANSWER_TO_EVERYTHING", $Example.ANSWER_TO_EVERYTHING)
 	prints("CONSTANT_WITHOUT_ENUM", $Example.CONSTANT_WITHOUT_ENUM)
 
-func on_signal(name, value):
+func _on_Example_custom_signal(name, value):
 	prints("Example emitted:", name, value)

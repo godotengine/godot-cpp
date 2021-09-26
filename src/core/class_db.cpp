@@ -55,17 +55,13 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1) {
 void ClassDB::add_property_group(const char *p_class, const char *p_name, const char *p_prefix) {
 	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), "Trying to add property to non-existing class.");
 
-	ClassInfo &info = classes[p_class];
-
-	info.property_list.push_back(PropertyInfo(Variant::NIL, p_name, PROPERTY_HINT_NONE, p_prefix, PROPERTY_USAGE_GROUP));
+	internal::interface->classdb_register_extension_class_property_group(internal::library, p_class, p_name, p_prefix);
 }
 
 void ClassDB::add_property_subgroup(const char *p_class, const char *p_name, const char *p_prefix) {
 	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), "Trying to add property to non-existing class.");
 
-	ClassInfo &info = classes[p_class];
-
-	info.property_list.push_back(PropertyInfo(Variant::NIL, p_name, PROPERTY_HINT_NONE, p_prefix, PROPERTY_USAGE_SUBGROUP));
+	internal::interface->classdb_register_extension_class_property_subgroup(internal::library, p_class, p_name, p_prefix);
 }
 
 void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, const char *p_setter, const char *p_getter, int p_index) {
@@ -73,7 +69,7 @@ void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, con
 
 	ClassInfo &info = classes[p_class];
 
-	ERR_FAIL_COND_MSG(info.property_setget.find(p_pinfo.name) != info.property_setget.end(), "Property already exists in class.");
+	ERR_FAIL_COND_MSG(info.property_names.find(p_pinfo.name) != info.property_names.end(), "Property already exists in class.");
 
 	MethodBind *setter = nullptr;
 	if (p_setter) {
@@ -94,7 +90,18 @@ void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, con
 		ERR_FAIL_COND_MSG(exp_args != getter->get_argument_count(), "Getter method must not take any argument.");
 	}
 
-	info.property_list.push_back(p_pinfo);
+	// register property with plugin
+	info.property_names.insert(p_pinfo.name);
+
+	// register with Godot
+	GDNativePropertyInfo prop_info = {
+		(uint32_t)p_pinfo.type, //uint32_t type;
+		p_pinfo.name, //const char *name;
+		p_pinfo.class_name, //const char *class_name;
+		p_pinfo.hint, // NONE //uint32_t hint;
+		p_pinfo.hint_string, // const char *hint_string;
+		p_pinfo.usage, // DEFAULT //uint32_t usage;
+	};
 
 	PropertySetGet setget;
 	setget.setter = p_setter;
@@ -104,7 +111,7 @@ void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, con
 	setget.index = p_index;
 	setget.type = p_pinfo.type;
 
-	info.property_setget[p_pinfo.name] = setget;
+	internal::interface->classdb_register_extension_class_property(internal::library, info.name, &prop_info, setget.setter, setget.getter);
 }
 
 MethodBind *ClassDB::get_method(const char *p_class, const char *p_method) {
@@ -162,10 +169,31 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 
 	p_bind->set_argument_names(args);
 
-	type.method_order.push_back(p_bind);
+	// register our method bind within our plugin
 	type.method_map[method_name.name] = p_bind;
 
+	// and register with godot
+	bind_method_godot(type.name, p_bind);
+
 	return p_bind;
+}
+
+void ClassDB::bind_method_godot(const char *p_class_name, MethodBind *p_method) {
+	GDNativeExtensionClassMethodInfo method_info = {
+		p_method->get_name(), //const char *name;
+		p_method, //void *method_userdata;
+		MethodBind::bind_call, //GDNativeExtensionClassMethodCall call_func;
+		MethodBind::bind_ptrcall, //GDNativeExtensionClassMethodPtrCall ptrcall_func;
+		GDNATIVE_EXTENSION_METHOD_FLAGS_DEFAULT, //uint32_t method_flags; /* GDNativeExtensionClassMethodFlags */
+		(uint32_t)p_method->get_argument_count(), //uint32_t argument_count;
+		(GDNativeBool)p_method->has_return(), //GDNativeBool has_return_value;
+		MethodBind::bind_get_argument_type, //(GDNativeExtensionClassMethodGetArgumentType) get_argument_type_func;
+		MethodBind::bind_get_argument_info, //GDNativeExtensionClassMethodGetArgumentInfo get_argument_info_func; /* name and hint information for the argument can be omitted in release builds. Class name should always be present if it applies. */
+		MethodBind::bind_get_argument_metadata, //GDNativeExtensionClassMethodGetArgumentMetadata get_argument_metadata_func;
+		p_method->get_hint_flags(), //uint32_t default_argument_count;
+		nullptr, //GDNativeVariantPtr *default_arguments;
+	};
+	internal::interface->classdb_register_extension_class_method(internal::library, p_class_name, &method_info);
 }
 
 void ClassDB::add_signal(const char *p_class, const MethodInfo &p_signal) {
@@ -173,27 +201,51 @@ void ClassDB::add_signal(const char *p_class, const MethodInfo &p_signal) {
 
 	ERR_FAIL_COND_MSG(type_it == classes.end(), "Class doesn't exist.");
 
-	ClassInfo &base = type_it->second;
-	ClassInfo *check = &base;
+	ClassInfo &cl = type_it->second;
+
+	// Check if this signal is already register
+	ClassInfo *check = &cl;
 	while (check) {
-		ERR_FAIL_COND_MSG(check->signal_map.find(p_signal.name) != check->signal_map.end(), String("Class '" + String(p_class) + "' already has signal '" + String(p_signal.name) + "'.").utf8().get_data());
+		ERR_FAIL_COND_MSG(check->signal_names.find(p_signal.name) != check->signal_names.end(), String("Class '" + String(p_class) + "' already has signal '" + String(p_signal.name) + "'.").utf8().get_data());
 		check = check->parent_ptr;
 	}
 
-	base.signal_map[p_signal.name] = p_signal;
+	// register our signal in our plugin
+	cl.signal_names.insert(p_signal.name);
+
+	// register our signal in godot
+	std::vector<GDNativePropertyInfo> parameters;
+	parameters.reserve(p_signal.arguments.size());
+
+	for (const PropertyInfo &par : p_signal.arguments) {
+		parameters.push_back(GDNativePropertyInfo{
+				static_cast<uint32_t>(par.type), // uint32_t type;
+				par.name, // const char *name;
+				par.class_name, // const char *class_name;
+				par.hint, // uint32_t hint;
+				par.hint_string, // const char *hint_string;
+				par.usage, // uint32_t usage;
+		});
+	}
+
+	internal::interface->classdb_register_extension_class_signal(internal::library, cl.name, p_signal.name, parameters.data(), parameters.size());
 }
 
-void ClassDB::bind_integer_constant(const char *p_class, const char *p_enum, const char *p_name, GDNativeInt p_constant) {
-	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(p_class);
+void ClassDB::bind_integer_constant(const char *p_class_name, const char *p_enum_name, const char *p_constant_name, GDNativeInt p_constant_value) {
+	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(p_class_name);
 
 	ERR_FAIL_COND_MSG(type_it == classes.end(), "Class doesn't exist.");
 
 	ClassInfo &type = type_it->second;
 
-	ERR_FAIL_COND_MSG(type.constant_map.find(p_name) != type.constant_map.end(), "Constant already registered.");
+	// check if it already exists
+	ERR_FAIL_COND_MSG(type.constant_names.find(p_constant_name) != type.constant_names.end(), "Constant already registered.");
 
-	type.constant_map[p_name] = std::pair<std::string, GDNativeInt>{ p_enum, p_constant };
-	type.constant_order.push_back(p_name);
+	// register it with our plugin (purely to check for duplicates)
+	type.constant_names.insert(p_constant_name);
+
+	// Register it with Godot
+	internal::interface->classdb_register_extension_class_integer_constant(internal::library, p_class_name, p_enum_name, p_constant_name, p_constant_value);
 }
 
 GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, const char *p_name) {
@@ -225,6 +277,9 @@ void ClassDB::bind_virtual_method(const char *p_class, const char *p_method, GDN
 	type.virtual_methods[p_method] = p_call;
 }
 
+void ClassDB::initialize_class(const ClassInfo &p_cl) {
+}
+
 void ClassDB::initialize(GDNativeInitializationLevel p_level) {
 	for (const std::pair<std::string, ClassInfo> pair : classes) {
 		const ClassInfo &cl = pair.second;
@@ -232,88 +287,7 @@ void ClassDB::initialize(GDNativeInitializationLevel p_level) {
 			continue;
 		}
 
-		GDNativeExtensionClassCreationInfo class_info = {
-			nullptr, // GDNativeExtensionClassSet set_func;
-			nullptr, // GDNativeExtensionClassGet get_func;
-			nullptr, // GDNativeExtensionClassGetPropertyList get_property_list_func;
-			nullptr, // GDNativeExtensionClassFreePropertyList free_property_list_func;
-			nullptr, // GDNativeExtensionClassNotification notification_func;
-			nullptr, // GDNativeExtensionClassToString to_string_func;
-			nullptr, // GDNativeExtensionClassReference reference_func;
-			nullptr, // GDNativeExtensionClassUnreference
-			cl.constructor, // GDNativeExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
-			cl.destructor, // GDNativeExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
-			cl.object_instance, // GDNativeExtensionClassObjectInstance object_instance_func; /* this one is mandatory */
-			&ClassDB::get_virtual_func, // GDNativeExtensionClassGetVirtual get_virtual_func;
-			(void *)cl.name, //void *class_userdata;
-		};
-
-		internal::interface->classdb_register_extension_class(internal::library, cl.name, cl.parent_name, &class_info);
-
-		for (MethodBind *method : cl.method_order) {
-			GDNativeExtensionClassMethodInfo method_info = {
-				method->get_name(), //const char *name;
-				method, //void *method_userdata;
-				MethodBind::bind_call, //GDNativeExtensionClassMethodCall call_func;
-				MethodBind::bind_ptrcall, //GDNativeExtensionClassMethodPtrCall ptrcall_func;
-				GDNATIVE_EXTENSION_METHOD_FLAGS_DEFAULT, //uint32_t method_flags; /* GDNativeExtensionClassMethodFlags */
-				(uint32_t)method->get_argument_count(), //uint32_t argument_count;
-				(GDNativeBool)method->has_return(), //GDNativeBool has_return_value;
-				MethodBind::bind_get_argument_type, //(GDNativeExtensionClassMethodGetArgumentType) get_argument_type_func;
-				MethodBind::bind_get_argument_info, //GDNativeExtensionClassMethodGetArgumentInfo get_argument_info_func; /* name and hint information for the argument can be omitted in release builds. Class name should always be present if it applies. */
-				MethodBind::bind_get_argument_metadata, //GDNativeExtensionClassMethodGetArgumentMetadata get_argument_metadata_func;
-				method->get_hint_flags(), //uint32_t default_argument_count;
-				nullptr, //GDNativeVariantPtr *default_arguments;
-			};
-			internal::interface->classdb_register_extension_class_method(internal::library, cl.name, &method_info);
-		}
-
-		for (const PropertyInfo &property : cl.property_list) {
-			GDNativePropertyInfo info = {
-				(uint32_t)property.type, //uint32_t type;
-				property.name, //const char *name;
-				property.class_name, //const char *class_name;
-				property.hint, // NONE //uint32_t hint;
-				property.hint_string, // const char *hint_string;
-				property.usage, // DEFAULT //uint32_t usage;
-			};
-
-			if (info.usage == PROPERTY_USAGE_GROUP) {
-				internal::interface->classdb_register_extension_class_property_group(internal::library, cl.name, info.name, info.hint_string);
-			} else if (info.usage == PROPERTY_USAGE_SUBGROUP) {
-				internal::interface->classdb_register_extension_class_property_subgroup(internal::library, cl.name, info.name, info.hint_string);
-			} else {
-				const PropertySetGet &setget = cl.property_setget.find(property.name)->second;
-
-				internal::interface->classdb_register_extension_class_property(internal::library, cl.name, &info, setget.setter, setget.getter);
-			}
-		}
-
-		for (const std::pair<std::string, MethodInfo> pair : cl.signal_map) {
-			const MethodInfo &signal = pair.second;
-
-			std::vector<GDNativePropertyInfo> parameters;
-			parameters.reserve(signal.arguments.size());
-
-			for (const PropertyInfo &par : signal.arguments) {
-				parameters.push_back(GDNativePropertyInfo{
-						static_cast<uint32_t>(par.type), // uint32_t type;
-						par.name, // const char *name;
-						par.class_name, // const char *class_name;
-						par.hint, // uint32_t hint;
-						par.hint_string, // const char *hint_string;
-						par.usage, // uint32_t usage;
-				});
-			}
-
-			internal::interface->classdb_register_extension_class_signal(internal::library, cl.name, pair.first.c_str(), parameters.data(), parameters.size());
-		}
-
-		for (std::string constant : cl.constant_order) {
-			const std::pair<std::string, GDNativeInt> &def = cl.constant_map.find(constant)->second;
-
-			internal::interface->classdb_register_extension_class_integer_constant(internal::library, cl.name, def.first.c_str(), constant.c_str(), def.second);
-		}
+		// Nothing to do here for now...
 	}
 }
 
@@ -326,8 +300,8 @@ void ClassDB::deinitialize(GDNativeInitializationLevel p_level) {
 
 		internal::interface->classdb_unregister_extension_class(internal::library, cl.name);
 
-		for (MethodBind *method : cl.method_order) {
-			memdelete(method);
+		for (auto method : cl.method_map) {
+			memdelete(method.second);
 		}
 	}
 }

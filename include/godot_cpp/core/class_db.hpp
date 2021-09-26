@@ -39,6 +39,7 @@
 #include <godot_cpp/core/object.hpp>
 
 #include <list>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -82,16 +83,10 @@ public:
 		const char *parent_name = nullptr;
 		GDNativeInitializationLevel level = GDNATIVE_INITIALIZATION_SCENE;
 		std::unordered_map<std::string, MethodBind *> method_map;
-		std::unordered_map<std::string, MethodInfo> signal_map;
-		std::list<MethodBind *> method_order;
-		GDExtensionClassInstancePtr (*constructor)(void *data);
+		std::set<std::string> signal_names;
 		std::unordered_map<std::string, GDNativeExtensionClassCallVirtual> virtual_methods;
-		void (*destructor)(void *data, GDExtensionClassInstancePtr ptr);
-		void (*object_instance)(GDExtensionClassInstancePtr p_instance, GDNativeObjectPtr p_object_instance);
-		std::unordered_map<std::string, PropertySetGet> property_setget;
-		std::list<PropertyInfo> property_list;
-		std::unordered_map<std::string, std::pair<std::string, GDNativeInt>> constant_map; // String in pair is enum name.
-		std::list<std::string> constant_order;
+		std::set<std::string> property_names;
+		std::set<std::string> constant_names;
 		ClassInfo *parent_ptr = nullptr;
 	};
 
@@ -99,6 +94,8 @@ private:
 	static std::unordered_map<std::string, ClassInfo> classes;
 
 	static MethodBind *bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount);
+	static void initialize_class(const ClassInfo &cl);
+	static void bind_method_godot(const char *p_class_name, MethodBind *p_method);
 
 public:
 	template <class T>
@@ -112,7 +109,7 @@ public:
 	static void add_property_subgroup(const char *p_class, const char *p_name, const char *p_prefix);
 	static void add_property(const char *p_class, const PropertyInfo &p_pinfo, const char *p_setter, const char *p_getter, int p_index = -1);
 	static void add_signal(const char *p_class, const MethodInfo &p_signal);
-	static void bind_integer_constant(const char *p_class, const char *p_enum, const char *p_name, GDNativeInt p_constant);
+	static void bind_integer_constant(const char *p_class_name, const char *p_enum_name, const char *p_constant_name, GDNativeInt p_constant_value);
 	static void bind_virtual_method(const char *p_class, const char *p_method, GDNativeExtensionClassCallVirtual p_call);
 
 	static MethodBind *get_method(const char *p_class, const char *p_method);
@@ -139,18 +136,40 @@ public:
 
 template <class T>
 void ClassDB::register_class() {
+	// Register this class within our plugin
 	ClassInfo cl;
 	cl.name = T::get_class_static();
 	cl.parent_name = T::get_parent_class_static();
 	cl.level = current_level;
-	cl.constructor = T::create;
-	cl.destructor = T::free;
-	cl.object_instance = T::set_object_instance;
 	classes[cl.name] = cl;
 	if (classes.find(cl.parent_name) != classes.end()) {
 		cl.parent_ptr = &classes[cl.parent_name];
 	}
+
+	// Register this class with Godot
+	GDNativeExtensionClassCreationInfo class_info = {
+		nullptr, // GDNativeExtensionClassSet set_func;
+		nullptr, // GDNativeExtensionClassGet get_func;
+		nullptr, // GDNativeExtensionClassGetPropertyList get_property_list_func;
+		nullptr, // GDNativeExtensionClassFreePropertyList free_property_list_func;
+		nullptr, // GDNativeExtensionClassNotification notification_func;
+		nullptr, // GDNativeExtensionClassToString to_string_func;
+		nullptr, // GDNativeExtensionClassReference reference_func;
+		nullptr, // GDNativeExtensionClassUnreference
+		T::create, // GDNativeExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
+		T::free, // GDNativeExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
+		T::set_object_instance, // GDNativeExtensionClassObjectInstance object_instance_func; /* this one is mandatory */
+		&ClassDB::get_virtual_func, // GDNativeExtensionClassGetVirtual get_virtual_func;
+		(void *)cl.name, //void *class_userdata;
+	};
+
+	internal::interface->classdb_register_extension_class(internal::library, cl.name, cl.parent_name, &class_info);
+
+	// call bind_methods etc. to register all members of the class
 	T::initialize_class();
+
+	// now register our class within ClassDB within Godot
+	initialize_class(classes[cl.name]);
 }
 
 template <class N, class M>
@@ -183,8 +202,11 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, const char *p_name, M 
 		ERR_FAIL_V_MSG(nullptr, "Binding duplicate method.");
 	}
 
+	// register our method bind within our plugin
 	type.method_map[p_name] = bind;
-	type.method_order.push_back(bind);
+
+	// and register with godot
+	bind_method_godot(type.name, bind);
 
 	return bind;
 }
