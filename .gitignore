@@ -1,3 +1,9 @@
+# Godot auto generated files
+*.gen.*
+.import/
+.godot/
+/gen/
+
 # Misc
 logs/*
 
@@ -17,6 +23,7 @@ bin
 *.creator.user
 *.files
 *.includes
+*.idb
 
 # Gprof output
 gmon.out

@@ -1,0 +1,8 @@
+[configuration]
+
+entry_symbol = "example_library_init"
+
+[libraries]
+
+linux.64 = "bin/x11/libgdexample.so"
+windows.64 = "bin/win64/libgdexample.dll"
