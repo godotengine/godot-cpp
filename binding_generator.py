@@ -164,7 +164,10 @@ def generate_builtin_bindings(api, output_dir, build_config):
         if "operators" in builtin_api:
             for operator in builtin_api["operators"]:
                 if "right_type" in operator:
-                    if is_included(operator["right_type"], class_name):
+                    # FIXME Temporary workaround for incorrect JSON
+                    if operator["right_type"] == "Nil":
+                        used_classes.add("Variant")
+                    elif is_included(operator["right_type"], class_name):
                         used_classes.add(operator["right_type"])
 
         for type_name in fully_used_classes:
