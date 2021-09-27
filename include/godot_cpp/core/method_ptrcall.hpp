@@ -184,6 +184,47 @@ struct PtrToArg<const T *> {
 	}
 };
 
+// Pointers.
+#define GDVIRTUAL_NATIVE_PTR(m_type)                                     \
+	template <>                                                          \
+	struct PtrToArg<m_type *> {                                          \
+		_FORCE_INLINE_ static m_type *convert(const void *p_ptr) {       \
+			return (m_type *)(*(void **)p_ptr);                          \
+		}                                                                \
+		typedef m_type *EncodeT;                                         \
+		_FORCE_INLINE_ static void encode(m_type *p_var, void *p_ptr) {  \
+			*((void **)p_ptr) = p_var;                                   \
+		}                                                                \
+	};                                                                   \
+                                                                         \
+	template <>                                                          \
+	struct PtrToArg<const m_type *> {                                    \
+		_FORCE_INLINE_ static const m_type *convert(const void *p_ptr) { \
+			return (const m_type *)(*(const void **)p_ptr);              \
+		}                                                                \
+		typedef const m_type *EncodeT;                                   \
+		_FORCE_INLINE_ static void encode(m_type *p_var, void *p_ptr) {  \
+			*((void **)p_ptr) = p_var;                                   \
+		}                                                                \
+	}
+
+GDVIRTUAL_NATIVE_PTR(bool);
+GDVIRTUAL_NATIVE_PTR(char);
+GDVIRTUAL_NATIVE_PTR(char16_t);
+GDVIRTUAL_NATIVE_PTR(char32_t);
+GDVIRTUAL_NATIVE_PTR(wchar_t);
+GDVIRTUAL_NATIVE_PTR(uint8_t);
+GDVIRTUAL_NATIVE_PTR(uint8_t *);
+GDVIRTUAL_NATIVE_PTR(int8_t);
+GDVIRTUAL_NATIVE_PTR(uint16_t);
+GDVIRTUAL_NATIVE_PTR(int16_t);
+GDVIRTUAL_NATIVE_PTR(uint32_t);
+GDVIRTUAL_NATIVE_PTR(int32_t);
+GDVIRTUAL_NATIVE_PTR(int64_t);
+GDVIRTUAL_NATIVE_PTR(uint64_t);
+GDVIRTUAL_NATIVE_PTR(float);
+GDVIRTUAL_NATIVE_PTR(double);
+
 } // namespace godot
 
 #endif // ! GODOT_CPP_METHOD_PTRCALL_HPP
