@@ -108,7 +108,7 @@ opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - onl
 opts.Add(EnumVariable("target", "Compilation target", "debug", allowed_values=("debug", "release"), ignorecase=2))
 opts.Add(
     PathVariable(
-        "headers_dir", "Path to the directory containing Godot headers", "godot-headers-temp", PathVariable.PathIsDir
+        "headers_dir", "Path to the directory containing Godot headers", "godot-headers", PathVariable.PathIsDir
     )
 )
 opts.Add(PathVariable("custom_api_file", "Path to a custom JSON API file", None, PathVariable.PathIsFile))

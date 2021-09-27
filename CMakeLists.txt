@@ -58,8 +58,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Input from user for godot headers and the api file
-set(GODOT_HEADERS_DIR "godot-headers-temp" CACHE STRING "")
-set(GODOT_CUSTOM_API_FILE "godot-headers-temp/extension_api.json" CACHE STRING "")
+set(GODOT_HEADERS_DIR "godot-headers" CACHE STRING "")
+set(GODOT_CUSTOM_API_FILE "godot-headers/extension_api.json" CACHE STRING "")
 
 set(GODOT_COMPILE_FLAGS )
 set(GODOT_LINKER_FLAGS )
