@@ -50,7 +50,6 @@
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 
-
 namespace godot {
 
 class Dictionary;

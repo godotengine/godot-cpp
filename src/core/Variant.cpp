@@ -37,7 +37,6 @@
 #include "GodotGlobal.hpp"
 #include "Object.hpp"
 
-
 namespace godot {
 
 Variant::Variant() {
