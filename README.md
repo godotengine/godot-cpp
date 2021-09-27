@@ -1,22 +1,53 @@
 # godot-cpp
 
-C++ bindings for the Godot extension API.
+This repository contains the  *C++ bindings* for the [**Godot Engine**](https://github.com/godotengine/godot)'s GDExtensions API.
 
-**Note: this is a work in progress for the extension system included in Godot 4.0**
+- [**Versioning**](#versioning)
+- [**Contributing**](#contributing)
+- [**Getting Started**](#getting-started)
+- [**Included Example**](#included-example)
 
-## Stub
+## Versioning
 
-Both this whole bindings system and this document are still work in progress and
-thus it is still incomplete. It will be improved once the extension API is settled.
+This repositories follows the same branch versioning as the main [Godot Engine
+repository](https://github.com/godotengine/godot):
 
-## How to use
+- `master` tracks the current development branch.
+- `3.x` tracks the development of the next 3.x minor release.
+- Other versioned branches (e.g. `3.3`, `3.2`) track the latest stable release
+  in the corresponding branch.
 
-It's a bit similar to what it was for 3.x but also a bit different.
+Stable releases are also tagged on this repository:
+[**Tags**](https://github.com/godotengine/godot-cpp/tags).
+
+**For any project built against a stable release of Godot, we recommend using
+this repository as a Git submodule, checking out the specific tag matching your
+Godot version.**
+
+> As the `master` and `3.x` branches are constantly getting updates, if you are
+> using `godot-cpp` against a more current version of Godot, see the instructions
+> in [**godot-headers**](https://github.com/godotengine/godot-headers) for
+> updating the relevant files.
+
+## Contributing
+
+We greatly appreciate help in maintaining and extending this project. If you
+wish to help out, ensure you have an account on GitHub and create a "fork" of
+this repository. Rémi "Akien" Verschelde wrote an excellent bit of documentation
+for the main Godot project on this:
+[Pull request workflow](https://docs.godotengine.org/en/stable/community/contributing/pr_workflow.html)
+
+Please install clang-format and copy the files in `misc/hooks` into `.git/hooks`
+so formatting is done before your changes are submitted.
+
+## Getting Started
+
+It's a bit similar to what it was for 3.x but also a bit different. This new approach is much more akin to how core Godot modules are structured.
 
 Compiling this repository generates a static library to be linked with your shared lib,
 just like before.
 
-To use the shared lib in your Godot project you'll need a `.gdextension` file, which replaces what was the `.gdnlib`before. Follow the example:
+To use the shared lib in your Godot project you'll need a `.gdextension` file, which replaces what was the `.gdnlib` before. Follow the example:
 
 ```ini
 [configuration]
@@ -25,21 +56,24 @@ entry_symbol = "example_library_init"
 
 [libraries]
 
-Linux.64 = "bin/x11/libgdexample.so"
+linux.64 = "bin/x11/libgdexample.so"
+windows.64 = "bin/win64/libgdexample.dll"
 ```
 
 The `entry_symbol` is the name of the function that initializes your library. It should be similar to following layout:
 
 ```cpp
 extern "C" {
+
+// Initialization.
+
 GDNativeBool GDN_EXPORT example_library_init(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) {
-	GDNativeBool result = godot::GDExtensionBinding::init(p_interface, p_library, r_initialization);
+	godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
 
-	if (result) {
-		register_example_types();
-	}
+	init_obj.register_scene_initializer(register_example_types);
+	init_obj.register_scene_terminator(unregister_example_types);
 
-	return result;
+	return init_obj.init();
 }
 }
 ```
@@ -53,22 +87,8 @@ void register_example_types() {
 }
 ```
 
-Extension registering has not yet been added to the Godot editor, so to make it recognize your extension you need to add the following section to your `project.godot`:
-
-```ini
-[native_extensions]
-
-paths=["res://example.gdextension"]
-```
-
 Any node and resource you register will be available in the corresponding `Create...` dialog. Any class will be available to scripting as well.
 
-## Example
+## Included Example
 
 Check the project in the `test` folder for an example on how to use and register different things.
-
-This project isn't yet made to run in CI.
-
-## Issues
-
-This really needs to be tested and very likely has things missing that weren't noticed yet. Use at your own risk (and contribute back with reports and fixes if you can).
