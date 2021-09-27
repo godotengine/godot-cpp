@@ -47,6 +47,8 @@
 
 #include "GodotGlobal.hpp"
 
+#include <type_traits>
+
 namespace godot {
 namespace detail {
 

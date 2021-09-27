@@ -50,7 +50,6 @@
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 
-#include <iostream>
 
 namespace godot {
 
