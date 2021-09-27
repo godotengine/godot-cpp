@@ -222,7 +222,7 @@ String operator+(const wchar_t *a, const String &b) {
 	return String(a) + b;
 }
 
-bool String::begins_with(String &p_string) const {
+bool String::begins_with(const String &p_string) const {
 	return godot::api->godot_string_begins_with(&_godot_string, &p_string._godot_string);
 }
 
@@ -251,7 +251,7 @@ bool String::empty() const {
 	return godot::api->godot_string_empty(&_godot_string);
 }
 
-bool String::ends_with(String &p_string) const {
+bool String::ends_with(const String &p_string) const {
 	return godot::api->godot_string_ends_with(&_godot_string, &p_string._godot_string);
 }
 

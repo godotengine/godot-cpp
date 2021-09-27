@@ -105,14 +105,14 @@ public:
 	CharString utf8() const;
 	CharString ascii(bool p_extended = false) const;
 
-	bool begins_with(String &s) const;
+	bool begins_with(const String &s) const;
 	bool begins_with_char_array(const char *p_char_array) const;
 	PoolStringArray bigrams() const;
 	String c_escape() const;
 	String c_unescape() const;
 	String capitalize() const;
 	bool empty() const;
-	bool ends_with(String &text) const;
+	bool ends_with(const String &text) const;
 	void erase(int position, int chars);
 	int find(String what, int from = 0) const;
 	int find_last(String what) const;
