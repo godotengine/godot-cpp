@@ -31,6 +31,7 @@
 #ifndef REF_H
 #define REF_H
 
+#include "Godot.hpp"
 #include "GodotGlobal.hpp"
 #include "Reference.hpp"
 #include "Variant.hpp"
