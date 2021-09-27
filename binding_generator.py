@@ -308,7 +308,7 @@ def generate_class_header(used_classes, c, use_template_get_node):
                     return "Rect2" + default_value
                 if _type == "Variant":
                     return "Variant()" if default_value == "Null" else default_value
-                if _type == "String":
+                if _type == "String" or _type == "NodePath":
                     return "\"" + default_value + "\""
                 if _type == "RID":
                     return "RID()"
