@@ -76,6 +76,7 @@ public:
 	String return_something(const String &base);
 	Viewport *return_something_const() const;
 	ExampleRef *return_extended_ref() const;
+	Ref<ExampleRef> extended_ref_checks(Ref<ExampleRef> p_ref) const;
 	Variant varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
 	void emit_custom_signal(const String &name, int value);
 

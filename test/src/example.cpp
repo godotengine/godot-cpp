@@ -53,6 +53,7 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("return_something"), &Example::return_something);
 	ClassDB::bind_method(D_METHOD("return_something_const"), &Example::return_something_const);
 	ClassDB::bind_method(D_METHOD("return_extended_ref"), &Example::return_extended_ref);
+	ClassDB::bind_method(D_METHOD("extended_ref_checks"), &Example::extended_ref_checks);
 
 	{
 		MethodInfo mi;
@@ -105,6 +106,15 @@ Viewport *Example::return_something_const() const {
 
 ExampleRef *Example::return_extended_ref() const {
 	return memnew(ExampleRef());
+}
+
+Ref<ExampleRef> Example::extended_ref_checks(Ref<ExampleRef> p_ref) const {
+	Ref<ExampleRef> ref;
+	ref.instantiate();
+	// TODO the returned value gets dereferenced too early and return a null object otherwise.
+	ref->reference();
+	UtilityFunctions::print("Example ref checks called with value: ", p_ref->get_instance_id(), ", returning value: ", ref->get_instance_id());
+	return ref;
 }
 
 Variant Example::varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
