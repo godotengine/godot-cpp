@@ -35,6 +35,7 @@
 
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
@@ -233,6 +234,48 @@ public:
 		Ref<T> r;
 		r.reference = (T *)obj;
 		return r;
+	}
+};
+
+template <class T>
+struct PtrToArg<Ref<T>> {
+	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
+		return Ref<T>(godot::internal::interface->object_get_instance_binding((void *)p_ptr, godot::internal::token, &T::___binding_callbacks));
+	}
+
+	typedef Ref<T> EncodeT;
+
+	_FORCE_INLINE_ static void encode(Ref<T> p_val, const void *p_ptr) {
+		*(void **)p_ptr = p_val->_owner;
+	}
+};
+
+template <class T>
+struct PtrToArg<const Ref<T> &> {
+	typedef Ref<T> EncodeT;
+
+	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
+		return Ref<T>(godot::internal::interface->object_get_instance_binding((void *)p_ptr, godot::internal::token, &T::___binding_callbacks));
+	}
+};
+
+template <class T>
+struct GetTypeInfo<Ref<T>, typename EnableIf<TypeInherits<RefCounted, T>::value>::type> {
+	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
+	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+
+	static inline PropertyInfo get_class_info() {
+		return PropertyInfo(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+	}
+};
+
+template <class T>
+struct GetTypeInfo<const Ref<T> &, typename EnableIf<TypeInherits<RefCounted, T>::value>::type> {
+	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
+	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+
+	static inline PropertyInfo get_class_info() {
+		return PropertyInfo(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
 	}
 };
 
