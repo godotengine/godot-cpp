@@ -2,9 +2,39 @@ name: Continuous integration
 on: [push, pull_request]
 
 jobs:
-  linux:
-    name: Build (Linux, GCC)
-    runs-on: ubuntu-18.04
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: 🐧 Linux (GCC)
+            os: ubuntu-18.04
+            platform: linux
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
+            artifact-path: bin/libgodot-cpp.linux.release.64.a
+
+          - name: 🏁 Windows (x86_64, MSVC)
+            os: windows-2019
+            platform: windows
+            artifact-name: godot-cpp-windows-msvc2019-x86_64-release
+            artifact-path: bin/libgodot-cpp.windows.release.64.lib
+
+          - name: 🏁 Windows (x86_64, MinGW)
+            os: windows-2019
+            platform: windows
+            artifact-name: godot-cpp-linux-mingw-x86_64-release
+            artifact-path: bin/libgodot-cpp.windows.release.64.a
+            flags: use_mingw=yes
+
+          - name: 🍎 macOS (universal)
+            os: macos-11
+            platform: osx
+            artifact-name: godot-cpp-macos-universal-release
+            artifact-path: bin/libgodot-cpp.osx.release.universal.a
+            flags: macos_arch=universal
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -16,107 +46,35 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Linux dependencies
+        if: ${{ matrix.platform == 'linux' }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qqq build-essential pkg-config
-          python -m pip install scons
 
-      - name: Build godot-cpp
-        run: |
-          scons target=release generate_bindings=yes -j $(nproc)
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: godot-cpp-linux-glibc2.27-x86_64-release
-          path: bin/libgodot-cpp.linux.release.64.a
-          if-no-files-found: error
-
-  windows-msvc:
-    name: Build (Windows, MSVC)
-    runs-on: windows-2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
+      - name: Install scons
         run: |
           python -m pip install scons
 
-      - name: Build godot-cpp
-        run: |
-          scons target=release generate_bindings=yes -j $env:NUMBER_OF_PROCESSORS
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: godot-cpp-windows-msvc2019-x86_64-release
-          path: bin/libgodot-cpp.windows.release.64.lib
-          if-no-files-found: error
-
-  windows-mingw:
-    name: Build (Windows, MinGW)
-    runs-on: windows-2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install scons
-
-      - name: Build godot-cpp
+      - name: Windows GCC dependency
+        if: ${{ matrix.platform == 'windows' }}
         # Install GCC from Scoop as the default supplied GCC doesn't work ("Error 1").
         run: |
           Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
           scoop install gcc
           g++ --version
           gcc --version
-          scons target=release generate_bindings=yes use_mingw=yes -j $env:NUMBER_OF_PROCESSORS
+
+      - name: Build godot-cpp
+        run: |
+          scons platform=${{ matrix.platform }} target=release generate_bindings=yes ${{ matrix.flags }} -j2
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: godot-cpp-linux-mingw-x86_64-release
-          path: bin/libgodot-cpp.windows.release.64.a
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
           if-no-files-found: error
-
-  macos:
-    name: Build (macOS, Clang, universal / x86_64 + arm64)
-    runs-on: macos-11
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install scons
-
-      - name: Build godot-cpp
-        run: |
-          scons target=release generate_bindings=yes -j $(sysctl -n hw.logicalcpu)
 
   static-checks:
     name: Static Checks (clang-format)
