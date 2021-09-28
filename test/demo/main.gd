@@ -10,6 +10,8 @@ func _ready():
 	prints("returned", $Example.return_something("some string"))
 	prints("returned const", $Example.return_something_const())
 	prints("returned ref", $Example.return_extended_ref())
+	var ref = ExampleRef.new()
+	prints("sending ref: ", ref.get_instance_id(), "returned ref: ", $Example.extended_ref_checks(ref).get_instance_id())
 	prints("vararg args", $Example.varargs_func("some", "arguments", "to", "test"))
 
 	# Use properties.
