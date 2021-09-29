@@ -165,6 +165,13 @@ if host_platform == "windows" and env["platform"] != "android":
 
     opts.Update(env)
 
+# Require C++17
+if host_platform == "windows" and env["platform"] == "windows" and not env["use_mingw"]:
+    # MSVC
+    env.Append(CCFLAGS=["/std:c++17"])
+else:
+    env.Append(CCFLAGS=["-std=c++17"])
+
 if env["target"] == "debug":
     env.Append(CPPDEFINES=["DEBUG_ENABLED", "DEBUG_METHODS_ENABLED"])
 
@@ -172,7 +179,7 @@ if env["platform"] == "linux" or env["platform"] == "freebsd":
     if env["use_llvm"]:
         env["CXX"] = "clang++"
 
-    env.Append(CCFLAGS=["-fPIC", "-std=c++17", "-Wwrite-strings"])
+    env.Append(CCFLAGS=["-fPIC", "-Wwrite-strings"])
     env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
 
     if env["target"] == "debug":
@@ -200,8 +207,6 @@ elif env["platform"] == "osx":
     else:
         env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
         env.Append(CCFLAGS=["-arch", env["macos_arch"]])
-
-    env.Append(CCFLAGS=["-std=c++17"])
 
     if env["macos_deployment_target"] != "default":
         env.Append(CCFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
@@ -246,7 +251,7 @@ elif env["platform"] == "ios":
     env["AR"] = compiler_path + "ar"
     env["RANLIB"] = compiler_path + "ranlib"
 
-    env.Append(CCFLAGS=["-std=c++17", "-arch", env["ios_arch"], "-isysroot", sdk_path])
+    env.Append(CCFLAGS=["-arch", env["ios_arch"], "-isysroot", sdk_path])
     env.Append(
         LINKFLAGS=[
             "-arch",
@@ -292,14 +297,16 @@ elif env["platform"] == "windows":
         # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
         env = Environment(ENV=os.environ, tools=["mingw"])
         opts.Update(env)
-        # env = env.Clone(tools=['mingw'])
+
+        # Still need to use C++17.
+        env.Append(CCFLAGS=["-std=c++17"])
 
         env["SPAWN"] = mySpawn
 
     # Native or cross-compilation using MinGW
     if host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx" or env["use_mingw"]:
         # These options are for a release build even using target=debug
-        env.Append(CCFLAGS=["-O3", "-std=c++17", "-Wwrite-strings"])
+        env.Append(CCFLAGS=["-O3", "-Wwrite-strings"])
         env.Append(
             LINKFLAGS=[
                 "--static",
