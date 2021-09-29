@@ -35,6 +35,19 @@ jobs:
             artifact-path: bin/libgodot-cpp.osx.release.universal.a
             flags: macos_arch=universal
 
+          - name: 🤖 Android (arm64)
+            os: ubuntu-18.04
+            platform: android
+            artifact-name: godot-cpp-android-arm64-release
+            artifact-path: bin/libgodot-cpp.android.release.arm64v8.a
+            flags: android_arch=arm64v8
+
+          - name: 🍏 iOS (arm64)
+            os: macos-11
+            platform: ios
+            artifact-name: godot-cpp-ios-arm64-release
+            artifact-path: bin/libgodot-cpp.ios.release.arm64.a
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
