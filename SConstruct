@@ -249,8 +249,6 @@ elif env["platform"] == "ios":
         LINKFLAGS=[
             "-arch",
             env["ios_arch"],
-            "-framework",
-            "Cocoa",
             "-Wl,-undefined,dynamic_lookup",
             "-isysroot",
             sdk_path,
