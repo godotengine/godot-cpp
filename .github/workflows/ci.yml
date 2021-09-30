@@ -82,6 +82,10 @@ jobs:
         run: |
           scons platform=${{ matrix.platform }} target=release generate_bindings=yes ${{ matrix.flags }} -j2
 
+      - name: Build test
+        run: |
+          scons -C test platform=${{ matrix.platform }} target=release ${{ matrix.flags }} -j2
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
