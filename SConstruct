@@ -144,6 +144,9 @@ opts.Add(
 )
 opts.Add(BoolVariable("generate_template_get_node", "Generate a template version of the Node class's get_node.", True))
 
+opts.Add(BoolVariable("build_library", "Build the godot-cpp library.", True))
+opts.Add("build_projects", "List of projects to build (comma-separated list of paths).", "")
+
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
 
@@ -250,14 +253,13 @@ elif env["platform"] == "ios":
     env["CXX"] = compiler_path + "clang++"
     env["AR"] = compiler_path + "ar"
     env["RANLIB"] = compiler_path + "ranlib"
+    env["SHLIBSUFFIX"] = ".dylib"
 
     env.Append(CCFLAGS=["-arch", env["ios_arch"], "-isysroot", sdk_path])
     env.Append(
         LINKFLAGS=[
             "-arch",
             env["ios_arch"],
-            "-framework",
-            "Cocoa",
             "-Wl,-undefined,dynamic_lookup",
             "-isysroot",
             sdk_path,
@@ -300,8 +302,13 @@ elif env["platform"] == "windows":
 
         # Still need to use C++17.
         env.Append(CCFLAGS=["-std=c++17"])
+        # Don't want lib prefixes
+        env["IMPLIBPREFIX"] = ""
+        env["SHLIBPREFIX"] = ""
 
+        # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
         env["SPAWN"] = mySpawn
+        env.Replace(ARFLAGS=["q"])
 
     # Native or cross-compilation using MinGW
     if host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx" or env["use_mingw"]:
@@ -321,9 +328,10 @@ elif env["platform"] == "android":
         # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
         env = Environment(ENV=os.environ, tools=["mingw"])
         opts.Update(env)
-        # env = env.Clone(tools=['mingw'])
 
+        # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
         env["SPAWN"] = mySpawn
+        env.Replace(ARFLAGS=["q"])
 
     # Verify NDK root
     if not "ANDROID_NDK_ROOT" in env:
@@ -389,11 +397,13 @@ elif env["platform"] == "android":
     env["CC"] = toolchain + "/bin/clang"
     env["CXX"] = toolchain + "/bin/clang++"
     env["AR"] = toolchain + "/bin/" + arch_info["tool_path"] + "-ar"
+    env["SHLIBSUFFIX"] = ".so"
 
     env.Append(
         CCFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"], "-fPIC"]
     )  # , '-fPIE', '-fno-addrsig', '-Oz'])
     env.Append(CCFLAGS=arch_info["ccflags"])
+    env.Append(LINKFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"]])
 
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-Og", "-g"])
@@ -481,8 +491,16 @@ elif env["platform"] == "javascript":
 elif env["platform"] == "osx":
     arch_suffix = env["macos_arch"]
 
-library = env.StaticLibrary(
-    target="bin/" + "libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["LIBSUFFIX"]),
-    source=sources,
-)
-Default(library)
+library = None
+env["OBJSUFFIX"] = ".{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["OBJSUFFIX"])
+library_name = "libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["LIBSUFFIX"])
+
+if env["build_library"]:
+    library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
+    Default(library)
+
+env["SHLIBSUFFIX"] = "{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["SHLIBSUFFIX"])
+env.Append(CPPPATH=[env.Dir(f) for f in ["gen/include", "include", "godot-headers"]])
+env.Append(LIBPATH=[env.Dir("bin")])
+env.Append(LIBS=library_name)
+Return("env")

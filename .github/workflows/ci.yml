@@ -152,6 +152,10 @@ jobs:
       #    cd test
       #    scons target=release use_mingw=yes -j $env:NUMBER_OF_PROCESSORS
 
+      - name: Build test
+        run: |
+          scons platform=${{ matrix.platform }} target=release ${{ matrix.flags }} -j2 build_projects=test
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
