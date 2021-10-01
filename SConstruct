@@ -151,8 +151,8 @@ opts.Add(
 opts.Add(EnumVariable(
     'macos_arch',
     'Target macOS architecture',
-    'x86_64',
-    ['x86_64', 'arm64']
+    'universal',
+    ['universal', 'x86_64', 'arm64']
 ))
 opts.Add(EnumVariable(
     'ios_arch',
@@ -228,7 +228,14 @@ elif env['platform'] == 'osx':
             'Only 64-bit builds are supported for the macOS target.'
         )
 
-    env.Append(CCFLAGS=['-std=c++14', '-arch', env['macos_arch']])
+    if env["macos_arch"] == "universal":
+        env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+        env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+    else:
+        env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
+        env.Append(CCFLAGS=["-arch", env["macos_arch"]])
+
+    env.Append(CCFLAGS=['-std=c++14'])
 
     if env['macos_deployment_target'] != 'default':
         env.Append(CCFLAGS=['-mmacosx-version-min=' + env['macos_deployment_target']])
@@ -239,8 +246,6 @@ elif env['platform'] == 'osx':
         env.Append(LINKFLAGS=['-isysroot', env['macos_sdk_path']])
 
     env.Append(LINKFLAGS=[
-        '-arch',
-        env['macos_arch'],
         '-framework',
         'Cocoa',
         '-Wl,-undefined,dynamic_lookup',
@@ -472,8 +477,8 @@ if env['platform'] == 'android':
 elif env['platform'] == 'ios':
     arch_suffix = env['ios_arch']
 elif env['platform'] == 'osx':
-    if env['macos_arch'] != 'x86_64':
-         arch_suffix = env['macos_arch']
+    if env['macos_arch'] != 'universal':
+        arch_suffix = env['macos_arch']
 elif env['platform'] == 'javascript':
     arch_suffix = 'wasm'
 
