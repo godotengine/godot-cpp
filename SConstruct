@@ -78,7 +78,7 @@ elif sys.platform == "darwin":
 elif sys.platform == "win32" or sys.platform == "msys":
     host_platform = "windows"
 else:
-    raise ValueError("Could not detect platform automatically, please specify with " "platform=<platform>")
+    raise ValueError("Could not detect platform automatically, please specify with platform=<platform>")
 
 env = Environment(ENV=os.environ)
 
@@ -124,7 +124,7 @@ opts.Add(
 opts.Add(EnumVariable("android_arch", "Target Android architecture", "armv7", ["armv7", "arm64v8", "x86", "x86_64"]))
 opts.Add("macos_deployment_target", "macOS deployment target", "default")
 opts.Add("macos_sdk_path", "macOS SDK path", "")
-opts.Add(EnumVariable("macos_arch", "Target macOS architecture", "x86_64", ["x86_64", "arm64"]))
+opts.Add(EnumVariable("macos_arch", "Target macOS architecture", "universal", ["universal", "x86_64", "arm64"]))
 opts.Add(EnumVariable("ios_arch", "Target iOS architecture", "arm64", ["armv7", "arm64", "x86_64"]))
 opts.Add(BoolVariable("ios_simulator", "Target iOS Simulator", False))
 opts.Add(
@@ -187,7 +187,14 @@ elif env["platform"] == "osx":
     if env["bits"] == "32":
         raise ValueError("Only 64-bit builds are supported for the macOS target.")
 
-    env.Append(CCFLAGS=["-std=c++17", "-arch", env["macos_arch"]])
+    if env["macos_arch"] == "universal":
+        env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+        env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+    else:
+        env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
+        env.Append(CCFLAGS=["-arch", env["macos_arch"]])
+
+    env.Append(CCFLAGS=["-std=c++17"])
 
     if env["macos_deployment_target"] != "default":
         env.Append(CCFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
@@ -199,8 +206,6 @@ elif env["platform"] == "osx":
 
     env.Append(
         LINKFLAGS=[
-            "-arch",
-            env["macos_arch"],
             "-framework",
             "Cocoa",
             "-Wl,-undefined,dynamic_lookup",
@@ -454,10 +459,12 @@ add_sources(sources, "gen/src/classes", "cpp")
 arch_suffix = env["bits"]
 if env["platform"] == "android":
     arch_suffix = env["android_arch"]
-if env["platform"] == "ios":
+elif env["platform"] == "ios":
     arch_suffix = env["ios_arch"]
-if env["platform"] == "javascript":
+elif env["platform"] == "javascript":
     arch_suffix = "wasm"
+elif env["platform"] == "osx":
+    arch_suffix = env["macos_arch"]
 
 library = env.StaticLibrary(
     target="bin/" + "libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["LIBSUFFIX"]),
