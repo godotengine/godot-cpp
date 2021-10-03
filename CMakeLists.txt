@@ -44,14 +44,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	add_definitions(-D_DEBUG)
-	add_definitions(-DDEBUG_ENABLED)
-	add_definitions(-DDEBUG_METHODS_ENABLED)
-else()
-	add_definitions(-DNDEBUG)
-endif(CMAKE_BUILD_TYPE MATCHES Debug)
-
 # Set the c++ standard to c++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -155,8 +147,11 @@ add_library(${PROJECT_NAME}
 		${GENERATED_FILES_LIST}
 )
 add_library(godot::cpp ALIAS ${PROJECT_NAME})
-target_include_directories(${PROJECT_NAME}
-	PUBLIC
+target_compile_definitions(${PROJECT_NAME} PUBLIC 
+	$<$<CONFIG:Debug>:DEBUG_ENABLED>
+	$<$<CONFIG:Debug>:DEBUG_METHODS_ENABLED>
+)
+target_include_directories(${PROJECT_NAME} PUBLIC
 	include
 	${CMAKE_CURRENT_BINARY_DIR}/gen/include
 )
