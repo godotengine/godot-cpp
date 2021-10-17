@@ -74,6 +74,7 @@ public:
 	void simple_func();
 	void simple_const_func() const;
 	String return_something(const String &base);
+	double return_double(double p_a, double p_b);
 	Viewport *return_something_const() const;
 	ExampleRef *return_extended_ref() const;
 	Ref<ExampleRef> extended_ref_checks(Ref<ExampleRef> p_ref) const;

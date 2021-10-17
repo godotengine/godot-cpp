@@ -50,10 +50,11 @@ void Example::_bind_methods() {
 	// Methods.
 	ClassDB::bind_method(D_METHOD("simple_func"), &Example::simple_func);
 	ClassDB::bind_method(D_METHOD("simple_const_func"), &Example::simple_const_func);
-	ClassDB::bind_method(D_METHOD("return_something"), &Example::return_something);
+	ClassDB::bind_method(D_METHOD("return_something", "base"), &Example::return_something);
+	ClassDB::bind_method(D_METHOD("return_double", "a", "b"), &Example::return_double);
 	ClassDB::bind_method(D_METHOD("return_something_const"), &Example::return_something_const);
 	ClassDB::bind_method(D_METHOD("return_extended_ref"), &Example::return_extended_ref);
-	ClassDB::bind_method(D_METHOD("extended_ref_checks"), &Example::extended_ref_checks);
+	ClassDB::bind_method(D_METHOD("extended_ref_checks", "ref"), &Example::extended_ref_checks);
 
 	{
 		MethodInfo mi;
@@ -93,6 +94,10 @@ void Example::simple_const_func() const {
 String Example::return_something(const String &base) {
 	UtilityFunctions::print("Return something called.");
 	return base;
+}
+
+double Example::return_double(double p_a, double p_b) {
+	return p_a + p_b;
 }
 
 Viewport *Example::return_something_const() const {

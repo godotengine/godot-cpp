@@ -8,6 +8,8 @@ func _ready():
 	$Example.simple_func()
 	($Example as Example).simple_const_func() # Force use of ptrcall
 	prints("returned", $Example.return_something("some string"))
+	prints("return 1 + 2 = ", $Example.return_double(1, 2))
+	prints("return 1.5 + 2.0 = ", $Example.return_double(1.5, 2.0))
 	prints("returned const", $Example.return_something_const())
 	prints("returned ref", $Example.return_extended_ref())
 	var ref = ExampleRef.new()
