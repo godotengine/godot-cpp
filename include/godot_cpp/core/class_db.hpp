@@ -163,7 +163,7 @@ void ClassDB::register_class() {
 		(void *)cl.name, //void *class_userdata;
 	};
 
-	internal::interface->classdb_register_extension_class(internal::library, cl.name, cl.parent_name, &class_info);
+	internal::gdn_interface->classdb_register_extension_class(internal::library, cl.name, cl.parent_name, &class_info);
 
 	// call bind_methods etc. to register all members of the class
 	T::initialize_class();

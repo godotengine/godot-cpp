@@ -37,7 +37,7 @@ namespace godot {
 
 namespace internal {
 
-extern "C" const GDNativeInterface *interface;
+extern "C" const GDNativeInterface *gdn_interface;
 extern "C" GDNativeExtensionClassLibraryPtr library;
 extern "C" void *token;
 
@@ -59,13 +59,13 @@ public:
 	static void free_instance_callback(void *p_token, void *p_instance, void *p_binding);
 
 	class InitObject {
-		const GDNativeInterface *interface;
+		const GDNativeInterface *gdn_interface;
 		const GDNativeExtensionClassLibraryPtr library;
 		GDNativeInitialization *initialization;
 
 	public:
 		InitObject(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) :
-				interface(p_interface),
+				gdn_interface(p_interface),
 				library(p_library),
 				initialization(r_initialization){};
 
