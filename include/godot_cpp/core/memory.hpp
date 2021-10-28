@@ -90,7 +90,7 @@ void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wra
 
 template <class T, std::enable_if_t<std::is_base_of_v<godot::Wrapped, T>, bool> = true>
 void memdelete(T *p_class) {
-	godot::internal::interface->object_destroy(p_class->_owner);
+	godot::internal::gdn_interface->object_destroy(p_class->_owner);
 }
 
 #define memnew_arr(m_class, m_count) memnew_arr_template<m_class>(m_count)

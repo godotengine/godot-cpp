@@ -55,13 +55,13 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1) {
 void ClassDB::add_property_group(const char *p_class, const char *p_name, const char *p_prefix) {
 	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), "Trying to add property to non-existing class.");
 
-	internal::interface->classdb_register_extension_class_property_group(internal::library, p_class, p_name, p_prefix);
+	internal::gdn_interface->classdb_register_extension_class_property_group(internal::library, p_class, p_name, p_prefix);
 }
 
 void ClassDB::add_property_subgroup(const char *p_class, const char *p_name, const char *p_prefix) {
 	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), "Trying to add property to non-existing class.");
 
-	internal::interface->classdb_register_extension_class_property_subgroup(internal::library, p_class, p_name, p_prefix);
+	internal::gdn_interface->classdb_register_extension_class_property_subgroup(internal::library, p_class, p_name, p_prefix);
 }
 
 void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, const char *p_setter, const char *p_getter, int p_index) {
@@ -111,7 +111,7 @@ void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, con
 	setget.index = p_index;
 	setget.type = p_pinfo.type;
 
-	internal::interface->classdb_register_extension_class_property(internal::library, info.name, &prop_info, setget.setter, setget.getter);
+	internal::gdn_interface->classdb_register_extension_class_property(internal::library, info.name, &prop_info, setget.setter, setget.getter);
 }
 
 MethodBind *ClassDB::get_method(const char *p_class, const char *p_method) {
@@ -193,7 +193,7 @@ void ClassDB::bind_method_godot(const char *p_class_name, MethodBind *p_method) 
 		p_method->get_hint_flags(), //uint32_t default_argument_count;
 		nullptr, //GDNativeVariantPtr *default_arguments;
 	};
-	internal::interface->classdb_register_extension_class_method(internal::library, p_class_name, &method_info);
+	internal::gdn_interface->classdb_register_extension_class_method(internal::library, p_class_name, &method_info);
 }
 
 void ClassDB::add_signal(const char *p_class, const MethodInfo &p_signal) {
@@ -228,7 +228,7 @@ void ClassDB::add_signal(const char *p_class, const MethodInfo &p_signal) {
 		});
 	}
 
-	internal::interface->classdb_register_extension_class_signal(internal::library, cl.name, p_signal.name, parameters.data(), parameters.size());
+	internal::gdn_interface->classdb_register_extension_class_signal(internal::library, cl.name, p_signal.name, parameters.data(), parameters.size());
 }
 
 void ClassDB::bind_integer_constant(const char *p_class_name, const char *p_enum_name, const char *p_constant_name, GDNativeInt p_constant_value) {
@@ -245,7 +245,7 @@ void ClassDB::bind_integer_constant(const char *p_class_name, const char *p_enum
 	type.constant_names.insert(p_constant_name);
 
 	// Register it with Godot
-	internal::interface->classdb_register_extension_class_integer_constant(internal::library, p_class_name, p_enum_name, p_constant_name, p_constant_value);
+	internal::gdn_interface->classdb_register_extension_class_integer_constant(internal::library, p_class_name, p_enum_name, p_constant_name, p_constant_value);
 }
 
 GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, const char *p_name) {
@@ -298,7 +298,7 @@ void ClassDB::deinitialize(GDNativeInitializationLevel p_level) {
 			continue;
 		}
 
-		internal::interface->classdb_unregister_extension_class(internal::library, cl.name);
+		internal::gdn_interface->classdb_unregister_extension_class(internal::library, cl.name);
 
 		for (auto method : cl.method_map) {
 			memdelete(method.second);

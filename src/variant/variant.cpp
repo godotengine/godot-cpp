@@ -45,8 +45,8 @@ GDNativeTypeFromVariantConstructorFunc Variant::to_type_constructor[Variant::VAR
 void Variant::init_bindings() {
 	// Start from 1 to skip NIL.
 	for (int i = 1; i < VARIANT_MAX; i++) {
-		from_type_constructor[i] = internal::interface->get_variant_from_type_constructor((GDNativeVariantType)i);
-		to_type_constructor[i] = internal::interface->get_variant_to_type_constructor((GDNativeVariantType)i);
+		from_type_constructor[i] = internal::gdn_interface->get_variant_from_type_constructor((GDNativeVariantType)i);
+		to_type_constructor[i] = internal::gdn_interface->get_variant_to_type_constructor((GDNativeVariantType)i);
 	}
 
 	String::init_bindings();
@@ -69,15 +69,15 @@ void Variant::init_bindings() {
 }
 
 Variant::Variant() {
-	internal::interface->variant_new_nil(ptr());
+	internal::gdn_interface->variant_new_nil(ptr());
 }
 
 Variant::Variant(const GDNativeVariantPtr native_ptr) {
-	internal::interface->variant_new_copy(ptr(), native_ptr);
+	internal::gdn_interface->variant_new_copy(ptr(), native_ptr);
 }
 
 Variant::Variant(const Variant &other) {
-	internal::interface->variant_new_copy(ptr(), other.ptr());
+	internal::gdn_interface->variant_new_copy(ptr(), other.ptr());
 }
 
 Variant::Variant(Variant &&other) {
@@ -227,7 +227,7 @@ Variant::Variant(const PackedColorArray &v) {
 }
 
 Variant::~Variant() {
-	internal::interface->variant_destroy(ptr());
+	internal::gdn_interface->variant_destroy(ptr());
 }
 
 Variant::operator bool() const {
@@ -372,7 +372,7 @@ Variant::operator Object *() const {
 	if (obj == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<Object *>(internal::interface->object_get_instance_binding(obj, internal::token, &Object::___binding_callbacks));
+	return reinterpret_cast<Object *>(internal::gdn_interface->object_get_instance_binding(obj, internal::token, &Object::___binding_callbacks));
 }
 
 Variant::operator Callable() const {
@@ -455,7 +455,7 @@ Variant::operator PackedColorArray() const {
 
 Variant &Variant::operator=(const Variant &other) {
 	clear();
-	internal::interface->variant_new_copy(ptr(), other.ptr());
+	internal::gdn_interface->variant_new_copy(ptr(), other.ptr());
 	return *this;
 }
 
@@ -495,22 +495,22 @@ bool Variant::operator<(const Variant &other) const {
 }
 
 void Variant::call(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDNativeCallError &r_error) {
-	internal::interface->variant_call(ptr(), method.ptr(), reinterpret_cast<const GDNativeVariantPtr *>(const_cast<Variant **>(args)), argcount, r_ret.ptr(), &r_error);
+	internal::gdn_interface->variant_call(ptr(), method.ptr(), reinterpret_cast<const GDNativeVariantPtr *>(const_cast<Variant **>(args)), argcount, r_ret.ptr(), &r_error);
 }
 
 void Variant::call_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDNativeCallError &r_error) {
-	internal::interface->variant_call_static(static_cast<GDNativeVariantType>(type), method.ptr(), reinterpret_cast<const GDNativeVariantPtr *>(const_cast<Variant **>(args)), argcount, r_ret.ptr(), &r_error);
+	internal::gdn_interface->variant_call_static(static_cast<GDNativeVariantType>(type), method.ptr(), reinterpret_cast<const GDNativeVariantPtr *>(const_cast<Variant **>(args)), argcount, r_ret.ptr(), &r_error);
 }
 
 void Variant::evaluate(const Operator &op, const Variant &a, const Variant &b, Variant &r_ret, bool &r_valid) {
 	GDNativeBool valid;
-	internal::interface->variant_evaluate(static_cast<GDNativeVariantOperator>(op), a.ptr(), b.ptr(), r_ret.ptr(), &valid);
+	internal::gdn_interface->variant_evaluate(static_cast<GDNativeVariantOperator>(op), a.ptr(), b.ptr(), r_ret.ptr(), &valid);
 	r_valid = PtrToArg<bool>::convert(&valid);
 }
 
 void Variant::set(const Variant &key, const Variant &value, bool *r_valid) {
 	GDNativeBool valid;
-	internal::interface->variant_set(ptr(), key.ptr(), value.ptr(), &valid);
+	internal::gdn_interface->variant_set(ptr(), key.ptr(), value.ptr(), &valid);
 	if (r_valid) {
 		*r_valid = PtrToArg<bool>::convert(&valid);
 	}
@@ -518,27 +518,27 @@ void Variant::set(const Variant &key, const Variant &value, bool *r_valid) {
 
 void Variant::set_named(const StringName &name, const Variant &value, bool &r_valid) {
 	GDNativeBool valid;
-	internal::interface->variant_set_named(ptr(), name.ptr(), value.ptr(), &valid);
+	internal::gdn_interface->variant_set_named(ptr(), name.ptr(), value.ptr(), &valid);
 	r_valid = PtrToArg<bool>::convert(&valid);
 }
 
 void Variant::set_indexed(int64_t index, const Variant &value, bool &r_valid, bool &r_oob) {
 	GDNativeBool valid, oob;
-	internal::interface->variant_set_indexed(ptr(), index, value.ptr(), &valid, &oob);
+	internal::gdn_interface->variant_set_indexed(ptr(), index, value.ptr(), &valid, &oob);
 	r_valid = PtrToArg<bool>::convert(&valid);
 	r_oob = PtrToArg<bool>::convert(&oob);
 }
 
 void Variant::set_keyed(const Variant &key, const Variant &value, bool &r_valid) {
 	GDNativeBool valid;
-	internal::interface->variant_set_keyed(ptr(), key.ptr(), value.ptr(), &valid);
+	internal::gdn_interface->variant_set_keyed(ptr(), key.ptr(), value.ptr(), &valid);
 	r_valid = PtrToArg<bool>::convert(&valid);
 }
 
 Variant Variant::get(const Variant &key, bool *r_valid) const {
 	Variant result;
 	GDNativeBool valid;
-	internal::interface->variant_get(ptr(), key.ptr(), result.ptr(), &valid);
+	internal::gdn_interface->variant_get(ptr(), key.ptr(), result.ptr(), &valid);
 	if (r_valid) {
 		*r_valid = PtrToArg<bool>::convert(&valid);
 	}
@@ -548,7 +548,7 @@ Variant Variant::get(const Variant &key, bool *r_valid) const {
 Variant Variant::get_named(const StringName &name, bool &r_valid) const {
 	Variant result;
 	GDNativeBool valid;
-	internal::interface->variant_get_named(ptr(), name.ptr(), result.ptr(), &valid);
+	internal::gdn_interface->variant_get_named(ptr(), name.ptr(), result.ptr(), &valid);
 	r_valid = PtrToArg<bool>::convert(&valid);
 	return result;
 }
@@ -557,7 +557,7 @@ Variant Variant::get_indexed(int64_t index, bool &r_valid, bool &r_oob) const {
 	Variant result;
 	GDNativeBool valid;
 	GDNativeBool oob;
-	internal::interface->variant_get_indexed(ptr(), index, result.ptr(), &valid, &oob);
+	internal::gdn_interface->variant_get_indexed(ptr(), index, result.ptr(), &valid, &oob);
 	r_valid = PtrToArg<bool>::convert(&valid);
 	r_oob = PtrToArg<bool>::convert(&oob);
 	return result;
@@ -566,7 +566,7 @@ Variant Variant::get_indexed(int64_t index, bool &r_valid, bool &r_oob) const {
 Variant Variant::get_keyed(const Variant &key, bool &r_valid) const {
 	Variant result;
 	GDNativeBool valid;
-	internal::interface->variant_get_keyed(ptr(), key.ptr(), result.ptr(), &valid);
+	internal::gdn_interface->variant_get_keyed(ptr(), key.ptr(), result.ptr(), &valid);
 	r_valid = PtrToArg<bool>::convert(&valid);
 	return result;
 }
@@ -583,36 +583,36 @@ bool Variant::in(const Variant &index, bool *r_valid) const {
 
 bool Variant::iter_init(Variant &r_iter, bool &r_valid) const {
 	GDNativeBool valid;
-	internal::interface->variant_iter_init(ptr(), r_iter.ptr(), &valid);
+	internal::gdn_interface->variant_iter_init(ptr(), r_iter.ptr(), &valid);
 	return PtrToArg<bool>::convert(&valid);
 }
 
 bool Variant::iter_next(Variant &r_iter, bool &r_valid) const {
 	GDNativeBool valid;
-	internal::interface->variant_iter_next(ptr(), r_iter.ptr(), &valid);
+	internal::gdn_interface->variant_iter_next(ptr(), r_iter.ptr(), &valid);
 	return PtrToArg<bool>::convert(&valid);
 }
 
 Variant Variant::iter_get(const Variant &r_iter, bool &r_valid) const {
 	Variant result;
 	GDNativeBool valid;
-	internal::interface->variant_iter_get(ptr(), r_iter.ptr(), result.ptr(), &valid);
+	internal::gdn_interface->variant_iter_get(ptr(), r_iter.ptr(), result.ptr(), &valid);
 	r_valid = PtrToArg<bool>::convert(&valid);
 	return result;
 }
 
 Variant::Type Variant::get_type() const {
-	return static_cast<Variant::Type>(internal::interface->variant_get_type(ptr()));
+	return static_cast<Variant::Type>(internal::gdn_interface->variant_get_type(ptr()));
 }
 
 bool Variant::has_method(const StringName &method) const {
-	GDNativeBool has = internal::interface->variant_has_method(ptr(), method.ptr());
+	GDNativeBool has = internal::gdn_interface->variant_has_method(ptr(), method.ptr());
 	return PtrToArg<bool>::convert(&has);
 }
 
 bool Variant::has_key(const Variant &key, bool *r_valid) const {
 	GDNativeBool valid;
-	GDNativeBool has = internal::interface->variant_has_key(ptr(), key.ptr(), &valid);
+	GDNativeBool has = internal::gdn_interface->variant_has_key(ptr(), key.ptr(), &valid);
 	if (r_valid) {
 		*r_valid = PtrToArg<bool>::convert(&valid);
 	}
@@ -620,23 +620,23 @@ bool Variant::has_key(const Variant &key, bool *r_valid) const {
 }
 
 bool Variant::has_member(Variant::Type type, const StringName &member) {
-	GDNativeBool has = internal::interface->variant_has_member(static_cast<GDNativeVariantType>(type), member.ptr());
+	GDNativeBool has = internal::gdn_interface->variant_has_member(static_cast<GDNativeVariantType>(type), member.ptr());
 	return PtrToArg<bool>::convert(&has);
 }
 
 bool Variant::hash_compare(const Variant &variant) const {
-	GDNativeBool compare = internal::interface->variant_hash_compare(ptr(), variant.ptr());
+	GDNativeBool compare = internal::gdn_interface->variant_hash_compare(ptr(), variant.ptr());
 	return PtrToArg<bool>::convert(&compare);
 }
 
 bool Variant::booleanize() const {
-	GDNativeBool booleanized = internal::interface->variant_booleanize(ptr());
+	GDNativeBool booleanized = internal::gdn_interface->variant_booleanize(ptr());
 	return PtrToArg<bool>::convert(&booleanized);
 }
 
 String Variant::stringify() const {
 	String result;
-	internal::interface->variant_stringify(ptr(), result.ptr());
+	internal::gdn_interface->variant_stringify(ptr(), result.ptr());
 	return result;
 }
 
@@ -644,33 +644,33 @@ Variant Variant::duplicate(bool deep) const {
 	Variant result;
 	GDNativeBool _deep;
 	PtrToArg<bool>::encode(deep, &_deep);
-	internal::interface->variant_duplicate(ptr(), result.ptr(), _deep);
+	internal::gdn_interface->variant_duplicate(ptr(), result.ptr(), _deep);
 	return result;
 }
 
 void Variant::blend(const Variant &a, const Variant &b, float c, Variant &r_dst) {
-	internal::interface->variant_blend(a.ptr(), b.ptr(), c, r_dst.ptr());
+	internal::gdn_interface->variant_blend(a.ptr(), b.ptr(), c, r_dst.ptr());
 }
 
 void Variant::interpolate(const Variant &a, const Variant &b, float c, Variant &r_dst) {
-	internal::interface->variant_interpolate(a.ptr(), b.ptr(), c, r_dst.ptr());
+	internal::gdn_interface->variant_interpolate(a.ptr(), b.ptr(), c, r_dst.ptr());
 }
 
 String Variant::get_type_name(Variant::Type type) {
 	String result;
-	internal::interface->variant_get_type_name(static_cast<GDNativeVariantType>(type), result.ptr());
+	internal::gdn_interface->variant_get_type_name(static_cast<GDNativeVariantType>(type), result.ptr());
 	return result;
 }
 
 bool Variant::can_convert(Variant::Type from, Variant::Type to) {
 	GDNativeBool can;
-	internal::interface->variant_can_convert(static_cast<GDNativeVariantType>(from), static_cast<GDNativeVariantType>(to));
+	internal::gdn_interface->variant_can_convert(static_cast<GDNativeVariantType>(from), static_cast<GDNativeVariantType>(to));
 	return PtrToArg<bool>::convert(&can);
 }
 
 bool Variant::can_convert_strict(Variant::Type from, Variant::Type to) {
 	GDNativeBool can;
-	internal::interface->variant_can_convert_strict(static_cast<GDNativeVariantType>(from), static_cast<GDNativeVariantType>(to));
+	internal::gdn_interface->variant_can_convert_strict(static_cast<GDNativeVariantType>(from), static_cast<GDNativeVariantType>(to));
 	return PtrToArg<bool>::convert(&can);
 }
 
@@ -718,9 +718,9 @@ void Variant::clear() {
 	};
 
 	if (unlikely(needs_deinit[get_type()])) { // Make it fast for types that don't need deinit.
-		internal::interface->variant_destroy(ptr());
+		internal::gdn_interface->variant_destroy(ptr());
 	}
-	internal::interface->variant_new_nil(ptr());
+	internal::gdn_interface->variant_new_nil(ptr());
 }
 
 } // namespace godot

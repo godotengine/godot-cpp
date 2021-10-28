@@ -136,11 +136,11 @@ MethodInfo::MethodInfo(const PropertyInfo &p_ret, const char *p_name, const Args
 
 template <class T>
 T *Object::cast_to(Object *p_object) {
-	GDNativeObjectPtr casted = internal::interface->object_cast_to(p_object->_owner, internal::interface->classdb_get_class_tag(T::get_class_static()));
+	GDNativeObjectPtr casted = internal::gdn_interface->object_cast_to(p_object->_owner, internal::gdn_interface->classdb_get_class_tag(T::get_class_static()));
 	if (casted == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<T *>(internal::interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
+	return reinterpret_cast<T *>(internal::gdn_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
 }
 
 } // namespace godot
