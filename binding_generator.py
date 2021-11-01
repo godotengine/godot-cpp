@@ -222,6 +222,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if class_name == "String":
         result.append("#include <godot_cpp/variant/char_string.hpp>")
 
+    if class_name == "Array":
+        result.append("#include <godot_cpp/variant/array_helpers.hpp>")
+
     for include in fully_used_classes:
         result.append(f"#include <godot_cpp/{get_include_path(include)}>")
 
@@ -423,6 +426,12 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("bool operator!=(const char32_t *p_str) const;")
         result.append(f"\tconst char32_t &operator[](int p_index) const;")
         result.append(f"\tchar32_t &operator[](int p_index);")
+
+    if class_name == "Array":
+        result.append("\ttemplate <class... Args>")
+        result.append("\tstatic Array make(Args... args) {")
+        result.append("\t\treturn helpers::append_all(Array(), args...);")
+        result.append("\t}")
 
     if is_packed_array(class_name):
         return_type = correct_type(builtin_api["indexing_return_type"])
