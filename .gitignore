@@ -6,6 +6,7 @@
 
 # Misc
 logs/*
+*.log
 
 # Binaries
 *.o
