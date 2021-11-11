@@ -151,6 +151,11 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 	$<$<CONFIG:Debug>:DEBUG_ENABLED>
 	$<$<CONFIG:Debug>:DEBUG_METHODS_ENABLED>
 )
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	target_compile_definitions(${PROJECT_NAME} PUBLIC TYPED_METHOD_BIND)
+endif()
+
 target_include_directories(${PROJECT_NAME} PUBLIC
 	include
 	${CMAKE_CURRENT_BINARY_DIR}/gen/include
