@@ -239,18 +239,18 @@ void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const G
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_MANY_ARGUMENTS;
-		r_error.argument = sizeof...(P);
+		r_error.argument = (int32_t)sizeof...(P);
 		return;
 	}
 #endif
 
 	int32_t missing = (int32_t)sizeof...(P) - (int32_t)p_argcount;
 
-	int32_t dvs = default_values.size();
+	int32_t dvs = (int32_t)default_values.size();
 #ifdef DEBUG_ENABLED
 	if (missing > dvs) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_FEW_ARGUMENTS;
-		r_error.argument = sizeof...(P);
+		r_error.argument = (int32_t)sizeof...(P);
 		return;
 	}
 #endif
@@ -274,18 +274,18 @@ void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, 
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_MANY_ARGUMENTS;
-		r_error.argument = sizeof...(P);
+		r_error.argument = (int32_t)sizeof...(P);
 		return;
 	}
 #endif
 
 	int32_t missing = (int32_t)sizeof...(P) - (int32_t)p_argcount;
 
-	int32_t dvs = default_values.size();
+	int32_t dvs = (int32_t)default_values.size();
 #ifdef DEBUG_ENABLED
 	if (missing > dvs) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_FEW_ARGUMENTS;
-		r_error.argument = sizeof...(P);
+		r_error.argument = (int32_t)sizeof...(P);
 		return;
 	}
 #endif
@@ -309,18 +309,18 @@ void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), const 
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_MANY_ARGUMENTS;
-		r_error.argument = sizeof...(P);
+		r_error.argument = (int32_t)sizeof...(P);
 		return;
 	}
 #endif
 
 	int32_t missing = (int32_t)sizeof...(P) - (int32_t)p_argcount;
 
-	int32_t dvs = default_values.size();
+	int32_t dvs = (int32_t)default_values.size();
 #ifdef DEBUG_ENABLED
 	if (missing > dvs) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_FEW_ARGUMENTS;
-		r_error.argument = sizeof...(P);
+		r_error.argument = (int32_t)sizeof...(P);
 		return;
 	}
 #endif
@@ -344,18 +344,18 @@ void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const,
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_MANY_ARGUMENTS;
-		r_error.argument = sizeof...(P);
+		r_error.argument = (int32_t)sizeof...(P);
 		return;
 	}
 #endif
 
 	int32_t missing = (int32_t)sizeof...(P) - (int32_t)p_argcount;
 
-	int32_t dvs = default_values.size();
+	int32_t dvs = (int32_t)default_values.size();
 #ifdef DEBUG_ENABLED
 	if (missing > dvs) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_FEW_ARGUMENTS;
-		r_error.argument = sizeof...(P);
+		r_error.argument = (int32_t)sizeof...(P);
 		return;
 	}
 #endif

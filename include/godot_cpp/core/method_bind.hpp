@@ -71,10 +71,10 @@ protected:
 public:
 	const char *get_name() const;
 	void set_name(const char *p_name);
-	_FORCE_INLINE_ int get_default_argument_count() const { return default_arguments.size(); }
+	_FORCE_INLINE_ int get_default_argument_count() const { return (int)default_arguments.size(); }
 	_FORCE_INLINE_ const std::vector<Variant> &get_default_arguments() const { return default_arguments; }
 	_FORCE_INLINE_ Variant has_default_argument(int p_arg) const {
-		int idx = p_arg - (argument_count - default_arguments.size());
+		int idx = p_arg - (argument_count - (int)default_arguments.size());
 
 		if (idx < 0 || idx >= default_arguments.size()) {
 			return false;
@@ -83,7 +83,7 @@ public:
 		}
 	}
 	_FORCE_INLINE_ Variant get_default_argument(int p_arg) const {
-		int idx = p_arg - (argument_count - default_arguments.size());
+		int idx = p_arg - (argument_count - (int)default_arguments.size());
 
 		if (idx < 0 || idx >= default_arguments.size()) {
 			return Variant();
@@ -159,7 +159,7 @@ public:
 	}
 
 	void set_method_info(const MethodInfo &p_info, bool p_return_nil_is_variant) {
-		set_argument_count(p_info.arguments.size());
+		set_argument_count((int)p_info.arguments.size());
 		if (p_info.arguments.size()) {
 			std::vector<std::string> names;
 			names.reserve(p_info.arguments.size());
@@ -175,7 +175,7 @@ public:
 		if (p_return_nil_is_variant) {
 			arguments.return_val.usage |= PROPERTY_USAGE_NIL_IS_VARIANT;
 		}
-		generate_argument_types(p_info.arguments.size());
+		generate_argument_types((int)p_info.arguments.size());
 	}
 
 	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_return) const {
@@ -252,7 +252,7 @@ public:
 
 	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
 #ifdef TYPED_METHOD_BIND
-		call_with_variant_args_dv(static_cast<T *>(p_instance), method, p_args, p_argument_count, r_error, get_default_arguments());
+		call_with_variant_args_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, r_error, get_default_arguments());
 #else
 		call_with_variant_args_dv(reinterpret_cast<MB_T *>(p_instance), method, p_args, p_argument_count, r_error, get_default_arguments());
 #endif
@@ -330,7 +330,7 @@ public:
 
 	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
 #ifdef TYPED_METHOD_BIND
-		call_with_variant_argsc_dv(static_cast<T *>(p_instance), method, p_args, p_argument_count, r_error, get_default_arguments());
+		call_with_variant_argsc_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, r_error, get_default_arguments());
 #else
 		call_with_variant_argsc_dv(reinterpret_cast<MB_T *>(p_instance), method, p_args, p_argument_count, r_error, get_default_arguments());
 #endif
@@ -414,7 +414,7 @@ public:
 	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
 		Variant ret;
 #ifdef TYPED_METHOD_BIND
-		call_with_variant_args_ret_dv(static_cast<T *>(p_instance), method, p_args, p_argument_count, ret, r_error, get_default_arguments());
+		call_with_variant_args_ret_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, ret, r_error, get_default_arguments());
 #else
 		call_with_variant_args_ret_dv((MB_T *)p_instance, method, p_args, p_argument_count, ret, r_error, get_default_arguments());
 #endif
@@ -499,7 +499,7 @@ public:
 	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
 		Variant ret;
 #ifdef TYPED_METHOD_BIND
-		call_with_variant_args_retc_dv(static_cast<T *>(p_instance), method, p_args, p_argument_count, ret, r_error, get_default_arguments());
+		call_with_variant_args_retc_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, ret, r_error, get_default_arguments());
 #else
 		call_with_variant_args_retc_dv((MB_T *)p_instance, method, p_args, p_argument_count, ret, r_error, get_default_arguments());
 #endif

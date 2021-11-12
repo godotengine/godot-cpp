@@ -38,12 +38,13 @@ opts.Add(
         host_platform,
         # We'll need to support these in due times
         # allowed_values=("linux", "freebsd", "osx", "windows", "android", "ios", "javascript"),
-        allowed_values=("linux", "windows"),
+        allowed_values=("linux", "windows", "osx"),
         ignorecase=2,
     )
 )
 opts.Add(EnumVariable("bits", "Target platform bits", "64", ("32", "64")))
 opts.Add(BoolVariable("use_llvm", "Use the LLVM / Clang compiler", "no"))
+opts.Add(EnumVariable("macos_arch", "Target macOS architecture", "universal", ["universal", "x86_64", "arm64"]))
 opts.Add(PathVariable("target_path", "The path where the lib is installed.", default_target_path, PathVariable.PathAccept))
 opts.Add(PathVariable("target_name", "The library name.", default_library_name, PathVariable.PathAccept))
 
@@ -90,13 +91,24 @@ if env["target"] == "debug":
 if env["platform"] == "osx":
     env["target_path"] += "osx/"
     cpp_library += ".osx"
-    env.Append(CCFLAGS=["-arch", "x86_64"])
+
+    if env["bits"] == "32":
+        raise ValueError("Only 64-bit builds are supported for the macOS target.")
+
+    if env["macos_arch"] == "universal":
+        env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+        env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+    else:
+        env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
+        env.Append(CCFLAGS=["-arch", env["macos_arch"]])
+
     env.Append(CXXFLAGS=["-std=c++17"])
-    env.Append(LINKFLAGS=["-arch", "x86_64"])
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-g", "-O2"])
     else:
         env.Append(CCFLAGS=["-g", "-O3"])
+
+    arch_suffix = env["macos_arch"]
 
 elif env["platform"] in ("x11", "linux"):
     cpp_library += ".linux"
@@ -107,6 +119,7 @@ elif env["platform"] in ("x11", "linux"):
     else:
         env.Append(CCFLAGS=["-g", "-O3"])
 
+    arch_suffix = str(bits)
 elif env["platform"] == "windows":
     cpp_library += ".windows"
     # This makes sure to keep the session environment variables on windows,
@@ -127,8 +140,7 @@ elif env["platform"] == "windows":
     if not(env["use_llvm"]):
         env.Append(CPPDEFINES=["TYPED_METHOD_BIND"])
 
-# determine our architecture suffix
-arch_suffix = str(bits)
+    arch_suffix = str(bits)
 
 # suffix our godot-cpp library
 cpp_library += "." + env["target"] + "." + arch_suffix

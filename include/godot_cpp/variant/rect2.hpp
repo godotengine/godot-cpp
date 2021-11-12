@@ -37,7 +37,7 @@
 
 namespace godot {
 
-struct Transform2D;
+class Transform2D;
 
 class Rect2 {
 public:
@@ -290,7 +290,7 @@ public:
 
 			//check ray box
 			r /= l;
-			Vector2 ir(1.0 / r.x, 1.0 / r.y);
+			Vector2 ir((real_t)1.0 / r.x, (real_t)1.0 / r.y);
 
 			// lb is the corner of AABB with minimal coordinates - left bottom, rt is maximal corner
 			// r.org is origin of ray

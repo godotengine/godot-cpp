@@ -95,7 +95,7 @@ public:
 
 	operator String() const;
 
-	operator Vector2() const { return Vector2(x, y); }
+	operator Vector2() const { return Vector2((real_t)x, (real_t)y); }
 
 	inline Vector2i() {}
 	inline Vector2i(const Vector2 &p_vec2) {
@@ -113,15 +113,19 @@ inline Vector2i operator*(const int32_t &p_scalar, const Vector2i &p_vector) {
 }
 
 inline Vector2i operator*(const int64_t &p_scalar, const Vector2i &p_vector) {
-	return p_vector * p_scalar;
+	return p_vector * (int32_t)p_scalar;
 }
 
 inline Vector2i operator*(const float &p_scalar, const Vector2i &p_vector) {
-	return p_vector * p_scalar;
+	float x = (float)p_vector.x * p_scalar;
+	float y = (float)p_vector.y * p_scalar;
+	return Vector2i((int32_t)round(x), (int32_t)round(y));
 }
 
 inline Vector2i operator*(const double &p_scalar, const Vector2i &p_vector) {
-	return p_vector * p_scalar;
+	double x = (double)p_vector.x * p_scalar;
+	double y = (double)p_vector.y * p_scalar;
+	return Vector2i((int32_t)round(x), (int32_t)round(y));
 }
 
 typedef Vector2i Size2i;

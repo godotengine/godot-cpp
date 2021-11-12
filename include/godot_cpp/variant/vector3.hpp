@@ -385,8 +385,8 @@ real_t Vector3::length_squared() const {
 
 void Vector3::normalize() {
 	real_t lengthsq = length_squared();
-	if (lengthsq == 0) {
-		x = y = z = 0;
+	if (lengthsq == (real_t)0.0) {
+		x = y = z = (real_t)0.0;
 	} else {
 		real_t length = Math::sqrt(lengthsq);
 		x /= length;
@@ -403,15 +403,15 @@ Vector3 Vector3::normalized() const {
 
 bool Vector3::is_normalized() const {
 	// use length_squared() instead of length() to avoid sqrt(), makes it more stringent.
-	return Math::is_equal_approx(length_squared(), 1.0, UNIT_EPSILON);
+	return Math::is_equal_approx(length_squared(), (real_t)1.0, (real_t)UNIT_EPSILON);
 }
 
 Vector3 Vector3::inverse() const {
-	return Vector3(1.0 / x, 1.0 / y, 1.0 / z);
+	return Vector3((real_t)1.0 / x, (real_t)1.0 / y, (real_t)1.0 / z);
 }
 
 void Vector3::zero() {
-	x = y = z = 0;
+	x = y = z = (real_t)0.0;
 }
 
 // slide returns the component of the vector along the given plane, specified by its normal vector.

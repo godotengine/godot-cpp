@@ -336,7 +336,7 @@ inline void AABB::expand_to(const Vector3 &p_vector) {
 }
 
 void AABB::project_range_in_plane(const Plane &p_plane, real_t &r_min, real_t &r_max) const {
-	Vector3 half_extents(size.x * 0.5, size.y * 0.5, size.z * 0.5);
+	Vector3 half_extents(size.x * (real_t)0.5, size.y * (real_t)0.5, size.z * (real_t)0.5);
 	Vector3 center(position.x + half_extents.x, position.y + half_extents.y, position.z + half_extents.z);
 
 	real_t length = p_plane.normal.abs().dot(half_extents);
@@ -374,9 +374,9 @@ inline real_t AABB::get_shortest_axis_size() const {
 }
 
 bool AABB::smits_intersect_ray(const Vector3 &p_from, const Vector3 &p_dir, real_t t0, real_t t1) const {
-	real_t divx = 1.0 / p_dir.x;
-	real_t divy = 1.0 / p_dir.y;
-	real_t divz = 1.0 / p_dir.z;
+	real_t divx = (real_t)1.0 / p_dir.x;
+	real_t divy = (real_t)1.0 / p_dir.y;
+	real_t divz = (real_t)1.0 / p_dir.z;
 
 	Vector3 upbound = position + size;
 	real_t tmin, tmax, tymin, tymax, tzmin, tzmax;
@@ -426,9 +426,9 @@ void AABB::grow_by(real_t p_amount) {
 	position.x -= p_amount;
 	position.y -= p_amount;
 	position.z -= p_amount;
-	size.x += 2.0 * p_amount;
-	size.y += 2.0 * p_amount;
-	size.z += 2.0 * p_amount;
+	size.x += (real_t)2.0 * p_amount;
+	size.y += (real_t)2.0 * p_amount;
+	size.z += (real_t)2.0 * p_amount;
 }
 
 void AABB::quantize(real_t p_unit) {
