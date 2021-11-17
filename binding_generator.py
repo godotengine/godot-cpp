@@ -444,6 +444,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append(f"\tconst " + return_type + f" &operator[](int p_index) const;")
         result.append(f"\t" + return_type + f" &operator[](int p_index);")
 
+    if class_name == "Array":
+        result.append(f"\tconst Variant &operator[](int p_index) const;")
+        result.append(f"\tVariant &operator[](int p_index);")
+
     result.append("};")
 
     if class_name == "String":
