@@ -56,6 +56,9 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("extended_ref_checks"), &Example::extended_ref_checks);
 	ClassDB::bind_method(D_METHOD("test_array"), &Example::test_array);
 
+	// just testing errors, this should return an error in our logs!
+	ClassDB::bind_method(D_METHOD("simple_func"), &Example::simple_func);
+
 	{
 		MethodInfo mi;
 		mi.arguments.push_back(PropertyInfo(Variant::STRING, "some_argument"));

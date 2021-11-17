@@ -199,7 +199,9 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, const char *p_name, M 
 
 	if (type.method_map.find(p_name) != type.method_map.end()) {
 		memdelete(bind);
-		ERR_FAIL_V_MSG(nullptr, "Binding duplicate method.");
+		char failmsg[1024];
+		sprintf(failmsg, "Binding duplicate method %s.%s.", type.name, p_name);
+		ERR_FAIL_V_MSG(nullptr, failmsg);
 	}
 
 	// register our method bind within our plugin
