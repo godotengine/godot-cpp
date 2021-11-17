@@ -143,19 +143,28 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 
 	if (type.method_map.find(method_name.name) != type.method_map.end()) {
 		memdelete(p_bind);
-		ERR_FAIL_V_MSG(nullptr, "Binding duplicate method.");
+
+		char failmsg[1024];
+		sprintf(failmsg, "Binding duplicate method %s.%s.", type.name, method_name.name);
+		ERR_FAIL_V_MSG(nullptr, failmsg);
 	}
 
 	if (type.virtual_methods.find(method_name.name) != type.virtual_methods.end()) {
 		memdelete(p_bind);
-		ERR_FAIL_V_MSG(nullptr, "Method already bound as virtual.");
+
+		char failmsg[1024];
+		sprintf(failmsg, "Method %s.%s already bound as virtual.", type.name, method_name.name);
+		ERR_FAIL_V_MSG(nullptr, failmsg);
 	}
 
 	p_bind->set_name(method_name.name);
 
 	if (method_name.args.size() > p_bind->get_argument_count()) {
 		memdelete(p_bind);
-		ERR_FAIL_V_MSG(nullptr, "Method definition has more arguments than the actual method.");
+
+		char failmsg[1024];
+		sprintf(failmsg, "Method %s.%s definition has more arguments than the actual method.", type.name, method_name.name);
+		ERR_FAIL_V_MSG(nullptr, failmsg);
 	}
 
 	p_bind->set_hint_flags(p_flags);
