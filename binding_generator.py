@@ -448,6 +448,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append(f"\tconst Variant &operator[](int p_index) const;")
         result.append(f"\tVariant &operator[](int p_index);")
 
+    if class_name == "Dictionary":
+        result.append(f"\tconst Variant &operator[](const Variant &p_key) const;")
+        result.append(f"\tVariant &operator[](const Variant &p_key);")
+
     result.append("};")
 
     if class_name == "String":
@@ -607,7 +611,10 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 
     # Move constructor.
     result.append(f"{class_name}::{class_name}({class_name} &&other) {{")
-    result.append("\tstd::swap(opaque, other.opaque);")
+    if needs_copy_instead_of_move(class_name) and copy_constructor_index >= 0:
+        result.append(f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &other);")
+    else:
+        result.append("\tstd::swap(opaque, other.opaque);")
     result.append("}")
     result.append("")
 
@@ -722,7 +729,10 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 
     # Move assignment.
     result.append(f"{class_name} &{class_name}::operator=({class_name} &&other) {{")
-    result.append("\tstd::swap(opaque, other.opaque);")
+    if needs_copy_instead_of_move(class_name) and copy_constructor_index >= 0:
+        result.append(f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &other);")
+    else:
+        result.append("\tstd::swap(opaque, other.opaque);")
     result.append("\treturn *this;")
     result.append("}")
 
@@ -1560,6 +1570,13 @@ def is_packed_array(type_name):
         "PackedVector3Array",
     ]
 
+def needs_copy_instead_of_move(type_name):
+    """
+    Those are types which need initialised data or we'll get warning spam so need a copy instead of move.
+    """
+    return type_name in [
+        "Dictionary",
+    ]
 
 def is_enum(type_name):
     return type_name.startswith("enum::")

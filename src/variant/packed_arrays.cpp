@@ -33,6 +33,7 @@
 #include <godot_cpp/godot.hpp>
 
 #include <godot_cpp/variant/array.hpp>
+#include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/packed_color_array.hpp>
 #include <godot_cpp/variant/packed_float32_array.hpp>
@@ -132,6 +133,16 @@ const Variant &Array::operator[](int p_index) const {
 
 Variant &Array::operator[](int p_index) {
 	Variant *var = (Variant *)internal::gdn_interface->array_operator_index((GDNativeTypePtr *)this, p_index);
+	return *var;
+}
+
+const Variant &Dictionary::operator[](const Variant &p_key) const {
+	const Variant *var = (const Variant *)internal::gdn_interface->dictionary_operator_index_const((GDNativeTypePtr *)this, (GDNativeVariantPtr)&p_key);
+	return *var;
+}
+
+Variant &Dictionary::operator[](const Variant &p_key) {
+	Variant *var = (Variant *)internal::gdn_interface->dictionary_operator_index((GDNativeTypePtr *)this, (GDNativeVariantPtr)&p_key);
 	return *var;
 }
 
