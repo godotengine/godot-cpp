@@ -127,7 +127,7 @@ Ref<ExampleRef> Example::extended_ref_checks(Ref<ExampleRef> p_ref) const {
 }
 
 Variant Example::varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
-	UtilityFunctions::print("Varargs called with ", String::num(arg_count), " arguments");
+	UtilityFunctions::print("Varargs called with ", String::num((double)arg_count), " arguments");
 	return arg_count;
 }
 

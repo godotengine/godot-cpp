@@ -163,7 +163,7 @@ inline double sinc(double p_x) {
 }
 
 inline float sincn(float p_x) {
-	return sinc(Math_PI * p_x);
+	return (float)sinc(Math_PI * p_x);
 }
 inline double sincn(double p_x) {
 	return sinc(Math_PI * p_x);

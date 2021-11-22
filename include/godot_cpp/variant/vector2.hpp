@@ -164,19 +164,19 @@ inline Vector2 Vector2::plane_project(real_t p_d, const Vector2 &p_vec) const {
 }
 
 inline Vector2 operator*(float p_scalar, const Vector2 &p_vec) {
-	return p_vec * p_scalar;
+	return p_vec * (real_t)p_scalar;
 }
 
 inline Vector2 operator*(double p_scalar, const Vector2 &p_vec) {
-	return p_vec * p_scalar;
+	return p_vec * (real_t)p_scalar;
 }
 
 inline Vector2 operator*(int32_t p_scalar, const Vector2 &p_vec) {
-	return p_vec * p_scalar;
+	return p_vec * (real_t)p_scalar;
 }
 
 inline Vector2 operator*(int64_t p_scalar, const Vector2 &p_vec) {
-	return p_vec * p_scalar;
+	return p_vec * (real_t)p_scalar;
 }
 
 inline Vector2 Vector2::operator+(const Vector2 &p_v) const {
