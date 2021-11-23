@@ -54,7 +54,9 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("return_something_const"), &Example::return_something_const);
 	ClassDB::bind_method(D_METHOD("return_extended_ref"), &Example::return_extended_ref);
 	ClassDB::bind_method(D_METHOD("extended_ref_checks"), &Example::extended_ref_checks);
+
 	ClassDB::bind_method(D_METHOD("test_array"), &Example::test_array);
+	ClassDB::bind_method(D_METHOD("test_dictionary"), &Example::test_dictionary);
 
 	{
 		MethodInfo mi;
@@ -143,6 +145,15 @@ Array Example::test_array() const {
 	arr[1] = Variant(2);
 
 	return arr;
+}
+
+Dictionary Example::test_dictionary() const {
+	Dictionary dict;
+
+	dict["hello"] = "world";
+	dict["foo"] = "bar";
+
+	return dict;
 }
 
 // Properties.
