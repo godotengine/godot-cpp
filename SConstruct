@@ -147,6 +147,13 @@ opts.Add(BoolVariable("generate_template_get_node", "Generate a template version
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
 
+# Detect and print a warning listing unknown SCons variables to ease troubleshooting.
+unknown = opts.UnknownVariables()
+if unknown:
+    print("WARNING: Unknown SCons variables were passed and will be ignored:")
+    for item in unknown.items():
+        print("    " + item[0] + "=" + item[1])
+
 # This makes sure to keep the session environment variables on Windows.
 # This way, you can run SCons in a Visual Studio 2017 prompt and it will find
 # all the required tools
