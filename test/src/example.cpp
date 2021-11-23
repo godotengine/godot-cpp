@@ -38,22 +38,43 @@
 
 using namespace godot;
 
+uint64_t ExampleRef::instance_count = 0;
+
+void ExampleRef::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_value"), &ExampleRef::get_value);
+	ClassDB::bind_method(D_METHOD("set_value", "value"), &ExampleRef::set_value);
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "value"), "set_value", "get_value");
+}
+
 ExampleRef::ExampleRef() {
-	UtilityFunctions::print("ExampleRef created.");
+	instance_count++;
+	UtilityFunctions::print("ExampleRef created. Our total instance count is now: ", instance_count);
+
+	// default this
+	value = 1;
 }
 
 ExampleRef::~ExampleRef() {
-	UtilityFunctions::print("ExampleRef destroyed.");
+	instance_count--;
+	UtilityFunctions::print("ExampleRef destroyed. Our total instance count is now: ", instance_count);
+}
+
+void ExampleRef::set_value(int64_t p_value) {
+	value = p_value;
+}
+
+int64_t ExampleRef::get_value() const {
+	return value;
 }
 
 void Example::_bind_methods() {
 	// Methods.
 	ClassDB::bind_method(D_METHOD("simple_func"), &Example::simple_func);
 	ClassDB::bind_method(D_METHOD("simple_const_func"), &Example::simple_const_func);
-	ClassDB::bind_method(D_METHOD("return_something"), &Example::return_something);
+	ClassDB::bind_method(D_METHOD("return_something", "base"), &Example::return_something);
 	ClassDB::bind_method(D_METHOD("return_something_const"), &Example::return_something_const);
 	ClassDB::bind_method(D_METHOD("return_extended_ref"), &Example::return_extended_ref);
-	ClassDB::bind_method(D_METHOD("extended_ref_checks"), &Example::extended_ref_checks);
+	ClassDB::bind_method(D_METHOD("extended_ref_checks", "ref"), &Example::extended_ref_checks);
 
 	ClassDB::bind_method(D_METHOD("test_array"), &Example::test_array);
 	ClassDB::bind_method(D_METHOD("test_dictionary"), &Example::test_dictionary);
@@ -73,6 +94,10 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_custom_position", "position"), &Example::set_custom_position);
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "group_subgroup_custom_position"), "set_custom_position", "get_custom_position");
 
+	ClassDB::bind_method(D_METHOD("get_ref_obj"), &Example::get_ref_obj);
+	ClassDB::bind_method(D_METHOD("set_ref_obj", "ref_obj"), &Example::set_ref_obj);
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "ref_obj", PROPERTY_HINT_RESOURCE_TYPE, "ExampleRef"), "set_ref_obj", "get_ref_obj");
+
 	// Signals.
 	ADD_SIGNAL(MethodInfo("custom_signal", PropertyInfo(Variant::STRING, "name"), PropertyInfo(Variant::INT, "value")));
 	ClassDB::bind_method(D_METHOD("emit_custom_signal", "name", "value"), &Example::emit_custom_signal);
@@ -85,11 +110,11 @@ void Example::_bind_methods() {
 }
 
 Example::Example() {
-	UtilityFunctions::print("Constructor.");
+	UtilityFunctions::print("Example Constructor.");
 }
 
 Example::~Example() {
-	UtilityFunctions::print("Destructor.");
+	UtilityFunctions::print("Example Destructor.");
 }
 
 // Methods.
@@ -115,15 +140,19 @@ Viewport *Example::return_something_const() const {
 	return nullptr;
 }
 
-ExampleRef *Example::return_extended_ref() const {
-	return memnew(ExampleRef());
+Ref<ExampleRef> Example::return_extended_ref() const {
+	// When subclassing RefCounted we should ALWAYS use Ref<..> or Godot will start doing confusing things as it will start using reference counting to manage the object.
+	// We should never instantiate the object directly such as this:
+	// return memnew(ExampleRef());
+
+	Ref<ExampleRef> ref;
+	ref.instantiate();
+	return ref;
 }
 
 Ref<ExampleRef> Example::extended_ref_checks(Ref<ExampleRef> p_ref) const {
 	Ref<ExampleRef> ref;
 	ref.instantiate();
-	// TODO the returned value gets dereferenced too early and return a null object otherwise.
-	ref->reference();
 	UtilityFunctions::print("Example ref checks called with value: ", p_ref->get_instance_id(), ", returning value: ", ref->get_instance_id());
 	return ref;
 }
@@ -163,6 +192,14 @@ void Example::set_custom_position(const Vector2 &pos) {
 
 Vector2 Example::get_custom_position() const {
 	return custom_position;
+}
+
+void Example::set_ref_obj(const Ref<ExampleRef> p_ref) {
+	ref_obj = p_ref;
+}
+
+Ref<ExampleRef> Example::get_ref_obj() const {
+	return ref_obj;
 }
 
 // Virtual function override.

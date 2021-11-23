@@ -186,6 +186,14 @@ public:
 		r.reference = nullptr;
 	}
 
+	template <class T_Other>
+	Ref(Ref<T_Other> &&p_other) {
+		// Should just be able to swap these...
+		T *swap = (T *)p_other.reference;
+		p_other.reference = (T_Other *)reference;
+		reference = swap;
+	}
+
 	Ref(T *p_reference) {
 		if (p_reference) {
 			ref_pointer(p_reference);

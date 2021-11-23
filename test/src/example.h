@@ -39,21 +39,30 @@
 
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/global_constants.hpp>
+#include <godot_cpp/classes/resource.hpp>
 #include <godot_cpp/classes/viewport.hpp>
 
 #include <godot_cpp/core/binder_common.hpp>
 
 using namespace godot;
 
-class ExampleRef : public RefCounted {
-	GDCLASS(ExampleRef, RefCounted);
+class ExampleRef : public Resource {
+	GDCLASS(ExampleRef, Resource);
+
+private:
+	static uint64_t instance_count; // just so we can test if this comes back to 0 at the end of our test
+
+	int64_t value;
 
 protected:
-	static void _bind_methods() {}
+	static void _bind_methods();
 
 public:
 	ExampleRef();
 	~ExampleRef();
+
+	void set_value(int64_t p_value);
+	int64_t get_value() const;
 };
 
 class Example : public Control {
@@ -64,6 +73,7 @@ protected:
 
 private:
 	Vector2 custom_position;
+	Ref<ExampleRef> ref_obj;
 
 public:
 	// Constants.
@@ -84,7 +94,7 @@ public:
 	void simple_const_func() const;
 	String return_something(const String &base);
 	Viewport *return_something_const() const;
-	ExampleRef *return_extended_ref() const;
+	Ref<ExampleRef> return_extended_ref() const;
 	Ref<ExampleRef> extended_ref_checks(Ref<ExampleRef> p_ref) const;
 	Variant varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
 	void emit_custom_signal(const String &name, int value);
@@ -95,6 +105,9 @@ public:
 	// Property.
 	void set_custom_position(const Vector2 &pos);
 	Vector2 get_custom_position() const;
+
+	void set_ref_obj(const Ref<ExampleRef> p_ref);
+	Ref<ExampleRef> get_ref_obj() const;
 
 	// Virtual function override (no need to bind manually).
 	virtual bool _has_point(const Vector2 &point) const override;

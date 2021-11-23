@@ -1,17 +1,25 @@
-[gd_scene load_steps=2 format=3 uid="uid://dmx2xuigcpvt4"]
+[gd_scene load_steps=3 format=3 uid="uid://dmx2xuigcpvt4"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_c326s"]
+
+[sub_resource type="ExampleRef" id="ExampleRef_gveeo"]
+value = 5
 
 [node name="Node" type="Node"]
 script = ExtResource( "1_c326s" )
 
 [node name="Example" type="Example" parent="."]
+ref_obj = SubResource( "ExampleRef_gveeo" )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Label" type="Label" parent="Example"]
 offset_left = 194.0
 offset_top = -2.0
 offset_right = 234.0
 offset_bottom = 21.0
+theme_override_font_sizes/font_size = 16
 __meta__ = {
 "_edit_use_anchors_": false
 }
