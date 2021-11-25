@@ -171,7 +171,12 @@ Variant::Variant(const godot::RID &v) {
 }
 
 Variant::Variant(const Object *v) {
-	from_type_constructor[OBJECT](ptr(), const_cast<GodotObject **>(&v->_owner));
+	if (v) {
+		from_type_constructor[OBJECT](ptr(), const_cast<GodotObject **>(&v->_owner));
+	} else {
+		GodotObject *nullobject = nullptr;
+		from_type_constructor[OBJECT](ptr(), &nullobject);
+	}
 }
 
 Variant::Variant(const Callable &v) {
