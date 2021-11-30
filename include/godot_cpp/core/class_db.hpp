@@ -158,9 +158,8 @@ void ClassDB::register_class() {
 		nullptr, // GDNativeExtensionClassUnreference
 		T::create, // GDNativeExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
 		T::free, // GDNativeExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
-		T::set_object_instance, // GDNativeExtensionClassObjectInstance object_instance_func; /* this one is mandatory */
 		&ClassDB::get_virtual_func, // GDNativeExtensionClassGetVirtual get_virtual_func;
-		(void *)cl.name, //void *class_userdata;
+		(void *)cl.name, // void *class_userdata;
 	};
 
 	internal::gdn_interface->classdb_register_extension_class(internal::library, cl.name, cl.parent_name, &class_info);

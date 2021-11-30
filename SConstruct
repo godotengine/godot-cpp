@@ -458,6 +458,7 @@ if should_generate_bindings:
 # Sources to compile
 sources = []
 add_sources(sources, "src", "cpp")
+add_sources(sources, "src/classes", "cpp")
 add_sources(sources, "src/core", "cpp")
 add_sources(sources, "src/variant", "cpp")
 add_sources(sources, "gen/src/variant", "cpp")

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  godot.hpp                                                            */
+/*  wrapped.cpp                                                          */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,59 +28,29 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_HPP
-#define GODOT_HPP
+#include <godot_cpp/classes/wrapped.hpp>
 
-#include <godot/gdnative_interface.h>
+#include <godot_cpp/variant/builtin_types.hpp>
+
+#include <godot_cpp/classes/object.hpp>
 
 namespace godot {
 
-namespace internal {
+void Wrapped::_postinitialize() {
+	godot::internal::gdn_interface->object_set_instance(_owner, _get_class(), this);
+	godot::internal::gdn_interface->object_set_instance_binding(_owner, godot::internal::token, this, _get_bindings_callbacks());
+}
 
-extern "C" const GDNativeInterface *gdn_interface;
-extern "C" GDNativeExtensionClassLibraryPtr library;
-extern "C" void *token;
+Wrapped::Wrapped(const char *p_godot_class) {
+	_owner = godot::internal::gdn_interface->classdb_construct_object(p_godot_class);
+}
 
-} // namespace internal
+Wrapped::Wrapped(GodotObject *p_godot_object) {
+	_owner = p_godot_object;
+}
 
-class GDExtensionBinding {
-public:
-	using Callback = void (*)();
-
-	static Callback init_callbacks[GDNATIVE_MAX_INITIALIZATION_LEVEL];
-	static Callback terminate_callbacks[GDNATIVE_MAX_INITIALIZATION_LEVEL];
-	static GDNativeBool init(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization);
-
-public:
-	static void initialize_level(void *userdata, GDNativeInitializationLevel p_level);
-	static void deinitialize_level(void *userdata, GDNativeInitializationLevel p_level);
-
-	class InitObject {
-		const GDNativeInterface *gdn_interface;
-		const GDNativeExtensionClassLibraryPtr library;
-		GDNativeInitialization *initialization;
-
-	public:
-		InitObject(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) :
-				gdn_interface(p_interface),
-				library(p_library),
-				initialization(r_initialization){};
-
-		void register_core_initializer(Callback p_core_init) const;
-		void register_server_initializer(Callback p_server_init) const;
-		void register_scene_initializer(Callback p_scene_init) const;
-		void register_editor_initializer(Callback p_editor_init) const;
-		void register_driver_initializer(Callback p_driver_init) const;
-		void register_core_terminator(Callback p_core_terminate) const;
-		void register_server_terminator(Callback p_server_terminate) const;
-		void register_scene_terminator(Callback p_scene_terminate) const;
-		void register_editor_terminator(Callback p_editor_terminate) const;
-		void register_driver_terminator(Callback p_driver_terminate) const;
-
-		GDNativeBool init() const;
-	};
-};
+void postinitialize_handler(Wrapped *p_wrapped) {
+	p_wrapped->_postinitialize();
+}
 
 } // namespace godot
-
-#endif // ! GODOT_HPP
