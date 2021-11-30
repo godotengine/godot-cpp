@@ -430,8 +430,8 @@ env.Append(
     CPPPATH=[
         ".",
         env["headers_dir"],
-        "#include",
-        "#gen/include",
+        "include",
+        "gen/include",
     ]
 )
 
@@ -478,3 +478,4 @@ library = env.StaticLibrary(
     source=sources,
 )
 Default(library)
+Return('library')
