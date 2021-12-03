@@ -91,17 +91,6 @@ void GDExtensionBinding::deinitialize_level(void *userdata, GDNativeInitializati
 	}
 }
 
-void *GDExtensionBinding::create_instance_callback(void *p_token, void *p_instance) {
-	ERR_FAIL_COND_V_MSG(p_token != internal::library, nullptr, "Asking for creating instance with invalid token.");
-	Wrapped *wrapped = memnew(Wrapped(p_instance));
-	return wrapped;
-}
-
-void GDExtensionBinding::free_instance_callback(void *p_token, void *p_instance, void *p_binding) {
-	ERR_FAIL_COND_MSG(p_token != internal::library, "Asking for freeing instance with invalid token.");
-	memdelete((Wrapped *)p_binding);
-}
-
 void GDExtensionBinding::InitObject::register_core_initializer(Callback p_core_init) const {
 	GDExtensionBinding::init_callbacks[GDNATIVE_INITIALIZATION_CORE] = p_core_init;
 }

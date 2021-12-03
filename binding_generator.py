@@ -914,9 +914,6 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("")
 
     result.append("public:")
-
-    # Constructor override, since parent Wrapped has protected constructor.
-    result.append(f"\t{class_name}() = default;")
     result.append("")
 
     if "enums" in class_api:

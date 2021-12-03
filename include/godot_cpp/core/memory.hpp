@@ -68,16 +68,17 @@ public:
 	static void free_static(void *p_ptr);
 };
 
-#define memnew(m_v)                                                           \
-	([&]() {                                                                  \
-		if constexpr (std::is_base_of<godot::Object, decltype(m_v)>::value) { \
-			return godot::internal::Creator<decltype(m_v)>::_new();           \
-		} else {                                                              \
-			return new ("") m_v;                                              \
-		}                                                                     \
-	}())
+_ALWAYS_INLINE_ void postinitialize_handler(void *) {}
 
-#define memnew_placement(m_placement, m_class) (new (m_placement, sizeof(m_class), "") m_class)
+template <class T>
+_ALWAYS_INLINE_ T *_post_initialize(T *p_obj) {
+	postinitialize_handler(p_obj);
+	return p_obj;
+}
+
+#define memnew(m_class) _post_initialize(new ("") m_class)
+
+#define memnew_placement(m_placement, m_class) _post_initialize(new (m_placement, sizeof(m_class), "") m_class)
 
 template <class T>
 void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wrapped, T>>::type * = 0) {

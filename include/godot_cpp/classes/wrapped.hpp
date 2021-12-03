@@ -34,6 +34,7 @@
 #include <godot_cpp/core/memory.hpp>
 
 #include <godot_cpp/godot.hpp>
+
 namespace godot {
 
 typedef void GodotObject;
@@ -41,45 +42,21 @@ typedef void GodotObject;
 // Base for all engine classes, to contain the pointer to the engine instance.
 class Wrapped {
 	friend class GDExtensionBinding;
-
-	// Private constructor, this should not be created directly by users.
-	Wrapped(GodotObject *p_owner) :
-			_owner(p_owner) {}
+	friend void postinitialize_handler(Wrapped *);
 
 protected:
-	Wrapped() = default;
+	virtual const char *_get_class() const = 0; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
+	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
+
+	void _postinitialize();
+
+	Wrapped(const char *p_godot_class);
+	Wrapped(GodotObject *p_godot_object);
 
 public:
 	// Must be public but you should not touch this.
 	GodotObject *_owner = nullptr;
-
-	static Wrapped *_new() {
-		return nullptr;
-	}
 };
-
-namespace internal {
-
-template <class T, class Enable = void>
-struct Creator {
-	static T *_new() { return nullptr; }
-};
-
-template <class T>
-struct Creator<T, typename std::enable_if<std::is_base_of_v<godot::Wrapped, T>>::type> {
-	static T *_new() { return T::_new(); }
-};
-
-// template <class T>
-// struct Creator<T, std::false_type> {
-// };
-
-// template <class T>
-// struct Creator<T, std::enable_if_t<std::is_base_of_v<godot::Wrapped, T>, bool>> {
-// 	static T *_new() { return T::_new(); }
-// };
-
-}; // namespace internal
 
 } // namespace godot
 
@@ -94,126 +71,126 @@ struct Creator<T, typename std::enable_if<std::is_base_of_v<godot::Wrapped, T>>:
 #define CHECK_CLASS_CONSTRUCTOR(m_constructor, m_class)
 #endif
 
-#define GDCLASS(m_class, m_inherits)                                                                                                                                  \
-private:                                                                                                                                                              \
-	friend class ClassDB;                                                                                                                                             \
-                                                                                                                                                                      \
-	using SelfType = m_class;                                                                                                                                         \
-                                                                                                                                                                      \
-protected:                                                                                                                                                            \
-	static void (*_get_bind_methods())() {                                                                                                                            \
-		return &m_class::_bind_methods;                                                                                                                               \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-	template <class T>                                                                                                                                                \
-	static void register_virtuals() {                                                                                                                                 \
-		m_inherits::register_virtuals<T>();                                                                                                                           \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-public:                                                                                                                                                               \
-	static void initialize_class() {                                                                                                                                  \
-		static bool initialized = false;                                                                                                                              \
-		if (initialized) {                                                                                                                                            \
-			return;                                                                                                                                                   \
-		}                                                                                                                                                             \
-		m_inherits::initialize_class();                                                                                                                               \
-		if (m_class::_get_bind_methods() != m_inherits::_get_bind_methods()) {                                                                                        \
-			_bind_methods();                                                                                                                                          \
-			m_inherits::register_virtuals<m_class>();                                                                                                                 \
-		}                                                                                                                                                             \
-		initialized = true;                                                                                                                                           \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-	static const char *get_class_static() {                                                                                                                           \
-		return #m_class;                                                                                                                                              \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-	static const char *get_parent_class_static() {                                                                                                                    \
-		return #m_inherits;                                                                                                                                           \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-	static GDExtensionClassInstancePtr create(void *data) {                                                                                                           \
-		return reinterpret_cast<GDExtensionClassInstancePtr>(new ("") m_class);                                                                                       \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-	static void free(void *data, GDExtensionClassInstancePtr ptr) {                                                                                                   \
-		if (ptr) {                                                                                                                                                    \
-			m_class *cls = reinterpret_cast<m_class *>(ptr);                                                                                                          \
-			cls->~m_class();                                                                                                                                          \
-			::godot::Memory::free_static(cls);                                                                                                                        \
-		}                                                                                                                                                             \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-	static void set_object_instance(GDExtensionClassInstancePtr p_instance, GDNativeObjectPtr p_object_instance) {                                                    \
-		godot::internal::gdn_interface->object_set_instance_binding(p_object_instance, godot::internal::token, p_instance, &m_class::___binding_callbacks);           \
-		reinterpret_cast<m_class *>(p_instance)->_owner = reinterpret_cast<godot::GodotObject *>(p_object_instance);                                                  \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-	static void *___binding_create_callback(void *p_token, void *p_instance) {                                                                                        \
-		return nullptr;                                                                                                                                               \
-	}                                                                                                                                                                 \
-	static void ___binding_free_callback(void *p_token, void *p_instance, void *p_binding) {                                                                          \
-	}                                                                                                                                                                 \
-	static GDNativeBool ___binding_reference_callback(void *p_token, void *p_instance, GDNativeBool p_reference) {                                                    \
-		return true;                                                                                                                                                  \
-	}                                                                                                                                                                 \
-	static constexpr GDNativeInstanceBindingCallbacks ___binding_callbacks = {                                                                                        \
-		___binding_create_callback,                                                                                                                                   \
-		___binding_free_callback,                                                                                                                                     \
-		___binding_reference_callback,                                                                                                                                \
-	};                                                                                                                                                                \
-                                                                                                                                                                      \
-	static m_class *_new() {                                                                                                                                          \
-		static GDNativeExtensionPtr ___extension = nullptr;                                                                                                           \
-		static GDNativeClassConstructor ___constructor = godot::internal::gdn_interface->classdb_get_constructor(#m_class, &___extension);                            \
-		CHECK_CLASS_CONSTRUCTOR(___constructor, m_class);                                                                                                             \
-		GDNativeObjectPtr obj = godot::internal::gdn_interface->classdb_construct_object(___constructor, ___extension);                                               \
-		return reinterpret_cast<m_class *>(godot::internal::gdn_interface->object_get_instance_binding(obj, godot::internal::token, &m_class::___binding_callbacks)); \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-private:
+#define GDCLASS(m_class, m_inherits)                                                                               \
+private:                                                                                                           \
+	void operator=(const m_class &p_rval) {}                                                                       \
+	friend class ClassDB;                                                                                          \
+                                                                                                                   \
+	using SelfType = m_class;                                                                                      \
+                                                                                                                   \
+protected:                                                                                                         \
+	virtual const char *_get_class() const override {                                                              \
+		return get_class_static();                                                                                 \
+	}                                                                                                              \
+                                                                                                                   \
+	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const override {                     \
+		return &___binding_callbacks;                                                                              \
+	}                                                                                                              \
+                                                                                                                   \
+	static void (*_get_bind_methods())() {                                                                         \
+		return &m_class::_bind_methods;                                                                            \
+	}                                                                                                              \
+                                                                                                                   \
+	template <class T>                                                                                             \
+	static void register_virtuals() {                                                                              \
+		m_inherits::register_virtuals<T>();                                                                        \
+	}                                                                                                              \
+                                                                                                                   \
+public:                                                                                                            \
+	static void initialize_class() {                                                                               \
+		static bool initialized = false;                                                                           \
+		if (initialized) {                                                                                         \
+			return;                                                                                                \
+		}                                                                                                          \
+		m_inherits::initialize_class();                                                                            \
+		if (m_class::_get_bind_methods() != m_inherits::_get_bind_methods()) {                                     \
+			_bind_methods();                                                                                       \
+			m_inherits::register_virtuals<m_class>();                                                              \
+		}                                                                                                          \
+		initialized = true;                                                                                        \
+	}                                                                                                              \
+                                                                                                                   \
+	static const char *get_class_static() {                                                                        \
+		return #m_class;                                                                                           \
+	}                                                                                                              \
+                                                                                                                   \
+	static const char *get_parent_class_static() {                                                                 \
+		return #m_inherits;                                                                                        \
+	}                                                                                                              \
+                                                                                                                   \
+	static GDNativeObjectPtr create(void *data) {                                                                  \
+		m_class *new_object = memnew(m_class);                                                                     \
+		return new_object->_owner;                                                                                 \
+	}                                                                                                              \
+                                                                                                                   \
+	static void free(void *data, GDExtensionClassInstancePtr ptr) {                                                \
+		if (ptr) {                                                                                                 \
+			m_class *cls = reinterpret_cast<m_class *>(ptr);                                                       \
+			cls->~m_class();                                                                                       \
+			::godot::Memory::free_static(cls);                                                                     \
+		}                                                                                                          \
+	}                                                                                                              \
+                                                                                                                   \
+	static void *___binding_create_callback(void *p_token, void *p_instance) {                                     \
+		return nullptr;                                                                                            \
+	}                                                                                                              \
+	static void ___binding_free_callback(void *p_token, void *p_instance, void *p_binding) {                       \
+	}                                                                                                              \
+	static GDNativeBool ___binding_reference_callback(void *p_token, void *p_instance, GDNativeBool p_reference) { \
+		return true;                                                                                               \
+	}                                                                                                              \
+	static constexpr GDNativeInstanceBindingCallbacks ___binding_callbacks = {                                     \
+		___binding_create_callback,                                                                                \
+		___binding_free_callback,                                                                                  \
+		___binding_reference_callback,                                                                             \
+	};
 
 // Don't use this for your classes, use GDCLASS() instead.
-#define GDNATIVE_CLASS(m_class, m_inherits)                                                                                                                           \
-protected:                                                                                                                                                            \
-	static void (*_get_bind_methods())() {                                                                                                                            \
-		return nullptr;                                                                                                                                               \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-public:                                                                                                                                                               \
-	static void initialize_class() {}                                                                                                                                 \
-                                                                                                                                                                      \
-	static const char *get_class_static() {                                                                                                                           \
-		return #m_class;                                                                                                                                              \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-	static const char *get_parent_class_static() {                                                                                                                    \
-		return #m_inherits;                                                                                                                                           \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-	static void *___binding_create_callback(void *p_token, void *p_instance) {                                                                                        \
-		m_class *obj = new ("") m_class;                                                                                                                              \
-		obj->_owner = (godot::GodotObject *)p_instance;                                                                                                               \
-		return obj;                                                                                                                                                   \
-	}                                                                                                                                                                 \
-	static void ___binding_free_callback(void *p_token, void *p_instance, void *p_binding) {                                                                          \
-		Memory::free_static(reinterpret_cast<m_class *>(p_binding));                                                                                                  \
-	}                                                                                                                                                                 \
-	static GDNativeBool ___binding_reference_callback(void *p_token, void *p_instance, GDNativeBool p_reference) {                                                    \
-		return true;                                                                                                                                                  \
-	}                                                                                                                                                                 \
-	static constexpr GDNativeInstanceBindingCallbacks ___binding_callbacks = {                                                                                        \
-		___binding_create_callback,                                                                                                                                   \
-		___binding_free_callback,                                                                                                                                     \
-		___binding_reference_callback,                                                                                                                                \
-	};                                                                                                                                                                \
-	static m_class *_new() {                                                                                                                                          \
-		static GDNativeClassConstructor ___constructor = godot::internal::gdn_interface->classdb_get_constructor(#m_class, nullptr);                                  \
-		CHECK_CLASS_CONSTRUCTOR(___constructor, m_class);                                                                                                             \
-		GDNativeObjectPtr obj = ___constructor();                                                                                                                     \
-		return reinterpret_cast<m_class *>(godot::internal::gdn_interface->object_get_instance_binding(obj, godot::internal::token, &m_class::___binding_callbacks)); \
-	}                                                                                                                                                                 \
-                                                                                                                                                                      \
-private:
+#define GDNATIVE_CLASS(m_class, m_inherits)                                                                        \
+private:                                                                                                           \
+	void operator=(const m_class &p_rval) {}                                                                       \
+                                                                                                                   \
+protected:                                                                                                         \
+	virtual const char *_get_class() const override {                                                              \
+		return get_class_static();                                                                                 \
+	}                                                                                                              \
+                                                                                                                   \
+	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const override {                     \
+		return &___binding_callbacks;                                                                              \
+	}                                                                                                              \
+                                                                                                                   \
+	m_class(const char *p_godot_class) : m_inherits(p_godot_class) {}                                              \
+	m_class(GodotObject *p_godot_object) : m_inherits(p_godot_object) {}                                           \
+                                                                                                                   \
+	static void (*_get_bind_methods())() {                                                                         \
+		return nullptr;                                                                                            \
+	}                                                                                                              \
+                                                                                                                   \
+public:                                                                                                            \
+	static void initialize_class() {}                                                                              \
+                                                                                                                   \
+	static const char *get_class_static() {                                                                        \
+		return #m_class;                                                                                           \
+	}                                                                                                              \
+                                                                                                                   \
+	static const char *get_parent_class_static() {                                                                 \
+		return #m_inherits;                                                                                        \
+	}                                                                                                              \
+                                                                                                                   \
+	static void *___binding_create_callback(void *p_token, void *p_instance) {                                     \
+		return memnew(m_class((GodotObject *)p_instance));                                                         \
+	}                                                                                                              \
+	static void ___binding_free_callback(void *p_token, void *p_instance, void *p_binding) {                       \
+		Memory::free_static(reinterpret_cast<m_class *>(p_binding));                                               \
+	}                                                                                                              \
+	static GDNativeBool ___binding_reference_callback(void *p_token, void *p_instance, GDNativeBool p_reference) { \
+		return true;                                                                                               \
+	}                                                                                                              \
+	static constexpr GDNativeInstanceBindingCallbacks ___binding_callbacks = {                                     \
+		___binding_create_callback,                                                                                \
+		___binding_free_callback,                                                                                  \
+		___binding_reference_callback,                                                                             \
+	};                                                                                                             \
+	m_class() : m_class(#m_class) {}
 
 #endif // ! GODOT_CPP_WRAPPED_HPP
