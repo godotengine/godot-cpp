@@ -188,6 +188,7 @@ Variant::Variant(const PoolColorArray &p_color_array) {
 }
 
 Variant &Variant::operator=(const Variant &v) {
+	godot::api->godot_variant_destroy(&_godot_variant);
 	godot::api->godot_variant_new_copy(&_godot_variant, &v._godot_variant);
 	return *this;
 }
