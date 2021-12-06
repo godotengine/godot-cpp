@@ -45,7 +45,7 @@ class Wrapped {
 	friend void postinitialize_handler(Wrapped *);
 
 protected:
-	virtual const char *_get_class() const = 0; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
+	virtual const char *_get_extension_class() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
 	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
 
 	void _postinitialize();
@@ -60,26 +60,13 @@ public:
 
 } // namespace godot
 
-#ifdef DEBUG_ENABLED
-#define CHECK_CLASS_CONSTRUCTOR(m_constructor, m_class)                                                      \
-	if (unlikely(!m_constructor)) {                                                                          \
-		ERR_PRINT_ONCE("Constructor for class " #m_class "not found. Likely wasn't registered in ClassDB."); \
-		return nullptr;                                                                                      \
-	} else                                                                                                   \
-		((void)0)
-#else
-#define CHECK_CLASS_CONSTRUCTOR(m_constructor, m_class)
-#endif
-
 #define GDCLASS(m_class, m_inherits)                                                                               \
 private:                                                                                                           \
 	void operator=(const m_class &p_rval) {}                                                                       \
 	friend class ClassDB;                                                                                          \
                                                                                                                    \
-	using SelfType = m_class;                                                                                      \
-                                                                                                                   \
 protected:                                                                                                         \
-	virtual const char *_get_class() const override {                                                              \
+	virtual const char *_get_extension_class() const override {                                                    \
 		return get_class_static();                                                                                 \
 	}                                                                                                              \
                                                                                                                    \
@@ -151,10 +138,6 @@ private:                                                                        
 	void operator=(const m_class &p_rval) {}                                                                       \
                                                                                                                    \
 protected:                                                                                                         \
-	virtual const char *_get_class() const override {                                                              \
-		return get_class_static();                                                                                 \
-	}                                                                                                              \
-                                                                                                                   \
 	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const override {                     \
 		return &___binding_callbacks;                                                                              \
 	}                                                                                                              \

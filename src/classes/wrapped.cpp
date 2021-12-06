@@ -36,8 +36,15 @@
 
 namespace godot {
 
+const char *Wrapped::_get_extension_class() const {
+	return nullptr;
+}
+
 void Wrapped::_postinitialize() {
-	godot::internal::gdn_interface->object_set_instance(_owner, _get_class(), this);
+	const char *extension_class = _get_extension_class();
+	if (extension_class) {
+		godot::internal::gdn_interface->object_set_instance(_owner, extension_class, this);
+	}
 	godot::internal::gdn_interface->object_set_instance_binding(_owner, godot::internal::token, this, _get_bindings_callbacks());
 }
 
