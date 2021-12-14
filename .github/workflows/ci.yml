@@ -51,8 +51,6 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qqq build-essential pkg-config cmake
-          curl -LO https://downloads.tuxfamily.org/godotengine/3.2.3/Godot_v3.2.3-stable_linux_server.64.zip
-          unzip Godot_v3.2.3-stable_linux_server.64.zip
 
       - name: Build godot-cpp
         run: |
@@ -63,10 +61,6 @@ jobs:
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release .
           make -j $(nproc)
-
-      - name: Run test GDNative library
-        run: |
-          ./Godot_v3.2.3-stable_linux_server.64 --path test -s script.gd
 
   linux-cmake-ninja:
     name: Build (Linux, GCC, CMake Ninja)
@@ -81,8 +75,6 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qqq build-essential pkg-config cmake ninja-build
-          curl -LO https://downloads.tuxfamily.org/godotengine/3.2.3/Godot_v3.2.3-stable_linux_server.64.zip
-          unzip Godot_v3.2.3-stable_linux_server.64.zip
 
       - name: Build godot-cpp
         run: |
@@ -93,10 +85,6 @@ jobs:
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
           cmake --build . -j $(nproc)
-
-      - name: Run test GDNative library
-        run: |
-          ./Godot_v3.2.3-stable_linux_server.64 --path test -s script.gd
 
   windows-msvc:
     name: Build (Windows, MSVC)
