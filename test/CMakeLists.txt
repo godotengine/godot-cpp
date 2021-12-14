@@ -103,8 +103,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} SYSTEM
     PRIVATE
         ${CPP_BINDINGS_PATH}/include
-        ${CPP_BINDINGS_PATH}/include/core
-        ${CPP_BINDINGS_PATH}/include/gen
+	${CPP_BINDINGS_PATH}/gen/include
         ${GODOT_HEADERS_PATH}
 )
 
