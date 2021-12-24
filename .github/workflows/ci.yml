@@ -38,6 +38,54 @@ jobs:
           path: bin/libgodot-cpp.linux.release.64.a
           if-no-files-found: error
 
+  linux-cmake:
+    name: Build (Linux, GCC, CMake)
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qqq build-essential pkg-config cmake
+
+      - name: Build godot-cpp
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release .
+          make -j $(nproc)
+
+      - name: Build test GDNative library
+        run: |
+          cd test && cmake -DCMAKE_BUILD_TYPE=Release .
+          make -j $(nproc)
+
+  linux-cmake-ninja:
+    name: Build (Linux, GCC, CMake Ninja)
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qqq build-essential pkg-config cmake ninja-build
+
+      - name: Build godot-cpp
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
+          cmake --build . -j $(nproc)
+
+      - name: Build test GDNative library
+        run: |
+          cd test && cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
+          cmake --build . -j $(nproc)
+
   windows-msvc:
     name: Build (Windows, MSVC)
     runs-on: windows-2019
