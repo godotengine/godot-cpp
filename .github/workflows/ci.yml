@@ -21,8 +21,8 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -qqq build-essential pkg-config
           python -m pip install scons
-          curl -LO https://downloads.tuxfamily.org/godotengine/3.4/Godot_v3.4-stable_linux_server.64.zip
-          unzip Godot_v3.4-stable_linux_server.64.zip
+          curl -LO https://downloads.tuxfamily.org/godotengine/3.4.2/Godot_v3.4.2-stable_linux_server.64.zip
+          unzip Godot_v3.4.2-stable_linux_server.64.zip
 
       - name: Build godot-cpp
         run: |
@@ -41,7 +41,7 @@ jobs:
 
       - name: Run test GDNative library
         run: |
-          ./Godot_v3.4-stable_linux_server.64 --path test -s script.gd
+          ./Godot_v3.4.2-stable_linux_server.64 --path test -s script.gd
 
   linux-cmake:
     name: Build (Linux, GCC, CMake)
@@ -56,8 +56,8 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qqq build-essential pkg-config cmake
-          curl -LO https://downloads.tuxfamily.org/godotengine/3.4/Godot_v3.4-stable_linux_server.64.zip
-          unzip Godot_v3.4-stable_linux_server.64.zip
+          curl -LO https://downloads.tuxfamily.org/godotengine/3.4.2/Godot_v3.4.2-stable_linux_server.64.zip
+          unzip Godot_v3.4.2-stable_linux_server.64.zip
 
       - name: Build godot-cpp
         run: |
@@ -71,7 +71,7 @@ jobs:
 
       - name: Run test GDNative library
         run: |
-          ./Godot_v3.4-stable_linux_server.64 --path test -s script.gd
+          ./Godot_v3.4.2-stable_linux_server.64 --path test -s script.gd
 
   linux-cmake-ninja:
     name: Build (Linux, GCC, CMake Ninja)
@@ -86,8 +86,8 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qqq build-essential pkg-config cmake ninja-build
-          curl -LO https://downloads.tuxfamily.org/godotengine/3.4/Godot_v3.4-stable_linux_server.64.zip
-          unzip Godot_v3.4-stable_linux_server.64.zip
+          curl -LO https://downloads.tuxfamily.org/godotengine/3.4.2/Godot_v3.4.2-stable_linux_server.64.zip
+          unzip Godot_v3.4.2-stable_linux_server.64.zip
 
       - name: Build godot-cpp
         run: |
@@ -101,7 +101,7 @@ jobs:
 
       - name: Run test GDNative library
         run: |
-          ./Godot_v3.4-stable_linux_server.64 --path test -s script.gd
+          ./Godot_v3.4.2-stable_linux_server.64 --path test -s script.gd
 
   windows-msvc:
     name: Build (Windows, MSVC)
@@ -183,8 +183,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install scons
-          curl -LO https://downloads.tuxfamily.org/godotengine/3.4/Godot_v3.4-stable_osx.universal.zip
-          unzip Godot_v3.4-stable_osx.universal.zip
+          curl -LO https://downloads.tuxfamily.org/godotengine/3.4.2/Godot_v3.4.2-stable_osx.universal.zip
+          unzip Godot_v3.4.2-stable_osx.universal.zip
 
       - name: Build godot-cpp
         run: |
