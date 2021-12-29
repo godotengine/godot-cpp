@@ -133,7 +133,7 @@ else()
 endif()
 
 # Generate source from the bindings file
-find_package(PythonInterp REQUIRED)
+find_package(Python3 3.4 REQUIRED) # pathlib should be present
 if(GENERATE_TEMPLATE_GET_NODE)
 	set(GENERATE_BINDING_PARAMETERS "True")
 else()
@@ -141,14 +141,14 @@ else()
 endif()
 
 message(STATUS "Generating Bindings")
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_CUSTOM_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True)"
+execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_CUSTOM_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True)"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	RESULT_VARIABLE HEADERS_FILE_LIST_RESULT
 	OUTPUT_VARIABLE HEADERS_FILE_LIST
 )
 set(HEADERS_FILE_LIST ${HEADERS_FILE_LIST})
 
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_CUSTOM_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", sources=True)"
+execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_CUSTOM_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", sources=True)"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	RESULT_VARIABLE SOURCES_FILE_LIST_RESULT
 	OUTPUT_VARIABLE SOURCES_FILE_LIST
@@ -156,7 +156,7 @@ execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; b
 set(SOURCES_FILE_LIST ${SOURCES_FILE_LIST})
 
 add_custom_command(OUTPUT ${HEADERS_FILE_LIST} ${SOURCES_FILE_LIST}
-		COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
+		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
 		VERBATIM
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		MAIN_DEPENDENCY ${GODOT_CUSTOM_API_FILE}
