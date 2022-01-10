@@ -89,7 +89,7 @@ if env["target"] == "debug":
 
 # Check our platform specifics
 if env["platform"] == "osx":
-    env["target_path"] += "osx/"
+    env["target_path"] += "{}.{}.framework/".format(env["target_name"], env["target"])
     cpp_library += ".osx"
 
     if env["bits"] == "32":
@@ -154,7 +154,11 @@ env.Append(LIBS=[cpp_library])
 env.Append(CPPPATH=["src/"])
 sources = Glob("src/*.cpp")
 
-target_name = "{}.{}.{}.{}".format(env["target_name"], env["platform"], env["target"], arch_suffix)
+if env["platform"] == "osx":
+    target_name = "{}.{}".format(env["target_name"], env["target"])
+else:
+    target_name = "{}.{}.{}.{}".format(env["target_name"], env["platform"], env["target"], arch_suffix)
+
 print(target_name)
 library = env.SharedLibrary(target=env["target_path"] + target_name, source=sources)
 
