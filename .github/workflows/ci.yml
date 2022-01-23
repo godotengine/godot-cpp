@@ -59,7 +59,7 @@ jobs:
 
       - name: Build test GDNative library
         run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release .
+          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." .
           make -j $(nproc)
 
   linux-cmake-ninja:
@@ -83,7 +83,7 @@ jobs:
 
       - name: Build test GDNative library
         run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
+          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -GNinja .
           cmake --build . -j $(nproc)
 
   windows-msvc:
@@ -119,6 +119,25 @@ jobs:
           name: godot-cpp-windows-msvc2019-x86_64-release
           path: bin/libgodot-cpp.windows.release.64.lib
           if-no-files-found: error
+  
+  windows-msvc-cmake:
+    name: Build (Windows, MSVC, CMake)
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Build godot-cpp
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 16 2019" .
+          cmake --build .
+
+      - name: Build test GDNative library
+        run: |
+          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
+          cmake --build .
 
   windows-mingw:
     name: Build (Windows, MinGW)
