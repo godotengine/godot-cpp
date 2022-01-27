@@ -1,0 +1,84 @@
+\\ use with:
+\\  * elite Elitefile [argument]
+
+required_version is 0.1
+
+set generate_bindings as "auto"
+set headers as "godot-headers"
+set target as "debug"
+set use_clang as "no"
+
+set base as "scons use_llvm={use_clang} generate_bindings={generate_bindings} target={target} headers={headers} -j4"
+set linux as "{base} platform=linux"
+set windows as "{base} platform=windows"
+set osx as "{base} platform=osx"
+
+for signal "start" [
+    for argument "linux32" [
+        println "elite: Build started for [linux32]"
+        use exec "{linux} bits=32"
+        use signal "exit"
+    ]
+
+    for argument "linux64" [
+        println "elite: Build started for [linux64]"
+        use exec "{linux} bits=64"
+        use signal "exit"
+    ]
+
+    for argument "windows32" [
+        println "elite: Build started for [windows32]"
+        use exec "{windows} bits=32"
+        use signal "exit"
+    ]
+
+    for argument "windows64" [
+        println "elite: Build started for [windows64]"
+        use exec "{windows} bits=64"
+        use signal "exit"
+    ]
+
+    for argument "osx32" [
+        println "elite: Build started for [osx32]"
+        use exec "{osx} bits=32"
+        use signal "exit"
+    ]
+
+    for argument "osx64" [
+        println "elite: Build started for [osx64]"
+        use exec "{osx} bits=64"
+        use signal "exit"
+    ]
+
+    for argument "linux" [
+        println "elite: Build started for [linux32]"
+        use exec "{linux} bits=32"
+        println "elite: Build started for [linux64]"
+        use exec "{linux} bits=64"
+        use signal "exit"
+    ]
+
+    for argument "windows" [
+        println "elite: Build started for [windows32]"
+        use exec "{windows} bits=32"
+        println "elite: Build started for [windows64]"
+        use exec "{windows} bits=64"
+        use signal "exit"
+    ]
+
+    for argument "osx" [
+        println "elite: Build started for [osx32]"
+        use exec "{osx} bits=32"
+        println "elite: Build started for [osx64]"
+        use exec "{osx} bits=64"
+        use signal "exit"
+    ]
+
+    for argument "all" [
+        use exec "elite Elitefile linux"
+        use exec "elite Elitefile windows"
+        use signal "exit"
+    ]
+
+    use exec "elite Elitefile all"
+]
