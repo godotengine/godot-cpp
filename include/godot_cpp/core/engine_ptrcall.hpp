@@ -48,6 +48,9 @@ O *_call_native_mb_ret_obj(const GDNativeMethodBindPtr mb, void *instance, const
 	GodotObject *ret = nullptr;
 	std::array<const GDNativeTypePtr, sizeof...(Args)> mb_args = { { (const GDNativeTypePtr)args... } };
 	internal::gdn_interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), &ret);
+	if (ret == nullptr) {
+		return nullptr;
+	}
 	return reinterpret_cast<O *>(internal::gdn_interface->object_get_instance_binding(ret, internal::token, &O::___binding_callbacks));
 }
 
