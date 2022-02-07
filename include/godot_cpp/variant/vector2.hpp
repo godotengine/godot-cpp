@@ -151,6 +151,7 @@ public:
 	real_t aspect() const { return width / height; }
 
 	operator String() const;
+	operator Vector2i() const;
 
 	inline Vector2() {}
 	inline Vector2(real_t p_x, real_t p_y) {
