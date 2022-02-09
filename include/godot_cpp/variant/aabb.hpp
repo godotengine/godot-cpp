@@ -44,9 +44,11 @@
 namespace godot {
 
 class AABB {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
 
+	friend class Variant;
+
+public:
 	Vector3 position;
 	Vector3 size;
 
@@ -73,8 +75,8 @@ public:
 	inline bool encloses(const AABB &p_aabb) const; /// p_aabb is completely inside this
 
 	AABB merge(const AABB &p_with) const;
-	void merge_with(const AABB &p_aabb); ///merge with another AABB
-	AABB intersection(const AABB &p_aabb) const; ///get box where two intersect, empty if no intersection occurs
+	void merge_with(const AABB &p_aabb); /// merge with another AABB
+	AABB intersection(const AABB &p_aabb) const; /// get box where two intersect, empty if no intersection occurs
 	bool intersects_segment(const Vector3 &p_from, const Vector3 &p_to, Vector3 *r_clip = nullptr, Vector3 *r_normal = nullptr) const;
 	bool intersects_ray(const Vector3 &p_from, const Vector3 &p_dir, Vector3 *r_clip = nullptr, Vector3 *r_normal = nullptr) const;
 	inline bool smits_intersect_ray(const Vector3 &p_from, const Vector3 &p_dir, real_t t0, real_t t1) const;

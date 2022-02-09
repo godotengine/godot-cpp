@@ -246,7 +246,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append(f"\tstatic constexpr size_t {snake_class_name}_SIZE = {size};")
     result.append(f"\tuint8_t opaque[{snake_class_name}_SIZE] = {{}};")
     result.append(
-        f"\t_FORCE_INLINE_ GDNativeTypePtr ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
+        f"\t_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
     )
 
     result.append("")
@@ -378,6 +378,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     # Special cases.
     if class_name == "String":
+        result.append("\tstatic String utf8(const char *from, int len = -1);")
+        result.append("\tvoid parse_utf8(const char *from, int len = -1);")
+        result.append("\tstatic String utf16(const char16_t *from, int len = -1);")
+        result.append("\tvoid parse_utf16(const char16_t *from, int len = -1);")
         result.append("\tCharString utf8() const;")
         result.append("\tCharString ascii() const;")
         result.append("\tChar16String utf16() const;")
@@ -426,6 +430,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("bool operator!=(const char32_t *p_str) const;")
         result.append(f"\tconst char32_t &operator[](int p_index) const;")
         result.append(f"\tchar32_t &operator[](int p_index);")
+        result.append(f"\tconst char32_t *ptr() const;")
+        result.append(f"\tchar32_t *ptrw();")
 
     if class_name == "Array":
         result.append("\ttemplate <class... Args>")
@@ -443,6 +449,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
             return_type = "float"
         result.append(f"\tconst " + return_type + f" &operator[](int p_index) const;")
         result.append(f"\t" + return_type + f" &operator[](int p_index);")
+        result.append(f"\tconst " + return_type + f" *ptr() const;")
+        result.append(f"\t" + return_type + f" *ptrw();")
 
     if class_name == "Array":
         result.append(f"\tconst Variant &operator[](int p_index) const;")

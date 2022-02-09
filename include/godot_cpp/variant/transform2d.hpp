@@ -40,9 +40,11 @@
 namespace godot {
 
 class Transform2D {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
 
+	friend class Variant;
+
+public:
 	// Warning #1: basis of Transform2D is stored differently from Basis. In terms of elements array, the basis matrix looks like "on paper":
 	// M = (elements[0][0] elements[1][0])
 	//     (elements[0][1] elements[1][1])
