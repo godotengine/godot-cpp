@@ -145,7 +145,6 @@ opts.Add(
 opts.Add(BoolVariable("generate_template_get_node", "Generate a template version of the Node class's get_node.", True))
 
 opts.Add(BoolVariable("build_library", "Build the godot-cpp library.", True))
-opts.Add("build_projects", "List of projects to build (comma-separated list of paths).", "")
 
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
@@ -236,7 +235,6 @@ elif env["platform"] == "ios":
     if env["ios_simulator"]:
         sdk_name = "iphonesimulator"
         env.Append(CCFLAGS=["-mios-simulator-version-min=10.0"])
-        env["LIBSUFFIX"] = ".simulator" + env["LIBSUFFIX"]
     else:
         sdk_name = "iphoneos"
         env.Append(CCFLAGS=["-miphoneos-version-min=10.0"])
@@ -486,6 +484,8 @@ if env["platform"] == "android":
     arch_suffix = env["android_arch"]
 elif env["platform"] == "ios":
     arch_suffix = env["ios_arch"]
+    if env["ios_simulator"]:
+        arch_suffix += ".simulator"
 elif env["platform"] == "javascript":
     arch_suffix = "wasm"
 elif env["platform"] == "osx":
@@ -499,7 +499,7 @@ if env["build_library"]:
     library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
     Default(library)
 
-env["SHLIBSUFFIX"] = "{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["SHLIBSUFFIX"])
+env["SHLIBSUFFIX"] = ".{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["SHLIBSUFFIX"])
 env.Append(CPPPATH=[env.Dir(f) for f in ["gen/include", "include", "godot-headers"]])
 env.Append(LIBPATH=[env.Dir("bin")])
 env.Append(LIBS=library_name)
