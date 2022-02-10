@@ -16,6 +16,9 @@ env = SConscript("../SConstruct")
 env.Append(CPPPATH=["src/"])
 sources = Glob("src/*.cpp")
 
-library = env.SharedLibrary("demo/bin/libgdexample" + env["SHLIBSUFFIX"], source=sources)
+if env["platform"] == "osx":
+    library = env.SharedLibrary("demo/bin/libgdexample.{}.{}.framework/libgdexample.{}.{}".format(env["platform"], env["target"], env["platform"], env["target"]), source=sources)
+else:
+    library = env.SharedLibrary("demo/bin/libgdexample.{}.{}.{}{}".format(env["platform"], env["target"], env["arch_suffix"], env["SHLIBSUFFIX"]), source=sources)
 
 Default(library)
