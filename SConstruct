@@ -125,7 +125,7 @@ opts.Add(EnumVariable("android_arch", "Target Android architecture", "armv7", ["
 opts.Add("macos_deployment_target", "macOS deployment target", "default")
 opts.Add("macos_sdk_path", "macOS SDK path", "")
 opts.Add(EnumVariable("macos_arch", "Target macOS architecture", "universal", ["universal", "x86_64", "arm64"]))
-opts.Add(EnumVariable("ios_arch", "Target iOS architecture", "arm64", ["armv7", "arm64", "x86_64"]))
+opts.Add(EnumVariable("ios_arch", "Target iOS architecture", "arm64", ["universal", "arm64", "x86_64"]))
 opts.Add(BoolVariable("ios_simulator", "Target iOS Simulator", False))
 opts.Add(
     "IPHONEPATH",
@@ -253,17 +253,19 @@ elif env["platform"] == "ios":
     env["RANLIB"] = compiler_path + "ranlib"
     env["SHLIBSUFFIX"] = ".dylib"
 
-    env.Append(CCFLAGS=["-arch", env["ios_arch"], "-isysroot", sdk_path])
-    env.Append(
-        LINKFLAGS=[
-            "-arch",
-            env["ios_arch"],
-            "-Wl,-undefined,dynamic_lookup",
-            "-isysroot",
-            sdk_path,
-            "-F" + sdk_path,
-        ]
-    )
+    if env["ios_arch"] == "universal":
+        if env["ios_simulator"]:
+            env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+            env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+        else:
+            env.Append(LINKFLAGS=["-arch", "arm64"])
+            env.Append(CCFLAGS=["-arch", "arm64"])
+    else:
+        env.Append(LINKFLAGS=["-arch", env["ios_arch"]])
+        env.Append(CCFLAGS=["-arch", env["ios_arch"]])
+
+    env.Append(CCFLAGS=["-isysroot", sdk_path])
+    env.Append(LINKFLAGS=["-isysroot", sdk_path, "-F" + sdk_path,])
 
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-Og", "-g"])
@@ -479,27 +481,26 @@ add_sources(sources, "src/variant", "cpp")
 add_sources(sources, "gen/src/variant", "cpp")
 add_sources(sources, "gen/src/classes", "cpp")
 
-arch_suffix = env["bits"]
+env["arch_suffix"] = env["bits"]
 if env["platform"] == "android":
-    arch_suffix = env["android_arch"]
+    env["arch_suffix"] = env["android_arch"]
 elif env["platform"] == "ios":
-    arch_suffix = env["ios_arch"]
+    env["arch_suffix"] = env["ios_arch"]
     if env["ios_simulator"]:
-        arch_suffix += ".simulator"
+        env["arch_suffix"] += ".simulator"
 elif env["platform"] == "javascript":
-    arch_suffix = "wasm"
+    env["arch_suffix"] = "wasm"
 elif env["platform"] == "osx":
-    arch_suffix = env["macos_arch"]
+    env["arch_suffix"] = env["macos_arch"]
 
 library = None
-env["OBJSUFFIX"] = ".{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["OBJSUFFIX"])
-library_name = "libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["LIBSUFFIX"])
+env["OBJSUFFIX"] = ".{}.{}.{}{}".format(env["platform"], env["target"], env["arch_suffix"], env["OBJSUFFIX"])
+library_name = "libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], env["arch_suffix"], env["LIBSUFFIX"])
 
 if env["build_library"]:
     library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
     Default(library)
 
-env["SHLIBSUFFIX"] = ".{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["SHLIBSUFFIX"])
 env.Append(CPPPATH=[env.Dir(f) for f in ["gen/include", "include", "godot-headers"]])
 env.Append(LIBPATH=[env.Dir("bin")])
 env.Append(LIBS=library_name)
