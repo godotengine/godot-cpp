@@ -62,6 +62,7 @@ def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
     target_dir.mkdir(parents=True)
 
     generate_global_constants(api, target_dir)
+    generate_global_constant_binds(api, target_dir)
     generate_builtin_bindings(api, target_dir, "float_64")
     generate_engine_classes_bindings(api, target_dir, use_template_get_node)
     generate_utility_functions(api, target_dir)
@@ -861,6 +862,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         result.append("};")
 
         result.append("")
+        result.append(f"GDVIRTUAL_NATIVE_PTR({struct_name});")
+        result.append("")
         result.append("} // namespace godot")
         result.append("")
         result.append(f"#endif // ! {header_guard}")
@@ -997,6 +1000,12 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("")
 
     result.append("} // namespace godot")
+    result.append("")
+
+    if "enums" in class_api and class_name != "Object":
+        for enum_api in class_api["enums"]:
+            result.append(f'VARIANT_ENUM_CAST({class_name}, {class_name}::{enum_api["name"]});')
+        result.append("")
 
     result.append(f"#endif // ! {header_guard}")
 
@@ -1174,6 +1183,42 @@ def generate_global_constants(api, output_dir):
     header.append("} // namespace godot")
 
     header.append("")
+    header.append(f"#endif // ! {header_guard}")
+
+    with header_filename.open("w+") as header_file:
+        header_file.write("\n".join(header))
+
+
+def generate_global_constant_binds(api, output_dir):
+    include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
+    source_gen_folder = Path(output_dir) / "src" / "classes"
+
+    include_gen_folder.mkdir(parents=True, exist_ok=True)
+    source_gen_folder.mkdir(parents=True, exist_ok=True)
+
+    # Generate header
+
+    header = []
+    add_header("global_constants_binds.hpp", header)
+
+    header_filename = include_gen_folder / "global_constants_binds.hpp"
+
+    header_guard = "GODOT_CPP_GLOBAL_CONSTANTS_BINDS_HPP"
+    header.append(f"#ifndef {header_guard}")
+    header.append(f"#define {header_guard}")
+    header.append("")
+    header.append("#include <godot_cpp/classes/global_constants.hpp>")
+    header.append("#include <godot_cpp/core/binder_common.hpp>")
+    header.append("")
+
+    for enum_def in api["global_enums"]:
+        if enum_def["name"].startswith("Variant."):
+            continue
+
+        header.append(f'VARIANT_ENUM_CAST(, godot::{enum_def["name"]});')
+
+    header.append("")
+
     header.append(f"#endif // ! {header_guard}")
 
     with header_filename.open("w+") as header_file:
