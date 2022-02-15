@@ -48,6 +48,9 @@ public:
 	int length() const;
 	const char *get_data() const;
 
+	CharString(CharString &&p_str);
+	void operator=(CharString &&p_str);
+	CharString() {}
 	~CharString();
 };
 
@@ -63,6 +66,9 @@ public:
 	int length() const;
 	const char16_t *get_data() const;
 
+	Char16String(Char16String &&p_str);
+	void operator=(Char16String &&p_str);
+	Char16String() {}
 	~Char16String();
 };
 
@@ -78,6 +84,9 @@ public:
 	int length() const;
 	const char32_t *get_data() const;
 
+	Char32String(Char32String &&p_str);
+	void operator=(Char32String &&p_str);
+	Char32String() {}
 	~Char32String();
 };
 
@@ -93,6 +102,9 @@ public:
 	int length() const;
 	const wchar_t *get_data() const;
 
+	CharWideString(CharWideString &&p_str);
+	void operator=(CharWideString &&p_str);
+	CharWideString() {}
 	~CharWideString();
 };
 

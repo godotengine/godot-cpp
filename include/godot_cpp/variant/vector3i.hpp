@@ -37,9 +37,11 @@
 namespace godot {
 
 class Vector3i {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
 
+	friend class Variant;
+
+public:
 	enum Axis {
 		AXIS_X,
 		AXIS_Y,

@@ -38,9 +38,11 @@ namespace godot {
 class String;
 
 class Color {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
 
+	friend class Variant;
+
+public:
 	union {
 		struct {
 			float r;
@@ -198,7 +200,7 @@ public:
 	static Color from_hsv(float p_h, float p_s, float p_v, float p_a);
 	static Color from_rgbe9995(uint32_t p_rgbe);
 
-	inline bool operator<(const Color &p_color) const; //used in set keys
+	inline bool operator<(const Color &p_color) const; // used in set keys
 	operator String() const;
 
 	// For the binder.

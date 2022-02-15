@@ -37,9 +37,11 @@
 namespace godot {
 
 class Quaternion {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
 
+	friend class Variant;
+
+public:
 	union {
 		struct {
 			real_t x;
