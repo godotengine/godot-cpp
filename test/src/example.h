@@ -64,6 +64,7 @@ protected:
 
 private:
 	Vector2 custom_position;
+	Ref<Texture2D> custom_texture;
 
 public:
 	// Constants.
@@ -88,6 +89,7 @@ public:
 	Ref<ExampleRef> extended_ref_checks(Ref<ExampleRef> p_ref) const;
 	Variant varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
 	void emit_custom_signal(const String &name, int value);
+	void set_texture_of_sprite(Object *p_sprite, Ref<Texture2D> p_texture);
 
 	Array test_array() const;
 	Dictionary test_dictionary() const;

@@ -24,4 +24,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(100, 100)
+
 [connection signal="custom_signal" from="Example" to="." method="_on_Example_custom_signal"]

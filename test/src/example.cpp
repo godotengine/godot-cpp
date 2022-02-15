@@ -34,6 +34,7 @@
 
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/label.hpp>
+#include <godot_cpp/classes/sprite2d.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
@@ -54,6 +55,7 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("return_something_const"), &Example::return_something_const);
 	ClassDB::bind_method(D_METHOD("return_extended_ref"), &Example::return_extended_ref);
 	ClassDB::bind_method(D_METHOD("extended_ref_checks"), &Example::extended_ref_checks);
+	ClassDB::bind_method(D_METHOD("set_texture_of_sprite", "p_sprite", "p_texture"), &Example::set_texture_of_sprite);
 
 	ClassDB::bind_method(D_METHOD("test_array"), &Example::test_array);
 	ClassDB::bind_method(D_METHOD("test_dictionary"), &Example::test_dictionary);
@@ -135,6 +137,19 @@ Variant Example::varargs_func(const Variant **args, GDNativeInt arg_count, GDNat
 
 void Example::emit_custom_signal(const String &name, int value) {
 	emit_signal("custom_signal", name, value);
+}
+
+// Nodes need to be passed as Object
+// Classes, that inherit from RefCounted, need to be passed as Ref<>
+void Example::set_texture_of_sprite(Object *p_sprite, Ref<Texture2D> p_texture) {
+	// make sure, that the object is indeed of the intended Class
+	Sprite2D *sprite = Object::cast_to<Sprite2D>(p_sprite);
+	if (sprite == nullptr) {
+		return;
+	}
+
+	custom_texture = p_texture;
+	sprite->set_texture(custom_texture);
 }
 
 Array Example::test_array() const {

@@ -2,6 +2,7 @@
 import os
 import sys
 
+# path to the SConstruct file of the Godot-CPP repository
 env = SConscript("../SConstruct")
 
 # For the reference:

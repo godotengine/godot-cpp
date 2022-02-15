@@ -17,6 +17,12 @@ func _ready():
 	prints("test array", $Example.test_array())
 	prints("test dictionary", $Example.test_dictionary())
 
+	var tex: Texture2D = NoiseTexture.new()
+	tex.width = 100
+	tex.height = 100
+	tex.noise = OpenSimplexNoise.new()
+	$Example.set_texture_of_sprite($Sprite2D, tex)
+
 	# Use properties.
 	prints("custom position is", $Example.group_subgroup_custom_position)
 	$Example.group_subgroup_custom_position = Vector2(50, 50)
