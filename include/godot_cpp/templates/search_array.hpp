@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  memory.cpp                                                           */
+/*  search_array.hpp                                                     */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,58 +28,44 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include <godot_cpp/core/memory.hpp>
+#ifndef SEARCH_ARRAY_HPP
+#define SEARCH_ARRAY_HPP
 
-#include <godot_cpp/godot.hpp>
+#include <godot_cpp/templates/sort_array.hpp>
 
 namespace godot {
 
-void *Memory::alloc_static(size_t p_bytes) {
-	return internal::gdn_interface->mem_alloc(p_bytes);
-}
+template <class T, class Comparator = _DefaultComparator<T>>
+class SearchArray {
+public:
+	Comparator compare;
 
-void *Memory::realloc_static(void *p_memory, size_t p_bytes) {
-	return internal::gdn_interface->mem_realloc(p_memory, p_bytes);
-}
-
-void Memory::free_static(void *p_ptr) {
-	internal::gdn_interface->mem_free(p_ptr);
-}
-
-_GlobalNil::_GlobalNil() {
-	left = this;
-	right = this;
-	parent = this;
-}
-
-_GlobalNil _GlobalNilClass::_nil;
+	inline int bisect(const T *p_array, int p_len, const T &p_value, bool p_before) const {
+		int lo = 0;
+		int hi = p_len;
+		if (p_before) {
+			while (lo < hi) {
+				const int mid = (lo + hi) / 2;
+				if (compare(p_array[mid], p_value)) {
+					lo = mid + 1;
+				} else {
+					hi = mid;
+				}
+			}
+		} else {
+			while (lo < hi) {
+				const int mid = (lo + hi) / 2;
+				if (compare(p_value, p_array[mid])) {
+					hi = mid;
+				} else {
+					lo = mid + 1;
+				}
+			}
+		}
+		return lo;
+	}
+};
 
 } // namespace godot
 
-void *operator new(size_t p_size, const char *p_description) {
-	return godot::Memory::alloc_static(p_size);
-}
-
-void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)) {
-	return p_allocfunc(p_size);
-}
-
-using namespace godot;
-
-#ifdef _MSC_VER
-void operator delete(void *p_mem, const char *p_description) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-void operator delete(void *p_mem, void *(*p_allocfunc)(size_t p_size)) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_description) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-#endif
+#endif // ! SEARCH_ARRAY_HPP

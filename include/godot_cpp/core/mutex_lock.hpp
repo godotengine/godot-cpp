@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  memory.cpp                                                           */
+/*  mutex_lock.hpp                                                       */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,58 +28,32 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include <godot_cpp/core/memory.hpp>
+#ifndef MUTEX_LOCK_HPP
+#define MUTEX_LOCK_HPP
 
-#include <godot_cpp/godot.hpp>
+#include <godot_cpp/classes/mutex.hpp>
 
 namespace godot {
 
-void *Memory::alloc_static(size_t p_bytes) {
-	return internal::gdn_interface->mem_alloc(p_bytes);
-}
+class MutexLock {
+	const Mutex &mutex;
 
-void *Memory::realloc_static(void *p_memory, size_t p_bytes) {
-	return internal::gdn_interface->mem_realloc(p_memory, p_bytes);
-}
+public:
+	_ALWAYS_INLINE_ explicit MutexLock(const Mutex &p_mutex) :
+			mutex(p_mutex) {
+		const_cast<Mutex *>(&mutex)->lock();
+	}
 
-void Memory::free_static(void *p_ptr) {
-	internal::gdn_interface->mem_free(p_ptr);
-}
+	_ALWAYS_INLINE_ ~MutexLock() {
+		const_cast<Mutex *>(&mutex)->unlock();
+	}
+};
 
-_GlobalNil::_GlobalNil() {
-	left = this;
-	right = this;
-	parent = this;
-}
-
-_GlobalNil _GlobalNilClass::_nil;
+#define _THREAD_SAFE_CLASS_ mutable Mutex _thread_safe_;
+#define _THREAD_SAFE_METHOD_ MutexLock _thread_safe_method_(_thread_safe_);
+#define _THREAD_SAFE_LOCK_ _thread_safe_.lock();
+#define _THREAD_SAFE_UNLOCK_ _thread_safe_.unlock();
 
 } // namespace godot
 
-void *operator new(size_t p_size, const char *p_description) {
-	return godot::Memory::alloc_static(p_size);
-}
-
-void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)) {
-	return p_allocfunc(p_size);
-}
-
-using namespace godot;
-
-#ifdef _MSC_VER
-void operator delete(void *p_mem, const char *p_description) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-void operator delete(void *p_mem, void *(*p_allocfunc)(size_t p_size)) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_description) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-#endif
+#endif // ! MUTEX_LOCK_HPP
