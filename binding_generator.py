@@ -72,6 +72,9 @@ builtin_classes = []
 # Key is class name, value is boolean where True means the class is refcounted.
 engine_classes = {}
 
+# Type names of native structures
+native_structures = []
+
 singletons = []
 
 
@@ -237,7 +240,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("")
 
     for type_name in used_classes:
-        result.append(f"class {type_name};")
+        if is_native_struct(type_name):
+            result.append(f"struct {type_name};")
+        else:
+            result.append(f"class {type_name};")
 
     if len(used_classes) > 0:
         result.append("")
@@ -753,6 +759,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
     global engine_classes
     global singletons
+    global native_structures
 
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
     source_gen_folder = Path(output_dir) / "src" / "classes"
@@ -768,6 +775,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         engine_classes[class_api["name"]] = class_api["is_refcounted"]
     for native_struct in api["native_structures"]:
         engine_classes[native_struct["name"]] = False
+        native_structures.append(native_struct["name"])
+
     for singleton in api["singletons"]:
         singletons.append(singleton["name"])
 
@@ -910,7 +919,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("")
 
     for type_name in used_classes:
-        result.append(f"class {type_name};")
+        if is_native_struct(type_name):
+            result.append(f"struct {type_name};")
+        else:
+            result.append(f"class {type_name};")
 
     if len(used_classes) > 0:
         result.append("")
@@ -1605,6 +1617,11 @@ def is_variant(type_name):
 def is_engine_class(type_name):
     global engine_classes
     return type_name == "Object" or type_name in engine_classes
+
+
+def is_native_struct(type_name):
+    global native_structures
+    return type_name in native_structures
 
 
 def is_refcounted(type_name):
