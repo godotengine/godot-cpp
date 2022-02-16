@@ -790,6 +790,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                 if "arguments" in method:
                     for argument in method["arguments"]:
                         type_name = argument["type"]
+                        if type_name.startswith("const "):
+                            type_name = type_name[6:]
                         if type_name.endswith("*"):
                             type_name = type_name[:-1]
                         if is_included(type_name, class_name):
@@ -803,6 +805,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                                 fully_used_classes.add("Ref")
                 if "return_value" in method:
                     type_name = method["return_value"]["type"]
+                    if type_name.startswith("const "):
+                        type_name = type_name[6:]
                     if type_name.endswith("*"):
                         type_name = type_name[:-1]
                     if is_included(type_name, class_name):

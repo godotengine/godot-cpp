@@ -185,27 +185,27 @@ struct PtrToArg<const T *> {
 };
 
 // Pointers.
-#define GDVIRTUAL_NATIVE_PTR(m_type)                                     \
-	template <>                                                          \
-	struct PtrToArg<m_type *> {                                          \
-		_FORCE_INLINE_ static m_type *convert(const void *p_ptr) {       \
-			return (m_type *)(*(void **)p_ptr);                          \
-		}                                                                \
-		typedef m_type *EncodeT;                                         \
-		_FORCE_INLINE_ static void encode(m_type *p_var, void *p_ptr) {  \
-			*((void **)p_ptr) = p_var;                                   \
-		}                                                                \
-	};                                                                   \
-                                                                         \
-	template <>                                                          \
-	struct PtrToArg<const m_type *> {                                    \
-		_FORCE_INLINE_ static const m_type *convert(const void *p_ptr) { \
-			return (const m_type *)(*(const void **)p_ptr);              \
-		}                                                                \
-		typedef const m_type *EncodeT;                                   \
-		_FORCE_INLINE_ static void encode(m_type *p_var, void *p_ptr) {  \
-			*((void **)p_ptr) = p_var;                                   \
-		}                                                                \
+#define GDVIRTUAL_NATIVE_PTR(m_type)                                                \
+	template <>                                                                     \
+	struct PtrToArg<m_type *> {                                                     \
+		_FORCE_INLINE_ static m_type *convert(const void *p_ptr) {                  \
+			return (m_type *)(*(void **)p_ptr);                                     \
+		}                                                                           \
+		typedef m_type *EncodeT;                                                    \
+		_FORCE_INLINE_ static void encode(m_type *p_var, void *p_ptr) {             \
+			*((void **)p_ptr) = p_var;                                              \
+		}                                                                           \
+	};                                                                              \
+                                                                                    \
+	template <>                                                                     \
+	struct PtrToArg<const m_type *> {                                               \
+		_FORCE_INLINE_ static const m_type *convert(const void *p_ptr) {            \
+			return (const m_type *)(*(const void **)p_ptr);                         \
+		}                                                                           \
+		typedef const m_type *EncodeT;                                              \
+		_FORCE_INLINE_ static void encode(const m_type *p_var, const void *p_ptr) { \
+			*((const void **)p_ptr) = p_var;                                        \
+		}                                                                           \
 	}
 
 GDVIRTUAL_NATIVE_PTR(bool);
