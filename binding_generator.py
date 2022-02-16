@@ -237,7 +237,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("")
 
     for type_name in used_classes:
-        result.append(f"class {type_name};")
+        if is_struct_type(type_name):
+            result.append(f"struct {type_name};")
+        else:
+            result.append(f"class {type_name};")
 
     if len(used_classes) > 0:
         result.append("")
@@ -910,7 +913,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("")
 
     for type_name in used_classes:
-        result.append(f"class {type_name};")
+        if is_struct_type(type_name):
+            result.append(f"struct {type_name};")
+        else:
+            result.append(f"class {type_name};")
 
     if len(used_classes) > 0:
         result.append("")
@@ -1083,8 +1089,10 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                 if has_return:
                     return_type = method["return_value"]["type"]
                     meta_type = method["return_value"]["meta"] if "meta" in method["return_value"] else None
-                    if is_pod_type(return_type) or is_variant(return_type) or is_enum(return_type):
+                    if is_pod_type(return_type) or is_variant(return_type):
                         method_call += f"return internal::_call_native_mb_ret<{correct_type(return_type, meta_type)}>(___method_bind, _owner"
+                    elif is_enum(return_type):
+                        method_call += f"return ({correct_type(return_type, meta_type)})internal::_call_native_mb_ret<GDNativeInt>(___method_bind, _owner"
                     elif is_refcounted(return_type):
                         method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
                         is_ref = True
@@ -1556,6 +1564,17 @@ def is_included_type(type_name):
         "Vector2i",
         "Vector3",
         "Vector3i",
+    ]
+
+
+def is_struct_type(type_name):
+    """
+    Workaround for fix compile problem with forward declaration for some stucts as classes
+    """
+    return type_name in [
+        "AudioFrame",
+        "Glyph",
+        "CaretInfo"
     ]
 
 

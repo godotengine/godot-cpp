@@ -112,6 +112,12 @@ public:
 	}
 
 	operator Variant() const {
+		if (reference != nullptr) {
+			// When assigning a variant this way it's not increasing the refcount like it should.
+			// Discussion currently going on if this shouldn't be handle by VariantInternal::set in godot itself.
+			reference->reference();
+		}
+
 		return Variant(reference);
 	}
 
@@ -186,6 +192,14 @@ public:
 		r.reference = nullptr;
 	}
 
+	template <class T_Other>
+	Ref(Ref<T_Other> &&p_other) {
+		// Should just be able to swap these...
+		T *swap = (T *)p_other.reference;
+		p_other.reference = (T_Other *)reference;
+		reference = swap;
+	}
+
 	Ref(T *p_reference) {
 		if (p_reference) {
 			ref_pointer(p_reference);
@@ -240,7 +254,7 @@ public:
 template <class T>
 struct PtrToArg<Ref<T>> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(godot::internal::gdn_interface->object_get_instance_binding((void *)p_ptr, godot::internal::token, &T::___binding_callbacks));
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
 	}
 
 	typedef Ref<T> EncodeT;
@@ -255,7 +269,7 @@ struct PtrToArg<const Ref<T> &> {
 	typedef Ref<T> EncodeT;
 
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(godot::internal::gdn_interface->object_get_instance_binding((void *)p_ptr, godot::internal::token, &T::___binding_callbacks));
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
 	}
 };
 
