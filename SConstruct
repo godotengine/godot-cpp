@@ -170,9 +170,9 @@ if host_platform == "windows" and env["platform"] != "android":
 # Require C++17
 if host_platform == "windows" and env["platform"] == "windows" and not env["use_mingw"]:
     # MSVC
-    env.Append(CCFLAGS=["/std:c++17"])
+    env.Append(CXXFLAGS=["/std:c++17"])
 else:
-    env.Append(CCFLAGS=["-std=c++17"])
+    env.Append(CXXFLAGS=["-std=c++17"])
 
 if env["target"] == "debug":
     env.Append(CPPDEFINES=["DEBUG_ENABLED", "DEBUG_METHODS_ENABLED"])
