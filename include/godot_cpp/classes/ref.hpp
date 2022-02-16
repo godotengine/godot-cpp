@@ -112,6 +112,12 @@ public:
 	}
 
 	operator Variant() const {
+		if (reference != nullptr) {
+			// When assigning a variant this way it's not increasing the refcount like it should.
+			// Discussion currently going on if this shouldn't be handle by VariantInternal::set in godot itself.
+			reference->reference();
+		}
+
 		return Variant(reference);
 	}
 
@@ -184,6 +190,14 @@ public:
 		r.reference = Object::cast_to<T>(refb);
 		ref(r);
 		r.reference = nullptr;
+	}
+
+	template <class T_Other>
+	Ref(Ref<T_Other> &&p_other) {
+		// Should just be able to swap these...
+		T *swap = (T *)p_other.reference;
+		p_other.reference = (T_Other *)reference;
+		reference = swap;
 	}
 
 	Ref(T *p_reference) {
