@@ -37,9 +37,11 @@
 namespace godot {
 
 class Rect2i {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
 
+	friend class Variant;
+
+public:
 	Point2i position;
 	Size2i size;
 
@@ -107,7 +109,7 @@ public:
 		new_rect.size.x = Math::max(p_rect.position.x + p_rect.size.x, position.x + size.x);
 		new_rect.size.y = Math::max(p_rect.position.y + p_rect.size.y, position.y + size.y);
 
-		new_rect.size = new_rect.size - new_rect.position; //make relative again
+		new_rect.size = new_rect.size - new_rect.position; // make relative again
 
 		return new_rect;
 	}

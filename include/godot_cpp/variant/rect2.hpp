@@ -40,9 +40,11 @@ namespace godot {
 class Transform2D;
 
 class Rect2 {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
 
+	friend class Variant;
+
+public:
 	Point2 position;
 	Size2 size;
 
@@ -161,7 +163,7 @@ public:
 		new_rect.size.x = Math::max(p_rect.position.x + p_rect.size.x, position.x + size.x);
 		new_rect.size.y = Math::max(p_rect.position.y + p_rect.size.y, position.y + size.y);
 
-		new_rect.size = new_rect.size - new_rect.position; //make relative again
+		new_rect.size = new_rect.size - new_rect.position; // make relative again
 
 		return new_rect;
 	}
@@ -225,7 +227,7 @@ public:
 		return r;
 	}
 
-	inline void expand_to(const Vector2 &p_vector) { //in place function for speed
+	inline void expand_to(const Vector2 &p_vector) { // in place function for speed
 
 		Vector2 begin = position;
 		Vector2 end = position + size;
@@ -279,7 +281,7 @@ public:
 				continue;
 			}
 
-			//check inside
+			// check inside
 			Vector2 tg = r.orthogonal();
 			float s = tg.dot(center) - tg.dot(a);
 			if (s < 0.0) {
@@ -288,7 +290,7 @@ public:
 				side_minus++;
 			}
 
-			//check ray box
+			// check ray box
 			r /= l;
 			Vector2 ir((real_t)1.0 / r.x, (real_t)1.0 / r.y);
 
@@ -309,7 +311,7 @@ public:
 		}
 
 		if (side_plus * side_minus == 0) {
-			return true; //all inside
+			return true; // all inside
 		} else {
 			return false;
 		}

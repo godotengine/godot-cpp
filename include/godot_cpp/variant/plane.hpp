@@ -38,14 +38,16 @@
 namespace godot {
 
 class Plane {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
 
+	friend class Variant;
+
+public:
 	Vector3 normal;
 	real_t d = 0;
 
 	void set_normal(const Vector3 &p_normal);
-	inline Vector3 get_normal() const { return normal; }; ///Point is coplanar, CMP_EPSILON for precision
+	inline Vector3 get_normal() const { return normal; }; /// Point is coplanar, CMP_EPSILON for precision
 
 	void normalize();
 	Plane normalized() const;
