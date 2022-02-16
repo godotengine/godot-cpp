@@ -240,7 +240,7 @@ public:
 template <class T>
 struct PtrToArg<Ref<T>> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(godot::internal::gdn_interface->object_get_instance_binding((void *)p_ptr, godot::internal::token, &T::___binding_callbacks));
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
 	}
 
 	typedef Ref<T> EncodeT;
@@ -255,7 +255,7 @@ struct PtrToArg<const Ref<T> &> {
 	typedef Ref<T> EncodeT;
 
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(godot::internal::gdn_interface->object_get_instance_binding((void *)p_ptr, godot::internal::token, &T::___binding_callbacks));
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
 	}
 };
 
