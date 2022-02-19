@@ -31,11 +31,16 @@
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/vector2.hpp>
+#include <godot_cpp/variant/vector2i.hpp>
 
 namespace godot {
 
 Vector2::operator String() const {
 	return String::num(x, 5) + ", " + String::num(y, 5);
+}
+
+Vector2::operator Vector2i() const {
+	return Vector2i(x, y);
 }
 
 real_t Vector2::angle() const {
