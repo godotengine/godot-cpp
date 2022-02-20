@@ -1,3 +1,7 @@
+# Generated directories with binaries
+build
+bin
+
 # Godot 4+ specific ignores
 .godot/
 

@@ -1,18 +1,17 @@
 project(godot-cpp-test)
 cmake_minimum_required(VERSION 3.6)
 
-# Local dependency paths, adapt them to your setup
-set(GODOT_HEADERS_PATH ../godot-headers/)
-set(CPP_BINDINGS_PATH ../)
+set(GODOT_HEADERS_PATH ../godot-headers/ CACHE STRING "Path to Godot headers")
+set(CPP_BINDINGS_PATH ../ CACHE STRING "Path to C++ bindings")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(TARGET_PATH x11)
+	set(TARGET_PATH x11)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(TARGET_PATH win64)
+	set(TARGET_PATH win64)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(TARGET_PATH osx)
+	set(TARGET_PATH osx)
 else()
-    message(FATAL_ERROR "Not implemented support for ${CMAKE_SYSTEM_NAME}")
+	message(FATAL_ERROR "Not implemented support for ${CMAKE_SYSTEM_NAME}")
 endif()
 
 # Change the output directory to the bin directory
@@ -37,7 +36,8 @@ set(GODOT_LINKER_FLAGS )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	# using Visual Studio C++
-	set(GODOT_COMPILE_FLAGS "/EHsc /WX") # /GF /MP
+	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /EHsc /WX") # /GF /MP
+	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /DTYPED_METHOD_BIND")
 
 	if(CMAKE_BUILD_TYPE MATCHES Debug)
 		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MDd") # /Od /RTC1 /Zi
@@ -101,10 +101,10 @@ file(GLOB_RECURSE HEADERS include/*.h**)
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 
 target_include_directories(${PROJECT_NAME} SYSTEM
-    PRIVATE
-        ${CPP_BINDINGS_PATH}/include
+	PRIVATE
+		${CPP_BINDINGS_PATH}/include
 	${CPP_BINDINGS_PATH}/gen/include
-        ${GODOT_HEADERS_PATH}
+		${GODOT_HEADERS_PATH}
 )
 
 # Create the correct name (godot.os.build_type.system_bits)
@@ -112,35 +112,36 @@ target_include_directories(${PROJECT_NAME} SYSTEM
 
 set(BITS 32)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(BITS 64)
+	set(BITS 64)
 endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-    set(GODOT_CPP_BUILD_TYPE Debug)
+	set(GODOT_CPP_BUILD_TYPE Debug)
 else()
-    set(GODOT_CPP_BUILD_TYPE Release)
+	set(GODOT_CPP_BUILD_TYPE Release)
 endif()
 
 string(TOLOWER ${CMAKE_SYSTEM_NAME} SYSTEM_NAME)
 string(TOLOWER ${GODOT_CPP_BUILD_TYPE} BUILD_TYPE)
 
 if(ANDROID)
-    # Added the android abi after system name
-    set(SYSTEM_NAME ${SYSTEM_NAME}.${ANDROID_ABI})
+	# Added the android abi after system name
+	set(SYSTEM_NAME ${SYSTEM_NAME}.${ANDROID_ABI})
 endif()
 
 if(CMAKE_VERSION VERSION_GREATER "3.13")
-    target_link_directories(${PROJECT_NAME}
-        PRIVATE
-        ${CPP_BINDINGS_PATH}/bin/
-    )
-    target_link_libraries(${PROJECT_NAME}
-        godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}$<$<NOT:$<PLATFORM_ID:Android>>:.${BITS}>
-    )
+	target_link_directories(${PROJECT_NAME}
+		PRIVATE
+		${CPP_BINDINGS_PATH}/bin/
+	)
+
+	target_link_libraries(${PROJECT_NAME}
+		godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}$<$<NOT:$<PLATFORM_ID:Android>>:.${BITS}>
+	)
 else()
-    target_link_libraries(${PROJECT_NAME}
-            ${CPP_BINDINGS_PATH}/bin/libgodot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}$<$<NOT:$<PLATFORM_ID:Android>>:.${BITS}>.a
-    )
+	target_link_libraries(${PROJECT_NAME}
+			${CPP_BINDINGS_PATH}/bin/libgodot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}$<$<NOT:$<PLATFORM_ID:Android>>:.${BITS}>.a
+	)
 endif()
 
 # Add the compile flags
@@ -148,5 +149,3 @@ set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS ${GODOT_LINKER_FLAGS})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME "gdexample")
-
-
