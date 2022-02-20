@@ -125,7 +125,7 @@ opts.Add(EnumVariable("android_arch", "Target Android architecture", "armv7", ["
 opts.Add("macos_deployment_target", "macOS deployment target", "default")
 opts.Add("macos_sdk_path", "macOS SDK path", "")
 opts.Add(EnumVariable("macos_arch", "Target macOS architecture", "universal", ["universal", "x86_64", "arm64"]))
-opts.Add(EnumVariable("ios_arch", "Target iOS architecture", "arm64", ["armv7", "arm64", "x86_64"]))
+opts.Add(EnumVariable("ios_arch", "Target iOS architecture", "arm64", ["universal", "arm64", "x86_64"]))
 opts.Add(BoolVariable("ios_simulator", "Target iOS Simulator", False))
 opts.Add(
     "IPHONEPATH",
@@ -143,6 +143,8 @@ opts.Add(
     os.environ.get("ANDROID_NDK_ROOT", None),
 )
 opts.Add(BoolVariable("generate_template_get_node", "Generate a template version of the Node class's get_node.", True))
+
+opts.Add(BoolVariable("build_library", "Build the godot-cpp library.", True))
 
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
@@ -165,6 +167,13 @@ if host_platform == "windows" and env["platform"] != "android":
 
     opts.Update(env)
 
+# Require C++17
+if host_platform == "windows" and env["platform"] == "windows" and not env["use_mingw"]:
+    # MSVC
+    env.Append(CXXFLAGS=["/std:c++17"])
+else:
+    env.Append(CXXFLAGS=["-std=c++17"])
+
 if env["target"] == "debug":
     env.Append(CPPDEFINES=["DEBUG_ENABLED", "DEBUG_METHODS_ENABLED"])
 
@@ -172,7 +181,7 @@ if env["platform"] == "linux" or env["platform"] == "freebsd":
     if env["use_llvm"]:
         env["CXX"] = "clang++"
 
-    env.Append(CCFLAGS=["-fPIC", "-std=c++17", "-Wwrite-strings"])
+    env.Append(CCFLAGS=["-fPIC", "-Wwrite-strings"])
     env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
 
     if env["target"] == "debug":
@@ -201,8 +210,6 @@ elif env["platform"] == "osx":
         env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
         env.Append(CCFLAGS=["-arch", env["macos_arch"]])
 
-    env.Append(CCFLAGS=["-std=c++17"])
-
     if env["macos_deployment_target"] != "default":
         env.Append(CCFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
         env.Append(LINKFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
@@ -228,7 +235,6 @@ elif env["platform"] == "ios":
     if env["ios_simulator"]:
         sdk_name = "iphonesimulator"
         env.Append(CCFLAGS=["-mios-simulator-version-min=10.0"])
-        env["LIBSUFFIX"] = ".simulator" + env["LIBSUFFIX"]
     else:
         sdk_name = "iphoneos"
         env.Append(CCFLAGS=["-miphoneos-version-min=10.0"])
@@ -245,20 +251,21 @@ elif env["platform"] == "ios":
     env["CXX"] = compiler_path + "clang++"
     env["AR"] = compiler_path + "ar"
     env["RANLIB"] = compiler_path + "ranlib"
+    env["SHLIBSUFFIX"] = ".dylib"
 
-    env.Append(CCFLAGS=["-std=c++17", "-arch", env["ios_arch"], "-isysroot", sdk_path])
-    env.Append(
-        LINKFLAGS=[
-            "-arch",
-            env["ios_arch"],
-            "-framework",
-            "Cocoa",
-            "-Wl,-undefined,dynamic_lookup",
-            "-isysroot",
-            sdk_path,
-            "-F" + sdk_path,
-        ]
-    )
+    if env["ios_arch"] == "universal":
+        if env["ios_simulator"]:
+            env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+            env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+        else:
+            env.Append(LINKFLAGS=["-arch", "arm64"])
+            env.Append(CCFLAGS=["-arch", "arm64"])
+    else:
+        env.Append(LINKFLAGS=["-arch", env["ios_arch"]])
+        env.Append(CCFLAGS=["-arch", env["ios_arch"]])
+
+    env.Append(CCFLAGS=["-isysroot", sdk_path])
+    env.Append(LINKFLAGS=["-isysroot", sdk_path, "-F" + sdk_path,])
 
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-Og", "-g"])
@@ -292,14 +299,21 @@ elif env["platform"] == "windows":
         # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
         env = Environment(ENV=os.environ, tools=["mingw"])
         opts.Update(env)
-        # env = env.Clone(tools=['mingw'])
 
+        # Still need to use C++17.
+        env.Append(CCFLAGS=["-std=c++17"])
+        # Don't want lib prefixes
+        env["IMPLIBPREFIX"] = ""
+        env["SHLIBPREFIX"] = ""
+
+        # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
         env["SPAWN"] = mySpawn
+        env.Replace(ARFLAGS=["q"])
 
     # Native or cross-compilation using MinGW
     if host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx" or env["use_mingw"]:
         # These options are for a release build even using target=debug
-        env.Append(CCFLAGS=["-O3", "-std=c++17", "-Wwrite-strings"])
+        env.Append(CCFLAGS=["-O3", "-Wwrite-strings"])
         env.Append(
             LINKFLAGS=[
                 "--static",
@@ -314,9 +328,10 @@ elif env["platform"] == "android":
         # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
         env = Environment(ENV=os.environ, tools=["mingw"])
         opts.Update(env)
-        # env = env.Clone(tools=['mingw'])
 
+        # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
         env["SPAWN"] = mySpawn
+        env.Replace(ARFLAGS=["q"])
 
     # Verify NDK root
     if not "ANDROID_NDK_ROOT" in env:
@@ -382,11 +397,13 @@ elif env["platform"] == "android":
     env["CC"] = toolchain + "/bin/clang"
     env["CXX"] = toolchain + "/bin/clang++"
     env["AR"] = toolchain + "/bin/" + arch_info["tool_path"] + "-ar"
+    env["SHLIBSUFFIX"] = ".so"
 
     env.Append(
         CCFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"], "-fPIC"]
     )  # , '-fPIE', '-fno-addrsig', '-Oz'])
     env.Append(CCFLAGS=arch_info["ccflags"])
+    env.Append(LINKFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"]])
 
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-Og", "-g"])
@@ -464,18 +481,27 @@ add_sources(sources, "src/variant", "cpp")
 add_sources(sources, "gen/src/variant", "cpp")
 add_sources(sources, "gen/src/classes", "cpp")
 
-arch_suffix = env["bits"]
+env["arch_suffix"] = env["bits"]
 if env["platform"] == "android":
-    arch_suffix = env["android_arch"]
+    env["arch_suffix"] = env["android_arch"]
 elif env["platform"] == "ios":
-    arch_suffix = env["ios_arch"]
+    env["arch_suffix"] = env["ios_arch"]
+    if env["ios_simulator"]:
+        env["arch_suffix"] += ".simulator"
 elif env["platform"] == "javascript":
-    arch_suffix = "wasm"
+    env["arch_suffix"] = "wasm"
 elif env["platform"] == "osx":
-    arch_suffix = env["macos_arch"]
+    env["arch_suffix"] = env["macos_arch"]
 
-library = env.StaticLibrary(
-    target="bin/" + "libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["LIBSUFFIX"]),
-    source=sources,
-)
-Default(library)
+library = None
+env["OBJSUFFIX"] = ".{}.{}.{}{}".format(env["platform"], env["target"], env["arch_suffix"], env["OBJSUFFIX"])
+library_name = "libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], env["arch_suffix"], env["LIBSUFFIX"])
+
+if env["build_library"]:
+    library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
+    Default(library)
+
+env.Append(CPPPATH=[env.Dir(f) for f in ["gen/include", "include", "godot-headers"]])
+env.Append(LIBPATH=[env.Dir("bin")])
+env.Append(LIBS=library_name)
+Return("env")

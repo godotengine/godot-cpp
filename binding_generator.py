@@ -62,6 +62,7 @@ def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
     target_dir.mkdir(parents=True)
 
     generate_global_constants(api, target_dir)
+    generate_global_constant_binds(api, target_dir)
     generate_builtin_bindings(api, target_dir, "float_64")
     generate_engine_classes_bindings(api, target_dir, use_template_get_node)
     generate_utility_functions(api, target_dir)
@@ -246,7 +247,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append(f"\tstatic constexpr size_t {snake_class_name}_SIZE = {size};")
     result.append(f"\tuint8_t opaque[{snake_class_name}_SIZE] = {{}};")
     result.append(
-        f"\t_FORCE_INLINE_ GDNativeTypePtr ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
+        f"\t_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
     )
 
     result.append("")
@@ -378,6 +379,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     # Special cases.
     if class_name == "String":
+        result.append("\tstatic String utf8(const char *from, int len = -1);")
+        result.append("\tvoid parse_utf8(const char *from, int len = -1);")
+        result.append("\tstatic String utf16(const char16_t *from, int len = -1);")
+        result.append("\tvoid parse_utf16(const char16_t *from, int len = -1);")
         result.append("\tCharString utf8() const;")
         result.append("\tCharString ascii() const;")
         result.append("\tChar16String utf16() const;")
@@ -426,6 +431,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("bool operator!=(const char32_t *p_str) const;")
         result.append(f"\tconst char32_t &operator[](int p_index) const;")
         result.append(f"\tchar32_t &operator[](int p_index);")
+        result.append(f"\tconst char32_t *ptr() const;")
+        result.append(f"\tchar32_t *ptrw();")
 
     if class_name == "Array":
         result.append("\ttemplate <class... Args>")
@@ -443,6 +450,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
             return_type = "float"
         result.append(f"\tconst " + return_type + f" &operator[](int p_index) const;")
         result.append(f"\t" + return_type + f" &operator[](int p_index);")
+        result.append(f"\tconst " + return_type + f" *ptr() const;")
+        result.append(f"\t" + return_type + f" *ptrw();")
 
     if class_name == "Array":
         result.append(f"\tconst Variant &operator[](int p_index) const;")
@@ -781,6 +790,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                 if "arguments" in method:
                     for argument in method["arguments"]:
                         type_name = argument["type"]
+                        if type_name.startswith("const "):
+                            type_name = type_name[6:]
                         if type_name.endswith("*"):
                             type_name = type_name[:-1]
                         if is_included(type_name, class_name):
@@ -794,6 +805,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                                 fully_used_classes.add("Ref")
                 if "return_value" in method:
                     type_name = method["return_value"]["type"]
+                    if type_name.startswith("const "):
+                        type_name = type_name[6:]
                     if type_name.endswith("*"):
                         type_name = type_name[:-1]
                     if is_included(type_name, class_name):
@@ -860,6 +873,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
             result.append(f"\t{field};")
         result.append("};")
 
+        result.append("")
+        result.append(f"GDVIRTUAL_NATIVE_PTR({struct_name});")
         result.append("")
         result.append("} // namespace godot")
         result.append("")
@@ -997,6 +1012,12 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("")
 
     result.append("} // namespace godot")
+    result.append("")
+
+    if "enums" in class_api and class_name != "Object":
+        for enum_api in class_api["enums"]:
+            result.append(f'VARIANT_ENUM_CAST({class_name}, {class_name}::{enum_api["name"]});')
+        result.append("")
 
     result.append(f"#endif // ! {header_guard}")
 
@@ -1174,6 +1195,42 @@ def generate_global_constants(api, output_dir):
     header.append("} // namespace godot")
 
     header.append("")
+    header.append(f"#endif // ! {header_guard}")
+
+    with header_filename.open("w+") as header_file:
+        header_file.write("\n".join(header))
+
+
+def generate_global_constant_binds(api, output_dir):
+    include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
+    source_gen_folder = Path(output_dir) / "src" / "classes"
+
+    include_gen_folder.mkdir(parents=True, exist_ok=True)
+    source_gen_folder.mkdir(parents=True, exist_ok=True)
+
+    # Generate header
+
+    header = []
+    add_header("global_constants_binds.hpp", header)
+
+    header_filename = include_gen_folder / "global_constants_binds.hpp"
+
+    header_guard = "GODOT_CPP_GLOBAL_CONSTANTS_BINDS_HPP"
+    header.append(f"#ifndef {header_guard}")
+    header.append(f"#define {header_guard}")
+    header.append("")
+    header.append("#include <godot_cpp/classes/global_constants.hpp>")
+    header.append("#include <godot_cpp/core/binder_common.hpp>")
+    header.append("")
+
+    for enum_def in api["global_enums"]:
+        if enum_def["name"].startswith("Variant."):
+            continue
+
+        header.append(f'VARIANT_ENUM_CAST(, godot::{enum_def["name"]});')
+
+    header.append("")
+
     header.append(f"#endif // ! {header_guard}")
 
     with header_filename.open("w+") as header_file:

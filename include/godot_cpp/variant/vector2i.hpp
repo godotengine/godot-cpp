@@ -32,15 +32,18 @@
 #define GODOT_VECTOR2I_HPP
 
 #include <godot_cpp/core/math.hpp>
-#include <godot_cpp/variant/string.hpp>
-#include <godot_cpp/variant/vector2.hpp>
 
 namespace godot {
 
-class Vector2i {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+class String;
+class Vector2;
 
+class Vector2i {
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
+
+	friend class Variant;
+
+public:
 	enum Axis {
 		AXIS_X,
 		AXIS_Y,
@@ -94,14 +97,9 @@ public:
 	Vector2i abs() const { return Vector2i(Math::abs(x), Math::abs(y)); }
 
 	operator String() const;
-
-	operator Vector2() const { return Vector2((real_t)x, (real_t)y); }
+	operator Vector2() const;
 
 	inline Vector2i() {}
-	inline Vector2i(const Vector2 &p_vec2) {
-		x = (int32_t)p_vec2.x;
-		y = (int32_t)p_vec2.y;
-	}
 	inline Vector2i(int32_t p_x, int32_t p_y) {
 		x = p_x;
 		y = p_y;

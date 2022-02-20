@@ -32,14 +32,20 @@
 #define GODOT_CPP_ERROR_MACROS_HPP
 
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/variant/string.hpp>
 
 #include <cstdint>
 
 namespace godot {
 
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, bool p_is_warning = false);
+void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, bool p_is_warning = false);
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const char *p_message, bool p_is_warning = false);
+void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const String &p_message, bool p_is_warning = false);
+void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, const char *p_message, bool p_is_warning = false);
+void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, const String &p_message, bool p_is_warning = false);
 void _err_print_index_error(const char *p_function, const char *p_file, int p_line, int64_t p_index, int64_t p_size, const char *p_index_str, const char *p_size_str, const char *p_message = "", bool fatal = false);
+void _err_print_index_error(const char *p_function, const char *p_file, int p_line, int64_t p_index, int64_t p_size, const char *p_index_str, const char *p_size_str, const String &p_message, bool fatal = false);
 
 // Used to strip debug messages in release mode
 #ifdef DEBUG_ENABLED

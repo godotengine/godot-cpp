@@ -56,8 +56,12 @@ entry_symbol = "example_library_init"
 
 [libraries]
 
-linux.64 = "bin/x11/libgdexample.so"
-windows.64 = "bin/win64/libgdexample.dll"
+linux.64.debug = "bin/libgdexample.linux.debug.64.so"
+linux.64.release = "bin/libgdexample.linux.release.64.so"
+windows.64.debug = "bin/libgdexample.windows.debug.64.dll"
+windows.64.release = "bin/libgdexample.windows.release.64.dll"
+macos.debug = "bin/libgdexample.debug.framework"
+macos.release = "bin/libgdexample.release.framework"
 ```
 
 The `entry_symbol` is the name of the function that initializes your library. It should be similar to following layout:

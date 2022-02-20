@@ -32,16 +32,18 @@
 #define GODOT_VECTOR2_HPP
 
 #include <godot_cpp/core/math.hpp>
-#include <godot_cpp/variant/string.hpp>
 
 namespace godot {
 
+class String;
 class Vector2i;
 
 class Vector2 {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
 
+	friend class Variant;
+
+public:
 	enum Axis {
 		AXIS_X,
 		AXIS_Y,
@@ -151,6 +153,7 @@ public:
 	real_t aspect() const { return width / height; }
 
 	operator String() const;
+	operator Vector2i() const;
 
 	inline Vector2() {}
 	inline Vector2(real_t p_x, real_t p_y) {

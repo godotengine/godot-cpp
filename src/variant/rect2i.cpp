@@ -30,4 +30,17 @@
 
 #include <godot_cpp/variant/rect2i.hpp>
 
-// No implementation left. This is here to add the header as a compiled unit.
+#include <godot_cpp/variant/rect2.hpp>
+#include <godot_cpp/variant/string.hpp>
+
+namespace godot {
+
+Rect2i::operator String() const {
+	return String(position) + ", " + String(size);
+}
+
+Rect2i::operator Rect2() const {
+	return Rect2(position, size);
+}
+
+} // namespace godot

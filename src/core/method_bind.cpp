@@ -103,7 +103,7 @@ void MethodBind::bind_call(void *p_method_userdata, GDExtensionClassInstancePtr 
 	Variant ret = bind->call(p_instance, p_args, p_argument_count, *r_error);
 	// This assumes the return value is an empty Variant, so it doesn't need to call the destructor first.
 	// Since only NativeExtensionMethodBind calls this from the Godot side, it should always be the case.
-	internal::gdn_interface->variant_new_copy(r_return, ret.ptr());
+	internal::gdn_interface->variant_new_copy(r_return, ret._native_ptr());
 }
 
 void MethodBind::bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_return) {

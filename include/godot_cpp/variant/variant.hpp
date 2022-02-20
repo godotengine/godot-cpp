@@ -45,7 +45,7 @@ namespace godot {
 class Variant {
 	uint8_t opaque[GODOT_CPP_VARIANT_SIZE]{ 0 };
 
-	_FORCE_INLINE_ GDNativeVariantPtr ptr() const { return const_cast<uint8_t(*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
+	_FORCE_INLINE_ GDNativeVariantPtr _native_ptr() const { return const_cast<uint8_t(*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
 
 	friend class GDExtensionBinding;
 	friend class MethodBind;

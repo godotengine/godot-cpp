@@ -54,6 +54,14 @@ uint8_t &PackedByteArray::operator[](int p_index) {
 	return *internal::gdn_interface->packed_byte_array_operator_index((GDNativeTypePtr *)this, p_index);
 }
 
+const uint8_t *PackedByteArray::ptr() const {
+	return internal::gdn_interface->packed_byte_array_operator_index_const((GDNativeTypePtr *)this, 0);
+}
+
+uint8_t *PackedByteArray::ptrw() {
+	return internal::gdn_interface->packed_byte_array_operator_index((GDNativeTypePtr *)this, 0);
+}
+
 const Color &PackedColorArray::operator[](int p_index) const {
 	const Color *color = (const Color *)internal::gdn_interface->packed_color_array_operator_index_const((GDNativeTypePtr *)this, p_index);
 	return *color;
@@ -64,12 +72,28 @@ Color &PackedColorArray::operator[](int p_index) {
 	return *color;
 }
 
+const Color *PackedColorArray::ptr() const {
+	return (const Color *)internal::gdn_interface->packed_color_array_operator_index_const((GDNativeTypePtr *)this, 0);
+}
+
+Color *PackedColorArray::ptrw() {
+	return (Color *)internal::gdn_interface->packed_color_array_operator_index((GDNativeTypePtr *)this, 0);
+}
+
 const float &PackedFloat32Array::operator[](int p_index) const {
 	return *internal::gdn_interface->packed_float32_array_operator_index_const((GDNativeTypePtr *)this, p_index);
 }
 
 float &PackedFloat32Array::operator[](int p_index) {
 	return *internal::gdn_interface->packed_float32_array_operator_index((GDNativeTypePtr *)this, p_index);
+}
+
+const float *PackedFloat32Array::ptr() const {
+	return internal::gdn_interface->packed_float32_array_operator_index_const((GDNativeTypePtr *)this, 0);
+}
+
+float *PackedFloat32Array::ptrw() {
+	return internal::gdn_interface->packed_float32_array_operator_index((GDNativeTypePtr *)this, 0);
 }
 
 const double &PackedFloat64Array::operator[](int p_index) const {
@@ -80,6 +104,14 @@ double &PackedFloat64Array::operator[](int p_index) {
 	return *internal::gdn_interface->packed_float64_array_operator_index((GDNativeTypePtr *)this, p_index);
 }
 
+const double *PackedFloat64Array::ptr() const {
+	return internal::gdn_interface->packed_float64_array_operator_index_const((GDNativeTypePtr *)this, 0);
+}
+
+double *PackedFloat64Array::ptrw() {
+	return internal::gdn_interface->packed_float64_array_operator_index((GDNativeTypePtr *)this, 0);
+}
+
 const int32_t &PackedInt32Array::operator[](int p_index) const {
 	return *internal::gdn_interface->packed_int32_array_operator_index_const((GDNativeTypePtr *)this, p_index);
 }
@@ -88,12 +120,28 @@ int32_t &PackedInt32Array::operator[](int p_index) {
 	return *internal::gdn_interface->packed_int32_array_operator_index((GDNativeTypePtr *)this, p_index);
 }
 
+const int32_t *PackedInt32Array::ptr() const {
+	return internal::gdn_interface->packed_int32_array_operator_index_const((GDNativeTypePtr *)this, 0);
+}
+
+int32_t *PackedInt32Array::ptrw() {
+	return internal::gdn_interface->packed_int32_array_operator_index((GDNativeTypePtr *)this, 0);
+}
+
 const int64_t &PackedInt64Array::operator[](int p_index) const {
 	return *internal::gdn_interface->packed_int64_array_operator_index_const((GDNativeTypePtr *)this, p_index);
 }
 
 int64_t &PackedInt64Array::operator[](int p_index) {
 	return *internal::gdn_interface->packed_int64_array_operator_index((GDNativeTypePtr *)this, p_index);
+}
+
+const int64_t *PackedInt64Array::ptr() const {
+	return internal::gdn_interface->packed_int64_array_operator_index_const((GDNativeTypePtr *)this, 0);
+}
+
+int64_t *PackedInt64Array::ptrw() {
+	return internal::gdn_interface->packed_int64_array_operator_index((GDNativeTypePtr *)this, 0);
 }
 
 const String &PackedStringArray::operator[](int p_index) const {
@@ -106,6 +154,14 @@ String &PackedStringArray::operator[](int p_index) {
 	return *string;
 }
 
+const String *PackedStringArray::ptr() const {
+	return (const String *)internal::gdn_interface->packed_string_array_operator_index_const((GDNativeTypePtr *)this, 0);
+}
+
+String *PackedStringArray::ptrw() {
+	return (String *)internal::gdn_interface->packed_string_array_operator_index((GDNativeTypePtr *)this, 0);
+}
+
 const Vector2 &PackedVector2Array::operator[](int p_index) const {
 	const Vector2 *vec = (const Vector2 *)internal::gdn_interface->packed_vector2_array_operator_index_const((GDNativeTypePtr *)this, p_index);
 	return *vec;
@@ -116,6 +172,14 @@ Vector2 &PackedVector2Array::operator[](int p_index) {
 	return *vec;
 }
 
+const Vector2 *PackedVector2Array::ptr() const {
+	return (const Vector2 *)internal::gdn_interface->packed_vector2_array_operator_index_const((GDNativeTypePtr *)this, 0);
+}
+
+Vector2 *PackedVector2Array::ptrw() {
+	return (Vector2 *)internal::gdn_interface->packed_vector2_array_operator_index((GDNativeTypePtr *)this, 0);
+}
+
 const Vector3 &PackedVector3Array::operator[](int p_index) const {
 	const Vector3 *vec = (const Vector3 *)internal::gdn_interface->packed_vector3_array_operator_index_const((GDNativeTypePtr *)this, p_index);
 	return *vec;
@@ -124,6 +188,14 @@ const Vector3 &PackedVector3Array::operator[](int p_index) const {
 Vector3 &PackedVector3Array::operator[](int p_index) {
 	Vector3 *vec = (Vector3 *)internal::gdn_interface->packed_vector3_array_operator_index((GDNativeTypePtr *)this, p_index);
 	return *vec;
+}
+
+const Vector3 *PackedVector3Array::ptr() const {
+	return (const Vector3 *)internal::gdn_interface->packed_vector3_array_operator_index_const((GDNativeTypePtr *)this, 0);
+}
+
+Vector3 *PackedVector3Array::ptrw() {
+	return (Vector3 *)internal::gdn_interface->packed_vector3_array_operator_index((GDNativeTypePtr *)this, 0);
 }
 
 const Variant &Array::operator[](int p_index) const {

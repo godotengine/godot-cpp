@@ -28,9 +28,11 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include <godot_cpp/variant/vector3.hpp>
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/variant/basis.hpp>
-#include <godot_cpp/variant/vector3.hpp>
+#include <godot_cpp/variant/vector3i.hpp>
 
 namespace godot {
 
@@ -119,6 +121,10 @@ bool Vector3::is_equal_approx(const Vector3 &p_v) const {
 
 Vector3::operator String() const {
 	return (String::num(x, 5) + ", " + String::num(y, 5) + ", " + String::num(z, 5));
+}
+
+Vector3::operator Vector3i() const {
+	return Vector3i(x, y, z);
 }
 
 } // namespace godot

@@ -31,15 +31,21 @@
 #ifndef GODOT_RECT2I_HPP
 #define GODOT_RECT2I_HPP
 
-#include <godot_cpp/variant/rect2.hpp>
+#include <godot_cpp/classes/global_constants.hpp>
+#include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
 
 namespace godot {
 
-class Rect2i {
-public:
-	_FORCE_INLINE_ GDNativeTypePtr ptr() const { return (void *)this; }
+class Rect2;
+class String;
 
+class Rect2i {
+	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
+
+	friend class Variant;
+
+public:
 	Point2i position;
 	Size2i size;
 
@@ -107,7 +113,7 @@ public:
 		new_rect.size.x = Math::max(p_rect.position.x + p_rect.size.x, position.x + size.x);
 		new_rect.size.y = Math::max(p_rect.position.y + p_rect.size.y, position.y + size.y);
 
-		new_rect.size = new_rect.size - new_rect.position; //make relative again
+		new_rect.size = new_rect.size - new_rect.position; // make relative again
 
 		return new_rect;
 	}
@@ -204,15 +210,10 @@ public:
 		return position + size;
 	}
 
-	operator String() const { return String(position) + ", " + String(size); }
-
-	operator Rect2() const { return Rect2(position, size); }
+	operator String() const;
+	operator Rect2() const;
 
 	Rect2i() {}
-	Rect2i(const Rect2 &p_r2) :
-			position(p_r2.position),
-			size(p_r2.size) {
-	}
 	Rect2i(int p_x, int p_y, int p_width, int p_height) :
 			position(Point2i(p_x, p_y)),
 			size(Size2i(p_width, p_height)) {

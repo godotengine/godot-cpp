@@ -126,20 +126,20 @@ else()
 endif()
 
 # Generate source from the bindings file
-find_package(PythonInterp 3.4 REQUIRED) # pathlib should be present
+find_package(Python3 3.4 REQUIRED) # pathlib should be present
 if(GENERATE_TEMPLATE_GET_NODE)
 	set(GENERATE_BINDING_PARAMETERS "True")
 else()
 	set(GENERATE_BINDING_PARAMETERS "False")
 endif()
 
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_CUSTOM_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True, sources=True)"
+execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_CUSTOM_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True, sources=True)"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	OUTPUT_VARIABLE GENERATED_FILES_LIST
 )
 
 add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
-		COMMAND "${PYTHON_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
+		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
 		VERBATIM
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		MAIN_DEPENDENCY ${GODOT_CUSTOM_API_FILE}

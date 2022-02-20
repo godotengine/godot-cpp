@@ -2,9 +2,52 @@ name: Continuous integration
 on: [push, pull_request]
 
 jobs:
-  linux:
-    name: Build (Linux, GCC)
-    runs-on: ubuntu-18.04
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: 🐧 Linux (GCC)
+            os: ubuntu-18.04
+            platform: linux
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
+            artifact-path: bin/libgodot-cpp.linux.release.64.a
+
+          - name: 🏁 Windows (x86_64, MSVC)
+            os: windows-2019
+            platform: windows
+            artifact-name: godot-cpp-windows-msvc2019-x86_64-release
+            artifact-path: bin/libgodot-cpp.windows.release.64.lib
+
+          - name: 🏁 Windows (x86_64, MinGW)
+            os: windows-2019
+            platform: windows
+            artifact-name: godot-cpp-linux-mingw-x86_64-release
+            artifact-path: bin/libgodot-cpp.windows.release.64.a
+            flags: use_mingw=yes
+
+          - name: 🍎 macOS (universal)
+            os: macos-11
+            platform: osx
+            artifact-name: godot-cpp-macos-universal-release
+            artifact-path: bin/libgodot-cpp.osx.release.universal.a
+            flags: macos_arch=universal
+
+          - name: 🤖 Android (arm64)
+            os: ubuntu-18.04
+            platform: android
+            artifact-name: godot-cpp-android-arm64-release
+            artifact-path: bin/libgodot-cpp.android.release.arm64v8.a
+            flags: android_arch=arm64v8
+
+          - name: 🍏 iOS (arm64)
+            os: macos-11
+            platform: ios
+            artifact-name: godot-cpp-ios-arm64-release
+            artifact-path: bin/libgodot-cpp.ios.release.arm64.a
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -16,26 +59,44 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Linux dependencies
+        if: ${{ matrix.platform == 'linux' }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qqq build-essential pkg-config
+
+      - name: Install scons
+        run: |
           python -m pip install scons
 
-      - name: Build godot-cpp
+      - name: Windows GCC dependency
+        if: ${{ matrix.platform == 'windows' }}
+        # Install GCC from Scoop as the default supplied GCC doesn't work ("Error 1").
         run: |
-          scons target=release generate_bindings=yes -j $(nproc)
+          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+          scoop install gcc
+          g++ --version
+          gcc --version
 
-      - name: Build test project
+      - name: Build godot-cpp (debug)
+        run: |
+          scons platform=${{ matrix.platform }} target=debug generate_bindings=yes ${{ matrix.flags }} -j2
+
+      - name: Build test without rebuilding godot-cpp (debug)
         run: |
           cd test
-          scons target=release -j $(nproc)
+          scons platform=${{ matrix.platform }} target=debug ${{ matrix.flags }} build_library=no -j2
+
+      - name: Build test and godot-cpp (release)
+        run: |
+          cd test
+          scons platform=${{ matrix.platform }} target=release ${{ matrix.flags }} -j2
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: godot-cpp-linux-glibc2.27-x86_64-release
-          path: bin/libgodot-cpp.linux.release.64.a
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
           if-no-files-found: error
 
   linux-cmake:
