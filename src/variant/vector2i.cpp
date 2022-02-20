@@ -28,15 +28,13 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include <godot_cpp/core/error_macros.hpp>
-#include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
 
-namespace godot {
+#include <godot_cpp/core/error_macros.hpp>
+#include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/vector2.hpp>
 
-Vector2i::operator String() const {
-	return String::num(x, 0) + ", " + String::num(y, 0);
-}
+namespace godot {
 
 Vector2i Vector2i::operator+(const Vector2i &p_v) const {
 	return Vector2i(x + p_v.x, y + p_v.y);
@@ -105,6 +103,14 @@ bool Vector2i::operator==(const Vector2i &p_vec2) const {
 
 bool Vector2i::operator!=(const Vector2i &p_vec2) const {
 	return x != p_vec2.x || y != p_vec2.y;
+}
+
+Vector2i::operator String() const {
+	return String::num(x, 0) + ", " + String::num(y, 0);
+}
+
+Vector2i::operator Vector2() const {
+	return Vector2((real_t)x, (real_t)y);
 }
 
 } // namespace godot

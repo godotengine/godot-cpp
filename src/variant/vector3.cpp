@@ -28,9 +28,10 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include <godot_cpp/variant/vector3.hpp>
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/variant/basis.hpp>
-#include <godot_cpp/variant/vector3.hpp>
 #include <godot_cpp/variant/vector3i.hpp>
 
 namespace godot {

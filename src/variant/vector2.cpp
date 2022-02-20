@@ -28,20 +28,13 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include <godot_cpp/variant/vector2.hpp>
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/variant/string.hpp>
-#include <godot_cpp/variant/vector2.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
 
 namespace godot {
-
-Vector2::operator String() const {
-	return String::num(x, 5) + ", " + String::num(y, 5);
-}
-
-Vector2::operator Vector2i() const {
-	return Vector2i(x, y);
-}
 
 real_t Vector2::angle() const {
 	return Math::atan2(y, x);
@@ -198,6 +191,14 @@ Vector2 Vector2::reflect(const Vector2 &p_normal) const {
 
 bool Vector2::is_equal_approx(const Vector2 &p_v) const {
 	return Math::is_equal_approx(x, p_v.x) && Math::is_equal_approx(y, p_v.y);
+}
+
+Vector2::operator String() const {
+	return String::num(x, 5) + ", " + String::num(y, 5);
+}
+
+Vector2::operator Vector2i() const {
+	return Vector2i(x, y);
 }
 
 } // namespace godot

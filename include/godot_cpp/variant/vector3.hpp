@@ -32,11 +32,11 @@
 #define GODOT_VECTOR3_HPP
 
 #include <godot_cpp/core/math.hpp>
-#include <godot_cpp/variant/string.hpp>
 
 namespace godot {
 
 class Basis;
+class String;
 class Vector3i;
 
 class Vector3 {
@@ -159,7 +159,6 @@ public:
 		y = p_y;
 		z = p_z;
 	}
-	Vector3(const Vector3i &p_ivec);
 };
 
 Vector3 Vector3::cross(const Vector3 &p_b) const {

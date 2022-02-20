@@ -32,9 +32,11 @@
 #define GODOT_VECTOR3I_HPP
 
 #include <godot_cpp/core/math.hpp>
-#include <godot_cpp/variant/string.hpp>
 
 namespace godot {
+
+class String;
+class Vector3;
 
 class Vector3i {
 	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
@@ -107,6 +109,7 @@ public:
 	inline bool operator>=(const Vector3i &p_v) const;
 
 	operator String() const;
+	operator Vector3() const;
 
 	inline Vector3i() {}
 	inline Vector3i(int32_t p_x, int32_t p_y, int32_t p_z) {
