@@ -28,9 +28,11 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include <godot_cpp/variant/vector3i.hpp>
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/variant/string.hpp>
-#include <godot_cpp/variant/vector3i.hpp>
+#include <godot_cpp/variant/vector3.hpp>
 
 namespace godot {
 
@@ -54,6 +56,10 @@ int Vector3i::max_axis() const {
 
 Vector3i::operator String() const {
 	return (String::num(x, 0) + ", " + String::num(y, 0) + ", " + String::num(z, 5));
+}
+
+Vector3i::operator Vector3() const {
+	return Vector3((real_t)x, (real_t)y, (real_t)z);
 }
 
 } // namespace godot

@@ -30,6 +30,8 @@
 
 #include <godot_cpp/variant/rect2.hpp>
 
+#include <godot_cpp/variant/rect2i.hpp>
+#include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/transform2d.hpp>
 
 namespace godot {
@@ -266,6 +268,14 @@ next4:
 	}
 
 	return true;
+}
+
+Rect2::operator String() const {
+	return String(position) + ", " + String(size);
+}
+
+Rect2::operator Rect2i() const {
+	return Rect2i(position, size);
 }
 
 } // namespace godot

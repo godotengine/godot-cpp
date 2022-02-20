@@ -37,6 +37,8 @@
 
 namespace godot {
 
+class Rect2i;
+class String;
 class Transform2D;
 
 class Rect2 {
@@ -326,6 +328,7 @@ public:
 	}
 
 	operator String() const;
+	operator Rect2i() const;
 
 	Rect2() {}
 	Rect2(real_t p_x, real_t p_y, real_t p_width, real_t p_height) :

@@ -32,10 +32,10 @@
 #define GODOT_VECTOR2_HPP
 
 #include <godot_cpp/core/math.hpp>
-#include <godot_cpp/variant/string.hpp>
 
 namespace godot {
 
+class String;
 class Vector2i;
 
 class Vector2 {
