@@ -54,6 +54,10 @@ protected:
 	Wrapped(GodotObject *p_godot_object);
 
 public:
+	static const char *get_class_static() {
+		return "Wrapped";
+	}
+
 	// Must be public but you should not touch this.
 	GodotObject *_owner = nullptr;
 };
@@ -102,7 +106,7 @@ public:                                                                         
 	}                                                                                                              \
                                                                                                                    \
 	static const char *get_parent_class_static() {                                                                 \
-		return #m_inherits;                                                                                        \
+		return m_inherits::get_class_static();                                                                     \
 	}                                                                                                              \
                                                                                                                    \
 	static GDNativeObjectPtr create(void *data) {                                                                  \
@@ -157,7 +161,7 @@ public:                                                                         
 	}                                                                                                              \
                                                                                                                    \
 	static const char *get_parent_class_static() {                                                                 \
-		return #m_inherits;                                                                                        \
+		return m_inherits::get_class_static();                                                                     \
 	}                                                                                                              \
                                                                                                                    \
 	static void *___binding_create_callback(void *p_token, void *p_instance) {                                     \
