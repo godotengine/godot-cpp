@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  memory.cpp                                                           */
+/*  vset.hpp                                                             */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,58 +28,118 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include <godot_cpp/core/memory.hpp>
+#ifndef VSET_HPP
+#define VSET_HPP
 
-#include <godot_cpp/godot.hpp>
+#include <godot_cpp/templates/vector.hpp>
 
 namespace godot {
 
-void *Memory::alloc_static(size_t p_bytes) {
-	return internal::gdn_interface->mem_alloc(p_bytes);
-}
+template <class T>
+class VSet {
+	Vector<T> _data;
 
-void *Memory::realloc_static(void *p_memory, size_t p_bytes) {
-	return internal::gdn_interface->mem_realloc(p_memory, p_bytes);
-}
+	_FORCE_INLINE_ int _find(const T &p_val, bool &r_exact) const {
+		r_exact = false;
+		if (_data.is_empty()) {
+			return 0;
+		}
 
-void Memory::free_static(void *p_ptr) {
-	internal::gdn_interface->mem_free(p_ptr);
-}
+		int low = 0;
+		int high = _data.size() - 1;
+		const T *a = &_data[0];
+		int middle = 0;
 
-_GlobalNil::_GlobalNil() {
-	left = this;
-	right = this;
-	parent = this;
-}
+#ifdef DEBUG_ENABLED
+		if (low > high) {
+			ERR_PRINT("low > high, this may be a bug");
+		}
+#endif
 
-_GlobalNil _GlobalNilClass::_nil;
+		while (low <= high) {
+			middle = (low + high) / 2;
+
+			if (p_val < a[middle]) {
+				high = middle - 1; // search low end of array
+			} else if (a[middle] < p_val) {
+				low = middle + 1; // search high end of array
+			} else {
+				r_exact = true;
+				return middle;
+			}
+		}
+
+		// return the position where this would be inserted
+		if (a[middle] < p_val) {
+			middle++;
+		}
+		return middle;
+	}
+
+	_FORCE_INLINE_ int _find_exact(const T &p_val) const {
+		if (_data.is_empty()) {
+			return -1;
+		}
+
+		int low = 0;
+		int high = _data.size() - 1;
+		int middle;
+		const T *a = &_data[0];
+
+		while (low <= high) {
+			middle = (low + high) / 2;
+
+			if (p_val < a[middle]) {
+				high = middle - 1; // search low end of array
+			} else if (a[middle] < p_val) {
+				low = middle + 1; // search high end of array
+			} else {
+				return middle;
+			}
+		}
+
+		return -1;
+	}
+
+public:
+	void insert(const T &p_val) {
+		bool exact;
+		int pos = _find(p_val, exact);
+		if (exact) {
+			return;
+		}
+		_data.insert(pos, p_val);
+	}
+
+	bool has(const T &p_val) const {
+		return _find_exact(p_val) != -1;
+	}
+
+	void erase(const T &p_val) {
+		int pos = _find_exact(p_val);
+		if (pos < 0) {
+			return;
+		}
+		_data.remove_at(pos);
+	}
+
+	int find(const T &p_val) const {
+		return _find_exact(p_val);
+	}
+
+	_FORCE_INLINE_ bool is_empty() const { return _data.is_empty(); }
+
+	_FORCE_INLINE_ int size() const { return _data.size(); }
+
+	inline T &operator[](int p_index) {
+		return _data.write[p_index];
+	}
+
+	inline const T &operator[](int p_index) const {
+		return _data[p_index];
+	}
+};
 
 } // namespace godot
 
-void *operator new(size_t p_size, const char *p_description) {
-	return godot::Memory::alloc_static(p_size);
-}
-
-void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)) {
-	return p_allocfunc(p_size);
-}
-
-using namespace godot;
-
-#ifdef _MSC_VER
-void operator delete(void *p_mem, const char *p_description) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-void operator delete(void *p_mem, void *(*p_allocfunc)(size_t p_size)) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_description) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-#endif
+#endif // VSET_H

@@ -209,6 +209,9 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, const char *p_name, M 
 
 	return bind;
 }
+
+#define GDREGISTER_CLASS(m_class) ClassDB::register_class<m_class>();
+
 } // namespace godot
 
 #endif // ! CLASS_DB_HPP

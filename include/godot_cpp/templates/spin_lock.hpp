@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  memory.cpp                                                           */
+/*  spin_lock.hpp                                                        */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,58 +28,27 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include <godot_cpp/core/memory.hpp>
+#ifndef SPIN_LOCK_HPP
+#define SPIN_LOCK_HPP
 
-#include <godot_cpp/godot.hpp>
+#include <atomic>
 
 namespace godot {
 
-void *Memory::alloc_static(size_t p_bytes) {
-	return internal::gdn_interface->mem_alloc(p_bytes);
-}
+class SpinLock {
+	std::atomic_flag locked = ATOMIC_FLAG_INIT;
 
-void *Memory::realloc_static(void *p_memory, size_t p_bytes) {
-	return internal::gdn_interface->mem_realloc(p_memory, p_bytes);
-}
-
-void Memory::free_static(void *p_ptr) {
-	internal::gdn_interface->mem_free(p_ptr);
-}
-
-_GlobalNil::_GlobalNil() {
-	left = this;
-	right = this;
-	parent = this;
-}
-
-_GlobalNil _GlobalNilClass::_nil;
+public:
+	_ALWAYS_INLINE_ void lock() {
+		while (locked.test_and_set(std::memory_order_acquire)) {
+			;
+		}
+	}
+	_ALWAYS_INLINE_ void unlock() {
+		locked.clear(std::memory_order_release);
+	}
+};
 
 } // namespace godot
 
-void *operator new(size_t p_size, const char *p_description) {
-	return godot::Memory::alloc_static(p_size);
-}
-
-void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)) {
-	return p_allocfunc(p_size);
-}
-
-using namespace godot;
-
-#ifdef _MSC_VER
-void operator delete(void *p_mem, const char *p_description) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-void operator delete(void *p_mem, void *(*p_allocfunc)(size_t p_size)) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_description) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-#endif
+#endif // ! SPIN_LOCK_HPP

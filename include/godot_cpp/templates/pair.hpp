@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  memory.cpp                                                           */
+/*  pair.hpp                                                             */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,58 +28,80 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include <godot_cpp/core/memory.hpp>
-
-#include <godot_cpp/godot.hpp>
+#ifndef PAIR_HPP
+#define PAIR_HPP
 
 namespace godot {
 
-void *Memory::alloc_static(size_t p_bytes) {
-	return internal::gdn_interface->mem_alloc(p_bytes);
+template <class F, class S>
+struct Pair {
+	F first;
+	S second;
+
+	Pair() :
+			first(),
+			second() {
+	}
+
+	Pair(F p_first, const S &p_second) :
+			first(p_first),
+			second(p_second) {
+	}
+};
+
+template <class F, class S>
+bool operator==(const Pair<F, S> &pair, const Pair<F, S> &other) {
+	return (pair.first == other.first) && (pair.second == other.second);
 }
 
-void *Memory::realloc_static(void *p_memory, size_t p_bytes) {
-	return internal::gdn_interface->mem_realloc(p_memory, p_bytes);
+template <class F, class S>
+bool operator!=(const Pair<F, S> &pair, const Pair<F, S> &other) {
+	return (pair.first != other.first) || (pair.second != other.second);
 }
 
-void Memory::free_static(void *p_ptr) {
-	internal::gdn_interface->mem_free(p_ptr);
+template <class F, class S>
+struct PairSort {
+	bool operator()(const Pair<F, S> &A, const Pair<F, S> &B) const {
+		if (A.first != B.first) {
+			return A.first < B.first;
+		}
+		return A.second < B.second;
+	}
+};
+
+template <class K, class V>
+struct KeyValue {
+	const K key;
+	V value;
+
+	void operator=(const KeyValue &p_kv) = delete;
+	_FORCE_INLINE_ KeyValue(const KeyValue &p_kv) :
+			key(p_kv.key),
+			value(p_kv.value) {
+	}
+	_FORCE_INLINE_ KeyValue(const K &p_key, const V &p_value) :
+			key(p_key),
+			value(p_value) {
+	}
+};
+
+template <class K, class V>
+bool operator==(const KeyValue<K, V> &pair, const KeyValue<K, V> &other) {
+	return (pair.key == other.key) && (pair.value == other.value);
 }
 
-_GlobalNil::_GlobalNil() {
-	left = this;
-	right = this;
-	parent = this;
+template <class K, class V>
+bool operator!=(const KeyValue<K, V> &pair, const KeyValue<K, V> &other) {
+	return (pair.key != other.key) || (pair.value != other.value);
 }
 
-_GlobalNil _GlobalNilClass::_nil;
+template <class K, class V>
+struct KeyValueSort {
+	bool operator()(const KeyValue<K, V> &A, const KeyValue<K, V> &B) const {
+		return A.key < B.key;
+	}
+};
 
 } // namespace godot
 
-void *operator new(size_t p_size, const char *p_description) {
-	return godot::Memory::alloc_static(p_size);
-}
-
-void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)) {
-	return p_allocfunc(p_size);
-}
-
-using namespace godot;
-
-#ifdef _MSC_VER
-void operator delete(void *p_mem, const char *p_description) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-void operator delete(void *p_mem, void *(*p_allocfunc)(size_t p_size)) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_description) {
-	ERR_PRINT("Call to placement delete should not happen.");
-	CRASH_NOW();
-}
-
-#endif
+#endif // ! PAIR_HPP
