@@ -623,7 +623,9 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     # Move constructor.
     result.append(f"{class_name}::{class_name}({class_name} &&other) {{")
     if needs_copy_instead_of_move(class_name) and copy_constructor_index >= 0:
-        result.append(f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &other);")
+        result.append(
+            f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &other);"
+        )
     else:
         result.append("\tstd::swap(opaque, other.opaque);")
     result.append("}")
@@ -741,7 +743,9 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     # Move assignment.
     result.append(f"{class_name} &{class_name}::operator=({class_name} &&other) {{")
     if needs_copy_instead_of_move(class_name) and copy_constructor_index >= 0:
-        result.append(f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &other);")
+        result.append(
+            f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &other);"
+        )
     else:
         result.append("\tstd::swap(opaque, other.opaque);")
     result.append("\treturn *this;")
@@ -1626,6 +1630,7 @@ def is_packed_array(type_name):
         "PackedVector3Array",
     ]
 
+
 def needs_copy_instead_of_move(type_name):
     """
     Those are types which need initialised data or we'll get warning spam so need a copy instead of move.
@@ -1633,6 +1638,7 @@ def needs_copy_instead_of_move(type_name):
     return type_name in [
         "Dictionary",
     ]
+
 
 def is_enum(type_name):
     return type_name.startswith("enum::")
