@@ -9,7 +9,6 @@ if sys.version_info < (3,):
     def decode_utf8(x):
         return x
 
-
 else:
     import codecs
 
@@ -265,7 +264,7 @@ elif env["platform"] == "ios":
         env.Append(CCFLAGS=["-arch", env["ios_arch"]])
 
     env.Append(CCFLAGS=["-isysroot", sdk_path])
-    env.Append(LINKFLAGS=["-isysroot", sdk_path, "-F" + sdk_path,])
+    env.Append(LINKFLAGS=["-isysroot", sdk_path, "-F" + sdk_path])
 
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-Og", "-g"])
