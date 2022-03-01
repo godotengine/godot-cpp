@@ -55,7 +55,7 @@ jobs:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.x'
 
@@ -157,7 +157,7 @@ jobs:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.x'
 
@@ -210,7 +210,7 @@ jobs:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.x'
 
@@ -249,7 +249,7 @@ jobs:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.x'
 
