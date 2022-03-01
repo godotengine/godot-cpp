@@ -103,12 +103,12 @@ void GDExtensionBinding::InitObject::register_scene_initializer(Callback p_scene
 	GDExtensionBinding::init_callbacks[GDNATIVE_INITIALIZATION_SCENE] = p_scene_init;
 }
 
-void GDExtensionBinding::InitObject::register_editor_initializer(Callback p_editor_init) const {
-	GDExtensionBinding::init_callbacks[GDNATIVE_INITIALIZATION_EDITOR] = p_editor_init;
-}
-
 void GDExtensionBinding::InitObject::register_driver_initializer(Callback p_driver_init) const {
 	GDExtensionBinding::init_callbacks[GDNATIVE_INITIALIZATION_DRIVER] = p_driver_init;
+}
+
+void GDExtensionBinding::InitObject::register_editor_initializer(Callback p_editor_init) const {
+	GDExtensionBinding::init_callbacks[GDNATIVE_INITIALIZATION_EDITOR] = p_editor_init;
 }
 
 void GDExtensionBinding::InitObject::register_core_terminator(Callback p_core_terminate) const {
@@ -123,12 +123,12 @@ void GDExtensionBinding::InitObject::register_scene_terminator(Callback p_scene_
 	GDExtensionBinding::terminate_callbacks[GDNATIVE_INITIALIZATION_SCENE] = p_scene_terminate;
 }
 
-void GDExtensionBinding::InitObject::register_editor_terminator(Callback p_editor_terminate) const {
-	GDExtensionBinding::terminate_callbacks[GDNATIVE_INITIALIZATION_EDITOR] = p_editor_terminate;
-}
-
 void GDExtensionBinding::InitObject::register_driver_terminator(Callback p_driver_terminate) const {
 	GDExtensionBinding::terminate_callbacks[GDNATIVE_INITIALIZATION_DRIVER] = p_driver_terminate;
+}
+
+void GDExtensionBinding::InitObject::register_editor_terminator(Callback p_editor_terminate) const {
+	GDExtensionBinding::terminate_callbacks[GDNATIVE_INITIALIZATION_EDITOR] = p_editor_terminate;
 }
 
 GDNativeBool GDExtensionBinding::InitObject::init() const {
