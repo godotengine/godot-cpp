@@ -268,9 +268,7 @@ public:
 
 	MethodBindT(void (MB_T::*p_method)(P...)) {
 		method = p_method;
-#ifdef DEBUG_METHODS_ENABLED
 		generate_argument_types(sizeof...(P));
-#endif // DEBUG_METHODS_ENABLED
 		set_argument_count(sizeof...(P));
 	}
 };
@@ -346,9 +344,7 @@ public:
 
 	MethodBindTC(void (MB_T::*p_method)(P...) const) {
 		method = p_method;
-#ifdef DEBUG_METHODS_ENABLED
 		generate_argument_types(sizeof...(P));
-#endif // DEBUG_METHODS_ENABLED
 		set_argument_count(sizeof...(P));
 	}
 };
@@ -430,9 +426,7 @@ public:
 
 	MethodBindTR(R (MB_T::*p_method)(P...)) {
 		method = p_method;
-#ifdef DEBUG_METHODS_ENABLED
 		generate_argument_types(sizeof...(P));
-#endif // DEBUG_METHODS_ENABLED
 		set_argument_count(sizeof...(P));
 		set_return(true);
 	}
@@ -515,9 +509,7 @@ public:
 
 	MethodBindTRC(R (MB_T::*p_method)(P...) const) {
 		method = p_method;
-#ifdef DEBUG_METHODS_ENABLED
 		generate_argument_types(sizeof...(P));
-#endif // DEBUG_METHODS_ENABLED
 		set_argument_count(sizeof...(P));
 		set_return(true);
 	}
