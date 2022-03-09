@@ -70,9 +70,10 @@ jobs:
           python -m pip install scons
 
       - name: Windows GCC dependency
-        if: ${{ matrix.platform == 'windows' }}
+        if: ${{ matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes' }}
         # Install GCC from Scoop as the default supplied GCC doesn't work ("Error 1").
         run: |
+          Set-ExecutionPolicy RemoteSigned -scope CurrentUser
           Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
           scoop install gcc
           g++ --version
