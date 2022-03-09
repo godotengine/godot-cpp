@@ -134,6 +134,17 @@ MethodInfo::MethodInfo(const PropertyInfo &p_ret, const char *p_name, const Args
 	arguments = { args... };
 }
 
+class ObjectDB {
+public:
+	static Object *get_instance(uint64_t p_object_id) {
+		GDNativeObjectPtr obj = internal::gdn_interface->object_get_instance_from_id(p_object_id);
+		if (obj == nullptr) {
+			return nullptr;
+		}
+		return reinterpret_cast<Object *>(internal::gdn_interface->object_get_instance_binding(obj, internal::token, &Object::___binding_callbacks));
+	}
+};
+
 template <class T>
 T *Object::cast_to(Object *p_object) {
 	GDNativeObjectPtr casted = internal::gdn_interface->object_cast_to(p_object->_owner, internal::gdn_interface->classdb_get_class_tag(T::get_class_static()));
