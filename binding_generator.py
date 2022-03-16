@@ -870,13 +870,29 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         result.append(f"#ifndef {header_guard}")
         result.append(f"#define {header_guard}")
 
+        used_classes = []
+        expanded_format = native_struct["format"].replace("(", " ").replace(")", ";").replace(",", ";")
+        for field in expanded_format.split(";"):
+            field_type = field.strip().split(" ")[0].split("::")[0]
+            if field_type != "" and not is_included_type(field_type) and not is_pod_type(field_type):
+                if not field_type in used_classes:
+                    used_classes.append(field_type)
+
         result.append("")
+
+        for included in used_classes:
+            result.append(f"#include <godot_cpp/{get_include_path(included)}>")
+
+        if len(used_classes) > 0:
+            result.append("")
+
         result.append("namespace godot {")
         result.append("")
 
         result.append(f"struct {struct_name} {{")
-        for field in native_struct["format"].split(","):
-            result.append(f"\t{field};")
+        for field in native_struct["format"].split(";"):
+            if field != "":
+                result.append(f"\t{field};")
         result.append("};")
 
         result.append("")
@@ -1582,10 +1598,15 @@ def is_pod_type(type_name):
     return type_name in [
         "Nil",
         "void",
-        "int",
-        "float",
         "bool",
+        "real_t",
+        "float",
         "double",
+        "int",
+        "int8_t",
+        "uint8_t",
+        "int16_t",
+        "uint16_t",
         "int32_t",
         "int64_t",
         "uint32_t",
@@ -1601,6 +1622,7 @@ def is_included_type(type_name):
         "AABB",
         "Basis",
         "Color",
+        "ObjectID",
         "Plane",
         "Quaternion",
         "Rect2",
