@@ -134,6 +134,28 @@ MethodInfo::MethodInfo(const PropertyInfo &p_ret, const char *p_name, const Args
 	arguments = { args... };
 }
 
+class ObjectID {
+	uint64_t id = 0;
+
+public:
+	_FORCE_INLINE_ bool is_ref_counted() const { return (id & (uint64_t(1) << 63)) != 0; }
+	_FORCE_INLINE_ bool is_valid() const { return id != 0; }
+	_FORCE_INLINE_ bool is_null() const { return id == 0; }
+	_FORCE_INLINE_ operator uint64_t() const { return id; }
+	_FORCE_INLINE_ operator int64_t() const { return id; }
+
+	_FORCE_INLINE_ bool operator==(const ObjectID &p_id) const { return id == p_id.id; }
+	_FORCE_INLINE_ bool operator!=(const ObjectID &p_id) const { return id != p_id.id; }
+	_FORCE_INLINE_ bool operator<(const ObjectID &p_id) const { return id < p_id.id; }
+
+	_FORCE_INLINE_ void operator=(int64_t p_int64) { id = p_int64; }
+	_FORCE_INLINE_ void operator=(uint64_t p_uint64) { id = p_uint64; }
+
+	_FORCE_INLINE_ ObjectID() {}
+	_FORCE_INLINE_ explicit ObjectID(const uint64_t p_id) { id = p_id; }
+	_FORCE_INLINE_ explicit ObjectID(const int64_t p_id) { id = p_id; }
+};
+
 class ObjectDB {
 public:
 	static Object *get_instance(uint64_t p_object_id) {
