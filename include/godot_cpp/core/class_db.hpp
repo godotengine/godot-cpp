@@ -155,10 +155,11 @@ void ClassDB::register_class() {
 		nullptr, // GDNativeExtensionClassNotification notification_func;
 		nullptr, // GDNativeExtensionClassToString to_string_func;
 		nullptr, // GDNativeExtensionClassReference reference_func;
-		nullptr, // GDNativeExtensionClassUnreference
+		nullptr, // GDNativeExtensionClassUnreference unreference_func;
 		T::create, // GDNativeExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
 		T::free, // GDNativeExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
 		&ClassDB::get_virtual_func, // GDNativeExtensionClassGetVirtual get_virtual_func;
+		nullptr, // GDNativeExtensionClassGetRID get_rid;
 		(void *)cl.name, // void *class_userdata;
 	};
 
