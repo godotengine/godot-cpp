@@ -4,6 +4,7 @@
 # godot-cpp cmake arguments
 # GODOT_HEADERS_DIR:		This is where the gdnative include folder is (godot_source/modules/gdnative/include)
 # GODOT_CUSTOM_API_FILE:	This is if you have another path for the godot_api.json
+# FLOAT_TYPE				Floating-point precision (32, 64)
 #
 # Android cmake arguments
 # CMAKE_TOOLCHAIN_FILE:		The path to the android cmake toolchain ($ANDROID_NDK/build/cmake/android.toolchain.cmake)
@@ -59,6 +60,16 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(FLOAT_TYPE_FLAG "float" CACHE STRING "")
+if(FLOAT_TYPE EQUAL 64)
+	set(FLOAT_TYPE_FLAG "double" CACHE STRING "")
+endif(FLOAT_TYPE EQUAL 64)
+
+set(BITS 32)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	set(BITS 64)
+endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 
 # Input from user for godot headers and the api file
 set(GODOT_HEADERS_DIR "godot-headers" CACHE STRING "")
@@ -139,7 +150,7 @@ execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; 
 )
 
 add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
-		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
+		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${BITS}\", \"${FLOAT_TYPE_FLAG}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
 		VERBATIM
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		MAIN_DEPENDENCY ${GODOT_CUSTOM_API_FILE}
@@ -184,11 +195,6 @@ set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS ${GODOT_LI
 
 
 # Create the correct name (godot.os.build_type.system_bits)
-
-set(BITS 32)
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-	set(BITS 64)
-endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 
 string(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME)
 string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
