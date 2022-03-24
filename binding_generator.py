@@ -1119,12 +1119,21 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                     return_type = method["return_value"]["type"]
                     meta_type = method["return_value"]["meta"] if "meta" in method["return_value"] else None
                     if is_pod_type(return_type) or is_variant(return_type) or is_enum(return_type):
-                        method_call += f"return internal::_call_native_mb_ret<{get_gdnative_type(correct_type(return_type, meta_type))}>(___method_bind, _owner"
+                        if method["is_static"]:
+                            method_call += f"return internal::_call_native_mb_ret<{get_gdnative_type(correct_type(return_type, meta_type))}>(___method_bind, nullptr"
+                        else:
+                            method_call += f"return internal::_call_native_mb_ret<{get_gdnative_type(correct_type(return_type, meta_type))}>(___method_bind, _owner"
                     elif is_refcounted(return_type):
-                        method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
+                        if method["is_static"]:
+                            method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _nullptr"
+                        else:
+                            method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
                         is_ref = True
                     else:
-                        method_call += f"return internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
+                        if method["is_static"]:
+                            method_call += f"return internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, nullptr"
+                        else:
+                            method_call += f"return internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
                 else:
                     method_call += f"internal::_call_native_mb_no_ret(___method_bind, _owner"
 
@@ -1511,7 +1520,9 @@ def make_signature(
 
     function_signature += ")"
 
-    if "is_const" in function_data and function_data["is_const"]:
+    if "is_static" in function_data and function_data["is_static"] and for_header:
+        function_signature = "static " + function_signature
+    elif "is_const" in function_data and function_data["is_const"]:
         function_signature += " const"
 
     return function_signature
