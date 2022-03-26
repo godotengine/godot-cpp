@@ -100,7 +100,10 @@ else()
 	set(GODOT_LINKER_FLAGS "-static-libgcc -static-libstdc++ -Wl,-R,'$$ORIGIN'")
 
 	# Hmm.. maybe to strikt?
-	set(GODOT_COMPILE_FLAGS "-fPIC -g -Wwrite-strings")
+	if(NOT CMAKE_SYSTEM_NAME MATCHES "Windows")
+		set(GODOT_COMPILE_FLAGS "-fPIC")
+	endif()
+	set(GODOT_COMPILE_FLAGS "-g -Wwrite-strings")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wchar-subscripts -Wcomment -Wdisabled-optimization")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wformat -Wformat=2 -Wformat-security -Wformat-y2k")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wimport -Winit-self -Winline -Winvalid-pch")
