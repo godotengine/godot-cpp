@@ -1058,6 +1058,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
     add_header(f"{snake_class_name}.cpp", result)
 
     result.append(f"#include <godot_cpp/classes/{snake_class_name}.hpp>")
+    result.append(f"#include <godot_cpp/classes/global_constants_binds.hpp>")
     result.append("")
     result.append(f"#include <godot_cpp/core/engine_ptrcall.hpp>")
     result.append(f"#include <godot_cpp/core/error_macros.hpp>")
@@ -1163,7 +1164,11 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             result.append(method_call)
 
             if vararg and ("return_value" in method and method["return_value"]["type"] != "void"):
-                result.append("\treturn ret;")
+                return_type = method["return_value"]["type"].replace("enum::", "")
+                if return_type != "Variant":
+                    result.append(f"\treturn VariantCaster<{return_type}>::cast(ret);")
+                else:
+                    result.append("\treturn ret;")
 
             result.append("}")
             result.append("")

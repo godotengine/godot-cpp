@@ -125,21 +125,19 @@ public:
 	virtual ~MethodBind();
 };
 
-template <class T>
-class MethodBindVarArg : public MethodBind {
-public:
-	typedef Variant (T::*NativeCall)(const Variant **, GDNativeInt, GDNativeCallError &);
-
+template <class Derived, class T, class R, bool should_returns>
+class MethodBindVarArgBase : public MethodBind {
 protected:
-	NativeCall call_method = nullptr;
-	MethodInfo arguments;
+	R(T::*method)
+	(const Variant **, GDNativeInt, GDNativeCallError &);
+	MethodInfo method_info;
 
 public:
 	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
 		if (p_arg < 0) {
-			return arguments.return_val;
-		} else if (p_arg < arguments.arguments.size()) {
-			return arguments.arguments[p_arg];
+			return _gen_return_type_info();
+		} else if (p_arg < method_info.arguments.size()) {
+			return method_info.arguments[p_arg];
 		} else {
 			return PropertyInfo(Variant::NIL, "vararg", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
 		}
@@ -153,50 +151,98 @@ public:
 		return GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
-		T *instance = static_cast<T *>(p_instance);
-		return (instance->*call_method)((const Variant **)p_args, p_argument_count, r_error);
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_return) const {
+		ERR_FAIL(); // Can't call.
 	}
 
-	void set_method_info(const MethodInfo &p_info, bool p_return_nil_is_variant) {
-		set_argument_count((int)p_info.arguments.size());
-		if (p_info.arguments.size()) {
+	virtual bool is_const() const { return false; }
+
+	virtual bool is_vararg() const { return true; }
+
+	MethodBindVarArgBase(
+			R (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &),
+			const MethodInfo &p_method_info,
+			bool p_return_nil_is_variant) :
+			method(p_method), method_info(p_method_info) {
+		set_argument_count(method_info.arguments.size());
+		if (method_info.arguments.size()) {
 			std::vector<std::string> names;
-			names.reserve(p_info.arguments.size());
-			for (int i = 0; i < p_info.arguments.size(); i++) {
-				names.push_back(p_info.arguments[i].name);
+			names.reserve(method_info.arguments.size());
+			for (int i = 0; i < method_info.arguments.size(); i++) {
+				names.push_back(method_info.arguments[i].name);
 			}
 
 			set_argument_names(names);
 		}
 
-		arguments = p_info;
-
 		if (p_return_nil_is_variant) {
-			arguments.return_val.usage |= PROPERTY_USAGE_NIL_IS_VARIANT;
+			method_info.return_val.usage |= PROPERTY_USAGE_NIL_IS_VARIANT;
 		}
-		generate_argument_types((int)p_info.arguments.size());
+		generate_argument_types((int)method_info.arguments.size());
+		set_return(should_returns);
 	}
 
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_return) const {
-		ERR_FAIL(); // Can't call.
-	}
-
-	void set_method(NativeCall p_method) { call_method = p_method; }
-	virtual bool is_const() const { return false; }
-
-	virtual bool is_vararg() const { return true; }
-
-	MethodBindVarArg() {
-		set_return(true);
+private:
+	GDNativePropertyInfo _gen_return_type_info() const {
+		return reinterpret_cast<const Derived *>(this)->_gen_return_type_info_impl();
 	}
 };
 
 template <class T>
-MethodBind *create_vararg_method_bind(Variant (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
-	MethodBindVarArg<T> *a = memnew(MethodBindVarArg<T>());
-	a->set_method(p_method);
-	a->set_method_info(p_info, p_return_nil_is_variant);
+class MethodBindVarArgT : public MethodBindVarArgBase<MethodBindVarArgT<T>, T, void, false> {
+	friend class MethodBindVarArgBase<MethodBindVarArgT<T>, T, void, false>;
+
+public:
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
+		(static_cast<T *>(p_instance)->*MethodBindVarArgBase<MethodBindVarArgT<T>, T, void, false>::method)((const Variant **)p_args, p_argument_count, r_error);
+		return {};
+	}
+
+	MethodBindVarArgT(
+			void (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &),
+			const MethodInfo &p_method_info,
+			bool p_return_nil_is_variant) :
+			MethodBindVarArgBase<MethodBindVarArgT<T>, T, void, false>(p_method, p_method_info, p_return_nil_is_variant) {
+	}
+
+private:
+	GDNativePropertyInfo _gen_return_type_info_impl() const {
+		return {};
+	}
+};
+
+template <class T>
+MethodBind *create_vararg_method_bind(void (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
+	MethodBind *a = memnew((MethodBindVarArgT<T>)(p_method, p_info, p_return_nil_is_variant));
+	a->set_instance_class(T::get_class_static());
+	return a;
+}
+
+template <class T, class R>
+class MethodBindVarArgTR : public MethodBindVarArgBase<MethodBindVarArgTR<T, R>, T, R, true> {
+	friend class MethodBindVarArgBase<MethodBindVarArgTR<T, R>, T, R, true>;
+
+public:
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
+		return (static_cast<T *>(p_instance)->*MethodBindVarArgBase<MethodBindVarArgTR<T, R>, T, R, true>::method)((const Variant **)p_args, p_argument_count, r_error);
+	}
+
+	MethodBindVarArgTR(
+			R (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &),
+			const MethodInfo &p_info,
+			bool p_return_nil_is_variant) :
+			MethodBindVarArgBase<MethodBindVarArgTR<T, R>, T, R, true>(p_method, p_info, p_return_nil_is_variant) {
+	}
+
+private:
+	GDNativePropertyInfo _gen_return_type_info_impl() const {
+		return GetTypeInfo<R>::get_class_info();
+	}
+};
+
+template <class T, class R>
+MethodBind *create_vararg_method_bind(R (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
+	MethodBind *a = memnew((MethodBindVarArgTR<T, R>)(p_method, p_info, p_return_nil_is_variant));
 	a->set_instance_class(T::get_class_static());
 	return a;
 }
