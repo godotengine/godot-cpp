@@ -87,6 +87,8 @@ public:
 	ExampleRef *return_extended_ref() const;
 	Ref<ExampleRef> extended_ref_checks(Ref<ExampleRef> p_ref) const;
 	Variant varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
+	int varargs_func_nv(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
+	void varargs_func_void(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
 	void emit_custom_signal(const String &name, int value);
 
 	Array test_array() const;

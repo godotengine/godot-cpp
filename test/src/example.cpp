@@ -65,6 +65,20 @@ void Example::_bind_methods() {
 		ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "varargs_func", &Example::varargs_func, mi);
 	}
 
+	{
+		MethodInfo mi;
+		mi.arguments.push_back(PropertyInfo(Variant::STRING, "some_argument"));
+		mi.name = "varargs_func_nv";
+		ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "varargs_func_nv", &Example::varargs_func_nv, mi);
+	}
+
+	{
+		MethodInfo mi;
+		mi.arguments.push_back(PropertyInfo(Variant::STRING, "some_argument"));
+		mi.name = "varargs_func_void";
+		ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "varargs_func_void", &Example::varargs_func_void, mi);
+	}
+
 	// Properties.
 	ADD_GROUP("Test group", "group_");
 	ADD_SUBGROUP("Test subgroup", "group_subgroup_");
@@ -129,8 +143,17 @@ Ref<ExampleRef> Example::extended_ref_checks(Ref<ExampleRef> p_ref) const {
 }
 
 Variant Example::varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
-	UtilityFunctions::print("Varargs called with ", String::num((double)arg_count), " arguments");
+	UtilityFunctions::print("Varargs (Variant return) called with ", String::num((double)arg_count), " arguments");
 	return arg_count;
+}
+
+int Example::varargs_func_nv(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
+	UtilityFunctions::print("Varargs (int return) called with ", String::num((double)arg_count), " arguments");
+	return 42;
+}
+
+void Example::varargs_func_void(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
+	UtilityFunctions::print("Varargs (no return) called with ", String::num((double)arg_count), " arguments");
 }
 
 void Example::emit_custom_signal(const String &name, int value) {

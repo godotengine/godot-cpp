@@ -13,6 +13,8 @@ func _ready():
 	var ref = ExampleRef.new()
 	prints("sending ref: ", ref.get_instance_id(), "returned ref: ", $Example.extended_ref_checks(ref).get_instance_id())
 	prints("vararg args", $Example.varargs_func("some", "arguments", "to", "test"))
+	prints("vararg_nv ret", $Example.varargs_func_nv("some", "arguments", "to", "test"))
+	$Example.varargs_func_void("some", "arguments", "to", "test")
 
 	prints("test array", $Example.test_array())
 	prints("test dictionary", $Example.test_dictionary())
