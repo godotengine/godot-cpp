@@ -99,7 +99,7 @@ jobs:
           ./${{ matrix.executable }} --path test -s script.gd
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
