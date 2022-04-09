@@ -88,7 +88,7 @@ jobs:
           scons platform=${{ matrix.platform }} target=release ${{ matrix.flags }} -j2
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
@@ -170,7 +170,7 @@ jobs:
           scons target=release -j $env:NUMBER_OF_PROCESSORS
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: godot-cpp-windows-msvc2019-x86_64-release
           path: bin/libgodot-cpp.windows.release.64.lib
@@ -226,7 +226,7 @@ jobs:
       #    scons target=release use_mingw=yes -j $env:NUMBER_OF_PROCESSORS
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: godot-cpp-linux-mingw-x86_64-release
           path: bin/libgodot-cpp.windows.release.64.a
