@@ -171,14 +171,14 @@ public:
 		return res;
 	}
 
-	inline Color to_linear() const {
+	inline Color srgb_to_linear() const {
 		return Color(
 				r < (real_t)0.04045 ? r * (real_t)(1.0 / 12.92) : Math::pow((r + (real_t)0.055) * (real_t)(1.0 / (1.0 + 0.055)), (real_t)2.4),
 				g < (real_t)0.04045 ? g * (real_t)(1.0 / 12.92) : Math::pow((g + (real_t)0.055) * (real_t)(1.0 / (1.0 + 0.055)), (real_t)2.4),
 				b < (real_t)0.04045 ? b * (real_t)(1.0 / 12.92) : Math::pow((b + (real_t)0.055) * (real_t)(1.0 / (1.0 + 0.055)), (real_t)2.4),
 				a);
 	}
-	inline Color to_srgb() const {
+	inline Color linear_to_srgb() const {
 		return Color(
 				r < (real_t)0.0031308 ? (real_t)12.92 * r : (real_t)(1.0 + 0.055) * Math::pow(r, (real_t)(1.0 / 2.4)) - (real_t)0.055,
 				g < (real_t)0.0031308 ? (real_t)12.92 * g : (real_t)(1.0 + 0.055) * Math::pow(g, (real_t)(1.0 / 2.4)) - (real_t)0.055,
