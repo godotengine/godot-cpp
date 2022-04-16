@@ -71,11 +71,13 @@ public:
 		void register_driver_initializer(Callback p_driver_init) const;
 		void register_scene_initializer(Callback p_scene_init) const;
 		void register_editor_initializer(Callback p_editor_init) const;
+		void ready_initializer(Callback p_ready_init) const;
 		void register_core_terminator(Callback p_core_terminate) const;
 		void register_server_terminator(Callback p_server_terminate) const;
 		void register_scene_terminator(Callback p_scene_terminate) const;
 		void register_driver_terminator(Callback p_driver_terminate) const;
 		void register_editor_terminator(Callback p_editor_terminate) const;
+		void ready_terminator(Callback p_ready_terminate) const;
 
 		GDNativeBool init() const;
 	};

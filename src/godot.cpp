@@ -111,6 +111,10 @@ void GDExtensionBinding::InitObject::register_editor_initializer(Callback p_edit
 	GDExtensionBinding::init_callbacks[GDNATIVE_INITIALIZATION_EDITOR] = p_editor_init;
 }
 
+void GDExtensionBinding::InitObject::ready_initializer(Callback p_ready_init) const {
+	GDExtensionBinding::init_callbacks[GDNATIVE_INITIALIZATION_READY] = p_ready_init;
+}
+
 void GDExtensionBinding::InitObject::register_core_terminator(Callback p_core_terminate) const {
 	GDExtensionBinding::terminate_callbacks[GDNATIVE_INITIALIZATION_CORE] = p_core_terminate;
 }
@@ -129,6 +133,10 @@ void GDExtensionBinding::InitObject::register_driver_terminator(Callback p_drive
 
 void GDExtensionBinding::InitObject::register_editor_terminator(Callback p_editor_terminate) const {
 	GDExtensionBinding::terminate_callbacks[GDNATIVE_INITIALIZATION_EDITOR] = p_editor_terminate;
+}
+
+void GDExtensionBinding::InitObject::ready_terminator(Callback p_ready_terminate) const {
+	GDExtensionBinding::terminate_callbacks[GDNATIVE_INITIALIZATION_READY] = p_ready_terminate;
 }
 
 GDNativeBool GDExtensionBinding::InitObject::init() const {
