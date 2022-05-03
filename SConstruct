@@ -81,7 +81,7 @@ else:
 
 env = Environment(ENV=os.environ)
 
-is64 = sys.maxsize > 2 ** 32
+is64 = sys.maxsize > 2**32
 if (
     env["TARGET_ARCH"] == "amd64"
     or env["TARGET_ARCH"] == "emt64"

@@ -1132,9 +1132,13 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                         is_ref = True
                     else:
                         if method["is_static"]:
-                            method_call += f"return internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, nullptr"
+                            method_call += (
+                                f"return internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, nullptr"
+                            )
                         else:
-                            method_call += f"return internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
+                            method_call += (
+                                f"return internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
+                            )
                 else:
                     if method["is_static"]:
                         method_call += f"internal::_call_native_mb_no_ret(___method_bind, nullptr"
