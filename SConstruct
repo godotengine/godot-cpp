@@ -409,7 +409,12 @@ elif env["platform"] == "android":
         env.Append(CCFLAGS=["-O3"])
 
 elif env["platform"] == "javascript":
-    env["ENV"] = os.environ
+    if host_platform == "windows":
+        env = Environment(ENV=os.environ, tools=["cc", "c++", "ar", "link", "textfile", "zip"])
+        opts.Update(env)
+    else:
+        env["ENV"] = os.environ
+
     env["CC"] = "emcc"
     env["CXX"] = "em++"
     env["AR"] = "emar"
