@@ -31,7 +31,10 @@
 #ifndef EXAMPLE_REGISTER_TYPES_H
 #define EXAMPLE_REGISTER_TYPES_H
 
-void register_example_types();
-void unregister_example_types();
+#include <godot_cpp/core/class_db.hpp>
+using namespace godot;
+
+void initialize_example_module(ModuleInitializationLevel p_level);
+void uninitialize_example_module(ModuleInitializationLevel p_level);
 
 #endif // ! EXAMPLE_REGISTER_TYPES_H
