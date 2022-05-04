@@ -95,9 +95,9 @@ void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, con
 
 	// register with Godot
 	GDNativePropertyInfo prop_info = {
-		(uint32_t)p_pinfo.type, //uint32_t type;
-		p_pinfo.name, //const char *name;
-		p_pinfo.class_name, //const char *class_name;
+		(uint32_t)p_pinfo.type, // uint32_t type;
+		p_pinfo.name, // const char *name;
+		p_pinfo.class_name, // const char *class_name;
 		p_pinfo.hint, // NONE //uint32_t hint;
 		p_pinfo.hint_string, // const char *hint_string;
 		p_pinfo.usage, // DEFAULT //uint32_t usage;
@@ -169,6 +169,16 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 
 	p_bind->set_argument_names(args);
 
+	std::vector<Variant> defvals;
+
+	defvals.resize(p_defcount);
+	for (int i = 0; i < p_defcount; i++) {
+		defvals[i] = *static_cast<const Variant *>(p_defs[i]);
+	}
+
+	p_bind->set_default_arguments(defvals);
+	p_bind->set_hint_flags(p_flags);
+
 	// register our method bind within our plugin
 	type.method_map[method_name.name] = p_bind;
 
@@ -179,19 +189,27 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 }
 
 void ClassDB::bind_method_godot(const char *p_class_name, MethodBind *p_method) {
+	std::vector<GDNativeVariantPtr> def_args;
+	const std::vector<Variant> &def_args_val = p_method->get_default_arguments();
+
+	def_args.resize(def_args_val.size());
+	for (int i = 0; i < def_args_val.size(); i++) {
+		def_args[i] = (GDNativeVariantPtr)&def_args_val[i];
+	}
+
 	GDNativeExtensionClassMethodInfo method_info = {
-		p_method->get_name(), //const char *name;
-		p_method, //void *method_userdata;
-		MethodBind::bind_call, //GDNativeExtensionClassMethodCall call_func;
-		MethodBind::bind_ptrcall, //GDNativeExtensionClassMethodPtrCall ptrcall_func;
-		GDNATIVE_EXTENSION_METHOD_FLAGS_DEFAULT, //uint32_t method_flags; /* GDNativeExtensionClassMethodFlags */
-		(uint32_t)p_method->get_argument_count(), //uint32_t argument_count;
-		(GDNativeBool)p_method->has_return(), //GDNativeBool has_return_value;
+		p_method->get_name(), // const char *name;
+		p_method, // void *method_userdata;
+		MethodBind::bind_call, // GDNativeExtensionClassMethodCall call_func;
+		MethodBind::bind_ptrcall, // GDNativeExtensionClassMethodPtrCall ptrcall_func;
+		p_method->get_hint_flags(), // uint32_t method_flags; /* GDNativeExtensionClassMethodFlags */
+		(uint32_t)p_method->get_argument_count(), // uint32_t argument_count;
+		(GDNativeBool)p_method->has_return(), // GDNativeBool has_return_value;
 		MethodBind::bind_get_argument_type, //(GDNativeExtensionClassMethodGetArgumentType) get_argument_type_func;
-		MethodBind::bind_get_argument_info, //GDNativeExtensionClassMethodGetArgumentInfo get_argument_info_func; /* name and hint information for the argument can be omitted in release builds. Class name should always be present if it applies. */
-		MethodBind::bind_get_argument_metadata, //GDNativeExtensionClassMethodGetArgumentMetadata get_argument_metadata_func;
-		p_method->get_hint_flags(), //uint32_t default_argument_count;
-		nullptr, //GDNativeVariantPtr *default_arguments;
+		MethodBind::bind_get_argument_info, // GDNativeExtensionClassMethodGetArgumentInfo get_argument_info_func; /* name and hint information for the argument can be omitted in release builds. Class name should always be present if it applies. */
+		MethodBind::bind_get_argument_metadata, // GDNativeExtensionClassMethodGetArgumentMetadata get_argument_metadata_func;
+		(uint32_t)p_method->get_default_argument_count(), // uint32_t default_argument_count;
+		def_args.data(), // GDNativeVariantPtr *default_arguments;
 	};
 	internal::gdn_interface->classdb_register_extension_class_method(internal::library, p_class_name, &method_info);
 }

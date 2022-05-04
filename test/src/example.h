@@ -90,6 +90,7 @@ public:
 	int varargs_func_nv(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
 	void varargs_func_void(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
 	void emit_custom_signal(const String &name, int value);
+	int def_args(int p_a = 100, int p_b = 200);
 
 	Array test_array() const;
 	Dictionary test_dictionary() const;
@@ -97,6 +98,10 @@ public:
 	// Property.
 	void set_custom_position(const Vector2 &pos);
 	Vector2 get_custom_position() const;
+
+	// Static method.
+	static int test_static(int p_a, int p_b);
+	static void test_static2();
 
 	// Virtual function override (no need to bind manually).
 	virtual bool _has_point(const Vector2 &point) const override;

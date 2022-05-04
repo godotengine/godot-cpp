@@ -33,22 +33,22 @@
 namespace godot {
 
 MethodInfo::MethodInfo() :
-		flags(METHOD_FLAG_NORMAL) {}
+		flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {}
 
 MethodInfo::MethodInfo(const char *p_name) :
-		name(p_name), flags(METHOD_FLAG_NORMAL) {}
+		name(p_name), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {}
 
 MethodInfo::MethodInfo(Variant::Type ret) :
-		flags(METHOD_FLAG_NORMAL) {
+		flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
 	return_val.type = ret;
 }
 
 MethodInfo::MethodInfo(Variant::Type ret, const char *p_name) :
-		name(p_name), flags(METHOD_FLAG_NORMAL) {
+		name(p_name), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
 	return_val.type = ret;
 }
 
 MethodInfo::MethodInfo(const PropertyInfo &p_ret, const char *p_name) :
-		name(p_name), return_val(p_ret), flags(METHOD_FLAG_NORMAL) {}
+		name(p_name), return_val(p_ret), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {}
 
 } // namespace godot
