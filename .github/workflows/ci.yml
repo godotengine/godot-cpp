@@ -15,6 +15,13 @@ jobs:
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.release.64.a
 
+          - name: 🐧 Linux (GCC, Double Precision)
+            os: ubuntu-18.04
+            platform: linux
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
+            artifact-path: bin/libgodot-cpp.linux.release.64.a
+            flags: float=64
+
           - name: 🏁 Windows (x86_64, MSVC)
             os: windows-2019
             platform: windows

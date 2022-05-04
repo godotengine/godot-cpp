@@ -139,6 +139,7 @@ opts.Add(
 opts.Add(BoolVariable("generate_template_get_node", "Generate a template version of the Node class's get_node.", True))
 
 opts.Add(BoolVariable("build_library", "Build the godot-cpp library.", True))
+opts.Add(EnumVariable("float", "Floating-point precision", "32", ("32", "64")))
 
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
@@ -170,6 +171,9 @@ else:
 
 if env["target"] == "debug":
     env.Append(CPPDEFINES=["DEBUG_ENABLED", "DEBUG_METHODS_ENABLED"])
+
+if env["float"] == "64":
+    env.Append(CPPDEFINES=["REAL_T_IS_DOUBLE"])
 
 if env["platform"] == "linux" or env["platform"] == "freebsd":
     if env["use_llvm"]:

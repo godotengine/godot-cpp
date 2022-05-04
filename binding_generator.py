@@ -64,11 +64,17 @@ def scons_emit_files(target, source, env):
 
 
 def scons_generate_bindings(target, source, env):
-    generate_bindings(str(source[0]), env["generate_template_get_node"], target[0].abspath)
+    generate_bindings(
+        str(source[0]),
+        env["generate_template_get_node"],
+        env["bits"],
+        "double" if (env["float"] == "64") else "float",
+        target[0].abspath,
+    )
     return None
 
 
-def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
+def generate_bindings(api_filepath, use_template_get_node, bits="64", double="float", output_dir="."):
     api = None
 
     target_dir = Path(output_dir) / "gen"
@@ -79,9 +85,11 @@ def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
     shutil.rmtree(target_dir, ignore_errors=True)
     target_dir.mkdir(parents=True)
 
+    print("Built-in type config: " + double + "_" + bits)
+
     generate_global_constants(api, target_dir)
     generate_global_constant_binds(api, target_dir)
-    generate_builtin_bindings(api, target_dir, "float_64")
+    generate_builtin_bindings(api, target_dir, double + "_" + bits)
     generate_engine_classes_bindings(api, target_dir, use_template_get_node)
     generate_utility_functions(api, target_dir)
 

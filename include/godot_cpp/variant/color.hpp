@@ -159,7 +159,7 @@ public:
 
 	inline Color blend(const Color &p_over) const {
 		Color res;
-		float sa = (real_t)1.0 - p_over.a;
+		float sa = 1.0 - p_over.a;
 		res.a = a * sa + p_over.a;
 		if (res.a == 0) {
 			return Color(0, 0, 0, 0);
@@ -173,16 +173,16 @@ public:
 
 	inline Color srgb_to_linear() const {
 		return Color(
-				r < (real_t)0.04045 ? r * (real_t)(1.0 / 12.92) : Math::pow((r + (real_t)0.055) * (real_t)(1.0 / (1.0 + 0.055)), (real_t)2.4),
-				g < (real_t)0.04045 ? g * (real_t)(1.0 / 12.92) : Math::pow((g + (real_t)0.055) * (real_t)(1.0 / (1.0 + 0.055)), (real_t)2.4),
-				b < (real_t)0.04045 ? b * (real_t)(1.0 / 12.92) : Math::pow((b + (real_t)0.055) * (real_t)(1.0 / (1.0 + 0.055)), (real_t)2.4),
+				r < 0.04045 ? r * (1.0 / 12.92) : Math::pow((r + 0.055f) * (1.0 / (1.0 + 0.055)), 2.4),
+				g < 0.04045 ? g * (1.0 / 12.92) : Math::pow((g + 0.055f) * (1.0 / (1.0 + 0.055)), 2.4),
+				b < 0.04045 ? b * (1.0 / 12.92) : Math::pow((b + 0.055f) * (1.0 / (1.0 + 0.055)), 2.4),
 				a);
 	}
 	inline Color linear_to_srgb() const {
 		return Color(
-				r < (real_t)0.0031308 ? (real_t)12.92 * r : (real_t)(1.0 + 0.055) * Math::pow(r, (real_t)(1.0 / 2.4)) - (real_t)0.055,
-				g < (real_t)0.0031308 ? (real_t)12.92 * g : (real_t)(1.0 + 0.055) * Math::pow(g, (real_t)(1.0 / 2.4)) - (real_t)0.055,
-				b < (real_t)0.0031308 ? (real_t)12.92 * b : (real_t)(1.0 + 0.055) * Math::pow(b, (real_t)(1.0 / 2.4)) - (real_t)0.055, a);
+				r < 0.0031308f ? 12.92f * r : (1.0f + 0.055f) * Math::pow(r, 1.0f / 2.4f) - 0.055f,
+				g < 0.0031308f ? 12.92f * g : (1.0f + 0.055f) * Math::pow(g, 1.0f / 2.4f) - 0.055f,
+				b < 0.0031308f ? 12.92f * b : (1.0f + 0.055f) * Math::pow(b, 1.0f / 2.4f) - 0.055f, a);
 	}
 
 	static Color hex(uint32_t p_hex);
@@ -204,14 +204,14 @@ public:
 	operator String() const;
 
 	// For the binder.
-	inline void set_r8(int32_t r8) { r = (Math::clamp(r8, 0, 255) / (real_t)255.0); }
-	inline int32_t get_r8() const { return int32_t(Math::clamp(r * (real_t)255.0, (real_t)0.0, (real_t)255.0)); }
-	inline void set_g8(int32_t g8) { g = (Math::clamp(g8, 0, 255) / (real_t)255.0); }
-	inline int32_t get_g8() const { return int32_t(Math::clamp(g * (real_t)255.0, (real_t)0.0, (real_t)255.0)); }
-	inline void set_b8(int32_t b8) { b = (Math::clamp(b8, 0, 255) / (real_t)255.0); }
-	inline int32_t get_b8() const { return int32_t(Math::clamp(b * (real_t)255.0, (real_t)0.0, (real_t)255.0)); }
-	inline void set_a8(int32_t a8) { a = (Math::clamp(a8, 0, 255) / (real_t)255.0); }
-	inline int32_t get_a8() const { return int32_t(Math::clamp(a * (real_t)255.0, (real_t)0.0, (real_t)255.0)); }
+	inline void set_r8(int32_t r8) { r = (Math::clamp(r8, 0, 255) / 255.0); }
+	inline int32_t get_r8() const { return int32_t(Math::clamp(r * 255.0, 0.0, 255.0)); }
+	inline void set_g8(int32_t g8) { g = (Math::clamp(g8, 0, 255) / 255.0); }
+	inline int32_t get_g8() const { return int32_t(Math::clamp(g * 255.0, 0.0, 255.0)); }
+	inline void set_b8(int32_t b8) { b = (Math::clamp(b8, 0, 255) / 255.0); }
+	inline int32_t get_b8() const { return int32_t(Math::clamp(b * 255.0, 0.0, 255.0)); }
+	inline void set_a8(int32_t a8) { a = (Math::clamp(a8, 0, 255) / 255.0); }
+	inline int32_t get_a8() const { return int32_t(Math::clamp(a * 255.0, 0.0, 255.0)); }
 
 	inline void set_h(float p_h) { set_hsv(p_h, get_s(), get_v()); }
 	inline void set_s(float p_s) { set_hsv(get_h(), p_s, get_v()); }
