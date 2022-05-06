@@ -53,8 +53,10 @@ class MethodBind {
 	int argument_count = 0;
 	uint32_t hint_flags = METHOD_FLAGS_DEFAULT;
 
+	bool _static = false;
 	bool _is_const = false;
 	bool _has_return = false;
+	bool _vararg = false;
 
 	std::vector<std::string> argument_names;
 	GDNativeVariantType *argument_types = nullptr;
@@ -66,6 +68,8 @@ protected:
 	void generate_argument_types(int p_count);
 	void set_const(bool p_const);
 	void set_return(bool p_return);
+	void set_static(bool p_static);
+	void set_vararg(bool p_vararg);
 	void set_argument_count(int p_count);
 
 public:
@@ -96,8 +100,10 @@ public:
 
 	_FORCE_INLINE_ int get_argument_count() const { return argument_count; };
 	_FORCE_INLINE_ bool is_const() const { return _is_const; }
+	_FORCE_INLINE_ bool is_static() const { return _static; }
+	_FORCE_INLINE_ bool is_vararg() const { return _vararg; }
 	_FORCE_INLINE_ bool has_return() const { return _has_return; }
-	_FORCE_INLINE_ uint32_t get_hint_flags() const { return hint_flags; }
+	_FORCE_INLINE_ uint32_t get_hint_flags() const { return hint_flags | (is_const() ? GDNATIVE_EXTENSION_METHOD_FLAG_CONST : 0) | (is_vararg() ? GDNATIVE_EXTENSION_METHOD_FLAG_VARARG : 0) | (is_static() ? GDNATIVE_EXTENSION_METHOD_FLAG_STATIC : 0); }
 	_FORCE_INLINE_ void set_hint_flags(uint32_t p_hint_flags) { hint_flags = p_hint_flags; }
 	void set_argument_names(const std::vector<std::string> &p_names);
 	std::vector<std::string> get_argument_names() const;
@@ -155,15 +161,13 @@ public:
 		ERR_FAIL(); // Can't call.
 	}
 
-	virtual bool is_const() const { return false; }
-
-	virtual bool is_vararg() const { return true; }
-
 	MethodBindVarArgBase(
 			R (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &),
 			const MethodInfo &p_method_info,
 			bool p_return_nil_is_variant) :
 			method(p_method), method_info(p_method_info) {
+		set_vararg(true);
+		set_const(true);
 		set_argument_count(method_info.arguments.size());
 		if (method_info.arguments.size()) {
 			std::vector<std::string> names;
@@ -569,6 +573,138 @@ MethodBind *create_method_bind(R (T::*p_method)(P...) const) {
 	MethodBind *a = memnew((MethodBindTRC<R, P...>)(reinterpret_cast<R (MB_T::*)(P...) const>(p_method)));
 #endif // TYPED_METHOD_BIND
 	a->set_instance_class(T::get_class_static());
+	return a;
+}
+
+// STATIC BINDS
+
+// no return
+
+template <class... P>
+class MethodBindTS : public MethodBind {
+	void (*function)(P...);
+
+protected:
+// GCC raises warnings in the case P = {} as the comparison is always false...
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wlogical-op"
+#endif
+	virtual GDNativeVariantType gen_argument_type(int p_arg) const {
+		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
+			return call_get_argument_type<P...>(p_arg);
+		} else {
+			return GDNATIVE_VARIANT_TYPE_NIL;
+		}
+	}
+
+	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
+		GDNativePropertyInfo pi;
+		call_get_argument_type_info<P...>(p_arg, pi);
+		return pi;
+	}
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
+public:
+	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int p_arg) const {
+		return call_get_argument_metadata<P...>(p_arg);
+	}
+
+	virtual Variant call(GDExtensionClassInstancePtr p_object, const GDNativeVariantPtr *p_args, const GDNativeInt p_arg_count, GDNativeCallError &r_error) const {
+		(void)p_object; // unused
+		call_with_variant_args_static_dv(function, p_args, p_arg_count, r_error, get_default_arguments());
+		return Variant();
+	}
+
+	virtual void ptrcall(GDExtensionClassInstancePtr p_object, const GDNativeTypePtr *p_args, GDNativeTypePtr r_ret) const {
+		(void)p_object;
+		(void)r_ret;
+		call_with_ptr_args_static_method(function, p_args);
+	}
+
+	MethodBindTS(void (*p_function)(P...)) {
+		function = p_function;
+		generate_argument_types(sizeof...(P));
+		set_argument_count(sizeof...(P));
+		set_static(true);
+	}
+};
+
+template <class... P>
+MethodBind *create_static_method_bind(void (*p_method)(P...)) {
+	MethodBind *a = memnew((MethodBindTS<P...>)(p_method));
+	return a;
+}
+
+// return
+
+template <class R, class... P>
+class MethodBindTRS : public MethodBind {
+	R(*function)
+	(P...);
+
+protected:
+// GCC raises warnings in the case P = {} as the comparison is always false...
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wlogical-op"
+#endif
+	virtual GDNativeVariantType gen_argument_type(int p_arg) const {
+		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
+			return call_get_argument_type<P...>(p_arg);
+		} else {
+			return GetTypeInfo<R>::VARIANT_TYPE;
+		}
+	}
+
+	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
+		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
+			GDNativePropertyInfo pi;
+			call_get_argument_type_info<P...>(p_arg, pi);
+			return pi;
+		} else {
+			return GetTypeInfo<R>::get_class_info();
+		}
+	}
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
+public:
+	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int p_arg) const {
+		if (p_arg >= 0) {
+			return call_get_argument_metadata<P...>(p_arg);
+		} else {
+			return GetTypeInfo<R>::METADATA;
+		}
+	}
+
+	virtual Variant call(GDExtensionClassInstancePtr p_object, const GDNativeVariantPtr *p_args, const GDNativeInt p_arg_count, GDNativeCallError &r_error) const {
+		Variant ret;
+		call_with_variant_args_static_ret_dv(function, p_args, p_arg_count, ret, r_error, get_default_arguments());
+		return ret;
+	}
+
+	virtual void ptrcall(GDExtensionClassInstancePtr p_object, const GDNativeTypePtr *p_args, GDNativeTypePtr r_ret) const {
+		(void)p_object;
+		call_with_ptr_args_static_method_ret(function, p_args, r_ret);
+	}
+
+	MethodBindTRS(R (*p_function)(P...)) {
+		function = p_function;
+		generate_argument_types(sizeof...(P));
+		set_argument_count(sizeof...(P));
+		set_static(true);
+		set_return(true);
+	}
+};
+
+template <class R, class... P>
+MethodBind *create_static_method_bind(R (*p_method)(P...)) {
+	MethodBind *a = memnew((MethodBindTRS<R, P...>)(p_method));
 	return a;
 }
 

@@ -52,6 +52,14 @@ void MethodBind::set_return(bool p_return) {
 	_has_return = p_return;
 }
 
+void MethodBind::set_static(bool p_static) {
+	_static = p_static;
+}
+
+void MethodBind::set_vararg(bool p_vararg) {
+	_vararg = p_vararg;
+}
+
 void MethodBind::set_argument_names(const std::vector<std::string> &p_names) {
 	argument_names = p_names;
 }

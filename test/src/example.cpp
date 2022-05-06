@@ -46,6 +46,18 @@ ExampleRef::~ExampleRef() {
 	UtilityFunctions::print("ExampleRef destroyed.");
 }
 
+int Example::test_static(int p_a, int p_b) {
+	return p_a + p_b;
+}
+
+void Example::test_static2() {
+	UtilityFunctions::print("  void static");
+}
+
+int Example::def_args(int p_a, int p_b) {
+	return p_a + p_b;
+}
+
 void Example::_bind_methods() {
 	// Methods.
 	ClassDB::bind_method(D_METHOD("simple_func"), &Example::simple_func);
@@ -57,6 +69,11 @@ void Example::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("test_array"), &Example::test_array);
 	ClassDB::bind_method(D_METHOD("test_dictionary"), &Example::test_dictionary);
+
+	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
+
+	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
+	ClassDB::bind_static_method("Example", D_METHOD("test_static2"), &Example::test_static2);
 
 	{
 		MethodInfo mi;
@@ -108,20 +125,20 @@ Example::~Example() {
 
 // Methods.
 void Example::simple_func() {
-	UtilityFunctions::print("Simple func called.");
+	UtilityFunctions::print("  Simple func called.");
 }
 
 void Example::simple_const_func() const {
-	UtilityFunctions::print("Simple const func called.");
+	UtilityFunctions::print("  Simple const func called.");
 }
 
 String Example::return_something(const String &base) {
-	UtilityFunctions::print("Return something called.");
+	UtilityFunctions::print("  Return something called.");
 	return base;
 }
 
 Viewport *Example::return_something_const() const {
-	UtilityFunctions::print("Return something const called.");
+	UtilityFunctions::print("  Return something const called.");
 	if (is_inside_tree()) {
 		Viewport *result = get_viewport();
 		return result;
@@ -138,22 +155,22 @@ Ref<ExampleRef> Example::extended_ref_checks(Ref<ExampleRef> p_ref) const {
 	ref.instantiate();
 	// TODO the returned value gets dereferenced too early and return a null object otherwise.
 	ref->reference();
-	UtilityFunctions::print("Example ref checks called with value: ", p_ref->get_instance_id(), ", returning value: ", ref->get_instance_id());
+	UtilityFunctions::print("  Example ref checks called with value: ", p_ref->get_instance_id(), ", returning value: ", ref->get_instance_id());
 	return ref;
 }
 
 Variant Example::varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
-	UtilityFunctions::print("Varargs (Variant return) called with ", String::num((double)arg_count), " arguments");
+	UtilityFunctions::print("  Varargs (Variant return) called with ", String::num((double)arg_count), " arguments");
 	return arg_count;
 }
 
 int Example::varargs_func_nv(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
-	UtilityFunctions::print("Varargs (int return) called with ", String::num((double)arg_count), " arguments");
+	UtilityFunctions::print("  Varargs (int return) called with ", String::num((double)arg_count), " arguments");
 	return 42;
 }
 
 void Example::varargs_func_void(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
-	UtilityFunctions::print("Varargs (no return) called with ", String::num((double)arg_count), " arguments");
+	UtilityFunctions::print("  Varargs (no return) called with ", String::num((double)arg_count), " arguments");
 }
 
 void Example::emit_custom_signal(const String &name, int value) {

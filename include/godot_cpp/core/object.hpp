@@ -117,20 +117,20 @@ struct MethodInfo {
 
 template <class... Args>
 MethodInfo::MethodInfo(const char *p_name, const Args &...args) :
-		name(p_name), flags(METHOD_FLAG_NORMAL) {
+		name(p_name), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
 	arguments = { args... };
 }
 
 template <class... Args>
 MethodInfo::MethodInfo(Variant::Type ret, const char *p_name, const Args &...args) :
-		name(p_name), flags(METHOD_FLAG_NORMAL) {
+		name(p_name), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
 	return_val.type = ret;
 	arguments = { args... };
 }
 
 template <class... Args>
 MethodInfo::MethodInfo(const PropertyInfo &p_ret, const char *p_name, const Args &...args) :
-		name(p_name), return_val(p_ret), flags(METHOD_FLAG_NORMAL) {
+		name(p_name), return_val(p_ret), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
 	arguments = { args... };
 }
 
