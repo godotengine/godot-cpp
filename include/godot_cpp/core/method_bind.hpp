@@ -431,7 +431,7 @@ protected:
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			return call_get_argument_type<P...>(p_arg);
 		} else {
-			return GetTypeInfo<R>::VARIANT_TYPE;
+			return GDNativeVariantType(GetTypeInfo<R>::VARIANT_TYPE);
 		}
 	}
 
@@ -514,7 +514,7 @@ protected:
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			return call_get_argument_type<P...>(p_arg);
 		} else {
-			return GetTypeInfo<R>::VARIANT_TYPE;
+			return GDNativeVariantType(GetTypeInfo<R>::VARIANT_TYPE);
 		}
 	}
 
@@ -655,7 +655,7 @@ protected:
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			return call_get_argument_type<P...>(p_arg);
 		} else {
-			return GetTypeInfo<R>::VARIANT_TYPE;
+			return GDNativeVariantType(GetTypeInfo<R>::VARIANT_TYPE);
 		}
 	}
 
