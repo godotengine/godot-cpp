@@ -105,7 +105,7 @@ struct VariantObjectClassChecker<const Ref<T> &> {
 template <class T>
 struct VariantCasterAndValidate {
 	static _FORCE_INLINE_ T cast(const Variant **p_args, uint32_t p_arg_idx, GDNativeCallError &r_error) {
-		GDNativeVariantType argtype = GetTypeInfo<T>::VARIANT_TYPE;
+		GDNativeVariantType argtype = GDNativeVariantType(GetTypeInfo<T>::VARIANT_TYPE);
 		if (!internal::gdn_interface->variant_can_convert_strict(static_cast<GDNativeVariantType>(p_args[p_arg_idx]->get_type()), argtype) ||
 				!VariantObjectClassChecker<T>::check(p_args[p_arg_idx])) {
 			r_error.error = GDNATIVE_CALL_ERROR_INVALID_ARGUMENT;
@@ -120,7 +120,7 @@ struct VariantCasterAndValidate {
 template <class T>
 struct VariantCasterAndValidate<T &> {
 	static _FORCE_INLINE_ T cast(const Variant **p_args, uint32_t p_arg_idx, GDNativeCallError &r_error) {
-		GDNativeVariantType argtype = GetTypeInfo<T>::VARIANT_TYPE;
+		GDNativeVariantType argtype = GDNativeVariantType(GetTypeInfo<T>::VARIANT_TYPE);
 		if (!internal::gdn_interface->variant_can_convert_strict(static_cast<GDNativeVariantType>(p_args[p_arg_idx]->get_type()), argtype) ||
 				!VariantObjectClassChecker<T>::check(p_args[p_arg_idx])) {
 			r_error.error = GDNATIVE_CALL_ERROR_INVALID_ARGUMENT;
@@ -135,7 +135,7 @@ struct VariantCasterAndValidate<T &> {
 template <class T>
 struct VariantCasterAndValidate<const T &> {
 	static _FORCE_INLINE_ T cast(const Variant **p_args, uint32_t p_arg_idx, GDNativeCallError &r_error) {
-		GDNativeVariantType argtype = GetTypeInfo<T>::VARIANT_TYPE;
+		GDNativeVariantType argtype = GDNativeVariantType(GetTypeInfo<T>::VARIANT_TYPE);
 		if (!internal::gdn_interface->variant_can_convert_strict(static_cast<GDNativeVariantType>(p_args[p_arg_idx]->get_type()), argtype) ||
 				!VariantObjectClassChecker<T>::check(p_args[p_arg_idx])) {
 			r_error.error = GDNATIVE_CALL_ERROR_INVALID_ARGUMENT;
@@ -384,7 +384,7 @@ void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const,
 template <class Q>
 void call_get_argument_type_helper(int p_arg, int &index, GDNativeVariantType &type) {
 	if (p_arg == index) {
-		type = GetTypeInfo<Q>::VARIANT_TYPE;
+		type = GDNativeVariantType(GetTypeInfo<Q>::VARIANT_TYPE);
 	}
 	index++;
 }
