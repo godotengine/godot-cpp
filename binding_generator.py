@@ -67,7 +67,7 @@ def scons_generate_bindings(target, source, env):
     generate_bindings(
         str(source[0]),
         env["generate_template_get_node"],
-        env["bits"],
+        "32" if "32" in env["arch"] else "64",
         "double" if (env["float"] == "64") else "float",
         target[0].abspath,
     )

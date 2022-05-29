@@ -13,26 +13,26 @@ jobs:
             os: ubuntu-18.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
-            artifact-path: bin/libgodot-cpp.linux.release.64.a
+            artifact-path: bin/libgodot-cpp.linux.release.x86_64.a
 
           - name: 🐧 Linux (GCC, Double Precision)
             os: ubuntu-18.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
-            artifact-path: bin/libgodot-cpp.linux.release.64.a
+            artifact-path: bin/libgodot-cpp.linux.release.x86_64.a
             flags: float=64
 
           - name: 🏁 Windows (x86_64, MSVC)
             os: windows-2019
             platform: windows
             artifact-name: godot-cpp-windows-msvc2019-x86_64-release
-            artifact-path: bin/libgodot-cpp.windows.release.64.lib
+            artifact-path: bin/libgodot-cpp.windows.release.x86_64.lib
 
           - name: 🏁 Windows (x86_64, MinGW)
             os: windows-2019
             platform: windows
             artifact-name: godot-cpp-linux-mingw-x86_64-release
-            artifact-path: bin/libgodot-cpp.windows.release.64.a
+            artifact-path: bin/libgodot-cpp.windows.release.x86_64.a
             flags: use_mingw=yes
 
           - name: 🍎 macOS (universal)
@@ -40,20 +40,21 @@ jobs:
             platform: osx
             artifact-name: godot-cpp-macos-universal-release
             artifact-path: bin/libgodot-cpp.osx.release.universal.a
-            flags: macos_arch=universal
+            flags: arch=universal
 
           - name: 🤖 Android (arm64)
             os: ubuntu-18.04
             platform: android
             artifact-name: godot-cpp-android-arm64-release
-            artifact-path: bin/libgodot-cpp.android.release.arm64v8.a
-            flags: android_arch=arm64v8
+            artifact-path: bin/libgodot-cpp.android.release.arm64.a
+            flags: arch=arm64
 
           - name: 🍏 iOS (arm64)
             os: macos-11
             platform: ios
             artifact-name: godot-cpp-ios-arm64-release
             artifact-path: bin/libgodot-cpp.ios.release.arm64.a
+            flags: arch=arm64
 
     steps:
       - name: Checkout
