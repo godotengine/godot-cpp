@@ -255,7 +255,7 @@ elif env["platform"] == "ios":
         env.Append(CCFLAGS=["-O3"])
 
 elif env["platform"] == "windows":
-    if host_platform == "windows" and not env["use_mingw"]:
+    if host_platform == "windows" and not env["use_mingw"] and not env["use_llvm"]:
         # MSVC
         env.Append(LINKFLAGS=["/WX"])
         if env["target"] == "debug":
@@ -284,8 +284,16 @@ elif env["platform"] == "windows":
 
         env["SPAWN"] = mySpawn
 
+    elif host_platform == "windows" and env["use_llvm"]:
+        env = Environment(ENV=os.environ, tools=["mingw"])
+        opts.Update(env)
+
+        env["CXX"] = "clang++"
+
+        env["SPAWN"] = mySpawn
+
     # Native or cross-compilation using MinGW
-    if host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx" or env["use_mingw"]:
+    if host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx" or env["use_mingw"] or env["use_llvm"]:
         # These options are for a release build even using target=debug
         env.Append(CCFLAGS=["-O3", "-std=c++14", "-Wwrite-strings"])
         env.Append(
@@ -296,6 +304,14 @@ elif env["platform"] == "windows":
                 "-static-libstdc++",
             ]
         )
+
+        if env["bits"] == "64":
+            env.Append(CCFLAGS=["-m64"])
+            env.Append(LINKFLAGS=["-m64"])
+        elif env["bits"] == "32":
+            env.Append(CCFLAGS=["-m32"])
+            env.Append(LINKFLAGS=["-m32"])
+
 
 elif env["platform"] == "android":
     if host_platform == "windows":
