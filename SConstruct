@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import platform
 import sys
 import subprocess
 from binding_generator import scons_generate_bindings, scons_emit_files
@@ -82,15 +83,6 @@ else:
 
 env = Environment(ENV=os.environ)
 
-is64 = sys.maxsize > 2**32
-if (
-    env["TARGET_ARCH"] == "amd64"
-    or env["TARGET_ARCH"] == "emt64"
-    or env["TARGET_ARCH"] == "x86_64"
-    or env["TARGET_ARCH"] == "arm64-v8a"
-):
-    is64 = True
-
 opts = Variables([], ARGUMENTS)
 opts.Add(
     EnumVariable(
@@ -101,7 +93,7 @@ opts.Add(
         ignorecase=2,
     )
 )
-opts.Add(EnumVariable("bits", "Target platform bits", "64" if is64 else "32", ("32", "64")))
+
 opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler - only effective when targeting Linux or FreeBSD", False))
 opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
 # Must be the same setting as used for cpp_bindings
@@ -115,11 +107,8 @@ opts.Add(PathVariable("custom_api_file", "Path to a custom JSON API file", None,
 opts.Add(
     BoolVariable("generate_bindings", "Force GDExtension API bindings generation. Auto-detected by default.", False)
 )
-opts.Add(EnumVariable("android_arch", "Target Android architecture", "armv7", ["armv7", "arm64v8", "x86", "x86_64"]))
 opts.Add("macos_deployment_target", "macOS deployment target", "default")
 opts.Add("macos_sdk_path", "macOS SDK path", "")
-opts.Add(EnumVariable("macos_arch", "Target macOS architecture", "universal", ["universal", "x86_64", "arm64"]))
-opts.Add(EnumVariable("ios_arch", "Target iOS architecture", "arm64", ["universal", "arm64", "x86_64"]))
 opts.Add(BoolVariable("ios_simulator", "Target iOS Simulator", False))
 opts.Add(
     "IPHONEPATH",
@@ -129,7 +118,7 @@ opts.Add(
 opts.Add(
     "android_api_level",
     "Target Android API level",
-    "18" if ARGUMENTS.get("android_arch", "armv7") in ["armv7", "x86"] else "21",
+    "18" if "32" in ARGUMENTS.get("arch", "arm64") else "21",
 )
 opts.Add(
     "ANDROID_NDK_ROOT",
@@ -141,8 +130,53 @@ opts.Add(BoolVariable("generate_template_get_node", "Generate a template version
 opts.Add(BoolVariable("build_library", "Build the godot-cpp library.", True))
 opts.Add(EnumVariable("float", "Floating-point precision", "32", ("32", "64")))
 
+# CPU architecture options.
+architecture_array = ["", "universal", "x86_32", "x86_64", "arm32", "arm64", "rv64", "ppc32", "ppc64", "wasm32"]
+architecture_aliases = {
+    "x64": "x86_64",
+    "amd64": "x86_64",
+    "armv7": "arm32",
+    "armv8": "arm64",
+    "arm64v8": "arm64",
+    "aarch64": "arm64",
+    "rv": "rv64",
+    "riscv": "rv64",
+    "riscv64": "rv64",
+    "ppcle": "ppc32",
+    "ppc": "ppc32",
+    "ppc64le": "ppc64",
+}
+opts.Add(EnumVariable("arch", "CPU architecture", "", architecture_array, architecture_aliases))
+
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
+
+# Process CPU architecture argument.
+if env["arch"] == "":
+    # No architecture specified. Default to arm64 if building for Android,
+    # universal if building for macOS or iOS, wasm32 if building for web,
+    # otherwise default to the host architecture.
+    if env["platform"] in ["osx", "ios"]:
+        env["arch"] = "universal"
+    elif env["platform"] == "android":
+        env["arch"] = "arm64"
+    elif env["platform"] == "javascript":
+        env["arch"] = "wasm32"
+    else:
+        host_machine = platform.machine().lower()
+        if host_machine in architecture_array:
+            env["arch"] = host_machine
+        elif host_machine in architecture_aliases.keys():
+            env["arch"] = architecture_aliases[host_machine]
+        elif "86" in host_machine:
+            # Catches x86, i386, i486, i586, i686, etc.
+            env["arch"] = "x86_32"
+        else:
+            print("Unsupported CPU architecture: " + host_machine)
+            Exit()
+
+# We use this to re-set env["arch"] anytime we call opts.Update(env).
+env_arch = env["arch"]
 
 # Detect and print a warning listing unknown SCons variables to ease troubleshooting.
 unknown = opts.UnknownVariables()
@@ -151,16 +185,19 @@ if unknown:
     for item in unknown.items():
         print("    " + item[0] + "=" + item[1])
 
+print("Building for architecture " + env["arch"] + " on platform " + env["platform"])
+
 # This makes sure to keep the session environment variables on Windows.
 # This way, you can run SCons in a Visual Studio 2017 prompt and it will find
 # all the required tools
 if host_platform == "windows" and env["platform"] != "android":
-    if env["bits"] == "64":
+    if env["arch"] == "x86_64":
         env = Environment(TARGET_ARCH="amd64")
-    elif env["bits"] == "32":
+    elif env["arch"] == "x86_32":
         env = Environment(TARGET_ARCH="x86")
 
     opts.Update(env)
+    env["arch"] = env_arch
 
 # Require C++17
 if host_platform == "windows" and env["platform"] == "windows" and not env["use_mingw"]:
@@ -187,26 +224,35 @@ if env["platform"] == "linux" or env["platform"] == "freebsd":
     elif env["target"] == "release":
         env.Append(CCFLAGS=["-O3"])
 
-    if env["bits"] == "64":
-        env.Append(CCFLAGS=["-m64"])
-        env.Append(LINKFLAGS=["-m64"])
-    elif env["bits"] == "32":
-        env.Append(CCFLAGS=["-m32"])
-        env.Append(LINKFLAGS=["-m32"])
+    if env["arch"] == "x86_64":
+        # -m64 and -m32 are x86-specific already, but it doesn't hurt to
+        # be clear and also specify -march=x86-64. Similar with 32-bit.
+        env.Append(CCFLAGS=["-m64", "-march=x86-64"])
+        env.Append(LINKFLAGS=["-m64", "-march=x86-64"])
+    elif env["arch"] == "x86_32":
+        env.Append(CCFLAGS=["-m32", "-march=i686"])
+        env.Append(LINKFLAGS=["-m32", "-march=i686"])
+    elif env_arch == "arm64":
+        env.Append(CCFLAGS=["-march=armv8-a"])
+        env.Append(LINKFLAGS=["-march=armv8-a"])
+    elif env_arch == "rv64":
+        env.Append(CCFLAGS=["-march=rv64gc"])
+        env.Append(LINKFLAGS=["-march=rv64gc"])
 
 elif env["platform"] == "osx":
+    if env["arch"] not in ("universal", "arm64", "x86_64"):
+        print("Only universal, arm64, and x86_64 are supported on macOS. Exiting.")
+        Exit()
+
     # Use Clang on macOS by default
     env["CXX"] = "clang++"
 
-    if env["bits"] == "32":
-        raise ValueError("Only 64-bit builds are supported for the macOS target.")
-
-    if env["macos_arch"] == "universal":
+    if env["arch"] == "universal":
         env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
         env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
     else:
-        env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
-        env.Append(CCFLAGS=["-arch", env["macos_arch"]])
+        env.Append(LINKFLAGS=["-arch", env["arch"]])
+        env.Append(CCFLAGS=["-arch", env["arch"]])
 
     if env["macos_deployment_target"] != "default":
         env.Append(CCFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
@@ -230,6 +276,10 @@ elif env["platform"] == "osx":
         env.Append(CCFLAGS=["-O3"])
 
 elif env["platform"] == "ios":
+    if env["arch"] not in ("universal", "arm64", "x86_64"):
+        print("Only universal, arm64, and x86_64 are supported on iOS. Exiting.")
+        Exit()
+
     if env["ios_simulator"]:
         sdk_name = "iphonesimulator"
         env.Append(CCFLAGS=["-mios-simulator-version-min=10.0"])
@@ -251,7 +301,7 @@ elif env["platform"] == "ios":
     env["RANLIB"] = compiler_path + "ranlib"
     env["SHLIBSUFFIX"] = ".dylib"
 
-    if env["ios_arch"] == "universal":
+    if env["arch"] == "universal":
         if env["ios_simulator"]:
             env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
             env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
@@ -259,8 +309,8 @@ elif env["platform"] == "ios":
             env.Append(LINKFLAGS=["-arch", "arm64"])
             env.Append(CCFLAGS=["-arch", "arm64"])
     else:
-        env.Append(LINKFLAGS=["-arch", env["ios_arch"]])
-        env.Append(CCFLAGS=["-arch", env["ios_arch"]])
+        env.Append(LINKFLAGS=["-arch", env["arch"]])
+        env.Append(CCFLAGS=["-arch", env["arch"]])
 
     env.Append(CCFLAGS=["-isysroot", sdk_path])
     env.Append(LINKFLAGS=["-isysroot", sdk_path, "-F" + sdk_path])
@@ -282,12 +332,12 @@ elif env["platform"] == "windows":
 
     elif host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx":
         # Cross-compilation using MinGW
-        if env["bits"] == "64":
+        if env["arch"] == "x86_64":
             env["CXX"] = "x86_64-w64-mingw32-g++"
             env["AR"] = "x86_64-w64-mingw32-ar"
             env["RANLIB"] = "x86_64-w64-mingw32-ranlib"
             env["LINK"] = "x86_64-w64-mingw32-g++"
-        elif env["bits"] == "32":
+        elif env["arch"] == "x86_32":
             env["CXX"] = "i686-w64-mingw32-g++"
             env["AR"] = "i686-w64-mingw32-ar"
             env["RANLIB"] = "i686-w64-mingw32-ranlib"
@@ -297,6 +347,7 @@ elif env["platform"] == "windows":
         # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
         env = Environment(ENV=os.environ, tools=["mingw"])
         opts.Update(env)
+        env["arch"] = env_arch
 
         # Still need to use C++17.
         env.Append(CCFLAGS=["-std=c++17"])
@@ -322,10 +373,15 @@ elif env["platform"] == "windows":
         )
 
 elif env["platform"] == "android":
+    if env["arch"] not in ("arm64", "x86_64", "arm32", "x86_32"):
+        print("Only arm64, x86_64, arm32, and x86_32 are supported on Android. Exiting.")
+        Exit()
+
     if host_platform == "windows":
         # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
         env = Environment(ENV=os.environ, tools=["mingw"])
         opts.Update(env)
+        env["arch"] = env_arch
 
         # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
         env["SPAWN"] = mySpawn
@@ -339,7 +395,7 @@ elif env["platform"] == "android":
 
     # Validate API level
     api_level = int(env["android_api_level"])
-    if env["android_arch"] in ["x86_64", "arm64v8"] and api_level < 21:
+    if "64" in env["arch"] and api_level < 21:
         print("WARN: 64-bit Android architectures require an API level of at least 21; setting android_api_level=21")
         env["android_api_level"] = "21"
         api_level = 21
@@ -360,21 +416,21 @@ elif env["platform"] == "android":
 
     # Get architecture info
     arch_info_table = {
-        "armv7": {
+        "arm32": {
             "march": "armv7-a",
             "target": "armv7a-linux-androideabi",
             "tool_path": "arm-linux-androideabi",
             "compiler_path": "armv7a-linux-androideabi",
             "ccflags": ["-mfpu=neon"],
         },
-        "arm64v8": {
+        "arm64": {
             "march": "armv8-a",
             "target": "aarch64-linux-android",
             "tool_path": "aarch64-linux-android",
             "compiler_path": "aarch64-linux-android",
             "ccflags": [],
         },
-        "x86": {
+        "x86_32": {
             "march": "i686",
             "target": "i686-linux-android",
             "tool_path": "i686-linux-android",
@@ -389,7 +445,7 @@ elif env["platform"] == "android":
             "ccflags": [],
         },
     }
-    arch_info = arch_info_table[env["android_arch"]]
+    arch_info = arch_info_table[env["arch"]]
 
     # Setup tools
     env["CC"] = toolchain + "/bin/clang"
@@ -409,9 +465,14 @@ elif env["platform"] == "android":
         env.Append(CCFLAGS=["-O3"])
 
 elif env["platform"] == "javascript":
+    if env["arch"] not in ("wasm32"):
+        print("Only wasm32 supported on web. Exiting.")
+        Exit()
+
     if host_platform == "windows":
         env = Environment(ENV=os.environ, tools=["cc", "c++", "ar", "link", "textfile", "zip"])
         opts.Update(env)
+        env["arch"] = env_arch
     else:
         env["ENV"] = os.environ
 
@@ -474,17 +535,9 @@ add_sources(sources, "src/core", "cpp")
 add_sources(sources, "src/variant", "cpp")
 sources.extend([f for f in bindings if str(f).endswith(".cpp")])
 
-env["arch_suffix"] = env["bits"]
-if env["platform"] == "android":
-    env["arch_suffix"] = env["android_arch"]
-elif env["platform"] == "ios":
-    env["arch_suffix"] = env["ios_arch"]
-    if env["ios_simulator"]:
-        env["arch_suffix"] += ".simulator"
-elif env["platform"] == "javascript":
-    env["arch_suffix"] = "wasm"
-elif env["platform"] == "osx":
-    env["arch_suffix"] = env["macos_arch"]
+env["arch_suffix"] = env["arch"]
+if env["ios_simulator"]:
+    env["arch_suffix"] += ".simulator"
 
 library = None
 env["OBJSUFFIX"] = ".{}.{}.{}{}".format(env["platform"], env["target"], env["arch_suffix"], env["OBJSUFFIX"])

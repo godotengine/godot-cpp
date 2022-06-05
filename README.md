@@ -42,12 +42,15 @@ so formatting is done before your changes are submitted.
 
 ## Getting Started
 
-It's a bit similar to what it was for 3.x but also a bit different. This new approach is much more akin to how core Godot modules are structured.
+It's a bit similar to what it was for 3.x but also a bit different.
+This new approach is much more akin to how core Godot modules are structured.
 
 Compiling this repository generates a static library to be linked with your shared lib,
 just like before.
 
-To use the shared lib in your Godot project you'll need a `.gdextension` file, which replaces what was the `.gdnlib` before. Follow the example:
+To use the shared lib in your Godot project you'll need a `.gdextension`
+file, which replaces what was the `.gdnlib` before.
+Follow [the example](test/demo/example.gdextension):
 
 ```ini
 [configuration]
@@ -56,15 +59,17 @@ entry_symbol = "example_library_init"
 
 [libraries]
 
-linux.64.debug = "bin/libgdexample.linux.debug.64.so"
-linux.64.release = "bin/libgdexample.linux.release.64.so"
-windows.64.debug = "bin/libgdexample.windows.debug.64.dll"
-windows.64.release = "bin/libgdexample.windows.release.64.dll"
-macos.debug = "bin/libgdexample.debug.framework"
-macos.release = "bin/libgdexample.release.framework"
+macos.debug = "bin/libgdexample.osx.debug.framework"
+macos.release = "bin/libgdexample.osx.release.framework"
+windows.debug.x86_64 = "bin/libgdexample.windows.debug.x86_64.dll"
+windows.release.x86_64 = "bin/libgdexample.windows.release.x86_64.dll"
+linux.debug.x86_64 = "bin/libgdexample.linux.debug.x86_64.so"
+linux.release.x86_64 = "bin/libgdexample.linux.release.x86_64.so"
+# Repeat for other architectures to support arm64, rv64, etc.
 ```
 
-The `entry_symbol` is the name of the function that initializes your library. It should be similar to following layout:
+The `entry_symbol` is the name of the function that initializes
+your library. It should be similar to following layout:
 
 ```cpp
 extern "C" {

@@ -4,9 +4,13 @@ entry_symbol = "example_library_init"
 
 [libraries]
 
-linux.64.debug = "bin/libgdexample.linux.debug.64.so"
-linux.64.release = "bin/libgdexample.linux.release.64.so"
-windows.64.debug = "bin/libgdexample.windows.debug.64.dll"
-windows.64.release = "bin/libgdexample.windows.release.64.dll"
 macos.debug = "bin/libgdexample.osx.debug.framework"
 macos.release = "bin/libgdexample.osx.release.framework"
+windows.debug.x86_64 = "bin/libgdexample.windows.debug.x86_64.dll"
+windows.release.x86_64 = "bin/libgdexample.windows.release.x86_64.dll"
+linux.debug.x86_64 = "bin/libgdexample.linux.debug.x86_64.so"
+linux.release.x86_64 = "bin/libgdexample.linux.release.x86_64.so"
+linux.debug.arm64 = "bin/libgdexample.linux.debug.arm64.so"
+linux.release.arm64 = "bin/libgdexample.linux.release.arm64.so"
+linux.debug.rv64 = "bin/libgdexample.linux.debug.rv64.so"
+linux.release.rv64 = "bin/libgdexample.linux.release.rv64.so"
