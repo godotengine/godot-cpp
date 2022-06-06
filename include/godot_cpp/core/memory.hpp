@@ -99,6 +99,14 @@ public:
 };
 
 template <class T>
+class DefaultTypedAllocator {
+public:
+	template <class... Args>
+	_ALWAYS_INLINE_ T *new_allocation(const Args &&...p_args) { return memnew(T(p_args...)); }
+	_ALWAYS_INLINE_ void delete_allocation(T *p_allocation) { memdelete(p_allocation); }
+};
+
+template <class T>
 void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wrapped, T>>::type * = 0) {
 	if (!__has_trivial_destructor(T)) {
 		p_class->~T();
