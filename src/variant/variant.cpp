@@ -629,6 +629,16 @@ bool Variant::has_member(Variant::Type type, const StringName &member) {
 	return PtrToArg<bool>::convert(&has);
 }
 
+uint32_t Variant::hash() const {
+	GDNativeInt hash = internal::gdn_interface->variant_hash(_native_ptr());
+	return PtrToArg<uint32_t>::convert(&hash);
+}
+
+uint32_t Variant::recursive_hash(int recursion_count) const {
+	GDNativeInt hash = internal::gdn_interface->variant_recursive_hash(_native_ptr(), recursion_count);
+	return PtrToArg<uint32_t>::convert(&hash);
+}
+
 bool Variant::hash_compare(const Variant &variant) const {
 	GDNativeBool compare = internal::gdn_interface->variant_hash_compare(_native_ptr(), variant._native_ptr());
 	return PtrToArg<bool>::convert(&compare);
@@ -681,45 +691,45 @@ bool Variant::can_convert_strict(Variant::Type from, Variant::Type to) {
 
 void Variant::clear() {
 	static const bool needs_deinit[Variant::VARIANT_MAX] = {
-		false, //NIL,
-		false, //BOOL,
-		false, //INT,
-		false, //FLOAT,
-		true, //STRING,
-		false, //VECTOR2,
-		false, //VECTOR2I,
-		false, //RECT2,
-		false, //RECT2I,
-		false, //VECTOR3,
-		false, //VECTOR3I,
-		true, //TRANSFORM2D,
-		false, //PLANE,
-		false, //QUATERNION,
-		true, //AABB,
-		true, //BASIS,
-		true, //TRANSFORM,
+		false, // NIL,
+		false, // BOOL,
+		false, // INT,
+		false, // FLOAT,
+		true, // STRING,
+		false, // VECTOR2,
+		false, // VECTOR2I,
+		false, // RECT2,
+		false, // RECT2I,
+		false, // VECTOR3,
+		false, // VECTOR3I,
+		true, // TRANSFORM2D,
+		false, // PLANE,
+		false, // QUATERNION,
+		true, // AABB,
+		true, // BASIS,
+		true, // TRANSFORM,
 
 		// misc types
-		false, //COLOR,
-		true, //STRING_NAME,
-		true, //NODE_PATH,
-		false, //RID,
-		true, //OBJECT,
-		true, //CALLABLE,
-		true, //SIGNAL,
-		true, //DICTIONARY,
-		true, //ARRAY,
+		false, // COLOR,
+		true, // STRING_NAME,
+		true, // NODE_PATH,
+		false, // RID,
+		true, // OBJECT,
+		true, // CALLABLE,
+		true, // SIGNAL,
+		true, // DICTIONARY,
+		true, // ARRAY,
 
 		// typed arrays
-		true, //PACKED_BYTE_ARRAY,
-		true, //PACKED_INT32_ARRAY,
-		true, //PACKED_INT64_ARRAY,
-		true, //PACKED_FLOAT32_ARRAY,
-		true, //PACKED_FLOAT64_ARRAY,
-		true, //PACKED_STRING_ARRAY,
-		true, //PACKED_VECTOR2_ARRAY,
-		true, //PACKED_VECTOR3_ARRAY,
-		true, //PACKED_COLOR_ARRAY,
+		true, // PACKED_BYTE_ARRAY,
+		true, // PACKED_INT32_ARRAY,
+		true, // PACKED_INT64_ARRAY,
+		true, // PACKED_FLOAT32_ARRAY,
+		true, // PACKED_FLOAT64_ARRAY,
+		true, // PACKED_STRING_ARRAY,
+		true, // PACKED_VECTOR2_ARRAY,
+		true, // PACKED_VECTOR3_ARRAY,
+		true, // PACKED_COLOR_ARRAY,
 	};
 
 	if (unlikely(needs_deinit[get_type()])) { // Make it fast for types that don't need deinit.

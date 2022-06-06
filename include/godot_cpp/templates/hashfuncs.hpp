@@ -32,7 +32,19 @@
 #define HASHFUNCS_HPP
 
 #include <godot_cpp/core/math.hpp>
+#include <godot_cpp/core/object.hpp>
+#include <godot_cpp/variant/aabb.hpp>
+#include <godot_cpp/variant/node_path.hpp>
+#include <godot_cpp/variant/rect2.hpp>
+#include <godot_cpp/variant/rect2i.hpp>
 #include <godot_cpp/variant/rid.hpp>
+#include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/string_name.hpp>
+#include <godot_cpp/variant/variant.hpp>
+#include <godot_cpp/variant/vector2.hpp>
+#include <godot_cpp/variant/vector2i.hpp>
+#include <godot_cpp/variant/vector3.hpp>
+#include <godot_cpp/variant/vector3i.hpp>
 
 /**
  * Hashing functions
@@ -152,9 +164,14 @@ static inline uint64_t make_uint64_t(T p_in) {
 	return _u._u64;
 }
 
+template <class T>
+class Ref;
+
 struct HashMapHasherDefault {
+	static _FORCE_INLINE_ uint32_t hash(const String &p_string) { return p_string.hash(); }
 	static _FORCE_INLINE_ uint32_t hash(const char *p_cstr) { return hash_djb2(p_cstr); }
 	static _FORCE_INLINE_ uint32_t hash(const uint64_t p_int) { return hash_one_uint64(p_int); }
+	static _FORCE_INLINE_ uint32_t hash(const ObjectID &p_id) { return hash_one_uint64(p_id); }
 
 	static _FORCE_INLINE_ uint32_t hash(const int64_t p_int) { return hash(uint64_t(p_int)); }
 	static _FORCE_INLINE_ uint32_t hash(const float p_float) { return hash_djb2_one_float(p_float); }
@@ -169,6 +186,60 @@ struct HashMapHasherDefault {
 	static _FORCE_INLINE_ uint32_t hash(const char16_t p_uchar) { return (uint32_t)p_uchar; }
 	static _FORCE_INLINE_ uint32_t hash(const char32_t p_uchar) { return (uint32_t)p_uchar; }
 	static _FORCE_INLINE_ uint32_t hash(const RID &p_rid) { return hash_one_uint64(p_rid.get_id()); }
+
+	static _FORCE_INLINE_ uint32_t hash(const StringName &p_string_name) { return p_string_name.hash(); }
+	static _FORCE_INLINE_ uint32_t hash(const NodePath &p_path) { return p_path.hash(); }
+
+	template <class T>
+	static _FORCE_INLINE_ uint32_t hash(const T *p_pointer) { return hash_one_uint64((uint64_t)p_pointer); }
+
+	template <class T>
+	static _FORCE_INLINE_ uint32_t hash(const Ref<T> &p_ref) { return hash_one_uint64((uint64_t)p_ref.operator->()); }
+
+	static _FORCE_INLINE_ uint32_t hash(const Vector2i &p_vec) {
+		uint32_t h = hash_djb2_one_32(p_vec.x);
+		return hash_djb2_one_32(p_vec.y, h);
+	}
+	static _FORCE_INLINE_ uint32_t hash(const Vector3i &p_vec) {
+		uint32_t h = hash_djb2_one_32(p_vec.x);
+		h = hash_djb2_one_32(p_vec.y, h);
+		return hash_djb2_one_32(p_vec.z, h);
+	}
+
+	static _FORCE_INLINE_ uint32_t hash(const Vector2 &p_vec) {
+		uint32_t h = hash_djb2_one_float(p_vec.x);
+		return hash_djb2_one_float(p_vec.y, h);
+	}
+	static _FORCE_INLINE_ uint32_t hash(const Vector3 &p_vec) {
+		uint32_t h = hash_djb2_one_float(p_vec.x);
+		h = hash_djb2_one_float(p_vec.y, h);
+		return hash_djb2_one_float(p_vec.z, h);
+	}
+
+	static _FORCE_INLINE_ uint32_t hash(const Rect2i &p_rect) {
+		uint32_t h = hash_djb2_one_32(p_rect.position.x);
+		h = hash_djb2_one_32(p_rect.position.y, h);
+		h = hash_djb2_one_32(p_rect.size.x, h);
+		return hash_djb2_one_32(p_rect.size.y, h);
+	}
+
+	static _FORCE_INLINE_ uint32_t hash(const Rect2 &p_rect) {
+		uint32_t h = hash_djb2_one_float(p_rect.position.x);
+		h = hash_djb2_one_float(p_rect.position.y, h);
+		h = hash_djb2_one_float(p_rect.size.x, h);
+		return hash_djb2_one_float(p_rect.size.y, h);
+	}
+
+	static _FORCE_INLINE_ uint32_t hash(const AABB &p_aabb) {
+		uint32_t h = hash_djb2_one_float(p_aabb.position.x);
+		h = hash_djb2_one_float(p_aabb.position.y, h);
+		h = hash_djb2_one_float(p_aabb.position.z, h);
+		h = hash_djb2_one_float(p_aabb.size.x, h);
+		h = hash_djb2_one_float(p_aabb.size.y, h);
+		return hash_djb2_one_float(p_aabb.size.z, h);
+	}
+
+	// static _FORCE_INLINE_ uint32_t hash(const void* p_ptr)  { return uint32_t(uint64_t(p_ptr))*(0x9e3779b1L); }
 };
 
 template <typename T>
@@ -176,16 +247,70 @@ struct HashMapComparatorDefault {
 	static bool compare(const T &p_lhs, const T &p_rhs) {
 		return p_lhs == p_rhs;
 	}
+};
 
-	bool compare(const float &p_lhs, const float &p_rhs) {
-		return (p_lhs == p_rhs) || (std::isnan(p_lhs) && std::isnan(p_rhs));
-	}
-
-	bool compare(const double &p_lhs, const double &p_rhs) {
+template <>
+struct HashMapComparatorDefault<float> {
+	static bool compare(const float &p_lhs, const float &p_rhs) {
 		return (p_lhs == p_rhs) || (std::isnan(p_lhs) && std::isnan(p_rhs));
 	}
 };
 
+template <>
+struct HashMapComparatorDefault<double> {
+	static bool compare(const double &p_lhs, const double &p_rhs) {
+		return (p_lhs == p_rhs) || (std::isnan(p_lhs) && std::isnan(p_rhs));
+	}
+};
+
+template <>
+struct HashMapComparatorDefault<Vector2> {
+	static bool compare(const Vector2 &p_lhs, const Vector2 &p_rhs) {
+		return ((p_lhs.x == p_rhs.x) || (std::isnan(p_lhs.x) && std::isnan(p_rhs.x))) && ((p_lhs.y == p_rhs.y) || (std::isnan(p_lhs.y) && std::isnan(p_rhs.y)));
+	}
+};
+
+template <>
+struct HashMapComparatorDefault<Vector3> {
+	static bool compare(const Vector3 &p_lhs, const Vector3 &p_rhs) {
+		return ((p_lhs.x == p_rhs.x) || (std::isnan(p_lhs.x) && std::isnan(p_rhs.x))) && ((p_lhs.y == p_rhs.y) || (std::isnan(p_lhs.y) && std::isnan(p_rhs.y))) && ((p_lhs.z == p_rhs.z) || (std::isnan(p_lhs.z) && std::isnan(p_rhs.z)));
+	}
+};
+
+constexpr uint32_t HASH_TABLE_SIZE_MAX = 29;
+
+const uint32_t hash_table_size_primes[HASH_TABLE_SIZE_MAX] = {
+	5,
+	13,
+	23,
+	47,
+	97,
+	193,
+	389,
+	769,
+	1543,
+	3079,
+	6151,
+	12289,
+	24593,
+	49157,
+	98317,
+	196613,
+	393241,
+	786433,
+	1572869,
+	3145739,
+	6291469,
+	12582917,
+	25165843,
+	50331653,
+	100663319,
+	201326611,
+	402653189,
+	805306457,
+	1610612741,
+};
+
 } // namespace godot
 
-#endif // ! HASHFUNCS_HPP
+#endif // HASHFUNCS_HPP
