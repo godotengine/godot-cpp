@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import ios_osxcross
 from SCons.Variables import *
 
 if sys.version_info < (3,):
@@ -17,15 +18,18 @@ else:
 
 def options(opts):
     opts.Add(BoolVariable("ios_simulator", "Target iOS Simulator", False))
+    opts.Add("ios_min_version", "Target minimum iphoneos/iphonesimulator version", "10.0")
     opts.Add(
         "IPHONEPATH",
         "Path to iPhone toolchain",
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain",
     )
+    opts.Add("IPHONESDK", "Path to the iPhone SDK", "")
+    ios_osxcross.options(opts)
 
 
 def exists(env):
-    return sys.platform == "darwin"
+    return sys.platform == "darwin" or ios_osxcross.exists(env)
 
 
 def generate(env):
@@ -35,24 +39,32 @@ def generate(env):
 
     if env["ios_simulator"]:
         sdk_name = "iphonesimulator"
-        env.Append(CCFLAGS=["-mios-simulator-version-min=10.0"])
+        env.Append(CCFLAGS=["-mios-simulator-version-min=" + env["ios_min_version"]])
     else:
         sdk_name = "iphoneos"
-        env.Append(CCFLAGS=["-miphoneos-version-min=10.0"])
+        env.Append(CCFLAGS=["-miphoneos-version-min=" + env["ios_min_version"]])
 
-    try:
-        sdk_path = decode_utf8(subprocess.check_output(["xcrun", "--sdk", sdk_name, "--show-sdk-path"]).strip())
-    except (subprocess.CalledProcessError, OSError):
-        raise ValueError("Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name))
+    if sys.platform == "darwin":
+        if env["IPHONESDK"] == "":
+            try:
+                env["IPHONESDK"] = decode_utf8(
+                    subprocess.check_output(["xcrun", "--sdk", sdk_name, "--show-sdk-path"]).strip()
+                )
+            except (subprocess.CalledProcessError, OSError):
+                raise ValueError(
+                    "Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name)
+                )
 
-    compiler_path = env["IPHONEPATH"] + "/usr/bin/"
-    env["ENV"]["PATH"] = env["IPHONEPATH"] + "/Developer/usr/bin/:" + env["ENV"]["PATH"]
+        compiler_path = env["IPHONEPATH"] + "/usr/bin/"
+        env["CC"] = compiler_path + "clang"
+        env["CXX"] = compiler_path + "clang++"
+        env["AR"] = compiler_path + "ar"
+        env["RANLIB"] = compiler_path + "ranlib"
+        env["SHLIBSUFFIX"] = ".dylib"
+        env["ENV"]["PATH"] = env["IPHONEPATH"] + "/Developer/usr/bin/:" + env["ENV"]["PATH"]
 
-    env["CC"] = compiler_path + "clang"
-    env["CXX"] = compiler_path + "clang++"
-    env["AR"] = compiler_path + "ar"
-    env["RANLIB"] = compiler_path + "ranlib"
-    env["SHLIBSUFFIX"] = ".dylib"
+    else:
+        ios_osxcross.generate(env)
 
     if env["arch"] == "universal":
         if env["ios_simulator"]:
@@ -65,8 +77,8 @@ def generate(env):
         env.Append(LINKFLAGS=["-arch", env["arch"]])
         env.Append(CCFLAGS=["-arch", env["arch"]])
 
-    env.Append(CCFLAGS=["-isysroot", sdk_path])
-    env.Append(LINKFLAGS=["-isysroot", sdk_path, "-F" + sdk_path])
+    env.Append(CCFLAGS=["-isysroot", env["IPHONESDK"]])
+    env.Append(LINKFLAGS=["-isysroot", env["IPHONESDK"], "-F" + env["IPHONESDK"]])
 
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-Og", "-g"])
