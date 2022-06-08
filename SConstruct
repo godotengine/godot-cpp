@@ -391,11 +391,11 @@ elif env["platform"] == "android":
     # Setup tools
     env["CC"] = toolchain + "/bin/clang"
     env["CXX"] = toolchain + "/bin/clang++"
-    env["AR"] = toolchain + "/bin/" + arch_info["tool_path"] + "-ar"
-    env["AS"] = toolchain + "/bin/" + arch_info["tool_path"] + "-as"
-    env["LD"] = toolchain + "/bin/" + arch_info["tool_path"] + "-ld"
-    env["STRIP"] = toolchain + "/bin/" + arch_info["tool_path"] + "-strip"
-    env["RANLIB"] = toolchain + "/bin/" + arch_info["tool_path"] + "-ranlib"
+    env["AR"] = toolchain + "/bin/llvm-ar"
+    env["AS"] = toolchain + "/bin/llvm-as"
+    env["LD"] = toolchain + "/bin/llvm-ld"
+    env["STRIP"] = toolchain + "/bin/llvm-strip"
+    env["RANLIB"] = toolchain + "/bin/llvm-ranlib"
     env["SHLIBSUFFIX"] = ".so"
 
     env.Append(
