@@ -2,9 +2,56 @@ name: Continuous integration
 on: [push, pull_request]
 
 jobs:
-  linux:
-    name: Build (Linux, GCC)
-    runs-on: ubuntu-18.04
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: 🐧 Linux (GCC)
+            os: ubuntu-18.04
+            platform: linux
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
+            artifact-path: bin/libgodot-cpp.linux.release.64.a
+            godot_zip: Godot_v3.4-stable_linux_server.64.zip
+            executable: Godot_v3.4-stable_linux_server.64
+
+          - name: 🏁 Windows (x86_64, MSVC)
+            os: windows-2019
+            platform: windows
+            artifact-name: godot-cpp-windows-msvc2019-x86_64-release
+            artifact-path: bin/libgodot-cpp.windows.release.64.lib
+
+          - name: 🏁 Windows (x86_64, MinGW)
+            os: windows-2019
+            platform: windows
+            artifact-name: godot-cpp-linux-mingw-x86_64-release
+            artifact-path: bin/libgodot-cpp.windows.release.64.a
+            flags: use_mingw=yes
+
+          - name: 🍎 macOS (universal)
+            os: macos-11
+            platform: osx
+            artifact-name: godot-cpp-macos-universal-release
+            artifact-path: bin/libgodot-cpp.osx.release.64.a
+            flags: macos_arch=universal
+            godot_zip: Godot_v3.4-stable_osx.universal.zip
+            executable: Godot.app/Contents/MacOS/Godot
+
+          - name: 🤖 Android (arm64)
+            os: ubuntu-18.04
+            platform: android
+            artifact-name: godot-cpp-android-arm64-release
+            artifact-path: bin/libgodot-cpp.android.release.arm64v8.a
+            flags: android_arch=arm64v8
+
+          - name: 🍏 iOS (arm64)
+            os: macos-11
+            platform: ios
+            artifact-name: godot-cpp-ios-arm64-release
+            artifact-path: bin/libgodot-cpp.ios.release.arm64.a
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -16,132 +63,47 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Linux dependencies
+        if: ${{ matrix.platform == 'linux' }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qqq build-essential pkg-config
-          python -m pip install scons
-          curl -LO https://downloads.tuxfamily.org/godotengine/3.4/Godot_v3.4-stable_linux_server.64.zip
-          unzip Godot_v3.4-stable_linux_server.64.zip
 
-      - name: Build godot-cpp
-        run: |
-          scons target=release generate_bindings=yes -j $(nproc)
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: godot-cpp-linux-glibc2.27-x86_64-release
-          path: bin/libgodot-cpp.linux.release.64.a
-          if-no-files-found: error
-
-      - name: Build test GDNative library
-        run: |
-          scons target=release platform=linux bits=64 -j $(nproc) -C test
-
-      - name: Run test GDNative library
-        run: |
-          ./Godot_v3.4-stable_linux_server.64 --path test -s script.gd
-
-  windows-msvc:
-    name: Build (Windows, MSVC)
-    runs-on: windows-2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
+      - name: Install scons
         run: |
           python -m pip install scons
 
-      - name: Build godot-cpp
-        run: |
-          scons target=release generate_bindings=yes -j $env:NUMBER_OF_PROCESSORS
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: godot-cpp-windows-msvc2019-x86_64-release
-          path: bin/libgodot-cpp.windows.release.64.lib
-          if-no-files-found: error
-
-  windows-mingw:
-    name: Build (Windows, MinGW)
-    runs-on: windows-2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install scons
-
-      - name: Setup MinGW for Windows/MinGW build
+      - name: Windows dependency (MinGW)
+        if: ${{ matrix.platform == 'windows' }}
         uses: egor-tensin/setup-mingw@v2
 
-      - name: Build godot-cpp
+      - name: Build godot-cpp (debug)
         run: |
-          scons target=release generate_bindings=yes use_mingw=yes -j $env:NUMBER_OF_PROCESSORS
+          scons platform=${{ matrix.platform }} target=debug generate_bindings=yes ${{ matrix.flags }} -j2
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: godot-cpp-linux-mingw-x86_64-release
-          path: bin/libgodot-cpp.windows.release.64.a
-          if-no-files-found: error
-
-  macos:
-    name: Build (macOS, Clang)
-    runs-on: macos-11
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
+      - name: Build test without rebuilding godot-cpp (debug)
         run: |
-          python -m pip install scons
-          curl -LO https://downloads.tuxfamily.org/godotengine/3.4/Godot_v3.4-stable_osx.universal.zip
-          unzip Godot_v3.4-stable_osx.universal.zip
+          cd test
+          scons platform=${{ matrix.platform }} target=debug ${{ matrix.flags }} build_library=no -j2
 
-      - name: Build godot-cpp
+      - name: Build test and godot-cpp (release)
         run: |
-          scons target=release generate_bindings=yes -j $(sysctl -n hw.logicalcpu)
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: godot-cpp-macos-universal-release
-          path: bin/libgodot-cpp.osx.release.64.a
-          if-no-files-found: error
-
-      - name: Build test GDNative library
-        run: |
-          scons target=release platform=osx bits=64 macos_arch=universal -j $(sysctl -n hw.logicalcpu) -C test
+          cd test
+          scons platform=${{ matrix.platform }} target=release ${{ matrix.flags }} -j2
 
       - name: Run test GDNative library
+        if: ${{ matrix.platform == 'linux' || matrix.platform == 'osx' }}
         run: |
-          ./Godot.app/Contents/MacOS/Godot --path test -s script.gd
+          curl -LO https://downloads.tuxfamily.org/godotengine/3.4/${{ matrix.godot_zip }}
+          unzip ${{ matrix.godot_zip }}
+          ./${{ matrix.executable }} --path test -s script.gd
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
 
   static-checks:
     name: Static Checks (clang-format)
