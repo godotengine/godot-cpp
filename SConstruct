@@ -419,28 +419,24 @@ elif env["platform"] == "android":
         "arm32": {
             "march": "armv7-a",
             "target": "armv7a-linux-androideabi",
-            "tool_path": "arm-linux-androideabi",
             "compiler_path": "armv7a-linux-androideabi",
             "ccflags": ["-mfpu=neon"],
         },
         "arm64": {
             "march": "armv8-a",
             "target": "aarch64-linux-android",
-            "tool_path": "aarch64-linux-android",
             "compiler_path": "aarch64-linux-android",
             "ccflags": [],
         },
         "x86_32": {
             "march": "i686",
             "target": "i686-linux-android",
-            "tool_path": "i686-linux-android",
             "compiler_path": "i686-linux-android",
             "ccflags": ["-mstackrealign"],
         },
         "x86_64": {
             "march": "x86-64",
             "target": "x86_64-linux-android",
-            "tool_path": "x86_64-linux-android",
             "compiler_path": "x86_64-linux-android",
             "ccflags": [],
         },
@@ -450,7 +446,11 @@ elif env["platform"] == "android":
     # Setup tools
     env["CC"] = toolchain + "/bin/clang"
     env["CXX"] = toolchain + "/bin/clang++"
-    env["AR"] = toolchain + "/bin/" + arch_info["tool_path"] + "-ar"
+    env["AR"] = toolchain + "/bin/llvm-ar"
+    env["AS"] = toolchain + "/bin/llvm-as"
+    env["LD"] = toolchain + "/bin/llvm-ld"
+    env["STRIP"] = toolchain + "/bin/llvm-strip"
+    env["RANLIB"] = toolchain + "/bin/llvm-ranlib"
     env["SHLIBSUFFIX"] = ".so"
 
     env.Append(
