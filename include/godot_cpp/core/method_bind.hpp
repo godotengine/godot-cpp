@@ -600,7 +600,11 @@ protected:
 
 	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
 		GDNativePropertyInfo pi;
-		call_get_argument_type_info<P...>(p_arg, pi);
+		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
+			call_get_argument_type_info<P...>(p_arg, pi);
+		} else {
+			pi = PropertyInfo();
+		}
 		return pi;
 	}
 #if defined(__GNUC__) && !defined(__clang__)
