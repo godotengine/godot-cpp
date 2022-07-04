@@ -1,7 +1,8 @@
 import sys
 
 import my_spawn
-from SCons.Tool.MSCommon import msvc_exists
+
+from SCons.Tool import msvc, mingw
 from SCons.Variables import *
 
 
@@ -15,14 +16,13 @@ def exists(env):
 
 def generate(env):
     base = None
-    if not env["use_mingw"] and msvc_exists(env):
-        base = env.Tool("msvc")
-        env["is_msvc"] = True
+    if not env["use_mingw"] and msvc.exists(env):
         if env["arch"] == "x86_64":
             env["TARGET_ARCH"] = "amd64"
         elif env["arch"] == "x86_32":
             env["TARGET_ARCH"] = "x86"
-        base.generate(env)
+        env["is_msvc"] = True
+        msvc.generate(env)
         env.Append(CPPDEFINES=["TYPED_METHOD_BIND"])
         env.Append(LINKFLAGS=["/WX"])
         if env["target"] == "debug":
@@ -32,8 +32,7 @@ def generate(env):
 
     elif sys.platform == "win32" or sys.platform == "msys":
         env["use_mingw"] = True
-        base = env.Tool("mingw")
-        base.generate(env)
+        mingw.generate(env)
         # Still need to use C++17.
         env.Append(CCFLAGS=["-std=c++17"])
         # Don't want lib prefixes
