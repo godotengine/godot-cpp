@@ -75,7 +75,7 @@ jobs:
 
       - name: Install scons
         run: |
-          python -m pip install scons
+          python -m pip install scons==4.0.0
 
       - name: Setup MinGW for Windows/MinGW build
         if: ${{ matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes' }}

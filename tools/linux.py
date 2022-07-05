@@ -1,4 +1,5 @@
 from SCons.Variables import *
+from SCons.Tool import clang, clangxx
 
 
 def options(opts):
@@ -11,8 +12,8 @@ def exists(env):
 
 def generate(env):
     if env["use_llvm"]:
-        base = env.Tool("clang")
-        base.generate(env)
+        clang.generate(env)
+        clangxx.generate(env)
 
     env.Append(CCFLAGS=["-fPIC", "-Wwrite-strings"])
     env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
