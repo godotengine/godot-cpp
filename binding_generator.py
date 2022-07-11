@@ -1064,7 +1064,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     if "enums" in class_api and class_name != "Object":
         for enum_api in class_api["enums"]:
-            result.append(f'VARIANT_ENUM_CAST({class_name}, {class_name}::{enum_api["name"]});')
+            if enum_api["is_bitfield"]:
+                result.append(f'VARIANT_BITFIELD_CAST({class_name}, {class_name}::{enum_api["name"]});')
+            else:
+                result.append(f'VARIANT_ENUM_CAST({class_name}, {class_name}::{enum_api["name"]});')
         result.append("")
 
     result.append(f"#endif // ! {header_guard}")
@@ -1194,7 +1197,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             result.append(method_call)
 
             if vararg and ("return_value" in method and method["return_value"]["type"] != "void"):
-                return_type = method["return_value"]["type"].replace("enum::", "")
+                return_type = get_enum_fullname(method["return_value"]["type"])
                 if return_type != "Variant":
                     result.append(f"\treturn VariantCaster<{return_type}>::cast(ret);")
                 else:
@@ -1712,18 +1715,35 @@ def needs_copy_instead_of_move(type_name):
 
 
 def is_enum(type_name):
-    return type_name.startswith("enum::")
+    return type_name.startswith("enum::") or type_name.startswith("bitfield::")
+
+
+def is_bitfield(type_name):
+    return type_name.startswith("bitfield::")
 
 
 def get_enum_class(enum_name: str):
     if "." in enum_name:
-        return enum_name.replace("enum::", "").split(".")[0]
+        if is_bitfield(enum_name):
+            return enum_name.replace("bitfield::", "").split(".")[0]
+        else:
+            return enum_name.replace("enum::", "").split(".")[0]
     else:
         return "GlobalConstants"
 
 
+def get_enum_fullname(enum_name: str):
+    if is_bitfield(enum_name):
+        return enum_name.replace("bitfield::", "BitField<") + ">"
+    else:
+        return enum_name.replace("enum::", "")
+
+
 def get_enum_name(enum_name: str):
-    return enum_name.replace("enum::", "").split(".")[-1]
+    if is_bitfield(enum_name):
+        return enum_name.replace("bitfield::", "").split(".")[-1]
+    else:
+        return enum_name.replace("enum::", "").split(".")[-1]
 
 
 def is_variant(type_name):
@@ -1781,10 +1801,16 @@ def correct_type(type_name, meta=None):
     if type_name in type_conversion:
         return type_conversion[type_name]
     if is_enum(type_name):
-        base_class = get_enum_class(type_name)
-        if base_class == "GlobalConstants":
-            return f"{get_enum_name(type_name)}"
-        return f"{base_class}::{get_enum_name(type_name)}"
+        if is_bitfield(type_name):
+            base_class = get_enum_class(type_name)
+            if base_class == "GlobalConstants":
+                return f"BitField<{get_enum_name(type_name)}>"
+            return f"BitField<{base_class}::{get_enum_name(type_name)}>"
+        else:
+            base_class = get_enum_class(type_name)
+            if base_class == "GlobalConstants":
+                return f"{get_enum_name(type_name)}"
+            return f"{base_class}::{get_enum_name(type_name)}"
     if is_refcounted(type_name):
         return f"Ref<{type_name}>"
     if type_name == "Object" or is_engine_class(type_name):
@@ -1806,6 +1832,9 @@ def get_gdnative_type(type_name):
         "int": "int64_t",
         "float": "double",
     }
+
+    if type_name.startswith("BitField<"):
+        return "int64_t"
 
     if type_name in type_conversion_map:
         return type_conversion_map[type_name]

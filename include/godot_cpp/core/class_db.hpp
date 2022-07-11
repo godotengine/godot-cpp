@@ -116,7 +116,7 @@ public:
 	static void add_property_subgroup(const char *p_class, const char *p_name, const char *p_prefix);
 	static void add_property(const char *p_class, const PropertyInfo &p_pinfo, const char *p_setter, const char *p_getter, int p_index = -1);
 	static void add_signal(const char *p_class, const MethodInfo &p_signal);
-	static void bind_integer_constant(const char *p_class_name, const char *p_enum_name, const char *p_constant_name, GDNativeInt p_constant_value);
+	static void bind_integer_constant(const char *p_class_name, const char *p_enum_name, const char *p_constant_name, GDNativeInt p_constant_value, bool p_is_bitfield = false);
 	static void bind_virtual_method(const char *p_class, const char *p_method, GDNativeExtensionClassCallVirtual p_call);
 
 	static MethodBind *get_method(const char *p_class, const char *p_method);
@@ -132,6 +132,9 @@ public:
 
 #define BIND_ENUM_CONSTANT(m_constant) \
 	godot::ClassDB::bind_integer_constant(get_class_static(), godot::__constant_get_enum_name(m_constant, #m_constant), #m_constant, m_constant);
+
+#define BIND_BITFIELD_FLAG(m_constant) \
+	godot::ClassDB::bind_integer_constant(get_class_static(), godot::__constant_get_bitfield_name(m_constant, #m_constant), #m_constant, m_constant, true);
 
 #define BIND_VIRTUAL_METHOD(m_class, m_method)                                                                                    \
 	{                                                                                                                             \

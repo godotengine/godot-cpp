@@ -219,6 +219,53 @@ inline const char *__constant_get_enum_name(T param, const char *p_constant) {
 	return GetTypeInfo<T>::get_class_info().class_name;
 }
 
+template <class T>
+class BitField {
+	uint32_t value = 0;
+
+public:
+	_FORCE_INLINE_ void set_flag(T p_flag) { value |= p_flag; }
+	_FORCE_INLINE_ bool has_flag(T p_flag) const { return value & p_flag; }
+	_FORCE_INLINE_ void clear_flag(T p_flag) { return value &= ~p_flag; }
+	_FORCE_INLINE_ BitField(uint32_t p_value) { value = p_value; }
+	_FORCE_INLINE_ operator uint32_t() const { return value; }
+	_FORCE_INLINE_ operator Variant() const { return value; }
+};
+
+#define TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, m_impl)                                                                                    \
+	template <>                                                                                                                                   \
+	struct GetTypeInfo<m_impl> {                                                                                                                  \
+		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                   \
+		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                    \
+		static inline GDNativePropertyInfo get_class_info() {                                                                                     \
+			return PropertyInfo(GDNATIVE_VARIANT_TYPE_INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_BITFIELD, \
+					#m_class "." #m_enum);                                                                                                        \
+		}                                                                                                                                         \
+	};                                                                                                                                            \
+	template <>                                                                                                                                   \
+	struct GetTypeInfo<BitField<m_impl>> {                                                                                                        \
+		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                   \
+		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                    \
+		static inline GDNativePropertyInfo get_class_info() {                                                                                     \
+			return PropertyInfo(GDNATIVE_VARIANT_TYPE_INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_BITFIELD, \
+					#m_class "." #m_enum);                                                                                                        \
+		}                                                                                                                                         \
+	};
+
+#define MAKE_BITFIELD_TYPE_INFO(m_class, m_enum)                 \
+	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, m_enum)       \
+	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, m_enum const) \
+	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, m_enum &)     \
+	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, const m_enum &)
+
+template <typename T>
+inline const char *__constant_get_bitfield_name(T param, const char *p_constant) {
+	if (GetTypeInfo<T>::VARIANT_TYPE == Variant::NIL) {
+		ERR_PRINT(("Missing VARIANT_ENUM_CAST for constant's bitfield: " + String(p_constant)).utf8().get_data());
+	}
+	return GetTypeInfo<BitField<T>>::get_class_info().class_name;
+}
+
 #define CLASS_INFO(m_type) (GetTypeInfo<m_type *>::get_class_info())
 
 } // namespace godot
