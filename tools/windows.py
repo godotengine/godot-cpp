@@ -8,6 +8,7 @@ from SCons.Variables import *
 
 def options(opts):
     opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
+    opts.Add(BoolVariable("use_clang_cl", "Use the clang driver instead of MSVC - only effective on Windows", False))
 
 
 def exists(env):
@@ -29,6 +30,9 @@ def generate(env):
             env.Append(CCFLAGS=["/Z7", "/Od", "/EHsc", "/D_DEBUG", "/MDd"])
         elif env["target"] == "release":
             env.Append(CCFLAGS=["/O2", "/EHsc", "/DNDEBUG", "/MD"])
+        if env["use_clang_cl"]:
+            env["CC"] = "clang-cl"
+            env["CXX"] = "clang-cl"
 
     elif sys.platform == "win32" or sys.platform == "msys":
         env["use_mingw"] = True
