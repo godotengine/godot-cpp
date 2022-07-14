@@ -249,7 +249,7 @@ void ClassDB::add_signal(const char *p_class, const MethodInfo &p_signal) {
 	internal::gdn_interface->classdb_register_extension_class_signal(internal::library, cl.name, p_signal.name, parameters.data(), parameters.size());
 }
 
-void ClassDB::bind_integer_constant(const char *p_class_name, const char *p_enum_name, const char *p_constant_name, GDNativeInt p_constant_value) {
+void ClassDB::bind_integer_constant(const char *p_class_name, const char *p_enum_name, const char *p_constant_name, GDNativeInt p_constant_value, bool p_is_bitfield) {
 	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(p_class_name);
 
 	ERR_FAIL_COND_MSG(type_it == classes.end(), "Class doesn't exist.");
@@ -263,7 +263,7 @@ void ClassDB::bind_integer_constant(const char *p_class_name, const char *p_enum
 	type.constant_names.insert(p_constant_name);
 
 	// Register it with Godot
-	internal::gdn_interface->classdb_register_extension_class_integer_constant(internal::library, p_class_name, p_enum_name, p_constant_name, p_constant_value);
+	internal::gdn_interface->classdb_register_extension_class_integer_constant(internal::library, p_class_name, p_enum_name, p_constant_name, p_constant_value, p_is_bitfield);
 }
 
 GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, const char *p_name) {

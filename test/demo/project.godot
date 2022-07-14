@@ -12,8 +12,8 @@ config_version=5
 
 config/name="GDExtension Test Project"
 run/main_scene="res://main.tscn"
-config/icon="res://icon.png"
 config/features=PackedStringArray("4.0")
+config/icon="res://icon.png"
 
 [native_extensions]
 
