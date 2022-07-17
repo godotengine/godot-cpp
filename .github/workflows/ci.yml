@@ -83,17 +83,17 @@ jobs:
 
       - name: Build godot-cpp (debug)
         run: |
-          scons platform=${{ matrix.platform }} target=debug generate_bindings=yes ${{ matrix.flags }} -j2
+          scons platform=${{ matrix.platform }} target=debug generate_bindings=yes ${{ matrix.flags }}
 
       - name: Build test without rebuilding godot-cpp (debug)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} target=debug ${{ matrix.flags }} build_library=no -j2
+          scons platform=${{ matrix.platform }} target=debug ${{ matrix.flags }} build_library=no
 
       - name: Build test and godot-cpp (release)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} target=release ${{ matrix.flags }} -j2
+          scons platform=${{ matrix.platform }} target=release ${{ matrix.flags }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
