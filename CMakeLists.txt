@@ -52,7 +52,7 @@ SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${BUILD_PATH}")
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${BUILD_PATH}")
 
 # Default build type is Debug in the SConstruct
-if(CMAKE_BUILD_TYPE STREQUAL "")
+if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
@@ -66,10 +66,12 @@ if(FLOAT_TYPE EQUAL 64)
 	set(FLOAT_TYPE_FLAG "double" CACHE STRING "")
 endif(FLOAT_TYPE EQUAL 64)
 
-set(BITS 32)
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-	set(BITS 64)
-endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+if(NOT DEFINED BITS)
+	set(BITS 32)
+	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(BITS 64)
+	endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+endif()
 
 # Input from user for godot headers and the api file
 set(GODOT_HEADERS_DIR "godot-headers" CACHE STRING "")
