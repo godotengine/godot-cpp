@@ -3,7 +3,7 @@ HEADERS = godot-headers
 TARGET = debug
 USE_CLANG = no
 
-BASE = scons use_llvm=$(USE_CLANG) generate_bindings=$(GENERATE_BINDINGS) target=$(TARGET) headers=$(HEADERS) -j4
+BASE = scons use_llvm=$(USE_CLANG) generate_bindings=$(GENERATE_BINDINGS) target=$(TARGET) headers=$(HEADERS)
 LINUX = $(BASE) platform=linux
 WINDOWS = $(BASE) platform=windows
 OSX = $(BASE) platform=osx
