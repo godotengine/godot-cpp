@@ -101,20 +101,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	#	string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	#endif()
 
-else()
-
-#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-	# using Clang
-#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	# using GCC and maybe MinGW?
-
+else()  # GCC/Clang
 	set(GODOT_LINKER_FLAGS "-static-libgcc -static-libstdc++ -Wl,-R,'$$ORIGIN'")
 
-	# Hmm.. maybe to strikt?
 	if(NOT CMAKE_SYSTEM_NAME MATCHES "Windows")
 		set(GODOT_COMPILE_FLAGS "-fPIC")
 	endif()
-	set(GODOT_COMPILE_FLAGS "-g -Wwrite-strings")
+	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -g -Wwrite-strings")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wchar-subscripts -Wcomment -Wdisabled-optimization")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wformat -Wformat=2 -Wformat-security -Wformat-y2k")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wimport -Winit-self -Winline -Winvalid-pch")
@@ -172,7 +165,7 @@ add_library(${PROJECT_NAME}
 		${GENERATED_FILES_LIST}
 )
 add_library(godot::cpp ALIAS ${PROJECT_NAME})
-target_compile_definitions(${PROJECT_NAME} PUBLIC 
+target_compile_definitions(${PROJECT_NAME} PUBLIC
 	$<$<CONFIG:Debug>:DEBUG_ENABLED>
 	$<$<CONFIG:Debug>:DEBUG_METHODS_ENABLED>
 )
