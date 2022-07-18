@@ -40,7 +40,7 @@ cmake_minimum_required(VERSION 3.6)
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
 
 # Change the output directory to the bin directory
-set(BUILD_PATH ${CMAKE_SOURCE_DIR}/bin)
+set(BUILD_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${BUILD_PATH}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${BUILD_PATH}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BUILD_PATH}")
