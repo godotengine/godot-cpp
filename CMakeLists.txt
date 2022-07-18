@@ -1,36 +1,36 @@
 # cmake arguments
 # CMAKE_BUILD_TYPE:			Compilation target (Debug or Release defaults to Debug)
-# 
+#
 # godot-cpp cmake arguments
 # GODOT_HEADERS_DIR:		This is where the gdnative include folder is (godot_source/modules/gdnative/include)
 # GODOT_CUSTOM_API_FILE:	This is if you have another path for the godot_api.json
-# 
+#
 # Android cmake arguments
 # CMAKE_TOOLCHAIN_FILE:		The path to the android cmake toolchain ($ANDROID_NDK/build/cmake/android.toolchain.cmake)
 # ANDROID_NDK:				The path to the android ndk root folder
 # ANDROID_TOOLCHAIN_NAME:	The android toolchain (arm-linux-androideabi-4.9 or aarch64-linux-android-4.9 or x86-4.9 or x86_64-4.9)
 # ANDROID_PLATFORM:			The android platform version (android-23)
 # More info here: https://godot.readthedocs.io/en/latest/development/compiling/compiling_for_android.html
-# 
+#
 # Examples
-# 
+#
 # Builds a debug version:
 # cmake .
 # cmake --build .
-# 
+#
 # Builds a release version with clang
 # CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" .
 # cmake --build .
-# 
+#
 # Builds an android armeabi-v7a debug version:
 # cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_NDK=$ANDROID_NDK \
 #		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 -DANDROID_PLATFORM=android-23 -DCMAKE_BUILD_TYPE=Debug .
 # cmake --build .
-# 
+#
 # Protip
 # Generate the buildfiles in a sub directory to not clutter the root directory with build files:
 # mkdir build && cd build && cmake -G "Unix Makefiles" .. && cmake --build .
-# 
+#
 # Todo
 # Test build for Windows, Mac and mingw.
 
@@ -97,17 +97,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	#	string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	#endif()
 
-else()
-
-#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-	# using Clang
-#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	# using GCC and maybe MinGW?
-
+else()  # GCC/Clang
 	set(GODOT_LINKER_FLAGS "-static-libgcc -static-libstdc++ -Wl,-R,'$$ORIGIN'")
 
-	# Hmm.. maybe to strikt?
-	set(GODOT_COMPILE_FLAGS "-fPIC -g -Wwrite-strings")
+	if(NOT CMAKE_SYSTEM_NAME MATCHES "Windows")
+		set(GODOT_COMPILE_FLAGS "-fPIC")
+	endif()
+	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -g -Wwrite-strings")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wchar-subscripts -Wcomment -Wdisabled-optimization")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wformat -Wformat=2 -Wformat-security -Wformat-y2k")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wimport -Winit-self -Winline -Winvalid-pch -Werror")
