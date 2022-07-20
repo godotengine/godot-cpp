@@ -278,6 +278,21 @@ inline float lerp_angle(float p_from, float p_to, float p_weight) {
 	return p_from + distance * p_weight;
 }
 
+inline double cubic_interpolate(double p_from, double p_to, double p_pre, double p_post, double p_weight) {
+	return 0.5 *
+		   ((p_from * 2.0) +
+				   (-p_pre + p_to) * p_weight +
+				   (2.0 * p_pre - 5.0 * p_from + 4.0 * p_to - p_post) * (p_weight * p_weight) +
+				   (-p_pre + 3.0 * p_from - 3.0 * p_to + p_post) * (p_weight * p_weight * p_weight));
+}
+inline float cubic_interpolate(float p_from, float p_to, float p_pre, float p_post, float p_weight) {
+	return 0.5f *
+		   ((p_from * 2.0f) +
+				   (-p_pre + p_to) * p_weight +
+				   (2.0f * p_pre - 5.0f * p_from + 4.0f * p_to - p_post) * (p_weight * p_weight) +
+				   (-p_pre + 3.0f * p_from - 3.0f * p_to + p_post) * (p_weight * p_weight * p_weight));
+}
+
 template <typename T>
 inline T clamp(T x, T minv, T maxv) {
 	if (x < minv) {

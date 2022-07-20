@@ -70,11 +70,14 @@ public:
 		VECTOR3,
 		VECTOR3I,
 		TRANSFORM2D,
+		VECTOR4,
+		VECTOR4I,
 		PLANE,
 		QUATERNION,
 		AABB,
 		BASIS,
 		TRANSFORM3D,
+		PROJECTION,
 
 		// misc types
 		COLOR,
@@ -172,11 +175,14 @@ public:
 	Variant(const Vector3 &v);
 	Variant(const Vector3i &v);
 	Variant(const Transform2D &v);
+	Variant(const Vector4 &v);
+	Variant(const Vector4i &v);
 	Variant(const Plane &v);
 	Variant(const Quaternion &v);
 	Variant(const godot::AABB &v);
 	Variant(const Basis &v);
 	Variant(const Transform3D &v);
+	Variant(const Projection &v);
 	Variant(const Color &v);
 	Variant(const StringName &v);
 	Variant(const NodePath &v);
@@ -212,11 +218,14 @@ public:
 	operator Vector3() const;
 	operator Vector3i() const;
 	operator Transform2D() const;
+	operator Vector4() const;
+	operator Vector4i() const;
 	operator Plane() const;
 	operator Quaternion() const;
 	operator godot::AABB() const;
 	operator Basis() const;
 	operator Transform3D() const;
+	operator Projection() const;
 	operator Color() const;
 	operator StringName() const;
 	operator NodePath() const;

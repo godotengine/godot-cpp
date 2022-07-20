@@ -19,6 +19,7 @@ func _ready():
 	prints("  returned", $Example.return_something("some string"))
 	prints("  returned const", $Example.return_something_const())
 	prints("  returned ref", $Example.return_extended_ref())
+	prints("  returned ", $Example.get_v4())
 
 	prints("VarArg method calls")
 	var ref = ExampleRef.new()

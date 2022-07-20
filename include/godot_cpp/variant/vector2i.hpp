@@ -31,6 +31,7 @@
 #ifndef GODOT_VECTOR2I_HPP
 #define GODOT_VECTOR2I_HPP
 
+#include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/math.hpp>
 
 namespace godot {
@@ -50,19 +51,43 @@ public:
 	};
 
 	union {
-		int32_t x = 0;
-		int32_t width;
-	};
-	union {
-		int32_t y = 0;
-		int32_t height;
+		struct {
+			union {
+				int32_t x;
+				int32_t width;
+			};
+			union {
+				int32_t y;
+				int32_t height;
+			};
+		};
+
+		int32_t coord[2] = { 0 };
 	};
 
-	inline int32_t &operator[](int p_idx) {
-		return p_idx ? y : x;
+	_FORCE_INLINE_ int32_t &operator[](int p_idx) {
+		DEV_ASSERT((unsigned int)p_idx < 2);
+		return coord[p_idx];
 	}
-	inline const int32_t &operator[](int p_idx) const {
-		return p_idx ? y : x;
+	_FORCE_INLINE_ const int32_t &operator[](int p_idx) const {
+		DEV_ASSERT((unsigned int)p_idx < 2);
+		return coord[p_idx];
+	}
+
+	_FORCE_INLINE_ Vector2i::Axis min_axis_index() const {
+		return x < y ? Vector2i::AXIS_X : Vector2i::AXIS_Y;
+	}
+
+	_FORCE_INLINE_ Vector2i::Axis max_axis_index() const {
+		return x < y ? Vector2i::AXIS_Y : Vector2i::AXIS_X;
+	}
+
+	Vector2i min(const Vector2i &p_vector2i) const {
+		return Vector2i(MIN(x, p_vector2i.x), MIN(y, p_vector2i.y));
+	}
+
+	Vector2i max(const Vector2i &p_vector2i) const {
+		return Vector2i(MAX(x, p_vector2i.x), MAX(y, p_vector2i.y));
 	}
 
 	Vector2i operator+(const Vector2i &p_v) const;
@@ -92,38 +117,40 @@ public:
 	bool operator==(const Vector2i &p_vec2) const;
 	bool operator!=(const Vector2i &p_vec2) const;
 
+	int64_t length_squared() const;
+	double length() const;
+
 	real_t aspect() const { return width / (real_t)height; }
-	Vector2i sign() const { return Vector2i(Math::sign(x), Math::sign(y)); }
-	Vector2i abs() const { return Vector2i(Math::abs(x), Math::abs(y)); }
+	Vector2i sign() const { return Vector2i(SIGN(x), SIGN(y)); }
+	Vector2i abs() const { return Vector2i(ABS(x), ABS(y)); }
+	Vector2i clamp(const Vector2i &p_min, const Vector2i &p_max) const;
 
 	operator String() const;
 	operator Vector2() const;
 
 	inline Vector2i() {}
-	inline Vector2i(int32_t p_x, int32_t p_y) {
+	inline Vector2i(const int32_t p_x, const int32_t p_y) {
 		x = p_x;
 		y = p_y;
 	}
 };
 
-inline Vector2i operator*(const int32_t &p_scalar, const Vector2i &p_vector) {
+// Multiplication operators required to workaround issues with LLVM using implicit conversion.
+
+_FORCE_INLINE_ Vector2i operator*(const int32_t p_scalar, const Vector2i &p_vector) {
 	return p_vector * p_scalar;
 }
 
-inline Vector2i operator*(const int64_t &p_scalar, const Vector2i &p_vector) {
-	return p_vector * (int32_t)p_scalar;
+_FORCE_INLINE_ Vector2i operator*(const int64_t p_scalar, const Vector2i &p_vector) {
+	return p_vector * p_scalar;
 }
 
-inline Vector2i operator*(const float &p_scalar, const Vector2i &p_vector) {
-	float x = (float)p_vector.x * p_scalar;
-	float y = (float)p_vector.y * p_scalar;
-	return Vector2i((int32_t)round(x), (int32_t)round(y));
+_FORCE_INLINE_ Vector2i operator*(const float p_scalar, const Vector2i &p_vector) {
+	return p_vector * p_scalar;
 }
 
-inline Vector2i operator*(const double &p_scalar, const Vector2i &p_vector) {
-	double x = (double)p_vector.x * p_scalar;
-	double y = (double)p_vector.y * p_scalar;
-	return Vector2i((int32_t)round(x), (int32_t)round(y));
+_FORCE_INLINE_ Vector2i operator*(const double p_scalar, const Vector2i &p_vector) {
+	return p_vector * p_scalar;
 }
 
 typedef Vector2i Size2i;

@@ -577,6 +577,21 @@ void _err_print_index_error(const char *p_function, const char *p_file, int p_li
 } // namespace godot
 
 /**
+ * This should be a 'free' assert for program flow and should not be needed in any releases,
+ *  only used in dev builds.
+ */
+#ifdef DEBUG_ENABLED
+#define DEV_ASSERT(m_cond)                                                                                              \
+	if (unlikely(!(m_cond))) {                                                                                          \
+		_err_print_error(FUNCTION_STR, __FILE__, __LINE__, "FATAL: DEV_ASSERT failed  \"" _STR(m_cond) "\" is false."); \
+		GENERATE_TRAP();                                                                                                \
+	} else                                                                                                              \
+		((void)0)
+#else
+#define DEV_ASSERT(m_cond)
+#endif
+
+/**
  * Gives an error message when a method bind is invalid (likely the hash changed).
  * Avoids crashing the application in this case. It's not free, so it's debug only.
  */

@@ -101,6 +101,7 @@ void Example::_bind_methods() {
 	ADD_SUBGROUP("Test subgroup", "group_subgroup_");
 
 	ClassDB::bind_method(D_METHOD("get_custom_position"), &Example::get_custom_position);
+	ClassDB::bind_method(D_METHOD("get_v4"), &Example::get_v4);
 	ClassDB::bind_method(D_METHOD("set_custom_position", "position"), &Example::set_custom_position);
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "group_subgroup_custom_position"), "set_custom_position", "get_custom_position");
 
@@ -203,6 +204,10 @@ void Example::set_custom_position(const Vector2 &pos) {
 
 Vector2 Example::get_custom_position() const {
 	return custom_position;
+}
+
+Vector4 Example::get_v4() const {
+	return Vector4(1.2, 3.4, 5.6, 7.8);
 }
 
 // Virtual function override.

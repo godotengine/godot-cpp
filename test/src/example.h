@@ -98,6 +98,7 @@ public:
 	// Property.
 	void set_custom_position(const Vector2 &pos);
 	Vector2 get_custom_position() const;
+	Vector4 get_v4() const;
 
 	// Static method.
 	static int test_static(int p_a, int p_b);
