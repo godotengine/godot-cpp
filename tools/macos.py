@@ -1,16 +1,16 @@
 import os
 import sys
-import osxcross
+import macos_osxcross
 
 
 def options(opts):
     opts.Add("macos_deployment_target", "macOS deployment target", "default")
     opts.Add("macos_sdk_path", "macOS SDK path", "")
-    osxcross.options(opts)
+    macos_osxcross.options(opts)
 
 
 def exists(env):
-    return sys.platform == "darwin" or osxcross.exists(env)
+    return sys.platform == "darwin" or macos_osxcross.exists(env)
 
 
 def generate(env):
@@ -24,7 +24,7 @@ def generate(env):
         env["CC"] = "clang"
     else:
         # Use osxcross
-        osxcross.generate(env)
+        macos_osxcross.generate(env)
 
     if env["arch"] == "universal":
         env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])

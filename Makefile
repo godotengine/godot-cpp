@@ -6,7 +6,7 @@ USE_CLANG = no
 BASE = scons use_llvm=$(USE_CLANG) generate_bindings=$(GENERATE_BINDINGS) target=$(TARGET) headers=$(HEADERS)
 LINUX = $(BASE) platform=linux
 WINDOWS = $(BASE) platform=windows
-OSX = $(BASE) platform=osx
+MACOS = $(BASE) platform=macos
 
 
 all:
@@ -36,12 +36,5 @@ windows64: SConstruct
 	$(WINDOWS) bits=64
 
 
-osx:
-	make osx32
-	make osx64
-
-osx32: SConstruct
-	$(OSX) bits=32
-
-osx64: SConstruct
-	$(OSX) bits=64
+macos: SConstruct
+	$(MACOS)

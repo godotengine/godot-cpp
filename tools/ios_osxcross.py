@@ -10,7 +10,7 @@ def exists(env):
 
 
 def generate(env):
-    compiler_path = "$IPHONEPATH/usr/bin/${ios_triple}"
+    compiler_path = "$IOS_TOOLCHAIN_PATH/usr/bin/${ios_triple}"
     env["CC"] = compiler_path + "clang"
     env["CXX"] = compiler_path + "clang++"
     env["AR"] = compiler_path + "ar"
@@ -19,8 +19,8 @@ def generate(env):
 
     env.Prepend(
         CPPPATH=[
-            "$IPHONESDK/usr/include",
-            "$IPHONESDK/System/Library/Frameworks/AudioUnit.framework/Headers",
+            "$IOS_SDK_PATH/usr/include",
+            "$IOS_SDK_PATH/System/Library/Frameworks/AudioUnit.framework/Headers",
         ]
     )
     env.Append(CCFLAGS=["-stdlib=libc++"])

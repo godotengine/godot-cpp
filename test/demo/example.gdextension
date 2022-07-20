@@ -4,8 +4,8 @@ entry_symbol = "example_library_init"
 
 [libraries]
 
-macos.debug = "bin/libgdexample.osx.debug.framework"
-macos.release = "bin/libgdexample.osx.release.framework"
+macos.debug = "bin/libgdexample.macos.debug.framework"
+macos.release = "bin/libgdexample.macos.release.framework"
 windows.debug.x86_32 = "bin/libgdexample.windows.debug.x86_32.dll"
 windows.release.x86_32 = "bin/libgdexample.windows.release.x86_32.dll"
 windows.debug.x86_64 = "bin/libgdexample.windows.debug.x86_64.dll"

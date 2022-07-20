@@ -37,9 +37,9 @@ jobs:
 
           - name: 🍎 macOS (universal)
             os: macos-11
-            platform: osx
+            platform: macos
             artifact-name: godot-cpp-macos-universal-release
-            artifact-path: bin/libgodot-cpp.osx.release.universal.a
+            artifact-path: bin/libgodot-cpp.macos.release.universal.a
             flags: arch=universal
 
           - name: 🤖 Android (arm64)
