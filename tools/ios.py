@@ -20,11 +20,11 @@ def options(opts):
     opts.Add(BoolVariable("ios_simulator", "Target iOS Simulator", False))
     opts.Add("ios_min_version", "Target minimum iphoneos/iphonesimulator version", "10.0")
     opts.Add(
-        "IPHONEPATH",
-        "Path to iPhone toolchain",
+        "IOS_TOOLCHAIN_PATH",
+        "Path to iOS toolchain",
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain",
     )
-    opts.Add("IPHONESDK", "Path to the iPhone SDK", "")
+    opts.Add("IOS_SDK_PATH", "Path to the iOS SDK", "")
     ios_osxcross.options(opts)
 
 
@@ -45,9 +45,9 @@ def generate(env):
         env.Append(CCFLAGS=["-miphoneos-version-min=" + env["ios_min_version"]])
 
     if sys.platform == "darwin":
-        if env["IPHONESDK"] == "":
+        if env["IOS_SDK_PATH"] == "":
             try:
-                env["IPHONESDK"] = decode_utf8(
+                env["IOS_SDK_PATH"] = decode_utf8(
                     subprocess.check_output(["xcrun", "--sdk", sdk_name, "--show-sdk-path"]).strip()
                 )
             except (subprocess.CalledProcessError, OSError):
@@ -55,13 +55,13 @@ def generate(env):
                     "Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name)
                 )
 
-        compiler_path = env["IPHONEPATH"] + "/usr/bin/"
+        compiler_path = env["IOS_TOOLCHAIN_PATH"] + "/usr/bin/"
         env["CC"] = compiler_path + "clang"
         env["CXX"] = compiler_path + "clang++"
         env["AR"] = compiler_path + "ar"
         env["RANLIB"] = compiler_path + "ranlib"
         env["SHLIBSUFFIX"] = ".dylib"
-        env["ENV"]["PATH"] = env["IPHONEPATH"] + "/Developer/usr/bin/:" + env["ENV"]["PATH"]
+        env["ENV"]["PATH"] = env["IOS_TOOLCHAIN_PATH"] + "/Developer/usr/bin/:" + env["ENV"]["PATH"]
 
     else:
         ios_osxcross.generate(env)
@@ -77,8 +77,8 @@ def generate(env):
         env.Append(LINKFLAGS=["-arch", env["arch"]])
         env.Append(CCFLAGS=["-arch", env["arch"]])
 
-    env.Append(CCFLAGS=["-isysroot", env["IPHONESDK"]])
-    env.Append(LINKFLAGS=["-isysroot", env["IPHONESDK"], "-F" + env["IPHONESDK"]])
+    env.Append(CCFLAGS=["-isysroot", env["IOS_SDK_PATH"]])
+    env.Append(LINKFLAGS=["-isysroot", env["IOS_SDK_PATH"], "-F" + env["IOS_SDK_PATH"]])
 
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-Og", "-g"])

@@ -20,7 +20,7 @@ def add_sources(sources, dir, extension):
 if sys.platform.startswith("linux"):
     default_platform = "linux"
 elif sys.platform == "darwin":
-    default_platform = "osx"
+    default_platform = "macos"
 elif sys.platform == "win32" or sys.platform == "msys":
     default_platform = "windows"
 elif ARGUMENTS.get("platform", ""):
@@ -48,7 +48,7 @@ if env.GetOption("num_jobs") == altered_num_jobs:
         )
         env.SetOption("num_jobs", safer_cpu_count)
 
-platforms = ("linux", "osx", "windows", "android", "ios", "javascript")
+platforms = ("linux", "macos", "windows", "android", "ios", "javascript")
 opts = Variables([], ARGUMENTS)
 opts.Add(
     EnumVariable(
@@ -110,7 +110,7 @@ if env["arch"] == "":
     # No architecture specified. Default to arm64 if building for Android,
     # universal if building for macOS or iOS, wasm32 if building for web,
     # otherwise default to the host architecture.
-    if env["platform"] in ["osx", "ios"]:
+    if env["platform"] in ["macos", "ios"]:
         env["arch"] = "universal"
     elif env["platform"] == "android":
         env["arch"] = "arm64"
