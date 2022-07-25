@@ -134,6 +134,14 @@ Variant::Variant(const Transform2D &v) {
 	from_type_constructor[TRANSFORM2D](_native_ptr(), v._native_ptr());
 }
 
+Variant::Variant(const Vector4 &v) {
+	from_type_constructor[VECTOR4](_native_ptr(), v._native_ptr());
+}
+
+Variant::Variant(const Vector4i &v) {
+	from_type_constructor[VECTOR4I](_native_ptr(), v._native_ptr());
+}
+
 Variant::Variant(const Plane &v) {
 	from_type_constructor[PLANE](_native_ptr(), v._native_ptr());
 }
@@ -152,6 +160,10 @@ Variant::Variant(const Basis &v) {
 
 Variant::Variant(const Transform3D &v) {
 	from_type_constructor[TRANSFORM3D](_native_ptr(), v._native_ptr());
+}
+
+Variant::Variant(const Projection &v) {
+	from_type_constructor[PROJECTION](_native_ptr(), v._native_ptr());
 }
 
 Variant::Variant(const Color &v) {
@@ -317,6 +329,18 @@ Variant::operator Transform2D() const {
 	return result;
 }
 
+Variant::operator Vector4() const {
+	Vector4 result;
+	to_type_constructor[VECTOR4](result._native_ptr(), _native_ptr());
+	return result;
+}
+
+Variant::operator Vector4i() const {
+	Vector4i result;
+	to_type_constructor[VECTOR4I](result._native_ptr(), _native_ptr());
+	return result;
+}
+
 Variant::operator Plane() const {
 	Plane result;
 	to_type_constructor[PLANE](result._native_ptr(), _native_ptr());
@@ -344,6 +368,12 @@ Variant::operator Basis() const {
 Variant::operator Transform3D() const {
 	Transform3D result;
 	to_type_constructor[TRANSFORM3D](result._native_ptr(), _native_ptr());
+	return result;
+}
+
+Variant::operator Projection() const {
+	Projection result;
+	to_type_constructor[PROJECTION](result._native_ptr(), _native_ptr());
 	return result;
 }
 
@@ -703,11 +733,14 @@ void Variant::clear() {
 		false, // VECTOR3,
 		false, // VECTOR3I,
 		true, // TRANSFORM2D,
+		false, // VECTOR4,
+		false, // VECTOR4I,
 		false, // PLANE,
 		false, // QUATERNION,
 		true, // AABB,
 		true, // BASIS,
-		true, // TRANSFORM,
+		true, // TRANSFORM3D,
+		true, // PROJECTION,
 
 		// misc types
 		false, // COLOR,

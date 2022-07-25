@@ -416,6 +416,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("\tChar16String utf16() const;")
         result.append("\tChar32String utf32() const;")
         result.append("\tCharWideString wide_string() const;")
+        result.append("\tstatic String num_real(double p_num, bool p_trailing = true);")
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
@@ -505,6 +506,11 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("String operator+(const wchar_t *p_chr, const String &p_str);")
         result.append("String operator+(const char16_t *p_chr, const String &p_str);")
         result.append("String operator+(const char32_t *p_chr, const String &p_str);")
+
+        result.append("String itos(int64_t p_val);")
+        result.append("String uitos(uint64_t p_val);")
+        result.append("String rtos(double p_val);")
+        result.append("String rtoss(double p_val);")
 
     result.append("")
     result.append("} // namespace godot")
@@ -1685,6 +1691,9 @@ def is_included_type(type_name):
         "Vector2i",
         "Vector3",
         "Vector3i",
+        "Vector4",
+        "Vector4i",
+        "Projection",
     ]
 
 

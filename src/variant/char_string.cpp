@@ -37,6 +37,8 @@
 
 #include <godot_cpp/godot.hpp>
 
+#include <cmath>
+
 namespace godot {
 
 int CharString::length() const {
@@ -184,6 +186,43 @@ String String::utf16(const char16_t *from, int len) {
 
 void String::parse_utf16(const char16_t *from, int len) {
 	internal::gdn_interface->string_new_with_utf16_chars_and_len(_native_ptr(), from, len);
+}
+
+String String::num_real(double p_num, bool p_trailing) {
+	if (p_num == (double)(int64_t)p_num) {
+		if (p_trailing) {
+			return num_int64((int64_t)p_num) + ".0";
+		} else {
+			return num_int64((int64_t)p_num);
+		}
+	}
+#ifdef REAL_T_IS_DOUBLE
+	int decimals = 14;
+#else
+	int decimals = 6;
+#endif
+	// We want to align the digits to the above sane default, so we only
+	// need to subtract log10 for numbers with a positive power of ten.
+	if (p_num > 10) {
+		decimals -= (int)floor(log10(p_num));
+	}
+	return num(p_num, decimals);
+}
+
+String itos(int64_t p_val) {
+	return String::num_int64(p_val);
+}
+
+String uitos(uint64_t p_val) {
+	return String::num_uint64(p_val);
+}
+
+String rtos(double p_val) {
+	return String::num(p_val);
+}
+
+String rtoss(double p_val) {
+	return String::num_scientific(p_val);
 }
 
 CharString String::utf8() const {

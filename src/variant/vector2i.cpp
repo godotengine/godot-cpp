@@ -30,11 +30,24 @@
 
 #include <godot_cpp/variant/vector2i.hpp>
 
-#include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/vector2.hpp>
 
 namespace godot {
+
+Vector2i Vector2i::clamp(const Vector2i &p_min, const Vector2i &p_max) const {
+	return Vector2i(
+			CLAMP(x, p_min.x, p_max.x),
+			CLAMP(y, p_min.y, p_max.y));
+}
+
+int64_t Vector2i::length_squared() const {
+	return x * (int64_t)x + y * (int64_t)y;
+}
+
+double Vector2i::length() const {
+	return Math::sqrt((double)length_squared());
+}
 
 Vector2i Vector2i::operator+(const Vector2i &p_v) const {
 	return Vector2i(x + p_v.x, y + p_v.y);
@@ -106,11 +119,11 @@ bool Vector2i::operator!=(const Vector2i &p_vec2) const {
 }
 
 Vector2i::operator String() const {
-	return String::num(x, 0) + ", " + String::num(y, 0);
+	return "(" + itos(x) + ", " + itos(y) + ")";
 }
 
 Vector2i::operator Vector2() const {
-	return Vector2((real_t)x, (real_t)y);
+	return Vector2((int32_t)x, (int32_t)y);
 }
 
 } // namespace godot
