@@ -169,6 +169,9 @@ public:
 
 template <class T>
 T *Object::cast_to(Object *p_object) {
+	if (p_object == nullptr) {
+		return nullptr;
+	}
 	GDNativeObjectPtr casted = internal::gdn_interface->object_cast_to(p_object->_owner, internal::gdn_interface->classdb_get_class_tag(T::get_class_static()));
 	if (casted == nullptr) {
 		return nullptr;
