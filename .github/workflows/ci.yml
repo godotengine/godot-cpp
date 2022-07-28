@@ -44,7 +44,7 @@ jobs:
             platform: android
             artifact-name: godot-cpp-android-arm64-release
             artifact-path: bin/libgodot-cpp.android.release.arm64v8.a
-            flags: android_arch=arm64v8
+            flags: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME android_arch=arm64v8
 
           - name: 🍏 iOS (arm64)
             os: macos-11
