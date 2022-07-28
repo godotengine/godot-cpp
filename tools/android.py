@@ -18,18 +18,14 @@ def options(opts):
 
 
 def exists(env):
-    if not "ANDROID_NDK_ROOT" in os.environ:
-        return False
-    return True
+    return "ANDROID_NDK_ROOT" in os.environ or "ANDROID_NDK_ROOT" in ARGUMENTS
 
 
 def generate(env):
-    if not "ANDROID_NDK_ROOT" in os.environ:
+    if "ANDROID_NDK_ROOT" not in env:
         raise ValueError(
             "To build for Android, ANDROID_NDK_ROOT must be defined. Please set ANDROID_NDK_ROOT to the root folder of your Android NDK installation."
         )
-
-    env["ANDROID_NDK_ROOT"] = os.environ["ANDROID_NDK_ROOT"]
 
     if env["arch"] not in ("arm64", "x86_64", "arm32", "x86_32"):
         print("Only arm64, x86_64, arm32, and x86_32 are supported on Android. Exiting.")
