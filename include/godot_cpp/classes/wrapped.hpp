@@ -165,9 +165,12 @@ public:                                                                         
 	}                                                                                                              \
                                                                                                                    \
 	static void *___binding_create_callback(void *p_token, void *p_instance) {                                     \
-		return memnew(m_class((GodotObject *)p_instance));                                                         \
+		/* Do not call memnew here, we don't want the postinitializer to be called */                              \
+		return new ("") m_class((GodotObject *)p_instance);                                                        \
 	}                                                                                                              \
 	static void ___binding_free_callback(void *p_token, void *p_instance, void *p_binding) {                       \
+		/* Explicitly call the deconstructor to ensure proper lifecycle for non-trivial members */                 \
+		reinterpret_cast<m_class *>(p_binding)->~m_class();                                                        \
 		Memory::free_static(reinterpret_cast<m_class *>(p_binding));                                               \
 	}                                                                                                              \
 	static GDNativeBool ___binding_reference_callback(void *p_token, void *p_instance, GDNativeBool p_reference) { \
