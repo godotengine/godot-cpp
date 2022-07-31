@@ -67,7 +67,7 @@ public:
 #define GDCLASS(m_class, m_inherits)                                                                               \
 private:                                                                                                           \
 	void operator=(const m_class &p_rval) {}                                                                       \
-	friend class ClassDB;                                                                                          \
+	friend class ::godot::ClassDB;                                                                                 \
                                                                                                                    \
 protected:                                                                                                         \
 	virtual const char *_get_extension_class() const override {                                                    \
