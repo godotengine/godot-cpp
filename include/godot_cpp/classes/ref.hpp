@@ -246,7 +246,12 @@ struct PtrToArg<Ref<T>> {
 	typedef Ref<T> EncodeT;
 
 	_FORCE_INLINE_ static void encode(Ref<T> p_val, const void *p_ptr) {
-		*(void **)p_ptr = p_val->_owner;
+		if (p_val != nullptr) {
+			p_val->reference();
+			*(void**)p_ptr = p_val->_owner;
+		} else {
+			*(void**)p_ptr = nullptr;
+		}
 	}
 };
 
