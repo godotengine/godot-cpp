@@ -31,6 +31,8 @@
 #ifndef CHAR_UTILS_HPP
 #define CHAR_UTILS_HPP
 
+#include <godot_cpp/core/defs.hpp>
+
 static _FORCE_INLINE_ bool is_ascii_upper_case(char32_t c) {
 	return (c >= 'A' && c <= 'Z');
 }

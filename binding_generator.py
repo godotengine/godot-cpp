@@ -963,8 +963,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     if class_name != "Object":
         result.append("#include <godot_cpp/core/class_db.hpp>")
-        result.append("")
-        result.append("#include <type_traits>")
+        if "enums" in class_api:
+            result.append("#include <godot_cpp/core/binder_common.hpp>")
         result.append("")
 
     result.append("namespace godot {")

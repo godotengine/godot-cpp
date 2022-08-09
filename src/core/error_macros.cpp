@@ -30,6 +30,8 @@
 
 #include <godot_cpp/core/error_macros.hpp>
 
+#include <godot_cpp/variant/string.hpp>
+
 #include <godot_cpp/godot.hpp>
 
 #include <string>

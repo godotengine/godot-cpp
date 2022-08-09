@@ -33,7 +33,7 @@
 
 #include <godot_cpp/core/defs.hpp>
 
-#include <godot_cpp/variant/builtin_types.hpp>
+#include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/variant_size.hpp>
 
 #include <godot/gdnative_interface.h>
@@ -41,6 +41,41 @@
 #include <array>
 
 namespace godot {
+
+class String;
+class Vector2;
+class Vector2i;
+class Rect2;
+class Rect2i;
+class Vector3;
+class Vector3i;
+class Transform2D;
+class Vector4;
+class Vector4i;
+class Plane;
+class Quaternion;
+class AABB;
+class Basis;
+class Transform3D;
+class Projection;
+class Color;
+class StringName;
+class NodePath;
+class RID;
+class Object;
+class Callable;
+class Signal;
+class Dictionary;
+class Array;
+class PackedByteArray;
+class PackedInt32Array;
+class PackedInt64Array;
+class PackedFloat32Array;
+class PackedFloat64Array;
+class PackedStringArray;
+class PackedVector2Array;
+class PackedVector3Array;
+class PackedColorArray;
 
 class Variant {
 	uint8_t opaque[GODOT_CPP_VARIANT_SIZE]{ 0 };

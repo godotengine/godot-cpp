@@ -37,6 +37,8 @@
 
 namespace godot {
 
+class ClassDB;
+
 typedef void GodotObject;
 
 // Base for all engine classes, to contain the pointer to the engine instance.
