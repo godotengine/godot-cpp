@@ -1,5 +1,14 @@
 # godot-cpp
 
+> **Warning**
+>
+> This repository's `master` branch is only usable with Godot 4.0 ([GDExtension](https://godotengine.org/article/introducing-gd-extensions)).
+>
+> Switch to the [`3.5` branch](https://github.com/godotengine/godot-cpp/tree/3.5)
+> if using Godot 3.5.x with GDNative,
+> or the [`3.x` branch](https://github.com/godotengine/godot-cpp/tree/3.x)
+> if using the Godot 3.x development branch with GDNative.
+
 This repository contains the  *C++ bindings* for the [**Godot Engine**](https://github.com/godotengine/godot)'s GDExtensions API.
 
 - [**Versioning**](#versioning)
