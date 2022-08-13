@@ -82,6 +82,8 @@ public:
 	// Functions.
 	void simple_func();
 	void simple_const_func() const;
+	void typed_ptr_parameter(Example* example);
+	void typed_const_ptr_parameter(const Example* example);
 	String return_something(const String &base);
 	Viewport *return_something_const() const;
 	ExampleRef *return_extended_ref() const;

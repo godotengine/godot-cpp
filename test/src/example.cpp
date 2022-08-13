@@ -62,6 +62,8 @@ void Example::_bind_methods() {
 	// Methods.
 	ClassDB::bind_method(D_METHOD("simple_func"), &Example::simple_func);
 	ClassDB::bind_method(D_METHOD("simple_const_func"), &Example::simple_const_func);
+	ClassDB::bind_method(D_METHOD("typed_ptr_parameter", "example"), &Example::typed_ptr_parameter);
+	ClassDB::bind_method(D_METHOD("typed_const_ptr_parameter", "example"), &Example::typed_const_ptr_parameter);
 	ClassDB::bind_method(D_METHOD("return_something"), &Example::return_something);
 	ClassDB::bind_method(D_METHOD("return_something_const"), &Example::return_something_const);
 	ClassDB::bind_method(D_METHOD("return_extended_ref"), &Example::return_extended_ref);
@@ -131,6 +133,14 @@ void Example::simple_func() {
 
 void Example::simple_const_func() const {
 	UtilityFunctions::print("  Simple const func called.");
+}
+
+void Example::typed_ptr_parameter(Example *example) {
+	UtilityFunctions::print("  typed_ptr_parameter called: ", example);
+}
+
+void Example::typed_const_ptr_parameter(const Example *example) {
+	UtilityFunctions::print("  typed_const_ptr_parameter called: ", example);
 }
 
 String Example::return_something(const String &base) {

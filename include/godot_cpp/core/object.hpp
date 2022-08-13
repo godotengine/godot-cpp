@@ -85,6 +85,8 @@ struct PropertyInfo {
 
 	PropertyInfo(GDNativeVariantType p_type, const char *p_name, PropertyHint p_hint = PROPERTY_HINT_NONE, const char *p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const char *p_class_name = "") :
 			PropertyInfo((Variant::Type)p_type, p_name, p_hint, p_hint_string, p_usage, p_class_name) {}
+
+	PropertyInfo(const char *p_class_name) : type((Variant::Type)GDNATIVE_VARIANT_TYPE_OBJECT), class_name(p_class_name) {}
 };
 
 struct MethodInfo {

@@ -16,6 +16,9 @@ func _ready():
 	prints("Instance method calls")
 	$Example.simple_func()
 	($Example as Example).simple_const_func() # Force use of ptrcall
+	$Example.typed_ptr_parameter($Example)
+	$Example.typed_const_ptr_parameter($Example)
+	
 	prints("  returned", $Example.return_something("some string"))
 	prints("  returned const", $Example.return_something_const())
 	prints("  returned ref", $Example.return_extended_ref())

@@ -185,7 +185,7 @@ struct GetTypeInfo<T *, typename EnableIf<TypeInherits<Object, T>::value>::type>
 	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
 	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline PropertyInfo get_class_info() {
-		return PropertyInfo(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+		return PropertyInfo(T::get_class_static());
 	}
 };
 
@@ -194,7 +194,7 @@ struct GetTypeInfo<const T *, typename EnableIf<TypeInherits<Object, T>::value>:
 	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
 	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline PropertyInfo get_class_info() {
-		return PropertyInfo(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+		return PropertyInfo(T::get_class_static());
 	}
 };
 
