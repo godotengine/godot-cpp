@@ -58,6 +58,10 @@ int Example::def_args(int p_a, int p_b) {
 	return p_a + p_b;
 }
 
+void Example::_notification(int p_what) {
+	UtilityFunctions::print("Notification: ", String::num(p_what));
+}
+
 void Example::_bind_methods() {
 	// Methods.
 	ClassDB::bind_method(D_METHOD("simple_func"), &Example::simple_func);

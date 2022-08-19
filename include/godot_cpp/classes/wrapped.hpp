@@ -48,6 +48,10 @@ protected:
 	virtual const char *_get_extension_class() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
 	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
 
+	void _notification(int p_what){};
+
+	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what){};
+
 	void _postinitialize();
 
 	Wrapped(const char *p_godot_class);
@@ -82,6 +86,10 @@ protected:                                                                      
 		return &m_class::_bind_methods;                                                                            \
 	}                                                                                                              \
                                                                                                                    \
+	static void (Wrapped::*_get_notification())(int) {                                                             \
+		return (void(Wrapped::*)(int)) & m_class::_notification;                                                   \
+	}                                                                                                              \
+                                                                                                                   \
 	template <class T>                                                                                             \
 	static void register_virtuals() {                                                                              \
 		m_inherits::register_virtuals<T>();                                                                        \
@@ -112,6 +120,16 @@ public:                                                                         
 	static GDNativeObjectPtr create(void *data) {                                                                  \
 		m_class *new_object = memnew(m_class);                                                                     \
 		return new_object->_owner;                                                                                 \
+	}                                                                                                              \
+                                                                                                                   \
+	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what) {                        \
+		if (p_instance) {                                                                                          \
+			if (m_class::_get_notification() != m_inherits::_get_notification()) {                                 \
+				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                            \
+				cls->_notification(p_what);                                                                        \
+			}                                                                                                      \
+			m_inherits::notification_bind(p_instance, p_what);                                                     \
+		}                                                                                                          \
 	}                                                                                                              \
                                                                                                                    \
 	static void free(void *data, GDExtensionClassInstancePtr ptr) {                                                \
@@ -150,6 +168,10 @@ protected:                                                                      
 	m_class(GodotObject *p_godot_object) : m_inherits(p_godot_object) {}                                           \
                                                                                                                    \
 	static void (*_get_bind_methods())() {                                                                         \
+		return nullptr;                                                                                            \
+	}                                                                                                              \
+                                                                                                                   \
+	static void (Wrapped::*_get_notification())(int) {                                                             \
 		return nullptr;                                                                                            \
 	}                                                                                                              \
                                                                                                                    \

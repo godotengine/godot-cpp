@@ -56,11 +56,20 @@ public:
 	~ExampleRef();
 };
 
+class ExampleMin : public Control {
+	GDCLASS(ExampleMin, Control);
+
+protected:
+	static void _bind_methods(){};
+};
+
 class Example : public Control {
 	GDCLASS(Example, Control);
 
 protected:
 	static void _bind_methods();
+
+	void _notification(int p_what);
 
 private:
 	Vector2 custom_position;

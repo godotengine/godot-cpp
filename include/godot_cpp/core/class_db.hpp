@@ -164,7 +164,7 @@ void ClassDB::register_class() {
 		nullptr, // GDNativeExtensionClassFreePropertyList free_property_list_func;
 		nullptr, // GDNativeExtensionClassPropertyCanRevert property_can_revert_func;
 		nullptr, // GDNativeExtensionClassPropertyGetRevert property_get_revert_func;
-		nullptr, // GDNativeExtensionClassNotification notification_func;
+		T::notification_bind, // GDNativeExtensionClassNotification notification_func;
 		nullptr, // GDNativeExtensionClassToString to_string_func;
 		nullptr, // GDNativeExtensionClassReference reference_func;
 		nullptr, // GDNativeExtensionClassUnreference unreference_func;

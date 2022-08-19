@@ -7,6 +7,8 @@ script = ExtResource( "1_c326s" )
 
 [node name="Example" type="Example" parent="."]
 
+[node name="ExampleMin" type="ExampleMin" parent="Example"]
+
 [node name="Label" type="Label" parent="Example"]
 offset_left = 194.0
 offset_top = -2.0
