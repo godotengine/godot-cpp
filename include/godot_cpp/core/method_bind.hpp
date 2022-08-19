@@ -287,7 +287,7 @@ protected:
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			call_get_argument_type_info<P...>(p_arg, pi);
 		} else {
-			pi = PropertyInfo();
+			pi = GDNativePropertyInfo();
 		}
 		return pi;
 	}
@@ -363,7 +363,7 @@ protected:
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			call_get_argument_type_info<P...>(p_arg, pi);
 		} else {
-			pi = PropertyInfo();
+			pi = GDNativePropertyInfo();
 		}
 		return pi;
 	}
@@ -603,7 +603,7 @@ protected:
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			call_get_argument_type_info<P...>(p_arg, pi);
 		} else {
-			pi = PropertyInfo();
+			pi = GDNativePropertyInfo();
 		}
 		return pi;
 	}

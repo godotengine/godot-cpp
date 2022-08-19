@@ -7,10 +7,20 @@ func _ready():
 
 	prints("")
 
+	# To string.
+	prints("To string")
+	prints("  Example --> ", $Example.to_string())
+	prints("  ExampleMin --> ", $Example/ExampleMin.to_string())
+
 	# Call static methods.
 	prints("Static method calls")
 	prints("  static (109)", Example.test_static(9, 100));
 	Example.test_static2();
+
+	# Property list.
+	prints("Property list")
+	$Example.property_from_list = Vector3(100, 200, 300)
+	prints("  property value ", $Example.property_from_list)
 	
 	# Call methods.
 	prints("Instance method calls")

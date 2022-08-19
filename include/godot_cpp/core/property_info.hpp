@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  register_types.cpp                                                   */
+/*  property_info.hpp                                                    */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,45 +28,59 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "register_types.h"
+#ifndef GODOT_PROPERTY_INFO_HPP
+#define GODOT_PROPERTY_INFO_HPP
+
+#include <godot_cpp/core/defs.hpp>
+
+#include <godot_cpp/classes/global_constants.hpp>
+
+#include <godot_cpp/variant/variant.hpp>
+
+#include <godot_cpp/godot.hpp>
 
 #include <godot/gdnative_interface.h>
 
-#include <godot_cpp/core/class_db.hpp>
-#include <godot_cpp/core/defs.hpp>
-#include <godot_cpp/godot.hpp>
+namespace godot {
 
-#include "example.h"
+struct PropertyInfo {
+	Variant::Type type = Variant::NIL;
+	const char *name = nullptr;
+	const char *class_name = nullptr;
+	uint32_t hint = 0;
+	const char *hint_string = nullptr;
+	uint32_t usage = 7;
 
-using namespace godot;
-
-void initialize_example_module(ModuleInitializationLevel p_level) {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
-		return;
+	operator GDNativePropertyInfo() const {
+		GDNativePropertyInfo info;
+		info.type = type;
+		info.name = name;
+		info.hint = hint;
+		info.hint_string = hint_string;
+		info.class_name = class_name;
+		info.usage = usage;
+		return info;
 	}
 
-	ClassDB::register_class<ExampleRef>();
-	ClassDB::register_class<ExampleMin>();
-	ClassDB::register_class<Example>();
-}
+	PropertyInfo() = default;
 
-void uninitialize_example_module(ModuleInitializationLevel p_level) {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
-		return;
+	PropertyInfo(Variant::Type p_type, const char *p_name, PropertyHint p_hint = PROPERTY_HINT_NONE, const char *p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const char *p_class_name = "") :
+			type(p_type),
+			name(p_name),
+			hint(p_hint),
+			hint_string(p_hint_string),
+			usage(p_usage) {
+		if (hint == PROPERTY_HINT_RESOURCE_TYPE) {
+			class_name = hint_string;
+		} else {
+			class_name = p_class_name;
+		}
 	}
-}
 
-extern "C" {
+	PropertyInfo(GDNativeVariantType p_type, const char *p_name, PropertyHint p_hint = PROPERTY_HINT_NONE, const char *p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const char *p_class_name = "") :
+			PropertyInfo((Variant::Type)p_type, p_name, p_hint, p_hint_string, p_usage, p_class_name) {}
+};
 
-// Initialization.
+} // namespace godot
 
-GDNativeBool GDN_EXPORT example_library_init(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) {
-	godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
-
-	init_obj.register_initializer(initialize_example_module);
-	init_obj.register_terminator(uninitialize_example_module);
-	init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_SCENE);
-
-	return init_obj.init();
-}
-}
+#endif // ! GODOT_OBJECT_HPP
