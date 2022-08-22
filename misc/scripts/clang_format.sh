@@ -17,7 +17,7 @@ while read -r f; do
         continue
     elif [[ "$f" == *"glsl" ]]; then
         continue
-    elif [[ "$f" == "platform/android/java/lib/src/org/godotengine/godot/input/InputManager"* ]]; then
+    elif [[ "$f" == "test/"* ]]; then
         continue
     fi
 
