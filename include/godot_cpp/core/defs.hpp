@@ -33,6 +33,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 #if !defined(GDN_EXPORT)
 #if defined(_WIN32)

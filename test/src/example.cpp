@@ -58,6 +58,51 @@ int Example::def_args(int p_a, int p_b) {
 	return p_a + p_b;
 }
 
+void Example::_notification(int p_what) {
+	UtilityFunctions::print("Notification: ", String::num(p_what));
+}
+
+bool Example::_set(const StringName &p_name, const Variant &p_value) {
+	if (p_name == StringName("property_from_list")) {
+		property_from_list = p_value;
+		return true;
+	}
+	return false;
+}
+
+bool Example::_get(const StringName &p_name, Variant &r_ret) const {
+	if (p_name == StringName("property_from_list")) {
+		r_ret = property_from_list;
+		return true;
+	}
+	return false;
+}
+
+String Example::_to_string() const {
+	return "[ GDExtension::Example <--> Instance ID:" + itos(get_instance_id()) + " ]";
+}
+
+void Example::_get_property_list(List<PropertyInfo> *p_list) const {
+	p_list->push_back(PropertyInfo(Variant::VECTOR3, "property_from_list"));
+}
+
+bool Example::_property_can_revert(const StringName &p_name) const {
+	if (p_name == StringName("property_from_list") && property_from_list != Vector3(42, 42, 42)) {
+		return true;
+	} else {
+		return false;
+	}
+};
+
+bool Example::_property_get_revert(const StringName &p_name, Variant &r_property) const {
+	if (p_name == StringName("property_from_list")) {
+		r_property = Vector3(42, 42, 42);
+		return true;
+	} else {
+		return false;
+	}
+};
+
 void Example::_bind_methods() {
 	// Methods.
 	ClassDB::bind_method(D_METHOD("simple_func"), &Example::simple_func);
