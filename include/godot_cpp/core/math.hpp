@@ -352,6 +352,22 @@ inline float range_lerp(float p_value, float p_istart, float p_istop, float p_os
 	return Math::lerp(p_ostart, p_ostop, Math::inverse_lerp(p_istart, p_istop, p_value));
 }
 
+inline bool is_nan(float p_val) {
+	return std::isnan(p_val);
+}
+
+inline bool is_nan(double p_val) {
+	return std::isnan(p_val);
+}
+
+inline bool is_inf(float p_val) {
+	return std::isinf(p_val);
+}
+
+inline bool is_inf(double p_val) {
+	return std::isinf(p_val);
+}
+
 inline bool is_equal_approx(real_t a, real_t b) {
 	// Check for exact equality first, required to handle "infinity" values.
 	if (a == b) {
