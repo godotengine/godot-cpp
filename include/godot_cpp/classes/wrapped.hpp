@@ -117,32 +117,32 @@ protected:                                                                      
 		return &m_class::_bind_methods;                                                                                                                  \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static void (Wrapped::*_get_notification())(int) {                                                                                                   \
-		return (void(Wrapped::*)(int)) & m_class::_notification;                                                                                         \
+	static void (::godot::Wrapped::*_get_notification())(int) {                                                                                          \
+		return (void(::godot::Wrapped::*)(int)) & m_class::_notification;                                                                                \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static bool (Wrapped::*_get_set())(const StringName &p_name, const Variant &p_property) {                                                            \
-		return (bool(Wrapped::*)(const StringName &p_name, const Variant &p_property)) & m_class::_set;                                                  \
+	static bool (::godot::Wrapped::*_get_set())(const ::godot::StringName &p_name, const ::godot::Variant &p_property) {                                 \
+		return (bool(::godot::Wrapped::*)(const ::godot::StringName &p_name, const ::godot::Variant &p_property)) & m_class::_set;                       \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static bool (Wrapped::*_get_get())(const StringName &p_name, Variant &r_ret) {                                                                       \
-		return (bool(Wrapped::*)(const StringName &p_name, Variant &r_ret)) & m_class::_set;                                                             \
+	static bool (::godot::Wrapped::*_get_get())(const ::godot::StringName &p_name, ::godot::Variant &r_ret) {                                            \
+		return (bool(::godot::Wrapped::*)(const ::godot::StringName &p_name, ::godot::Variant &r_ret)) & m_class::_set;                                  \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static void (Wrapped::*_get_get_property_list())(List<PropertyInfo> * p_list) {                                                                      \
-		return (void(Wrapped::*)(List<PropertyInfo> * p_list)) & m_class::_get_property_list;                                                            \
+	static void (::godot::Wrapped::*_get_get_property_list())(::godot::List<::godot::PropertyInfo> * p_list) {                                           \
+		return (void(::godot::Wrapped::*)(::godot::List<::godot::PropertyInfo> * p_list)) & m_class::_get_property_list;                                 \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static bool (Wrapped::*_get_property_can_revert())(const StringName &p_name) {                                                                       \
-		return (bool(Wrapped::*)(const StringName &p_name)) & m_class::_property_can_revert;                                                             \
+	static bool (::godot::Wrapped::*_get_property_can_revert())(const ::godot::StringName &p_name) {                                                     \
+		return (bool(::godot::Wrapped::*)(const ::godot::StringName &p_name)) & m_class::_property_can_revert;                                           \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static bool (Wrapped::*_get_property_get_revert())(const StringName &p_name, Variant &) {                                                            \
-		return (bool(Wrapped::*)(const StringName &p_name, Variant &)) & m_class::_property_get_revert;                                                  \
+	static bool (::godot::Wrapped::*_get_property_get_revert())(const ::godot::StringName &p_name, ::godot::Variant &) {                                 \
+		return (bool(::godot::Wrapped::*)(const ::godot::StringName &p_name, ::godot::Variant &)) & m_class::_property_get_revert;                       \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static String (Wrapped::*_get_to_string())() {                                                                                                       \
-		return (String(Wrapped::*)()) & m_class::_to_string;                                                                                             \
+	static ::godot::String (::godot::Wrapped::*_get_to_string())() {                                                                                     \
+		return (::godot::String(::godot::Wrapped::*)()) & m_class::_to_string;                                                                           \
 	}                                                                                                                                                    \
                                                                                                                                                          \
 	template <class T>                                                                                                                                   \
@@ -191,7 +191,7 @@ public:                                                                         
 		if (p_instance && m_class::_get_set()) {                                                                                                         \
 			if (m_class::_get_set() != m_inherits::_get_set()) {                                                                                         \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                  \
-				return cls->_set(*reinterpret_cast<const StringName *>(p_name), *reinterpret_cast<const Variant *>(p_value));                            \
+				return cls->_set(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<const ::godot::Variant *>(p_value));          \
 			}                                                                                                                                            \
 			return m_inherits::set_bind(p_instance, p_name, p_value);                                                                                    \
 		}                                                                                                                                                \
@@ -202,7 +202,7 @@ public:                                                                         
 		if (p_instance && m_class::_get_get()) {                                                                                                         \
 			if (m_class::_get_get() != m_inherits::_get_get()) {                                                                                         \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                  \
-				return cls->_get(*reinterpret_cast<const StringName *>(p_name), *reinterpret_cast<Variant *>(r_ret));                                    \
+				return cls->_get(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                  \
 			}                                                                                                                                            \
 			return m_inherits::get_bind(p_instance, p_name, r_ret);                                                                                      \
 		}                                                                                                                                                \
@@ -213,12 +213,12 @@ public:                                                                         
 		if (p_instance && m_class::_get_get_property_list()) {                                                                                           \
 			if (m_class::_get_get_property_list() != m_inherits::_get_get_property_list()) {                                                             \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                  \
-				List<PropertyInfo> list;                                                                                                                 \
+				::godot::List<::godot::PropertyInfo> list;                                                                                               \
 				cls->_get_property_list(&list);                                                                                                          \
 				ERR_FAIL_COND_V_MSG(cls->plist != nullptr || cls->plist_size != 0, nullptr, "Internal error, property list was not freed by engine!");   \
 				cls->plist = reinterpret_cast<GDNativePropertyInfo *>(memalloc(sizeof(GDNativePropertyInfo) * list.size()));                             \
 				cls->plist_size = 0;                                                                                                                     \
-				for (const PropertyInfo &E : list) {                                                                                                     \
+				for (const ::godot::PropertyInfo &E : list) {                                                                                            \
 					cls->plist[cls->plist_size].type = E.type;                                                                                           \
 					cls->plist[cls->plist_size].name = _alloc_and_copy_cstr(E.name);                                                                     \
 					cls->plist[cls->plist_size].hint = E.hint;                                                                                           \
@@ -255,7 +255,7 @@ public:                                                                         
 		if (p_instance && m_class::_get_property_can_revert()) {                                                                                         \
 			if (m_class::_get_property_can_revert() != m_inherits::_get_property_can_revert()) {                                                         \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                  \
-				return cls->_property_can_revert(*reinterpret_cast<const StringName *>(p_name));                                                         \
+				return cls->_property_can_revert(*reinterpret_cast<const ::godot::StringName *>(p_name));                                                \
 			}                                                                                                                                            \
 			return m_inherits::property_can_revert_bind(p_instance, p_name);                                                                             \
 		}                                                                                                                                                \
@@ -266,7 +266,7 @@ public:                                                                         
 		if (p_instance && m_class::_get_property_get_revert()) {                                                                                         \
 			if (m_class::_get_property_get_revert() != m_inherits::_get_property_get_revert()) {                                                         \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                  \
-				return cls->_property_get_revert(*reinterpret_cast<const StringName *>(p_name), *reinterpret_cast<Variant *>(r_ret));                    \
+				return cls->_property_get_revert(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));  \
 			}                                                                                                                                            \
 			return m_inherits::property_get_revert_bind(p_instance, p_name, r_ret);                                                                      \
 		}                                                                                                                                                \
@@ -277,7 +277,7 @@ public:                                                                         
 		if (p_instance && m_class::_get_to_string()) {                                                                                                   \
 			if (m_class::_get_to_string() != m_inherits::_get_to_string()) {                                                                             \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                  \
-				*reinterpret_cast<String *>(r_out) = cls->_to_string();                                                                                  \
+				*reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                         \
 				return;                                                                                                                                  \
 			}                                                                                                                                            \
 			m_inherits::to_string_bind(p_instance, r_out);                                                                                               \

@@ -77,14 +77,14 @@ _ALWAYS_INLINE_ T *_post_initialize(T *p_obj) {
 	return p_obj;
 }
 
-#define memalloc(m_size) Memory::alloc_static(m_size)
-#define memrealloc(m_mem, m_size) Memory::realloc_static(m_mem, m_size)
-#define memfree(m_mem) Memory::free_static(m_mem)
+#define memalloc(m_size) ::godot::Memory::alloc_static(m_size)
+#define memrealloc(m_mem, m_size) ::godot::Memory::realloc_static(m_mem, m_size)
+#define memfree(m_mem) ::godot::Memory::free_static(m_mem)
 
-#define memnew(m_class) _post_initialize(new ("") m_class)
+#define memnew(m_class) ::godot::_post_initialize(new ("") m_class)
 
-#define memnew_allocator(m_class, m_allocator) _post_initialize(new (m_allocator::alloc) m_class)
-#define memnew_placement(m_placement, m_class) _post_initialize(new (m_placement, sizeof(m_class), "") m_class)
+#define memnew_allocator(m_class, m_allocator) ::godot::_post_initialize(new (m_allocator::alloc) m_class)
+#define memnew_placement(m_placement, m_class) ::godot::_post_initialize(new (m_placement, sizeof(m_class), "") m_class)
 
 // Generic comparator used in Map, List, etc.
 template <class T>
