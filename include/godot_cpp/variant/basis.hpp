@@ -258,10 +258,10 @@ public:
 	Basis(const Vector3 &p_axis, real_t p_phi) { set_axis_angle(p_axis, p_phi); }
 	Basis(const Vector3 &p_axis, real_t p_phi, const Vector3 &p_scale) { set_axis_angle_scale(p_axis, p_phi, p_scale); }
 
-	inline Basis(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2) {
-		elements[0] = row0;
-		elements[1] = row1;
-		elements[2] = row2;
+	inline Basis(const Vector3 &p_x, const Vector3 &p_y, const Vector3 &p_z) {
+		set_axis(0, p_x);
+		set_axis(1, p_y);
+		set_axis(2, p_z);
 	}
 
 	inline Basis() {}
