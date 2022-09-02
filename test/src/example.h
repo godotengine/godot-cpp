@@ -58,6 +58,7 @@ protected:
 private:
 	Vector2 custom_position;
 	Vector3 property_from_list;
+	Vector2 dprop[3];
 
 public:
 	// Constants.

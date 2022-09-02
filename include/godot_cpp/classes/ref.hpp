@@ -240,7 +240,7 @@ public:
 template <class T>
 struct PtrToArg<Ref<T>> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(reinterpret_cast<T*>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
 	}
 
 	typedef Ref<T> EncodeT;
@@ -255,7 +255,7 @@ struct PtrToArg<const Ref<T> &> {
 	typedef Ref<T> EncodeT;
 
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(reinterpret_cast<T*>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
 	}
 };
 
@@ -264,8 +264,8 @@ struct GetTypeInfo<Ref<T>, typename EnableIf<TypeInherits<RefCounted, T>::value>
 	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
 	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 
-	static inline PropertyInfo get_class_info() {
-		return PropertyInfo(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+	static inline GDNativePropertyInfo get_class_info() {
+		return make_property_info(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
 	}
 };
 
@@ -274,8 +274,8 @@ struct GetTypeInfo<const Ref<T> &, typename EnableIf<TypeInherits<RefCounted, T>
 	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
 	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 
-	static inline PropertyInfo get_class_info() {
-		return PropertyInfo(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+	static inline GDNativePropertyInfo get_class_info() {
+		return make_property_info(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
 	}
 };
 
