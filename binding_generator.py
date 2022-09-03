@@ -1005,6 +1005,13 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
             result.append("\t};")
             result.append("")
 
+    if "constants" in class_api:
+        for value in class_api["constants"]:
+            if "type" not in value:
+                value["type"] = "int"
+            result.append(f'\tconst {value["type"]} {value["name"]} = {value["value"]};')
+        result.append("")
+
     if is_singleton:
         result.append(f"\tstatic {class_name} *get_singleton();")
         result.append("")
