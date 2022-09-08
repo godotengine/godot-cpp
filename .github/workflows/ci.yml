@@ -103,7 +103,7 @@ jobs:
           if-no-files-found: error
 
   linux-cmake:
-    name: Build (Linux, GCC, CMake)
+    name: 🐧 Build (Linux, GCC, CMake)
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
@@ -127,7 +127,7 @@ jobs:
           make -j $(nproc)
 
   linux-cmake-ninja:
-    name: Build (Linux, GCC, CMake Ninja)
+    name: 🐧 Build (Linux, GCC, CMake Ninja)
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
@@ -151,7 +151,7 @@ jobs:
           cmake --build . -j $(nproc)
 
   windows-msvc-cmake:
-    name: Build (Windows, MSVC, CMake)
+    name: 🏁 Build (Windows, MSVC, CMake)
     runs-on: windows-2019
     steps:
       - name: Checkout
@@ -170,7 +170,7 @@ jobs:
           cmake --build .
 
   static-checks:
-    name: Static Checks (clang-format)
+    name: 📊 Static Checks (clang-format)
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
