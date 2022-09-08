@@ -2,6 +2,7 @@
 
 import codecs
 import os
+import platform
 import sys
 import subprocess
 from binding_generator import scons_generate_bindings, scons_emit_files
@@ -91,15 +92,6 @@ if hasattr(os, "cpu_count") and env.GetOption("num_jobs") == altered_num_jobs:
         )
         env.SetOption("num_jobs", safer_cpu_count)
 
-is64 = sys.maxsize > 2 ** 32
-if (
-    env["TARGET_ARCH"] == "amd64"
-    or env["TARGET_ARCH"] == "emt64"
-    or env["TARGET_ARCH"] == "x86_64"
-    or env["TARGET_ARCH"] == "arm64-v8a"
-):
-    is64 = True
-
 opts = Variables([], ARGUMENTS)
 opts.Add(
     EnumVariable(
@@ -110,7 +102,7 @@ opts.Add(
         ignorecase=2,
     )
 )
-opts.Add(EnumVariable("bits", "Target platform bits", "64" if is64 else "32", ("32", "64")))
+opts.Add(EnumVariable("bits", "Target platform bits", "auto", ("auto", "32", "64")))
 opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler - only effective when targeting Linux or FreeBSD", False))
 opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
 # Must be the same setting as used for cpp_bindings
@@ -163,6 +155,25 @@ opts.Add(
 
 opts.Add(BoolVariable("build_library", "Build the godot-cpp library.", True))
 
+# CPU architecture options.
+architectures = ["auto", "universal", "x86_32", "x86_64", "arm32", "arm64", "rv64", "ppc32", "ppc64", "wasm32"]
+architecture_aliases = {
+    "x86": "x86_32",
+    "x64": "x86_64",
+    "amd64": "x86_64",
+    "armv7": "arm32",
+    "armv8": "arm64",
+    "arm64v8": "arm64",
+    "aarch64": "arm64",
+    "rv": "rv64",
+    "riscv": "rv64",
+    "riscv64": "rv64",
+    "ppcle": "ppc32",
+    "ppc": "ppc32",
+    "ppc64le": "ppc64",
+}
+opts.Add(EnumVariable("arch", "CPU architecture", "auto", architectures, architecture_aliases))
+
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
 
@@ -173,16 +184,50 @@ if unknown:
     for item in unknown.items():
         print("    " + item[0] + "=" + item[1])
 
+# Compatibility with old bits argument on Windows/Linux.
+# Not needed on macOS or web. Android and iOS don't use env["arch"].
+if env["platform"] in ["windows", "linux"]:
+    if env["bits"] == "64":
+        env["arch"] = "x86_64"
+    elif env["bits"] == "32":
+        env["arch"] = "x86_32"
+
+# Process CPU architecture argument.
+if env["arch"] == "auto":
+    # Use env["arch"] on all platforms except Android and iOS.
+    # For macOS, default arch to macos_arch, which defaults to universal (compat with old argument).
+    # For the web (javascript), default arch to wasm32.
+    # For Windows and Linux, default arch to the host architecture.
+    if env["platform"] == "osx":
+        env["arch"] = env["macos_arch"]
+    elif env["platform"] == "javascript":
+        env["arch"] = "wasm32"
+    else:
+        host_machine = platform.machine().lower()
+        if host_machine in architectures:
+            env["arch"] = host_machine
+        elif host_machine in architecture_aliases.keys():
+            env["arch"] = architecture_aliases[host_machine]
+        elif "86" in host_machine:
+            # Catches x86, i386, i486, i586, i686, etc.
+            env["arch"] = "x86_32"
+        else:
+            print("Unsupported CPU architecture: " + host_machine)
+            Exit()
+
+env_arch = env["arch"]
+
 # This makes sure to keep the session environment variables on Windows.
 # This way, you can run SCons in a Visual Studio 2017 prompt and it will find
 # all the required tools
 if host_platform == "windows" and env["platform"] != "android":
-    if env["bits"] == "64":
+    if env["arch"] == "x86_64":
         env = Environment(TARGET_ARCH="amd64")
-    elif env["bits"] == "32":
+    elif env["arch"] == "x86_32":
         env = Environment(TARGET_ARCH="x86")
 
     opts.Update(env)
+    env["arch"] = env_arch
 
 # Require C++14
 if host_platform == "windows" and env["platform"] == "windows" and not env["use_mingw"]:
@@ -203,10 +248,10 @@ if env["platform"] == "linux" or env["platform"] == "freebsd":
     elif env["target"] == "release":
         env.Append(CCFLAGS=["-O3"])
 
-    if env["bits"] == "64":
+    if env["arch"] == "x86_64":
         env.Append(CCFLAGS=["-m64"])
         env.Append(LINKFLAGS=["-m64"])
-    elif env["bits"] == "32":
+    elif env["arch"] == "x86_32":
         env.Append(CCFLAGS=["-m32"])
         env.Append(LINKFLAGS=["-m32"])
 
@@ -214,15 +259,16 @@ elif env["platform"] == "osx":
     # Use Clang on macOS by default
     env["CXX"] = "clang++"
 
-    if env["bits"] == "32":
-        raise ValueError("Only 64-bit builds are supported for the macOS target.")
+    if env["arch"] not in ("universal", "x86_64", "arm64"):
+        print("Only universal, x86_64, and arm64 are supported on macOS. Exiting.")
+        Exit()
 
-    if env["macos_arch"] == "universal":
+    if env["arch"] == "universal":
         env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
         env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
     else:
-        env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
-        env.Append(CCFLAGS=["-arch", env["macos_arch"]])
+        env.Append(LINKFLAGS=["-arch", env["arch"]])
+        env.Append(CCFLAGS=["-arch", env["arch"]])
 
     if env["macos_deployment_target"] != "default":
         env.Append(CCFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
@@ -289,12 +335,12 @@ elif env["platform"] == "windows":
 
     elif host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx":
         # Cross-compilation using MinGW
-        if env["bits"] == "64":
+        if env["arch"] == "x86_64":
             env["CXX"] = "x86_64-w64-mingw32-g++"
             env["AR"] = "x86_64-w64-mingw32-ar"
             env["RANLIB"] = "x86_64-w64-mingw32-ranlib"
             env["LINK"] = "x86_64-w64-mingw32-g++"
-        elif env["bits"] == "32":
+        elif env["arch"] == "x86_32":
             env["CXX"] = "i686-w64-mingw32-g++"
             env["AR"] = "i686-w64-mingw32-ar"
             env["RANLIB"] = "i686-w64-mingw32-ranlib"
@@ -304,6 +350,7 @@ elif env["platform"] == "windows":
         # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
         env = Environment(ENV=os.environ, tools=["mingw"])
         opts.Update(env)
+        env["arch"] = env_arch
 
         # Still need to use C++14.
         env.Append(CCFLAGS=["-std=c++14"])
@@ -332,6 +379,7 @@ elif env["platform"] == "android":
         # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
         env = Environment(ENV=os.environ, tools=["mingw"])
         opts.Update(env)
+        env["arch"] = env_arch
 
         # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
         env["SPAWN"] = mySpawn
@@ -423,6 +471,10 @@ elif env["platform"] == "android":
         env.Append(CCFLAGS=["-O3"])
 
 elif env["platform"] == "javascript":
+    if env["arch"] != "wasm32":
+        print("Only the WebAssembly architecture (wasm32) is supported on the web. Exiting.")
+        Exit()
+
     env["ENV"] = os.environ
     env["CC"] = "emcc"
     env["CXX"] = "em++"
@@ -487,18 +539,13 @@ sources = []
 add_sources(sources, "src/core", "cpp")
 sources.extend(f for f in bindings if str(f).endswith(".cpp"))
 
-arch_suffix = env["bits"]
+arch_suffix = env["arch"]
 if env["platform"] == "android":
     arch_suffix = env["android_arch"]
 elif env["platform"] == "ios":
     arch_suffix = env["ios_arch"]
     if env["ios_simulator"]:
         arch_suffix += ".simulator"
-elif env["platform"] == "osx":
-    if env["macos_arch"] != "universal":
-        arch_suffix = env["macos_arch"]
-elif env["platform"] == "javascript":
-    arch_suffix = "wasm"
 # Expose it to projects that import this env.
 env["arch_suffix"] = arch_suffix
 
