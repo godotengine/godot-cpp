@@ -4,6 +4,10 @@
 .godot/
 /gen/
 
+# Godot 3.x ignores
+include/gen
+src/gen
+
 # Misc
 logs/*
 *.log
