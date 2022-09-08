@@ -14,8 +14,8 @@ jobs:
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.release.64.a
-            godot_zip: Godot_v3.4-stable_linux_server.64.zip
-            executable: Godot_v3.4-stable_linux_server.64
+            godot_zip: Godot_v3.5-stable_linux_server.64.zip
+            executable: Godot_v3.5-stable_linux_server.64
 
           - name: 🏁 Windows (x86_64, MSVC)
             os: windows-2019
@@ -36,7 +36,7 @@ jobs:
             artifact-name: godot-cpp-macos-universal-release
             artifact-path: bin/libgodot-cpp.osx.release.64.a
             flags: macos_arch=universal
-            godot_zip: Godot_v3.4-stable_osx.universal.zip
+            godot_zip: Godot_v3.5-stable_osx.universal.zip
             executable: Godot.app/Contents/MacOS/Godot
 
           - name: 🤖 Android (arm64)
@@ -94,7 +94,7 @@ jobs:
       - name: Run test GDNative library
         if: ${{ matrix.platform == 'linux' || matrix.platform == 'osx' }}
         run: |
-          curl -LO https://downloads.tuxfamily.org/godotengine/3.4/${{ matrix.godot_zip }}
+          curl -LO https://downloads.tuxfamily.org/godotengine/3.5/${{ matrix.godot_zip }}
           unzip ${{ matrix.godot_zip }}
           ./${{ matrix.executable }} --path test -s script.gd
 
@@ -106,7 +106,7 @@ jobs:
           if-no-files-found: error
 
   static-checks:
-    name: Static Checks (clang-format)
+    name: 📊 Static Checks (clang-format)
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
