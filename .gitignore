@@ -1,4 +1,5 @@
 # Misc
+gen/*
 logs/*
 *.log
 
