@@ -119,12 +119,12 @@ jobs:
       - name: Build godot-cpp
         run: |
           cmake -DCMAKE_BUILD_TYPE=Release .
-          make -j $(nproc)
+          make -j $(nproc) VERBOSE=1
 
       - name: Build test GDNative library
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." .
-          make -j $(nproc)
+          make -j $(nproc) VERBOSE=1
 
   linux-cmake-ninja:
     name: 🐧 Build (Linux, GCC, CMake Ninja)
@@ -143,12 +143,12 @@ jobs:
       - name: Build godot-cpp
         run: |
           cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
-          cmake --build . -j $(nproc)
+          cmake --build . -j $(nproc) --verbose
 
       - name: Build test GDNative library
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -GNinja .
-          cmake --build . -j $(nproc)
+          cmake --build . -j $(nproc) --verbose
 
   windows-msvc-cmake:
     name: 🏁 Build (Windows, MSVC, CMake)
@@ -162,12 +162,12 @@ jobs:
       - name: Build godot-cpp
         run: |
           cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 16 2019" .
-          cmake --build .
+          cmake --build . --verbose
 
       - name: Build test GDNative library
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
-          cmake --build .
+          cmake --build . --verbose
 
   static-checks:
     name: 📊 Static Checks (clang-format)
