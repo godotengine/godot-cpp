@@ -50,8 +50,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	# Disable conversion warning, truncation, unreferenced var, signed mismatch
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /wd4244 /wd4305 /wd4101 /wd4018 /wd4267")
 
-	# Todo: Check if needed.
-	add_definitions(-DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS)
+	add_definitions(-DNOMINMAX)
 
 	# Unkomment for warning level 4
 	#if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
