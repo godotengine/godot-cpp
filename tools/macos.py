@@ -48,8 +48,3 @@ def generate(env):
             "-Wl,-undefined,dynamic_lookup",
         ]
     )
-
-    if env["target"] == "debug":
-        env.Append(CCFLAGS=["-Og", "-g"])
-    elif env["target"] == "release":
-        env.Append(CCFLAGS=["-O3"])

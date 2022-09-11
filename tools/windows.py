@@ -25,12 +25,13 @@ def generate(env):
         env["is_msvc"] = True
         msvc.generate(env)
         env.Append(CPPDEFINES=["TYPED_METHOD_BIND", "NOMINMAX"])
+        env.Append(CCFLAGS=["/EHsc"])
         env.Append(LINKFLAGS=["/WX"])
-        if env["target"] == "debug":
-            env.Append(CCFLAGS=["/Z7", "/Od", "/EHsc", "/D_DEBUG", "/MDd"])
-            env.Append(LINKFLAGS=["/DEBUG:FULL"])
-        elif env["target"] == "release":
-            env.Append(CCFLAGS=["/O2", "/EHsc", "/DNDEBUG", "/MD"])
+        if env["debug_symbols"] or env["target"] == "debug":
+            env.Append(CCFLAGS=["/MDd"])
+        else:
+            env.Append(CCFLAGS=["/MD"])
+
         if env["use_clang_cl"]:
             env["CC"] = "clang-cl"
             env["CXX"] = "clang-cl"
