@@ -79,8 +79,3 @@ def generate(env):
 
     env.Append(CCFLAGS=["-isysroot", env["IOS_SDK_PATH"]])
     env.Append(LINKFLAGS=["-isysroot", env["IOS_SDK_PATH"], "-F" + env["IOS_SDK_PATH"]])
-
-    if env["target"] == "debug":
-        env.Append(CCFLAGS=["-Og", "-g"])
-    elif env["target"] == "release":
-        env.Append(CCFLAGS=["-O3"])
