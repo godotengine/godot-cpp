@@ -40,14 +40,27 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
         if sources:
             files.append(str(source_filename.as_posix()))
 
-    utility_functions_header_path = include_gen_folder / "variant" / "utility_functions.hpp"
-    utility_functions_source_path = source_gen_folder / "variant" / "utility_functions.cpp"
-    global_constants_header_path = include_gen_folder / "classes" / "global_constants.hpp"
+    for native_struct in api["native_structures"]:
+        struct_name = native_struct["name"]
+        snake_struct_name = camel_to_snake(struct_name)
+
+        header_filename = include_gen_folder / "classes" / (snake_struct_name + ".hpp")
+        if headers:
+            files.append(str(header_filename.as_posix()))
+
     if headers:
-        files.append(str(utility_functions_header_path.as_posix()))
-        files.append(str(global_constants_header_path.as_posix()))
+        for path in [
+            include_gen_folder / "variant" / "builtin_types.hpp",
+            include_gen_folder / "variant" / "utility_functions.hpp",
+            include_gen_folder / "variant" / "variant_size.hpp",
+            include_gen_folder / "classes" / "global_constants.hpp",
+            include_gen_folder / "classes" / "global_constants_binds.hpp",
+        ]:
+            files.append(str(path.as_posix()))
     if sources:
+        utility_functions_source_path = source_gen_folder / "variant" / "utility_functions.cpp"
         files.append(str(utility_functions_source_path.as_posix()))
+
     return files
 
 
