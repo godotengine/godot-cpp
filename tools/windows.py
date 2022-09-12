@@ -24,7 +24,7 @@ def generate(env):
             env["TARGET_ARCH"] = "x86"
         env["is_msvc"] = True
         msvc.generate(env)
-        env.Append(CPPDEFINES=["TYPED_METHOD_BIND"])
+        env.Append(CPPDEFINES=["TYPED_METHOD_BIND", "NOMINMAX"])
         env.Append(LINKFLAGS=["/WX"])
         if env["target"] == "debug":
             env.Append(CCFLAGS=["/Z7", "/Od", "/EHsc", "/D_DEBUG", "/MDd"])

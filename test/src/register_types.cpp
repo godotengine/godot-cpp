@@ -12,6 +12,7 @@
 #include <godot_cpp/godot.hpp>
 
 #include "example.h"
+#include "tests.h"
 
 using namespace godot;
 
