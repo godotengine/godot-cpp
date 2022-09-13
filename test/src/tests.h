@@ -42,6 +42,7 @@
 #include "godot_cpp/templates/rid_owner.hpp"
 #include "godot_cpp/templates/safe_refcount.hpp"
 #include "godot_cpp/templates/search_array.hpp"
+#include "godot_cpp/templates/self_list.hpp"
 #include "godot_cpp/templates/sort_array.hpp"
 #include "godot_cpp/templates/spin_lock.hpp"
 #include "godot_cpp/templates/thread_work_pool.hpp"
