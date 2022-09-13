@@ -204,6 +204,11 @@ def generate_builtin_bindings(api, output_dir, build_config):
             if type_name in used_classes:
                 used_classes.remove(type_name)
 
+        used_classes = list(used_classes)
+        used_classes.sort()
+        fully_used_classes = list(fully_used_classes)
+        fully_used_classes.sort()
+
         with header_filename.open("w+") as header_file:
             header_file.write(generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes))
 
@@ -887,6 +892,11 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         for type_name in fully_used_classes:
             if type_name in used_classes:
                 used_classes.remove(type_name)
+
+        used_classes = list(used_classes)
+        used_classes.sort()
+        fully_used_classes = list(fully_used_classes)
+        fully_used_classes.sort()
 
         with header_filename.open("w+") as header_file:
             header_file.write(

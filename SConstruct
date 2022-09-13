@@ -168,12 +168,19 @@ else:
     json_api_file = os.path.join(os.getcwd(), env["headers_dir"], "extension_api.json")
 
 bindings = env.GenerateBindings(
-    env.Dir("."), [json_api_file, os.path.join(env["headers_dir"], "godot", "gdnative_interface.h")]
+    env.Dir("."),
+    [json_api_file, os.path.join(env["headers_dir"], "godot", "gdnative_interface.h"), "binding_generator.py"],
 )
+
+scons_cache_path = os.environ.get("SCONS_CACHE")
+if scons_cache_path is not None:
+    CacheDir(scons_cache_path)
+    Decider("MD5")
 
 # Forces bindings regeneration.
 if env["generate_bindings"]:
     AlwaysBuild(bindings)
+    NoCache(bindings)
 
 # Includes
 env.Append(CPPPATH=[[env.Dir(d) for d in [env["headers_dir"], "include", os.path.join("gen", "include")]]])

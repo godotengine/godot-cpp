@@ -12,6 +12,9 @@ src/gen
 logs/*
 *.log
 
+# The default cache directory
+cache/
+
 # Binaries
 *.o
 *.os
