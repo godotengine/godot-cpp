@@ -68,6 +68,21 @@ struct TypeInherits {
 							  !TypesAreSame<B volatile const, void volatile const>::value;
 };
 
+static GDNativePropertyInfo make_property_info(GDNativeVariantType p_type, const char *p_name, uint32_t p_hint = PROPERTY_HINT_NONE, const char *p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const char *p_class_name = "") {
+	GDNativePropertyInfo info;
+	info.type = p_type;
+	info.name = p_name;
+	info.hint = p_hint;
+	info.hint_string = p_hint_string;
+	info.usage = p_usage;
+	if (p_hint == PROPERTY_HINT_RESOURCE_TYPE) {
+		info.class_name = p_hint_string;
+	} else {
+		info.class_name = p_class_name;
+	}
+	return info;
+}
+
 // If the compiler fails because it's trying to instantiate the primary 'GetTypeInfo' template
 // instead of one of the specializations, it's most likely because the type 'T' is not supported.
 // If 'T' is a class that inherits 'Object', make sure it can see the actual class declaration
@@ -83,7 +98,7 @@ struct GetTypeInfo;
 		static constexpr GDNativeVariantType VARIANT_TYPE = m_var_type;                                                            \
 		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE; \
 		static inline GDNativePropertyInfo get_class_info() {                                                                      \
-			return PropertyInfo(VARIANT_TYPE, "");                                                                                 \
+			return make_property_info(VARIANT_TYPE, "");                                                                           \
 		}                                                                                                                          \
 	};                                                                                                                             \
 	template <>                                                                                                                    \
@@ -91,7 +106,7 @@ struct GetTypeInfo;
 		static constexpr GDNativeVariantType VARIANT_TYPE = m_var_type;                                                            \
 		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE; \
 		static inline GDNativePropertyInfo get_class_info() {                                                                      \
-			return PropertyInfo(VARIANT_TYPE, "");                                                                                 \
+			return make_property_info(VARIANT_TYPE, "");                                                                           \
 		}                                                                                                                          \
 	};
 
@@ -101,7 +116,7 @@ struct GetTypeInfo;
 		static constexpr GDNativeVariantType VARIANT_TYPE = m_var_type;                      \
 		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = m_metadata; \
 		static inline GDNativePropertyInfo get_class_info() {                                \
-			return PropertyInfo(VARIANT_TYPE, "");                                           \
+			return make_property_info(VARIANT_TYPE, "");                                     \
 		}                                                                                    \
 	};                                                                                       \
 	template <>                                                                              \
@@ -109,7 +124,7 @@ struct GetTypeInfo;
 		static constexpr GDNativeVariantType VARIANT_TYPE = m_var_type;                      \
 		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = m_metadata; \
 		static inline GDNativePropertyInfo get_class_info() {                                \
-			return PropertyInfo(VARIANT_TYPE, "");                                           \
+			return make_property_info(VARIANT_TYPE, "");                                     \
 		}                                                                                    \
 	};
 
@@ -167,7 +182,7 @@ struct GetTypeInfo<Variant> {
 	static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_NIL;
 	static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline GDNativePropertyInfo get_class_info() {
-		return PropertyInfo(GDNATIVE_VARIANT_TYPE_NIL, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
+		return make_property_info(GDNATIVE_VARIANT_TYPE_NIL, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
 	}
 };
 
@@ -176,7 +191,7 @@ struct GetTypeInfo<const Variant &> {
 	static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_NIL;
 	static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline GDNativePropertyInfo get_class_info() {
-		return PropertyInfo(GDNATIVE_VARIANT_TYPE_NIL, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
+		return make_property_info(GDNATIVE_VARIANT_TYPE_NIL, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
 	}
 };
 
@@ -184,8 +199,8 @@ template <typename T>
 struct GetTypeInfo<T *, typename EnableIf<TypeInherits<Object, T>::value>::type> {
 	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
 	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
-	static inline PropertyInfo get_class_info() {
-		return PropertyInfo(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+	static inline GDNativePropertyInfo get_class_info() {
+		return make_property_info(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
 	}
 };
 
@@ -193,19 +208,19 @@ template <typename T>
 struct GetTypeInfo<const T *, typename EnableIf<TypeInherits<Object, T>::value>::type> {
 	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
 	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
-	static inline PropertyInfo get_class_info() {
-		return PropertyInfo(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+	static inline GDNativePropertyInfo get_class_info() {
+		return make_property_info(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
 	}
 };
 
-#define TEMPL_MAKE_ENUM_TYPE_INFO(m_class, m_enum, m_impl)                                                                                                           \
-	template <>                                                                                                                                                      \
-	struct GetTypeInfo<m_impl> {                                                                                                                                     \
-		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                                      \
-		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                       \
-		static inline GDNativePropertyInfo get_class_info() {                                                                                                        \
-			return PropertyInfo(GDNATIVE_VARIANT_TYPE_INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_ENUM, #m_class "." #m_enum); \
-		}                                                                                                                                                            \
+#define TEMPL_MAKE_ENUM_TYPE_INFO(m_class, m_enum, m_impl)                                                                                                                 \
+	template <>                                                                                                                                                            \
+	struct GetTypeInfo<m_impl> {                                                                                                                                           \
+		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                                            \
+		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                             \
+		static inline GDNativePropertyInfo get_class_info() {                                                                                                              \
+			return make_property_info(GDNATIVE_VARIANT_TYPE_INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_ENUM, #m_class "." #m_enum); \
+		}                                                                                                                                                                  \
 	};
 
 #define MAKE_ENUM_TYPE_INFO(m_class, m_enum)                          \
@@ -235,24 +250,24 @@ public:
 	_FORCE_INLINE_ operator Variant() const { return value; }
 };
 
-#define TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, m_impl)                                                                                    \
-	template <>                                                                                                                                   \
-	struct GetTypeInfo<m_impl> {                                                                                                                  \
-		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                   \
-		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                    \
-		static inline GDNativePropertyInfo get_class_info() {                                                                                     \
-			return PropertyInfo(GDNATIVE_VARIANT_TYPE_INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_BITFIELD, \
-					#m_class "." #m_enum);                                                                                                        \
-		}                                                                                                                                         \
-	};                                                                                                                                            \
-	template <>                                                                                                                                   \
-	struct GetTypeInfo<BitField<m_impl>> {                                                                                                        \
-		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                   \
-		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                    \
-		static inline GDNativePropertyInfo get_class_info() {                                                                                     \
-			return PropertyInfo(GDNATIVE_VARIANT_TYPE_INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_BITFIELD, \
-					#m_class "." #m_enum);                                                                                                        \
-		}                                                                                                                                         \
+#define TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, m_impl)                                                                                          \
+	template <>                                                                                                                                         \
+	struct GetTypeInfo<m_impl> {                                                                                                                        \
+		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                         \
+		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                          \
+		static inline GDNativePropertyInfo get_class_info() {                                                                                           \
+			return make_property_info(GDNATIVE_VARIANT_TYPE_INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_BITFIELD, \
+					#m_class "." #m_enum);                                                                                                              \
+		}                                                                                                                                               \
+	};                                                                                                                                                  \
+	template <>                                                                                                                                         \
+	struct GetTypeInfo<BitField<m_impl>> {                                                                                                              \
+		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                         \
+		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                          \
+		static inline GDNativePropertyInfo get_class_info() {                                                                                           \
+			return make_property_info(GDNATIVE_VARIANT_TYPE_INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_BITFIELD, \
+					#m_class "." #m_enum);                                                                                                              \
+		}                                                                                                                                               \
 	};
 
 #define MAKE_BITFIELD_TYPE_INFO(m_class, m_enum)                 \

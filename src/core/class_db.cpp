@@ -69,7 +69,7 @@ void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, con
 
 	ClassInfo &info = classes[p_class];
 
-	ERR_FAIL_COND_MSG(info.property_names.find(p_pinfo.name) != info.property_names.end(), "Property already exists in class.");
+	ERR_FAIL_COND_MSG(info.property_names.find(p_pinfo.name.utf8().get_data()) != info.property_names.end(), "Property already exists in class.");
 
 	MethodBind *setter = nullptr;
 	if (p_setter) {
@@ -91,15 +91,15 @@ void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, con
 	}
 
 	// register property with plugin
-	info.property_names.insert(p_pinfo.name);
+	info.property_names.insert(p_pinfo.name.utf8().get_data());
 
 	// register with Godot
 	GDNativePropertyInfo prop_info = {
-		(uint32_t)p_pinfo.type, // uint32_t type;
-		p_pinfo.name, // const char *name;
-		p_pinfo.class_name, // const char *class_name;
+		static_cast<uint32_t>(p_pinfo.type), // uint32_t type;
+		_alloc_and_copy_cstr(p_pinfo.name.utf8().get_data()), // const char *name;
+		_alloc_and_copy_cstr(p_pinfo.class_name.utf8().get_data()), // const char *class_name;
 		p_pinfo.hint, // NONE //uint32_t hint;
-		p_pinfo.hint_string, // const char *hint_string;
+		_alloc_and_copy_cstr(p_pinfo.hint_string.utf8().get_data()), // const char *hint_string;
 		p_pinfo.usage, // DEFAULT //uint32_t usage;
 	};
 
@@ -112,6 +112,10 @@ void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, con
 	setget.type = p_pinfo.type;
 
 	internal::gdn_interface->classdb_register_extension_class_property(internal::library, info.name, &prop_info, setget.setter, setget.getter);
+
+	memfree(const_cast<char *>(prop_info.name));
+	memfree(const_cast<char *>(prop_info.class_name));
+	memfree(const_cast<char *>(prop_info.hint_string));
 }
 
 MethodBind *ClassDB::get_method(const char *p_class, const char *p_method) {
@@ -238,15 +242,21 @@ void ClassDB::add_signal(const char *p_class, const MethodInfo &p_signal) {
 	for (const PropertyInfo &par : p_signal.arguments) {
 		parameters.push_back(GDNativePropertyInfo{
 				static_cast<uint32_t>(par.type), // uint32_t type;
-				par.name, // const char *name;
-				par.class_name, // const char *class_name;
-				par.hint, // uint32_t hint;
-				par.hint_string, // const char *hint_string;
-				par.usage, // uint32_t usage;
+				_alloc_and_copy_cstr(par.name.utf8().get_data()), // const char *name;
+				_alloc_and_copy_cstr(par.class_name.utf8().get_data()), // const char *class_name;
+				par.hint, // NONE //uint32_t hint;
+				_alloc_and_copy_cstr(par.hint_string.utf8().get_data()), // const char *hint_string;
+				par.usage, // DEFAULT //uint32_t usage;
 		});
 	}
 
 	internal::gdn_interface->classdb_register_extension_class_signal(internal::library, cl.name, p_signal.name, parameters.data(), parameters.size());
+
+	for (GDNativePropertyInfo &par : parameters) {
+		memfree(const_cast<char *>(par.name));
+		memfree(const_cast<char *>(par.class_name));
+		memfree(const_cast<char *>(par.hint_string));
+	}
 }
 
 void ClassDB::bind_integer_constant(const char *p_class_name, const char *p_enum_name, const char *p_constant_name, GDNativeInt p_constant_value, bool p_is_bitfield) {

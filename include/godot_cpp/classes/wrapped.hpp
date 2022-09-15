@@ -220,10 +220,10 @@ public:                                                                         
 				cls->plist_size = 0;                                                                                                                     \
 				for (const ::godot::PropertyInfo &E : list) {                                                                                            \
 					cls->plist[cls->plist_size].type = E.type;                                                                                           \
-					cls->plist[cls->plist_size].name = _alloc_and_copy_cstr(E.name);                                                                     \
+					cls->plist[cls->plist_size].name = _alloc_and_copy_cstr(E.name.utf8().get_data());                                                   \
 					cls->plist[cls->plist_size].hint = E.hint;                                                                                           \
-					cls->plist[cls->plist_size].hint_string = _alloc_and_copy_cstr(E.hint_string);                                                       \
-					cls->plist[cls->plist_size].class_name = _alloc_and_copy_cstr(E.class_name);                                                         \
+					cls->plist[cls->plist_size].hint_string = _alloc_and_copy_cstr(E.hint_string.utf8().get_data());                                     \
+					cls->plist[cls->plist_size].class_name = _alloc_and_copy_cstr(E.class_name.utf8().get_data());                                       \
 					cls->plist[cls->plist_size].usage = E.usage;                                                                                         \
 					cls->plist_size++;                                                                                                                   \
 				}                                                                                                                                        \

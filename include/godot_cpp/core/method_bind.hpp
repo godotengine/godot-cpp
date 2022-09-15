@@ -136,16 +136,16 @@ class MethodBindVarArgBase : public MethodBind {
 protected:
 	R(T::*method)
 	(const Variant **, GDNativeInt, GDNativeCallError &);
-	MethodInfo method_info;
+	std::vector<GDNativePropertyInfo> arguments;
 
 public:
 	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
 		if (p_arg < 0) {
 			return _gen_return_type_info();
-		} else if (p_arg < method_info.arguments.size()) {
-			return method_info.arguments[p_arg];
+		} else if (p_arg < arguments.size()) {
+			return arguments[p_arg];
 		} else {
-			return PropertyInfo(Variant::NIL, "vararg", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
+			return make_property_info(GDNATIVE_VARIANT_TYPE_NIL, "vararg", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
 		}
 	}
 
@@ -161,29 +161,49 @@ public:
 		ERR_FAIL(); // Can't call.
 	}
 
+	static _FORCE_INLINE_ char *_alloc_and_copy_cstr(const char *p_str) {
+		size_t size = strlen(p_str) + 1;
+		char *ret = reinterpret_cast<char *>(memalloc(size));
+		memcpy(ret, p_str, size);
+		return ret;
+	}
+
 	MethodBindVarArgBase(
 			R (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &),
 			const MethodInfo &p_method_info,
 			bool p_return_nil_is_variant) :
-			method(p_method), method_info(p_method_info) {
+			method(p_method) {
 		set_vararg(true);
 		set_const(true);
-		set_argument_count(method_info.arguments.size());
-		if (method_info.arguments.size()) {
+		set_argument_count(p_method_info.arguments.size());
+		if (p_method_info.arguments.size()) {
 			std::vector<std::string> names;
-			names.reserve(method_info.arguments.size());
-			for (int i = 0; i < method_info.arguments.size(); i++) {
-				names.push_back(method_info.arguments[i].name);
+			names.reserve(p_method_info.arguments.size());
+			for (int i = 0; i < p_method_info.arguments.size(); i++) {
+				names.push_back(p_method_info.arguments[i].name.utf8().get_data());
+				arguments.push_back(GDNativePropertyInfo{
+						static_cast<uint32_t>(p_method_info.arguments[i].type), // uint32_t type;
+						_alloc_and_copy_cstr(p_method_info.arguments[i].name.utf8().get_data()), // const char *name;
+						_alloc_and_copy_cstr(p_method_info.arguments[i].class_name.utf8().get_data()), // const char *class_name;
+						p_method_info.arguments[i].hint, // NONE //uint32_t hint;
+						_alloc_and_copy_cstr(p_method_info.arguments[i].hint_string.utf8().get_data()), // const char *hint_string;
+						p_method_info.arguments[i].usage, // DEFAULT //uint32_t usage;
+				});
 			}
 
 			set_argument_names(names);
 		}
 
-		if (p_return_nil_is_variant) {
-			method_info.return_val.usage |= PROPERTY_USAGE_NIL_IS_VARIANT;
-		}
-		generate_argument_types((int)method_info.arguments.size());
+		generate_argument_types((int)p_method_info.arguments.size());
 		set_return(should_returns);
+	}
+
+	~MethodBindVarArgBase() {
+		for (GDNativePropertyInfo &arg : arguments) {
+			memfree(const_cast<char *>(arg.name));
+			memfree(const_cast<char *>(arg.class_name));
+			memfree(const_cast<char *>(arg.hint_string));
+		}
 	}
 
 private:
