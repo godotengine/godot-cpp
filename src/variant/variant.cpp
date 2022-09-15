@@ -693,14 +693,6 @@ Variant Variant::duplicate(bool deep) const {
 	return result;
 }
 
-void Variant::blend(const Variant &a, const Variant &b, float c, Variant &r_dst) {
-	internal::gdn_interface->variant_blend(a._native_ptr(), b._native_ptr(), c, r_dst._native_ptr());
-}
-
-void Variant::interpolate(const Variant &a, const Variant &b, float c, Variant &r_dst) {
-	internal::gdn_interface->variant_interpolate(a._native_ptr(), b._native_ptr(), c, r_dst._native_ptr());
-}
-
 String Variant::get_type_name(Variant::Type type) {
 	String result;
 	internal::gdn_interface->variant_get_type_name(static_cast<GDNativeVariantType>(type), result._native_ptr());
