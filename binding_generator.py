@@ -276,7 +276,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("#include <godot_cpp/variant/array_helpers.hpp>")
 
     for include in fully_used_classes:
-        result.append(f"#include <godot_cpp/{get_include_path(include)}>")
+        if include == "TypedArray":
+            result.append("#include <godot_cpp/variant/typed_array.hpp>")
+        else:
+            result.append(f"#include <godot_cpp/{get_include_path(include)}>")
 
     if len(fully_used_classes) > 0:
         result.append("")
@@ -860,7 +863,21 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                         if type_name.endswith("*"):
                             type_name = type_name[:-1]
                         if is_included(type_name, class_name):
-                            if is_enum(type_name):
+                            if type_name.startswith("typedarray::"):
+                                fully_used_classes.add("TypedArray")
+                                array_type_name = type_name.replace("typedarray::", "")
+                                if array_type_name.startswith("const "):
+                                    array_type_name = array_type_name[6:]
+                                if array_type_name.endswith("*"):
+                                    array_type_name = array_type_name[:-1]
+                                if is_included(array_type_name, class_name):
+                                    if is_enum(array_type_name):
+                                        fully_used_classes.add(get_enum_class(array_type_name))
+                                    elif "default_value" in argument:
+                                        fully_used_classes.add(array_type_name)
+                                    else:
+                                        used_classes.add(array_type_name)
+                            elif is_enum(type_name):
                                 fully_used_classes.add(get_enum_class(type_name))
                             elif "default_value" in argument:
                                 fully_used_classes.add(type_name)
@@ -875,7 +892,21 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                     if type_name.endswith("*"):
                         type_name = type_name[:-1]
                     if is_included(type_name, class_name):
-                        if is_enum(type_name):
+                        if type_name.startswith("typedarray::"):
+                            fully_used_classes.add("TypedArray")
+                            array_type_name = type_name.replace("typedarray::", "")
+                            if array_type_name.startswith("const "):
+                                array_type_name = array_type_name[6:]
+                            if array_type_name.endswith("*"):
+                                array_type_name = array_type_name[:-1]
+                            if is_included(array_type_name, class_name):
+                                if is_enum(array_type_name):
+                                    fully_used_classes.add(get_enum_class(array_type_name))
+                                elif is_variant(array_type_name):
+                                    fully_used_classes.add(array_type_name)
+                                else:
+                                    used_classes.add(array_type_name)
+                        elif is_enum(type_name):
                             fully_used_classes.add(get_enum_class(type_name))
                         elif is_variant(type_name):
                             fully_used_classes.add(type_name)
@@ -988,7 +1019,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("")
 
     for included in fully_used_classes:
-        result.append(f"#include <godot_cpp/{get_include_path(included)}>")
+        if included == "TypedArray":
+            result.append("#include <godot_cpp/variant/typed_array.hpp>")
+        else:
+            result.append(f"#include <godot_cpp/{get_include_path(included)}>")
 
     if len(fully_used_classes) > 0:
         result.append("")
@@ -1803,7 +1837,12 @@ def get_enum_name(enum_name: str):
 
 
 def is_variant(type_name):
-    return type_name == "Variant" or type_name in builtin_classes or type_name == "Nil"
+    return (
+        type_name == "Variant"
+        or type_name in builtin_classes
+        or type_name == "Nil"
+        or type_name.startswith("typedarray::")
+    )
 
 
 def is_engine_class(type_name):
@@ -1825,6 +1864,8 @@ def is_included(type_name, current_type):
     Check if a builtin type should be included.
     This removes Variant and POD types from inclusion, and the current type.
     """
+    if type_name.startswith("typedarray::"):
+        return True
     to_include = get_enum_class(type_name) if is_enum(type_name) else type_name
     if to_include == current_type or is_pod_type(to_include):
         return False
@@ -1850,6 +1891,12 @@ def correct_default_value(value, type_name):
     return value
 
 
+def correct_typed_array(type_name):
+    if type_name.startswith("typedarray::"):
+        return type_name.replace("typedarray::", "TypedArray<") + ">"
+    return type_name
+
+
 def correct_type(type_name, meta=None):
     type_conversion = {"float": "double", "int": "int64_t", "Nil": "Variant"}
     if meta != None:
@@ -1861,6 +1908,8 @@ def correct_type(type_name, meta=None):
             return meta
     if type_name in type_conversion:
         return type_conversion[type_name]
+    if type_name.startswith("typedarray::"):
+        return type_name.replace("typedarray::", "TypedArray<") + ">"
     if is_enum(type_name):
         if is_bitfield(type_name):
             base_class = get_enum_class(type_name)
@@ -1962,6 +2011,8 @@ def get_default_value_for_type(type_name):
         return "0.0"
     if type_name == "bool":
         return "false"
+    if type_name.startswith("typedarray::"):
+        return f"{correct_type(type_name)}()"
     if is_enum(type_name):
         return f"{correct_type(type_name)}(0)"
     if is_variant(type_name):

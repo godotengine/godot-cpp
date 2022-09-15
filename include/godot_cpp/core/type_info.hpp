@@ -32,6 +32,7 @@
 #define GODOT_TYPE_INFO_HPP
 
 #include <godot_cpp/core/object.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
 #include <godot/gdnative_interface.h>
@@ -283,6 +284,106 @@ inline const char *__constant_get_bitfield_name(T param, const char *p_constant)
 	}
 	return GetTypeInfo<BitField<T>>::get_class_info().class_name;
 }
+
+template <class T>
+struct PtrToArg<TypedArray<T>> {
+	_FORCE_INLINE_ static TypedArray<T> convert(const void *p_ptr) {
+		return TypedArray<T>(*reinterpret_cast<const Array *>(p_ptr));
+	}
+	typedef Array EncodeT;
+	_FORCE_INLINE_ static void encode(TypedArray<T> p_val, void *p_ptr) {
+		*(Array *)p_ptr = p_val;
+	}
+};
+
+template <class T>
+struct PtrToArg<const TypedArray<T> &> {
+	typedef Array EncodeT;
+	_FORCE_INLINE_ static TypedArray<T>
+	convert(const void *p_ptr) {
+		return TypedArray<T>(*reinterpret_cast<const Array *>(p_ptr));
+	}
+};
+
+template <typename T>
+struct GetTypeInfo<TypedArray<T>> {
+	static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_ARRAY;
+	static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static inline GDNativePropertyInfo get_class_info() {
+		return make_property_info(GDNATIVE_VARIANT_TYPE_ARRAY, "", PROPERTY_HINT_ARRAY_TYPE, T::get_class_static());
+	}
+};
+
+template <typename T>
+struct GetTypeInfo<const TypedArray<T> &> {
+	static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_ARRAY;
+	static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static inline GDNativePropertyInfo get_class_info() {
+		return make_property_info(GDNATIVE_VARIANT_TYPE_ARRAY, "", PROPERTY_HINT_ARRAY_TYPE, T::get_class_static());
+	}
+};
+
+#define MAKE_TYPED_ARRAY_INFO(m_type, m_variant_type)                                                                                                       \
+	template <>                                                                                                                                             \
+	struct GetTypeInfo<TypedArray<m_type>> {                                                                                                                \
+		static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_ARRAY;                                                                    \
+		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                          \
+		static inline GDNativePropertyInfo get_class_info() {                                                                                               \
+			return make_property_info(GDNATIVE_VARIANT_TYPE_ARRAY, "", PROPERTY_HINT_ARRAY_TYPE, Variant::get_type_name(m_variant_type).utf8().get_data()); \
+		}                                                                                                                                                   \
+	};                                                                                                                                                      \
+	template <>                                                                                                                                             \
+	struct GetTypeInfo<const TypedArray<m_type> &> {                                                                                                        \
+		static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_ARRAY;                                                                    \
+		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                          \
+		static inline GDNativePropertyInfo get_class_info() {                                                                                               \
+			return make_property_info(GDNATIVE_VARIANT_TYPE_ARRAY, "", PROPERTY_HINT_ARRAY_TYPE, Variant::get_type_name(m_variant_type).utf8().get_data()); \
+		}                                                                                                                                                   \
+	};
+
+MAKE_TYPED_ARRAY_INFO(bool, Variant::BOOL)
+MAKE_TYPED_ARRAY_INFO(uint8_t, Variant::INT)
+MAKE_TYPED_ARRAY_INFO(int8_t, Variant::INT)
+MAKE_TYPED_ARRAY_INFO(uint16_t, Variant::INT)
+MAKE_TYPED_ARRAY_INFO(int16_t, Variant::INT)
+MAKE_TYPED_ARRAY_INFO(uint32_t, Variant::INT)
+MAKE_TYPED_ARRAY_INFO(int32_t, Variant::INT)
+MAKE_TYPED_ARRAY_INFO(uint64_t, Variant::INT)
+MAKE_TYPED_ARRAY_INFO(int64_t, Variant::INT)
+MAKE_TYPED_ARRAY_INFO(float, Variant::FLOAT)
+MAKE_TYPED_ARRAY_INFO(double, Variant::FLOAT)
+MAKE_TYPED_ARRAY_INFO(String, Variant::STRING)
+MAKE_TYPED_ARRAY_INFO(Vector2, Variant::VECTOR2)
+MAKE_TYPED_ARRAY_INFO(Vector2i, Variant::VECTOR2I)
+MAKE_TYPED_ARRAY_INFO(Rect2, Variant::RECT2)
+MAKE_TYPED_ARRAY_INFO(Rect2i, Variant::RECT2I)
+MAKE_TYPED_ARRAY_INFO(Vector3, Variant::VECTOR3)
+MAKE_TYPED_ARRAY_INFO(Vector3i, Variant::VECTOR3I)
+MAKE_TYPED_ARRAY_INFO(Transform2D, Variant::TRANSFORM2D)
+MAKE_TYPED_ARRAY_INFO(Plane, Variant::PLANE)
+MAKE_TYPED_ARRAY_INFO(Quaternion, Variant::QUATERNION)
+MAKE_TYPED_ARRAY_INFO(AABB, Variant::AABB)
+MAKE_TYPED_ARRAY_INFO(Basis, Variant::BASIS)
+MAKE_TYPED_ARRAY_INFO(Transform3D, Variant::TRANSFORM3D)
+MAKE_TYPED_ARRAY_INFO(Color, Variant::COLOR)
+MAKE_TYPED_ARRAY_INFO(StringName, Variant::STRING_NAME)
+MAKE_TYPED_ARRAY_INFO(NodePath, Variant::NODE_PATH)
+MAKE_TYPED_ARRAY_INFO(RID, Variant::RID)
+MAKE_TYPED_ARRAY_INFO(Callable, Variant::CALLABLE)
+MAKE_TYPED_ARRAY_INFO(Signal, Variant::SIGNAL)
+MAKE_TYPED_ARRAY_INFO(Dictionary, Variant::DICTIONARY)
+MAKE_TYPED_ARRAY_INFO(Array, Variant::ARRAY)
+/*
+MAKE_TYPED_ARRAY_INFO(Vector<uint8_t>, Variant::PACKED_BYTE_ARRAY)
+MAKE_TYPED_ARRAY_INFO(Vector<int32_t>, Variant::PACKED_INT32_ARRAY)
+MAKE_TYPED_ARRAY_INFO(Vector<int64_t>, Variant::PACKED_INT64_ARRAY)
+MAKE_TYPED_ARRAY_INFO(Vector<float>, Variant::PACKED_FLOAT32_ARRAY)
+MAKE_TYPED_ARRAY_INFO(Vector<double>, Variant::PACKED_FLOAT64_ARRAY)
+MAKE_TYPED_ARRAY_INFO(Vector<String>, Variant::PACKED_STRING_ARRAY)
+MAKE_TYPED_ARRAY_INFO(Vector<Vector2>, Variant::PACKED_VECTOR2_ARRAY)
+MAKE_TYPED_ARRAY_INFO(Vector<Vector3>, Variant::PACKED_VECTOR3_ARRAY)
+MAKE_TYPED_ARRAY_INFO(Vector<Color>, Variant::PACKED_COLOR_ARRAY)
+*/
 
 #define CLASS_INFO(m_type) (GetTypeInfo<m_type *>::get_class_info())
 
