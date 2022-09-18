@@ -75,12 +75,16 @@ public:
 	bool is_normalized() const;
 	Vector4 abs() const;
 	Vector4 sign() const;
+	Vector4 floor() const;
+	Vector4 ceil() const;
+	Vector4 round() const;
 
 	Vector4::Axis min_axis_index() const;
 	Vector4::Axis max_axis_index() const;
 	Vector4 clamp(const Vector4 &p_min, const Vector4 &p_max) const;
 
 	Vector4 inverse() const;
+	Vector4 lerp(const Vector4 &p_to, const real_t p_weight) const;
 	_FORCE_INLINE_ real_t dot(const Vector4 &p_vec4) const;
 
 	_FORCE_INLINE_ void operator+=(const Vector4 &p_vec4);
