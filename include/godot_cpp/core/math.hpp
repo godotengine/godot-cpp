@@ -280,17 +280,126 @@ inline float lerp_angle(float p_from, float p_to, float p_weight) {
 
 inline double cubic_interpolate(double p_from, double p_to, double p_pre, double p_post, double p_weight) {
 	return 0.5 *
-		   ((p_from * 2.0) +
-				   (-p_pre + p_to) * p_weight +
-				   (2.0 * p_pre - 5.0 * p_from + 4.0 * p_to - p_post) * (p_weight * p_weight) +
-				   (-p_pre + 3.0 * p_from - 3.0 * p_to + p_post) * (p_weight * p_weight * p_weight));
+			((p_from * 2.0) +
+					(-p_pre + p_to) * p_weight +
+					(2.0 * p_pre - 5.0 * p_from + 4.0 * p_to - p_post) * (p_weight * p_weight) +
+					(-p_pre + 3.0 * p_from - 3.0 * p_to + p_post) * (p_weight * p_weight * p_weight));
 }
+
 inline float cubic_interpolate(float p_from, float p_to, float p_pre, float p_post, float p_weight) {
 	return 0.5f *
-		   ((p_from * 2.0f) +
-				   (-p_pre + p_to) * p_weight +
-				   (2.0f * p_pre - 5.0f * p_from + 4.0f * p_to - p_post) * (p_weight * p_weight) +
-				   (-p_pre + 3.0f * p_from - 3.0f * p_to + p_post) * (p_weight * p_weight * p_weight));
+			((p_from * 2.0f) +
+					(-p_pre + p_to) * p_weight +
+					(2.0f * p_pre - 5.0f * p_from + 4.0f * p_to - p_post) * (p_weight * p_weight) +
+					(-p_pre + 3.0f * p_from - 3.0f * p_to + p_post) * (p_weight * p_weight * p_weight));
+}
+
+inline double cubic_interpolate_angle(double p_from, double p_to, double p_pre, double p_post, double p_weight) {
+	double from_rot = fmod(p_from, Math_TAU);
+
+	double pre_diff = fmod(p_pre - from_rot, Math_TAU);
+	double pre_rot = from_rot + fmod(2.0 * pre_diff, Math_TAU) - pre_diff;
+
+	double to_diff = fmod(p_to - from_rot, Math_TAU);
+	double to_rot = from_rot + fmod(2.0 * to_diff, Math_TAU) - to_diff;
+
+	double post_diff = fmod(p_post - to_rot, Math_TAU);
+	double post_rot = to_rot + fmod(2.0 * post_diff, Math_TAU) - post_diff;
+
+	return cubic_interpolate(from_rot, to_rot, pre_rot, post_rot, p_weight);
+}
+
+inline float cubic_interpolate_angle(float p_from, float p_to, float p_pre, float p_post, float p_weight) {
+	float from_rot = fmod(p_from, (float)Math_TAU);
+
+	float pre_diff = fmod(p_pre - from_rot, (float)Math_TAU);
+	float pre_rot = from_rot + fmod(2.0f * pre_diff, (float)Math_TAU) - pre_diff;
+
+	float to_diff = fmod(p_to - from_rot, (float)Math_TAU);
+	float to_rot = from_rot + fmod(2.0f * to_diff, (float)Math_TAU) - to_diff;
+
+	float post_diff = fmod(p_post - to_rot, (float)Math_TAU);
+	float post_rot = to_rot + fmod(2.0f * post_diff, (float)Math_TAU) - post_diff;
+
+	return cubic_interpolate(from_rot, to_rot, pre_rot, post_rot, p_weight);
+}
+
+inline double cubic_interpolate_in_time(double p_from, double p_to, double p_pre, double p_post, double p_weight,
+		double p_to_t, double p_pre_t, double p_post_t) {
+	/* Barry-Goldman method */
+	double t = Math::lerp(0.0, p_to_t, p_weight);
+	double a1 = Math::lerp(p_pre, p_from, p_pre_t == 0 ? 0.0 : (t - p_pre_t) / -p_pre_t);
+	double a2 = Math::lerp(p_from, p_to, p_to_t == 0 ? 0.5 : t / p_to_t);
+	double a3 = Math::lerp(p_to, p_post, p_post_t - p_to_t == 0 ? 1.0 : (t - p_to_t) / (p_post_t - p_to_t));
+	double b1 = Math::lerp(a1, a2, p_to_t - p_pre_t == 0 ? 0.0 : (t - p_pre_t) / (p_to_t - p_pre_t));
+	double b2 = Math::lerp(a2, a3, p_post_t == 0 ? 1.0 : t / p_post_t);
+	return Math::lerp(b1, b2, p_to_t == 0 ? 0.5 : t / p_to_t);
+}
+
+inline float cubic_interpolate_in_time(float p_from, float p_to, float p_pre, float p_post, float p_weight,
+		float p_to_t, float p_pre_t, float p_post_t) {
+	/* Barry-Goldman method */
+	float t = Math::lerp(0.0f, p_to_t, p_weight);
+	float a1 = Math::lerp(p_pre, p_from, p_pre_t == 0 ? 0.0f : (t - p_pre_t) / -p_pre_t);
+	float a2 = Math::lerp(p_from, p_to, p_to_t == 0 ? 0.5f : t / p_to_t);
+	float a3 = Math::lerp(p_to, p_post, p_post_t - p_to_t == 0 ? 1.0f : (t - p_to_t) / (p_post_t - p_to_t));
+	float b1 = Math::lerp(a1, a2, p_to_t - p_pre_t == 0 ? 0.0f : (t - p_pre_t) / (p_to_t - p_pre_t));
+	float b2 = Math::lerp(a2, a3, p_post_t == 0 ? 1.0f : t / p_post_t);
+	return Math::lerp(b1, b2, p_to_t == 0 ? 0.5f : t / p_to_t);
+}
+
+inline double cubic_interpolate_angle_in_time(double p_from, double p_to, double p_pre, double p_post, double p_weight,
+		double p_to_t, double p_pre_t, double p_post_t) {
+	double from_rot = fmod(p_from, Math_TAU);
+
+	double pre_diff = fmod(p_pre - from_rot, Math_TAU);
+	double pre_rot = from_rot + fmod(2.0 * pre_diff, Math_TAU) - pre_diff;
+
+	double to_diff = fmod(p_to - from_rot, Math_TAU);
+	double to_rot = from_rot + fmod(2.0 * to_diff, Math_TAU) - to_diff;
+
+	double post_diff = fmod(p_post - to_rot, Math_TAU);
+	double post_rot = to_rot + fmod(2.0 * post_diff, Math_TAU) - post_diff;
+
+	return cubic_interpolate_in_time(from_rot, to_rot, pre_rot, post_rot, p_weight, p_to_t, p_pre_t, p_post_t);
+}
+
+inline float cubic_interpolate_angle_in_time(float p_from, float p_to, float p_pre, float p_post, float p_weight,
+		float p_to_t, float p_pre_t, float p_post_t) {
+	float from_rot = fmod(p_from, (float)Math_TAU);
+
+	float pre_diff = fmod(p_pre - from_rot, (float)Math_TAU);
+	float pre_rot = from_rot + fmod(2.0f * pre_diff, (float)Math_TAU) - pre_diff;
+
+	float to_diff = fmod(p_to - from_rot, (float)Math_TAU);
+	float to_rot = from_rot + fmod(2.0f * to_diff, (float)Math_TAU) - to_diff;
+
+	float post_diff = fmod(p_post - to_rot, (float)Math_TAU);
+	float post_rot = to_rot + fmod(2.0f * post_diff, (float)Math_TAU) - post_diff;
+
+	return cubic_interpolate_in_time(from_rot, to_rot, pre_rot, post_rot, p_weight, p_to_t, p_pre_t, p_post_t);
+}
+
+inline double bezier_interpolate(double p_start, double p_control_1, double p_control_2, double p_end, double p_t) {
+	/* Formula from Wikipedia article on Bezier curves. */
+	double omt = (1.0 - p_t);
+	double omt2 = omt * omt;
+	double omt3 = omt2 * omt;
+	double t2 = p_t * p_t;
+	double t3 = t2 * p_t;
+
+	return p_start * omt3 + p_control_1 * omt2 * p_t * 3.0 + p_control_2 * omt * t2 * 3.0 + p_end * t3;
+}
+
+inline float bezier_interpolate(float p_start, float p_control_1, float p_control_2, float p_end, float p_t) {
+	/* Formula from Wikipedia article on Bezier curves. */
+	float omt = (1.0f - p_t);
+	float omt2 = omt * omt;
+	float omt3 = omt2 * omt;
+	float t2 = p_t * p_t;
+	float t3 = t2 * p_t;
+
+	return p_start * omt3 + p_control_1 * omt2 * p_t * 3.0f + p_control_2 * omt * t2 * 3.0f + p_end * t3;
 }
 
 template <typename T>
