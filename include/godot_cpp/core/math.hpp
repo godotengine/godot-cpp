@@ -113,7 +113,7 @@ inline float fposmod(float p_x, float p_y) {
 	if ((value < 0 && p_y > 0) || (value > 0 && p_y < 0)) {
 		value += p_y;
 	}
-	value += 0.0;
+	value += 0.0f;
 	return value;
 }
 
@@ -122,7 +122,7 @@ inline float fposmodp(float p_x, float p_y) {
 	if (value < 0) {
 		value += p_y;
 	}
-	value += 0.0;
+	value += 0.0f;
 	return value;
 }
 inline double fposmodp(double p_x, double p_y) {
@@ -131,6 +131,14 @@ inline double fposmodp(double p_x, double p_y) {
 		value += p_y;
 	}
 	value += 0.0;
+	return value;
+}
+
+inline int64_t posmod(int64_t p_x, int64_t p_y) {
+	int64_t value = p_x % p_y;
+	if ((value < 0 && p_y > 0) || (value > 0 && p_y < 0)) {
+		value += p_y;
+	}
 	return value;
 }
 
@@ -454,10 +462,10 @@ inline float inverse_lerp(float p_from, float p_to, float p_value) {
 	return (p_value - p_from) / (p_to - p_from);
 }
 
-inline double range_lerp(double p_value, double p_istart, double p_istop, double p_ostart, double p_ostop) {
+inline double remap(double p_value, double p_istart, double p_istop, double p_ostart, double p_ostop) {
 	return Math::lerp(p_ostart, p_ostop, Math::inverse_lerp(p_istart, p_istop, p_value));
 }
-inline float range_lerp(float p_value, float p_istart, float p_istop, float p_ostart, float p_ostop) {
+inline float remap(float p_value, float p_istart, float p_istop, float p_ostart, float p_ostop) {
 	return Math::lerp(p_ostart, p_ostop, Math::inverse_lerp(p_istart, p_istop, p_value));
 }
 
