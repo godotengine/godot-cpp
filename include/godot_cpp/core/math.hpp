@@ -583,19 +583,6 @@ inline float wrapf(real_t value, real_t min, real_t max) {
 	return is_zero_approx(range) ? min : value - (range * floor((value - min) / range));
 }
 
-inline float stepify(float p_value, float p_step) {
-	if (p_step != 0) {
-		p_value = floor(p_value / p_step + 0.5f) * p_step;
-	}
-	return p_value;
-}
-inline double stepify(double p_value, double p_step) {
-	if (p_step != 0) {
-		p_value = floor(p_value / p_step + 0.5) * p_step;
-	}
-	return p_value;
-}
-
 inline unsigned int next_power_of_2(unsigned int x) {
 	if (x == 0)
 		return 0;
@@ -639,6 +626,24 @@ inline double snapped(double p_value, double p_step) {
 		p_value = Math::floor(p_value / p_step + 0.5) * p_step;
 	}
 	return p_value;
+}
+
+inline float snap_scalar(float p_offset, float p_step, float p_target) {
+	return p_step != 0 ? Math::snapped(p_target - p_offset, p_step) + p_offset : p_target;
+}
+
+inline float snap_scalar_separation(float p_offset, float p_step, float p_target, float p_separation) {
+	if (p_step != 0) {
+		float a = Math::snapped(p_target - p_offset, p_step + p_separation) + p_offset;
+		float b = a;
+		if (p_target >= 0) {
+			b -= p_separation;
+		} else {
+			b += p_step;
+		}
+		return (Math::abs(p_target - a) < Math::abs(p_target - b)) ? a : b;
+	}
+	return p_target;
 }
 
 } // namespace Math
