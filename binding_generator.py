@@ -1022,7 +1022,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         for value in class_api["constants"]:
             if "type" not in value:
                 value["type"] = "int"
-            result.append(f'\tconst {value["type"]} {value["name"]} = {value["value"]};')
+            result.append(f'\tstatic const {value["type"]} {value["name"]} = {value["value"]};')
         result.append("")
 
     if is_singleton:
