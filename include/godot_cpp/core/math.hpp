@@ -583,6 +583,22 @@ inline float wrapf(real_t value, real_t min, real_t max) {
 	return is_zero_approx(range) ? min : value - (range * floor((value - min) / range));
 }
 
+inline float fract(float value) {
+	return value - floor(value);
+}
+
+inline double fract(double value) {
+	return value - floor(value);
+}
+
+inline float pingpong(float value, float length) {
+	return (length != 0.0f) ? abs(fract((value - length) / (length * 2.0f)) * length * 2.0f - length) : 0.0f;
+}
+
+inline double pingpong(double value, double length) {
+	return (length != 0.0) ? abs(fract((value - length) / (length * 2.0)) * length * 2.0 - length) : 0.0;
+}
+
 inline unsigned int next_power_of_2(unsigned int x) {
 	if (x == 0)
 		return 0;
