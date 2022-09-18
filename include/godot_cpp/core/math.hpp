@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_MATH_H
-#define GODOT_MATH_H
+#ifndef GODOT_MATH_HPP
+#define GODOT_MATH_HPP
 
 #include <godot_cpp/core/defs.hpp>
 
@@ -368,30 +368,56 @@ inline bool is_inf(double p_val) {
 	return std::isinf(p_val);
 }
 
-inline bool is_equal_approx(real_t a, real_t b) {
+inline bool is_equal_approx(float a, float b) {
 	// Check for exact equality first, required to handle "infinity" values.
 	if (a == b) {
 		return true;
 	}
 	// Then check for approximate equality.
-	real_t tolerance = CMP_EPSILON * std::abs(a);
+	float tolerance = (float)CMP_EPSILON * abs(a);
+	if (tolerance < (float)CMP_EPSILON) {
+		tolerance = (float)CMP_EPSILON;
+	}
+	return abs(a - b) < tolerance;
+}
+
+inline bool is_equal_approx(float a, float b, float tolerance) {
+	// Check for exact equality first, required to handle "infinity" values.
+	if (a == b) {
+		return true;
+	}
+	// Then check for approximate equality.
+	return abs(a - b) < tolerance;
+}
+
+inline bool is_zero_approx(float s) {
+	return abs(s) < (float)CMP_EPSILON;
+}
+
+inline bool is_equal_approx(double a, double b) {
+	// Check for exact equality first, required to handle "infinity" values.
+	if (a == b) {
+		return true;
+	}
+	// Then check for approximate equality.
+	double tolerance = CMP_EPSILON * abs(a);
 	if (tolerance < CMP_EPSILON) {
 		tolerance = CMP_EPSILON;
 	}
-	return std::abs(a - b) < tolerance;
+	return abs(a - b) < tolerance;
 }
 
-inline bool is_equal_approx(real_t a, real_t b, real_t tolerance) {
+inline bool is_equal_approx(double a, double b, double tolerance) {
 	// Check for exact equality first, required to handle "infinity" values.
 	if (a == b) {
 		return true;
 	}
 	// Then check for approximate equality.
-	return std::abs(a - b) < tolerance;
+	return abs(a - b) < tolerance;
 }
 
-inline bool is_zero_approx(real_t s) {
-	return std::abs(s) < CMP_EPSILON;
+inline bool is_zero_approx(double s) {
+	return abs(s) < CMP_EPSILON;
 }
 
 inline double smoothstep(double p_from, double p_to, double p_weight) {
@@ -509,4 +535,4 @@ inline double snapped(double p_value, double p_step) {
 } // namespace Math
 } // namespace godot
 
-#endif // GODOT_MATH_H
+#endif // GODOT_MATH_HPP

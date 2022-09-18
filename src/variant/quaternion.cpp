@@ -86,7 +86,7 @@ Quaternion Quaternion::normalized() const {
 }
 
 bool Quaternion::is_normalized() const {
-	return Math::is_equal_approx(length_squared(), 1.0, UNIT_EPSILON); //use less epsilon
+	return Math::is_equal_approx(length_squared(), (real_t)1.0, (real_t)UNIT_EPSILON); //use less epsilon
 }
 
 Quaternion Quaternion::inverse() const {
