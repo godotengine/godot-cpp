@@ -33,14 +33,23 @@
 
 #include <godot_cpp/core/defs.hpp>
 
-#include <godot_cpp/variant/builtin_types.hpp>
 #include <godot_cpp/variant/variant_size.hpp>
+#include <godot_cpp/variant/string.hpp>
 
 #include <godot/gdnative_interface.h>
 
 #include <array>
 
 namespace godot {
+
+class RID;
+class Vector2;
+class Vector3;
+class Vector3i;
+class Vector2i;
+class Rect2;
+class Rect2i;
+class StringName;
 
 class Variant {
 	uint8_t opaque[GODOT_CPP_VARIANT_SIZE]{ 0 };
@@ -319,5 +328,7 @@ struct VariantComparator {
 };
 
 } // namespace godot
+
+#include <godot_cpp/variant/builtin_types.hpp>
 
 #endif // ! GODOT_CPP_VARIANT_HPP

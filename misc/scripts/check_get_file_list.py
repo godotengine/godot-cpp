@@ -14,7 +14,7 @@ double = "float"
 output_dir = "self_test"
 
 generate_bindings(api_filepath, use_template_get_node=False, bits=bits, double=double, output_dir=output_dir)
-flist = get_file_list(api_filepath, output_dir, headers=True, sources=True)
+flist = get_file_list(api_filepath, output_dir, headers=True, sources=True, impl=True)
 
 p = Path(output_dir) / "gen"
 allfiles = [str(f.as_posix()) for f in p.glob("**/*.*")]

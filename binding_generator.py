@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 
 
-def get_file_list(api_filepath, output_dir, headers=False, sources=False):
+def get_file_list(api_filepath, output_dir, headers=False, sources=False, impl=True):
     api = {}
     files = []
     with open(api_filepath) as api_file:
@@ -23,11 +23,20 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
             continue
 
         header_filename = include_gen_folder / "variant" / (camel_to_snake(builtin_class["name"]) + ".hpp")
+        implid_filename = include_gen_folder / "variant" / (camel_to_snake(builtin_class["name"]) + ".impl")
         source_filename = source_gen_folder / "variant" / (camel_to_snake(builtin_class["name"]) + ".cpp")
         if headers:
             files.append(str(header_filename.as_posix()))
         if sources:
             files.append(str(source_filename.as_posix()))
+        if impl:
+            has_impl = False
+            if "methods" in builtin_class:
+                for method in builtin_class["methods"]:
+                    if method["is_vararg"]:
+                        has_impl = True
+            if has_impl:
+                files.append(str(implid_filename.as_posix()))
 
     for engine_class in api["classes"]:
         # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
@@ -64,14 +73,14 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
     return files
 
 
-def print_file_list(api_filepath, output_dir, headers=False, sources=False):
+def print_file_list(api_filepath, output_dir, headers=False, sources=False, impl=True):
     end = ";"
-    for f in get_file_list(api_filepath, output_dir, headers, sources):
+    for f in get_file_list(api_filepath, output_dir, headers, sources, impl):
         print(f, end=end)
 
 
 def scons_emit_files(target, source, env):
-    files = [env.File(f) for f in get_file_list(str(source[0]), target[0].abspath, True, True)]
+    files = [env.File(f) for f in get_file_list(str(source[0]), target[0].abspath, True, True, True)]
     env.Clean(files, target)
     return [target[0]] + files, source
 
@@ -155,6 +164,8 @@ def generate_builtin_bindings(api, output_dir, build_config):
 
         variant_size_file.write("\n".join(variant_size_source))
 
+    implid_builtins = set()
+
     for builtin_api in api["builtin_classes"]:
         if is_pod_type(builtin_api["name"]):
             continue
@@ -164,11 +175,15 @@ def generate_builtin_bindings(api, output_dir, build_config):
         size = builtin_sizes[builtin_api["name"]]
 
         header_filename = include_gen_folder / (camel_to_snake(builtin_api["name"]) + ".hpp")
+        implid_filename = include_gen_folder / (camel_to_snake(builtin_api["name"]) + ".impl")
         source_filename = source_gen_folder / (camel_to_snake(builtin_api["name"]) + ".cpp")
 
         # Check used classes for header include
         used_classes = set()
         fully_used_classes = set()
+
+        # Check varargs methods for impl file gen
+        template_methods = list()
 
         class_name = builtin_api["name"]
 
@@ -194,6 +209,8 @@ def generate_builtin_bindings(api, output_dir, build_config):
                 if "return_type" in method:
                     if is_included(method["return_type"], class_name):
                         used_classes.add(method["return_type"])
+                if method["is_vararg"]:
+                    template_methods.append(method)
 
         if "members" in builtin_api:
             for member in builtin_api["members"]:
@@ -217,6 +234,11 @@ def generate_builtin_bindings(api, output_dir, build_config):
             if type_name in used_classes:
                 used_classes.remove(type_name)
 
+        has_templates = len(template_methods) > 0
+
+        if has_templates:
+            implid_builtins.add(builtin_api["name"])
+
         used_classes = list(used_classes)
         used_classes.sort()
         fully_used_classes = list(fully_used_classes)
@@ -227,6 +249,9 @@ def generate_builtin_bindings(api, output_dir, build_config):
 
         with source_filename.open("w+") as source_file:
             source_file.write(generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes))
+        if has_templates:
+            with implid_filename.open("w+") as impl_file:
+                impl_file.write(generate_builtin_class_impl(builtin_api, template_methods))
 
     # Create a header with all builtin types for convenience.
     builtin_header_filename = include_gen_folder / "builtin_types.hpp"
@@ -809,6 +834,88 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 
     result.append("")
     result.append("} //namespace godot")
+
+    return "\n".join(result)
+
+
+def generate_builtin_class_impl(builtin_api, template_methods):
+    result = []
+
+    class_name = builtin_api["name"]
+    snake_class_name = camel_to_snake(class_name)
+    enum_type_name = f"GDNATIVE_VARIANT_TYPE_{snake_class_name.upper()}"
+
+    result.append("#include <godot_cpp/core/binder_common.hpp>")
+    result.append("")
+
+    result.append("#include <godot_cpp/core/builtin_ptrcall.hpp>")
+    result.append("")
+
+    for method in template_methods:
+        if "return_type" in method:
+            result.append(f'#include <godot_cpp/{get_include_path(method["return_type"])}>')
+    result.append("")
+
+    result.append("namespace godot {")
+    result.append("")
+
+    for method in template_methods:
+
+        result.append("template<class... Args>")
+
+        return_type = ""
+        if "return_type" in method:
+            return_type = method["return_type"]
+        else:
+            return_type = "void"
+
+        method_parameters = []
+        if "arguments" in method:
+            method_parameters = method["arguments"]
+        parameters = make_function_parameters(
+            method_parameters, include_default=False, for_builtin=False, is_vararg=True
+        )
+
+        const_qualifier = ""
+        if "is_const" in method and method["is_const"]:
+            const_qualifier = " const"
+
+        result.append(f'{return_type} {builtin_api["name"]}::{method["name"]}({parameters}){const_qualifier}')
+
+        result.append("{")
+
+        method_call = "\t"
+        if "return_type" in method:
+            method_call += f'return internal::_call_builtin_method_ret<{correct_type(method["return_type"])}>('
+        else:
+            method_call += f"internal::_call_builtin_method_no_ret("
+        method_call += f'_method_bindings.method_{method["name"]}, '
+        if "is_static" in method and method["is_static"]:
+            method_call += "nullptr"
+        else:
+            method_call += "_native_ptr()"
+
+        if "arguments" in method:
+            arguments = []
+            method_call += ", "
+            for argument in method["arguments"]:
+                (encode, arg_name) = get_encoded_arg(
+                    argument["name"],
+                    argument["type"],
+                    argument["meta"] if "meta" in argument else None,
+                )
+                result += encode
+                arguments.append(arg_name)
+            method_call += ", ".join(arguments)
+        method_call += ", Variant(args)..."
+        method_call += ");"
+
+        result.append(method_call)
+
+        result.append("}")
+        result.append("")
+
+    result.append("} // namespace godot")
 
     return "\n".join(result)
 
