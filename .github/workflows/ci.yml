@@ -1,6 +1,14 @@
 name: Continuous integration
 on: [push, pull_request]
 
+env:
+  # Only used for the cache key. Increment version to force clean build.
+  GODOT_BASE_BRANCH: master
+
+concurrency:
+  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: ${{ matrix.name }}
@@ -14,6 +22,7 @@ jobs:
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.release.x86_64.a
+            cache-name: linux-x86_64
 
           - name: 🐧 Linux (GCC, Double Precision)
             os: ubuntu-18.04
@@ -21,12 +30,14 @@ jobs:
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
             artifact-path: bin/libgodot-cpp.linux.release.x86_64.a
             flags: float=64
+            cache-name: linux-x86_64-f64
 
           - name: 🏁 Windows (x86_64, MSVC)
             os: windows-2019
             platform: windows
             artifact-name: godot-cpp-windows-msvc2019-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.release.x86_64.lib
+            cache-name: windows-x86_64-msvc
 
           - name: 🏁 Windows (x86_64, MinGW)
             os: windows-2019
@@ -34,6 +45,7 @@ jobs:
             artifact-name: godot-cpp-linux-mingw-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.release.x86_64.a
             flags: use_mingw=yes
+            cache-name: windows-x86_64-mingw
 
           - name: 🍎 macOS (universal)
             os: macos-11
@@ -41,6 +53,7 @@ jobs:
             artifact-name: godot-cpp-macos-universal-release
             artifact-path: bin/libgodot-cpp.macos.release.universal.a
             flags: arch=universal
+            cache-name: macos-universal
 
           - name: 🤖 Android (arm64)
             os: ubuntu-18.04
@@ -48,6 +61,7 @@ jobs:
             artifact-name: godot-cpp-android-arm64-release
             artifact-path: bin/libgodot-cpp.android.release.arm64.a
             flags: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME arch=arm64
+            cache-name: android-arm64
 
           - name: 🍏 iOS (arm64)
             os: macos-11
@@ -55,12 +69,22 @@ jobs:
             artifact-name: godot-cpp-ios-arm64-release
             artifact-path: bin/libgodot-cpp.ios.release.arm64.a
             flags: arch=arm64
+            cache-name: ios-arm64
+
+    env:
+      SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Setup Godot build cache
+        uses: ./.github/actions/godot-cache
+        with:
+          cache-name: ${{ matrix.cache-name }}
+        continue-on-error: true
 
       - name: Set up Python (for SCons)
         uses: actions/setup-python@v4
@@ -83,7 +107,7 @@ jobs:
 
       - name: Build godot-cpp (debug)
         run: |
-          scons platform=${{ matrix.platform }} target=debug generate_bindings=yes ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} target=debug ${{ matrix.flags }}
 
       - name: Build test without rebuilding godot-cpp (debug)
         run: |
