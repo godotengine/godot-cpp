@@ -33,7 +33,7 @@
 #include <godot_cpp/variant/string.hpp>
 
 #define cofac(row1, col1, row2, col2) \
-	(elements[row1][col1] * elements[row2][col2] - elements[row1][col2] * elements[row2][col1])
+	(rows[row1][col1] * rows[row2][col2] - rows[row1][col2] * rows[row2][col1])
 
 namespace godot {
 
@@ -42,25 +42,25 @@ void Basis::from_z(const Vector3 &p_z) {
 		// choose p in y-z plane
 		real_t a = p_z[1] * p_z[1] + p_z[2] * p_z[2];
 		real_t k = 1.0 / Math::sqrt(a);
-		elements[0] = Vector3(0, -p_z[2] * k, p_z[1] * k);
-		elements[1] = Vector3(a * k, -p_z[0] * elements[0][2], p_z[0] * elements[0][1]);
+		rows[0] = Vector3(0, -p_z[2] * k, p_z[1] * k);
+		rows[1] = Vector3(a * k, -p_z[0] * rows[0][2], p_z[0] * rows[0][1]);
 	} else {
 		// choose p in x-y plane
 		real_t a = p_z.x * p_z.x + p_z.y * p_z.y;
 		real_t k = 1.0 / Math::sqrt(a);
-		elements[0] = Vector3(-p_z.y * k, p_z.x * k, 0);
-		elements[1] = Vector3(-p_z.z * elements[0].y, p_z.z * elements[0].x, a * k);
+		rows[0] = Vector3(-p_z.y * k, p_z.x * k, 0);
+		rows[1] = Vector3(-p_z.z * rows[0].y, p_z.z * rows[0].x, a * k);
 	}
-	elements[2] = p_z;
+	rows[2] = p_z;
 }
 
 void Basis::invert() {
 	real_t co[3] = {
 		cofac(1, 1, 2, 2), cofac(1, 2, 2, 0), cofac(1, 0, 2, 1)
 	};
-	real_t det = elements[0][0] * co[0] +
-				 elements[0][1] * co[1] +
-				 elements[0][2] * co[2];
+	real_t det = rows[0][0] * co[0] +
+				 rows[0][1] * co[1] +
+				 rows[0][2] * co[2];
 #ifdef MATH_CHECKS
 	ERR_FAIL_COND(det == 0);
 #endif
@@ -104,9 +104,9 @@ bool Basis::is_orthogonal() const {
 
 bool Basis::is_diagonal() const {
 	return (
-			Math::is_zero_approx(elements[0][1]) && Math::is_zero_approx(elements[0][2]) &&
-			Math::is_zero_approx(elements[1][0]) && Math::is_zero_approx(elements[1][2]) &&
-			Math::is_zero_approx(elements[2][0]) && Math::is_zero_approx(elements[2][1]));
+			Math::is_zero_approx(rows[0][1]) && Math::is_zero_approx(rows[0][2]) &&
+			Math::is_zero_approx(rows[1][0]) && Math::is_zero_approx(rows[1][2]) &&
+			Math::is_zero_approx(rows[2][0]) && Math::is_zero_approx(rows[2][1]));
 }
 
 bool Basis::is_rotation() const {
@@ -116,13 +116,13 @@ bool Basis::is_rotation() const {
 #ifdef MATH_CHECKS
 // This method is only used once, in diagonalize. If it's desired elsewhere, feel free to remove the #ifdef.
 bool Basis::is_symmetric() const {
-	if (!Math::is_equal_approx(elements[0][1], elements[1][0])) {
+	if (!Math::is_equal_approx(rows[0][1], rows[1][0])) {
 		return false;
 	}
-	if (!Math::is_equal_approx(elements[0][2], elements[2][0])) {
+	if (!Math::is_equal_approx(rows[0][2], rows[2][0])) {
 		return false;
 	}
-	if (!Math::is_equal_approx(elements[1][2], elements[2][1])) {
+	if (!Math::is_equal_approx(rows[1][2], rows[2][1])) {
 		return false;
 	}
 
@@ -138,14 +138,14 @@ Basis Basis::diagonalize() {
 #endif
 	const int ite_max = 1024;
 
-	real_t off_matrix_norm_2 = elements[0][1] * elements[0][1] + elements[0][2] * elements[0][2] + elements[1][2] * elements[1][2];
+	real_t off_matrix_norm_2 = rows[0][1] * rows[0][1] + rows[0][2] * rows[0][2] + rows[1][2] * rows[1][2];
 
 	int ite = 0;
 	Basis acc_rot;
 	while (off_matrix_norm_2 > CMP_EPSILON2 && ite++ < ite_max) {
-		real_t el01_2 = elements[0][1] * elements[0][1];
-		real_t el02_2 = elements[0][2] * elements[0][2];
-		real_t el12_2 = elements[1][2] * elements[1][2];
+		real_t el01_2 = rows[0][1] * rows[0][1];
+		real_t el02_2 = rows[0][2] * rows[0][2];
+		real_t el12_2 = rows[1][2] * rows[1][2];
 		// Find the pivot element
 		int i, j;
 		if (el01_2 > el02_2) {
@@ -168,19 +168,19 @@ Basis Basis::diagonalize() {
 
 		// Compute the rotation angle
 		real_t angle;
-		if (Math::is_equal_approx(elements[j][j], elements[i][i])) {
+		if (Math::is_equal_approx(rows[j][j], rows[i][i])) {
 			angle = Math_PI / 4;
 		} else {
-			angle = 0.5 * Math::atan(2 * elements[i][j] / (elements[j][j] - elements[i][i]));
+			angle = 0.5 * Math::atan(2 * rows[i][j] / (rows[j][j] - rows[i][i]));
 		}
 
 		// Compute the rotation matrix
 		Basis rot;
-		rot.elements[i][i] = rot.elements[j][j] = Math::cos(angle);
-		rot.elements[i][j] = -(rot.elements[j][i] = Math::sin(angle));
+		rot.rows[i][i] = rot.rows[j][j] = Math::cos(angle);
+		rot.rows[i][j] = -(rot.rows[j][i] = Math::sin(angle));
 
 		// Update the off matrix norm
-		off_matrix_norm_2 -= elements[i][j] * elements[i][j];
+		off_matrix_norm_2 -= rows[i][j] * rows[i][j];
 
 		// Apply the rotation
 		*this = rot * *this * rot.transposed();
@@ -197,9 +197,9 @@ Basis Basis::inverse() const {
 }
 
 void Basis::transpose() {
-	SWAP(elements[0][1], elements[1][0]);
-	SWAP(elements[0][2], elements[2][0]);
-	SWAP(elements[1][2], elements[2][1]);
+	SWAP(rows[0][1], rows[1][0]);
+	SWAP(rows[0][2], rows[2][0]);
+	SWAP(rows[1][2], rows[2][1]);
 }
 
 Basis Basis::transposed() const {
@@ -211,15 +211,15 @@ Basis Basis::transposed() const {
 // Multiplies the matrix from left by the scaling matrix: M -> S.M
 // See the comment for Basis::rotated for further explanation.
 void Basis::scale(const Vector3 &p_scale) {
-	elements[0][0] *= p_scale.x;
-	elements[0][1] *= p_scale.x;
-	elements[0][2] *= p_scale.x;
-	elements[1][0] *= p_scale.y;
-	elements[1][1] *= p_scale.y;
-	elements[1][2] *= p_scale.y;
-	elements[2][0] *= p_scale.z;
-	elements[2][1] *= p_scale.z;
-	elements[2][2] *= p_scale.z;
+	rows[0][0] *= p_scale.x;
+	rows[0][1] *= p_scale.x;
+	rows[0][2] *= p_scale.x;
+	rows[1][0] *= p_scale.y;
+	rows[1][1] *= p_scale.y;
+	rows[1][2] *= p_scale.y;
+	rows[2][0] *= p_scale.z;
+	rows[2][1] *= p_scale.z;
+	rows[2][2] *= p_scale.z;
 }
 
 Basis Basis::scaled(const Vector3 &p_scale) const {
@@ -235,14 +235,14 @@ void Basis::scale_local(const Vector3 &p_scale) {
 }
 
 float Basis::get_uniform_scale() const {
-	return (elements[0].length() + elements[1].length() + elements[2].length()) / 3.0;
+	return (rows[0].length() + rows[1].length() + rows[2].length()) / 3.0;
 }
 
 void Basis::make_scale_uniform() {
-	float l = (elements[0].length() + elements[1].length() + elements[2].length()) / 3.0;
+	float l = (rows[0].length() + rows[1].length() + rows[2].length()) / 3.0;
 	for (int i = 0; i < 3; i++) {
-		elements[i].normalize();
-		elements[i] *= l;
+		rows[i].normalize();
+		rows[i] *= l;
 	}
 }
 
@@ -255,14 +255,14 @@ Basis Basis::scaled_local(const Vector3 &p_scale) const {
 
 Vector3 Basis::get_scale_abs() const {
 	return Vector3(
-			Vector3(elements[0][0], elements[1][0], elements[2][0]).length(),
-			Vector3(elements[0][1], elements[1][1], elements[2][1]).length(),
-			Vector3(elements[0][2], elements[1][2], elements[2][2]).length());
+			Vector3(rows[0][0], rows[1][0], rows[2][0]).length(),
+			Vector3(rows[0][1], rows[1][1], rows[2][1]).length(),
+			Vector3(rows[0][2], rows[1][2], rows[2][2]).length());
 }
 
 Vector3 Basis::get_scale_local() const {
 	real_t det_sign = Math::sign(determinant());
-	return det_sign * Vector3(elements[0].length(), elements[1].length(), elements[2].length());
+	return det_sign * Vector3(rows[0].length(), rows[1].length(), rows[2].length());
 }
 
 // get_scale works with get_rotation, use get_scale_abs if you need to enforce positive signature.
@@ -284,14 +284,14 @@ Vector3 Basis::get_scale() const {
 	//
 	// A proper way to get rid of this issue would be to store the scaling values (or at least their signs)
 	// as a part of Basis. However, if we go that path, we need to disable direct (write) access to the
-	// matrix elements.
+	// matrix rows.
 	//
 	// The rotation part of this decomposition is returned by get_rotation* functions.
 	real_t det_sign = Math::sign(determinant());
 	return det_sign * Vector3(
-							  Vector3(elements[0][0], elements[1][0], elements[2][0]).length(),
-							  Vector3(elements[0][1], elements[1][1], elements[2][1]).length(),
-							  Vector3(elements[0][2], elements[1][2], elements[2][2]).length());
+							  Vector3(rows[0][0], rows[1][0], rows[2][0]).length(),
+							  Vector3(rows[0][1], rows[1][1], rows[2][1]).length(),
+							  Vector3(rows[0][2], rows[1][2], rows[2][2]).length());
 }
 
 // Decomposes a Basis into a rotation-reflection matrix (an element of the group O(3)) and a positive scaling matrix as B = O.S.
@@ -431,27 +431,27 @@ Vector3 Basis::get_euler_xyz() const {
 	//       -cx*cz*sy+sx*sz  cz*sx+cx*sy*sz  cx*cy
 
 	Vector3 euler;
-	real_t sy = elements[0][2];
+	real_t sy = rows[0][2];
 	if (sy < (1.0 - CMP_EPSILON)) {
 		if (sy > -(1.0 - CMP_EPSILON)) {
 			// is this a pure Y rotation?
-			if (elements[1][0] == 0.0 && elements[0][1] == 0.0 && elements[1][2] == 0 && elements[2][1] == 0 && elements[1][1] == 1) {
+			if (rows[1][0] == 0.0 && rows[0][1] == 0.0 && rows[1][2] == 0 && rows[2][1] == 0 && rows[1][1] == 1) {
 				// return the simplest form (human friendlier in editor and scripts)
 				euler.x = 0;
-				euler.y = atan2(elements[0][2], elements[0][0]);
+				euler.y = atan2(rows[0][2], rows[0][0]);
 				euler.z = 0;
 			} else {
-				euler.x = Math::atan2(-elements[1][2], elements[2][2]);
+				euler.x = Math::atan2(-rows[1][2], rows[2][2]);
 				euler.y = Math::asin(sy);
-				euler.z = Math::atan2(-elements[0][1], elements[0][0]);
+				euler.z = Math::atan2(-rows[0][1], rows[0][0]);
 			}
 		} else {
-			euler.x = Math::atan2(elements[2][1], elements[1][1]);
+			euler.x = Math::atan2(rows[2][1], rows[1][1]);
 			euler.y = -Math_PI / 2.0;
 			euler.z = 0.0;
 		}
 	} else {
-		euler.x = Math::atan2(elements[2][1], elements[1][1]);
+		euler.x = Math::atan2(rows[2][1], rows[1][1]);
 		euler.y = Math_PI / 2.0;
 		euler.z = 0.0;
 	}
@@ -490,21 +490,21 @@ Vector3 Basis::get_euler_xzy() const {
 	//        cy*sx*sz          cz*sx           cx*cy+sx*sz*sy
 
 	Vector3 euler;
-	real_t sz = elements[0][1];
+	real_t sz = rows[0][1];
 	if (sz < (1.0 - CMP_EPSILON)) {
 		if (sz > -(1.0 - CMP_EPSILON)) {
-			euler.x = Math::atan2(elements[2][1], elements[1][1]);
-			euler.y = Math::atan2(elements[0][2], elements[0][0]);
+			euler.x = Math::atan2(rows[2][1], rows[1][1]);
+			euler.y = Math::atan2(rows[0][2], rows[0][0]);
 			euler.z = Math::asin(-sz);
 		} else {
 			// It's -1
-			euler.x = -Math::atan2(elements[1][2], elements[2][2]);
+			euler.x = -Math::atan2(rows[1][2], rows[2][2]);
 			euler.y = 0.0;
 			euler.z = Math_PI / 2.0;
 		}
 	} else {
 		// It's 1
-		euler.x = -Math::atan2(elements[1][2], elements[2][2]);
+		euler.x = -Math::atan2(rows[1][2], rows[2][2]);
 		euler.y = 0.0;
 		euler.z = -Math_PI / 2.0;
 	}
@@ -538,21 +538,21 @@ Vector3 Basis::get_euler_yzx() const {
 	//        -cz*sy            cy*sx+cx*sy*sz     cy*cx-sy*sz*sx
 
 	Vector3 euler;
-	real_t sz = elements[1][0];
+	real_t sz = rows[1][0];
 	if (sz < (1.0 - CMP_EPSILON)) {
 		if (sz > -(1.0 - CMP_EPSILON)) {
-			euler.x = Math::atan2(-elements[1][2], elements[1][1]);
-			euler.y = Math::atan2(-elements[2][0], elements[0][0]);
+			euler.x = Math::atan2(-rows[1][2], rows[1][1]);
+			euler.y = Math::atan2(-rows[2][0], rows[0][0]);
 			euler.z = Math::asin(sz);
 		} else {
 			// It's -1
-			euler.x = Math::atan2(elements[2][1], elements[2][2]);
+			euler.x = Math::atan2(rows[2][1], rows[2][2]);
 			euler.y = 0.0;
 			euler.z = -Math_PI / 2.0;
 		}
 	} else {
 		// It's 1
-		euler.x = Math::atan2(elements[2][1], elements[2][2]);
+		euler.x = Math::atan2(rows[2][1], rows[2][2]);
 		euler.y = 0.0;
 		euler.z = Math_PI / 2.0;
 	}
@@ -590,29 +590,29 @@ Vector3 Basis::get_euler_yxz() const {
 
 	Vector3 euler;
 
-	real_t m12 = elements[1][2];
+	real_t m12 = rows[1][2];
 
 	if (m12 < (1 - CMP_EPSILON)) {
 		if (m12 > -(1 - CMP_EPSILON)) {
 			// is this a pure X rotation?
-			if (elements[1][0] == 0 && elements[0][1] == 0 && elements[0][2] == 0 && elements[2][0] == 0 && elements[0][0] == 1) {
+			if (rows[1][0] == 0 && rows[0][1] == 0 && rows[0][2] == 0 && rows[2][0] == 0 && rows[0][0] == 1) {
 				// return the simplest form (human friendlier in editor and scripts)
-				euler.x = atan2(-m12, elements[1][1]);
+				euler.x = atan2(-m12, rows[1][1]);
 				euler.y = 0;
 				euler.z = 0;
 			} else {
 				euler.x = asin(-m12);
-				euler.y = atan2(elements[0][2], elements[2][2]);
-				euler.z = atan2(elements[1][0], elements[1][1]);
+				euler.y = atan2(rows[0][2], rows[2][2]);
+				euler.z = atan2(rows[1][0], rows[1][1]);
 			}
 		} else { // m12 == -1
 			euler.x = Math_PI * 0.5;
-			euler.y = atan2(elements[0][1], elements[0][0]);
+			euler.y = atan2(rows[0][1], rows[0][0]);
 			euler.z = 0;
 		}
 	} else { // m12 == 1
 		euler.x = -Math_PI * 0.5;
-		euler.y = -atan2(elements[0][1], elements[0][0]);
+		euler.y = -atan2(rows[0][1], rows[0][0]);
 		euler.z = 0;
 	}
 
@@ -650,22 +650,22 @@ Vector3 Basis::get_euler_zxy() const {
 	//        cy*sz+cz*sx*sy    cz*cx                 sz*sy-cz*cy*sx
 	//        -cx*sy            sx                    cx*cy
 	Vector3 euler;
-	real_t sx = elements[2][1];
+	real_t sx = rows[2][1];
 	if (sx < (1.0 - CMP_EPSILON)) {
 		if (sx > -(1.0 - CMP_EPSILON)) {
 			euler.x = Math::asin(sx);
-			euler.y = Math::atan2(-elements[2][0], elements[2][2]);
-			euler.z = Math::atan2(-elements[0][1], elements[1][1]);
+			euler.y = Math::atan2(-rows[2][0], rows[2][2]);
+			euler.z = Math::atan2(-rows[0][1], rows[1][1]);
 		} else {
 			// It's -1
 			euler.x = -Math_PI / 2.0;
-			euler.y = Math::atan2(elements[0][2], elements[0][0]);
+			euler.y = Math::atan2(rows[0][2], rows[0][0]);
 			euler.z = 0;
 		}
 	} else {
 		// It's 1
 		euler.x = Math_PI / 2.0;
-		euler.y = Math::atan2(elements[0][2], elements[0][0]);
+		euler.y = Math::atan2(rows[0][2], rows[0][0]);
 		euler.z = 0;
 	}
 	return euler;
@@ -697,23 +697,23 @@ Vector3 Basis::get_euler_zyx() const {
 	//        cy*sz             cz*cx+sz*sy*sx        cx*sz*sy-cz*sx
 	//        -sy               cy*sx                 cy*cx
 	Vector3 euler;
-	real_t sy = elements[2][0];
+	real_t sy = rows[2][0];
 	if (sy < (1.0 - CMP_EPSILON)) {
 		if (sy > -(1.0 - CMP_EPSILON)) {
-			euler.x = Math::atan2(elements[2][1], elements[2][2]);
+			euler.x = Math::atan2(rows[2][1], rows[2][2]);
 			euler.y = Math::asin(-sy);
-			euler.z = Math::atan2(elements[1][0], elements[0][0]);
+			euler.z = Math::atan2(rows[1][0], rows[0][0]);
 		} else {
 			// It's -1
 			euler.x = 0;
 			euler.y = Math_PI / 2.0;
-			euler.z = -Math::atan2(elements[0][1], elements[1][1]);
+			euler.z = -Math::atan2(rows[0][1], rows[1][1]);
 		}
 	} else {
 		// It's 1
 		euler.x = 0;
 		euler.y = -Math_PI / 2.0;
-		euler.z = -Math::atan2(elements[0][1], elements[1][1]);
+		euler.z = -Math::atan2(rows[0][1], rows[1][1]);
 	}
 	return euler;
 }
@@ -737,13 +737,13 @@ void Basis::set_euler_zyx(const Vector3 &p_euler) {
 }
 
 bool Basis::is_equal_approx(const Basis &p_basis) const {
-	return elements[0].is_equal_approx(p_basis.elements[0]) && elements[1].is_equal_approx(p_basis.elements[1]) && elements[2].is_equal_approx(p_basis.elements[2]);
+	return rows[0].is_equal_approx(p_basis.rows[0]) && rows[1].is_equal_approx(p_basis.rows[1]) && rows[2].is_equal_approx(p_basis.rows[2]);
 }
 
 bool Basis::operator==(const Basis &p_matrix) const {
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			if (elements[i][j] != p_matrix.elements[i][j]) {
+			if (rows[i][j] != p_matrix.rows[i][j]) {
 				return false;
 			}
 		}
@@ -764,7 +764,7 @@ Basis::operator String() const {
 				mtx = mtx + ", ";
 			}
 
-			mtx = mtx + String::num(elements[j][i]); // matrix is stored transposed for performance, so print it transposed
+			mtx = mtx + String::num(rows[j][i]); // matrix is stored transposed for performance, so print it transposed
 		}
 	}
 
@@ -777,7 +777,7 @@ Quaternion Basis::get_quaternion() const {
 #endif
 	/* Allow getting a quaternion from an unnormalized transform */
 	Basis m = *this;
-	real_t trace = m.elements[0][0] + m.elements[1][1] + m.elements[2][2];
+	real_t trace = m.rows[0][0] + m.rows[1][1] + m.rows[2][2];
 	real_t temp[4];
 
 	if (trace > 0.0) {
@@ -785,23 +785,23 @@ Quaternion Basis::get_quaternion() const {
 		temp[3] = (s * 0.5);
 		s = 0.5 / s;
 
-		temp[0] = ((m.elements[2][1] - m.elements[1][2]) * s);
-		temp[1] = ((m.elements[0][2] - m.elements[2][0]) * s);
-		temp[2] = ((m.elements[1][0] - m.elements[0][1]) * s);
+		temp[0] = ((m.rows[2][1] - m.rows[1][2]) * s);
+		temp[1] = ((m.rows[0][2] - m.rows[2][0]) * s);
+		temp[2] = ((m.rows[1][0] - m.rows[0][1]) * s);
 	} else {
-		int i = m.elements[0][0] < m.elements[1][1] ?
-						(m.elements[1][1] < m.elements[2][2] ? 2 : 1) :
-						  (m.elements[0][0] < m.elements[2][2] ? 2 : 0);
+		int i = m.rows[0][0] < m.rows[1][1] ?
+						(m.rows[1][1] < m.rows[2][2] ? 2 : 1) :
+						  (m.rows[0][0] < m.rows[2][2] ? 2 : 0);
 		int j = (i + 1) % 3;
 		int k = (i + 2) % 3;
 
-		real_t s = Math::sqrt(m.elements[i][i] - m.elements[j][j] - m.elements[k][k] + 1.0);
+		real_t s = Math::sqrt(m.rows[i][i] - m.rows[j][j] - m.rows[k][k] + 1.0);
 		temp[i] = s * 0.5;
 		s = 0.5 / s;
 
-		temp[3] = (m.elements[k][j] - m.elements[j][k]) * s;
-		temp[j] = (m.elements[j][i] + m.elements[i][j]) * s;
-		temp[k] = (m.elements[k][i] + m.elements[i][k]) * s;
+		temp[3] = (m.rows[k][j] - m.rows[j][k]) * s;
+		temp[j] = (m.rows[j][i] + m.rows[i][j]) * s;
+		temp[k] = (m.rows[k][i] + m.rows[i][k]) * s;
 	}
 
 	return Quaternion(temp[0], temp[1], temp[2], temp[3]);
@@ -878,11 +878,11 @@ void Basis::get_axis_angle(Vector3 &r_axis, real_t &r_angle) const {
 	real_t epsilon = 0.01; // margin to allow for rounding errors
 	real_t epsilon2 = 0.1; // margin to distinguish between 0 and 180 degrees
 
-	if ((Math::abs(elements[1][0] - elements[0][1]) < epsilon) && (Math::abs(elements[2][0] - elements[0][2]) < epsilon) && (Math::abs(elements[2][1] - elements[1][2]) < epsilon)) {
+	if ((Math::abs(rows[1][0] - rows[0][1]) < epsilon) && (Math::abs(rows[2][0] - rows[0][2]) < epsilon) && (Math::abs(rows[2][1] - rows[1][2]) < epsilon)) {
 		// singularity found
 		// first check for identity matrix which must have +1 for all terms
 		//  in leading diagonaland zero in other terms
-		if ((Math::abs(elements[1][0] + elements[0][1]) < epsilon2) && (Math::abs(elements[2][0] + elements[0][2]) < epsilon2) && (Math::abs(elements[2][1] + elements[1][2]) < epsilon2) && (Math::abs(elements[0][0] + elements[1][1] + elements[2][2] - 3) < epsilon2)) {
+		if ((Math::abs(rows[1][0] + rows[0][1]) < epsilon2) && (Math::abs(rows[2][0] + rows[0][2]) < epsilon2) && (Math::abs(rows[2][1] + rows[1][2]) < epsilon2) && (Math::abs(rows[0][0] + rows[1][1] + rows[2][2] - 3) < epsilon2)) {
 			// this singularity is identity matrix so angle = 0
 			r_axis = Vector3(0, 1, 0);
 			r_angle = 0;
@@ -890,13 +890,13 @@ void Basis::get_axis_angle(Vector3 &r_axis, real_t &r_angle) const {
 		}
 		// otherwise this singularity is angle = 180
 		angle = Math_PI;
-		real_t xx = (elements[0][0] + 1) / 2;
-		real_t yy = (elements[1][1] + 1) / 2;
-		real_t zz = (elements[2][2] + 1) / 2;
-		real_t xy = (elements[1][0] + elements[0][1]) / 4;
-		real_t xz = (elements[2][0] + elements[0][2]) / 4;
-		real_t yz = (elements[2][1] + elements[1][2]) / 4;
-		if ((xx > yy) && (xx > zz)) { // elements[0][0] is the largest diagonal term
+		real_t xx = (rows[0][0] + 1) / 2;
+		real_t yy = (rows[1][1] + 1) / 2;
+		real_t zz = (rows[2][2] + 1) / 2;
+		real_t xy = (rows[1][0] + rows[0][1]) / 4;
+		real_t xz = (rows[2][0] + rows[0][2]) / 4;
+		real_t yz = (rows[2][1] + rows[1][2]) / 4;
+		if ((xx > yy) && (xx > zz)) { // rows[0][0] is the largest diagonal term
 			if (xx < epsilon) {
 				x = 0;
 				y = Math_SQRT12;
@@ -906,7 +906,7 @@ void Basis::get_axis_angle(Vector3 &r_axis, real_t &r_angle) const {
 				y = xy / x;
 				z = xz / x;
 			}
-		} else if (yy > zz) { // elements[1][1] is the largest diagonal term
+		} else if (yy > zz) { // rows[1][1] is the largest diagonal term
 			if (yy < epsilon) {
 				x = Math_SQRT12;
 				y = 0;
@@ -916,7 +916,7 @@ void Basis::get_axis_angle(Vector3 &r_axis, real_t &r_angle) const {
 				x = xy / y;
 				z = yz / y;
 			}
-		} else { // elements[2][2] is the largest diagonal term so base result on this
+		} else { // rows[2][2] is the largest diagonal term so base result on this
 			if (zz < epsilon) {
 				x = Math_SQRT12;
 				y = Math_SQRT12;
@@ -932,15 +932,15 @@ void Basis::get_axis_angle(Vector3 &r_axis, real_t &r_angle) const {
 		return;
 	}
 	// as we have reached here there are no singularities so we can handle normally
-	real_t s = Math::sqrt((elements[1][2] - elements[2][1]) * (elements[1][2] - elements[2][1]) + (elements[2][0] - elements[0][2]) * (elements[2][0] - elements[0][2]) + (elements[0][1] - elements[1][0]) * (elements[0][1] - elements[1][0])); // s=|axis||sin(angle)|, used to normalise
+	real_t s = Math::sqrt((rows[1][2] - rows[2][1]) * (rows[1][2] - rows[2][1]) + (rows[2][0] - rows[0][2]) * (rows[2][0] - rows[0][2]) + (rows[0][1] - rows[1][0]) * (rows[0][1] - rows[1][0])); // s=|axis||sin(angle)|, used to normalise
 
-	angle = Math::acos((elements[0][0] + elements[1][1] + elements[2][2] - 1) / 2);
+	angle = Math::acos((rows[0][0] + rows[1][1] + rows[2][2] - 1) / 2);
 	if (angle < 0) {
 		s = -s;
 	}
-	x = (elements[2][1] - elements[1][2]) / s;
-	y = (elements[0][2] - elements[2][0]) / s;
-	z = (elements[1][0] - elements[0][1]) / s;
+	x = (rows[2][1] - rows[1][2]) / s;
+	y = (rows[0][2] - rows[2][0]) / s;
+	z = (rows[1][0] - rows[0][1]) / s;
 
 	r_axis = Vector3(x, y, z);
 	r_angle = angle;
@@ -965,27 +965,27 @@ void Basis::set_axis_angle(const Vector3 &p_axis, real_t p_phi) {
 #endif
 	Vector3 axis_sq(p_axis.x * p_axis.x, p_axis.y * p_axis.y, p_axis.z * p_axis.z);
 	real_t cosine = Math::cos(p_phi);
-	elements[0][0] = axis_sq.x + cosine * (1.0 - axis_sq.x);
-	elements[1][1] = axis_sq.y + cosine * (1.0 - axis_sq.y);
-	elements[2][2] = axis_sq.z + cosine * (1.0 - axis_sq.z);
+	rows[0][0] = axis_sq.x + cosine * (1.0 - axis_sq.x);
+	rows[1][1] = axis_sq.y + cosine * (1.0 - axis_sq.y);
+	rows[2][2] = axis_sq.z + cosine * (1.0 - axis_sq.z);
 
 	real_t sine = Math::sin(p_phi);
 	real_t t = 1 - cosine;
 
 	real_t xyzt = p_axis.x * p_axis.y * t;
 	real_t zyxs = p_axis.z * sine;
-	elements[0][1] = xyzt - zyxs;
-	elements[1][0] = xyzt + zyxs;
+	rows[0][1] = xyzt - zyxs;
+	rows[1][0] = xyzt + zyxs;
 
 	xyzt = p_axis.x * p_axis.z * t;
 	zyxs = p_axis.y * sine;
-	elements[0][2] = xyzt + zyxs;
-	elements[2][0] = xyzt - zyxs;
+	rows[0][2] = xyzt + zyxs;
+	rows[2][0] = xyzt - zyxs;
 
 	xyzt = p_axis.y * p_axis.z * t;
 	zyxs = p_axis.x * sine;
-	elements[1][2] = xyzt - zyxs;
-	elements[2][1] = xyzt + zyxs;
+	rows[1][2] = xyzt - zyxs;
+	rows[2][1] = xyzt + zyxs;
 }
 
 void Basis::set_axis_angle_scale(const Vector3 &p_axis, real_t p_phi, const Vector3 &p_scale) {
@@ -1004,17 +1004,17 @@ void Basis::set_quaternion_scale(const Quaternion &p_quat, const Vector3 &p_scal
 }
 
 void Basis::set_diagonal(const Vector3 &p_diag) {
-	elements[0][0] = p_diag.x;
-	elements[0][1] = 0;
-	elements[0][2] = 0;
+	rows[0][0] = p_diag.x;
+	rows[0][1] = 0;
+	rows[0][2] = 0;
 
-	elements[1][0] = 0;
-	elements[1][1] = p_diag.y;
-	elements[1][2] = 0;
+	rows[1][0] = 0;
+	rows[1][1] = p_diag.y;
+	rows[1][2] = 0;
 
-	elements[2][0] = 0;
-	elements[2][1] = 0;
-	elements[2][2] = p_diag.z;
+	rows[2][0] = 0;
+	rows[2][1] = 0;
+	rows[2][2] = p_diag.z;
 }
 
 Basis Basis::slerp(const Basis &p_to, const real_t &p_weight) const {
@@ -1023,9 +1023,9 @@ Basis Basis::slerp(const Basis &p_to, const real_t &p_weight) const {
 	Quaternion to(p_to);
 
 	Basis b(from.slerp(to, p_weight));
-	b.elements[0] *= Math::lerp(elements[0].length(), p_to.elements[0].length(), p_weight);
-	b.elements[1] *= Math::lerp(elements[1].length(), p_to.elements[1].length(), p_weight);
-	b.elements[2] *= Math::lerp(elements[2].length(), p_to.elements[2].length(), p_weight);
+	b.rows[0] *= Math::lerp(rows[0].length(), p_to.rows[0].length(), p_weight);
+	b.rows[1] *= Math::lerp(rows[1].length(), p_to.rows[1].length(), p_weight);
+	b.rows[2] *= Math::lerp(rows[2].length(), p_to.rows[2].length(), p_weight);
 
 	return b;
 }
@@ -1051,15 +1051,15 @@ void Basis::rotate_sh(real_t *p_values) {
 
 	real_t src[9] = { p_values[0], p_values[1], p_values[2], p_values[3], p_values[4], p_values[5], p_values[6], p_values[7], p_values[8] };
 
-	real_t m00 = elements[0][0];
-	real_t m01 = elements[0][1];
-	real_t m02 = elements[0][2];
-	real_t m10 = elements[1][0];
-	real_t m11 = elements[1][1];
-	real_t m12 = elements[1][2];
-	real_t m20 = elements[2][0];
-	real_t m21 = elements[2][1];
-	real_t m22 = elements[2][2];
+	real_t m00 = rows[0][0];
+	real_t m01 = rows[0][1];
+	real_t m02 = rows[0][2];
+	real_t m10 = rows[1][0];
+	real_t m11 = rows[1][1];
+	real_t m12 = rows[1][2];
+	real_t m20 = rows[2][0];
+	real_t m21 = rows[2][1];
+	real_t m22 = rows[2][2];
 
 	p_values[0] = src[0];
 	p_values[1] = m11 * src[1] - m12 * src[2] + m10 * src[3];
