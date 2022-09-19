@@ -63,8 +63,28 @@ Vector4 Vector4::sign() const {
 	return Vector4(Math::sign(x), Math::sign(y), Math::sign(z), Math::sign(w));
 }
 
+Vector4 Vector4::floor() const {
+	return Vector4(Math::floor(x), Math::floor(y), Math::floor(z), Math::floor(w));
+}
+
+Vector4 Vector4::ceil() const {
+	return Vector4(Math::ceil(x), Math::ceil(y), Math::ceil(z), Math::ceil(w));
+}
+
+Vector4 Vector4::round() const {
+	return Vector4(Math::round(x), Math::round(y), Math::round(z), Math::round(w));
+}
+
 Vector4 Vector4::inverse() const {
 	return Vector4(1.0f / x, 1.0f / y, 1.0f / z, 1.0f / w);
+}
+
+Vector4 Vector4::lerp(const Vector4 &p_to, const real_t p_weight) const {
+	return Vector4(
+			x + (p_weight * (p_to.x - x)),
+			y + (p_weight * (p_to.y - y)),
+			z + (p_weight * (p_to.z - z)),
+			w + (p_weight * (p_to.w - w)));
 }
 
 Vector4::Axis Vector4::min_axis_index() const {
