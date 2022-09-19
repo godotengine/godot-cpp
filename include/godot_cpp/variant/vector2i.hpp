@@ -45,6 +45,8 @@ class Vector2i {
 	friend class Variant;
 
 public:
+	static const int AXIS_COUNT = 2;
+
 	enum Axis {
 		AXIS_X,
 		AXIS_Y,
@@ -122,7 +124,7 @@ public:
 
 	real_t aspect() const { return width / (real_t)height; }
 	Vector2i sign() const { return Vector2i(SIGN(x), SIGN(y)); }
-	Vector2i abs() const { return Vector2i(ABS(x), ABS(y)); }
+	Vector2i abs() const { return Vector2i(Math::abs(x), Math::abs(y)); }
 	Vector2i clamp(const Vector2i &p_min, const Vector2i &p_max) const;
 
 	operator String() const;
