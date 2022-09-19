@@ -131,8 +131,8 @@ bool Basis::is_symmetric() const {
 #endif
 
 Basis Basis::diagonalize() {
-//NOTE: only implemented for symmetric matrices
-//with the Jacobi iterative method method
+// NOTE: only implemented for symmetric matrices
+// with the Jacobi iterative method method
 #ifdef MATH_CHECKS
 	ERR_FAIL_COND_V(!is_symmetric(), Basis());
 #endif
@@ -368,7 +368,7 @@ Vector3 Basis::get_rotation_euler() const {
 	return m.get_euler();
 }
 
-Quaternion Basis::get_rotation_quat() const {
+Quaternion Basis::get_rotation_quaternion() const {
 	// Assumes that the matrix can be decomposed into a proper rotation and scaling matrix as M = R.S,
 	// and returns the Euler angles corresponding to the rotation part, complementing get_scale().
 	// See the comment in get_scale() for further information.
@@ -379,7 +379,7 @@ Quaternion Basis::get_rotation_quat() const {
 		m.scale(Vector3(-1, -1, -1));
 	}
 
-	return m.get_quat();
+	return m.get_quaternion();
 }
 
 void Basis::get_rotation_axis_angle(Vector3 &p_axis, real_t &p_angle) const {
@@ -477,7 +477,7 @@ void Basis::set_euler_xyz(const Vector3 &p_euler) {
 	s = Math::sin(p_euler.z);
 	Basis zmat(c, -s, 0.0, s, c, 0.0, 0.0, 0.0, 1.0);
 
-	//optimizer will optimize away all this anyway
+	// optimizer will optimize away all this anyway
 	*this = xmat * (ymat * zmat);
 }
 
@@ -638,7 +638,7 @@ void Basis::set_euler_yxz(const Vector3 &p_euler) {
 	s = Math::sin(p_euler.z);
 	Basis zmat(c, -s, 0.0, s, c, 0.0, 0.0, 0.0, 1.0);
 
-	//optimizer will optimize away all this anyway
+	// optimizer will optimize away all this anyway
 	*this = ymat * xmat * zmat;
 }
 
@@ -764,14 +764,14 @@ Basis::operator String() const {
 				mtx = mtx + ", ";
 			}
 
-			mtx = mtx + String::num(elements[j][i]); //matrix is stored transposed for performance, so print it transposed
+			mtx = mtx + String::num(elements[j][i]); // matrix is stored transposed for performance, so print it transposed
 		}
 	}
 
 	return mtx;
 }
 
-Quaternion Basis::get_quat() const {
+Quaternion Basis::get_quaternion() const {
 #ifdef MATH_CHECKS
 	ERR_FAIL_COND_V(!is_rotation(), Quaternion());
 #endif
@@ -790,7 +790,7 @@ Quaternion Basis::get_quat() const {
 		temp[2] = ((m.elements[1][0] - m.elements[0][1]) * s);
 	} else {
 		int i = m.elements[0][0] < m.elements[1][1] ?
-						  (m.elements[1][1] < m.elements[2][2] ? 2 : 1) :
+						(m.elements[1][1] < m.elements[2][2] ? 2 : 1) :
 						  (m.elements[0][0] < m.elements[2][2] ? 2 : 0);
 		int j = (i + 1) % 3;
 		int k = (i + 2) % 3;
@@ -835,7 +835,7 @@ static const Basis _ortho_bases[24] = {
 };
 
 int Basis::get_orthogonal_index() const {
-	//could be sped up if i come up with a way
+	// could be sped up if i come up with a way
 	Basis orth = *this;
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -862,7 +862,7 @@ int Basis::get_orthogonal_index() const {
 }
 
 void Basis::set_orthogonal_index(int p_index) {
-	//there only exist 24 orthogonal bases in r3
+	// there only exist 24 orthogonal bases in r3
 	ERR_FAIL_INDEX(p_index, 24);
 
 	*this = _ortho_bases[p_index];
@@ -946,7 +946,7 @@ void Basis::get_axis_angle(Vector3 &r_axis, real_t &r_angle) const {
 	r_angle = angle;
 }
 
-void Basis::set_quat(const Quaternion &p_quat) {
+void Basis::set_quaternion(const Quaternion &p_quat) {
 	real_t d = p_quat.length_squared();
 	real_t s = 2.0 / d;
 	real_t xs = p_quat.x * s, ys = p_quat.y * s, zs = p_quat.z * s;
@@ -998,7 +998,7 @@ void Basis::set_euler_scale(const Vector3 &p_euler, const Vector3 &p_scale) {
 	rotate(p_euler);
 }
 
-void Basis::set_quat_scale(const Quaternion &p_quat, const Vector3 &p_scale) {
+void Basis::set_quaternion_scale(const Quaternion &p_quat, const Vector3 &p_scale) {
 	set_diagonal(p_scale);
 	rotate(p_quat);
 }
@@ -1018,7 +1018,7 @@ void Basis::set_diagonal(const Vector3 &p_diag) {
 }
 
 Basis Basis::slerp(const Basis &p_to, const real_t &p_weight) const {
-	//consider scale
+	// consider scale
 	Quaternion from(*this);
 	Quaternion to(p_to);
 
