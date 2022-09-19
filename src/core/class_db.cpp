@@ -277,20 +277,29 @@ void ClassDB::bind_integer_constant(const char *p_class_name, const char *p_enum
 }
 
 GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, const char *p_name) {
+	// This is called by Godot the first time it calls a virtual function, and it caches the result, per object instance.
+	// Because of this, it can happen from different threads at once.
+	// It should be ok not using any mutex as long as we only READ data.
+
 	const char *class_name = (const char *)p_userdata;
 
 	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(class_name);
 	ERR_FAIL_COND_V_MSG(type_it == classes.end(), nullptr, "Class doesn't exist.");
 
-	ClassInfo &type = type_it->second;
+	const ClassInfo *type = &type_it->second;
 
-	std::unordered_map<std::string, GDNativeExtensionClassCallVirtual>::iterator method_it = type.virtual_methods.find(p_name);
+	// Find method in current class, or any of its parent classes (Godot classes not included)
+	while (type != nullptr) {
+		std::unordered_map<std::string, GDNativeExtensionClassCallVirtual>::const_iterator method_it = type->virtual_methods.find(p_name);
 
-	if (method_it == type.virtual_methods.end()) {
-		return nullptr;
+		if (method_it != type->virtual_methods.end()) {
+			return method_it->second;
+		}
+
+		type = type->parent_ptr;
 	}
 
-	return method_it->second;
+	return nullptr;
 }
 
 void ClassDB::bind_virtual_method(const char *p_class, const char *p_method, GDNativeExtensionClassCallVirtual p_call) {

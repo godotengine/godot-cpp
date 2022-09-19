@@ -1071,17 +1071,22 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
             result.append(method_signature + ";")
 
     result.append("protected:")
-    result.append("\ttemplate <class T>")
+    # T is the custom class we want to register (from which the call initiates, going up the inheritance chain),
+    # B is its base class (can be a custom class too, that's why we pass it).
+    result.append("\ttemplate <class T, class B>")
     result.append("\tstatic void register_virtuals() {")
     if class_name != "Object":
-        result.append(f"\t\t{inherits}::register_virtuals<T>();")
+        result.append(f"\t\t{inherits}::register_virtuals<T, B>();")
         if "methods" in class_api:
             for method in class_api["methods"]:
                 if not method["is_virtual"]:
                     continue
                 method_name = escape_identifier(method["name"])
                 result.append(
-                    f"\t\tif constexpr (!std::is_same_v<decltype(&{class_name}::{method_name}),decltype(&T::{method_name})>) {{"
+                    # If the method is different from the base class, it means T overrides it, so it needs to be bound.
+                    # Note that with an `if constexpr`, the code inside the `if` will not even be compiled if the
+                    # condition returns false (in such cases it can't compile due to ambiguity).
+                    f"\t\tif constexpr (!std::is_same_v<decltype(&B::{method_name}),decltype(&T::{method_name})>) {{"
                 )
                 result.append(f"\t\t\tBIND_VIRTUAL_METHOD(T, {method_name});")
                 result.append("\t\t}")
