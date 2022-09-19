@@ -144,6 +144,18 @@ T *Object::cast_to(Object *p_object) {
 	return reinterpret_cast<T *>(internal::gdn_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
 }
 
+template <class T>
+const T *Object::cast_to(const Object *p_object) {
+	if (p_object == nullptr) {
+		return nullptr;
+	}
+	GDNativeObjectPtr casted = internal::gdn_interface->object_cast_to(p_object->_owner, internal::gdn_interface->classdb_get_class_tag(T::get_class_static()));
+	if (casted == nullptr) {
+		return nullptr;
+	}
+	return reinterpret_cast<const T *>(internal::gdn_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
+}
+
 } // namespace godot
 
 #endif // ! GODOT_OBJECT_HPP
