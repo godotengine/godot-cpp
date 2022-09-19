@@ -90,10 +90,10 @@ jobs:
           cd test
           scons platform=${{ matrix.platform }} target=debug ${{ matrix.flags }} build_library=no
 
-      - name: Build test and godot-cpp (release)
+      - name: Build test and godot-cpp (release, with debug symbols)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} target=release ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} target=release debug_symbols=yes ${{ matrix.flags }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3

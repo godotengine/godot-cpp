@@ -102,6 +102,10 @@ architecture_aliases = {
 }
 opts.Add(EnumVariable("arch", "CPU architecture", "", architecture_array, architecture_aliases))
 
+# Targets flags tool (optimizations, debug symbols)
+target_tool = Tool("targets", toolpath=["tools"])
+target_tool.options(opts)
+
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
 
@@ -135,6 +139,7 @@ if tool is None or not tool.exists(env):
     raise ValueError("Required toolchain not found for platform " + env["platform"])
 
 tool.generate(env)
+target_tool.generate(env)
 
 # Detect and print a warning listing unknown SCons variables to ease troubleshooting.
 unknown = opts.UnknownVariables()
