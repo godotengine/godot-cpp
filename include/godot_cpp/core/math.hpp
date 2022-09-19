@@ -537,6 +537,27 @@ inline bool is_zero_approx(double s) {
 	return abs(s) < CMP_EPSILON;
 }
 
+inline float absf(float g) {
+	union {
+		float f;
+		uint32_t i;
+	} u;
+
+	u.f = g;
+	u.i &= 2147483647u;
+	return u.f;
+}
+
+inline double absd(double g) {
+	union {
+		double d;
+		uint64_t i;
+	} u;
+	u.d = g;
+	u.i &= (uint64_t)9223372036854775807ull;
+	return u.d;
+}
+
 inline double smoothstep(double p_from, double p_to, double p_weight) {
 	if (is_equal_approx(static_cast<real_t>(p_from), static_cast<real_t>(p_to))) {
 		return p_from;
