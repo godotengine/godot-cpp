@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_MATH_H
-#define GODOT_MATH_H
+#ifndef GODOT_MATH_HPP
+#define GODOT_MATH_HPP
 
 #include <godot_cpp/core/defs.hpp>
 
@@ -113,7 +113,7 @@ inline float fposmod(float p_x, float p_y) {
 	if ((value < 0 && p_y > 0) || (value > 0 && p_y < 0)) {
 		value += p_y;
 	}
-	value += 0.0;
+	value += 0.0f;
 	return value;
 }
 
@@ -122,7 +122,7 @@ inline float fposmodp(float p_x, float p_y) {
 	if (value < 0) {
 		value += p_y;
 	}
-	value += 0.0;
+	value += 0.0f;
 	return value;
 }
 inline double fposmodp(double p_x, double p_y) {
@@ -131,6 +131,14 @@ inline double fposmodp(double p_x, double p_y) {
 		value += p_y;
 	}
 	value += 0.0;
+	return value;
+}
+
+inline int64_t posmod(int64_t p_x, int64_t p_y) {
+	int64_t value = p_x % p_y;
+	if ((value < 0 && p_y > 0) || (value > 0 && p_y < 0)) {
+		value += p_y;
+	}
 	return value;
 }
 
@@ -280,17 +288,126 @@ inline float lerp_angle(float p_from, float p_to, float p_weight) {
 
 inline double cubic_interpolate(double p_from, double p_to, double p_pre, double p_post, double p_weight) {
 	return 0.5 *
-		   ((p_from * 2.0) +
-				   (-p_pre + p_to) * p_weight +
-				   (2.0 * p_pre - 5.0 * p_from + 4.0 * p_to - p_post) * (p_weight * p_weight) +
-				   (-p_pre + 3.0 * p_from - 3.0 * p_to + p_post) * (p_weight * p_weight * p_weight));
+			((p_from * 2.0) +
+					(-p_pre + p_to) * p_weight +
+					(2.0 * p_pre - 5.0 * p_from + 4.0 * p_to - p_post) * (p_weight * p_weight) +
+					(-p_pre + 3.0 * p_from - 3.0 * p_to + p_post) * (p_weight * p_weight * p_weight));
 }
+
 inline float cubic_interpolate(float p_from, float p_to, float p_pre, float p_post, float p_weight) {
 	return 0.5f *
-		   ((p_from * 2.0f) +
-				   (-p_pre + p_to) * p_weight +
-				   (2.0f * p_pre - 5.0f * p_from + 4.0f * p_to - p_post) * (p_weight * p_weight) +
-				   (-p_pre + 3.0f * p_from - 3.0f * p_to + p_post) * (p_weight * p_weight * p_weight));
+			((p_from * 2.0f) +
+					(-p_pre + p_to) * p_weight +
+					(2.0f * p_pre - 5.0f * p_from + 4.0f * p_to - p_post) * (p_weight * p_weight) +
+					(-p_pre + 3.0f * p_from - 3.0f * p_to + p_post) * (p_weight * p_weight * p_weight));
+}
+
+inline double cubic_interpolate_angle(double p_from, double p_to, double p_pre, double p_post, double p_weight) {
+	double from_rot = fmod(p_from, Math_TAU);
+
+	double pre_diff = fmod(p_pre - from_rot, Math_TAU);
+	double pre_rot = from_rot + fmod(2.0 * pre_diff, Math_TAU) - pre_diff;
+
+	double to_diff = fmod(p_to - from_rot, Math_TAU);
+	double to_rot = from_rot + fmod(2.0 * to_diff, Math_TAU) - to_diff;
+
+	double post_diff = fmod(p_post - to_rot, Math_TAU);
+	double post_rot = to_rot + fmod(2.0 * post_diff, Math_TAU) - post_diff;
+
+	return cubic_interpolate(from_rot, to_rot, pre_rot, post_rot, p_weight);
+}
+
+inline float cubic_interpolate_angle(float p_from, float p_to, float p_pre, float p_post, float p_weight) {
+	float from_rot = fmod(p_from, (float)Math_TAU);
+
+	float pre_diff = fmod(p_pre - from_rot, (float)Math_TAU);
+	float pre_rot = from_rot + fmod(2.0f * pre_diff, (float)Math_TAU) - pre_diff;
+
+	float to_diff = fmod(p_to - from_rot, (float)Math_TAU);
+	float to_rot = from_rot + fmod(2.0f * to_diff, (float)Math_TAU) - to_diff;
+
+	float post_diff = fmod(p_post - to_rot, (float)Math_TAU);
+	float post_rot = to_rot + fmod(2.0f * post_diff, (float)Math_TAU) - post_diff;
+
+	return cubic_interpolate(from_rot, to_rot, pre_rot, post_rot, p_weight);
+}
+
+inline double cubic_interpolate_in_time(double p_from, double p_to, double p_pre, double p_post, double p_weight,
+		double p_to_t, double p_pre_t, double p_post_t) {
+	/* Barry-Goldman method */
+	double t = Math::lerp(0.0, p_to_t, p_weight);
+	double a1 = Math::lerp(p_pre, p_from, p_pre_t == 0 ? 0.0 : (t - p_pre_t) / -p_pre_t);
+	double a2 = Math::lerp(p_from, p_to, p_to_t == 0 ? 0.5 : t / p_to_t);
+	double a3 = Math::lerp(p_to, p_post, p_post_t - p_to_t == 0 ? 1.0 : (t - p_to_t) / (p_post_t - p_to_t));
+	double b1 = Math::lerp(a1, a2, p_to_t - p_pre_t == 0 ? 0.0 : (t - p_pre_t) / (p_to_t - p_pre_t));
+	double b2 = Math::lerp(a2, a3, p_post_t == 0 ? 1.0 : t / p_post_t);
+	return Math::lerp(b1, b2, p_to_t == 0 ? 0.5 : t / p_to_t);
+}
+
+inline float cubic_interpolate_in_time(float p_from, float p_to, float p_pre, float p_post, float p_weight,
+		float p_to_t, float p_pre_t, float p_post_t) {
+	/* Barry-Goldman method */
+	float t = Math::lerp(0.0f, p_to_t, p_weight);
+	float a1 = Math::lerp(p_pre, p_from, p_pre_t == 0 ? 0.0f : (t - p_pre_t) / -p_pre_t);
+	float a2 = Math::lerp(p_from, p_to, p_to_t == 0 ? 0.5f : t / p_to_t);
+	float a3 = Math::lerp(p_to, p_post, p_post_t - p_to_t == 0 ? 1.0f : (t - p_to_t) / (p_post_t - p_to_t));
+	float b1 = Math::lerp(a1, a2, p_to_t - p_pre_t == 0 ? 0.0f : (t - p_pre_t) / (p_to_t - p_pre_t));
+	float b2 = Math::lerp(a2, a3, p_post_t == 0 ? 1.0f : t / p_post_t);
+	return Math::lerp(b1, b2, p_to_t == 0 ? 0.5f : t / p_to_t);
+}
+
+inline double cubic_interpolate_angle_in_time(double p_from, double p_to, double p_pre, double p_post, double p_weight,
+		double p_to_t, double p_pre_t, double p_post_t) {
+	double from_rot = fmod(p_from, Math_TAU);
+
+	double pre_diff = fmod(p_pre - from_rot, Math_TAU);
+	double pre_rot = from_rot + fmod(2.0 * pre_diff, Math_TAU) - pre_diff;
+
+	double to_diff = fmod(p_to - from_rot, Math_TAU);
+	double to_rot = from_rot + fmod(2.0 * to_diff, Math_TAU) - to_diff;
+
+	double post_diff = fmod(p_post - to_rot, Math_TAU);
+	double post_rot = to_rot + fmod(2.0 * post_diff, Math_TAU) - post_diff;
+
+	return cubic_interpolate_in_time(from_rot, to_rot, pre_rot, post_rot, p_weight, p_to_t, p_pre_t, p_post_t);
+}
+
+inline float cubic_interpolate_angle_in_time(float p_from, float p_to, float p_pre, float p_post, float p_weight,
+		float p_to_t, float p_pre_t, float p_post_t) {
+	float from_rot = fmod(p_from, (float)Math_TAU);
+
+	float pre_diff = fmod(p_pre - from_rot, (float)Math_TAU);
+	float pre_rot = from_rot + fmod(2.0f * pre_diff, (float)Math_TAU) - pre_diff;
+
+	float to_diff = fmod(p_to - from_rot, (float)Math_TAU);
+	float to_rot = from_rot + fmod(2.0f * to_diff, (float)Math_TAU) - to_diff;
+
+	float post_diff = fmod(p_post - to_rot, (float)Math_TAU);
+	float post_rot = to_rot + fmod(2.0f * post_diff, (float)Math_TAU) - post_diff;
+
+	return cubic_interpolate_in_time(from_rot, to_rot, pre_rot, post_rot, p_weight, p_to_t, p_pre_t, p_post_t);
+}
+
+inline double bezier_interpolate(double p_start, double p_control_1, double p_control_2, double p_end, double p_t) {
+	/* Formula from Wikipedia article on Bezier curves. */
+	double omt = (1.0 - p_t);
+	double omt2 = omt * omt;
+	double omt3 = omt2 * omt;
+	double t2 = p_t * p_t;
+	double t3 = t2 * p_t;
+
+	return p_start * omt3 + p_control_1 * omt2 * p_t * 3.0 + p_control_2 * omt * t2 * 3.0 + p_end * t3;
+}
+
+inline float bezier_interpolate(float p_start, float p_control_1, float p_control_2, float p_end, float p_t) {
+	/* Formula from Wikipedia article on Bezier curves. */
+	float omt = (1.0f - p_t);
+	float omt2 = omt * omt;
+	float omt3 = omt2 * omt;
+	float t2 = p_t * p_t;
+	float t3 = t2 * p_t;
+
+	return p_start * omt3 + p_control_1 * omt2 * p_t * 3.0f + p_control_2 * omt * t2 * 3.0f + p_end * t3;
 }
 
 template <typename T>
@@ -345,10 +462,10 @@ inline float inverse_lerp(float p_from, float p_to, float p_value) {
 	return (p_value - p_from) / (p_to - p_from);
 }
 
-inline double range_lerp(double p_value, double p_istart, double p_istop, double p_ostart, double p_ostop) {
+inline double remap(double p_value, double p_istart, double p_istop, double p_ostart, double p_ostop) {
 	return Math::lerp(p_ostart, p_ostop, Math::inverse_lerp(p_istart, p_istop, p_value));
 }
-inline float range_lerp(float p_value, float p_istart, float p_istop, float p_ostart, float p_ostop) {
+inline float remap(float p_value, float p_istart, float p_istop, float p_ostart, float p_ostop) {
 	return Math::lerp(p_ostart, p_ostop, Math::inverse_lerp(p_istart, p_istop, p_value));
 }
 
@@ -368,30 +485,56 @@ inline bool is_inf(double p_val) {
 	return std::isinf(p_val);
 }
 
-inline bool is_equal_approx(real_t a, real_t b) {
+inline bool is_equal_approx(float a, float b) {
 	// Check for exact equality first, required to handle "infinity" values.
 	if (a == b) {
 		return true;
 	}
 	// Then check for approximate equality.
-	real_t tolerance = CMP_EPSILON * std::abs(a);
+	float tolerance = (float)CMP_EPSILON * abs(a);
+	if (tolerance < (float)CMP_EPSILON) {
+		tolerance = (float)CMP_EPSILON;
+	}
+	return abs(a - b) < tolerance;
+}
+
+inline bool is_equal_approx(float a, float b, float tolerance) {
+	// Check for exact equality first, required to handle "infinity" values.
+	if (a == b) {
+		return true;
+	}
+	// Then check for approximate equality.
+	return abs(a - b) < tolerance;
+}
+
+inline bool is_zero_approx(float s) {
+	return abs(s) < (float)CMP_EPSILON;
+}
+
+inline bool is_equal_approx(double a, double b) {
+	// Check for exact equality first, required to handle "infinity" values.
+	if (a == b) {
+		return true;
+	}
+	// Then check for approximate equality.
+	double tolerance = CMP_EPSILON * abs(a);
 	if (tolerance < CMP_EPSILON) {
 		tolerance = CMP_EPSILON;
 	}
-	return std::abs(a - b) < tolerance;
+	return abs(a - b) < tolerance;
 }
 
-inline bool is_equal_approx(real_t a, real_t b, real_t tolerance) {
+inline bool is_equal_approx(double a, double b, double tolerance) {
 	// Check for exact equality first, required to handle "infinity" values.
 	if (a == b) {
 		return true;
 	}
 	// Then check for approximate equality.
-	return std::abs(a - b) < tolerance;
+	return abs(a - b) < tolerance;
 }
 
-inline bool is_zero_approx(real_t s) {
-	return std::abs(s) < CMP_EPSILON;
+inline bool is_zero_approx(double s) {
+	return abs(s) < CMP_EPSILON;
 }
 
 inline double smoothstep(double p_from, double p_to, double p_weight) {
@@ -448,17 +591,20 @@ inline float wrapf(real_t value, real_t min, real_t max) {
 	return is_zero_approx(range) ? min : value - (range * floor((value - min) / range));
 }
 
-inline float stepify(float p_value, float p_step) {
-	if (p_step != 0) {
-		p_value = floor(p_value / p_step + 0.5f) * p_step;
-	}
-	return p_value;
+inline float fract(float value) {
+	return value - floor(value);
 }
-inline double stepify(double p_value, double p_step) {
-	if (p_step != 0) {
-		p_value = floor(p_value / p_step + 0.5) * p_step;
-	}
-	return p_value;
+
+inline double fract(double value) {
+	return value - floor(value);
+}
+
+inline float pingpong(float value, float length) {
+	return (length != 0.0f) ? abs(fract((value - length) / (length * 2.0f)) * length * 2.0f - length) : 0.0f;
+}
+
+inline double pingpong(double value, double length) {
+	return (length != 0.0) ? abs(fract((value - length) / (length * 2.0)) * length * 2.0 - length) : 0.0;
 }
 
 inline unsigned int next_power_of_2(unsigned int x) {
@@ -506,7 +652,25 @@ inline double snapped(double p_value, double p_step) {
 	return p_value;
 }
 
+inline float snap_scalar(float p_offset, float p_step, float p_target) {
+	return p_step != 0 ? Math::snapped(p_target - p_offset, p_step) + p_offset : p_target;
+}
+
+inline float snap_scalar_separation(float p_offset, float p_step, float p_target, float p_separation) {
+	if (p_step != 0) {
+		float a = Math::snapped(p_target - p_offset, p_step + p_separation) + p_offset;
+		float b = a;
+		if (p_target >= 0) {
+			b -= p_separation;
+		} else {
+			b += p_step;
+		}
+		return (Math::abs(p_target - a) < Math::abs(p_target - b)) ? a : b;
+	}
+	return p_target;
+}
+
 } // namespace Math
 } // namespace godot
 
-#endif // GODOT_MATH_H
+#endif // GODOT_MATH_HPP

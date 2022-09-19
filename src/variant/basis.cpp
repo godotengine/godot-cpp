@@ -110,7 +110,7 @@ bool Basis::is_diagonal() const {
 }
 
 bool Basis::is_rotation() const {
-	return Math::is_equal_approx(determinant(), 1, UNIT_EPSILON) && is_orthogonal();
+	return Math::is_equal_approx(determinant(), (real_t)1, (real_t)UNIT_EPSILON) && is_orthogonal();
 }
 
 #ifdef MATH_CHECKS
