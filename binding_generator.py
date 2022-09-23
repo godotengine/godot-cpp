@@ -1587,7 +1587,9 @@ def get_encoded_arg(arg_name, type_name, type_meta):
         result.append(f"\tPtrToArg<{correct_type(type_name)}>::encode({name}, &{name}_encoded);")
         name = f"&{name}_encoded"
     elif is_engine_class(type_name):
-        name = f"{name}->_owner"
+        # `{name}` is a C++ wrapper, it contains a field which is the object's pointer Godot expects.
+        # We have to check `nullptr` because when the caller sends `nullptr`, the wrapper itself will be null.
+        name = f"({name} != nullptr ? {name}->_owner : nullptr)"
     else:
         name = f"&{name}"
 
