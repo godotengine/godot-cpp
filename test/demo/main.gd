@@ -45,7 +45,10 @@ func _ready():
 
 	prints("Array and Dictionary")
 	prints("  test array", $Example.test_array())
+	prints("  test tarray", $Example.test_tarray())
 	prints("  test dictionary", $Example.test_dictionary())
+	var array: Array[int] = [1, 2, 3]
+	$Example.test_tarray_arg(array)
 
 	prints("Properties")
 	prints("  custom position is", $Example.group_subgroup_custom_position)

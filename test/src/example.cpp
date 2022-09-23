@@ -103,6 +103,8 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("extended_ref_checks"), &Example::extended_ref_checks);
 
 	ClassDB::bind_method(D_METHOD("test_array"), &Example::test_array);
+	ClassDB::bind_method(D_METHOD("test_tarray_arg", "array"), &Example::test_tarray_arg);
+	ClassDB::bind_method(D_METHOD("test_tarray"), &Example::test_tarray);
 	ClassDB::bind_method(D_METHOD("test_dictionary"), &Example::test_dictionary);
 
 	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
@@ -219,6 +221,22 @@ Array Example::test_array() const {
 	arr.resize(2);
 	arr[0] = Variant(1);
 	arr[1] = Variant(2);
+
+	return arr;
+}
+
+void Example::test_tarray_arg(const TypedArray<int64_t> &p_array) {
+	for (int i = 0; i < p_array.size(); i++) {
+		UtilityFunctions::print(p_array[i]);
+	}
+}
+
+TypedArray<Vector2> Example::test_tarray() const {
+	TypedArray<Vector2> arr;
+
+	arr.resize(2);
+	arr[0] = Vector2(1, 2);
+	arr[1] = Vector2(2, 3);
 
 	return arr;
 }
