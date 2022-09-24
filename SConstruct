@@ -48,8 +48,17 @@ if env.GetOption("num_jobs") == altered_num_jobs:
         )
         env.SetOption("num_jobs", safer_cpu_count)
 
+# Custom options and profile flags.
+customs = ["custom.py"]
+profile = ARGUMENTS.get("profile", "")
+if profile:
+    if os.path.isfile(profile):
+        customs.append(profile)
+    elif os.path.isfile(profile + ".py"):
+        customs.append(profile + ".py")
+opts = Variables(customs, ARGUMENTS)
+
 platforms = ("linux", "macos", "windows", "android", "ios", "javascript")
-opts = Variables([], ARGUMENTS)
 opts.Add(
     EnumVariable(
         "platform",
@@ -60,8 +69,12 @@ opts.Add(
     )
 )
 
-# Must be the same setting as used for cpp_bindings
-opts.Add(EnumVariable("target", "Compilation target", "debug", allowed_values=("debug", "release"), ignorecase=2))
+# Editor and template_debug are compatible (i.e. you can use the same binary for Godot editor builds and Godot debug templates).
+# Godot release templates are only compatible with "template_release" builds.
+# For this reason, we default to template_debug builds, unlike Godot which defaults to editor builds.
+opts.Add(
+    EnumVariable("target", "Compilation target", "template_debug", ("editor", "template_release", "template_debug"))
+)
 opts.Add(
     PathVariable(
         "headers_dir", "Path to the directory containing Godot headers", "godot-headers", PathVariable.PathIsDir
@@ -156,12 +169,8 @@ if env.get("is_msvc", False):
 else:
     env.Append(CXXFLAGS=["-std=c++17"])
 
-if env["target"] == "debug":
-    env.Append(CPPDEFINES=["DEBUG_ENABLED", "DEBUG_METHODS_ENABLED"])
-
 if env["float"] == "64":
     env.Append(CPPDEFINES=["REAL_T_IS_DOUBLE"])
-
 
 # Generate bindings
 env.Append(BUILDERS={"GenerateBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
@@ -198,13 +207,21 @@ add_sources(sources, "src/core", "cpp")
 add_sources(sources, "src/variant", "cpp")
 sources.extend([f for f in bindings if str(f).endswith(".cpp")])
 
-env["arch_suffix"] = env["arch"]
+suffix = ".{}.{}".format(env["platform"], env["target"])
+if env.dev_build:
+    suffix += ".dev"
+if env["float"] == "64":
+    suffix += ".double"
+suffix += "." + env["arch"]
 if env["ios_simulator"]:
-    env["arch_suffix"] += ".simulator"
+    suffix += ".simulator"
+
+# Expose it when included from another project
+env["suffix"] = suffix
 
 library = None
-env["OBJSUFFIX"] = ".{}.{}.{}{}".format(env["platform"], env["target"], env["arch_suffix"], env["OBJSUFFIX"])
-library_name = "libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], env["arch_suffix"], env["LIBSUFFIX"])
+env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
+library_name = "libgodot-cpp{}{}".format(suffix, env["LIBSUFFIX"])
 
 if env["build_library"]:
     library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
