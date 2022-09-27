@@ -6,14 +6,82 @@ import shutil
 from pathlib import Path
 
 
+def generate_mod_version(argcount, const=False, returns=False):
+    s = """
+#define MODBIND$VER($RETTYPE m_name$ARG) \\
+virtual $RETVAL _##m_name($FUNCARGS) $CONST override; \\
+"""
+    sproto = str(argcount)
+    method_info = ""
+    if returns:
+        sproto += "R"
+        s = s.replace("$RETTYPE", "m_ret, ")
+        s = s.replace("$RETVAL", "m_ret")
+
+    else:
+        s = s.replace("$RETTYPE", "")
+        s = s.replace("$RETVAL", "void")
+
+    if const:
+        sproto += "C"
+        s = s.replace("$CONST", "const")
+    else:
+        s = s.replace("$CONST", "")
+
+    s = s.replace("$VER", sproto)
+    argtext = ""
+    funcargs = ""
+
+    for i in range(argcount):
+        if i > 0:
+            funcargs += ", "
+
+        argtext += ", m_type" + str(i + 1)
+        funcargs += "m_type" + str(i + 1) + " arg" + str(i + 1)
+
+    if argcount:
+        s = s.replace("$ARG", argtext)
+        s = s.replace("$FUNCARGS", funcargs)
+    else:
+        s = s.replace("$ARG", "")
+        s = s.replace("$FUNCARGS", funcargs)
+
+    return s
+
+
+def generate_wrappers(target):
+    max_versions = 12
+
+    txt = """
+#ifndef GDEXTENSION_WRAPPERS_GEN_H
+#define GDEXTENSION_WRAPPERS_GEN_H
+
+"""
+
+    for i in range(max_versions + 1):
+        txt += "\n/* Module Wrapper " + str(i) + " Arguments */\n"
+        txt += generate_mod_version(i, False, False)
+        txt += generate_mod_version(i, False, True)
+        txt += generate_mod_version(i, True, False)
+        txt += generate_mod_version(i, True, True)
+
+    txt += "\n#endif\n"
+
+    with open(target, "w") as f:
+        f.write(txt)
+
+
 def get_file_list(api_filepath, output_dir, headers=False, sources=False):
     api = {}
     files = []
     with open(api_filepath) as api_file:
         api = json.load(api_file)
 
+    core_gen_folder = Path(output_dir) / "gen" / "include" / "godot_cpp" / "core"
     include_gen_folder = Path(output_dir) / "gen" / "include" / "godot_cpp"
     source_gen_folder = Path(output_dir) / "gen" / "src"
+
+    files.append(str((core_gen_folder / "ext_wrappers.gen.inc").as_posix()))
 
     for builtin_class in api["builtin_classes"]:
         if is_pod_type(builtin_class["name"]):
@@ -121,11 +189,15 @@ singletons = []
 def generate_builtin_bindings(api, output_dir, build_config):
     global builtin_classes
 
+    core_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "core"
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "variant"
     source_gen_folder = Path(output_dir) / "src" / "variant"
 
+    core_gen_folder.mkdir(parents=True, exist_ok=True)
     include_gen_folder.mkdir(parents=True, exist_ok=True)
     source_gen_folder.mkdir(parents=True, exist_ok=True)
+
+    generate_wrappers(core_gen_folder / "ext_wrappers.gen.inc")
 
     # Store types beforehand.
     for builtin_api in api["builtin_classes"]:
