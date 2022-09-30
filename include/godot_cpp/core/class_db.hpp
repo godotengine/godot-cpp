@@ -227,14 +227,14 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, const char *p_name, M 
 	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(instance_type);
 	if (type_it == classes.end()) {
 		memdelete(bind);
-		ERR_FAIL_V_MSG(nullptr, "Class doesn't exist.");
+		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(instance_type));
 	}
 
 	ClassInfo &type = type_it->second;
 
 	if (type.method_map.find(p_name) != type.method_map.end()) {
 		memdelete(bind);
-		ERR_FAIL_V_MSG(nullptr, "Binding duplicate method.");
+		ERR_FAIL_V_MSG(nullptr, String("Binding duplicate method: {0}::{1}.").format(Array::make(instance_type, p_method)));
 	}
 
 	// register our method bind within our plugin
