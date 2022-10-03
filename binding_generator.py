@@ -280,10 +280,7 @@ def generate_builtin_bindings(api, output_dir, build_config):
         if "operators" in builtin_api:
             for operator in builtin_api["operators"]:
                 if "right_type" in operator:
-                    # FIXME Temporary workaround for incorrect JSON
-                    if operator["right_type"] == "Nil":
-                        used_classes.add("Variant")
-                    elif is_included(operator["right_type"], class_name):
+                    if is_included(operator["right_type"], class_name):
                         used_classes.add(operator["right_type"])
 
         for type_name in fully_used_classes:
@@ -728,8 +725,12 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     if "operators" in builtin_api:
         for operator in builtin_api["operators"]:
             if "right_type" in operator:
+                if operator["right_type"] == "Variant":
+                    right_type_variant_type = "GDNATIVE_VARIANT_TYPE_NIL"
+                else:
+                    right_type_variant_type = f"GDNATIVE_VARIANT_TYPE_{camel_to_snake(operator['right_type']).upper()}"
                 result.append(
-                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]} = internal::gdn_interface->variant_get_ptr_operator_evaluator(GDNATIVE_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, GDNATIVE_VARIANT_TYPE_{camel_to_snake(operator["right_type"]).upper()});'
+                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]} = internal::gdn_interface->variant_get_ptr_operator_evaluator(GDNATIVE_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, {right_type_variant_type});'
                 )
             else:
                 result.append(
