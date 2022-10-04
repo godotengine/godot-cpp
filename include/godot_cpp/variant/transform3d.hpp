@@ -54,11 +54,11 @@ public:
 	void affine_invert();
 	Transform3D affine_inverse() const;
 
-	Transform3D rotated(const Vector3 &p_axis, real_t p_phi) const;
+	Transform3D rotated(const Vector3 &p_axis, real_t p_angle) const;
 	Transform3D rotated_local(const Vector3 &p_axis, real_t p_angle) const;
 
-	void rotate(const Vector3 &p_axis, real_t p_phi);
-	void rotate_basis(const Vector3 &p_axis, real_t p_phi);
+	void rotate(const Vector3 &p_axis, real_t p_angle);
+	void rotate_basis(const Vector3 &p_axis, real_t p_angle);
 
 	void set_look_at(const Vector3 &p_eye, const Vector3 &p_target, const Vector3 &p_up = Vector3(0, 1, 0));
 	Transform3D looking_at(const Vector3 &p_target, const Vector3 &p_up = Vector3(0, 1, 0)) const;
@@ -67,8 +67,8 @@ public:
 	Transform3D scaled(const Vector3 &p_scale) const;
 	Transform3D scaled_local(const Vector3 &p_scale) const;
 	void scale_basis(const Vector3 &p_scale);
-	void translate(real_t p_tx, real_t p_ty, real_t p_tz);
-	void translate(const Vector3 &p_translation);
+	void translate_local(real_t p_tx, real_t p_ty, real_t p_tz);
+	void translate_local(const Vector3 &p_translation);
 	Transform3D translated(const Vector3 &p_translation) const;
 	Transform3D translated_local(const Vector3 &p_translation) const;
 
@@ -80,29 +80,41 @@ public:
 
 	void orthonormalize();
 	Transform3D orthonormalized() const;
+	void orthogonalize();
+	Transform3D orthogonalized() const;
 	bool is_equal_approx(const Transform3D &p_transform) const;
 
 	bool operator==(const Transform3D &p_transform) const;
 	bool operator!=(const Transform3D &p_transform) const;
 
-	inline Vector3 xform(const Vector3 &p_vector) const;
-	inline Vector3 xform_inv(const Vector3 &p_vector) const;
+	_FORCE_INLINE_ Vector3 xform(const Vector3 &p_vector) const;
+	_FORCE_INLINE_ AABB xform(const AABB &p_aabb) const;
+	_FORCE_INLINE_ PackedVector3Array xform(const PackedVector3Array &p_array) const;
 
-	inline Plane xform(const Plane &p_plane) const;
-	inline Plane xform_inv(const Plane &p_plane) const;
+	// NOTE: These are UNSAFE with non-uniform scaling, and will produce incorrect results.
+	// They use the transpose.
+	// For safe inverse transforms, xform by the affine_inverse.
+	_FORCE_INLINE_ Vector3 xform_inv(const Vector3 &p_vector) const;
+	_FORCE_INLINE_ AABB xform_inv(const AABB &p_aabb) const;
+	_FORCE_INLINE_ PackedVector3Array xform_inv(const PackedVector3Array &p_array) const;
 
-	inline AABB xform(const AABB &p_aabb) const;
-	inline AABB xform_inv(const AABB &p_aabb) const;
+	// Safe with non-uniform scaling (uses affine_inverse).
+	_FORCE_INLINE_ Plane xform(const Plane &p_plane) const;
+	_FORCE_INLINE_ Plane xform_inv(const Plane &p_plane) const;
 
-	inline PackedVector3Array xform(const PackedVector3Array &p_array) const;
-	inline PackedVector3Array xform_inv(const PackedVector3Array &p_array) const;
+	// These fast versions use precomputed affine inverse, and should be used in bottleneck areas where
+	// multiple planes are to be transformed.
+	_FORCE_INLINE_ Plane xform_fast(const Plane &p_plane, const Basis &p_basis_inverse_transpose) const;
+	static _FORCE_INLINE_ Plane xform_inv_fast(const Plane &p_plane, const Transform3D &p_inverse, const Basis &p_basis_transpose);
 
 	void operator*=(const Transform3D &p_transform);
 	Transform3D operator*(const Transform3D &p_transform) const;
+	void operator*=(const real_t p_val);
+	Transform3D operator*(const real_t p_val) const;
 
 	Transform3D interpolate_with(const Transform3D &p_transform, real_t p_c) const;
 
-	inline Transform3D inverse_xform(const Transform3D &t) const {
+	_FORCE_INLINE_ Transform3D inverse_xform(const Transform3D &t) const {
 		Vector3 v = t.origin - origin;
 		return Transform3D(basis.transpose_xform(t.basis),
 				basis.xform(v));
@@ -123,14 +135,14 @@ public:
 	Transform3D(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz, real_t ox, real_t oy, real_t oz);
 };
 
-inline Vector3 Transform3D::xform(const Vector3 &p_vector) const {
+_FORCE_INLINE_ Vector3 Transform3D::xform(const Vector3 &p_vector) const {
 	return Vector3(
 			basis[0].dot(p_vector) + origin.x,
 			basis[1].dot(p_vector) + origin.y,
 			basis[2].dot(p_vector) + origin.z);
 }
 
-inline Vector3 Transform3D::xform_inv(const Vector3 &p_vector) const {
+_FORCE_INLINE_ Vector3 Transform3D::xform_inv(const Vector3 &p_vector) const {
 	Vector3 v = p_vector - origin;
 
 	return Vector3(
@@ -139,34 +151,24 @@ inline Vector3 Transform3D::xform_inv(const Vector3 &p_vector) const {
 			(basis.rows[0][2] * v.x) + (basis.rows[1][2] * v.y) + (basis.rows[2][2] * v.z));
 }
 
-inline Plane Transform3D::xform(const Plane &p_plane) const {
-	Vector3 point = p_plane.normal * p_plane.d;
-	Vector3 point_dir = point + p_plane.normal;
-	point = xform(point);
-	point_dir = xform(point_dir);
-
-	Vector3 normal = point_dir - point;
-	normal.normalize();
-	real_t d = normal.dot(point);
-
-	return Plane(normal, d);
+// Neither the plane regular xform or xform_inv are particularly efficient,
+// as they do a basis inverse. For xforming a large number
+// of planes it is better to pre-calculate the inverse transpose basis once
+// and reuse it for each plane, by using the 'fast' version of the functions.
+_FORCE_INLINE_ Plane Transform3D::xform(const Plane &p_plane) const {
+	Basis b = basis.inverse();
+	b.transpose();
+	return xform_fast(p_plane, b);
 }
 
-inline Plane Transform3D::xform_inv(const Plane &p_plane) const {
-	Vector3 point = p_plane.normal * p_plane.d;
-	Vector3 point_dir = point + p_plane.normal;
-	point = xform_inv(point);
-	point_dir = xform_inv(point_dir);
-
-	Vector3 normal = point_dir - point;
-	normal.normalize();
-	real_t d = normal.dot(point);
-
-	return Plane(normal, d);
+_FORCE_INLINE_ Plane Transform3D::xform_inv(const Plane &p_plane) const {
+	Transform3D inv = affine_inverse();
+	Basis basis_transpose = basis.transposed();
+	return xform_inv_fast(p_plane, inv, basis_transpose);
 }
 
-inline AABB Transform3D::xform(const AABB &p_aabb) const {
-	/* http://dev.theomader.com/transform-bounding-boxes/ */
+_FORCE_INLINE_ AABB Transform3D::xform(const AABB &p_aabb) const {
+	/* https://dev.theomader.com/transform-bounding-boxes/ */
 	Vector3 min = p_aabb.position;
 	Vector3 max = p_aabb.position + p_aabb.size;
 	Vector3 tmin, tmax;
@@ -190,7 +192,7 @@ inline AABB Transform3D::xform(const AABB &p_aabb) const {
 	return r_aabb;
 }
 
-inline AABB Transform3D::xform_inv(const AABB &p_aabb) const {
+_FORCE_INLINE_ AABB Transform3D::xform_inv(const AABB &p_aabb) const {
 	/* define vertices */
 	Vector3 vertices[8] = {
 		Vector3(p_aabb.position.x + p_aabb.size.x, p_aabb.position.y + p_aabb.size.y, p_aabb.position.z + p_aabb.size.z),
@@ -218,8 +220,11 @@ PackedVector3Array Transform3D::xform(const PackedVector3Array &p_array) const {
 	PackedVector3Array array;
 	array.resize(p_array.size());
 
+	const Vector3 *r = p_array.ptr();
+	Vector3 *w = array.ptrw();
+
 	for (int i = 0; i < p_array.size(); ++i) {
-		array[i] = xform(p_array[i]);
+		w[i] = xform(r[i]);
 	}
 	return array;
 }
@@ -228,12 +233,48 @@ PackedVector3Array Transform3D::xform_inv(const PackedVector3Array &p_array) con
 	PackedVector3Array array;
 	array.resize(p_array.size());
 
+	const Vector3 *r = p_array.ptr();
+	Vector3 *w = array.ptrw();
+
 	for (int i = 0; i < p_array.size(); ++i) {
-		array[i] = xform_inv(p_array[i]);
+		w[i] = xform_inv(r[i]);
 	}
 	return array;
 }
 
+_FORCE_INLINE_ Plane Transform3D::xform_fast(const Plane &p_plane, const Basis &p_basis_inverse_transpose) const {
+	// Transform a single point on the plane.
+	Vector3 point = p_plane.normal * p_plane.d;
+	point = xform(point);
+
+	// Use inverse transpose for correct normals with non-uniform scaling.
+	Vector3 normal = p_basis_inverse_transpose.xform(p_plane.normal);
+	normal.normalize();
+
+	real_t d = normal.dot(point);
+	return Plane(normal, d);
+}
+
+_FORCE_INLINE_ Plane Transform3D::xform_inv_fast(const Plane &p_plane, const Transform3D &p_inverse, const Basis &p_basis_transpose) {
+	// Transform a single point on the plane.
+	Vector3 point = p_plane.normal * p_plane.d;
+	point = p_inverse.xform(point);
+
+	// Note that instead of precalculating the transpose, an alternative
+	// would be to use the transpose for the basis transform.
+	// However that would be less SIMD friendly (requiring a swizzle).
+	// So the cost is one extra precalced value in the calling code.
+	// This is probably worth it, as this could be used in bottleneck areas. And
+	// where it is not a bottleneck, the non-fast method is fine.
+
+	// Use transpose for correct normals with non-uniform scaling.
+	Vector3 normal = p_basis_transpose.xform(p_plane.normal);
+	normal.normalize();
+
+	real_t d = normal.dot(point);
+	return Plane(normal, d);
+}
+
 } // namespace godot
 
-#endif // GODOT_TRANSFORM_HPP
+#endif // GODOT_TRANSFORM3D_HPP
