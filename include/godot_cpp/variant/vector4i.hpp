@@ -45,6 +45,8 @@ class Vector4i {
 	friend class Variant;
 
 public:
+	static const int AXIS_COUNT = 4;
+
 	enum Axis {
 		AXIS_X,
 		AXIS_Y,
@@ -64,10 +66,12 @@ public:
 	};
 
 	_FORCE_INLINE_ const int32_t &operator[](const int p_axis) const {
+		DEV_ASSERT((unsigned int)p_axis < 4);
 		return coord[p_axis];
 	}
 
 	_FORCE_INLINE_ int32_t &operator[](const int p_axis) {
+		DEV_ASSERT((unsigned int)p_axis < 4);
 		return coord[p_axis];
 	}
 
@@ -137,11 +141,11 @@ double Vector4i::length() const {
 }
 
 Vector4i Vector4i::abs() const {
-	return Vector4i(ABS(x), ABS(y), ABS(z), ABS(w));
+	return Vector4i(Math::abs(x), Math::abs(y), Math::abs(z), Math::abs(w));
 }
 
 Vector4i Vector4i::sign() const {
-	return Vector4i(SIGN(x), SIGN(y), SIGN(z), SIGN(w));
+	return Vector4i(Math::sign(x), Math::sign(y), Math::sign(z), Math::sign(w));
 }
 
 /* Operators */
