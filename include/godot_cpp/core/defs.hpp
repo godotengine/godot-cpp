@@ -72,6 +72,10 @@
 #endif
 #endif
 
+#ifndef _NO_DISCARD_
+#define _NO_DISCARD_ [[nodiscard]]
+#endif
+
 // Windows badly defines a lot of stuff we'll never use. Undefine it.
 #ifdef _WIN32
 #undef min // override standard definition

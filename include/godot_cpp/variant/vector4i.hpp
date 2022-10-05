@@ -37,14 +37,9 @@
 namespace godot {
 
 class String;
-class Vector4;
+struct Vector4;
 
-class Vector4i {
-	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
-
-	friend class Variant;
-
-public:
+struct _NO_DISCARD_ Vector4i {
 	static const int AXIS_COUNT = 4;
 
 	enum Axis {

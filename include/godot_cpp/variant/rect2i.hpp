@@ -37,15 +37,10 @@
 
 namespace godot {
 
-class Rect2;
 class String;
+struct Rect2;
 
-class Rect2i {
-	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
-
-	friend class Variant;
-
-public:
+struct _NO_DISCARD_ Rect2i {
 	Point2i position;
 	Size2i size;
 

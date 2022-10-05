@@ -39,18 +39,13 @@
 
 namespace godot {
 
-class AABB;
-class Plane;
-class Rect2;
-class Transform3D;
-class Vector2;
+struct AABB;
+struct Plane;
+struct Rect2;
+struct Transform3D;
+struct Vector2;
 
-class Projection {
-	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
-
-	friend class Variant;
-
-public:
+struct _NO_DISCARD_ Projection {
 	enum Planes {
 		PLANE_NEAR,
 		PLANE_FAR,

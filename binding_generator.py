@@ -362,7 +362,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("")
 
     for type_name in used_classes:
-        if is_native_struct(type_name):
+        if is_struct_type(type_name):
             result.append(f"struct {type_name};")
         else:
             result.append(f"class {type_name};")
@@ -1109,7 +1109,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("")
 
     for type_name in used_classes:
-        if is_native_struct(type_name):
+        if is_struct_type(type_name):
             result.append(f"struct {type_name};")
         else:
             result.append(f"class {type_name};")
@@ -1831,15 +1831,18 @@ def is_pod_type(type_name):
 
 
 def is_included_type(type_name):
-    """
-    Those are types for which we already have a class file implemented.
-    """
+    # Types which we already have implemented.
+    return is_included_struct_type(type_name) or type_name in ["ObjectID"]
+
+
+def is_included_struct_type(type_name):
+    # Struct types which we already have implemented.
     return type_name in [
         "AABB",
         "Basis",
         "Color",
-        "ObjectID",
         "Plane",
+        "Projection",
         "Quaternion",
         "Rect2",
         "Rect2i",
@@ -1851,7 +1854,6 @@ def is_included_type(type_name):
         "Vector3i",
         "Vector4",
         "Vector4i",
-        "Projection",
     ]
 
 
@@ -1927,9 +1929,10 @@ def is_engine_class(type_name):
     return type_name == "Object" or type_name in engine_classes
 
 
-def is_native_struct(type_name):
+def is_struct_type(type_name):
+    # This is used to determine which keyword to use for forward declarations.
     global native_structures
-    return type_name in native_structures
+    return is_included_struct_type(type_name) or type_name in native_structures
 
 
 def is_refcounted(type_name):
