@@ -145,9 +145,9 @@ protected:                                                                      
 		return (::godot::String(::godot::Wrapped::*)()) & m_class::_to_string;                                                                           \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	template <class T>                                                                                                                                   \
+	template <class T, class B>                                                                                                                          \
 	static void register_virtuals() {                                                                                                                    \
-		m_inherits::register_virtuals<T>();                                                                                                              \
+		m_inherits::register_virtuals<T, B>();                                                                                                           \
 	}                                                                                                                                                    \
                                                                                                                                                          \
 public:                                                                                                                                                  \
@@ -159,7 +159,7 @@ public:                                                                         
 		m_inherits::initialize_class();                                                                                                                  \
 		if (m_class::_get_bind_methods() != m_inherits::_get_bind_methods()) {                                                                           \
 			_bind_methods();                                                                                                                             \
-			m_inherits::register_virtuals<m_class>();                                                                                                    \
+			m_inherits::register_virtuals<m_class, m_inherits>();                                                                                        \
 		}                                                                                                                                                \
 		initialized = true;                                                                                                                              \
 	}                                                                                                                                                    \

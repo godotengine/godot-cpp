@@ -89,10 +89,12 @@ public:
 		std::unordered_map<std::string, GDNativeExtensionClassCallVirtual> virtual_methods;
 		std::set<std::string> property_names;
 		std::set<std::string> constant_names;
+		// Pointer to the parent custom class, if any. Will be null if the parent class is a Godot class.
 		ClassInfo *parent_ptr = nullptr;
 	};
 
 private:
+	// This may only contain custom classes, not Godot classes
 	static std::unordered_map<std::string, ClassInfo> classes;
 
 	static MethodBind *bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount);
@@ -158,10 +160,12 @@ void ClassDB::register_class() {
 	cl.name = T::get_class_static();
 	cl.parent_name = T::get_parent_class_static();
 	cl.level = current_level;
-	classes[cl.name] = cl;
-	if (classes.find(cl.parent_name) != classes.end()) {
-		cl.parent_ptr = &classes[cl.parent_name];
+	std::unordered_map<std::string, ClassInfo>::iterator parent_it = classes.find(cl.parent_name);
+	if (parent_it != classes.end()) {
+		// Assign parent if it is also a custom class
+		cl.parent_ptr = &parent_it->second;
 	}
+	classes[cl.name] = cl;
 
 	// Register this class with Godot
 	GDNativeExtensionClassCreationInfo class_info = {
