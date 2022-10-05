@@ -37,12 +37,7 @@
 
 namespace godot {
 
-class Plane {
-	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
-
-	friend class Variant;
-
-public:
+struct _NO_DISCARD_ Plane {
 	Vector3 normal;
 	real_t d = 0;
 

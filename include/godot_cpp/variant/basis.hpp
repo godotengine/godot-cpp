@@ -37,12 +37,7 @@
 
 namespace godot {
 
-class Basis {
-	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
-
-	friend class Variant;
-
-public:
+struct _NO_DISCARD_ Basis {
 	Vector3 rows[3] = {
 		Vector3(1, 0, 0),
 		Vector3(0, 1, 0),

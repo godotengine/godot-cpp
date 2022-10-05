@@ -107,67 +107,67 @@ Variant::Variant(const String &v) {
 }
 
 Variant::Variant(const Vector2 &v) {
-	from_type_constructor[VECTOR2](_native_ptr(), v._native_ptr());
+	from_type_constructor[VECTOR2](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Vector2i &v) {
-	from_type_constructor[VECTOR2I](_native_ptr(), v._native_ptr());
+	from_type_constructor[VECTOR2I](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Rect2 &v) {
-	from_type_constructor[RECT2](_native_ptr(), v._native_ptr());
+	from_type_constructor[RECT2](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Rect2i &v) {
-	from_type_constructor[RECT2I](_native_ptr(), v._native_ptr());
+	from_type_constructor[RECT2I](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Vector3 &v) {
-	from_type_constructor[VECTOR3](_native_ptr(), v._native_ptr());
+	from_type_constructor[VECTOR3](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Vector3i &v) {
-	from_type_constructor[VECTOR3I](_native_ptr(), v._native_ptr());
+	from_type_constructor[VECTOR3I](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Transform2D &v) {
-	from_type_constructor[TRANSFORM2D](_native_ptr(), v._native_ptr());
+	from_type_constructor[TRANSFORM2D](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Vector4 &v) {
-	from_type_constructor[VECTOR4](_native_ptr(), v._native_ptr());
+	from_type_constructor[VECTOR4](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Vector4i &v) {
-	from_type_constructor[VECTOR4I](_native_ptr(), v._native_ptr());
+	from_type_constructor[VECTOR4I](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Plane &v) {
-	from_type_constructor[PLANE](_native_ptr(), v._native_ptr());
+	from_type_constructor[PLANE](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Quaternion &v) {
-	from_type_constructor[QUATERNION](_native_ptr(), v._native_ptr());
+	from_type_constructor[QUATERNION](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const godot::AABB &v) {
-	from_type_constructor[AABB](_native_ptr(), v._native_ptr());
+	from_type_constructor[AABB](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Basis &v) {
-	from_type_constructor[BASIS](_native_ptr(), v._native_ptr());
+	from_type_constructor[BASIS](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Transform3D &v) {
-	from_type_constructor[TRANSFORM3D](_native_ptr(), v._native_ptr());
+	from_type_constructor[TRANSFORM3D](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Projection &v) {
-	from_type_constructor[PROJECTION](_native_ptr(), v._native_ptr());
+	from_type_constructor[PROJECTION](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const Color &v) {
-	from_type_constructor[COLOR](_native_ptr(), v._native_ptr());
+	from_type_constructor[COLOR](_native_ptr(), (GDNativeTypePtr)&v);
 }
 
 Variant::Variant(const StringName &v) {
@@ -289,97 +289,97 @@ Variant::operator String() const {
 
 Variant::operator Vector2() const {
 	Vector2 result;
-	to_type_constructor[VECTOR2](result._native_ptr(), _native_ptr());
+	to_type_constructor[VECTOR2]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Vector2i() const {
 	Vector2i result;
-	to_type_constructor[VECTOR2I](result._native_ptr(), _native_ptr());
+	to_type_constructor[VECTOR2I]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Rect2() const {
 	Rect2 result;
-	to_type_constructor[RECT2](result._native_ptr(), _native_ptr());
+	to_type_constructor[RECT2]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Rect2i() const {
 	Rect2i result;
-	to_type_constructor[RECT2I](result._native_ptr(), _native_ptr());
+	to_type_constructor[RECT2I]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Vector3() const {
 	Vector3 result;
-	to_type_constructor[VECTOR3](result._native_ptr(), _native_ptr());
+	to_type_constructor[VECTOR3]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Vector3i() const {
 	Vector3i result;
-	to_type_constructor[VECTOR3I](result._native_ptr(), _native_ptr());
+	to_type_constructor[VECTOR3I]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Transform2D() const {
 	Transform2D result;
-	to_type_constructor[TRANSFORM2D](result._native_ptr(), _native_ptr());
+	to_type_constructor[TRANSFORM2D]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Vector4() const {
 	Vector4 result;
-	to_type_constructor[VECTOR4](result._native_ptr(), _native_ptr());
+	to_type_constructor[VECTOR4]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Vector4i() const {
 	Vector4i result;
-	to_type_constructor[VECTOR4I](result._native_ptr(), _native_ptr());
+	to_type_constructor[VECTOR4I]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Plane() const {
 	Plane result;
-	to_type_constructor[PLANE](result._native_ptr(), _native_ptr());
+	to_type_constructor[PLANE]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Quaternion() const {
 	Quaternion result;
-	to_type_constructor[QUATERNION](result._native_ptr(), _native_ptr());
+	to_type_constructor[QUATERNION]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator godot::AABB() const {
 	godot::AABB result;
-	to_type_constructor[AABB](result._native_ptr(), _native_ptr());
+	to_type_constructor[AABB]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Basis() const {
 	Basis result;
-	to_type_constructor[BASIS](result._native_ptr(), _native_ptr());
+	to_type_constructor[BASIS]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Transform3D() const {
 	Transform3D result;
-	to_type_constructor[TRANSFORM3D](result._native_ptr(), _native_ptr());
+	to_type_constructor[TRANSFORM3D]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Projection() const {
 	Projection result;
-	to_type_constructor[PROJECTION](result._native_ptr(), _native_ptr());
+	to_type_constructor[PROJECTION]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 
 Variant::operator Color() const {
 	Color result;
-	to_type_constructor[COLOR](result._native_ptr(), _native_ptr());
+	to_type_constructor[COLOR]((GDNativeTypePtr)&result, _native_ptr());
 	return result;
 }
 

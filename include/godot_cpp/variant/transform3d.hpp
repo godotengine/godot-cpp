@@ -39,12 +39,7 @@
 
 namespace godot {
 
-class Transform3D {
-	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
-
-	friend class Variant;
-
-public:
+struct _NO_DISCARD_ Transform3D {
 	Basis basis;
 	Vector3 origin;
 
