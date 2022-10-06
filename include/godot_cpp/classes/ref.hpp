@@ -35,8 +35,9 @@
 
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/ref_counted.hpp>
-#include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/memory.hpp>
+#include <godot_cpp/core/method_ptrcall.hpp>
+#include <godot_cpp/core/type_info.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
 namespace godot {

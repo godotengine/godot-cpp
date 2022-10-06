@@ -31,6 +31,8 @@
 #ifndef PAIR_HPP
 #define PAIR_HPP
 
+#include <godot_cpp/core/defs.hpp>
+
 namespace godot {
 
 template <class F, class S>

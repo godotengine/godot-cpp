@@ -31,6 +31,8 @@
 #ifndef SPIN_LOCK_HPP
 #define SPIN_LOCK_HPP
 
+#include <godot_cpp/core/defs.hpp>
+
 #include <atomic>
 
 namespace godot {

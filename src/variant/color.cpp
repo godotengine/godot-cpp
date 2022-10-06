@@ -30,7 +30,7 @@
 
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/variant/color.hpp>
-#include <godot_cpp/variant/color_names.inc.hpp>
+#include <godot_cpp/variant/color_names.inc>
 #include <godot_cpp/variant/string.hpp>
 
 namespace godot {

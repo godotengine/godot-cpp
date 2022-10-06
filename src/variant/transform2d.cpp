@@ -30,6 +30,8 @@
 
 #include <godot_cpp/variant/transform2d.hpp>
 
+#include <godot_cpp/variant/string.hpp>
+
 namespace godot {
 
 void Transform2D::invert() {
@@ -237,7 +239,7 @@ real_t Transform2D::basis_determinant() const {
 }
 
 Transform2D Transform2D::interpolate_with(const Transform2D &p_transform, real_t p_c) const {
-	//extract parameters
+	// Extract parameters.
 	Vector2 p1 = get_origin();
 	Vector2 p2 = p_transform.get_origin();
 
@@ -247,7 +249,7 @@ Transform2D Transform2D::interpolate_with(const Transform2D &p_transform, real_t
 	Size2 s1 = get_scale();
 	Size2 s2 = p_transform.get_scale();
 
-	//slerp rotation
+	// Slerp rotation.
 	Vector2 v1(Math::cos(r1), Math::sin(r1));
 	Vector2 v2(Math::cos(r2), Math::sin(r2));
 
@@ -258,14 +260,15 @@ Transform2D Transform2D::interpolate_with(const Transform2D &p_transform, real_t
 	Vector2 v;
 
 	if (dot > 0.9995) {
-		v = v1.lerp(v2, p_c).normalized(); //linearly interpolate to avoid numerical precision issues
+		// Linearly interpolate to avoid numerical precision issues.
+		v = v1.lerp(v2, p_c).normalized();
 	} else {
 		real_t angle = p_c * Math::acos(dot);
 		Vector2 v3 = (v2 - v1 * dot).normalized();
 		v = v1 * Math::cos(angle) + v3 * Math::sin(angle);
 	}
 
-	//construct matrix
+	// Construct matrix.
 	Transform2D res(Math::atan2(v.y, v.x), p1.lerp(p2, p_c));
 	res.scale_basis(s1.lerp(s2, p_c));
 	return res;

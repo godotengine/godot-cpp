@@ -253,6 +253,81 @@ static _FORCE_INLINE_ uint32_t hash_djb2_one_float(double p_in, uint32_t p_prev 
 	return ((p_prev << 5) + p_prev) + hash_one_uint64(u.i);
 }
 
+#define HASH_MURMUR3_SEED 0x7F07C65
+// Murmurhash3 32-bit version.
+// All MurmurHash versions are public domain software, and the author disclaims all copyright to their code.
+
+static _FORCE_INLINE_ uint32_t hash_murmur3_one_32(uint32_t p_in, uint32_t p_seed = HASH_MURMUR3_SEED) {
+	p_in *= 0xcc9e2d51;
+	p_in = (p_in << 15) | (p_in >> 17);
+	p_in *= 0x1b873593;
+
+	p_seed ^= p_in;
+	p_seed = (p_seed << 13) | (p_seed >> 19);
+	p_seed = p_seed * 5 + 0xe6546b64;
+
+	return p_seed;
+}
+
+static _FORCE_INLINE_ uint32_t hash_murmur3_one_float(float p_in, uint32_t p_seed = HASH_MURMUR3_SEED) {
+	union {
+		float f;
+		uint32_t i;
+	} u;
+
+	// Normalize +/- 0.0 and NaN values so they hash the same.
+	if (p_in == 0.0f) {
+		u.f = 0.0;
+	} else if (Math::is_nan(p_in)) {
+		u.f = NAN;
+	} else {
+		u.f = p_in;
+	}
+
+	return hash_murmur3_one_32(u.i, p_seed);
+}
+
+static _FORCE_INLINE_ uint32_t hash_murmur3_one_64(uint64_t p_in, uint32_t p_seed = HASH_MURMUR3_SEED) {
+	p_seed = hash_murmur3_one_32(p_in & 0xFFFFFFFF, p_seed);
+	return hash_murmur3_one_32(p_in >> 32, p_seed);
+}
+
+static _FORCE_INLINE_ uint32_t hash_murmur3_one_double(double p_in, uint32_t p_seed = HASH_MURMUR3_SEED) {
+	union {
+		double d;
+		uint64_t i;
+	} u;
+
+	// Normalize +/- 0.0 and NaN values so they hash the same.
+	if (p_in == 0.0f) {
+		u.d = 0.0;
+	} else if (Math::is_nan(p_in)) {
+		u.d = NAN;
+	} else {
+		u.d = p_in;
+	}
+
+	return hash_murmur3_one_64(u.i, p_seed);
+}
+
+static _FORCE_INLINE_ uint32_t hash_murmur3_one_real(real_t p_in, uint32_t p_seed = HASH_MURMUR3_SEED) {
+#ifdef REAL_T_IS_DOUBLE
+	return hash_murmur3_one_double(p_in, p_seed);
+#else
+	return hash_murmur3_one_float(p_in, p_seed);
+#endif
+}
+
+static _FORCE_INLINE_ uint32_t hash_fmix32(uint32_t h) {
+	h ^= h >> 16;
+	h *= 0x85ebca6b;
+	h ^= h >> 13;
+	h *= 0xc2b2ae35;
+	h ^= h >> 16;
+
+	return h;
+}
+
 template <class T>
 static _FORCE_INLINE_ uint32_t hash_make_uint32_t(T p_in) {
 	union {

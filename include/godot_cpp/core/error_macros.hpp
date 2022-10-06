@@ -32,11 +32,12 @@
 #define GODOT_CPP_ERROR_MACROS_HPP
 
 #include <godot_cpp/core/defs.hpp>
-#include <godot_cpp/variant/string.hpp>
 
 #include <cstdint>
 
 namespace godot {
+
+class String;
 
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, bool p_is_warning = false);
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, bool p_is_warning = false);
