@@ -32,7 +32,6 @@
 #define GODOT_RECT2_HPP
 
 #include <godot_cpp/classes/global_constants.hpp>
-#include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/vector2.hpp>
 
 namespace godot {
@@ -52,7 +51,14 @@ struct _NO_DISCARD_ Rect2 {
 
 	real_t get_area() const { return size.width * size.height; }
 
+	_FORCE_INLINE_ Vector2 get_center() const { return position + (size * 0.5f); }
+
 	inline bool intersects(const Rect2 &p_rect, const bool p_include_borders = false) const {
+#ifdef MATH_CHECKS
+		if (unlikely(size.x < 0 || size.y < 0 || p_rect.size.x < 0 || p_rect.size.y < 0)) {
+			ERR_PRINT("Rect2 size is negative, this is not supported. Use Rect2.abs() to get a Rect2 with a positive size.");
+		}
+#endif
 		if (p_include_borders) {
 			if (position.x > (p_rect.position.x + p_rect.size.width)) {
 				return false;
@@ -85,6 +91,11 @@ struct _NO_DISCARD_ Rect2 {
 	}
 
 	inline real_t distance_to(const Vector2 &p_point) const {
+#ifdef MATH_CHECKS
+		if (unlikely(size.x < 0 || size.y < 0)) {
+			ERR_PRINT("Rect2 size is negative, this is not supported. Use Rect2.abs() to get a Rect2 with a positive size.");
+		}
+#endif
 		real_t dist = 0.0;
 		bool inside = true;
 
@@ -121,13 +132,18 @@ struct _NO_DISCARD_ Rect2 {
 	bool intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 *r_pos = nullptr, Point2 *r_normal = nullptr) const;
 
 	inline bool encloses(const Rect2 &p_rect) const {
+#ifdef MATH_CHECKS
+		if (unlikely(size.x < 0 || size.y < 0 || p_rect.size.x < 0 || p_rect.size.y < 0)) {
+			ERR_PRINT("Rect2 size is negative, this is not supported. Use Rect2.abs() to get a Rect2 with a positive size.");
+		}
+#endif
 		return (p_rect.position.x >= position.x) && (p_rect.position.y >= position.y) &&
-			   ((p_rect.position.x + p_rect.size.x) <= (position.x + size.x)) &&
-			   ((p_rect.position.y + p_rect.size.y) <= (position.y + size.y));
+				((p_rect.position.x + p_rect.size.x) <= (position.x + size.x)) &&
+				((p_rect.position.y + p_rect.size.y) <= (position.y + size.y));
 	}
 
-	inline bool has_no_area() const {
-		return (size.x <= 0 || size.y <= 0);
+	_FORCE_INLINE_ bool has_area() const {
+		return size.x > 0.0f && size.y > 0.0f;
 	}
 
 	// Returns the instersection between two Rect2s or an empty Rect2 if there is no intersection
@@ -151,7 +167,11 @@ struct _NO_DISCARD_ Rect2 {
 	}
 
 	inline Rect2 merge(const Rect2 &p_rect) const { ///< return a merged rect
-
+#ifdef MATH_CHECKS
+		if (unlikely(size.x < 0 || size.y < 0 || p_rect.size.x < 0 || p_rect.size.y < 0)) {
+			ERR_PRINT("Rect2 size is negative, this is not supported. Use Rect2.abs() to get a Rect2 with a positive size.");
+		}
+#endif
 		Rect2 new_rect;
 
 		new_rect.position.x = Math::min(p_rect.position.x, position.x);
@@ -160,11 +180,17 @@ struct _NO_DISCARD_ Rect2 {
 		new_rect.size.x = Math::max(p_rect.position.x + p_rect.size.x, position.x + size.x);
 		new_rect.size.y = Math::max(p_rect.position.y + p_rect.size.y, position.y + size.y);
 
-		new_rect.size = new_rect.size - new_rect.position; // make relative again
+		new_rect.size = new_rect.size - new_rect.position; // Make relative again.
 
 		return new_rect;
 	}
+
 	inline bool has_point(const Point2 &p_point) const {
+#ifdef MATH_CHECKS
+		if (unlikely(size.x < 0 || size.y < 0)) {
+			ERR_PRINT("Rect2 size is negative, this is not supported. Use Rect2.abs() to get a Rect2 with a positive size.");
+		}
+#endif
 		if (p_point.x < position.x) {
 			return false;
 		}
@@ -181,6 +207,7 @@ struct _NO_DISCARD_ Rect2 {
 
 		return true;
 	}
+
 	bool is_equal_approx(const Rect2 &p_rect) const;
 
 	bool operator==(const Rect2 &p_rect) const { return position == p_rect.position && size == p_rect.size; }
@@ -188,11 +215,15 @@ struct _NO_DISCARD_ Rect2 {
 
 	inline Rect2 grow(real_t p_amount) const {
 		Rect2 g = *this;
-		g.position.x -= p_amount;
-		g.position.y -= p_amount;
-		g.size.width += p_amount * 2;
-		g.size.height += p_amount * 2;
+		g.grow_by(p_amount);
 		return g;
+	}
+
+	inline void grow_by(real_t p_amount) {
+		position.x -= p_amount;
+		position.y -= p_amount;
+		size.width += p_amount * 2;
+		size.height += p_amount * 2;
 	}
 
 	inline Rect2 grow_side(Side p_side, real_t p_amount) const {
@@ -218,14 +249,18 @@ struct _NO_DISCARD_ Rect2 {
 		return g;
 	}
 
-	inline Rect2 expand(const Vector2 &p_vector) const {
+	_FORCE_INLINE_ Rect2 expand(const Vector2 &p_vector) const {
 		Rect2 r = *this;
 		r.expand_to(p_vector);
 		return r;
 	}
 
-	inline void expand_to(const Vector2 &p_vector) { // in place function for speed
-
+	inline void expand_to(const Vector2 &p_vector) { // In place function for speed.
+#ifdef MATH_CHECKS
+		if (unlikely(size.x < 0 || size.y < 0)) {
+			ERR_PRINT("Rect2 size is negative, this is not supported. Use Rect2.abs() to get a Rect2 with a positive size.");
+		}
+#endif
 		Vector2 begin = position;
 		Vector2 end = position + size;
 
@@ -247,21 +282,21 @@ struct _NO_DISCARD_ Rect2 {
 		size = end - begin;
 	}
 
-	inline Rect2 abs() const {
+	_FORCE_INLINE_ Rect2 abs() const {
 		return Rect2(Point2(position.x + Math::min(size.x, (real_t)0), position.y + Math::min(size.y, (real_t)0)), size.abs());
 	}
 
 	Vector2 get_support(const Vector2 &p_normal) const {
-		Vector2 half_extents = size * 0.5;
+		Vector2 half_extents = size * 0.5f;
 		Vector2 ofs = position + half_extents;
 		return Vector2(
 					   (p_normal.x > 0) ? -half_extents.x : half_extents.x,
 					   (p_normal.y > 0) ? -half_extents.y : half_extents.y) +
-			   ofs;
+				ofs;
 	}
 
-	inline bool intersects_filled_polygon(const Vector2 *p_points, int p_point_count) const {
-		Vector2 center = position + size * 0.5;
+	_FORCE_INLINE_ bool intersects_filled_polygon(const Vector2 *p_points, int p_point_count) const {
+		Vector2 center = get_center();
 		int side_plus = 0;
 		int side_minus = 0;
 		Vector2 end = position + size;
@@ -274,22 +309,22 @@ struct _NO_DISCARD_ Rect2 {
 
 			Vector2 r = (b - a);
 			float l = r.length();
-			if (l == 0.0) {
+			if (l == 0.0f) {
 				continue;
 			}
 
-			// check inside
+			// Check inside.
 			Vector2 tg = r.orthogonal();
 			float s = tg.dot(center) - tg.dot(a);
-			if (s < 0.0) {
+			if (s < 0.0f) {
 				side_plus++;
 			} else {
 				side_minus++;
 			}
 
-			// check ray box
+			// Check ray box.
 			r /= l;
-			Vector2 ir((real_t)1.0 / r.x, (real_t)1.0 / r.y);
+			Vector2 ir(1.0f / r.x, 1.0f / r.y);
 
 			// lb is the corner of AABB with minimal coordinates - left bottom, rt is maximal corner
 			// r.org is origin of ray
@@ -308,17 +343,17 @@ struct _NO_DISCARD_ Rect2 {
 		}
 
 		if (side_plus * side_minus == 0) {
-			return true; // all inside
+			return true; // All inside.
 		} else {
 			return false;
 		}
 	}
 
-	inline void set_end(const Vector2 &p_end) {
+	_FORCE_INLINE_ void set_end(const Vector2 &p_end) {
 		size = p_end - position;
 	}
 
-	inline Vector2 get_end() const {
+	_FORCE_INLINE_ Vector2 get_end() const {
 		return position + size;
 	}
 

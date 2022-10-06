@@ -36,7 +36,7 @@
 namespace godot {
 
 Rect2i::operator String() const {
-	return String(position) + ", " + String(size);
+	return "[P: " + position.operator String() + ", S: " + size + "]";
 }
 
 Rect2i::operator Rect2() const {

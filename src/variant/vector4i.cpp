@@ -35,16 +35,6 @@
 
 namespace godot {
 
-void Vector4i::set_axis(const int p_axis, const int32_t p_value) {
-	ERR_FAIL_INDEX(p_axis, 4);
-	coord[p_axis] = p_value;
-}
-
-int32_t Vector4i::get_axis(const int p_axis) const {
-	ERR_FAIL_INDEX_V(p_axis, 4, 0);
-	return operator[](p_axis);
-}
-
 Vector4i::Axis Vector4i::min_axis_index() const {
 	uint32_t min_index = 0;
 	int32_t min_value = x;

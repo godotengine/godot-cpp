@@ -31,6 +31,7 @@
 #include <godot_cpp/variant/plane.hpp>
 
 #include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/variant.hpp>
 
 namespace godot {
 
@@ -59,7 +60,7 @@ Vector3 Plane::get_any_perpendicular_normal() const {
 	static const Vector3 p2 = Vector3(0, 1, 0);
 	Vector3 p;
 
-	if (Math::abs(normal.dot(p1)) > 0.99) { // if too similar to p1
+	if (Math::abs(normal.dot(p1)) > 0.99f) { // if too similar to p1
 		p = p2; // use p2
 	} else {
 		p = p1; // use p1
@@ -89,7 +90,7 @@ bool Plane::intersect_3(const Plane &p_plane1, const Plane &p_plane2, Vector3 *r
 		*r_result = ((vec3_cross(normal1, normal2) * p_plane0.d) +
 							(vec3_cross(normal2, normal0) * p_plane1.d) +
 							(vec3_cross(normal0, normal1) * p_plane2.d)) /
-					denom;
+				denom;
 	}
 
 	return true;
@@ -107,7 +108,7 @@ bool Plane::intersects_ray(const Vector3 &p_from, const Vector3 &p_dir, Vector3 
 	real_t dist = (normal.dot(p_from) - d) / den;
 	//printf("dist is %i\n",dist);
 
-	if (dist > CMP_EPSILON) { //this is a ray, before the emitting pos (p_from) doesn't exist
+	if (dist > (real_t)CMP_EPSILON) { //this is a ray, before the emitting pos (p_from) doesn't exist
 
 		return false;
 	}
@@ -130,7 +131,7 @@ bool Plane::intersects_segment(const Vector3 &p_begin, const Vector3 &p_end, Vec
 	real_t dist = (normal.dot(p_begin) - d) / den;
 	//printf("dist is %i\n",dist);
 
-	if (dist < -CMP_EPSILON || dist > (1.0 + CMP_EPSILON)) {
+	if (dist < (real_t)-CMP_EPSILON || dist > (1.0f + (real_t)CMP_EPSILON)) {
 		return false;
 	}
 
@@ -138,6 +139,33 @@ bool Plane::intersects_segment(const Vector3 &p_begin, const Vector3 &p_end, Vec
 	*p_intersection = p_begin + segment * dist;
 
 	return true;
+}
+
+Variant Plane::intersect_3_bind(const Plane &p_plane1, const Plane &p_plane2) const {
+	Vector3 inters;
+	if (intersect_3(p_plane1, p_plane2, &inters)) {
+		return inters;
+	} else {
+		return Variant();
+	}
+}
+
+Variant Plane::intersects_ray_bind(const Vector3 &p_from, const Vector3 &p_dir) const {
+	Vector3 inters;
+	if (intersects_ray(p_from, p_dir, &inters)) {
+		return inters;
+	} else {
+		return Variant();
+	}
+}
+
+Variant Plane::intersects_segment_bind(const Vector3 &p_begin, const Vector3 &p_end) const {
+	Vector3 inters;
+	if (intersects_segment(p_begin, p_end, &inters)) {
+		return inters;
+	} else {
+		return Variant();
+	}
 }
 
 /* misc */
@@ -151,7 +179,7 @@ bool Plane::is_equal_approx(const Plane &p_plane) const {
 }
 
 Plane::operator String() const {
-	return normal.operator String() + ", " + String::num(d, 3);
+	return "[N: " + normal.operator String() + ", D: " + String::num_real(d, false) + "]";
 }
 
 } // namespace godot
