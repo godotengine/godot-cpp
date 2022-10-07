@@ -119,6 +119,7 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
     if headers:
         for path in [
             include_gen_folder / "variant" / "builtin_types.hpp",
+            include_gen_folder / "variant" / "builtin_binds.hpp",
             include_gen_folder / "variant" / "utility_functions.hpp",
             include_gen_folder / "variant" / "variant_size.hpp",
             include_gen_folder / "classes" / "global_constants.hpp",
@@ -319,6 +320,29 @@ def generate_builtin_bindings(api, output_dir, build_config):
         builtin_header.append("#endif // ! GODOT_CPP_BUILTIN_TYPES_HPP")
 
         builtin_header_file.write("\n".join(builtin_header))
+
+    # Create a header with bindings for builtin types.
+    builtin_binds_filename = include_gen_folder / "builtin_binds.hpp"
+    with builtin_binds_filename.open("w+") as builtin_binds_file:
+        builtin_binds = []
+        add_header("builtin_binds.hpp", builtin_binds)
+
+        builtin_binds.append("#ifndef GODOT_CPP_BUILTIN_BINDS_HPP")
+        builtin_binds.append("#define GODOT_CPP_BUILTIN_BINDS_HPP")
+        builtin_binds.append("")
+        builtin_binds.append("#include <godot_cpp/variant/builtin_types.hpp>")
+        builtin_binds.append("")
+
+        for builtin_api in api["builtin_classes"]:
+            if is_included_type(builtin_api["name"]):
+                if "enums" in builtin_api:
+                    for enum_api in builtin_api["enums"]:
+                        builtin_binds.append(f"VARIANT_ENUM_CAST({builtin_api['name']}, {enum_api['name']});")
+
+        builtin_binds.append("")
+        builtin_binds.append("#endif // ! GODOT_CPP_BUILTIN_BINDS_HPP")
+
+        builtin_binds_file.write("\n".join(builtin_binds))
 
 
 def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes):
@@ -1251,7 +1275,6 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
     add_header(f"{snake_class_name}.cpp", result)
 
     result.append(f"#include <godot_cpp/classes/{snake_class_name}.hpp>")
-    result.append(f"#include <godot_cpp/classes/global_constants_binds.hpp>")
     result.append("")
     result.append(f"#include <godot_cpp/core/engine_ptrcall.hpp>")
     result.append(f"#include <godot_cpp/core/error_macros.hpp>")
@@ -1456,7 +1479,6 @@ def generate_global_constant_binds(api, output_dir):
     header.append(f"#define {header_guard}")
     header.append("")
     header.append("#include <godot_cpp/classes/global_constants.hpp>")
-    header.append("#include <godot_cpp/core/binder_common.hpp>")
     header.append("")
 
     for enum_def in api["global_enums"]:

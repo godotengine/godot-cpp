@@ -579,4 +579,7 @@ void call_with_ptr_args_static_method_ret(R (*p_method)(P...), const GDNativeTyp
 
 } // namespace godot
 
+#include <godot_cpp/classes/global_constants_binds.hpp>
+#include <godot_cpp/variant/builtin_binds.hpp>
+
 #endif // ! GODOT_CPP_BINDER_COMMON_HPP
