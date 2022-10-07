@@ -53,41 +53,41 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1) {
 }
 
 void ClassDB::add_property_group(const char *p_class, const char *p_name, const char *p_prefix) {
-	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), "Trying to add property to non-existing class.");
+	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), String("Trying to add property '{0}{1}' to non-existing class '{2}'.").format(Array::make(p_prefix, p_name, p_class)));
 
 	internal::gdn_interface->classdb_register_extension_class_property_group(internal::library, p_class, p_name, p_prefix);
 }
 
 void ClassDB::add_property_subgroup(const char *p_class, const char *p_name, const char *p_prefix) {
-	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), "Trying to add property to non-existing class.");
+	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), String("Trying to add property '{0}{1}' to non-existing class '{2}'.").format(Array::make(p_prefix, p_name, p_class)));
 
 	internal::gdn_interface->classdb_register_extension_class_property_subgroup(internal::library, p_class, p_name, p_prefix);
 }
 
 void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, const char *p_setter, const char *p_getter, int p_index) {
-	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), "Trying to add property to non-existing class.");
+	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), String("Trying to add property '{0}' to non-existing class '{1}'.").format(Array::make(p_pinfo.name, p_class)));
 
 	ClassInfo &info = classes[p_class];
 
-	ERR_FAIL_COND_MSG(info.property_names.find(p_pinfo.name.utf8().get_data()) != info.property_names.end(), "Property already exists in class.");
+	ERR_FAIL_COND_MSG(info.property_names.find(p_pinfo.name.utf8().get_data()) != info.property_names.end(), String("Property '{0}' already exists in class '{1}'.").format(Array::make(p_pinfo.name, p_class)));
 
 	MethodBind *setter = nullptr;
 	if (p_setter) {
 		setter = get_method(p_class, p_setter);
 
-		ERR_FAIL_COND_MSG(!setter, "Setter method not found for property.");
+		ERR_FAIL_COND_MSG(!setter, String("Setter method '{0}::{1}()' not found for property '{2}::{3}'.").format(Array::make(p_class, p_setter, p_class, p_pinfo.name)));
 
 		size_t exp_args = 1 + (p_index >= 0 ? 1 : 0);
-		ERR_FAIL_COND_MSG(exp_args != setter->get_argument_count(), "Setter method must take a single argument.");
+		ERR_FAIL_COND_MSG(exp_args != setter->get_argument_count(), String("Setter method '{0}::{1}()' must take a single argument.").format(Array::make(p_class, p_setter)));
 	}
 
-	ERR_FAIL_COND_MSG(!p_getter, "Getter method must be specified.");
+	ERR_FAIL_COND_MSG(!p_getter, String("Getter method must be specified for '{0}::{1}'.").format(Array::make(p_class, p_pinfo.name)));
 
 	MethodBind *getter = get_method(p_class, p_getter);
-	ERR_FAIL_COND_MSG(!getter, "Getter method not found for property.");
+	ERR_FAIL_COND_MSG(!getter, String("Getter method '{0}::{1}()' not found for property '{2}::{3}'.").format(Array::make(p_class, p_getter, p_class, p_pinfo.name)));
 	{
 		size_t exp_args = 0 + (p_index >= 0 ? 1 : 0);
-		ERR_FAIL_COND_MSG(exp_args != getter->get_argument_count(), "Getter method must not take any argument.");
+		ERR_FAIL_COND_MSG(exp_args != getter->get_argument_count(), String("Getter method '{0}::{1}()' must not take any argument.").format(Array::make(p_class, p_getter)));
 	}
 
 	// register property with plugin
@@ -119,7 +119,7 @@ void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, con
 }
 
 MethodBind *ClassDB::get_method(const char *p_class, const char *p_method) {
-	ERR_FAIL_COND_V_MSG(classes.find(p_class) == classes.end(), nullptr, "Class not found.");
+	ERR_FAIL_COND_V_MSG(classes.find(p_class) == classes.end(), nullptr, String("Class '{0}' not found.").format(p_class));
 
 	ClassInfo *type = &classes[p_class];
 	while (type) {
@@ -140,26 +140,26 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(instance_type);
 	if (type_it == classes.end()) {
 		memdelete(p_bind);
-		ERR_FAIL_V_MSG(nullptr, "Class doesn't exist.");
+		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(instance_type));
 	}
 
 	ClassInfo &type = type_it->second;
 
 	if (type.method_map.find(method_name.name) != type.method_map.end()) {
 		memdelete(p_bind);
-		ERR_FAIL_V_MSG(nullptr, "Binding duplicate method.");
+		ERR_FAIL_V_MSG(nullptr, String("Binding duplicate method: {0}::{1}().").format(Array::make(instance_type, method_name.name)));
 	}
 
 	if (type.virtual_methods.find(method_name.name) != type.virtual_methods.end()) {
 		memdelete(p_bind);
-		ERR_FAIL_V_MSG(nullptr, "Method already bound as virtual.");
+		ERR_FAIL_V_MSG(nullptr, String("Method '{0}::{1}()' already bound as virtual.").format(Array::make(instance_type, method_name.name)));
 	}
 
 	p_bind->set_name(method_name.name);
 
 	if (method_name.args.size() > p_bind->get_argument_count()) {
 		memdelete(p_bind);
-		ERR_FAIL_V_MSG(nullptr, "Method definition has more arguments than the actual method.");
+		ERR_FAIL_V_MSG(nullptr, String("Method '{0}::{1}()' definition has more arguments than the actual method.").format(Array::make(instance_type, method_name.name)));
 	}
 
 	p_bind->set_hint_flags(p_flags);
@@ -221,14 +221,14 @@ void ClassDB::bind_method_godot(const char *p_class_name, MethodBind *p_method) 
 void ClassDB::add_signal(const char *p_class, const MethodInfo &p_signal) {
 	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(p_class);
 
-	ERR_FAIL_COND_MSG(type_it == classes.end(), "Class doesn't exist.");
+	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(p_class));
 
 	ClassInfo &cl = type_it->second;
 
 	// Check if this signal is already register
 	ClassInfo *check = &cl;
 	while (check) {
-		ERR_FAIL_COND_MSG(check->signal_names.find(p_signal.name) != check->signal_names.end(), String("Class '" + String(p_class) + "' already has signal '" + String(p_signal.name) + "'.").utf8().get_data());
+		ERR_FAIL_COND_MSG(check->signal_names.find(p_signal.name) != check->signal_names.end(), String("Class '{0}' already has signal '{1}'.").format(Array::make(p_class, p_signal.name)));
 		check = check->parent_ptr;
 	}
 
@@ -262,12 +262,12 @@ void ClassDB::add_signal(const char *p_class, const MethodInfo &p_signal) {
 void ClassDB::bind_integer_constant(const char *p_class_name, const char *p_enum_name, const char *p_constant_name, GDNativeInt p_constant_value, bool p_is_bitfield) {
 	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(p_class_name);
 
-	ERR_FAIL_COND_MSG(type_it == classes.end(), "Class doesn't exist.");
+	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(p_class_name));
 
 	ClassInfo &type = type_it->second;
 
 	// check if it already exists
-	ERR_FAIL_COND_MSG(type.constant_names.find(p_constant_name) != type.constant_names.end(), "Constant already registered.");
+	ERR_FAIL_COND_MSG(type.constant_names.find(p_constant_name) != type.constant_names.end(), String("Constant '{0}::{1}' already registered.").format(Array::make(p_class_name, p_constant_name)));
 
 	// register it with our plugin (purely to check for duplicates)
 	type.constant_names.insert(p_constant_name);
@@ -284,7 +284,7 @@ GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, co
 	const char *class_name = (const char *)p_userdata;
 
 	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(class_name);
-	ERR_FAIL_COND_V_MSG(type_it == classes.end(), nullptr, "Class doesn't exist.");
+	ERR_FAIL_COND_V_MSG(type_it == classes.end(), nullptr, String("Class '{0}' doesn't exist.").format(class_name));
 
 	const ClassInfo *type = &type_it->second;
 
@@ -304,12 +304,12 @@ GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, co
 
 void ClassDB::bind_virtual_method(const char *p_class, const char *p_method, GDNativeExtensionClassCallVirtual p_call) {
 	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(p_class);
-	ERR_FAIL_COND_MSG(type_it == classes.end(), "Class doesn't exist.");
+	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(p_class));
 
 	ClassInfo &type = type_it->second;
 
-	ERR_FAIL_COND_MSG(type.method_map.find(p_method) != type.method_map.end(), "Method already registered as non-virtual.");
-	ERR_FAIL_COND_MSG(type.virtual_methods.find(p_method) != type.virtual_methods.end(), "Virtual method already registered.");
+	ERR_FAIL_COND_MSG(type.method_map.find(p_method) != type.method_map.end(), String("Method '{0}::{1}()' already registered as non-virtual.").format(Array::make(p_class, p_method)));
+	ERR_FAIL_COND_MSG(type.virtual_methods.find(p_method) != type.virtual_methods.end(), String("Virtual '{0}::{1}()' method already registered.").format(Array::make(p_class, p_method)));
 
 	type.virtual_methods[p_method] = p_call;
 }
