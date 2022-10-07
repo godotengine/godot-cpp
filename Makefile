@@ -1,17 +1,17 @@
-GENERATE_BINDINGS = auto
-HEADERS = godot-headers
-TARGET = debug
-USE_CLANG = no
+TARGET = template_debug
 
-BASE = scons use_llvm=$(USE_CLANG) generate_bindings=$(GENERATE_BINDINGS) target=$(TARGET) headers=$(HEADERS)
+BASE = scons target=$(TARGET) $(EXTRA_ARGS)
 LINUX = $(BASE) platform=linux
 WINDOWS = $(BASE) platform=windows
 MACOS = $(BASE) platform=macos
 
 
-all:
-	make linux
-	make windows
+.PHONY: usage
+usage:
+	@echo -e "Specify one of the available targets:\n"
+        # https://stackoverflow.com/a/26339924
+	@LC_ALL=C $(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | grep -E -v -e '^[^[:alnum:]]' -e '^$@$$'
+	@echo -e "\nDefine the SCons target with TARGET, and pass extra SCons arguments with EXTRA_ARGS."
 
 
 linux:
@@ -19,10 +19,10 @@ linux:
 	make linux64
 
 linux32: SConstruct
-	$(LINUX) bits=32
+	$(LINUX) arch=x86_32
 
 linux64: SConstruct
-	$(LINUX) bits=64
+	$(LINUX) arch=x86_64
 
 
 windows:
@@ -30,10 +30,10 @@ windows:
 	make windows64
 
 windows32: SConstruct
-	$(WINDOWS) bits=32
+	$(WINDOWS) arch=x86_32
 
 windows64: SConstruct
-	$(WINDOWS) bits=64
+	$(WINDOWS) arch=x86_64
 
 
 macos: SConstruct
