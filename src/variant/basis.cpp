@@ -122,7 +122,7 @@ bool Basis::is_diagonal() const {
 }
 
 bool Basis::is_rotation() const {
-	return Math::is_equal_approx(determinant(), (real_t)1, (real_t)UNIT_EPSILON) && is_orthogonal();
+	return Math::is_equal_approx(determinant(), 1, (real_t)UNIT_EPSILON) && is_orthogonal();
 }
 
 #ifdef MATH_CHECKS
@@ -315,7 +315,7 @@ Vector3 Basis::get_scale() const {
 	//
 	// A proper way to get rid of this issue would be to store the scaling values (or at least their signs)
 	// as a part of Basis. However, if we go that path, we need to disable direct (write) access to the
-	// matrix rows.
+	// matrix elements.
 	//
 	// The rotation part of this decomposition is returned by get_rotation* functions.
 	real_t det_sign = SIGN(determinant());

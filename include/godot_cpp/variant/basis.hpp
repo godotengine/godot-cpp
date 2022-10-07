@@ -31,7 +31,6 @@
 #ifndef GODOT_BASIS_HPP
 #define GODOT_BASIS_HPP
 
-#include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/quaternion.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 

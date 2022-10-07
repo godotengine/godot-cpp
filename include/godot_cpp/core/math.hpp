@@ -441,17 +441,17 @@ inline T abs(T x) {
 	return std::abs(x);
 }
 
-inline double deg2rad(double p_y) {
+inline double deg_to_rad(double p_y) {
 	return p_y * Math_PI / 180.0;
 }
-inline float deg2rad(float p_y) {
+inline float deg_to_rad(float p_y) {
 	return p_y * static_cast<float>(Math_PI) / 180.f;
 }
 
-inline double rad2deg(double p_y) {
+inline double rad_to_deg(double p_y) {
 	return p_y * 180.0 / Math_PI;
 }
-inline float rad2deg(float p_y) {
+inline float rad_to_deg(float p_y) {
 	return p_y * 180.f / static_cast<float>(Math_PI);
 }
 
