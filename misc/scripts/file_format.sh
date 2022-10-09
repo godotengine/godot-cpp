@@ -15,29 +15,6 @@ IFS=$'\n\t'
 # Loops through all text files tracked by Git.
 git grep -zIl '' |
 while IFS= read -rd '' f; do
-    # Exclude some types of files.
-    if [[ "$f" == *"csproj" ]]; then
-        continue
-    elif [[ "$f" == *"sln" ]]; then
-        continue
-    elif [[ "$f" == *".bat" ]]; then
-        continue
-    elif [[ "$f" == *".out" ]]; then
-        # GDScript integration testing files.
-        continue
-    elif [[ "$f" == *"patch" ]]; then
-        continue
-    elif [[ "$f" == *"pot" ]]; then
-        continue
-    elif [[ "$f" == *"po" ]]; then
-        continue
-    elif [[ "$f" == "thirdparty"* ]]; then
-        continue
-    elif [[ "$f" == "platform/android/java/lib/src/com/google"* ]]; then
-        continue
-    elif [[ "$f" == *"-so_wrap."* ]]; then
-        continue
-    fi
     # Ensure that files are UTF-8 formatted.
     recode UTF-8 "$f" 2> /dev/null
     # Ensure that files have LF line endings and do not contain a BOM.
