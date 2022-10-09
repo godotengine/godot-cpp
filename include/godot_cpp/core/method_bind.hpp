@@ -182,7 +182,7 @@ public:
 			for (int i = 0; i < p_method_info.arguments.size(); i++) {
 				names.push_back(p_method_info.arguments[i].name.utf8().get_data());
 				arguments.push_back(GDNativePropertyInfo{
-						static_cast<uint32_t>(p_method_info.arguments[i].type), // uint32_t type;
+						static_cast<GDNativeVariantType>(p_method_info.arguments[i].type), // GDNativeVariantType type;
 						_alloc_and_copy_cstr(p_method_info.arguments[i].name.utf8().get_data()), // const char *name;
 						_alloc_and_copy_cstr(p_method_info.arguments[i].class_name.utf8().get_data()), // const char *class_name;
 						p_method_info.arguments[i].hint, // NONE //uint32_t hint;
