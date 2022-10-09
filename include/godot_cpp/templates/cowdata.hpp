@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef COWDATA_HPP
-#define COWDATA_HPP
+#ifndef GODOT_COWDATA_HPP
+#define GODOT_COWDATA_HPP
 
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/core/class_db.hpp>
@@ -389,4 +389,4 @@ CowData<T>::~CowData() {
 
 } // namespace godot
 
-#endif // ! COWDATA_HPP
+#endif // GODOT_COWDATA_HPP

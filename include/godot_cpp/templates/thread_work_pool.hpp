@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef THREAD_WORK_POOL_HPP
-#define THREAD_WORK_POOL_HPP
+#ifndef GODOT_THREAD_WORK_POOL_HPP
+#define GODOT_THREAD_WORK_POOL_HPP
 
 #include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/classes/semaphore.hpp>
@@ -202,4 +202,4 @@ public:
 
 } // namespace godot
 
-#endif // ! THREAD_WORK_POOL_HPP
+#endif // GODOT_THREAD_WORK_POOL_HPP

@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_CPP_METHOD_PTRCALL_HPP
-#define GODOT_CPP_METHOD_PTRCALL_HPP
+#ifndef GODOT_METHOD_PTRCALL_HPP
+#define GODOT_METHOD_PTRCALL_HPP
 
 #include <godot_cpp/core/defs.hpp>
 
@@ -230,4 +230,4 @@ GDVIRTUAL_NATIVE_PTR(double);
 
 } // namespace godot
 
-#endif // ! GODOT_CPP_METHOD_PTRCALL_HPP
+#endif // GODOT_METHOD_PTRCALL_HPP

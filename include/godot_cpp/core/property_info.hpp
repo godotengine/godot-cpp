@@ -72,4 +72,4 @@ struct PropertyInfo {
 
 } // namespace godot
 
-#endif // ! GODOT_OBJECT_HPP
+#endif // GODOT_PROPERTY_INFO_HPP

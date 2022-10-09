@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef PAIR_HPP
-#define PAIR_HPP
+#ifndef GODOT_PAIR_HPP
+#define GODOT_PAIR_HPP
 
 namespace godot {
 
@@ -104,4 +104,4 @@ struct KeyValueSort {
 
 } // namespace godot
 
-#endif // ! PAIR_HPP
+#endif // GODOT_PAIR_HPP

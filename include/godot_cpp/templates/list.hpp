@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef LIST_HPP
-#define LIST_HPP
+#ifndef GODOT_LIST_HPP
+#define GODOT_LIST_HPP
 
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/memory.hpp>
@@ -766,4 +766,4 @@ public:
 
 } // namespace godot
 
-#endif // ! LIST_HPP
+#endif // GODOT_LIST_HPP

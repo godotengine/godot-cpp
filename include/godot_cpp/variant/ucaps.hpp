@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef UCAPS_HPP
-#define UCAPS_HPP
+#ifndef GODOT_UCAPS_HPP
+#define GODOT_UCAPS_HPP
 
 // satan invented unicode?
 #define CAPS_LEN 666
@@ -1412,4 +1412,4 @@ static int _find_lower(int ch) {
 	return ch;
 }
 
-#endif // UCAPS_HPP
+#endif // GODOT_UCAPS_HPP

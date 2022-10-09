@@ -28,11 +28,11 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef SELF_LIST_HPP
-#define SELF_LIST_HPP
+#ifndef GODOT_SELF_LIST_HPP
+#define GODOT_SELF_LIST_HPP
 
-#include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/core/error_macros.hpp>
 
 namespace godot {
 
@@ -140,4 +140,4 @@ public:
 
 } // namespace godot
 
-#endif // SELF_LIST_HPP
+#endif // GODOT_SELF_LIST_HPP

@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef MUTEX_LOCK_HPP
-#define MUTEX_LOCK_HPP
+#ifndef GODOT_MUTEX_LOCK_HPP
+#define GODOT_MUTEX_LOCK_HPP
 
 #include <godot_cpp/classes/mutex.hpp>
 
@@ -56,4 +56,4 @@ public:
 
 } // namespace godot
 
-#endif // ! MUTEX_LOCK_HPP
+#endif // GODOT_MUTEX_LOCK_HPP

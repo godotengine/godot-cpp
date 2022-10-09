@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_CPP_BUILTIN_PTRCALL_HPP
-#define GODOT_CPP_BUILTIN_PTRCALL_HPP
+#ifndef GODOT_BUILTIN_PTRCALL_HPP
+#define GODOT_BUILTIN_PTRCALL_HPP
 
 #include <godot/gdnative_interface.h>
 
@@ -77,4 +77,4 @@ T _call_builtin_ptr_getter(const GDNativePtrGetter getter, const GDNativeTypePtr
 
 } // namespace godot
 
-#endif // ! GODOT_CPP_BUILTIN_PTRCALL_HPP
+#endif // GODOT_BUILTIN_PTRCALL_HPP

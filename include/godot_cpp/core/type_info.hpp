@@ -66,7 +66,7 @@ struct TypeInherits {
 	static char (&test(...))[2];
 
 	static bool const value = sizeof(test(get_d())) == sizeof(char) &&
-							  !TypesAreSame<B volatile const, void volatile const>::value;
+			!TypesAreSame<B volatile const, void volatile const>::value;
 };
 
 static GDNativePropertyInfo make_property_info(GDNativeVariantType p_type, const char *p_name, uint32_t p_hint = PROPERTY_HINT_NONE, const char *p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const char *p_class_name = "") {
@@ -389,4 +389,4 @@ MAKE_TYPED_ARRAY_INFO(Vector<Color>, Variant::PACKED_COLOR_ARRAY)
 
 } // namespace godot
 
-#endif // ! GODOT_TYPE_INFO_HPP
+#endif // GODOT_TYPE_INFO_HPP

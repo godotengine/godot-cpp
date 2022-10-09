@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_CPP_VARIANT_HPP
-#define GODOT_CPP_VARIANT_HPP
+#ifndef GODOT_VARIANT_HPP
+#define GODOT_VARIANT_HPP
 
 #include <godot_cpp/core/defs.hpp>
 
@@ -320,4 +320,4 @@ struct VariantComparator {
 
 } // namespace godot
 
-#endif // ! GODOT_CPP_VARIANT_HPP
+#endif // GODOT_VARIANT_HPP

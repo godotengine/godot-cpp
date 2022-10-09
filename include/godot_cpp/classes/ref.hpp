@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_CPP_REF_HPP
-#define GODOT_CPP_REF_HPP
+#ifndef GODOT_REF_HPP
+#define GODOT_REF_HPP
 
 #include <godot_cpp/core/defs.hpp>
 
@@ -281,4 +281,4 @@ struct GetTypeInfo<const Ref<T> &, typename EnableIf<TypeInherits<RefCounted, T>
 
 } // namespace godot
 
-#endif // ! GODOT_CPP_REF_HPP
+#endif // GODOT_REF_HPP

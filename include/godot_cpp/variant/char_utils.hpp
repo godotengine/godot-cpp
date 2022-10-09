@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef CHAR_UTILS_HPP
-#define CHAR_UTILS_HPP
+#ifndef GODOT_CHAR_UTILS_HPP
+#define GODOT_CHAR_UTILS_HPP
 
 static _FORCE_INLINE_ bool is_ascii_upper_case(char32_t c) {
 	return (c >= 'A' && c <= 'Z');
@@ -87,4 +87,4 @@ static _FORCE_INLINE_ bool is_underscore(char32_t p_char) {
 	return (p_char == '_');
 }
 
-#endif // CHAR_UTILS_HPP
+#endif // GODOT_CHAR_UTILS_HPP

@@ -21,7 +21,7 @@ func _ready():
 	prints("Property list")
 	$Example.property_from_list = Vector3(100, 200, 300)
 	prints("  property value ", $Example.property_from_list)
-	
+
 	# Call methods.
 	prints("Instance method calls")
 	$Example.simple_func()
