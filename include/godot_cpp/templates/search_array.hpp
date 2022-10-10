@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef SEARCH_ARRAY_HPP
-#define SEARCH_ARRAY_HPP
+#ifndef GODOT_SEARCH_ARRAY_HPP
+#define GODOT_SEARCH_ARRAY_HPP
 
 #include <godot_cpp/templates/sort_array.hpp>
 
@@ -68,4 +68,4 @@ public:
 
 } // namespace godot
 
-#endif // ! SEARCH_ARRAY_HPP
+#endif // GODOT_SEARCH_ARRAY_HPP

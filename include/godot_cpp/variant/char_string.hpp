@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_CPP_CHAR_STRING_HPP
-#define GODOT_CPP_CHAR_STRING_HPP
+#ifndef GODOT_CHAR_STRING_HPP
+#define GODOT_CHAR_STRING_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -110,4 +110,4 @@ public:
 
 } // namespace godot
 
-#endif // ! GODOT_CPP_CHAR_STRING_HPP
+#endif // GODOT_CHAR_STRING_HPP

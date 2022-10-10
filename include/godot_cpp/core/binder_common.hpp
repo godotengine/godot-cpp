@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_CPP_BINDER_COMMON_HPP
-#define GODOT_CPP_BINDER_COMMON_HPP
+#ifndef GODOT_BINDER_COMMON_HPP
+#define GODOT_BINDER_COMMON_HPP
 
 #include <godot/gdnative_interface.h>
 
@@ -582,4 +582,4 @@ void call_with_ptr_args_static_method_ret(R (*p_method)(P...), const GDNativeTyp
 #include <godot_cpp/classes/global_constants_binds.hpp>
 #include <godot_cpp/variant/builtin_binds.hpp>
 
-#endif // ! GODOT_CPP_BINDER_COMMON_HPP
+#endif // GODOT_BINDER_COMMON_HPP

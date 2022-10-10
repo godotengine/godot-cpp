@@ -192,35 +192,3 @@ jobs:
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
           cmake --build . --verbose
-
-  static-checks:
-    name: 📊 Static Checks (clang-format)
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Make apt sources.list use the default Ubuntu repositories
-        run: |
-          sudo rm -f /etc/apt/sources.list.d/*
-          sudo cp -f misc/ci/sources.list /etc/apt/sources.list
-          sudo apt-get update
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get install -qq dos2unix recode clang-format-11
-          sudo update-alternatives --remove-all clang-format
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-11 100
-          python -m pip install black==22.3.0
-
-      - name: Style checks via clang-format
-        run: |
-          bash ./misc/scripts/clang_format.sh
-
-      - name: Python style checks via black (black_format.sh)
-        run: |
-          bash ./misc/scripts/black_format.sh
-
-      - name: Bindings generation checks (ensures get_file_list returns all generated files)
-        run: |
-          python ./misc/scripts/check_get_file_list.py

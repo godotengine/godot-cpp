@@ -158,4 +158,4 @@ const T *Object::cast_to(const Object *p_object) {
 
 } // namespace godot
 
-#endif // ! GODOT_OBJECT_HPP
+#endif // GODOT_OBJECT_HPP

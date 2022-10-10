@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef SPIN_LOCK_HPP
-#define SPIN_LOCK_HPP
+#ifndef GODOT_SPIN_LOCK_HPP
+#define GODOT_SPIN_LOCK_HPP
 
 #include <atomic>
 
@@ -51,4 +51,4 @@ public:
 
 } // namespace godot
 
-#endif // ! SPIN_LOCK_HPP
+#endif // GODOT_SPIN_LOCK_HPP

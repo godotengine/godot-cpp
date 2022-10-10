@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef DEFS_H
-#define DEFS_H
+#ifndef GODOT_DEFS_HPP
+#define GODOT_DEFS_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -127,4 +127,4 @@ struct BuildIndexSequence : BuildIndexSequence<N - 1, N - 1, Is...> {};
 template <size_t... Is>
 struct BuildIndexSequence<0, Is...> : IndexSequence<Is...> {};
 
-#endif // ! DEFS_H
+#endif // GODOT_DEFS_HPP

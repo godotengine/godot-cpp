@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef VSET_HPP
-#define VSET_HPP
+#ifndef GODOT_VSET_HPP
+#define GODOT_VSET_HPP
 
 #include <godot_cpp/templates/vector.hpp>
 
@@ -142,4 +142,4 @@ public:
 
 } // namespace godot
 
-#endif // VSET_H
+#endif // GODOT_VSET_HPP

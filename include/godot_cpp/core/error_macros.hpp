@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_CPP_ERROR_MACROS_HPP
-#define GODOT_CPP_ERROR_MACROS_HPP
+#ifndef GODOT_ERROR_MACROS_HPP
+#define GODOT_ERROR_MACROS_HPP
 
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/variant/string.hpp>
@@ -614,4 +614,4 @@ void _err_print_index_error(const char *p_function, const char *p_file, int p_li
 #define CHECK_METHOD_BIND(m_mb)
 #endif
 
-#endif // ! GODOT_CPP_ERROR_MACROS_HPP
+#endif // GODOT_ERROR_MACROS_HPP

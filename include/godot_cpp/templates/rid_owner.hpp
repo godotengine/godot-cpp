@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef RID_OWNER_HPP
-#define RID_OWNER_HPP
+#ifndef GODOT_RID_OWNER_HPP
+#define GODOT_RID_OWNER_HPP
 
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/godot.hpp>
@@ -462,4 +462,4 @@ public:
 
 } // namespace godot
 
-#endif // ! RID_OWNER_HPP
+#endif // GODOT_RID_OWNER_HPP

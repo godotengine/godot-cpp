@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_CPP_ENGINE_PTRCALL_HPP
-#define GODOT_CPP_ENGINE_PTRCALL_HPP
+#ifndef GODOT_ENGINE_PTRCALL_HPP
+#define GODOT_ENGINE_PTRCALL_HPP
 
 #include <godot/gdnative_interface.h>
 
@@ -94,4 +94,4 @@ void _call_utility_no_ret(const GDNativePtrUtilityFunction func, const Args &...
 
 } // namespace godot
 
-#endif // ! GODOT_CPP_ENGINE_PTRCALL_HPP
+#endif // GODOT_ENGINE_PTRCALL_HPP

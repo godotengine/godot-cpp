@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef CLASS_DB_HPP
-#define CLASS_DB_HPP
+#ifndef GODOT_CLASS_DB_HPP
+#define GODOT_CLASS_DB_HPP
 
 #include <godot/gdnative_interface.h>
 
@@ -254,4 +254,4 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, const char *p_name, M 
 
 } // namespace godot
 
-#endif // ! CLASS_DB_HPP
+#endif // GODOT_CLASS_DB_HPP

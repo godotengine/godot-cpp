@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GODOT_CPP_WRAPPED_HPP
-#define GODOT_CPP_WRAPPED_HPP
+#ifndef GODOT_WRAPPED_HPP
+#define GODOT_WRAPPED_HPP
 
 #include <godot_cpp/core/memory.hpp>
 
@@ -384,4 +384,4 @@ public:                                                                         
 	};                                                                                                             \
 	m_class() : m_class(#m_class) {}
 
-#endif // ! GODOT_CPP_WRAPPED_HPP
+#endif // GODOT_WRAPPED_HPP

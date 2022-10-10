@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef HASH_MAP_HPP
-#define HASH_MAP_HPP
+#ifndef GODOT_HASH_MAP_HPP
+#define GODOT_HASH_MAP_HPP
 
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/memory.hpp>
@@ -588,4 +588,4 @@ public:
 
 } // namespace godot
 
-#endif // HASH_MAP_HPP
+#endif // GODOT_HASH_MAP_HPP
