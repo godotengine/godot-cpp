@@ -1192,6 +1192,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     if is_singleton:
         result.append(f"\tstatic {class_name} *get_singleton();")
         result.append("")
+        result.append(f"\t~{class_name}();")
+        result.append("")
 
     if "methods" in class_api:
         for method in class_api["methods"]:
@@ -1314,6 +1316,8 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
     result.append("")
 
     if is_singleton:
+        result.append(f"static bool {class_name}_singleton_destroyed = false;")
+        result.append("")
         result.append(f"{class_name} *{class_name}::get_singleton() {{")
         result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
         result.append(
@@ -1325,7 +1329,18 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
         result.append(
             f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::gde_interface->object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));"
         )
+        result.append(f"\tstatic struct {class_name}_BindingCleanup {{")
+        result.append(f"\t\t~{class_name}_BindingCleanup() {{")
+        result.append(f"\t\t\tif (!{class_name}_singleton_destroyed) {{")
+        result.append("\t\t\t\tinternal::gde_interface->object_clear_instance_binding(singleton_obj, internal::token);")
+        result.append("\t\t\t}")
+        result.append("\t\t}")
+        result.append("\t} binding_cleanup;")
         result.append("\treturn singleton;")
+        result.append("}")
+        result.append("")
+        result.append(f"{class_name}::~{class_name}() {{")
+        result.append(f"\t{class_name}_singleton_destroyed = true;")
         result.append("}")
         result.append("")
 
