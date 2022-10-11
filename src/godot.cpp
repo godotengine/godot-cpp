@@ -79,11 +79,12 @@ void GDExtensionBinding::initialize_level(void *userdata, GDNativeInitialization
 
 void GDExtensionBinding::deinitialize_level(void *userdata, GDNativeInitializationLevel p_level) {
 	ClassDB::current_level = p_level;
-	ClassDB::deinitialize(p_level);
 
 	if (terminate_callback) {
 		terminate_callback(static_cast<ModuleInitializationLevel>(p_level));
 	}
+
+	ClassDB::deinitialize(p_level);
 }
 
 void GDExtensionBinding::InitObject::register_initializer(Callback p_init) const {
