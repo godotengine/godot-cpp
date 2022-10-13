@@ -95,7 +95,7 @@ void ClassDB::add_property(const char *p_class, const PropertyInfo &p_pinfo, con
 
 	// register with Godot
 	GDNativePropertyInfo prop_info = {
-		static_cast<uint32_t>(p_pinfo.type), // uint32_t type;
+		static_cast<GDNativeVariantType>(p_pinfo.type), // GDNativeVariantType type;
 		_alloc_and_copy_cstr(p_pinfo.name.utf8().get_data()), // const char *name;
 		_alloc_and_copy_cstr(p_pinfo.class_name.utf8().get_data()), // const char *class_name;
 		p_pinfo.hint, // NONE //uint32_t hint;
@@ -241,7 +241,7 @@ void ClassDB::add_signal(const char *p_class, const MethodInfo &p_signal) {
 
 	for (const PropertyInfo &par : p_signal.arguments) {
 		parameters.push_back(GDNativePropertyInfo{
-				static_cast<uint32_t>(par.type), // uint32_t type;
+				static_cast<GDNativeVariantType>(par.type), // GDNativeVariantType type;
 				_alloc_and_copy_cstr(par.name.utf8().get_data()), // const char *name;
 				_alloc_and_copy_cstr(par.class_name.utf8().get_data()), // const char *class_name;
 				par.hint, // NONE //uint32_t hint;
