@@ -9,6 +9,9 @@ from SCons.Variables import *
 def options(opts):
     opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
     opts.Add(BoolVariable("use_clang_cl", "Use the clang driver instead of MSVC - only effective on Windows", False))
+    opts.Add(
+        BoolVariable("use_static_cpp", "Link MSVC C++ runtime libraries statically - only effective on Windows", False)
+    )
 
 
 def exists(env):
@@ -27,10 +30,10 @@ def generate(env):
         env.Append(CPPDEFINES=["TYPED_METHOD_BIND", "NOMINMAX"])
         env.Append(CCFLAGS=["/EHsc"])
         env.Append(LINKFLAGS=["/WX"])
-        if env["debug_symbols"] or env["target"] == "debug":
-            env.Append(CCFLAGS=["/MDd"])
+        if env["dev_build"]:
+            env.Append(CCFLAGS=["/MTd" if env["use_static_cpp"] else "/MDd"])
         else:
-            env.Append(CCFLAGS=["/MD"])
+            env.Append(CCFLAGS=["/MT" if env["use_static_cpp"] else "/MD"])
 
         if env["use_clang_cl"]:
             env["CC"] = "clang-cl"

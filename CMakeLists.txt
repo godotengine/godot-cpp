@@ -35,10 +35,14 @@
 # Todo
 # Test build for Windows, Mac and mingw.
 
+cmake_minimum_required(VERSION 3.15)
+
 project(godot-cpp LANGUAGES CXX)
-cmake_minimum_required(VERSION 3.6)
+
+include(CMakeDependentOption)
 
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
+cmake_dependent_option(USE_STATIC_RUNTIME_LIBRARY "Link C++ runtime libraries statically" OFF "MSVC" ON)
 
 set(BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${BUILD_PATH}")
@@ -50,11 +54,6 @@ SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BUILD_PATH}")
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BUILD_PATH}")
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${BUILD_PATH}")
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${BUILD_PATH}")
-
-# Default build type is Debug in the SConstruct
-if("${CMAKE_BUILD_TYPE}" STREQUAL "")
-	set(CMAKE_BUILD_TYPE Debug)
-endif()
 
 # Set the c++ standard to c++17
 set(CMAKE_CXX_STANDARD 17)
@@ -82,26 +81,12 @@ set(GODOT_LINKER_FLAGS )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	# using Visual Studio C++
-	set(GODOT_COMPILE_FLAGS "/EHsc /WX") # /GF /MP
-
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MDd") # /Od /RTC1 /Zi
-	else()
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MD /O2") # /Oy /GL /Gy
-		STRING(REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-		string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
-	endif(CMAKE_BUILD_TYPE MATCHES Debug)
+	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /W3 /WX")
 
 	# Disable conversion warning, truncation, unreferenced var, signed mismatch, different type
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /wd4244 /wd4305 /wd4101 /wd4018 /wd4267 /wd4099")
 
 	add_definitions(-DNOMINMAX)
-
-	# Unkomment for warning level 4
-	#if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-	#	string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	#endif()
-
 else()  # GCC/Clang
 	set(GODOT_LINKER_FLAGS "-static-libgcc -static-libstdc++ -Wl,-R,'$$ORIGIN'")
 
@@ -125,12 +110,6 @@ else()  # GCC/Clang
 	if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
 		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wno-ignored-attributes")
 	endif()
-
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -fno-omit-frame-pointer -O0")
-	else()
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -O3")
-	endif(CMAKE_BUILD_TYPE MATCHES Debug)
 endif()
 
 # Generate source from the bindings file
@@ -190,11 +169,17 @@ target_include_directories(${PROJECT_NAME}
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS ${GODOT_LINKER_FLAGS})
 
+# Set the desired runtime linkage for MSVC (/MT[d] or /MD[d])
+if(USE_STATIC_RUNTIME_LIBRARY)
+	set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+else()
+	set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+endif()
 
-# Create the correct name (godot.os.build_type.system_bits)
+# Create the correct name (godot-cpp.os[.android_abi].build_type[.system_bits])
 
-string(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME)
-string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+set(SYSTEM_NAME "$<LOWER_CASE:$<PLATFORM_ID>>")
+set(BUILD_TYPE "$<LOWER_CASE:$<CONFIG>>")
 
 if(ANDROID)
 	# Added the android abi after system name
