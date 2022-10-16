@@ -107,4 +107,18 @@ public:
 
 VARIANT_ENUM_CAST(Example, Constants);
 
+class ExampleVirtual : public Object {
+	GDCLASS(ExampleVirtual, Object);
+
+protected:
+	static void _bind_methods() {}
+};
+
+class ExampleAbstract : public Object {
+	GDCLASS(ExampleAbstract, Object);
+
+protected:
+	static void _bind_methods() {}
+};
+
 #endif // EXAMPLE_CLASS_H

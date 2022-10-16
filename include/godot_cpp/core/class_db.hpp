@@ -108,9 +108,14 @@ private:
 		return ret;
 	}
 
+	template <class T, bool is_abstract>
+	static void _register_class(bool p_virtual = false);
+
 public:
 	template <class T>
-	static void register_class();
+	static void register_class(bool p_virtual = false);
+	template <class T>
+	static void register_abstract_class();
 
 	template <class N, class M, typename... VarArgs>
 	static MethodBind *bind_method(N p_method_name, M p_method, VarArgs... p_args);
@@ -153,8 +158,8 @@ public:
 		godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, ___call##m_method);                           \
 	}
 
-template <class T>
-void ClassDB::register_class() {
+template <class T, bool is_abstract>
+void ClassDB::_register_class(bool p_virtual) {
 	// Register this class within our plugin
 	ClassInfo cl;
 	cl.name = T::get_class_static();
@@ -169,6 +174,8 @@ void ClassDB::register_class() {
 
 	// Register this class with Godot
 	GDNativeExtensionClassCreationInfo class_info = {
+		p_virtual, // GDNativeBool is_virtual;
+		is_abstract, // GDNativeBool is_abstract;
 		T::set_bind, // GDNativeExtensionClassSet set_func;
 		T::get_bind, // GDNativeExtensionClassGet get_func;
 		T::get_property_list_bind, // GDNativeExtensionClassGetPropertyList get_property_list_func;
@@ -193,6 +200,16 @@ void ClassDB::register_class() {
 
 	// now register our class within ClassDB within Godot
 	initialize_class(classes[cl.name]);
+}
+
+template <class T>
+void ClassDB::register_class(bool p_virtual) {
+	ClassDB::_register_class<T, false>(p_virtual);
+}
+
+template <class T>
+void ClassDB::register_abstract_class() {
+	ClassDB::_register_class<T, true>();
 }
 
 template <class N, class M, typename... VarArgs>
@@ -251,6 +268,8 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, const char *p_name, M 
 }
 
 #define GDREGISTER_CLASS(m_class) ClassDB::register_class<m_class>();
+#define GDREGISTER_VIRTUAL_CLASS(m_class) ClassDB::register_class<m_class>(true);
+#define GDREGISTER_ABSTRACT_CLASS(m_class) ClassDB::register_abstract_class<m_class>();
 
 } // namespace godot
 
