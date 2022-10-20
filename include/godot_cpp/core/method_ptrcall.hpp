@@ -211,6 +211,7 @@ struct PtrToArg<const T *> {
 		}                                                                           \
 	}
 
+GDVIRTUAL_NATIVE_PTR(void);
 GDVIRTUAL_NATIVE_PTR(bool);
 GDVIRTUAL_NATIVE_PTR(char);
 GDVIRTUAL_NATIVE_PTR(char16_t);
