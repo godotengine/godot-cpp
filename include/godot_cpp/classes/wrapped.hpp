@@ -49,7 +49,7 @@ class Wrapped {
 	friend void postinitialize_handler(Wrapped *);
 
 protected:
-	virtual const StringName *_get_extension_class() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
+	virtual const StringName *_get_extension_class_name() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
 	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
 
 	void _notification(int p_what){};
@@ -106,7 +106,7 @@ private:                                                                        
 	friend class ::godot::ClassDB;                                                                                                                       \
                                                                                                                                                          \
 protected:                                                                                                                                               \
-	virtual const StringName *_get_extension_class() const override {                                                                                    \
+	virtual const StringName *_get_extension_class_name() const override {                                                                               \
 		static StringName string_name = get_class_static();                                                                                              \
 		return &string_name;                                                                                                                             \
 	}                                                                                                                                                    \
@@ -171,7 +171,7 @@ public:                                                                         
 		return string_name;                                                                                                                              \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static StringName *get_parent_class_static() {                                                                                                       \
+	static StringName get_parent_class_static() {                                                                                                        \
 		return m_inherits::get_class_static();                                                                                                           \
 	}                                                                                                                                                    \
                                                                                                                                                          \
@@ -223,10 +223,10 @@ public:                                                                         
 				cls->plist_size = 0;                                                                                                                     \
 				for (const ::godot::PropertyInfo &E : list) {                                                                                            \
 					cls->plist[cls->plist_size].type = static_cast<GDNativeVariantType>(E.type);                                                         \
-					cls->plist[cls->plist_size].name = _alloc_and_copy_cstr(E.name.utf8().get_data());                                                   \
+					cls->plist[cls->plist_size].name = E.name._native_ptr();                                                                             \
 					cls->plist[cls->plist_size].hint = E.hint;                                                                                           \
-					cls->plist[cls->plist_size].hint_string = _alloc_and_copy_cstr(E.hint_string.utf8().get_data());                                     \
-					cls->plist[cls->plist_size].class_name = _alloc_and_copy_cstr(E.class_name.utf8().get_data());                                       \
+					cls->plist[cls->plist_size].hint_string = E.hint_string._native_ptr();                                                               \
+					cls->plist[cls->plist_size].class_name = E.class_name._native_ptr();                                                                 \
 					cls->plist[cls->plist_size].usage = E.usage;                                                                                         \
 					cls->plist_size++;                                                                                                                   \
 				}                                                                                                                                        \
@@ -243,11 +243,6 @@ public:                                                                         
 		if (p_instance) {                                                                                                                                \
 			m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                      \
 			ERR_FAIL_COND_MSG(cls->plist == nullptr, "Internal error, property list double free!");                                                      \
-			for (size_t i = 0; i < cls->plist_size; i++) {                                                                                               \
-				memfree(const_cast<char *>(cls->plist[i].name));                                                                                         \
-				memfree(const_cast<char *>(cls->plist[i].class_name));                                                                                   \
-				memfree(const_cast<char *>(cls->plist[i].hint_string));                                                                                  \
-			}                                                                                                                                            \
 			memfree(cls->plist);                                                                                                                         \
 			cls->plist = nullptr;                                                                                                                        \
 			cls->plist_size = 0;                                                                                                                         \

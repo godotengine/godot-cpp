@@ -48,8 +48,8 @@
 namespace godot {
 
 class MethodBind {
-	const char *name = nullptr;
-	const char *instance_class = nullptr;
+	StringName name;
+	StringName instance_class;
 	int argument_count = 0;
 	uint32_t hint_flags = METHOD_FLAGS_DEFAULT;
 
@@ -58,13 +58,13 @@ class MethodBind {
 	bool _has_return = false;
 	bool _vararg = false;
 
-	std::vector<std::string> argument_names;
+	std::vector<StringName> argument_names;
 	GDNativeVariantType *argument_types = nullptr;
 	std::vector<Variant> default_arguments;
 
 protected:
 	virtual GDNativeVariantType gen_argument_type(int p_arg) const = 0;
-	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const = 0;
+	virtual PropertyInfo gen_argument_type_info(int p_arg) const = 0;
 	void generate_argument_types(int p_count);
 	void set_const(bool p_const);
 	void set_return(bool p_return);
@@ -73,8 +73,8 @@ protected:
 	void set_argument_count(int p_count);
 
 public:
-	const char *get_name() const;
-	void set_name(const char *p_name);
+	StringName get_name() const;
+	void set_name(const StringName &p_name);
 	_FORCE_INLINE_ int get_default_argument_count() const { return (int)default_arguments.size(); }
 	_FORCE_INLINE_ const std::vector<Variant> &get_default_arguments() const { return default_arguments; }
 	_FORCE_INLINE_ Variant has_default_argument(int p_arg) const {
@@ -95,8 +95,8 @@ public:
 			return default_arguments[idx];
 		}
 	}
-	_FORCE_INLINE_ const char *get_instance_class() const { return instance_class; }
-	_FORCE_INLINE_ void set_instance_class(const char *p_class) { instance_class = p_class; }
+	_FORCE_INLINE_ StringName get_instance_class() const { return instance_class; }
+	_FORCE_INLINE_ void set_instance_class(StringName p_class) { instance_class = p_class; }
 
 	_FORCE_INLINE_ int get_argument_count() const { return argument_count; };
 	_FORCE_INLINE_ bool is_const() const { return _is_const; }
@@ -105,8 +105,8 @@ public:
 	_FORCE_INLINE_ bool has_return() const { return _has_return; }
 	_FORCE_INLINE_ uint32_t get_hint_flags() const { return hint_flags | (is_const() ? GDNATIVE_EXTENSION_METHOD_FLAG_CONST : 0) | (is_vararg() ? GDNATIVE_EXTENSION_METHOD_FLAG_VARARG : 0) | (is_static() ? GDNATIVE_EXTENSION_METHOD_FLAG_STATIC : 0); }
 	_FORCE_INLINE_ void set_hint_flags(uint32_t p_hint_flags) { hint_flags = p_hint_flags; }
-	void set_argument_names(const std::vector<std::string> &p_names);
-	std::vector<std::string> get_argument_names() const;
+	void set_argument_names(const std::vector<StringName> &p_names);
+	std::vector<StringName> get_argument_names() const;
 	void set_default_arguments(const std::vector<Variant> &p_default_arguments) { default_arguments = p_default_arguments; }
 
 	_FORCE_INLINE_ GDNativeVariantType get_argument_type(int p_argument) const {
@@ -114,16 +114,30 @@ public:
 		return argument_types[p_argument + 1];
 	}
 
-	GDNativePropertyInfo get_argument_info(int p_argument) const;
+	PropertyInfo get_argument_info(int p_argument) const;
 	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const = 0;
+
+	std::vector<PropertyInfo> get_arguments_info_list() const {
+		std::vector<PropertyInfo> vec;
+		// First element is return value
+		vec.reserve(argument_count + 1);
+		for (int i = 0; i < argument_count; i++) {
+			vec.push_back(get_argument_info(i - 1));
+		}
+		return vec;
+	}
+	std::vector<GDNativeExtensionClassMethodArgumentMetadata> get_arguments_metadata_list() const {
+		std::vector<GDNativeExtensionClassMethodArgumentMetadata> vec;
+		// First element is return value
+		vec.reserve(argument_count + 1);
+		for (int i = 0; i < argument_count; i++) {
+			vec.push_back(get_argument_metadata(i - 1));
+		}
+		return vec;
+	}
 
 	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const = 0;
 	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_return) const = 0;
-
-	// Extension info.
-	static GDNativeVariantType bind_get_argument_type(void *p_method_userdata, int32_t p_argument);
-	static void bind_get_argument_info(void *p_method_userdata, int32_t p_argument, GDNativePropertyInfo *r_info);
-	static GDNativeExtensionClassMethodArgumentMetadata bind_get_argument_metadata(void *p_method_userdata, int32_t p_argument);
 
 	static void bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeVariantPtr r_return, GDNativeCallError *r_error);
 	static void bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_return);
@@ -136,16 +150,16 @@ class MethodBindVarArgBase : public MethodBind {
 protected:
 	R(T::*method)
 	(const Variant **, GDNativeInt, GDNativeCallError &);
-	std::vector<GDNativePropertyInfo> arguments;
+	std::vector<PropertyInfo> arguments;
 
 public:
-	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
+	virtual PropertyInfo gen_argument_type_info(int p_arg) const {
 		if (p_arg < 0) {
 			return _gen_return_type_info();
 		} else if (p_arg < arguments.size()) {
 			return arguments[p_arg];
 		} else {
-			return make_property_info(GDNATIVE_VARIANT_TYPE_NIL, "vararg", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
+			return make_property_info(Variant::Type::NIL, "vararg", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
 		}
 	}
 
@@ -177,20 +191,13 @@ public:
 		set_const(true);
 		set_argument_count(p_method_info.arguments.size());
 		if (p_method_info.arguments.size()) {
-			std::vector<std::string> names;
+			arguments = p_method_info.arguments;
+
+			std::vector<StringName> names;
 			names.reserve(p_method_info.arguments.size());
 			for (int i = 0; i < p_method_info.arguments.size(); i++) {
-				names.push_back(p_method_info.arguments[i].name.utf8().get_data());
-				arguments.push_back(GDNativePropertyInfo{
-						static_cast<GDNativeVariantType>(p_method_info.arguments[i].type), // GDNativeVariantType type;
-						_alloc_and_copy_cstr(p_method_info.arguments[i].name.utf8().get_data()), // const char *name;
-						_alloc_and_copy_cstr(p_method_info.arguments[i].class_name.utf8().get_data()), // const char *class_name;
-						p_method_info.arguments[i].hint, // NONE //uint32_t hint;
-						_alloc_and_copy_cstr(p_method_info.arguments[i].hint_string.utf8().get_data()), // const char *hint_string;
-						p_method_info.arguments[i].usage, // DEFAULT //uint32_t usage;
-				});
+				names.push_back(p_method_info.arguments[i].name);
 			}
-
 			set_argument_names(names);
 		}
 
@@ -198,16 +205,10 @@ public:
 		set_return(should_returns);
 	}
 
-	~MethodBindVarArgBase() {
-		for (GDNativePropertyInfo &arg : arguments) {
-			memfree(const_cast<char *>(arg.name));
-			memfree(const_cast<char *>(arg.class_name));
-			memfree(const_cast<char *>(arg.hint_string));
-		}
-	}
+	~MethodBindVarArgBase() {}
 
 private:
-	GDNativePropertyInfo _gen_return_type_info() const {
+	PropertyInfo _gen_return_type_info() const {
 		return reinterpret_cast<const Derived *>(this)->_gen_return_type_info_impl();
 	}
 };
@@ -230,7 +231,7 @@ public:
 	}
 
 private:
-	GDNativePropertyInfo _gen_return_type_info_impl() const {
+	PropertyInfo _gen_return_type_info_impl() const {
 		return {};
 	}
 };
@@ -259,7 +260,7 @@ public:
 	}
 
 private:
-	GDNativePropertyInfo _gen_return_type_info_impl() const {
+	PropertyInfo _gen_return_type_info_impl() const {
 		return GetTypeInfo<R>::get_class_info();
 	}
 };
@@ -302,12 +303,12 @@ protected:
 		}
 	}
 
-	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
-		GDNativePropertyInfo pi;
+	virtual PropertyInfo gen_argument_type_info(int p_arg) const {
+		PropertyInfo pi;
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			call_get_argument_type_info<P...>(p_arg, pi);
 		} else {
-			pi = GDNativePropertyInfo();
+			pi = PropertyInfo();
 		}
 		return pi;
 	}
@@ -378,12 +379,12 @@ protected:
 		}
 	}
 
-	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
-		GDNativePropertyInfo pi;
+	virtual PropertyInfo gen_argument_type_info(int p_arg) const {
+		PropertyInfo pi;
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			call_get_argument_type_info<P...>(p_arg, pi);
 		} else {
-			pi = GDNativePropertyInfo();
+			pi = PropertyInfo();
 		}
 		return pi;
 	}
@@ -455,9 +456,9 @@ protected:
 		}
 	}
 
-	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
+	virtual PropertyInfo gen_argument_type_info(int p_arg) const {
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
-			GDNativePropertyInfo pi;
+			PropertyInfo pi;
 			call_get_argument_type_info<P...>(p_arg, pi);
 			return pi;
 		} else {
@@ -538,9 +539,9 @@ protected:
 		}
 	}
 
-	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
+	virtual PropertyInfo gen_argument_type_info(int p_arg) const {
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
-			GDNativePropertyInfo pi;
+			PropertyInfo pi;
 			call_get_argument_type_info<P...>(p_arg, pi);
 			return pi;
 		} else {
@@ -618,12 +619,12 @@ protected:
 		}
 	}
 
-	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
-		GDNativePropertyInfo pi;
+	virtual PropertyInfo gen_argument_type_info(int p_arg) const {
+		PropertyInfo pi;
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			call_get_argument_type_info<P...>(p_arg, pi);
 		} else {
-			pi = GDNativePropertyInfo();
+			pi = PropertyInfo();
 		}
 		return pi;
 	}
@@ -683,9 +684,9 @@ protected:
 		}
 	}
 
-	virtual GDNativePropertyInfo gen_argument_type_info(int p_arg) const {
+	virtual PropertyInfo gen_argument_type_info(int p_arg) const {
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
-			GDNativePropertyInfo pi;
+			PropertyInfo pi;
 			call_get_argument_type_info<P...>(p_arg, pi);
 			return pi;
 		} else {

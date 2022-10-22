@@ -53,7 +53,7 @@
 namespace godot {
 
 struct MethodInfo {
-	const char *name;
+	StringName name;
 	PropertyInfo return_val;
 	uint32_t flags;
 	int id = 0;
@@ -68,33 +68,33 @@ struct MethodInfo {
 	static MethodInfo from_dict(const Dictionary &p_dict);
 
 	MethodInfo();
-	MethodInfo(const char *p_name);
+	MethodInfo(StringName p_name);
 	template <class... Args>
-	MethodInfo(const char *p_name, const Args &...args);
+	MethodInfo(StringName p_name, const Args &...args);
 	MethodInfo(Variant::Type ret);
-	MethodInfo(Variant::Type ret, const char *p_name);
+	MethodInfo(Variant::Type ret, StringName p_name);
 	template <class... Args>
-	MethodInfo(Variant::Type ret, const char *p_name, const Args &...args);
-	MethodInfo(const PropertyInfo &p_ret, const char *p_name);
+	MethodInfo(Variant::Type ret, StringName p_name, const Args &...args);
+	MethodInfo(const PropertyInfo &p_ret, StringName p_name);
 	template <class... Args>
-	MethodInfo(const PropertyInfo &p_ret, const char *p_name, const Args &...);
+	MethodInfo(const PropertyInfo &p_ret, StringName p_name, const Args &...);
 };
 
 template <class... Args>
-MethodInfo::MethodInfo(const char *p_name, const Args &...args) :
+MethodInfo::MethodInfo(StringName p_name, const Args &...args) :
 		name(p_name), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
 	arguments = { args... };
 }
 
 template <class... Args>
-MethodInfo::MethodInfo(Variant::Type ret, const char *p_name, const Args &...args) :
+MethodInfo::MethodInfo(Variant::Type ret, StringName p_name, const Args &...args) :
 		name(p_name), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
 	return_val.type = ret;
 	arguments = { args... };
 }
 
 template <class... Args>
-MethodInfo::MethodInfo(const PropertyInfo &p_ret, const char *p_name, const Args &...args) :
+MethodInfo::MethodInfo(const PropertyInfo &p_ret, StringName p_name, const Args &...args) :
 		name(p_name), return_val(p_ret), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
 	arguments = { args... };
 }
@@ -137,7 +137,8 @@ T *Object::cast_to(Object *p_object) {
 	if (p_object == nullptr) {
 		return nullptr;
 	}
-	GDNativeObjectPtr casted = internal::gdn_interface->object_cast_to(p_object->_owner, internal::gdn_interface->classdb_get_class_tag(T::get_class_static()));
+	StringName class_name = T::get_class_static();
+	GDNativeObjectPtr casted = internal::gdn_interface->object_cast_to(p_object->_owner, internal::gdn_interface->classdb_get_class_tag(class_name._native_ptr()));
 	if (casted == nullptr) {
 		return nullptr;
 	}
@@ -149,7 +150,8 @@ const T *Object::cast_to(const Object *p_object) {
 	if (p_object == nullptr) {
 		return nullptr;
 	}
-	GDNativeObjectPtr casted = internal::gdn_interface->object_cast_to(p_object->_owner, internal::gdn_interface->classdb_get_class_tag(T::get_class_static()));
+	StringName class_name = T::get_class_static();
+	GDNativeObjectPtr casted = internal::gdn_interface->object_cast_to(p_object->_owner, internal::gdn_interface->classdb_get_class_tag(class_name._native_ptr()));
 	if (casted == nullptr) {
 		return nullptr;
 	}

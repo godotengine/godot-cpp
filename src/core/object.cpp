@@ -35,7 +35,7 @@ namespace godot {
 MethodInfo::MethodInfo() :
 		flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {}
 
-MethodInfo::MethodInfo(const char *p_name) :
+MethodInfo::MethodInfo(StringName p_name) :
 		name(p_name), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {}
 
 MethodInfo::MethodInfo(Variant::Type ret) :
@@ -43,12 +43,12 @@ MethodInfo::MethodInfo(Variant::Type ret) :
 	return_val.type = ret;
 }
 
-MethodInfo::MethodInfo(Variant::Type ret, const char *p_name) :
+MethodInfo::MethodInfo(Variant::Type ret, StringName p_name) :
 		name(p_name), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
 	return_val.type = ret;
 }
 
-MethodInfo::MethodInfo(const PropertyInfo &p_ret, const char *p_name) :
+MethodInfo::MethodInfo(const PropertyInfo &p_ret, StringName p_name) :
 		name(p_name), return_val(p_ret), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {}
 
 } // namespace godot

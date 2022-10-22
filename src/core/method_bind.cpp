@@ -32,11 +32,11 @@
 
 namespace godot {
 
-const char *MethodBind::get_name() const {
+StringName MethodBind::get_name() const {
 	return name;
 }
 
-void MethodBind::set_name(const char *p_name) {
+void MethodBind::set_name(const StringName &p_name) {
 	name = p_name;
 }
 
@@ -60,11 +60,11 @@ void MethodBind::set_vararg(bool p_vararg) {
 	_vararg = p_vararg;
 }
 
-void MethodBind::set_argument_names(const std::vector<std::string> &p_names) {
+void MethodBind::set_argument_names(const std::vector<StringName> &p_names) {
 	argument_names = p_names;
 }
 
-std::vector<std::string> MethodBind::get_argument_names() const {
+std::vector<StringName> MethodBind::get_argument_names() const {
 	return argument_names;
 }
 
@@ -83,27 +83,12 @@ void MethodBind::generate_argument_types(int p_count) {
 	}
 }
 
-GDNativePropertyInfo MethodBind::get_argument_info(int p_argument) const {
-	GDNativePropertyInfo info = gen_argument_type_info(p_argument);
+PropertyInfo MethodBind::get_argument_info(int p_argument) const {
+	PropertyInfo info = gen_argument_type_info(p_argument);
 	if (p_argument >= 0) {
-		info.name = p_argument < (int)argument_names.size() ? argument_names[p_argument].c_str() : "";
+		info.name = p_argument < (int)argument_names.size() ? argument_names[p_argument] : "";
 	}
 	return info;
-}
-
-GDNativeVariantType MethodBind::bind_get_argument_type(void *p_method_userdata, int32_t p_argument) {
-	const MethodBind *bind = reinterpret_cast<const MethodBind *>(p_method_userdata);
-	return bind->get_argument_type(p_argument);
-}
-
-void MethodBind::bind_get_argument_info(void *p_method_userdata, int32_t p_argument, GDNativePropertyInfo *r_info) {
-	const MethodBind *bind = reinterpret_cast<const MethodBind *>(p_method_userdata);
-	*r_info = bind->get_argument_info(p_argument);
-}
-
-GDNativeExtensionClassMethodArgumentMetadata MethodBind::bind_get_argument_metadata(void *p_method_userdata, int32_t p_argument) {
-	const MethodBind *bind = reinterpret_cast<const MethodBind *>(p_method_userdata);
-	return bind->get_argument_metadata(p_argument);
 }
 
 void MethodBind::bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeVariantPtr r_return, GDNativeCallError *r_error) {

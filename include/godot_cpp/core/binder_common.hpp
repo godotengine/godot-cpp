@@ -423,7 +423,7 @@ GDNativeVariantType call_get_argument_type(int p_arg) {
 }
 
 template <class Q>
-void call_get_argument_type_info_helper(int p_arg, int &index, GDNativePropertyInfo &info) {
+void call_get_argument_type_info_helper(int p_arg, int &index, PropertyInfo &info) {
 	if (p_arg == index) {
 		info = GetTypeInfo<Q>::get_class_info();
 	}
@@ -431,7 +431,7 @@ void call_get_argument_type_info_helper(int p_arg, int &index, GDNativePropertyI
 }
 
 template <class... P>
-void call_get_argument_type_info(int p_arg, GDNativePropertyInfo &info) {
+void call_get_argument_type_info(int p_arg, PropertyInfo &info) {
 	int index = 0;
 	// I think rocket science is simpler than modern C++.
 	using expand_type = int[];

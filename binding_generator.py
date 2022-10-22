@@ -394,9 +394,6 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append(f"class {class_name} {{")
     result.append(f"\tstatic constexpr size_t {snake_class_name}_SIZE = {size};")
     result.append(f"\tuint8_t opaque[{snake_class_name}_SIZE] = {{}};")
-    result.append(
-        f"\t_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
-    )
 
     result.append("")
     result.append("\tfriend class Variant;")
@@ -445,6 +442,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     result.append("")
     result.append("public:")
+
+    result.append(
+        f"\t_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
+    )
 
     copy_constructor_index = -1
 
@@ -694,17 +695,17 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             # TODO: Add error check for hash mismatch.
             result.append(f'\t__name = StringName("{method["name"]}");')
             result.append(
-                f'\t_method_bindings.method_{method["name"]} = internal::gdn_interface->variant_get_ptr_builtin_method({enum_type_name}, (void *)&__name, {method["hash"]});'
+                f'\t_method_bindings.method_{method["name"]} = internal::gdn_interface->variant_get_ptr_builtin_method({enum_type_name}, __name._native_ptr(), {method["hash"]});'
             )
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
             result.append(f'\t__name = StringName("{member["name"]}");')
             result.append(
-                f'\t_method_bindings.member_{member["name"]}_setter = internal::gdn_interface->variant_get_ptr_setter({enum_type_name}, (void *)&__name);'
+                f'\t_method_bindings.member_{member["name"]}_setter = internal::gdn_interface->variant_get_ptr_setter({enum_type_name}, __name._native_ptr());'
             )
             result.append(
-                f'\t_method_bindings.member_{member["name"]}_getter = internal::gdn_interface->variant_get_ptr_getter({enum_type_name}, (void *)&__name);'
+                f'\t_method_bindings.member_{member["name"]}_getter = internal::gdn_interface->variant_get_ptr_getter({enum_type_name}, __name._native_ptr());'
             )
 
     if "indexing_return_type" in builtin_api:
@@ -1296,9 +1297,9 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
 
     if is_singleton:
         result.append(f"{class_name} *{class_name}::get_singleton() {{")
-        result.append(f'\tconst StringName __class_name = {class_name}::get_class_static();')
+        result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
         result.append(
-            f"\tstatic GDNativeObjectPtr singleton_obj = internal::gdn_interface->global_get_singleton((void *)&__class_name);"
+            f"\tstatic GDNativeObjectPtr singleton_obj = internal::gdn_interface->global_get_singleton(__class_name._native_ptr());"
         )
         result.append("#ifdef DEBUG_ENABLED")
         result.append("\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
@@ -1323,10 +1324,10 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             result.append(method_signature + " {")
 
             # Method body.
-            result.append(f'\tconst StringName __class_name = {class_name}::get_class_static();')
+            result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
             result.append(f'\tconst StringName __method_name = "{method["name"]}";')
             result.append(
-                f'\tstatic GDNativeMethodBindPtr ___method_bind = internal::gdn_interface->classdb_get_method_bind((void *)&__class_name, (void *)&__method_name, {method["hash"]});'
+                f'\tstatic GDNativeMethodBindPtr ___method_bind = internal::gdn_interface->classdb_get_method_bind(__class_name._native_ptr(), __method_name._native_ptr(), {method["hash"]});'
             )
             method_call = "\t"
             has_return = "return_value" in method and method["return_value"]["type"] != "void"
@@ -1575,7 +1576,7 @@ def generate_utility_functions(api, output_dir):
 
         source.append(f'\tconst StringName __function_name = "{function["name"]}";')
         source.append(
-            f'\tstatic GDNativePtrUtilityFunction ___function = internal::gdn_interface->variant_get_ptr_utility_function((void *)&__function_name, {function["hash"]});'
+            f'\tstatic GDNativePtrUtilityFunction ___function = internal::gdn_interface->variant_get_ptr_utility_function(__function_name._native_ptr(), {function["hash"]});'
         )
         has_return = "return_type" in function and function["return_type"] != "void"
         if has_return:

@@ -45,15 +45,15 @@ namespace godot {
 
 struct PropertyInfo {
 	Variant::Type type = Variant::NIL;
-	String name;
-	String class_name;
+	StringName name;
+	StringName class_name;
 	uint32_t hint = 0;
 	String hint_string;
 	uint32_t usage = 7;
 
 	PropertyInfo() = default;
 
-	PropertyInfo(Variant::Type p_type, const String &p_name, PropertyHint p_hint = PROPERTY_HINT_NONE, const String &p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const String &p_class_name = "") :
+	PropertyInfo(Variant::Type p_type, const StringName &p_name, PropertyHint p_hint = PROPERTY_HINT_NONE, const String &p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const StringName &p_class_name = "") :
 			type(p_type),
 			name(p_name),
 			hint(p_hint),
@@ -66,7 +66,7 @@ struct PropertyInfo {
 		}
 	}
 
-	PropertyInfo(GDNativeVariantType p_type, const String &p_name, PropertyHint p_hint = PROPERTY_HINT_NONE, const String &p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const String &p_class_name = "") :
+	PropertyInfo(GDNativeVariantType p_type, const StringName &p_name, PropertyHint p_hint = PROPERTY_HINT_NONE, const String &p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const StringName &p_class_name = "") :
 			PropertyInfo((Variant::Type)p_type, p_name, p_hint, p_hint_string, p_usage, p_class_name) {}
 };
 
