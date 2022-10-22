@@ -49,7 +49,7 @@ class Wrapped {
 	friend void postinitialize_handler(Wrapped *);
 
 protected:
-	virtual const char *_get_extension_class() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
+	virtual const StringName *_get_extension_class() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
 	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
 
 	void _notification(int p_what){};
@@ -74,12 +74,13 @@ protected:
 
 	void _postinitialize();
 
-	Wrapped(const char *p_godot_class);
+	Wrapped(const StringName p_godot_class);
 	Wrapped(GodotObject *p_godot_object);
 
 public:
-	static const char *get_class_static() {
-		return "Wrapped";
+	static StringName get_class_static() {
+		static StringName string_name = StringName("Wrapped");
+		return string_name;
 	}
 
 	uint64_t get_instance_id() const {
@@ -105,8 +106,9 @@ private:                                                                        
 	friend class ::godot::ClassDB;                                                                                                                       \
                                                                                                                                                          \
 protected:                                                                                                                                               \
-	virtual const char *_get_extension_class() const override {                                                                                          \
-		return get_class_static();                                                                                                                       \
+	virtual const StringName *_get_extension_class() const override {                                                                                    \
+		static StringName string_name = get_class_static();                                                                                              \
+		return &string_name;                                                                                                                             \
 	}                                                                                                                                                    \
                                                                                                                                                          \
 	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const override {                                                           \
@@ -164,11 +166,12 @@ public:                                                                         
 		initialized = true;                                                                                                                              \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static const char *get_class_static() {                                                                                                              \
-		return #m_class;                                                                                                                                 \
+	static StringName get_class_static() {                                                                                                               \
+		static StringName string_name = StringName(#m_class);                                                                                            \
+		return string_name;                                                                                                                              \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static const char *get_parent_class_static() {                                                                                                       \
+	static StringName *get_parent_class_static() {                                                                                                       \
 		return m_inherits::get_class_static();                                                                                                           \
 	}                                                                                                                                                    \
                                                                                                                                                          \
@@ -357,11 +360,12 @@ protected:                                                                      
 public:                                                                                                            \
 	static void initialize_class() {}                                                                              \
                                                                                                                    \
-	static const char *get_class_static() {                                                                        \
-		return #m_class;                                                                                           \
+	static StringName get_class_static() {                                                                         \
+		static StringName string_name = StringName(#m_class);                                                      \
+		return string_name;                                                                                        \
 	}                                                                                                              \
                                                                                                                    \
-	static const char *get_parent_class_static() {                                                                 \
+	static StringName get_parent_class_static() {                                                                  \
 		return m_inherits::get_class_static();                                                                     \
 	}                                                                                                              \
                                                                                                                    \
