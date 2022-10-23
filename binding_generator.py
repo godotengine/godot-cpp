@@ -397,6 +397,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     result.append("")
     result.append("\tfriend class Variant;")
+    if class_name == "String":
+        result.append("\tfriend class StringName;")
 
     result.append("")
     result.append("\tstatic struct _MethodBindings {")
@@ -439,6 +441,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     result.append("")
     result.append("\tstatic void init_bindings();")
+    result.append("\tstatic void _init_bindings_constructors_destructor();")
 
     result.append("")
     result.append("public:")
@@ -675,7 +678,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     result.append(f"{class_name}::_MethodBindings {class_name}::_method_bindings;")
     result.append("")
 
-    result.append(f"void {class_name}::init_bindings() {{")
+    result.append(f"void {class_name}::_init_bindings_constructors_destructor() {{")
 
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
@@ -688,7 +691,16 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             f"\t_method_bindings.destructor = internal::gdn_interface->variant_get_ptr_destructor({enum_type_name});"
         )
 
-    result.append(f"StringName __name;")
+    result.append("}")
+
+    result.append(f"void {class_name}::init_bindings() {{")
+
+    # StringName's constructor internally uses String, so it constructor must be ready !
+    if class_name == "StringName":
+        result.append(f"\tString::_init_bindings_constructors_destructor();")
+    result.append(f"\t{class_name}::_init_bindings_constructors_destructor();")
+
+    result.append(f"\tStringName __name;")
 
     if "methods" in builtin_api:
         for method in builtin_api["methods"]:

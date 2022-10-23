@@ -115,7 +115,7 @@ void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinf
 }
 
 MethodBind *ClassDB::get_method(const StringName &p_class, const StringName &p_method) {
-	ERR_FAIL_COND_V_MSG(classes.find(p_class) == classes.end(), nullptr, String("Class '{0}' not found.").format(p_class));
+	ERR_FAIL_COND_V_MSG(classes.find(p_class) == classes.end(), nullptr, String("Class '{0}' not found.").format(Array::make(p_class)));
 
 	ClassInfo *type = &classes[p_class];
 	while (type) {
@@ -136,7 +136,7 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(instance_type);
 	if (type_it == classes.end()) {
 		memdelete(p_bind);
-		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(instance_type));
+		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(Array::make(instance_type)));
 	}
 
 	ClassInfo &type = type_it->second;
@@ -240,7 +240,7 @@ void ClassDB::bind_method_godot(const StringName &p_class_name, MethodBind *p_me
 void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) {
 	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class);
 
-	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(p_class));
+	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
 
 	ClassInfo &cl = type_it->second;
 
@@ -275,7 +275,7 @@ void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) 
 void ClassDB::bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDNativeInt p_constant_value, bool p_is_bitfield) {
 	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class_name);
 
-	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(p_class_name));
+	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class_name)));
 
 	ClassInfo &type = type_it->second;
 
@@ -296,7 +296,7 @@ GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, co
 	const StringName *name = reinterpret_cast<const StringName *>(p_name);
 
 	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(*class_name);
-	ERR_FAIL_COND_V_MSG(type_it == classes.end(), nullptr, String("Class '{0}' doesn't exist.").format(*class_name));
+	ERR_FAIL_COND_V_MSG(type_it == classes.end(), nullptr, String("Class '{0}' doesn't exist.").format(Array::make(*class_name)));
 
 	const ClassInfo *type = &type_it->second;
 
@@ -316,7 +316,7 @@ GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, co
 
 void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p_method, GDNativeExtensionClassCallVirtual p_call) {
 	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class);
-	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(p_class));
+	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
 
 	ClassInfo &type = type_it->second;
 

@@ -191,7 +191,7 @@ void ClassDB::_register_class(bool p_virtual) {
 		T::free, // GDNativeExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
 		&ClassDB::get_virtual_func, // GDNativeExtensionClassGetVirtual get_virtual_func;
 		nullptr, // GDNativeExtensionClassGetRID get_rid;
-		(void *)&cl.name, // void *class_userdata;
+		(void *)&T::get_class_static(), // void *class_userdata;
 	};
 
 	internal::gdn_interface->classdb_register_extension_class(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
@@ -249,7 +249,7 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p
 	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(instance_type);
 	if (type_it == classes.end()) {
 		memdelete(bind);
-		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(instance_type));
+		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(Array::make(instance_type)));
 	}
 
 	ClassInfo &type = type_it->second;

@@ -78,7 +78,7 @@ protected:
 	Wrapped(GodotObject *p_godot_object);
 
 public:
-	static StringName get_class_static() {
+	static StringName &get_class_static() {
 		static StringName string_name = StringName("Wrapped");
 		return string_name;
 	}
@@ -159,12 +159,12 @@ public:                                                                         
 		initialized = true;                                                                                                                              \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static StringName get_class_static() {                                                                                                               \
+	static StringName &get_class_static() {                                                                                                              \
 		static StringName string_name = StringName(#m_class);                                                                                            \
 		return string_name;                                                                                                                              \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static StringName get_parent_class_static() {                                                                                                        \
+	static StringName &get_parent_class_static() {                                                                                                       \
 		return m_inherits::get_class_static();                                                                                                           \
 	}                                                                                                                                                    \
                                                                                                                                                          \
@@ -349,12 +349,12 @@ protected:                                                                      
 public:                                                                                                            \
 	static void initialize_class() {}                                                                              \
                                                                                                                    \
-	static StringName get_class_static() {                                                                         \
+	static StringName &get_class_static() {                                                                        \
 		static StringName string_name = StringName(#m_class);                                                      \
 		return string_name;                                                                                        \
 	}                                                                                                              \
                                                                                                                    \
-	static StringName get_parent_class_static() {                                                                  \
+	static StringName &get_parent_class_static() {                                                                 \
 		return m_inherits::get_class_static();                                                                     \
 	}                                                                                                              \
                                                                                                                    \
