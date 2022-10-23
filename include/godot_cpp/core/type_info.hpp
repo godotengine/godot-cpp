@@ -278,7 +278,7 @@ public:
 	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, const m_enum &)
 
 template <typename T>
-inline const char *__constant_get_bitfield_name(T param, const char *p_constant) {
+inline StringName __constant_get_bitfield_name(T param, StringName p_constant) {
 	if (GetTypeInfo<T>::VARIANT_TYPE == Variant::NIL) {
 		ERR_PRINT(("Missing VARIANT_ENUM_CAST for constant's bitfield: " + String(p_constant)).utf8().get_data());
 	}
