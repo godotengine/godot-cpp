@@ -225,7 +225,7 @@ typedef void (*GDNativeExtensionClassFreePropertyList)(GDExtensionClassInstanceP
 typedef GDNativeBool (*GDNativeExtensionClassPropertyCanRevert)(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name);
 typedef GDNativeBool (*GDNativeExtensionClassPropertyGetRevert)(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name, GDNativeVariantPtr r_ret);
 typedef void (*GDNativeExtensionClassNotification)(GDExtensionClassInstancePtr p_instance, int32_t p_what);
-typedef void (*GDNativeExtensionClassToString)(GDExtensionClassInstancePtr p_instance, GDNativeStringPtr p_out);
+typedef void (*GDNativeExtensionClassToString)(GDExtensionClassInstancePtr p_instance, GDNativeBool *r_is_valid, GDNativeStringPtr p_out);
 typedef void (*GDNativeExtensionClassReference)(GDExtensionClassInstancePtr p_instance);
 typedef void (*GDNativeExtensionClassUnreference)(GDExtensionClassInstancePtr p_instance);
 typedef void (*GDNativeExtensionClassCallVirtual)(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_ret);
@@ -324,7 +324,7 @@ typedef GDNativeBool (*GDNativeExtensionScriptInstanceHasMethod)(GDNativeExtensi
 
 typedef void (*GDNativeExtensionScriptInstanceCall)(GDNativeExtensionScriptInstanceDataPtr p_self, const GDNativeStringNamePtr p_method, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeVariantPtr r_return, GDNativeCallError *r_error);
 typedef void (*GDNativeExtensionScriptInstanceNotification)(GDNativeExtensionScriptInstanceDataPtr p_instance, int32_t p_what);
-typedef const char *(*GDNativeExtensionScriptInstanceToString)(GDNativeExtensionScriptInstanceDataPtr p_instance, GDNativeBool *r_is_valid);
+typedef void (*GDNativeExtensionScriptInstanceToString)(GDNativeExtensionScriptInstanceDataPtr p_instance, GDNativeBool *r_is_valid, GDNativeStringPtr r_out);
 
 typedef void (*GDNativeExtensionScriptInstanceRefCountIncremented)(GDNativeExtensionScriptInstanceDataPtr p_instance);
 typedef GDNativeBool (*GDNativeExtensionScriptInstanceRefCountDecremented)(GDNativeExtensionScriptInstanceDataPtr p_instance);

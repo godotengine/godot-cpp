@@ -67,7 +67,7 @@ protected:
 	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDNativePropertyInfo *p_list) {}
 	static GDNativeBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name) { return false; }
 	static GDNativeBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name, GDNativeVariantPtr r_ret) { return false; }
-	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeStringPtr r_out) {}
+	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeBool *r_is_valid, GDNativeStringPtr r_out) {}
 
 	GDNativePropertyInfo *plist = nullptr;
 	uint32_t plist_size = 0;
@@ -264,14 +264,15 @@ public:                                                                         
 		return false;                                                                                                                                    \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeStringPtr r_out) {                                                        \
+	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeBool *r_is_valid, GDNativeStringPtr r_out) {                              \
 		if (p_instance && m_class::_get_to_string()) {                                                                                                   \
 			if (m_class::_get_to_string() != m_inherits::_get_to_string()) {                                                                             \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                  \
 				*reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                         \
+				*r_is_valid = true;                                                                                                                      \
 				return;                                                                                                                                  \
 			}                                                                                                                                            \
-			m_inherits::to_string_bind(p_instance, r_out);                                                                                               \
+			m_inherits::to_string_bind(p_instance, r_is_valid, r_out);                                                                                   \
 		}                                                                                                                                                \
 	}                                                                                                                                                    \
                                                                                                                                                          \
