@@ -109,13 +109,6 @@ private:
 	static void initialize_class(const ClassInfo &cl);
 	static void bind_method_godot(const StringName &p_class_name, MethodBind *p_method);
 
-	static _FORCE_INLINE_ char *_alloc_and_copy_cstr(const char *p_str) {
-		size_t size = strlen(p_str) + 1;
-		char *ret = reinterpret_cast<char *>(memalloc(size));
-		memcpy(ret, p_str, size);
-		return ret;
-	}
-
 	template <class T, bool is_abstract>
 	static void _register_class(bool p_virtual = false);
 

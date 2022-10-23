@@ -175,13 +175,6 @@ public:
 		ERR_FAIL(); // Can't call.
 	}
 
-	static _FORCE_INLINE_ char *_alloc_and_copy_cstr(const char *p_str) {
-		size_t size = strlen(p_str) + 1;
-		char *ret = reinterpret_cast<char *>(memalloc(size));
-		memcpy(ret, p_str, size);
-		return ret;
-	}
-
 	MethodBindVarArgBase(
 			R (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &),
 			const MethodInfo &p_method_info,
