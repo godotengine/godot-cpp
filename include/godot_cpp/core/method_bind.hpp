@@ -345,11 +345,7 @@ public:
 
 template <class C, class T, class... P>
 MethodBind *create_inherited_method_bind(void (T::*p_method)(P...)) {
-#ifdef TYPED_METHOD_BIND
 	MethodBind *a = memnew((MethodBindT<C, P...>)(p_method));
-#else
-	MethodBind *a = memnew((MethodBindT<P...>)(reinterpret_cast<void (MB_T::*)(P...)>(p_method)));
-#endif // TYPED_METHOD_BIND
 	a->set_instance_class(C::get_class_static());
 	return a;
 }
@@ -526,11 +522,7 @@ public:
 
 template <class C, class T, class R, class... P>
 MethodBind *create_inherited_method_bind(R (T::*p_method)(P...)) {
-#ifdef TYPED_METHOD_BIND
 	MethodBind *a = memnew((MethodBindTR<C, R, P...>)(p_method));
-#else
-	MethodBind *a = memnew((MethodBindTR<R, P...>)(reinterpret_cast<R (MB_T::*)(P...)>(p_method)));
-#endif // TYPED_METHOD_BIND
 	a->set_instance_class(C::get_class_static());
 	return a;
 }
@@ -620,11 +612,7 @@ public:
 
 template <class C, class T, class R, class... P>
 MethodBind *create_inherited_method_bind(R (T::*p_method)(P...) const) {
-#ifdef TYPED_METHOD_BIND
 	MethodBind *a = memnew((MethodBindTRC<C, R, P...>)(p_method));
-#else
-	MethodBind *a = memnew((MethodBindTRC<R, P...>)(reinterpret_cast<R (MB_T::*)(P...) const>(p_method)));
-#endif // TYPED_METHOD_BIND
 	a->set_instance_class(C::get_class_static());
 	return a;
 }
