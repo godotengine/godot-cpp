@@ -270,3 +270,16 @@ bool Example::_has_point(const Vector2 &point) const {
 
 	return false;
 }
+
+void ExampleBaseClass::example_void_method() {
+	return;
+}
+
+int ExampleBaseClass::example_int_method() {
+	return 42;
+}
+
+void ExampleInheriting::_bind_methods() {
+	ClassDB::bind_inherited_method<ExampleInheriting>(D_METHOD("example_void_method"), &ExampleInheriting::example_void_method);
+	ClassDB::bind_inherited_method<ExampleInheriting>(D_METHOD("example_int_method"), &ExampleInheriting::example_int_method);
+}
