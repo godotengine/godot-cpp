@@ -1,0 +1,194 @@
+name: Continuous integration
+on: workflow_call
+
+env:
+  # Only used for the cache key. Increment version to force clean build.
+  GODOT_BASE_BRANCH: master
+
+concurrency:
+  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}
+  cancel-in-progress: true
+
+jobs:
+  SCons:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: SCons 🐧 Linux (GCC)
+            os: ubuntu-18.04
+            platform: linux
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
+            artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
+            cache-name: linux-x86_64
+
+          - name: Scons 🐧 Linux (GCC, Double Precision)
+            os: ubuntu-18.04
+            platform: linux
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
+            artifact-path: bin/libgodot-cpp.linux.template_release.double.x86_64.a
+            flags: float=64
+            cache-name: linux-x86_64-f64
+
+          - name: Scons 🏁 Windows (x86_64, MSVC)
+            os: windows-2019
+            platform: windows
+            artifact-name: godot-cpp-windows-msvc2019-x86_64-release
+            artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.lib
+            cache-name: windows-x86_64-msvc
+
+          - name: Scons 🏁 Windows (x86_64, MinGW)
+            os: windows-2019
+            platform: windows
+            artifact-name: godot-cpp-linux-mingw-x86_64-release
+            artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.a
+            flags: use_mingw=yes
+            cache-name: windows-x86_64-mingw
+
+          - name: Scons 🍎 macOS (universal)
+            os: macos-11
+            platform: macos
+            artifact-name: godot-cpp-macos-universal-release
+            artifact-path: bin/libgodot-cpp.macos.template_release.universal.a
+            flags: arch=universal
+            cache-name: macos-universal
+
+          - name: Scons 🤖 Android (arm64)
+            os: ubuntu-18.04
+            platform: android
+            artifact-name: godot-cpp-android-arm64-release
+            artifact-path: bin/libgodot-cpp.android.template_release.arm64.a
+            flags: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME arch=arm64
+            cache-name: android-arm64
+
+          - name: Scons 🍏 iOS (arm64)
+            os: macos-11
+            platform: ios
+            artifact-name: godot-cpp-ios-arm64-release
+            artifact-path: bin/libgodot-cpp.ios.template_release.arm64.a
+            flags: arch=arm64
+            cache-name: ios-arm64
+
+    env:
+      SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup Godot build cache
+        uses: ./.github/actions/godot-cache
+        with:
+          cache-name: ${{ matrix.cache-name }}
+        continue-on-error: true
+
+      - name: Set up Python (for SCons)
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Linux dependencies
+        if: ${{ matrix.platform == 'linux' }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qqq build-essential pkg-config
+
+      - name: Install scons
+        run: |
+          python -m pip install scons==4.0.0
+
+      - name: Setup MinGW for Windows/MinGW build
+        if: ${{ matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes' }}
+        uses: egor-tensin/setup-mingw@v2
+
+      - name: Build godot-cpp (debug)
+        run: |
+          scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }}
+
+      - name: Build test without rebuilding godot-cpp (debug)
+        run: |
+          cd test
+          scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }} build_library=no
+
+      - name: Build test and godot-cpp (release)
+        run: |
+          cd test
+          scons platform=${{ matrix.platform }} target=template_release ${{ matrix.flags }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
+
+  linux-cmake:
+    name: CMake 🐧 Linux (Make, GCC)
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qqq build-essential pkg-config cmake
+
+      - name: Build godot-cpp
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release .
+          make -j $(nproc) VERBOSE=1
+
+      - name: Build test GDNative library
+        run: |
+          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." .
+          make -j $(nproc) VERBOSE=1
+
+  linux-cmake-ninja:
+    name: CMake 🐧 Linux (Ninja, GCC)
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qqq build-essential pkg-config cmake ninja-build
+
+      - name: Build godot-cpp
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
+          cmake --build . -j $(nproc) --verbose
+
+      - name: Build test GDNative library
+        run: |
+          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -GNinja .
+          cmake --build . -j $(nproc) --verbose
+
+  windows-msvc-cmake:
+    name: CMake 🏁 Windows (VS, MSVC)
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Build godot-cpp
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 16 2019" .
+          cmake --build . --verbose
+
+      - name: Build test GDNative library
+        run: |
+          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
+          cmake --build . --verbose

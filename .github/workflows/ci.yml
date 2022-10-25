@@ -1,194 +1,58 @@
-name: Continuous integration
+name: CI
 on: [push, pull_request]
 
-env:
-  # Only used for the cache key. Increment version to force clean build.
-  GODOT_BASE_BRANCH: master
-
 concurrency:
-  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}
+  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-static
   cancel-in-progress: true
 
 jobs:
+  static-checks:
+    name: 📊 Static Checks - Format
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Azure repositories are not reliable, we need to prevent Azure giving us packages.
+      - name: Make apt sources.list use the default Ubuntu repositories
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/*
+          sudo cp -f misc/ci/sources.list /etc/apt/sources.list
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo apt-add-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-13 main"
+          sudo apt-get update
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -qq dos2unix recode clang-format-13 libxml2-utils python3-pip moreutils
+          sudo update-alternatives --remove-all clang-format || true
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-13 100
+          sudo pip3 install black==22.3.0 pygments pytest==7.1.2 mypy==0.971
+
+      - name: File formatting checks (file_format.sh)
+        run: |
+          bash ./misc/scripts/file_format.sh
+
+      - name: Header guards formatting checks (header_guards.sh)
+        run: |
+          bash ./misc/scripts/header_guards.sh
+
+      - name: Python style checks via black (black_format.sh)
+        run: |
+          bash ./misc/scripts/black_format.sh
+
+      - name: Python scripts static analysis (mypy_check.sh)
+        run: |
+          bash ./misc/scripts/mypy_check.sh
+
+      - name: Bindings generation checks (ensures get_file_list returns all generated files)
+        run: |
+          python ./misc/scripts/check_get_file_list.py
+
+      - name: Style checks via clang-format (clang_format.sh)
+        run: |
+          bash ./misc/scripts/clang_format.sh
   build:
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: 🐧 Linux (GCC)
-            os: ubuntu-18.04
-            platform: linux
-            artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
-            artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
-            cache-name: linux-x86_64
-
-          - name: 🐧 Linux (GCC, Double Precision)
-            os: ubuntu-18.04
-            platform: linux
-            artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
-            artifact-path: bin/libgodot-cpp.linux.template_release.double.x86_64.a
-            flags: float=64
-            cache-name: linux-x86_64-f64
-
-          - name: 🏁 Windows (x86_64, MSVC)
-            os: windows-2019
-            platform: windows
-            artifact-name: godot-cpp-windows-msvc2019-x86_64-release
-            artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.lib
-            cache-name: windows-x86_64-msvc
-
-          - name: 🏁 Windows (x86_64, MinGW)
-            os: windows-2019
-            platform: windows
-            artifact-name: godot-cpp-linux-mingw-x86_64-release
-            artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.a
-            flags: use_mingw=yes
-            cache-name: windows-x86_64-mingw
-
-          - name: 🍎 macOS (universal)
-            os: macos-11
-            platform: macos
-            artifact-name: godot-cpp-macos-universal-release
-            artifact-path: bin/libgodot-cpp.macos.template_release.universal.a
-            flags: arch=universal
-            cache-name: macos-universal
-
-          - name: 🤖 Android (arm64)
-            os: ubuntu-18.04
-            platform: android
-            artifact-name: godot-cpp-android-arm64-release
-            artifact-path: bin/libgodot-cpp.android.template_release.arm64.a
-            flags: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME arch=arm64
-            cache-name: android-arm64
-
-          - name: 🍏 iOS (arm64)
-            os: macos-11
-            platform: ios
-            artifact-name: godot-cpp-ios-arm64-release
-            artifact-path: bin/libgodot-cpp.ios.template_release.arm64.a
-            flags: arch=arm64
-            cache-name: ios-arm64
-
-    env:
-      SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Setup Godot build cache
-        uses: ./.github/actions/godot-cache
-        with:
-          cache-name: ${{ matrix.cache-name }}
-        continue-on-error: true
-
-      - name: Set up Python (for SCons)
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Linux dependencies
-        if: ${{ matrix.platform == 'linux' }}
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -qqq build-essential pkg-config
-
-      - name: Install scons
-        run: |
-          python -m pip install scons==4.0.0
-
-      - name: Setup MinGW for Windows/MinGW build
-        if: ${{ matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes' }}
-        uses: egor-tensin/setup-mingw@v2
-
-      - name: Build godot-cpp (debug)
-        run: |
-          scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }}
-
-      - name: Build test without rebuilding godot-cpp (debug)
-        run: |
-          cd test
-          scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }} build_library=no
-
-      - name: Build test and godot-cpp (release)
-        run: |
-          cd test
-          scons platform=${{ matrix.platform }} target=template_release ${{ matrix.flags }}
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.artifact-name }}
-          path: ${{ matrix.artifact-path }}
-          if-no-files-found: error
-
-  linux-cmake:
-    name: 🐧 Build (Linux, GCC, CMake)
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -qqq build-essential pkg-config cmake
-
-      - name: Build godot-cpp
-        run: |
-          cmake -DCMAKE_BUILD_TYPE=Release .
-          make -j $(nproc) VERBOSE=1
-
-      - name: Build test GDNative library
-        run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." .
-          make -j $(nproc) VERBOSE=1
-
-  linux-cmake-ninja:
-    name: 🐧 Build (Linux, GCC, CMake Ninja)
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -qqq build-essential pkg-config cmake ninja-build
-
-      - name: Build godot-cpp
-        run: |
-          cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
-          cmake --build . -j $(nproc) --verbose
-
-      - name: Build test GDNative library
-        run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -GNinja .
-          cmake --build . -j $(nproc) --verbose
-
-  windows-msvc-cmake:
-    name: 🏁 Build (Windows, MSVC, CMake)
-    runs-on: windows-2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Build godot-cpp
-        run: |
-          cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 16 2019" .
-          cmake --build . --verbose
-
-      - name: Build test GDNative library
-        run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
-          cmake --build . --verbose
+    name: Build
+    needs: static-checks
+    uses: ./.github/workflows/build.yml
