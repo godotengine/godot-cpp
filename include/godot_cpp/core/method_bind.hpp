@@ -271,22 +271,11 @@ MethodBind *create_vararg_method_bind(R (T::*p_method)(const Variant **, GDNativ
 	return a;
 }
 
-#ifndef TYPED_METHOD_BIND
-class ___UnexistingClass;
-#define MB_T ___UnexistingClass
-#else
-#define MB_T T
-#endif
-
 // No return, not const.
 
-#ifdef TYPED_METHOD_BIND
 template <class T, class... P>
-#else
-template <class... P>
-#endif // TYPED_METHOD_BIND
 class MethodBindT : public MethodBind {
-	void (MB_T::*method)(P...);
+	void (T::*method)(P...);
 
 protected:
 // GCC raises warnings in the case P = {} as the comparison is always false...
@@ -321,22 +310,14 @@ public:
 	}
 
 	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
-#ifdef TYPED_METHOD_BIND
 		call_with_variant_args_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, r_error, get_default_arguments());
-#else
-		call_with_variant_args_dv(reinterpret_cast<MB_T *>(p_instance), method, p_args, p_argument_count, r_error, get_default_arguments());
-#endif
 		return Variant();
 	}
 	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_ret) const {
-#ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, P...>(static_cast<T *>(p_instance), method, p_args, nullptr);
-#else
-		call_with_ptr_args<MB_T, P...>(reinterpret_cast<MB_T *>(p_instance), method, p_args, nullptr);
-#endif // TYPED_METHOD_BIND
 	}
 
-	MethodBindT(void (MB_T::*p_method)(P...)) {
+	MethodBindT(void (T::*p_method)(P...)) {
 		method = p_method;
 		generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
@@ -352,24 +333,16 @@ MethodBind *create_inherited_method_bind(void (T::*p_method)(P...)) {
 
 template <class T, class... P>
 MethodBind *create_method_bind(void (T::*p_method)(P...)) {
-#ifdef TYPED_METHOD_BIND
 	MethodBind *a = memnew((MethodBindT<T, P...>)(p_method));
-#else
-	MethodBind *a = memnew((MethodBindT<P...>)(reinterpret_cast<void (MB_T::*)(P...)>(p_method)));
-#endif // TYPED_METHOD_BIND
 	a->set_instance_class(T::get_class_static());
 	return a;
 }
 
 // No return, const.
 
-#ifdef TYPED_METHOD_BIND
 template <class T, class... P>
-#else
-template <class... P>
-#endif // TYPED_METHOD_BIND
 class MethodBindTC : public MethodBind {
-	void (MB_T::*method)(P...) const;
+	void (T::*method)(P...) const;
 
 protected:
 // GCC raises warnings in the case P = {} as the comparison is always false...
@@ -404,22 +377,14 @@ public:
 	}
 
 	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
-#ifdef TYPED_METHOD_BIND
 		call_with_variant_argsc_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, r_error, get_default_arguments());
-#else
-		call_with_variant_argsc_dv(reinterpret_cast<MB_T *>(p_instance), method, p_args, p_argument_count, r_error, get_default_arguments());
-#endif
 		return Variant();
 	}
 	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_ret) const {
-#ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, P...>(static_cast<T *>(p_instance), method, p_args, nullptr);
-#else
-		call_with_ptr_args<MB_T, P...>(reinterpret_cast<MB_T *>(p_instance), method, p_args, nullptr);
-#endif // TYPED_METHOD_BIND
 	}
 
-	MethodBindTC(void (MB_T::*p_method)(P...) const) {
+	MethodBindTC(void (T::*p_method)(P...) const) {
 		method = p_method;
 		generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
@@ -428,35 +393,23 @@ public:
 
 template <class C, class T, class... P>
 MethodBind *create_method_bind(void (T::*p_method)(P...) const) {
-#ifdef TYPED_METHOD_BIND
 	MethodBind *a = memnew((MethodBindTC<C, P...>)(p_method));
-#else
-	MethodBind *a = memnew((MethodBindTC<P...>)(reinterpret_cast<void (MB_T::*)(P...) const>(p_method)));
-#endif // TYPED_METHOD_BIND
 	a->set_instance_class(T::get_class_static());
 	return a;
 }
 
 template <class T, class... P>
 MethodBind *create_method_bind(void (T::*p_method)(P...) const) {
-#ifdef TYPED_METHOD_BIND
 	MethodBind *a = memnew((MethodBindTC<T, P...>)(p_method));
-#else
-	MethodBind *a = memnew((MethodBindTC<P...>)(reinterpret_cast<void (MB_T::*)(P...) const>(p_method)));
-#endif // TYPED_METHOD_BIND
 	a->set_instance_class(T::get_class_static());
 	return a;
 }
 
 // Return, not const.
 
-#ifdef TYPED_METHOD_BIND
 template <class T, class R, class... P>
-#else
-template <class R, class... P>
-#endif // TYPED_METHOD_BIND
 class MethodBindTR : public MethodBind {
-	R(MB_T::*method)
+	R(T::*method)
 	(P...);
 
 protected:
@@ -497,22 +450,14 @@ public:
 
 	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
 		Variant ret;
-#ifdef TYPED_METHOD_BIND
 		call_with_variant_args_ret_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, ret, r_error, get_default_arguments());
-#else
-		call_with_variant_args_ret_dv((MB_T *)p_instance, method, p_args, p_argument_count, ret, r_error, get_default_arguments());
-#endif
 		return ret;
 	}
 	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_ret) const {
-#ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, R, P...>(static_cast<T *>(p_instance), method, p_args, r_ret);
-#else
-		call_with_ptr_args<MB_T, R, P...>(reinterpret_cast<MB_T *>(p_instance), method, p_args, r_ret);
-#endif // TYPED_METHOD_BIND
 	}
 
-	MethodBindTR(R (MB_T::*p_method)(P...)) {
+	MethodBindTR(R (T::*p_method)(P...)) {
 		method = p_method;
 		generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
@@ -529,24 +474,16 @@ MethodBind *create_inherited_method_bind(R (T::*p_method)(P...)) {
 
 template <class T, class R, class... P>
 MethodBind *create_method_bind(R (T::*p_method)(P...)) {
-#ifdef TYPED_METHOD_BIND
 	MethodBind *a = memnew((MethodBindTR<T, R, P...>)(p_method));
-#else
-	MethodBind *a = memnew((MethodBindTR<R, P...>)(reinterpret_cast<R (MB_T::*)(P...)>(p_method)));
-#endif // TYPED_METHOD_BIND
 	a->set_instance_class(T::get_class_static());
 	return a;
 }
 
 // Return, const.
 
-#ifdef TYPED_METHOD_BIND
 template <class T, class R, class... P>
-#else
-template <class R, class... P>
-#endif // TYPED_METHOD_BIND
 class MethodBindTRC : public MethodBind {
-	R(MB_T::*method)
+	R(T::*method)
 	(P...) const;
 
 protected:
@@ -587,22 +524,14 @@ public:
 
 	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDNativeVariantPtr *p_args, const GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
 		Variant ret;
-#ifdef TYPED_METHOD_BIND
 		call_with_variant_args_retc_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, ret, r_error, get_default_arguments());
-#else
-		call_with_variant_args_retc_dv((MB_T *)p_instance, method, p_args, p_argument_count, ret, r_error, get_default_arguments());
-#endif
 		return ret;
 	}
 	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr r_ret) const {
-#ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, R, P...>(static_cast<T *>(p_instance), method, p_args, r_ret);
-#else
-		call_with_ptr_args<MB_T, R, P...>(reinterpret_cast<MB_T *>(p_instance), method, p_args, r_ret);
-#endif // TYPED_METHOD_BIND
 	}
 
-	MethodBindTRC(R (MB_T::*p_method)(P...) const) {
+	MethodBindTRC(R (T::*p_method)(P...) const) {
 		method = p_method;
 		generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
@@ -619,11 +548,7 @@ MethodBind *create_inherited_method_bind(R (T::*p_method)(P...) const) {
 
 template <class T, class R, class... P>
 MethodBind *create_method_bind(R (T::*p_method)(P...) const) {
-#ifdef TYPED_METHOD_BIND
 	MethodBind *a = memnew((MethodBindTRC<T, R, P...>)(p_method));
-#else
-	MethodBind *a = memnew((MethodBindTRC<R, P...>)(reinterpret_cast<R (MB_T::*)(P...) const>(p_method)));
-#endif // TYPED_METHOD_BIND
 	a->set_instance_class(T::get_class_static());
 	return a;
 }
