@@ -15,6 +15,28 @@ def add_sources(sources, dir, extension):
             sources.append(dir + "/" + f)
 
 
+def make_gdextension(env, name, sources, library_dir="lib", entry_symbol="", output_dir=""):
+    target_dir = output_dir if output_dir else name
+    init = entry_symbol if entry_symbol else f"{name}_library_init"
+    autodetect_prefix = "{}/lib{}".format(library_dir, name)
+    lib = env.SharedLibrary(
+        target_dir + "/" + "{}{}{}".format(autodetect_prefix, env["suffix"], env["SHLIBSUFFIX"]),
+        source=sources,
+    )
+    ext_text = """[configuration]
+entry_symbol = "{}"
+
+[libraries]
+autodetect_prefix = "{}"
+""".format(
+        init, autodetect_prefix
+    )
+    config = env.Textfile("{}/{}.gdextension".format(target_dir, name), ext_text)
+    env.AlwaysBuild(config)
+    env.NoCache(config)
+    return [env.Dir(target_dir), lib, config]
+
+
 # Try to detect the host platform automatically.
 # This is used if no `platform` argument is passed
 if sys.platform.startswith("linux"):
@@ -229,4 +251,5 @@ if env["build_library"]:
 
 env.Append(LIBPATH=[env.Dir("bin")])
 env.Append(LIBS=library_name)
+env.AddMethod(make_gdextension, "GDExtension")
 Return("env")

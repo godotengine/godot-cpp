@@ -2,6 +2,9 @@
 build
 bin
 
+# Generated extension directory
+demo/gdexample
+
 # Godot 4+ specific ignores
 .godot/
 
