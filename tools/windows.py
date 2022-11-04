@@ -39,8 +39,6 @@ def generate(env):
     elif sys.platform == "win32" or sys.platform == "msys":
         env["use_mingw"] = True
         mingw.generate(env)
-        # Still need to use C++17.
-        env.Append(CCFLAGS=["-std=c++17"])
         # Don't want lib prefixes
         env["IMPLIBPREFIX"] = ""
         env["SHLIBPREFIX"] = ""
