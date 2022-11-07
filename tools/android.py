@@ -53,6 +53,7 @@ def generate(env):
         toolchain += "linux-x86_64"
     elif sys.platform == "darwin":
         toolchain += "darwin-x86_64"
+        env.Append(LINKFLAGS=["-shared"])
     env.PrependENVPath("PATH", toolchain + "/bin")  # This does nothing half of the time, but we'll put it here anyways
 
     # Get architecture info
