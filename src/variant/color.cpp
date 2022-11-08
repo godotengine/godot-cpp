@@ -406,7 +406,7 @@ int Color::find_named_color(const String &p_name) {
 	name = name.replace("_", "");
 	name = name.replace("'", "");
 	name = name.replace(".", "");
-	name = name.to_upper();
+	name = name.to_lower();
 
 	int idx = 0;
 	while (named_colors[idx].name != nullptr) {
