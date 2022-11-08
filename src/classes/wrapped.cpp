@@ -36,20 +36,24 @@
 
 namespace godot {
 
-const char *Wrapped::_get_extension_class() const {
+const StringName *Wrapped::_get_extension_class_name() const {
 	return nullptr;
 }
 
 void Wrapped::_postinitialize() {
-	const char *extension_class = _get_extension_class();
+	const StringName *extension_class = _get_extension_class_name();
 	if (extension_class) {
-		godot::internal::gdn_interface->object_set_instance(_owner, extension_class, this);
+		// TODO: replace C cast by a proper reinterpret_cast once `object_set_instance` signature correctly handles `const GDNativeStringNamePtr` param
+		// (see: https://github.com/godotengine/godot/pull/67751)
+		godot::internal::gdn_interface->object_set_instance(_owner, (GDNativeStringNamePtr)(extension_class), this);
 	}
 	godot::internal::gdn_interface->object_set_instance_binding(_owner, godot::internal::token, this, _get_bindings_callbacks());
 }
 
-Wrapped::Wrapped(const char *p_godot_class) {
-	_owner = godot::internal::gdn_interface->classdb_construct_object(p_godot_class);
+Wrapped::Wrapped(const StringName p_godot_class) {
+	// TODO: replace C cast by a proper reinterpret_cast once `classdb_construct_object` signature correctly handles `const GDNativeStringNamePtr` param
+	// (see: https://github.com/godotengine/godot/pull/67751)
+	_owner = godot::internal::gdn_interface->classdb_construct_object((GDNativeStringNamePtr)(p_godot_class._native_ptr()));
 }
 
 Wrapped::Wrapped(GodotObject *p_godot_object) {
