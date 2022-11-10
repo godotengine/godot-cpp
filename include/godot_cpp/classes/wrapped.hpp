@@ -49,7 +49,7 @@ class Wrapped {
 	friend void postinitialize_handler(Wrapped *);
 
 protected:
-	virtual const char *_get_extension_class() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
+	virtual const StringName *_get_extension_class_name() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
 	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
 
 	void _notification(int p_what){};
@@ -67,30 +67,24 @@ protected:
 	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDNativePropertyInfo *p_list) {}
 	static GDNativeBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name) { return false; }
 	static GDNativeBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name, GDNativeVariantPtr r_ret) { return false; }
-	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeStringPtr r_out) {}
+	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeBool *r_is_valid, GDNativeStringPtr r_out) {}
 
 	GDNativePropertyInfo *plist = nullptr;
 	uint32_t plist_size = 0;
 
 	void _postinitialize();
 
-	Wrapped(const char *p_godot_class);
+	Wrapped(const StringName p_godot_class);
 	Wrapped(GodotObject *p_godot_object);
 
 public:
-	static const char *get_class_static() {
-		return "Wrapped";
+	static StringName &get_class_static() {
+		static StringName string_name = StringName("Wrapped");
+		return string_name;
 	}
 
 	uint64_t get_instance_id() const {
 		return 0;
-	}
-
-	static _FORCE_INLINE_ char *_alloc_and_copy_cstr(const char *p_str) {
-		size_t size = strlen(p_str) + 1;
-		char *ret = reinterpret_cast<char *>(memalloc(size));
-		memcpy(ret, p_str, size);
-		return ret;
 	}
 
 	// Must be public but you should not touch this.
@@ -105,8 +99,9 @@ private:                                                                        
 	friend class ::godot::ClassDB;                                                                                                                       \
                                                                                                                                                          \
 protected:                                                                                                                                               \
-	virtual const char *_get_extension_class() const override {                                                                                          \
-		return get_class_static();                                                                                                                       \
+	virtual const StringName *_get_extension_class_name() const override {                                                                               \
+		static StringName string_name = get_class_static();                                                                                              \
+		return &string_name;                                                                                                                             \
 	}                                                                                                                                                    \
                                                                                                                                                          \
 	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const override {                                                           \
@@ -164,11 +159,12 @@ public:                                                                         
 		initialized = true;                                                                                                                              \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static const char *get_class_static() {                                                                                                              \
-		return #m_class;                                                                                                                                 \
+	static StringName &get_class_static() {                                                                                                              \
+		static StringName string_name = StringName(#m_class);                                                                                            \
+		return string_name;                                                                                                                              \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static const char *get_parent_class_static() {                                                                                                       \
+	static StringName &get_parent_class_static() {                                                                                                       \
 		return m_inherits::get_class_static();                                                                                                           \
 	}                                                                                                                                                    \
                                                                                                                                                          \
@@ -220,10 +216,10 @@ public:                                                                         
 				cls->plist_size = 0;                                                                                                                     \
 				for (const ::godot::PropertyInfo &E : list) {                                                                                            \
 					cls->plist[cls->plist_size].type = static_cast<GDNativeVariantType>(E.type);                                                         \
-					cls->plist[cls->plist_size].name = _alloc_and_copy_cstr(E.name.utf8().get_data());                                                   \
+					cls->plist[cls->plist_size].name = E.name._native_ptr();                                                                             \
 					cls->plist[cls->plist_size].hint = E.hint;                                                                                           \
-					cls->plist[cls->plist_size].hint_string = _alloc_and_copy_cstr(E.hint_string.utf8().get_data());                                     \
-					cls->plist[cls->plist_size].class_name = _alloc_and_copy_cstr(E.class_name.utf8().get_data());                                       \
+					cls->plist[cls->plist_size].hint_string = E.hint_string._native_ptr();                                                               \
+					cls->plist[cls->plist_size].class_name = E.class_name._native_ptr();                                                                 \
 					cls->plist[cls->plist_size].usage = E.usage;                                                                                         \
 					cls->plist_size++;                                                                                                                   \
 				}                                                                                                                                        \
@@ -240,11 +236,6 @@ public:                                                                         
 		if (p_instance) {                                                                                                                                \
 			m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                      \
 			ERR_FAIL_COND_MSG(cls->plist == nullptr, "Internal error, property list double free!");                                                      \
-			for (size_t i = 0; i < cls->plist_size; i++) {                                                                                               \
-				memfree(const_cast<char *>(cls->plist[i].name));                                                                                         \
-				memfree(const_cast<char *>(cls->plist[i].class_name));                                                                                   \
-				memfree(const_cast<char *>(cls->plist[i].hint_string));                                                                                  \
-			}                                                                                                                                            \
 			memfree(cls->plist);                                                                                                                         \
 			cls->plist = nullptr;                                                                                                                        \
 			cls->plist_size = 0;                                                                                                                         \
@@ -273,14 +264,15 @@ public:                                                                         
 		return false;                                                                                                                                    \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeStringPtr r_out) {                                                        \
+	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeBool *r_is_valid, GDNativeStringPtr r_out) {                              \
 		if (p_instance && m_class::_get_to_string()) {                                                                                                   \
 			if (m_class::_get_to_string() != m_inherits::_get_to_string()) {                                                                             \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                  \
 				*reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                         \
+				*r_is_valid = true;                                                                                                                      \
 				return;                                                                                                                                  \
 			}                                                                                                                                            \
-			m_inherits::to_string_bind(p_instance, r_out);                                                                                               \
+			m_inherits::to_string_bind(p_instance, r_is_valid, r_out);                                                                                   \
 		}                                                                                                                                                \
 	}                                                                                                                                                    \
                                                                                                                                                          \
@@ -357,11 +349,12 @@ protected:                                                                      
 public:                                                                                                            \
 	static void initialize_class() {}                                                                              \
                                                                                                                    \
-	static const char *get_class_static() {                                                                        \
-		return #m_class;                                                                                           \
+	static StringName &get_class_static() {                                                                        \
+		static StringName string_name = StringName(#m_class);                                                      \
+		return string_name;                                                                                        \
 	}                                                                                                              \
                                                                                                                    \
-	static const char *get_parent_class_static() {                                                                 \
+	static StringName &get_parent_class_static() {                                                                 \
 		return m_inherits::get_class_static();                                                                     \
 	}                                                                                                              \
                                                                                                                    \

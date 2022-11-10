@@ -44,22 +44,30 @@
 #include <unordered_map>
 #include <vector>
 
+// Needed to use StringName as key in `std::unordered_map`
+template <>
+struct std::hash<godot::StringName> {
+	std::size_t operator()(godot::StringName const &s) const noexcept {
+		return s.hash();
+	}
+};
+
 namespace godot {
 
 #define DEFVAL(m_defval) (m_defval)
 
 struct MethodDefinition {
-	const char *name = nullptr;
-	std::list<std::string> args;
+	StringName name;
+	std::list<StringName> args;
 	MethodDefinition() {}
-	MethodDefinition(const char *p_name) :
+	MethodDefinition(StringName p_name) :
 			name(p_name) {}
 };
 
-MethodDefinition D_METHOD(const char *p_name);
-MethodDefinition D_METHOD(const char *p_name, const char *p_arg1);
+MethodDefinition D_METHOD(StringName p_name);
+MethodDefinition D_METHOD(StringName p_name, StringName p_arg1);
 template <typename... Args>
-MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, Args... args) {
+MethodDefinition D_METHOD(StringName p_name, StringName p_arg1, Args... args) {
 	MethodDefinition md = D_METHOD(p_name, args...);
 	md.args.push_front(p_arg1);
 	return md;
@@ -73,40 +81,33 @@ class ClassDB {
 public:
 	struct PropertySetGet {
 		int index;
-		const char *setter;
-		const char *getter;
+		StringName setter;
+		StringName getter;
 		MethodBind *_setptr;
 		MethodBind *_getptr;
 		Variant::Type type;
 	};
 
 	struct ClassInfo {
-		const char *name = nullptr;
-		const char *parent_name = nullptr;
+		StringName name;
+		StringName parent_name;
 		GDNativeInitializationLevel level = GDNATIVE_INITIALIZATION_SCENE;
-		std::unordered_map<std::string, MethodBind *> method_map;
-		std::set<std::string> signal_names;
-		std::unordered_map<std::string, GDNativeExtensionClassCallVirtual> virtual_methods;
-		std::set<std::string> property_names;
-		std::set<std::string> constant_names;
+		std::unordered_map<StringName, MethodBind *> method_map;
+		std::set<StringName> signal_names;
+		std::unordered_map<StringName, GDNativeExtensionClassCallVirtual> virtual_methods;
+		std::set<StringName> property_names;
+		std::set<StringName> constant_names;
 		// Pointer to the parent custom class, if any. Will be null if the parent class is a Godot class.
 		ClassInfo *parent_ptr = nullptr;
 	};
 
 private:
 	// This may only contain custom classes, not Godot classes
-	static std::unordered_map<std::string, ClassInfo> classes;
+	static std::unordered_map<StringName, ClassInfo> classes;
 
 	static MethodBind *bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount);
 	static void initialize_class(const ClassInfo &cl);
-	static void bind_method_godot(const char *p_class_name, MethodBind *p_method);
-
-	static _FORCE_INLINE_ char *_alloc_and_copy_cstr(const char *p_str) {
-		size_t size = strlen(p_str) + 1;
-		char *ret = reinterpret_cast<char *>(memalloc(size));
-		memcpy(ret, p_str, size);
-		return ret;
-	}
+	static void bind_method_godot(const StringName &p_class_name, MethodBind *p_method);
 
 	template <class T, bool is_abstract>
 	static void _register_class(bool p_virtual = false);
@@ -121,21 +122,21 @@ public:
 	static MethodBind *bind_method(N p_method_name, M p_method, VarArgs... p_args);
 
 	template <class N, class M, typename... VarArgs>
-	static MethodBind *bind_static_method(const char *p_class, N p_method_name, M p_method, VarArgs... p_args);
+	static MethodBind *bind_static_method(StringName p_class, N p_method_name, M p_method, VarArgs... p_args);
 
 	template <class M>
-	static MethodBind *bind_vararg_method(uint32_t p_flags, const char *p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const std::vector<Variant> &p_default_args = std::vector<Variant>{}, bool p_return_nil_is_variant = true);
+	static MethodBind *bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const std::vector<Variant> &p_default_args = std::vector<Variant>{}, bool p_return_nil_is_variant = true);
 
-	static void add_property_group(const char *p_class, const char *p_name, const char *p_prefix);
-	static void add_property_subgroup(const char *p_class, const char *p_name, const char *p_prefix);
-	static void add_property(const char *p_class, const PropertyInfo &p_pinfo, const char *p_setter, const char *p_getter, int p_index = -1);
-	static void add_signal(const char *p_class, const MethodInfo &p_signal);
-	static void bind_integer_constant(const char *p_class_name, const char *p_enum_name, const char *p_constant_name, GDNativeInt p_constant_value, bool p_is_bitfield = false);
-	static void bind_virtual_method(const char *p_class, const char *p_method, GDNativeExtensionClassCallVirtual p_call);
+	static void add_property_group(const StringName &p_class, const String &p_name, const String &p_prefix);
+	static void add_property_subgroup(const StringName &p_class, const String &p_name, const String &p_prefix);
+	static void add_property(const StringName &p_class, const PropertyInfo &p_pinfo, const StringName &p_setter, const StringName &p_getter, int p_index = -1);
+	static void add_signal(const StringName &p_class, const MethodInfo &p_signal);
+	static void bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDNativeInt p_constant_value, bool p_is_bitfield = false);
+	static void bind_virtual_method(const StringName &p_class, const StringName &p_method, GDNativeExtensionClassCallVirtual p_call);
 
-	static MethodBind *get_method(const char *p_class, const char *p_method);
+	static MethodBind *get_method(const StringName &p_class, const StringName &p_method);
 
-	static GDNativeExtensionClassCallVirtual get_virtual_func(void *p_userdata, const char *p_name);
+	static GDNativeExtensionClassCallVirtual get_virtual_func(void *p_userdata, const GDNativeStringNamePtr p_name);
 
 	static void initialize(GDNativeInitializationLevel p_level);
 	static void deinitialize(GDNativeInitializationLevel p_level);
@@ -165,7 +166,7 @@ void ClassDB::_register_class(bool p_virtual) {
 	cl.name = T::get_class_static();
 	cl.parent_name = T::get_parent_class_static();
 	cl.level = current_level;
-	std::unordered_map<std::string, ClassInfo>::iterator parent_it = classes.find(cl.parent_name);
+	std::unordered_map<StringName, ClassInfo>::iterator parent_it = classes.find(cl.parent_name);
 	if (parent_it != classes.end()) {
 		// Assign parent if it is also a custom class
 		cl.parent_ptr = &parent_it->second;
@@ -190,10 +191,10 @@ void ClassDB::_register_class(bool p_virtual) {
 		T::free, // GDNativeExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
 		&ClassDB::get_virtual_func, // GDNativeExtensionClassGetVirtual get_virtual_func;
 		nullptr, // GDNativeExtensionClassGetRID get_rid;
-		(void *)cl.name, // void *class_userdata;
+		(void *)&T::get_class_static(), // void *class_userdata;
 	};
 
-	internal::gdn_interface->classdb_register_extension_class(internal::library, cl.name, cl.parent_name, &class_info);
+	internal::gdn_interface->classdb_register_extension_class(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
 
 	// call bind_methods etc. to register all members of the class
 	T::initialize_class();
@@ -224,7 +225,7 @@ MethodBind *ClassDB::bind_method(N p_method_name, M p_method, VarArgs... p_args)
 }
 
 template <class N, class M, typename... VarArgs>
-MethodBind *ClassDB::bind_static_method(const char *p_class, N p_method_name, M p_method, VarArgs... p_args) {
+MethodBind *ClassDB::bind_static_method(StringName p_class, N p_method_name, M p_method, VarArgs... p_args) {
 	Variant args[sizeof...(p_args) + 1] = { p_args..., Variant() }; // +1 makes sure zero sized arrays are also supported.
 	const Variant *argptrs[sizeof...(p_args) + 1];
 	for (uint32_t i = 0; i < sizeof...(p_args); i++) {
@@ -236,19 +237,19 @@ MethodBind *ClassDB::bind_static_method(const char *p_class, N p_method_name, M 
 }
 
 template <class M>
-MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, const char *p_name, M p_method, const MethodInfo &p_info, const std::vector<Variant> &p_default_args, bool p_return_nil_is_variant) {
+MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info, const std::vector<Variant> &p_default_args, bool p_return_nil_is_variant) {
 	MethodBind *bind = create_vararg_method_bind(p_method, p_info, p_return_nil_is_variant);
 	ERR_FAIL_COND_V(!bind, nullptr);
 
 	bind->set_name(p_name);
 	bind->set_default_arguments(p_default_args);
 
-	const char *instance_type = bind->get_instance_class();
+	StringName instance_type = bind->get_instance_class();
 
-	std::unordered_map<std::string, ClassInfo>::iterator type_it = classes.find(instance_type);
+	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(instance_type);
 	if (type_it == classes.end()) {
 		memdelete(bind);
-		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(instance_type));
+		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(Array::make(instance_type)));
 	}
 
 	ClassInfo &type = type_it->second;

@@ -49,8 +49,8 @@ void Variant::init_bindings() {
 		to_type_constructor[i] = internal::gdn_interface->get_variant_to_type_constructor((GDNativeVariantType)i);
 	}
 
-	String::init_bindings();
 	StringName::init_bindings();
+	String::init_bindings();
 	NodePath::init_bindings();
 	RID::init_bindings();
 	Callable::init_bindings();

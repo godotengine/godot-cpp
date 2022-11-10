@@ -264,8 +264,8 @@ struct GetTypeInfo<Ref<T>, typename EnableIf<TypeInherits<RefCounted, T>::value>
 	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
 	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 
-	static inline GDNativePropertyInfo get_class_info() {
-		return make_property_info(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+	static inline PropertyInfo get_class_info() {
+		return make_property_info(Variant::Type::OBJECT, T::get_class_static());
 	}
 };
 
@@ -274,8 +274,8 @@ struct GetTypeInfo<const Ref<T> &, typename EnableIf<TypeInherits<RefCounted, T>
 	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
 	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 
-	static inline GDNativePropertyInfo get_class_info() {
-		return make_property_info(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+	static inline PropertyInfo get_class_info() {
+		return make_property_info(Variant::Type::OBJECT, T::get_class_static());
 	}
 };
 
