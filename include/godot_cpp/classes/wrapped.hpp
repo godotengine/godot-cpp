@@ -99,8 +99,8 @@ private:                                                                        
 	friend class ::godot::ClassDB;                                                                                                                       \
                                                                                                                                                          \
 protected:                                                                                                                                               \
-	virtual const StringName *_get_extension_class_name() const override {                                                                               \
-		static StringName string_name = get_class_static();                                                                                              \
+	virtual const ::godot::StringName *_get_extension_class_name() const override {                                                                      \
+		static ::godot::StringName string_name = get_class_static();                                                                                     \
 		return &string_name;                                                                                                                             \
 	}                                                                                                                                                    \
                                                                                                                                                          \
@@ -159,12 +159,12 @@ public:                                                                         
 		initialized = true;                                                                                                                              \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static StringName &get_class_static() {                                                                                                              \
-		static StringName string_name = StringName(#m_class);                                                                                            \
+	static ::godot::StringName &get_class_static() {                                                                                                     \
+		static ::godot::StringName string_name = ::godot::StringName(#m_class);                                                                          \
 		return string_name;                                                                                                                              \
 	}                                                                                                                                                    \
                                                                                                                                                          \
-	static StringName &get_parent_class_static() {                                                                                                       \
+	static ::godot::StringName &get_parent_class_static() {                                                                                              \
 		return m_inherits::get_class_static();                                                                                                           \
 	}                                                                                                                                                    \
                                                                                                                                                          \
@@ -322,11 +322,11 @@ protected:                                                                      
 		return nullptr;                                                                                            \
 	}                                                                                                              \
                                                                                                                    \
-	static bool (Wrapped::*_get_set())(const StringName &p_name, const Variant &p_property) {                      \
+	static bool (Wrapped::*_get_set())(const ::godot::StringName &p_name, const Variant &p_property) {             \
 		return nullptr;                                                                                            \
 	}                                                                                                              \
                                                                                                                    \
-	static bool (Wrapped::*_get_get())(const StringName &p_name, Variant &r_ret) const {                           \
+	static bool (Wrapped::*_get_get())(const ::godot::StringName &p_name, Variant &r_ret) const {                  \
 		return nullptr;                                                                                            \
 	}                                                                                                              \
                                                                                                                    \
@@ -334,11 +334,11 @@ protected:                                                                      
 		return nullptr;                                                                                            \
 	}                                                                                                              \
                                                                                                                    \
-	static bool (Wrapped::*_get_property_can_revert())(const StringName &p_name) {                                 \
+	static bool (Wrapped::*_get_property_can_revert())(const ::godot::StringName &p_name) {                        \
 		return nullptr;                                                                                            \
 	}                                                                                                              \
                                                                                                                    \
-	static bool (Wrapped::*_get_property_get_revert())(const StringName &p_name, Variant &) {                      \
+	static bool (Wrapped::*_get_property_get_revert())(const ::godot::StringName &p_name, Variant &) {             \
 		return nullptr;                                                                                            \
 	}                                                                                                              \
                                                                                                                    \
@@ -349,12 +349,12 @@ protected:                                                                      
 public:                                                                                                            \
 	static void initialize_class() {}                                                                              \
                                                                                                                    \
-	static StringName &get_class_static() {                                                                        \
-		static StringName string_name = StringName(#m_class);                                                      \
+	static ::godot::StringName &get_class_static() {                                                               \
+		static ::godot::StringName string_name = ::godot::StringName(#m_class);                                    \
 		return string_name;                                                                                        \
 	}                                                                                                              \
                                                                                                                    \
-	static StringName &get_parent_class_static() {                                                                 \
+	static ::godot::StringName &get_parent_class_static() {                                                        \
 		return m_inherits::get_class_static();                                                                     \
 	}                                                                                                              \
                                                                                                                    \
