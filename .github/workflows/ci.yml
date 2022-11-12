@@ -109,6 +109,11 @@ jobs:
         run: |
           scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }}
 
+      - name: Build example without rebuilding godot-cpp (debug)
+        run: |
+          cd example
+          scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }} build_library=no
+
       - name: Build test without rebuilding godot-cpp (debug)
         run: |
           cd test
