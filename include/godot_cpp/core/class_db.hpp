@@ -174,15 +174,29 @@ void ClassDB::_register_class(bool p_virtual) {
 	classes[cl.name] = cl;
 
 	// Register this class with Godot
+
+	uint32_t property_count = 0;
+	GDNativePropertyInfo *properties_info = T::get_property_list_bind(&property_count);
+
+	Variant properties_revert_value[property_count];
+	GDNativeVariantPtr properties_revert_value_ptrs[property_count];
+	for (uint32_t i = 0; i < property_count; i++) {
+		Variant ret;
+		if (T::property_get_revert_bind(properties_info[i].name, &properties_revert_value[i])) {
+			properties_revert_value_ptrs[i] = &properties_revert_value[i];
+		} else {
+			properties_revert_value_ptrs[i] = nullptr;
+		}
+	}
+
 	GDNativeExtensionClassCreationInfo class_info = {
 		p_virtual, // GDNativeBool is_virtual;
 		is_abstract, // GDNativeBool is_abstract;
 		T::set_bind, // GDNativeExtensionClassSet set_func;
 		T::get_bind, // GDNativeExtensionClassGet get_func;
-		T::get_property_list_bind, // GDNativeExtensionClassGetPropertyList get_property_list_func;
-		T::free_property_list_bind, // GDNativeExtensionClassFreePropertyList free_property_list_func;
-		T::property_can_revert_bind, // GDNativeExtensionClassPropertyCanRevert property_can_revert_func;
-		T::property_get_revert_bind, // GDNativeExtensionClassPropertyGetRevert property_get_revert_func;
+		property_count,
+		properties_info,
+		properties_revert_value_ptrs,
 		T::notification_bind, // GDNativeExtensionClassNotification notification_func;
 		T::to_string_bind, // GDNativeExtensionClassToString to_string_func;
 		nullptr, // GDNativeExtensionClassReference reference_func;
@@ -195,6 +209,8 @@ void ClassDB::_register_class(bool p_virtual) {
 	};
 
 	internal::gdn_interface->classdb_register_extension_class(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
+
+	T::free_property_list_bind(properties_info);
 
 	// call bind_methods etc. to register all members of the class
 	T::initialize_class();

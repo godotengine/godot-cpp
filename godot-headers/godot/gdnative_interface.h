@@ -238,10 +238,10 @@ typedef struct {
 	GDNativeBool is_abstract;
 	GDNativeExtensionClassSet set_func;
 	GDNativeExtensionClassGet get_func;
-	GDNativeExtensionClassGetPropertyList get_property_list_func;
-	GDNativeExtensionClassFreePropertyList free_property_list_func;
-	GDNativeExtensionClassPropertyCanRevert property_can_revert_func;
-	GDNativeExtensionClassPropertyGetRevert property_get_revert_func;
+	uint32_t property_count;
+	GDNativePropertyInfo *properties_info; // array of `property_count` size
+	// array of `property_count` size, properties that can't be reverted are set to NULL
+	GDNativeVariantPtr *properties_revert_value;
 	GDNativeExtensionClassNotification notification_func;
 	GDNativeExtensionClassToString to_string_func;
 	GDNativeExtensionClassReference reference_func;
@@ -309,6 +309,7 @@ typedef GDNativeBool (*GDNativeExtensionScriptInstanceSet)(GDNativeExtensionScri
 typedef GDNativeBool (*GDNativeExtensionScriptInstanceGet)(GDNativeExtensionScriptInstanceDataPtr p_instance, const GDNativeStringNamePtr p_name, GDNativeVariantPtr r_ret);
 typedef const GDNativePropertyInfo *(*GDNativeExtensionScriptInstanceGetPropertyList)(GDNativeExtensionScriptInstanceDataPtr p_instance, uint32_t *r_count);
 typedef void (*GDNativeExtensionScriptInstanceFreePropertyList)(GDNativeExtensionScriptInstanceDataPtr p_instance, const GDNativePropertyInfo *p_list);
+typedef GDNativeVariantType (*GDNativeExtensionScriptInstanceGetPropertyType)(GDNativeExtensionScriptInstanceDataPtr p_instance, const GDNativeStringNamePtr p_name, GDNativeBool *r_is_valid);
 
 typedef GDNativeBool (*GDNativeExtensionScriptInstancePropertyCanRevert)(GDNativeExtensionScriptInstanceDataPtr p_instance, const GDNativeStringNamePtr p_name);
 typedef GDNativeBool (*GDNativeExtensionScriptInstancePropertyGetRevert)(GDNativeExtensionScriptInstanceDataPtr p_instance, const GDNativeStringNamePtr p_name, GDNativeVariantPtr r_ret);
@@ -354,6 +355,7 @@ typedef struct {
 
 	GDNativeExtensionScriptInstanceGetMethodList get_method_list_func;
 	GDNativeExtensionScriptInstanceFreeMethodList free_method_list_func;
+	GDNativeExtensionScriptInstanceGetPropertyType get_property_type_func;
 
 	GDNativeExtensionScriptInstanceHasMethod has_method_func;
 
