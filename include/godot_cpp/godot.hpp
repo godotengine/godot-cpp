@@ -57,7 +57,7 @@ public:
 	static Callback init_callback;
 	static Callback terminate_callback;
 	static GDNativeInitializationLevel minimum_initialization_level;
-	static GDNativeBool init(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization);
+	static GDNativeBool init(const GDNativeInterface *p_interface, GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization);
 
 public:
 	static void initialize_level(void *userdata, GDNativeInitializationLevel p_level);
@@ -65,11 +65,11 @@ public:
 
 	class InitObject {
 		const GDNativeInterface *gdn_interface;
-		const GDNativeExtensionClassLibraryPtr library;
+		GDNativeExtensionClassLibraryPtr library;
 		GDNativeInitialization *initialization;
 
 	public:
-		InitObject(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) :
+		InitObject(const GDNativeInterface *p_interface, GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) :
 				gdn_interface(p_interface),
 				library(p_library),
 				initialization(r_initialization) {}

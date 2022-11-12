@@ -292,7 +292,7 @@ struct PtrToArg<TypedArray<T>> {
 	}
 	typedef Array EncodeT;
 	_FORCE_INLINE_ static void encode(TypedArray<T> p_val, void *p_ptr) {
-		*(Array *)p_ptr = p_val;
+		*reinterpret_cast<Array *>(p_ptr) = p_val;
 	}
 };
 

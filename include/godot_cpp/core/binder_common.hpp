@@ -41,46 +41,46 @@
 
 namespace godot {
 
-#define VARIANT_ENUM_CAST(m_class, m_enum)                                            \
-	namespace godot {                                                                 \
-	MAKE_ENUM_TYPE_INFO(m_class, m_enum)                                              \
-	template <>                                                                       \
-	struct VariantCaster<m_class::m_enum> {                                           \
-		static _FORCE_INLINE_ m_class::m_enum cast(const Variant &p_variant) {        \
-			return (m_class::m_enum)p_variant.operator int64_t();                     \
-		}                                                                             \
-	};                                                                                \
-	template <>                                                                       \
-	struct PtrToArg<m_class::m_enum> {                                                \
-		_FORCE_INLINE_ static m_class::m_enum convert(const void *p_ptr) {            \
-			return m_class::m_enum(*reinterpret_cast<const int64_t *>(p_ptr));        \
-		}                                                                             \
-		typedef int64_t EncodeT;                                                      \
-		_FORCE_INLINE_ static void encode(m_class::m_enum p_val, const void *p_ptr) { \
-			*(int64_t *)p_ptr = p_val;                                                \
-		}                                                                             \
-	};                                                                                \
+#define VARIANT_ENUM_CAST(m_class, m_enum)                                      \
+	namespace godot {                                                           \
+	MAKE_ENUM_TYPE_INFO(m_class, m_enum)                                        \
+	template <>                                                                 \
+	struct VariantCaster<m_class::m_enum> {                                     \
+		static _FORCE_INLINE_ m_class::m_enum cast(const Variant &p_variant) {  \
+			return (m_class::m_enum)p_variant.operator int64_t();               \
+		}                                                                       \
+	};                                                                          \
+	template <>                                                                 \
+	struct PtrToArg<m_class::m_enum> {                                          \
+		_FORCE_INLINE_ static m_class::m_enum convert(const void *p_ptr) {      \
+			return m_class::m_enum(*reinterpret_cast<const int64_t *>(p_ptr));  \
+		}                                                                       \
+		typedef int64_t EncodeT;                                                \
+		_FORCE_INLINE_ static void encode(m_class::m_enum p_val, void *p_ptr) { \
+			*reinterpret_cast<int64_t *>(p_ptr) = p_val;                        \
+		}                                                                       \
+	};                                                                          \
 	}
 
-#define VARIANT_BITFIELD_CAST(m_class, m_enum)                                                  \
-	namespace godot {                                                                           \
-	MAKE_BITFIELD_TYPE_INFO(m_class, m_enum)                                                    \
-	template <>                                                                                 \
-	struct VariantCaster<BitField<m_class::m_enum>> {                                           \
-		static _FORCE_INLINE_ BitField<m_class::m_enum> cast(const Variant &p_variant) {        \
-			return BitField<m_class::m_enum>(p_variant.operator int64_t());                     \
-		}                                                                                       \
-	};                                                                                          \
-	template <>                                                                                 \
-	struct PtrToArg<BitField<m_class::m_enum>> {                                                \
-		_FORCE_INLINE_ static BitField<m_class::m_enum> convert(const void *p_ptr) {            \
-			return BitField<m_class::m_enum>(*reinterpret_cast<const int64_t *>(p_ptr));        \
-		}                                                                                       \
-		typedef int64_t EncodeT;                                                                \
-		_FORCE_INLINE_ static void encode(BitField<m_class::m_enum> p_val, const void *p_ptr) { \
-			*(int64_t *)p_ptr = p_val;                                                          \
-		}                                                                                       \
-	};                                                                                          \
+#define VARIANT_BITFIELD_CAST(m_class, m_enum)                                            \
+	namespace godot {                                                                     \
+	MAKE_BITFIELD_TYPE_INFO(m_class, m_enum)                                              \
+	template <>                                                                           \
+	struct VariantCaster<BitField<m_class::m_enum>> {                                     \
+		static _FORCE_INLINE_ BitField<m_class::m_enum> cast(const Variant &p_variant) {  \
+			return BitField<m_class::m_enum>(p_variant.operator int64_t());               \
+		}                                                                                 \
+	};                                                                                    \
+	template <>                                                                           \
+	struct PtrToArg<BitField<m_class::m_enum>> {                                          \
+		_FORCE_INLINE_ static BitField<m_class::m_enum> convert(const void *p_ptr) {      \
+			return BitField<m_class::m_enum>(*reinterpret_cast<const int64_t *>(p_ptr));  \
+		}                                                                                 \
+		typedef int64_t EncodeT;                                                          \
+		_FORCE_INLINE_ static void encode(BitField<m_class::m_enum> p_val, void *p_ptr) { \
+			*reinterpret_cast<int64_t *>(p_ptr) = p_val;                                  \
+		}                                                                                 \
+	};                                                                                    \
 	}
 
 template <class T>
@@ -169,42 +169,42 @@ struct VariantCasterAndValidate<const T &> {
 };
 
 template <class T, class... P, size_t... Is>
-void call_with_ptr_args_helper(T *p_instance, void (T::*p_method)(P...), const GDNativeTypePtr *p_args, IndexSequence<Is...>) {
+void call_with_ptr_args_helper(T *p_instance, void (T::*p_method)(P...), GDNativeConstTypePtr *p_args, IndexSequence<Is...>) {
 	(p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...);
 }
 
 template <class T, class... P, size_t... Is>
-void call_with_ptr_argsc_helper(T *p_instance, void (T::*p_method)(P...) const, const GDNativeTypePtr *p_args, IndexSequence<Is...>) {
+void call_with_ptr_argsc_helper(T *p_instance, void (T::*p_method)(P...) const, GDNativeConstTypePtr *p_args, IndexSequence<Is...>) {
 	(p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...);
 }
 
 template <class T, class R, class... P, size_t... Is>
-void call_with_ptr_args_ret_helper(T *p_instance, R (T::*p_method)(P...), const GDNativeTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
+void call_with_ptr_args_ret_helper(T *p_instance, R (T::*p_method)(P...), GDNativeConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
 	PtrToArg<R>::encode((p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...), r_ret);
 }
 
 template <class T, class R, class... P, size_t... Is>
-void call_with_ptr_args_retc_helper(T *p_instance, R (T::*p_method)(P...) const, const GDNativeTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
+void call_with_ptr_args_retc_helper(T *p_instance, R (T::*p_method)(P...) const, GDNativeConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
 	PtrToArg<R>::encode((p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...), r_ret);
 }
 
 template <class T, class... P>
-void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...), const GDNativeTypePtr *p_args, void * /*ret*/) {
+void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...), GDNativeConstTypePtr *p_args, void * /*ret*/) {
 	call_with_ptr_args_helper<T, P...>(p_instance, p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 
 template <class T, class... P>
-void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...) const, const GDNativeTypePtr *p_args, void * /*ret*/) {
+void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...) const, GDNativeConstTypePtr *p_args, void * /*ret*/) {
 	call_with_ptr_argsc_helper<T, P...>(p_instance, p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 
 template <class T, class R, class... P>
-void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...), const GDNativeTypePtr *p_args, void *r_ret) {
+void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...), GDNativeConstTypePtr *p_args, void *r_ret) {
 	call_with_ptr_args_ret_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
 }
 
 template <class T, class R, class... P>
-void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...) const, const GDNativeTypePtr *p_args, void *r_ret) {
+void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...) const, GDNativeConstTypePtr *p_args, void *r_ret) {
 	call_with_ptr_args_retc_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
 }
 
@@ -256,7 +256,7 @@ void call_with_variant_args_retc_helper(T *p_instance, R (T::*p_method)(P...) co
 }
 
 template <class T, class... P>
-void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const GDNativeVariantPtr *p_args, int p_argcount, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), GDNativeConstVariantPtr *p_args, int p_argcount, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -291,7 +291,7 @@ void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const G
 }
 
 template <class T, class... P>
-void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, const GDNativeVariantPtr *p_args, int p_argcount, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, GDNativeConstVariantPtr *p_args, int p_argcount, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -326,7 +326,7 @@ void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, 
 }
 
 template <class T, class R, class... P>
-void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), const GDNativeVariantPtr *p_args, int p_argcount, Variant &r_ret, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), GDNativeConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -361,7 +361,7 @@ void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), const 
 }
 
 template <class T, class R, class... P>
-void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const, const GDNativeVariantPtr *p_args, int p_argcount, Variant &r_ret, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const, GDNativeConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -473,7 +473,7 @@ void call_with_variant_args_static(void (*p_method)(P...), const Variant **p_arg
 }
 
 template <class... P>
-void call_with_variant_args_static_dv(void (*p_method)(P...), const GDNativeVariantPtr *p_args, int p_argcount, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_static_dv(void (*p_method)(P...), GDNativeConstVariantPtr *p_args, int p_argcount, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -508,12 +508,12 @@ void call_with_variant_args_static_dv(void (*p_method)(P...), const GDNativeVari
 }
 
 template <class... P, size_t... Is>
-void call_with_ptr_args_static_method_helper(void (*p_method)(P...), const GDNativeTypePtr *p_args, IndexSequence<Is...>) {
+void call_with_ptr_args_static_method_helper(void (*p_method)(P...), GDNativeConstTypePtr *p_args, IndexSequence<Is...>) {
 	p_method(PtrToArg<P>::convert(p_args[Is])...);
 }
 
 template <class... P>
-void call_with_ptr_args_static_method(void (*p_method)(P...), const GDNativeTypePtr *p_args) {
+void call_with_ptr_args_static_method(void (*p_method)(P...), GDNativeConstTypePtr *p_args) {
 	call_with_ptr_args_static_method_helper<P...>(p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 
@@ -529,7 +529,7 @@ void call_with_variant_args_static_ret(R (*p_method)(P...), const Variant **p_ar
 }
 
 template <class R, class... P>
-void call_with_variant_args_static_ret_dv(R (*p_method)(P...), const GDNativeVariantPtr *p_args, int p_argcount, Variant &r_ret, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_static_ret_dv(R (*p_method)(P...), GDNativeConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDNativeCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDNATIVE_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -564,12 +564,12 @@ void call_with_variant_args_static_ret_dv(R (*p_method)(P...), const GDNativeVar
 }
 
 template <class R, class... P, size_t... Is>
-void call_with_ptr_args_static_method_ret_helper(R (*p_method)(P...), const GDNativeTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
+void call_with_ptr_args_static_method_ret_helper(R (*p_method)(P...), GDNativeConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
 	PtrToArg<R>::encode(p_method(PtrToArg<P>::convert(p_args[Is])...), r_ret);
 }
 
 template <class R, class... P>
-void call_with_ptr_args_static_method_ret(R (*p_method)(P...), const GDNativeTypePtr *p_args, void *r_ret) {
+void call_with_ptr_args_static_method_ret(R (*p_method)(P...), GDNativeConstTypePtr *p_args, void *r_ret) {
 	call_with_ptr_args_static_method_ret_helper<R, P...>(p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
 }
 

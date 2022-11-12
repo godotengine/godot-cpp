@@ -145,7 +145,7 @@ public:
 	Variant();
 	Variant(std::nullptr_t n) :
 			Variant() {}
-	explicit Variant(const GDNativeVariantPtr native_ptr);
+	explicit Variant(GDNativeConstVariantPtr native_ptr);
 	Variant(const Variant &other);
 	Variant(Variant &&other);
 	Variant(bool v);
@@ -257,7 +257,7 @@ public:
 	Variant call(const StringName &method, Args... args) {
 		Variant result;
 		GDNativeCallError error;
-		std::array<const GDNativeVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
+		std::array<GDNativeConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
 		call(method, call_args.data(), call_args.size(), result, error);
 		return result;
 	}
@@ -268,7 +268,7 @@ public:
 	static Variant call_static(Variant::Type type, const StringName &method, Args... args) {
 		Variant result;
 		GDNativeCallError error;
-		std::array<const GDNativeVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
+		std::array<GDNativeConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
 		call_static(type, method, call_args.data(), call_args.size(), result, error);
 		return result;
 	}

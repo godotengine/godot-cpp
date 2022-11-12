@@ -861,7 +861,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             if f'get_{member["name"]}' not in method_list:
                 result.append(f'{correct_type(member["type"])} {class_name}::get_{member["name"]}() const {{')
                 result.append(
-                    f'\treturn internal::_call_builtin_ptr_getter<{correct_type(member["type"])}>(_method_bindings.member_{member["name"]}_getter, (const GDNativeTypePtr)&opaque);'
+                    f'\treturn internal::_call_builtin_ptr_getter<{correct_type(member["type"])}>(_method_bindings.member_{member["name"]}_getter, (GDNativeConstTypePtr)&opaque);'
                 )
                 result.append("}")
 
@@ -870,7 +870,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                 (encode, arg_name) = get_encoded_arg("value", member["type"], None)
                 result += encode
                 result.append(
-                    f'\t_method_bindings.member_{member["name"]}_setter((const GDNativeTypePtr)&opaque, (const GDNativeTypePtr){arg_name});'
+                    f'\t_method_bindings.member_{member["name"]}_setter((GDNativeConstTypePtr)&opaque, (GDNativeConstTypePtr){arg_name});'
                 )
 
                 result.append("}")
@@ -886,7 +886,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                     (encode, arg_name) = get_encoded_arg("other", operator["right_type"], None)
                     result += encode
                     result.append(
-                        f'\treturn internal::_call_builtin_operator_ptr<{get_gdnative_type(correct_type(operator["return_type"]))}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]}, (const GDNativeTypePtr)&opaque, (const GDNativeTypePtr){arg_name});'
+                        f'\treturn internal::_call_builtin_operator_ptr<{get_gdnative_type(correct_type(operator["return_type"]))}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]}, (GDNativeConstTypePtr)&opaque, (GDNativeConstTypePtr){arg_name});'
                     )
                     result.append("}")
                 else:
@@ -894,7 +894,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                         f'{correct_type(operator["return_type"])} {class_name}::operator{operator["name"].replace("unary", "")}() const {{'
                     )
                     result.append(
-                        f'\treturn internal::_call_builtin_operator_ptr<{get_gdnative_type(correct_type(operator["return_type"]))}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}, (const GDNativeTypePtr)&opaque, (const GDNativeTypePtr)nullptr);'
+                        f'\treturn internal::_call_builtin_operator_ptr<{get_gdnative_type(correct_type(operator["return_type"]))}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}, (GDNativeConstTypePtr)&opaque, (GDNativeConstTypePtr)nullptr);'
                     )
                     result.append("}")
                 result.append("")
@@ -1401,7 +1401,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             else:  # vararg.
                 result.append("\tGDNativeCallError error;")
                 result.append("\tVariant ret;")
-                method_call += "internal::gdn_interface->object_method_bind_call(___method_bind, _owner, (const GDNativeVariantPtr *)args, arg_count, &ret, &error"
+                method_call += "internal::gdn_interface->object_method_bind_call(___method_bind, _owner, reinterpret_cast<GDNativeConstVariantPtr *>(args), arg_count, &ret, &error"
 
             if is_ref:
                 method_call += ")"  # Close Ref<> constructor.
@@ -1627,7 +1627,7 @@ def generate_utility_functions(api, output_dir):
                 function_call += ", ".join(arguments)
         else:
             source.append("\tVariant ret;")
-            function_call += "___function(&ret, (const GDNativeVariantPtr *)args, arg_count"
+            function_call += "___function(&ret, reinterpret_cast<GDNativeConstVariantPtr *>(args), arg_count"
 
         function_call += ");"
         source.append(function_call)

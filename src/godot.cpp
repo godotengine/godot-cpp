@@ -51,7 +51,7 @@ GDExtensionBinding::Callback GDExtensionBinding::init_callback = nullptr;
 GDExtensionBinding::Callback GDExtensionBinding::terminate_callback = nullptr;
 GDNativeInitializationLevel GDExtensionBinding::minimum_initialization_level = GDNATIVE_INITIALIZATION_CORE;
 
-GDNativeBool GDExtensionBinding::init(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) {
+GDNativeBool GDExtensionBinding::init(const GDNativeInterface *p_interface, GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) {
 	internal::gdn_interface = p_interface;
 	internal::library = p_library;
 	internal::token = p_library;
