@@ -225,10 +225,10 @@ void ClassDB::bind_method_godot(const StringName &p_class_name, MethodBind *p_me
 		MethodBind::bind_call, // GDNativeExtensionClassMethodCall call_func;
 		MethodBind::bind_ptrcall, // GDNativeExtensionClassMethodPtrCall ptrcall_func;
 		p_method->get_hint_flags(), // uint32_t method_flags; /* GDNativeExtensionClassMethodFlags */
-		(uint32_t)p_method->get_argument_count(), // uint32_t argument_count;
 		(GDNativeBool)p_method->has_return(), // GDNativeBool has_return_value;
 		return_value_info, // GDNativePropertyInfo *
 		*return_value_metadata, // GDNativeExtensionClassMethodArgumentMetadata *
+		(uint32_t)p_method->get_argument_count(), // uint32_t argument_count;
 		arguments_info, // GDNativePropertyInfo *
 		arguments_metadata, // GDNativeExtensionClassMethodArgumentMetadata *
 		(uint32_t)p_method->get_default_argument_count(), // uint32_t default_argument_count;
