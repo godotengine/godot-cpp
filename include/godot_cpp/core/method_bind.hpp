@@ -98,7 +98,7 @@ public:
 	_FORCE_INLINE_ StringName get_instance_class() const { return instance_class; }
 	_FORCE_INLINE_ void set_instance_class(StringName p_class) { instance_class = p_class; }
 
-	_FORCE_INLINE_ int get_argument_count() const { return argument_count; };
+	_FORCE_INLINE_ int get_argument_count() const { return argument_count; }
 	_FORCE_INLINE_ bool is_const() const { return _is_const; }
 	_FORCE_INLINE_ bool is_static() const { return _static; }
 	_FORCE_INLINE_ bool is_vararg() const { return _vararg; }

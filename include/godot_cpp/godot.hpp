@@ -72,7 +72,7 @@ public:
 		InitObject(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) :
 				gdn_interface(p_interface),
 				library(p_library),
-				initialization(r_initialization){};
+				initialization(r_initialization) {}
 
 		void register_initializer(Callback p_init) const;
 		void register_terminator(Callback p_init) const;

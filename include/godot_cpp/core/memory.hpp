@@ -107,7 +107,7 @@ public:
 };
 
 template <class T>
-void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wrapped, T>>::type * = 0) {
+void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wrapped, T>>::type * = nullptr) {
 	if (!__has_trivial_destructor(T)) {
 		p_class->~T();
 	}

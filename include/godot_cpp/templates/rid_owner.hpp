@@ -37,7 +37,7 @@
 #include <godot_cpp/templates/spin_lock.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
-#include <stdio.h>
+#include <cstdio>
 #include <typeinfo>
 
 namespace godot {
