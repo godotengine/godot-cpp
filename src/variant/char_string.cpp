@@ -327,6 +327,22 @@ bool String::operator!=(const char32_t *p_str) const {
 	return *this != String(p_str);
 }
 
+String String::operator+(const char *p_chr) {
+	return *this + String(p_chr);
+}
+
+String String::operator+(const wchar_t *p_chr) {
+	return *this + String(p_chr);
+}
+
+String String::operator+(const char16_t *p_chr) {
+	return *this + String(p_chr);
+}
+
+String String::operator+(const char32_t *p_chr) {
+	return *this + String(p_chr);
+}
+
 const char32_t &String::operator[](int p_index) const {
 	return *internal::gdn_interface->string_operator_index_const((GDNativeStringPtr)this, p_index);
 }
