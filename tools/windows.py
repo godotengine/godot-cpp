@@ -27,10 +27,6 @@ def generate(env):
         env.Append(CPPDEFINES=["TYPED_METHOD_BIND", "NOMINMAX"])
         env.Append(CCFLAGS=["/EHsc"])
         env.Append(LINKFLAGS=["/WX"])
-        if env["debug_symbols"] or env["target"] == "debug":
-            env.Append(CCFLAGS=["/MDd"])
-        else:
-            env.Append(CCFLAGS=["/MD"])
 
         if env["use_clang_cl"]:
             env["CC"] = "clang-cl"

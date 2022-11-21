@@ -55,7 +55,7 @@ def generate(env):
     env["optimize"] = ARGUMENTS.get("optimize", opt_level)
     env["debug_symbols"] = get_cmdline_bool("debug_symbols", env.dev_build)
 
-    if "is_msvc" in env and env["is_msvc"]:
+    if env.get("is_msvc", False):
         if env["debug_symbols"]:
             env.Append(CCFLAGS=["/Zi", "/FS"])
             env.Append(LINKFLAGS=["/DEBUG:FULL"])
@@ -66,8 +66,12 @@ def generate(env):
         elif env["optimize"] == "size":
             env.Append(CCFLAGS=["/O1"])
             env.Append(LINKFLAGS=["/OPT:REF"])
-        elif env["optimize"] == "debug" or env["optimize"] == "none":
-            env.Append(CCFLAGS=["/Od"])
+
+        if env["optimize"] == "debug" or env["optimize"] == "none":
+            env.Append(CCFLAGS=["/MDd", "/Od"])
+        else:
+            env.Append(CCFLAGS=["/MD"])
+
     else:
         if env["debug_symbols"]:
             if env.dev_build:
