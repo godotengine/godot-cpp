@@ -488,7 +488,7 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 				euler.z = 0.0f;
 			}
 			return euler;
-		} break;
+		}
 		case EULER_ORDER_XZY: {
 			// Euler angles in XZY convention.
 			// See https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
@@ -517,7 +517,7 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 				euler.z = -Math_PI / 2.0f;
 			}
 			return euler;
-		} break;
+		}
 		case EULER_ORDER_YXZ: {
 			// Euler angles in YXZ convention.
 			// See https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
@@ -555,7 +555,7 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 			}
 
 			return euler;
-		} break;
+		}
 		case EULER_ORDER_YZX: {
 			// Euler angles in YZX convention.
 			// See https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
@@ -584,7 +584,7 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 				euler.z = Math_PI / 2.0f;
 			}
 			return euler;
-		} break;
+		}
 		case EULER_ORDER_ZXY: {
 			// Euler angles in ZXY convention.
 			// See https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
@@ -612,7 +612,7 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 				euler.z = 0;
 			}
 			return euler;
-		} break;
+		}
 		case EULER_ORDER_ZYX: {
 			// Euler angles in ZYX convention.
 			// See https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
@@ -640,7 +640,7 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 				euler.z = -Math::atan2(rows[0][1], rows[1][1]);
 			}
 			return euler;
-		} break;
+		}
 		default: {
 			ERR_FAIL_V_MSG(Vector3(), "Invalid parameter for get_euler(order)");
 		}

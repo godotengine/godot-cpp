@@ -52,12 +52,12 @@ protected:
 	virtual const StringName *_get_extension_class_name() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
 	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
 
-	void _notification(int p_what){};
-	bool _set(const StringName &p_name, const Variant &p_property) { return false; };
-	bool _get(const StringName &p_name, Variant &r_property) const { return false; };
-	void _get_property_list(List<PropertyInfo> *p_list) const {};
-	bool _property_can_revert(const StringName &p_name) const { return false; };
-	bool _property_get_revert(const StringName &p_name, Variant &r_property) const { return false; };
+	void _notification(int p_what) {}
+	bool _set(const StringName &p_name, const Variant &p_property) { return false; }
+	bool _get(const StringName &p_name, Variant &r_property) const { return false; }
+	void _get_property_list(List<PropertyInfo> *p_list) const {}
+	bool _property_can_revert(const StringName &p_name) const { return false; }
+	bool _property_get_revert(const StringName &p_name, Variant &r_property) const { return false; }
 	String _to_string() const { return "[" + String(get_class_static()) + ":" + itos(get_instance_id()) + "]"; }
 
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what) {}
