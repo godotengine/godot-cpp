@@ -40,7 +40,7 @@ void Example::_notification(int p_what) {
 bool Example::_set(const StringName &p_name, const Variant &p_value) {
 	String name = p_name;
 	if (name.begins_with("dproperty")) {
-		int index = name.get_slicec('_', 1).to_int();
+		int64_t index = name.get_slicec('_', 1).to_int();
 		dprop[index] = p_value;
 		return true;
 	}
@@ -54,7 +54,7 @@ bool Example::_set(const StringName &p_name, const Variant &p_value) {
 bool Example::_get(const StringName &p_name, Variant &r_ret) const {
 	String name = p_name;
 	if (name.begins_with("dproperty")) {
-		int index = name.get_slicec('_', 1).to_int();
+		int64_t index = name.get_slicec('_', 1).to_int();
 		r_ret = dprop[index];
 		return true;
 	}
@@ -66,7 +66,7 @@ bool Example::_get(const StringName &p_name, Variant &r_ret) const {
 }
 
 String Example::_to_string() const {
-	return "[ GDExtension::Example <--> Instance ID:" + itos(get_instance_id()) + " ]";
+	return "[ GDExtension::Example <--> Instance ID:" + uitos(get_instance_id()) + " ]";
 }
 
 void Example::_get_property_list(List<PropertyInfo> *p_list) const {
