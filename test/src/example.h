@@ -121,4 +121,17 @@ protected:
 	static void _bind_methods() {}
 };
 
+class ExampleBaseClass {
+public:
+	void example_void_method();
+	int example_int_method();
+};
+
+class ExampleInheriting : public ExampleBaseClass, public Object {
+	GDCLASS(ExampleInheriting, Object)
+
+protected:
+	static void _bind_methods();
+};
+
 #endif // EXAMPLE_CLASS_H

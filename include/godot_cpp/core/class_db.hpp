@@ -118,6 +118,9 @@ public:
 	template <class T>
 	static void register_abstract_class();
 
+	template <class C, class N, class M, typename... VarArgs>
+	static MethodBind *bind_inherited_method(N p_method_name, M p_method, VarArgs... p_args);
+
 	template <class N, class M, typename... VarArgs>
 	static MethodBind *bind_method(N p_method_name, M p_method, VarArgs... p_args);
 
@@ -211,6 +214,17 @@ void ClassDB::register_class(bool p_virtual) {
 template <class T>
 void ClassDB::register_abstract_class() {
 	ClassDB::_register_class<T, true>();
+}
+
+template <class C, class N, class M, typename... VarArgs>
+MethodBind *ClassDB::bind_inherited_method(N p_method_name, M p_method, VarArgs... p_args) {
+	Variant args[sizeof...(p_args) + 1] = { p_args..., Variant() }; // +1 makes sure zero sized arrays are also supported.
+	const Variant *argptrs[sizeof...(p_args) + 1];
+	for (uint32_t i = 0; i < sizeof...(p_args); i++) {
+		argptrs[i] = &args[i];
+	}
+	MethodBind *bind = create_inherited_method_bind<C>(p_method);
+	return bind_methodfi(METHOD_FLAGS_DEFAULT, bind, p_method_name, sizeof...(p_args) == 0 ? nullptr : (const void **)argptrs, sizeof...(p_args));
 }
 
 template <class N, class M, typename... VarArgs>
