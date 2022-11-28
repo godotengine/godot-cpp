@@ -101,6 +101,8 @@ public:
 	TypedArray<Vector2> test_tarray() const;
 	Dictionary test_dictionary() const;
 	Example *test_node_argument(Example *p_node) const;
+	String test_string_ops() const;
+	int test_vector_ops() const;
 
 	// Property.
 	void set_custom_position(const Vector2 &pos);

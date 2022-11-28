@@ -123,6 +123,8 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_tarray"), &Example::test_tarray);
 	ClassDB::bind_method(D_METHOD("test_dictionary"), &Example::test_dictionary);
 	ClassDB::bind_method(D_METHOD("test_node_argument"), &Example::test_node_argument);
+	ClassDB::bind_method(D_METHOD("test_string_ops"), &Example::test_string_ops);
+	ClassDB::bind_method(D_METHOD("test_vector_ops"), &Example::test_vector_ops);
 
 	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
 
@@ -253,6 +255,28 @@ Array Example::test_array() const {
 	arr[1] = Variant(2);
 
 	return arr;
+}
+
+String Example::test_string_ops() const {
+	String s = String("A");
+	s += "B";
+	s += "C";
+	s += char32_t(0x010E);
+	s = s + "E";
+	return s;
+}
+
+int Example::test_vector_ops() const {
+	PackedInt32Array arr;
+	arr.push_back(10);
+	arr.push_back(20);
+	arr.push_back(30);
+	arr.push_back(45);
+	int ret = 0;
+	for (const int32_t &E : arr) {
+		ret += E;
+	}
+	return ret;
 }
 
 void Example::test_tarray_arg(const TypedArray<int64_t> &p_array) {
