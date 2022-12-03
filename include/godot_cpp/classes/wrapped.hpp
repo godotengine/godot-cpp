@@ -61,12 +61,12 @@ protected:
 	String _to_string() const { return "[" + String(get_class_static()) + ":" + itos(get_instance_id()) + "]"; }
 
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what) {}
-	static GDNativeBool set_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name, const GDNativeVariantPtr p_value) { return false; }
-	static GDNativeBool get_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name, GDNativeVariantPtr r_ret) { return false; }
+	static GDNativeBool set_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeConstVariantPtr p_value) { return false; }
+	static GDNativeBool get_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeVariantPtr r_ret) { return false; }
 	static const GDNativePropertyInfo *get_property_list_bind(GDExtensionClassInstancePtr p_instance, uint32_t *r_count) { return nullptr; }
 	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDNativePropertyInfo *p_list) {}
-	static GDNativeBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name) { return false; }
-	static GDNativeBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name, GDNativeVariantPtr r_ret) { return false; }
+	static GDNativeBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name) { return false; }
+	static GDNativeBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeVariantPtr r_ret) { return false; }
 	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeBool *r_is_valid, GDNativeStringPtr r_out) {}
 
 	::godot::List<::godot::PropertyInfo> plist_owned;
@@ -184,7 +184,7 @@ public:                                                                         
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDNativeBool set_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name, const GDNativeVariantPtr p_value) {                                       \
+	static GDNativeBool set_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeConstVariantPtr p_value) {                                         \
 		if (p_instance && m_class::_get_set()) {                                                                                                                                       \
 			if (m_class::_get_set() != m_inherits::_get_set()) {                                                                                                                       \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
@@ -195,7 +195,7 @@ public:                                                                         
 		return false;                                                                                                                                                                  \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDNativeBool get_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name, GDNativeVariantPtr r_ret) {                                               \
+	static GDNativeBool get_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeVariantPtr r_ret) {                                                \
 		if (p_instance && m_class::_get_get()) {                                                                                                                                       \
 			if (m_class::_get_get() != m_inherits::_get_get()) {                                                                                                                       \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
@@ -243,7 +243,7 @@ public:                                                                         
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDNativeBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name) {                                                         \
+	static GDNativeBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name) {                                                          \
 		if (p_instance && m_class::_get_property_can_revert()) {                                                                                                                       \
 			if (m_class::_get_property_can_revert() != m_inherits::_get_property_can_revert()) {                                                                                       \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
@@ -254,7 +254,7 @@ public:                                                                         
 		return false;                                                                                                                                                                  \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDNativeBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, const GDNativeStringNamePtr p_name, GDNativeVariantPtr r_ret) {                               \
+	static GDNativeBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeVariantPtr r_ret) {                                \
 		if (p_instance && m_class::_get_property_get_revert()) {                                                                                                                       \
 			if (m_class::_get_property_get_revert() != m_inherits::_get_property_get_revert()) {                                                                                       \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \

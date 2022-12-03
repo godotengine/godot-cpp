@@ -72,7 +72,7 @@ Variant::Variant() {
 	internal::gdn_interface->variant_new_nil(_native_ptr());
 }
 
-Variant::Variant(const GDNativeVariantPtr native_ptr) {
+Variant::Variant(GDNativeConstVariantPtr native_ptr) {
 	internal::gdn_interface->variant_new_copy(_native_ptr(), native_ptr);
 }
 
@@ -530,11 +530,11 @@ bool Variant::operator<(const Variant &other) const {
 }
 
 void Variant::call(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDNativeCallError &r_error) {
-	internal::gdn_interface->variant_call(_native_ptr(), method._native_ptr(), reinterpret_cast<const GDNativeVariantPtr *>(const_cast<Variant **>(args)), argcount, r_ret._native_ptr(), &r_error);
+	internal::gdn_interface->variant_call(_native_ptr(), method._native_ptr(), reinterpret_cast<GDNativeConstVariantPtr *>(args), argcount, r_ret._native_ptr(), &r_error);
 }
 
 void Variant::call_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDNativeCallError &r_error) {
-	internal::gdn_interface->variant_call_static(static_cast<GDNativeVariantType>(type), method._native_ptr(), reinterpret_cast<const GDNativeVariantPtr *>(const_cast<Variant **>(args)), argcount, r_ret._native_ptr(), &r_error);
+	internal::gdn_interface->variant_call_static(static_cast<GDNativeVariantType>(type), method._native_ptr(), reinterpret_cast<GDNativeConstVariantPtr *>(args), argcount, r_ret._native_ptr(), &r_error);
 }
 
 void Variant::evaluate(const Operator &op, const Variant &a, const Variant &b, Variant &r_ret, bool &r_valid) {

@@ -49,7 +49,7 @@ struct PtrToArg {};
 		}                                                              \
 		typedef m_type EncodeT;                                        \
 		_FORCE_INLINE_ static void encode(m_type p_val, void *p_ptr) { \
-			*((m_type *)p_ptr) = p_val;                                \
+			*reinterpret_cast<m_type *>(p_ptr) = p_val;                \
 		}                                                              \
 	};                                                                 \
 	template <>                                                        \
@@ -59,7 +59,7 @@ struct PtrToArg {};
 		}                                                              \
 		typedef m_type EncodeT;                                        \
 		_FORCE_INLINE_ static void encode(m_type p_val, void *p_ptr) { \
-			*((m_type *)p_ptr) = p_val;                                \
+			*reinterpret_cast<m_type *>(p_ptr) = p_val;                \
 		}                                                              \
 	}
 
@@ -71,7 +71,7 @@ struct PtrToArg {};
 		}                                                                         \
 		typedef m_conv EncodeT;                                                   \
 		_FORCE_INLINE_ static void encode(m_type p_val, void *p_ptr) {            \
-			*((m_conv *)p_ptr) = static_cast<m_conv>(p_val);                      \
+			*reinterpret_cast<m_conv *>(p_ptr) = static_cast<m_conv>(p_val);      \
 		}                                                                         \
 		_FORCE_INLINE_ static m_conv encode_arg(m_type p_val) {                   \
 			return static_cast<m_conv>(p_val);                                    \
@@ -84,7 +84,7 @@ struct PtrToArg {};
 		}                                                                         \
 		typedef m_conv EncodeT;                                                   \
 		_FORCE_INLINE_ static void encode(m_type p_val, void *p_ptr) {            \
-			*((m_conv *)p_ptr) = static_cast<m_conv>(p_val);                      \
+			*reinterpret_cast<m_conv *>(p_ptr) = static_cast<m_conv>(p_val);      \
 		}                                                                         \
 		_FORCE_INLINE_ static m_conv encode_arg(m_type p_val) {                   \
 			return static_cast<m_conv>(p_val);                                    \
@@ -99,7 +99,7 @@ struct PtrToArg {};
 		}                                                                     \
 		typedef m_type EncodeT;                                               \
 		_FORCE_INLINE_ static void encode(const m_type &p_val, void *p_ptr) { \
-			*((m_type *)p_ptr) = p_val;                                       \
+			*reinterpret_cast<m_type *>(p_ptr) = p_val;                       \
 		}                                                                     \
 	};                                                                        \
 	template <>                                                               \
@@ -109,7 +109,7 @@ struct PtrToArg {};
 		}                                                                     \
 		typedef m_type EncodeT;                                               \
 		_FORCE_INLINE_ static void encode(const m_type &p_val, void *p_ptr) { \
-			*((m_type *)p_ptr) = p_val;                                       \
+			*reinterpret_cast<m_type *>(p_ptr) = p_val;                       \
 		}                                                                     \
 	}
 
@@ -168,47 +168,47 @@ MAKE_PTRARG_BY_REFERENCE(Variant);
 template <class T>
 struct PtrToArg<T *> {
 	_FORCE_INLINE_ static T *convert(const void *p_ptr) {
-		return reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks));
+		return reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*reinterpret_cast<GDNativeConstObjectPtr *>(const_cast<void *>(p_ptr)), godot::internal::token, &T::___binding_callbacks));
 	}
 	typedef Object *EncodeT;
 	_FORCE_INLINE_ static void encode(T *p_var, void *p_ptr) {
-		*((void **)p_ptr) = p_var ? p_var->_owner : nullptr;
+		*reinterpret_cast<const void **>(p_ptr) = p_var ? p_var->_owner : nullptr;
 	}
 };
 
 template <class T>
 struct PtrToArg<const T *> {
 	_FORCE_INLINE_ static const T *convert(const void *p_ptr) {
-		return reinterpret_cast<const T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks));
+		return reinterpret_cast<const T *>(godot::internal::gdn_interface->object_get_instance_binding(*reinterpret_cast<GDNativeConstObjectPtr *>(const_cast<void *>(p_ptr)), godot::internal::token, &T::___binding_callbacks));
 	}
 	typedef const Object *EncodeT;
 	_FORCE_INLINE_ static void encode(T *p_var, void *p_ptr) {
-		*((void **)p_ptr) = p_var ? p_var->_owner : nullptr;
+		*reinterpret_cast<const void **>(p_ptr) = p_var ? p_var->_owner : nullptr;
 	}
 };
 
 // Pointers.
-#define GDVIRTUAL_NATIVE_PTR(m_type)                                                \
-	template <>                                                                     \
-	struct PtrToArg<m_type *> {                                                     \
-		_FORCE_INLINE_ static m_type *convert(const void *p_ptr) {                  \
-			return (m_type *)(*(void **)p_ptr);                                     \
-		}                                                                           \
-		typedef m_type *EncodeT;                                                    \
-		_FORCE_INLINE_ static void encode(m_type *p_var, void *p_ptr) {             \
-			*((void **)p_ptr) = p_var;                                              \
-		}                                                                           \
-	};                                                                              \
-                                                                                    \
-	template <>                                                                     \
-	struct PtrToArg<const m_type *> {                                               \
-		_FORCE_INLINE_ static const m_type *convert(const void *p_ptr) {            \
-			return (const m_type *)(*(const void **)p_ptr);                         \
-		}                                                                           \
-		typedef const m_type *EncodeT;                                              \
-		_FORCE_INLINE_ static void encode(const m_type *p_var, const void *p_ptr) { \
-			*((const void **)p_ptr) = p_var;                                        \
-		}                                                                           \
+#define GDVIRTUAL_NATIVE_PTR(m_type)                                          \
+	template <>                                                               \
+	struct PtrToArg<m_type *> {                                               \
+		_FORCE_INLINE_ static m_type *convert(const void *p_ptr) {            \
+			return (m_type *)(*(void **)p_ptr);                               \
+		}                                                                     \
+		typedef m_type *EncodeT;                                              \
+		_FORCE_INLINE_ static void encode(m_type *p_var, void *p_ptr) {       \
+			*reinterpret_cast<m_type **>(p_ptr) = p_var;                      \
+		}                                                                     \
+	};                                                                        \
+                                                                              \
+	template <>                                                               \
+	struct PtrToArg<const m_type *> {                                         \
+		_FORCE_INLINE_ static const m_type *convert(const void *p_ptr) {      \
+			return (const m_type *)(*(const void **)p_ptr);                   \
+		}                                                                     \
+		typedef const m_type *EncodeT;                                        \
+		_FORCE_INLINE_ static void encode(const m_type *p_var, void *p_ptr) { \
+			*reinterpret_cast<const m_type **>(p_ptr) = p_var;                \
+		}                                                                     \
 	}
 
 GDVIRTUAL_NATIVE_PTR(void);

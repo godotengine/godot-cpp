@@ -136,7 +136,7 @@ public:
 
 	static MethodBind *get_method(const StringName &p_class, const StringName &p_method);
 
-	static GDNativeExtensionClassCallVirtual get_virtual_func(void *p_userdata, const GDNativeStringNamePtr p_name);
+	static GDNativeExtensionClassCallVirtual get_virtual_func(void *p_userdata, GDNativeConstStringNamePtr p_name);
 
 	static void initialize(GDNativeInitializationLevel p_level);
 	static void deinitialize(GDNativeInitializationLevel p_level);
@@ -151,12 +151,12 @@ public:
 #define BIND_BITFIELD_FLAG(m_constant) \
 	godot::ClassDB::bind_integer_constant(get_class_static(), godot::__constant_get_bitfield_name(m_constant, #m_constant), #m_constant, m_constant, true);
 
-#define BIND_VIRTUAL_METHOD(m_class, m_method)                                                                                    \
-	{                                                                                                                             \
-		auto ___call##m_method = [](GDNativeObjectPtr p_instance, const GDNativeTypePtr *p_args, GDNativeTypePtr p_ret) -> void { \
-			call_with_ptr_args(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret);                       \
-		};                                                                                                                        \
-		godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, ___call##m_method);                           \
+#define BIND_VIRTUAL_METHOD(m_class, m_method)                                                                                   \
+	{                                                                                                                            \
+		auto ___call##m_method = [](GDNativeObjectPtr p_instance, GDNativeConstTypePtr *p_args, GDNativeTypePtr p_ret) -> void { \
+			call_with_ptr_args(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret);                      \
+		};                                                                                                                       \
+		godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, ___call##m_method);                          \
 	}
 
 template <class T, bool is_abstract>

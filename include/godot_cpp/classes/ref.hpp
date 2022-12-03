@@ -240,13 +240,13 @@ public:
 template <class T>
 struct PtrToArg<Ref<T>> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*reinterpret_cast<GDNativeObjectPtr *>(const_cast<void *>(p_ptr)), godot::internal::token, &T::___binding_callbacks)));
 	}
 
 	typedef Ref<T> EncodeT;
 
-	_FORCE_INLINE_ static void encode(Ref<T> p_val, const void *p_ptr) {
-		*(void **)p_ptr = p_val->_owner;
+	_FORCE_INLINE_ static void encode(Ref<T> p_val, void *p_ptr) {
+		*reinterpret_cast<const GodotObject **>(p_ptr) = p_val->_owner;
 	}
 };
 
@@ -255,7 +255,7 @@ struct PtrToArg<const Ref<T> &> {
 	typedef Ref<T> EncodeT;
 
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*reinterpret_cast<GDNativeObjectPtr *>(const_cast<void *>(p_ptr)), godot::internal::token, &T::___binding_callbacks)));
 	}
 };
 

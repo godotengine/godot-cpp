@@ -220,7 +220,7 @@ void ClassDB::bind_method_godot(const StringName &p_class_name, MethodBind *p_me
 
 	StringName name = p_method->get_name();
 	GDNativeExtensionClassMethodInfo method_info = {
-		name._native_ptr(), // const GDNativeStringNamePtr;
+		name._native_ptr(), // GDNativeStringNamePtr;
 		p_method, // void *method_userdata;
 		MethodBind::bind_call, // GDNativeExtensionClassMethodCall call_func;
 		MethodBind::bind_ptrcall, // GDNativeExtensionClassMethodPtrCall ptrcall_func;
@@ -261,10 +261,10 @@ void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) 
 	for (const PropertyInfo &par : p_signal.arguments) {
 		parameters.push_back(GDNativePropertyInfo{
 				static_cast<GDNativeVariantType>(par.type), // GDNativeVariantType type;
-				par.name._native_ptr(), // const GDNativeStringNamePtr name;
-				par.class_name._native_ptr(), // const GDNativeStringNamePtr class_name;
+				par.name._native_ptr(), // GDNativeStringNamePtr name;
+				par.class_name._native_ptr(), // GDNativeStringNamePtr class_name;
 				par.hint, // NONE //uint32_t hint;
-				par.hint_string._native_ptr(), // const GDNativeStringPtr hint_string;
+				par.hint_string._native_ptr(), // GDNativeStringPtr hint_string;
 				par.usage, // DEFAULT //uint32_t usage;
 		});
 	}
@@ -288,7 +288,7 @@ void ClassDB::bind_integer_constant(const StringName &p_class_name, const String
 	// Register it with Godot
 	internal::gdn_interface->classdb_register_extension_class_integer_constant(internal::library, p_class_name._native_ptr(), p_enum_name._native_ptr(), p_constant_name._native_ptr(), p_constant_value, p_is_bitfield);
 }
-GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, const GDNativeStringNamePtr p_name) {
+GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDNativeConstStringNamePtr p_name) {
 	// This is called by Godot the first time it calls a virtual function, and it caches the result, per object instance.
 	// Because of this, it can happen from different threads at once.
 	// It should be ok not using any mutex as long as we only READ data.
