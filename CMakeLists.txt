@@ -36,30 +36,14 @@
 # Test build for Windows, Mac and mingw.
 
 project(godot-cpp LANGUAGES CXX)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.12)
 
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
-
-set(BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${BUILD_PATH}")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${BUILD_PATH}")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BUILD_PATH}")
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${BUILD_PATH}")
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${BUILD_PATH}")
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BUILD_PATH}")
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BUILD_PATH}")
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${BUILD_PATH}")
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${BUILD_PATH}")
 
 # Default build type is Debug in the SConstruct
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
-
-# Set the c++ standard to c++17
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(FLOAT_TYPE_FLAG "float" CACHE STRING "")
 if(FLOAT_TYPE EQUAL 64)
@@ -156,8 +140,8 @@ add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
 )
 
 # Get Sources
-file(GLOB_RECURSE SOURCES src/*.c**)
-file(GLOB_RECURSE HEADERS include/*.h**)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.c**)
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS include/*.h**)
 
 # Define our godot-cpp library
 add_library(${PROJECT_NAME}
@@ -166,6 +150,12 @@ add_library(${PROJECT_NAME}
 		${GENERATED_FILES_LIST}
 )
 add_library(godot::cpp ALIAS ${PROJECT_NAME})
+
+target_compile_features(${PROJECT_NAME}
+	PRIVATE
+		cxx_std_17
+)
+
 target_compile_definitions(${PROJECT_NAME} PUBLIC
 	$<$<CONFIG:Debug>:DEBUG_ENABLED>
 	$<$<CONFIG:Debug>:DEBUG_METHODS_ENABLED>
@@ -190,17 +180,25 @@ target_include_directories(${PROJECT_NAME}
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS ${GODOT_LINKER_FLAGS})
 
-
 # Create the correct name (godot.os.build_type.system_bits)
-
 string(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME)
 string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
 
 if(ANDROID)
 	# Added the android abi after system name
 	set(SYSTEM_NAME ${SYSTEM_NAME}.${ANDROID_ABI})
+
 	# Android does not have the bits at the end if you look at the main godot repo build
-	set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}")
+	set(OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}")
 else()
-	set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}.${BITS}")
+	set(OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}.${BITS}")
 endif()
+
+set_target_properties(${PROJECT_NAME}
+	PROPERTIES
+		CXX_EXTENSIONS OFF
+		ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+		OUTPUT_NAME "${OUTPUT_NAME}"
+)
