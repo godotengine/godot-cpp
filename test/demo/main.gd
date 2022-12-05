@@ -28,7 +28,10 @@ func _ready():
 	($Example as Example).simple_const_func() # Force use of ptrcall
 	prints("  returned", $Example.return_something("some string"))
 	prints("  returned const", $Example.return_something_const())
-	prints("  returned ref", $Example.return_extended_ref())
+	var null_ref = $Example.return_empty_ref()
+	prints("  returned empty ref", null_ref)
+	var ret_ref = $Example.return_extended_ref()
+	prints("  returned ref", ret_ref.get_instance_id(), ", id:", ret_ref.get_id())
 	prints("  returned ", $Example.get_v4())
 
 	prints("VarArg method calls")

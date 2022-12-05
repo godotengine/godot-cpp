@@ -25,12 +25,20 @@ using namespace godot;
 class ExampleRef : public RefCounted {
 	GDCLASS(ExampleRef, RefCounted);
 
+private:
+	static int instance_count;
+	static int last_id;
+
+	int id;
+
 protected:
-	static void _bind_methods() {}
+	static void _bind_methods();
 
 public:
 	ExampleRef();
 	~ExampleRef();
+
+	int get_id();
 };
 
 class ExampleMin : public Control {
@@ -79,6 +87,7 @@ public:
 	void simple_const_func() const;
 	String return_something(const String &base);
 	Viewport *return_something_const() const;
+	Ref<ExampleRef> return_empty_ref() const;
 	ExampleRef *return_extended_ref() const;
 	Ref<ExampleRef> extended_ref_checks(Ref<ExampleRef> p_ref) const;
 	Variant varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
