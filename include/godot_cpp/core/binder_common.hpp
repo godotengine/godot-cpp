@@ -122,7 +122,13 @@ struct VariantCaster<const T &> {
 template <typename T>
 struct VariantObjectClassChecker {
 	static _FORCE_INLINE_ bool check(const Variant &p_variant) {
-		return true;
+		using TStripped = std::remove_pointer_t<T>;
+		if constexpr (std::is_base_of<Object, TStripped>::value) {
+			Object *obj = p_variant;
+			return Object::cast_to<TStripped>(p_variant) || !obj;
+		} else {
+			return true;
+		}
 	}
 };
 

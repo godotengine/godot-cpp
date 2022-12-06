@@ -276,7 +276,7 @@ struct GetTypeInfo<Ref<T>, typename EnableIf<TypeInherits<RefCounted, T>::value>
 	static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 
 	static inline PropertyInfo get_class_info() {
-		return make_property_info(Variant::Type::OBJECT, T::get_class_static());
+		return make_property_info(Variant::Type::OBJECT, "", PROPERTY_HINT_RESOURCE_TYPE, T::get_class_static());
 	}
 };
 
@@ -286,7 +286,7 @@ struct GetTypeInfo<const Ref<T> &, typename EnableIf<TypeInherits<RefCounted, T>
 	static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 
 	static inline PropertyInfo get_class_info() {
-		return make_property_info(Variant::Type::OBJECT, T::get_class_static());
+		return make_property_info(Variant::Type::OBJECT, "", PROPERTY_HINT_RESOURCE_TYPE, T::get_class_static());
 	}
 };
 
