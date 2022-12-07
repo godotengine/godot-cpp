@@ -35,13 +35,13 @@
 #include <cstdint>
 #include <cstring>
 
-#if !defined(GDN_EXPORT)
+#if !defined(GDE_EXPORT)
 #if defined(_WIN32)
-#define GDN_EXPORT __declspec(dllexport)
+#define GDE_EXPORT __declspec(dllexport)
 #elif defined(__GNUC__)
-#define GDN_EXPORT __attribute__((visibility("default")))
+#define GDE_EXPORT __attribute__((visibility("default")))
 #else
-#define GDN_EXPORT
+#define GDE_EXPORT
 #endif
 #endif
 

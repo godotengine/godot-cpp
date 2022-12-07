@@ -35,7 +35,7 @@
 #include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
-#include <godot/gdnative_interface.h>
+#include <godot/gdextension_interface.h>
 
 namespace godot {
 
@@ -93,95 +93,95 @@ static PropertyInfo make_property_info(Variant::Type p_type, const StringName &p
 template <class T, typename = void>
 struct GetTypeInfo;
 
-#define MAKE_TYPE_INFO(m_type, m_var_type)                                                                                         \
-	template <>                                                                                                                    \
-	struct GetTypeInfo<m_type> {                                                                                                   \
-		static constexpr GDNativeVariantType VARIANT_TYPE = m_var_type;                                                            \
-		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE; \
-		static inline PropertyInfo get_class_info() {                                                                              \
-			return make_property_info((Variant::Type)VARIANT_TYPE, "");                                                            \
-		}                                                                                                                          \
-	};                                                                                                                             \
-	template <>                                                                                                                    \
-	struct GetTypeInfo<const m_type &> {                                                                                           \
-		static constexpr GDNativeVariantType VARIANT_TYPE = m_var_type;                                                            \
-		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE; \
-		static inline PropertyInfo get_class_info() {                                                                              \
-			return make_property_info((Variant::Type)VARIANT_TYPE, "");                                                            \
-		}                                                                                                                          \
+#define MAKE_TYPE_INFO(m_type, m_var_type)                                                                            \
+	template <>                                                                                                       \
+	struct GetTypeInfo<m_type> {                                                                                      \
+		static constexpr GDExtensionVariantType VARIANT_TYPE = m_var_type;                                            \
+		static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE; \
+		static inline PropertyInfo get_class_info() {                                                                 \
+			return make_property_info((Variant::Type)VARIANT_TYPE, "");                                               \
+		}                                                                                                             \
+	};                                                                                                                \
+	template <>                                                                                                       \
+	struct GetTypeInfo<const m_type &> {                                                                              \
+		static constexpr GDExtensionVariantType VARIANT_TYPE = m_var_type;                                            \
+		static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE; \
+		static inline PropertyInfo get_class_info() {                                                                 \
+			return make_property_info((Variant::Type)VARIANT_TYPE, "");                                               \
+		}                                                                                                             \
 	};
 
-#define MAKE_TYPE_INFO_WITH_META(m_type, m_var_type, m_metadata)                             \
-	template <>                                                                              \
-	struct GetTypeInfo<m_type> {                                                             \
-		static constexpr GDNativeVariantType VARIANT_TYPE = m_var_type;                      \
-		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = m_metadata; \
-		static inline PropertyInfo get_class_info() {                                        \
-			return make_property_info((Variant::Type)VARIANT_TYPE, "");                      \
-		}                                                                                    \
-	};                                                                                       \
-	template <>                                                                              \
-	struct GetTypeInfo<const m_type &> {                                                     \
-		static constexpr GDNativeVariantType VARIANT_TYPE = m_var_type;                      \
-		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = m_metadata; \
-		static inline PropertyInfo get_class_info() {                                        \
-			return make_property_info((Variant::Type)VARIANT_TYPE, "");                      \
-		}                                                                                    \
+#define MAKE_TYPE_INFO_WITH_META(m_type, m_var_type, m_metadata)                       \
+	template <>                                                                        \
+	struct GetTypeInfo<m_type> {                                                       \
+		static constexpr GDExtensionVariantType VARIANT_TYPE = m_var_type;             \
+		static constexpr GDExtensionClassMethodArgumentMetadata METADATA = m_metadata; \
+		static inline PropertyInfo get_class_info() {                                  \
+			return make_property_info((Variant::Type)VARIANT_TYPE, "");                \
+		}                                                                              \
+	};                                                                                 \
+	template <>                                                                        \
+	struct GetTypeInfo<const m_type &> {                                               \
+		static constexpr GDExtensionVariantType VARIANT_TYPE = m_var_type;             \
+		static constexpr GDExtensionClassMethodArgumentMetadata METADATA = m_metadata; \
+		static inline PropertyInfo get_class_info() {                                  \
+			return make_property_info((Variant::Type)VARIANT_TYPE, "");                \
+		}                                                                              \
 	};
 
-MAKE_TYPE_INFO(bool, GDNATIVE_VARIANT_TYPE_BOOL)
-MAKE_TYPE_INFO_WITH_META(uint8_t, GDNATIVE_VARIANT_TYPE_INT, GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_UINT8)
-MAKE_TYPE_INFO_WITH_META(int8_t, GDNATIVE_VARIANT_TYPE_INT, GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_INT8)
-MAKE_TYPE_INFO_WITH_META(uint16_t, GDNATIVE_VARIANT_TYPE_INT, GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_UINT16)
-MAKE_TYPE_INFO_WITH_META(int16_t, GDNATIVE_VARIANT_TYPE_INT, GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_INT16)
-MAKE_TYPE_INFO_WITH_META(uint32_t, GDNATIVE_VARIANT_TYPE_INT, GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_UINT32)
-MAKE_TYPE_INFO_WITH_META(int32_t, GDNATIVE_VARIANT_TYPE_INT, GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_INT32)
-MAKE_TYPE_INFO_WITH_META(uint64_t, GDNATIVE_VARIANT_TYPE_INT, GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_UINT64)
-MAKE_TYPE_INFO_WITH_META(int64_t, GDNATIVE_VARIANT_TYPE_INT, GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_INT64)
-MAKE_TYPE_INFO(char16_t, GDNATIVE_VARIANT_TYPE_INT)
-MAKE_TYPE_INFO(char32_t, GDNATIVE_VARIANT_TYPE_INT)
-MAKE_TYPE_INFO_WITH_META(float, GDNATIVE_VARIANT_TYPE_FLOAT, GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_REAL_IS_FLOAT)
-MAKE_TYPE_INFO_WITH_META(double, GDNATIVE_VARIANT_TYPE_FLOAT, GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_REAL_IS_DOUBLE)
+MAKE_TYPE_INFO(bool, GDEXTENSION_VARIANT_TYPE_BOOL)
+MAKE_TYPE_INFO_WITH_META(uint8_t, GDEXTENSION_VARIANT_TYPE_INT, GDEXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_UINT8)
+MAKE_TYPE_INFO_WITH_META(int8_t, GDEXTENSION_VARIANT_TYPE_INT, GDEXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_INT8)
+MAKE_TYPE_INFO_WITH_META(uint16_t, GDEXTENSION_VARIANT_TYPE_INT, GDEXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_UINT16)
+MAKE_TYPE_INFO_WITH_META(int16_t, GDEXTENSION_VARIANT_TYPE_INT, GDEXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_INT16)
+MAKE_TYPE_INFO_WITH_META(uint32_t, GDEXTENSION_VARIANT_TYPE_INT, GDEXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_UINT32)
+MAKE_TYPE_INFO_WITH_META(int32_t, GDEXTENSION_VARIANT_TYPE_INT, GDEXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_INT32)
+MAKE_TYPE_INFO_WITH_META(uint64_t, GDEXTENSION_VARIANT_TYPE_INT, GDEXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_UINT64)
+MAKE_TYPE_INFO_WITH_META(int64_t, GDEXTENSION_VARIANT_TYPE_INT, GDEXTENSION_METHOD_ARGUMENT_METADATA_INT_IS_INT64)
+MAKE_TYPE_INFO(char16_t, GDEXTENSION_VARIANT_TYPE_INT)
+MAKE_TYPE_INFO(char32_t, GDEXTENSION_VARIANT_TYPE_INT)
+MAKE_TYPE_INFO_WITH_META(float, GDEXTENSION_VARIANT_TYPE_FLOAT, GDEXTENSION_METHOD_ARGUMENT_METADATA_REAL_IS_FLOAT)
+MAKE_TYPE_INFO_WITH_META(double, GDEXTENSION_VARIANT_TYPE_FLOAT, GDEXTENSION_METHOD_ARGUMENT_METADATA_REAL_IS_DOUBLE)
 
-MAKE_TYPE_INFO(String, GDNATIVE_VARIANT_TYPE_STRING)
-MAKE_TYPE_INFO(Vector2, GDNATIVE_VARIANT_TYPE_VECTOR2)
-MAKE_TYPE_INFO(Vector2i, GDNATIVE_VARIANT_TYPE_VECTOR2I)
-MAKE_TYPE_INFO(Rect2, GDNATIVE_VARIANT_TYPE_RECT2)
-MAKE_TYPE_INFO(Rect2i, GDNATIVE_VARIANT_TYPE_RECT2I)
-MAKE_TYPE_INFO(Vector3, GDNATIVE_VARIANT_TYPE_VECTOR3)
-MAKE_TYPE_INFO(Vector3i, GDNATIVE_VARIANT_TYPE_VECTOR3I)
-MAKE_TYPE_INFO(Transform2D, GDNATIVE_VARIANT_TYPE_TRANSFORM2D)
-MAKE_TYPE_INFO(Vector4, GDNATIVE_VARIANT_TYPE_VECTOR4)
-MAKE_TYPE_INFO(Vector4i, GDNATIVE_VARIANT_TYPE_VECTOR4I)
-MAKE_TYPE_INFO(Plane, GDNATIVE_VARIANT_TYPE_PLANE)
-MAKE_TYPE_INFO(Quaternion, GDNATIVE_VARIANT_TYPE_QUATERNION)
-MAKE_TYPE_INFO(AABB, GDNATIVE_VARIANT_TYPE_AABB)
-MAKE_TYPE_INFO(Basis, GDNATIVE_VARIANT_TYPE_BASIS)
-MAKE_TYPE_INFO(Transform3D, GDNATIVE_VARIANT_TYPE_TRANSFORM3D)
-MAKE_TYPE_INFO(Projection, GDNATIVE_VARIANT_TYPE_PROJECTION)
-MAKE_TYPE_INFO(Color, GDNATIVE_VARIANT_TYPE_COLOR)
-MAKE_TYPE_INFO(StringName, GDNATIVE_VARIANT_TYPE_STRING_NAME)
-MAKE_TYPE_INFO(NodePath, GDNATIVE_VARIANT_TYPE_NODE_PATH)
-MAKE_TYPE_INFO(RID, GDNATIVE_VARIANT_TYPE_RID)
-MAKE_TYPE_INFO(Callable, GDNATIVE_VARIANT_TYPE_CALLABLE)
-MAKE_TYPE_INFO(Signal, GDNATIVE_VARIANT_TYPE_SIGNAL)
-MAKE_TYPE_INFO(Dictionary, GDNATIVE_VARIANT_TYPE_DICTIONARY)
-MAKE_TYPE_INFO(Array, GDNATIVE_VARIANT_TYPE_ARRAY)
-MAKE_TYPE_INFO(PackedByteArray, GDNATIVE_VARIANT_TYPE_PACKED_BYTE_ARRAY)
-MAKE_TYPE_INFO(PackedInt32Array, GDNATIVE_VARIANT_TYPE_PACKED_INT32_ARRAY)
-MAKE_TYPE_INFO(PackedInt64Array, GDNATIVE_VARIANT_TYPE_PACKED_INT64_ARRAY)
-MAKE_TYPE_INFO(PackedFloat32Array, GDNATIVE_VARIANT_TYPE_PACKED_FLOAT32_ARRAY)
-MAKE_TYPE_INFO(PackedFloat64Array, GDNATIVE_VARIANT_TYPE_PACKED_FLOAT64_ARRAY)
-MAKE_TYPE_INFO(PackedStringArray, GDNATIVE_VARIANT_TYPE_PACKED_STRING_ARRAY)
-MAKE_TYPE_INFO(PackedVector2Array, GDNATIVE_VARIANT_TYPE_PACKED_VECTOR2_ARRAY)
-MAKE_TYPE_INFO(PackedVector3Array, GDNATIVE_VARIANT_TYPE_PACKED_VECTOR3_ARRAY)
-MAKE_TYPE_INFO(PackedColorArray, GDNATIVE_VARIANT_TYPE_PACKED_COLOR_ARRAY)
+MAKE_TYPE_INFO(String, GDEXTENSION_VARIANT_TYPE_STRING)
+MAKE_TYPE_INFO(Vector2, GDEXTENSION_VARIANT_TYPE_VECTOR2)
+MAKE_TYPE_INFO(Vector2i, GDEXTENSION_VARIANT_TYPE_VECTOR2I)
+MAKE_TYPE_INFO(Rect2, GDEXTENSION_VARIANT_TYPE_RECT2)
+MAKE_TYPE_INFO(Rect2i, GDEXTENSION_VARIANT_TYPE_RECT2I)
+MAKE_TYPE_INFO(Vector3, GDEXTENSION_VARIANT_TYPE_VECTOR3)
+MAKE_TYPE_INFO(Vector3i, GDEXTENSION_VARIANT_TYPE_VECTOR3I)
+MAKE_TYPE_INFO(Transform2D, GDEXTENSION_VARIANT_TYPE_TRANSFORM2D)
+MAKE_TYPE_INFO(Vector4, GDEXTENSION_VARIANT_TYPE_VECTOR4)
+MAKE_TYPE_INFO(Vector4i, GDEXTENSION_VARIANT_TYPE_VECTOR4I)
+MAKE_TYPE_INFO(Plane, GDEXTENSION_VARIANT_TYPE_PLANE)
+MAKE_TYPE_INFO(Quaternion, GDEXTENSION_VARIANT_TYPE_QUATERNION)
+MAKE_TYPE_INFO(AABB, GDEXTENSION_VARIANT_TYPE_AABB)
+MAKE_TYPE_INFO(Basis, GDEXTENSION_VARIANT_TYPE_BASIS)
+MAKE_TYPE_INFO(Transform3D, GDEXTENSION_VARIANT_TYPE_TRANSFORM3D)
+MAKE_TYPE_INFO(Projection, GDEXTENSION_VARIANT_TYPE_PROJECTION)
+MAKE_TYPE_INFO(Color, GDEXTENSION_VARIANT_TYPE_COLOR)
+MAKE_TYPE_INFO(StringName, GDEXTENSION_VARIANT_TYPE_STRING_NAME)
+MAKE_TYPE_INFO(NodePath, GDEXTENSION_VARIANT_TYPE_NODE_PATH)
+MAKE_TYPE_INFO(RID, GDEXTENSION_VARIANT_TYPE_RID)
+MAKE_TYPE_INFO(Callable, GDEXTENSION_VARIANT_TYPE_CALLABLE)
+MAKE_TYPE_INFO(Signal, GDEXTENSION_VARIANT_TYPE_SIGNAL)
+MAKE_TYPE_INFO(Dictionary, GDEXTENSION_VARIANT_TYPE_DICTIONARY)
+MAKE_TYPE_INFO(Array, GDEXTENSION_VARIANT_TYPE_ARRAY)
+MAKE_TYPE_INFO(PackedByteArray, GDEXTENSION_VARIANT_TYPE_PACKED_BYTE_ARRAY)
+MAKE_TYPE_INFO(PackedInt32Array, GDEXTENSION_VARIANT_TYPE_PACKED_INT32_ARRAY)
+MAKE_TYPE_INFO(PackedInt64Array, GDEXTENSION_VARIANT_TYPE_PACKED_INT64_ARRAY)
+MAKE_TYPE_INFO(PackedFloat32Array, GDEXTENSION_VARIANT_TYPE_PACKED_FLOAT32_ARRAY)
+MAKE_TYPE_INFO(PackedFloat64Array, GDEXTENSION_VARIANT_TYPE_PACKED_FLOAT64_ARRAY)
+MAKE_TYPE_INFO(PackedStringArray, GDEXTENSION_VARIANT_TYPE_PACKED_STRING_ARRAY)
+MAKE_TYPE_INFO(PackedVector2Array, GDEXTENSION_VARIANT_TYPE_PACKED_VECTOR2_ARRAY)
+MAKE_TYPE_INFO(PackedVector3Array, GDEXTENSION_VARIANT_TYPE_PACKED_VECTOR3_ARRAY)
+MAKE_TYPE_INFO(PackedColorArray, GDEXTENSION_VARIANT_TYPE_PACKED_COLOR_ARRAY)
 
 // For variant.
 template <>
 struct GetTypeInfo<Variant> {
-	static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_NIL;
-	static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_NIL;
+	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::NIL, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
 	}
@@ -189,8 +189,8 @@ struct GetTypeInfo<Variant> {
 
 template <>
 struct GetTypeInfo<const Variant &> {
-	static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_NIL;
-	static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_NIL;
+	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::NIL, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
 	}
@@ -198,8 +198,8 @@ struct GetTypeInfo<const Variant &> {
 
 template <typename T>
 struct GetTypeInfo<T *, typename EnableIf<TypeInherits<Object, T>::value>::type> {
-	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
-	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static const GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_OBJECT;
+	static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::OBJECT, T::get_class_static());
 	}
@@ -207,8 +207,8 @@ struct GetTypeInfo<T *, typename EnableIf<TypeInherits<Object, T>::value>::type>
 
 template <typename T>
 struct GetTypeInfo<const T *, typename EnableIf<TypeInherits<Object, T>::value>::type> {
-	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
-	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static const GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_OBJECT;
+	static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::OBJECT, T::get_class_static());
 	}
@@ -218,7 +218,7 @@ struct GetTypeInfo<const T *, typename EnableIf<TypeInherits<Object, T>::value>:
 	template <>                                                                                                                                                     \
 	struct GetTypeInfo<m_impl> {                                                                                                                                    \
 		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                                     \
-		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                      \
+		static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                                   \
 		static inline PropertyInfo get_class_info() {                                                                                                               \
 			return make_property_info(Variant::Type::INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_ENUM, #m_class "." #m_enum); \
 		}                                                                                                                                                           \
@@ -255,7 +255,7 @@ public:
 	template <>                                                                                                                                  \
 	struct GetTypeInfo<m_impl> {                                                                                                                 \
 		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                  \
-		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                   \
+		static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                \
 		static inline PropertyInfo get_class_info() {                                                                                            \
 			return make_property_info(Variant::Type::INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_BITFIELD, \
 					#m_class "." #m_enum);                                                                                                       \
@@ -264,7 +264,7 @@ public:
 	template <>                                                                                                                                  \
 	struct GetTypeInfo<BitField<m_impl>> {                                                                                                       \
 		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                  \
-		static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                   \
+		static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                \
 		static inline PropertyInfo get_class_info() {                                                                                            \
 			return make_property_info(Variant::Type::INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_BITFIELD, \
 					#m_class "." #m_enum);                                                                                                       \
@@ -307,8 +307,8 @@ struct PtrToArg<const TypedArray<T> &> {
 
 template <typename T>
 struct GetTypeInfo<TypedArray<T>> {
-	static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_ARRAY;
-	static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_ARRAY;
+	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::ARRAY, "", PROPERTY_HINT_ARRAY_TYPE, T::get_class_static());
 	}
@@ -316,8 +316,8 @@ struct GetTypeInfo<TypedArray<T>> {
 
 template <typename T>
 struct GetTypeInfo<const TypedArray<T> &> {
-	static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_ARRAY;
-	static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_ARRAY;
+	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::ARRAY, "", PROPERTY_HINT_ARRAY_TYPE, T::get_class_static());
 	}
@@ -326,16 +326,16 @@ struct GetTypeInfo<const TypedArray<T> &> {
 #define MAKE_TYPED_ARRAY_INFO(m_type, m_variant_type)                                                                                                \
 	template <>                                                                                                                                      \
 	struct GetTypeInfo<TypedArray<m_type>> {                                                                                                         \
-		static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_ARRAY;                                                             \
-		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                   \
+		static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_ARRAY;                                                       \
+		static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                \
 		static inline PropertyInfo get_class_info() {                                                                                                \
 			return make_property_info(Variant::Type::ARRAY, "", PROPERTY_HINT_ARRAY_TYPE, Variant::get_type_name(m_variant_type).utf8().get_data()); \
 		}                                                                                                                                            \
 	};                                                                                                                                               \
 	template <>                                                                                                                                      \
 	struct GetTypeInfo<const TypedArray<m_type> &> {                                                                                                 \
-		static constexpr GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_ARRAY;                                                             \
-		static constexpr GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;                   \
+		static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_ARRAY;                                                       \
+		static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                \
 		static inline PropertyInfo get_class_info() {                                                                                                \
 			return make_property_info(Variant::Type::ARRAY, "", PROPERTY_HINT_ARRAY_TYPE, Variant::get_type_name(m_variant_type).utf8().get_data()); \
 		}                                                                                                                                            \

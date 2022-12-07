@@ -31,7 +31,7 @@
 #ifndef GODOT_CLASS_DB_HPP
 #define GODOT_CLASS_DB_HPP
 
-#include <godot/gdnative_interface.h>
+#include <godot/gdextension_interface.h>
 
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/core/error_macros.hpp>
@@ -74,7 +74,7 @@ MethodDefinition D_METHOD(StringName p_name, StringName p_arg1, Args... args) {
 }
 
 class ClassDB {
-	static GDNativeInitializationLevel current_level;
+	static GDExtensionInitializationLevel current_level;
 
 	friend class godot::GDExtensionBinding;
 
@@ -91,10 +91,10 @@ public:
 	struct ClassInfo {
 		StringName name;
 		StringName parent_name;
-		GDNativeInitializationLevel level = GDNATIVE_INITIALIZATION_SCENE;
+		GDExtensionInitializationLevel level = GDEXTENSION_INITIALIZATION_SCENE;
 		std::unordered_map<StringName, MethodBind *> method_map;
 		std::set<StringName> signal_names;
-		std::unordered_map<StringName, GDNativeExtensionClassCallVirtual> virtual_methods;
+		std::unordered_map<StringName, GDExtensionClassCallVirtual> virtual_methods;
 		std::set<StringName> property_names;
 		std::set<StringName> constant_names;
 		// Pointer to the parent custom class, if any. Will be null if the parent class is a Godot class.
@@ -131,15 +131,15 @@ public:
 	static void add_property_subgroup(const StringName &p_class, const String &p_name, const String &p_prefix);
 	static void add_property(const StringName &p_class, const PropertyInfo &p_pinfo, const StringName &p_setter, const StringName &p_getter, int p_index = -1);
 	static void add_signal(const StringName &p_class, const MethodInfo &p_signal);
-	static void bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDNativeInt p_constant_value, bool p_is_bitfield = false);
-	static void bind_virtual_method(const StringName &p_class, const StringName &p_method, GDNativeExtensionClassCallVirtual p_call);
+	static void bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDExtensionInt p_constant_value, bool p_is_bitfield = false);
+	static void bind_virtual_method(const StringName &p_class, const StringName &p_method, GDExtensionClassCallVirtual p_call);
 
 	static MethodBind *get_method(const StringName &p_class, const StringName &p_method);
 
-	static GDNativeExtensionClassCallVirtual get_virtual_func(void *p_userdata, GDNativeConstStringNamePtr p_name);
+	static GDExtensionClassCallVirtual get_virtual_func(void *p_userdata, GDExtensionConstStringNamePtr p_name);
 
-	static void initialize(GDNativeInitializationLevel p_level);
-	static void deinitialize(GDNativeInitializationLevel p_level);
+	static void initialize(GDExtensionInitializationLevel p_level);
+	static void deinitialize(GDExtensionInitializationLevel p_level);
 };
 
 #define BIND_CONSTANT(m_constant) \
@@ -151,12 +151,12 @@ public:
 #define BIND_BITFIELD_FLAG(m_constant) \
 	godot::ClassDB::bind_integer_constant(get_class_static(), godot::__constant_get_bitfield_name(m_constant, #m_constant), #m_constant, m_constant, true);
 
-#define BIND_VIRTUAL_METHOD(m_class, m_method)                                                                                   \
-	{                                                                                                                            \
-		auto ___call##m_method = [](GDNativeObjectPtr p_instance, GDNativeConstTypePtr *p_args, GDNativeTypePtr p_ret) -> void { \
-			call_with_ptr_args(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret);                      \
-		};                                                                                                                       \
-		godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, ___call##m_method);                          \
+#define BIND_VIRTUAL_METHOD(m_class, m_method)                                                                                            \
+	{                                                                                                                                     \
+		auto ___call##m_method = [](GDExtensionObjectPtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr p_ret) -> void { \
+			call_with_ptr_args(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret);                               \
+		};                                                                                                                                \
+		godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, ___call##m_method);                                   \
 	}
 
 template <class T, bool is_abstract>
@@ -174,27 +174,27 @@ void ClassDB::_register_class(bool p_virtual) {
 	classes[cl.name] = cl;
 
 	// Register this class with Godot
-	GDNativeExtensionClassCreationInfo class_info = {
-		p_virtual, // GDNativeBool is_virtual;
-		is_abstract, // GDNativeBool is_abstract;
-		T::set_bind, // GDNativeExtensionClassSet set_func;
-		T::get_bind, // GDNativeExtensionClassGet get_func;
-		T::get_property_list_bind, // GDNativeExtensionClassGetPropertyList get_property_list_func;
-		T::free_property_list_bind, // GDNativeExtensionClassFreePropertyList free_property_list_func;
-		T::property_can_revert_bind, // GDNativeExtensionClassPropertyCanRevert property_can_revert_func;
-		T::property_get_revert_bind, // GDNativeExtensionClassPropertyGetRevert property_get_revert_func;
-		T::notification_bind, // GDNativeExtensionClassNotification notification_func;
-		T::to_string_bind, // GDNativeExtensionClassToString to_string_func;
-		nullptr, // GDNativeExtensionClassReference reference_func;
-		nullptr, // GDNativeExtensionClassUnreference unreference_func;
-		T::create, // GDNativeExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
-		T::free, // GDNativeExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
-		&ClassDB::get_virtual_func, // GDNativeExtensionClassGetVirtual get_virtual_func;
-		nullptr, // GDNativeExtensionClassGetRID get_rid;
+	GDExtensionClassCreationInfo class_info = {
+		p_virtual, // GDExtensionBool is_virtual;
+		is_abstract, // GDExtensionBool is_abstract;
+		T::set_bind, // GDExtensionClassSet set_func;
+		T::get_bind, // GDExtensionClassGet get_func;
+		T::get_property_list_bind, // GDExtensionClassGetPropertyList get_property_list_func;
+		T::free_property_list_bind, // GDExtensionClassFreePropertyList free_property_list_func;
+		T::property_can_revert_bind, // GDExtensionClassPropertyCanRevert property_can_revert_func;
+		T::property_get_revert_bind, // GDExtensionClassPropertyGetRevert property_get_revert_func;
+		T::notification_bind, // GDExtensionClassNotification notification_func;
+		T::to_string_bind, // GDExtensionClassToString to_string_func;
+		nullptr, // GDExtensionClassReference reference_func;
+		nullptr, // GDExtensionClassUnreference unreference_func;
+		T::create, // GDExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
+		T::free, // GDExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
+		&ClassDB::get_virtual_func, // GDExtensionClassGetVirtual get_virtual_func;
+		nullptr, // GDExtensionClassGetRID get_rid;
 		(void *)&T::get_class_static(), // void *class_userdata;
 	};
 
-	internal::gdn_interface->classdb_register_extension_class(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
+	internal::gde_interface->classdb_register_extension_class(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
 
 	// call bind_methods etc. to register all members of the class
 	T::initialize_class();

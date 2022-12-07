@@ -38,33 +38,33 @@ namespace godot {
 
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const char *p_message, bool p_is_warning) {
 	if (p_is_warning) {
-		internal::gdn_interface->print_warning(p_message, p_function, p_file, p_line);
+		internal::gde_interface->print_warning(p_message, p_function, p_file, p_line);
 	} else {
-		internal::gdn_interface->print_error(p_message, p_function, p_file, p_line);
+		internal::gde_interface->print_error(p_message, p_function, p_file, p_line);
 	}
 }
 
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, const char *p_message, bool p_is_warning) {
 	if (p_is_warning) {
-		internal::gdn_interface->print_warning(p_message, p_function, p_file, p_line);
+		internal::gde_interface->print_warning(p_message, p_function, p_file, p_line);
 	} else {
-		internal::gdn_interface->print_error(p_message, p_function, p_file, p_line);
+		internal::gde_interface->print_error(p_message, p_function, p_file, p_line);
 	}
 }
 
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const String &p_message, bool p_is_warning) {
 	if (p_is_warning) {
-		internal::gdn_interface->print_warning(p_message.utf8().get_data(), p_function, p_file, p_line);
+		internal::gde_interface->print_warning(p_message.utf8().get_data(), p_function, p_file, p_line);
 	} else {
-		internal::gdn_interface->print_error(p_message.utf8().get_data(), p_function, p_file, p_line);
+		internal::gde_interface->print_error(p_message.utf8().get_data(), p_function, p_file, p_line);
 	}
 }
 
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, const String &p_message, bool p_is_warning) {
 	if (p_is_warning) {
-		internal::gdn_interface->print_warning(p_message.utf8().get_data(), p_function, p_file, p_line);
+		internal::gde_interface->print_warning(p_message.utf8().get_data(), p_function, p_file, p_line);
 	} else {
-		internal::gdn_interface->print_error(p_message.utf8().get_data(), p_function, p_file, p_line);
+		internal::gde_interface->print_error(p_message.utf8().get_data(), p_function, p_file, p_line);
 	}
 }
 

@@ -31,23 +31,23 @@
 #ifndef GODOT_GODOT_HPP
 #define GODOT_GODOT_HPP
 
-#include <godot/gdnative_interface.h>
+#include <godot/gdextension_interface.h>
 
 namespace godot {
 
 namespace internal {
 
-extern "C" const GDNativeInterface *gdn_interface;
-extern "C" GDNativeExtensionClassLibraryPtr library;
+extern "C" const GDExtensionInterface *gde_interface;
+extern "C" GDExtensionClassLibraryPtr library;
 extern "C" void *token;
 
 } // namespace internal
 
 enum ModuleInitializationLevel {
-	MODULE_INITIALIZATION_LEVEL_CORE = GDNATIVE_INITIALIZATION_CORE,
-	MODULE_INITIALIZATION_LEVEL_SERVERS = GDNATIVE_INITIALIZATION_SERVERS,
-	MODULE_INITIALIZATION_LEVEL_SCENE = GDNATIVE_INITIALIZATION_SCENE,
-	MODULE_INITIALIZATION_LEVEL_EDITOR = GDNATIVE_INITIALIZATION_EDITOR
+	MODULE_INITIALIZATION_LEVEL_CORE = GDEXTENSION_INITIALIZATION_CORE,
+	MODULE_INITIALIZATION_LEVEL_SERVERS = GDEXTENSION_INITIALIZATION_SERVERS,
+	MODULE_INITIALIZATION_LEVEL_SCENE = GDEXTENSION_INITIALIZATION_SCENE,
+	MODULE_INITIALIZATION_LEVEL_EDITOR = GDEXTENSION_INITIALIZATION_EDITOR
 };
 
 class GDExtensionBinding {
@@ -56,21 +56,21 @@ public:
 
 	static Callback init_callback;
 	static Callback terminate_callback;
-	static GDNativeInitializationLevel minimum_initialization_level;
-	static GDNativeBool init(const GDNativeInterface *p_interface, GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization);
+	static GDExtensionInitializationLevel minimum_initialization_level;
+	static GDExtensionBool init(const GDExtensionInterface *p_interface, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization);
 
 public:
-	static void initialize_level(void *userdata, GDNativeInitializationLevel p_level);
-	static void deinitialize_level(void *userdata, GDNativeInitializationLevel p_level);
+	static void initialize_level(void *userdata, GDExtensionInitializationLevel p_level);
+	static void deinitialize_level(void *userdata, GDExtensionInitializationLevel p_level);
 
 	class InitObject {
-		const GDNativeInterface *gdn_interface;
-		GDNativeExtensionClassLibraryPtr library;
-		GDNativeInitialization *initialization;
+		const GDExtensionInterface *gde_interface;
+		GDExtensionClassLibraryPtr library;
+		GDExtensionInitialization *initialization;
 
 	public:
-		InitObject(const GDNativeInterface *p_interface, GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) :
-				gdn_interface(p_interface),
+		InitObject(const GDExtensionInterface *p_interface, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) :
+				gde_interface(p_interface),
 				library(p_library),
 				initialization(r_initialization) {}
 
@@ -78,7 +78,7 @@ public:
 		void register_terminator(Callback p_init) const;
 		void set_minimum_library_initialization_level(ModuleInitializationLevel p_level) const;
 
-		GDNativeBool init() const;
+		GDExtensionBool init() const;
 	};
 };
 

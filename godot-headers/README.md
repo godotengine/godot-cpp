@@ -1,7 +1,7 @@
 # godot-headers
 
 This repository contains C headers for
-[**Godot Engine**](https://github.com/godotengine/godot)'s *GDNative Extensions* API.
+[**Godot Engine**](https://github.com/godotengine/godot)'s *GDExtensions* API.
 
 ## Updating Headers
 
@@ -13,4 +13,4 @@ procedure used to sync this repository with upstream releases:
   version/commit which you are using.
 - Use the compiled executable to generate the `extension_api.json` file with:
   `godot --dump-extension-api extension_api.json`
-- Copy the file `core/extension/gdnative_interface.h` to `godot`
+- Copy the file `core/extension/gdextension_interface.h` to `godot`

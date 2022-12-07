@@ -31,7 +31,7 @@
 #ifndef GODOT_ENGINE_PTRCALL_HPP
 #define GODOT_ENGINE_PTRCALL_HPP
 
-#include <godot/gdnative_interface.h>
+#include <godot/gdextension_interface.h>
 
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/object.hpp>
@@ -44,49 +44,49 @@ namespace godot {
 namespace internal {
 
 template <class O, class... Args>
-O *_call_native_mb_ret_obj(const GDNativeMethodBindPtr mb, void *instance, const Args &...args) {
+O *_call_native_mb_ret_obj(const GDExtensionMethodBindPtr mb, void *instance, const Args &...args) {
 	GodotObject *ret = nullptr;
-	std::array<GDNativeConstTypePtr, sizeof...(Args)> mb_args = { { (GDNativeConstTypePtr)args... } };
-	internal::gdn_interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), &ret);
+	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
+	internal::gde_interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), &ret);
 	if (ret == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<O *>(internal::gdn_interface->object_get_instance_binding(ret, internal::token, &O::___binding_callbacks));
+	return reinterpret_cast<O *>(internal::gde_interface->object_get_instance_binding(ret, internal::token, &O::___binding_callbacks));
 }
 
 template <class R, class... Args>
-R _call_native_mb_ret(const GDNativeMethodBindPtr mb, void *instance, const Args &...args) {
+R _call_native_mb_ret(const GDExtensionMethodBindPtr mb, void *instance, const Args &...args) {
 	R ret;
-	std::array<GDNativeConstTypePtr, sizeof...(Args)> mb_args = { { (GDNativeConstTypePtr)args... } };
-	internal::gdn_interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), &ret);
+	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
+	internal::gde_interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), &ret);
 	return ret;
 }
 
 template <class... Args>
-void _call_native_mb_no_ret(const GDNativeMethodBindPtr mb, void *instance, const Args &...args) {
-	std::array<GDNativeConstTypePtr, sizeof...(Args)> mb_args = { { (GDNativeConstTypePtr)args... } };
-	internal::gdn_interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), nullptr);
+void _call_native_mb_no_ret(const GDExtensionMethodBindPtr mb, void *instance, const Args &...args) {
+	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
+	internal::gde_interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), nullptr);
 }
 
 template <class R, class... Args>
-R _call_utility_ret(GDNativePtrUtilityFunction func, const Args &...args) {
+R _call_utility_ret(GDExtensionPtrUtilityFunction func, const Args &...args) {
 	R ret;
-	std::array<GDNativeConstTypePtr, sizeof...(Args)> mb_args = { { (GDNativeConstTypePtr)args... } };
+	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
 	func(&ret, mb_args.data(), mb_args.size());
 	return ret;
 }
 
 template <class... Args>
-Object *_call_utility_ret_obj(const GDNativePtrUtilityFunction func, void *instance, const Args &...args) {
+Object *_call_utility_ret_obj(const GDExtensionPtrUtilityFunction func, void *instance, const Args &...args) {
 	GodotObject *ret = nullptr;
-	std::array<GDNativeConstTypePtr, sizeof...(Args)> mb_args = { { (GDNativeConstTypePtr)args... } };
+	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
 	func(&ret, mb_args.data(), mb_args.size());
-	return (Object *)internal::gdn_interface->object_get_instance_binding(ret, internal::token, &Object::___binding_callbacks);
+	return (Object *)internal::gde_interface->object_get_instance_binding(ret, internal::token, &Object::___binding_callbacks);
 }
 
 template <class... Args>
-void _call_utility_no_ret(const GDNativePtrUtilityFunction func, const Args &...args) {
-	std::array<GDNativeConstTypePtr, sizeof...(Args)> mb_args = { { (GDNativeConstTypePtr)args... } };
+void _call_utility_no_ret(const GDExtensionPtrUtilityFunction func, const Args &...args) {
+	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
 	func(nullptr, mb_args.data(), mb_args.size());
 }
 

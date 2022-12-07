@@ -50,7 +50,7 @@ class Wrapped {
 
 protected:
 	virtual const StringName *_get_extension_class_name() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
-	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
+	virtual const GDExtensionInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
 
 	void _notification(int p_what) {}
 	bool _set(const StringName &p_name, const Variant &p_property) { return false; }
@@ -61,16 +61,16 @@ protected:
 	String _to_string() const { return "[" + String(get_class_static()) + ":" + itos(get_instance_id()) + "]"; }
 
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what) {}
-	static GDNativeBool set_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeConstVariantPtr p_value) { return false; }
-	static GDNativeBool get_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeVariantPtr r_ret) { return false; }
-	static const GDNativePropertyInfo *get_property_list_bind(GDExtensionClassInstancePtr p_instance, uint32_t *r_count) { return nullptr; }
-	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDNativePropertyInfo *p_list) {}
-	static GDNativeBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name) { return false; }
-	static GDNativeBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeVariantPtr r_ret) { return false; }
-	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeBool *r_is_valid, GDNativeStringPtr r_out) {}
+	static GDExtensionBool set_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionConstVariantPtr p_value) { return false; }
+	static GDExtensionBool get_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionVariantPtr r_ret) { return false; }
+	static const GDExtensionPropertyInfo *get_property_list_bind(GDExtensionClassInstancePtr p_instance, uint32_t *r_count) { return nullptr; }
+	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDExtensionPropertyInfo *p_list) {}
+	static GDExtensionBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name) { return false; }
+	static GDExtensionBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionVariantPtr r_ret) { return false; }
+	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDExtensionBool *r_is_valid, GDExtensionStringPtr r_out) {}
 
 	::godot::List<::godot::PropertyInfo> plist_owned;
-	GDNativePropertyInfo *plist = nullptr;
+	GDExtensionPropertyInfo *plist = nullptr;
 	uint32_t plist_size = 0;
 
 	void _postinitialize();
@@ -105,7 +105,7 @@ protected:                                                                      
 		return &string_name;                                                                                                                                                           \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const override {                                                                                         \
+	virtual const GDExtensionInstanceBindingCallbacks *_get_bindings_callbacks() const override {                                                                                      \
 		return &___binding_callbacks;                                                                                                                                                  \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
@@ -169,7 +169,7 @@ public:                                                                         
 		return m_inherits::get_class_static();                                                                                                                                         \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDNativeObjectPtr create(void *data) {                                                                                                                                      \
+	static GDExtensionObjectPtr create(void *data) {                                                                                                                                   \
 		m_class *new_object = memnew(m_class);                                                                                                                                         \
 		return new_object->_owner;                                                                                                                                                     \
 	}                                                                                                                                                                                  \
@@ -184,7 +184,7 @@ public:                                                                         
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDNativeBool set_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeConstVariantPtr p_value) {                                         \
+	static GDExtensionBool set_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionConstVariantPtr p_value) {                                \
 		if (p_instance && m_class::_get_set()) {                                                                                                                                       \
 			if (m_class::_get_set() != m_inherits::_get_set()) {                                                                                                                       \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
@@ -195,7 +195,7 @@ public:                                                                         
 		return false;                                                                                                                                                                  \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDNativeBool get_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeVariantPtr r_ret) {                                                \
+	static GDExtensionBool get_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionVariantPtr r_ret) {                                       \
 		if (p_instance && m_class::_get_get()) {                                                                                                                                       \
 			if (m_class::_get_get() != m_inherits::_get_get()) {                                                                                                                       \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
@@ -206,16 +206,16 @@ public:                                                                         
 		return false;                                                                                                                                                                  \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static const GDNativePropertyInfo *get_property_list_bind(GDExtensionClassInstancePtr p_instance, uint32_t *r_count) {                                                             \
+	static const GDExtensionPropertyInfo *get_property_list_bind(GDExtensionClassInstancePtr p_instance, uint32_t *r_count) {                                                          \
 		if (p_instance && m_class::_get_get_property_list()) {                                                                                                                         \
 			if (m_class::_get_get_property_list() != m_inherits::_get_get_property_list()) {                                                                                           \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
 				ERR_FAIL_COND_V_MSG(!cls->plist_owned.is_empty() || cls->plist != nullptr || cls->plist_size != 0, nullptr, "Internal error, property list was not freed by engine!"); \
 				cls->_get_property_list(&cls->plist_owned);                                                                                                                            \
-				cls->plist = reinterpret_cast<GDNativePropertyInfo *>(memalloc(sizeof(GDNativePropertyInfo) * cls->plist_owned.size()));                                               \
+				cls->plist = reinterpret_cast<GDExtensionPropertyInfo *>(memalloc(sizeof(GDExtensionPropertyInfo) * cls->plist_owned.size()));                                         \
 				cls->plist_size = 0;                                                                                                                                                   \
 				for (const ::godot::PropertyInfo &E : cls->plist_owned) {                                                                                                              \
-					cls->plist[cls->plist_size].type = static_cast<GDNativeVariantType>(E.type);                                                                                       \
+					cls->plist[cls->plist_size].type = static_cast<GDExtensionVariantType>(E.type);                                                                                    \
 					cls->plist[cls->plist_size].name = E.name._native_ptr();                                                                                                           \
 					cls->plist[cls->plist_size].hint = E.hint;                                                                                                                         \
 					cls->plist[cls->plist_size].hint_string = E.hint_string._native_ptr();                                                                                             \
@@ -232,7 +232,7 @@ public:                                                                         
 		return nullptr;                                                                                                                                                                \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDNativePropertyInfo *p_list) {                                                                  \
+	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDExtensionPropertyInfo *p_list) {                                                               \
 		if (p_instance) {                                                                                                                                                              \
 			m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
 			ERR_FAIL_COND_MSG(cls->plist == nullptr, "Internal error, property list double free!");                                                                                    \
@@ -243,7 +243,7 @@ public:                                                                         
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDNativeBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name) {                                                          \
+	static GDExtensionBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name) {                                                    \
 		if (p_instance && m_class::_get_property_can_revert()) {                                                                                                                       \
 			if (m_class::_get_property_can_revert() != m_inherits::_get_property_can_revert()) {                                                                                       \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
@@ -254,7 +254,7 @@ public:                                                                         
 		return false;                                                                                                                                                                  \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDNativeBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, GDNativeConstStringNamePtr p_name, GDNativeVariantPtr r_ret) {                                \
+	static GDExtensionBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionVariantPtr r_ret) {                       \
 		if (p_instance && m_class::_get_property_get_revert()) {                                                                                                                       \
 			if (m_class::_get_property_get_revert() != m_inherits::_get_property_get_revert()) {                                                                                       \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
@@ -265,7 +265,7 @@ public:                                                                         
 		return false;                                                                                                                                                                  \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDNativeBool *r_is_valid, GDNativeStringPtr r_out) {                                                            \
+	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDExtensionBool *r_is_valid, GDExtensionStringPtr r_out) {                                                      \
 		if (p_instance && m_class::_get_to_string()) {                                                                                                                                 \
 			if (m_class::_get_to_string() != m_inherits::_get_to_string()) {                                                                                                           \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
@@ -292,90 +292,90 @@ public:                                                                         
 	static void ___binding_free_callback(void *p_token, void *p_instance, void *p_binding) {                                                                                           \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDNativeBool ___binding_reference_callback(void *p_token, void *p_instance, GDNativeBool p_reference) {                                                                     \
+	static GDExtensionBool ___binding_reference_callback(void *p_token, void *p_instance, GDExtensionBool p_reference) {                                                               \
 		return true;                                                                                                                                                                   \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static constexpr GDNativeInstanceBindingCallbacks ___binding_callbacks = {                                                                                                         \
+	static constexpr GDExtensionInstanceBindingCallbacks ___binding_callbacks = {                                                                                                      \
 		___binding_create_callback,                                                                                                                                                    \
 		___binding_free_callback,                                                                                                                                                      \
 		___binding_reference_callback,                                                                                                                                                 \
 	};
 
 // Don't use this for your classes, use GDCLASS() instead.
-#define GDNATIVE_CLASS(m_class, m_inherits)                                                                        \
-private:                                                                                                           \
-	void operator=(const m_class &p_rval) {}                                                                       \
-                                                                                                                   \
-protected:                                                                                                         \
-	virtual const GDNativeInstanceBindingCallbacks *_get_bindings_callbacks() const override {                     \
-		return &___binding_callbacks;                                                                              \
-	}                                                                                                              \
-                                                                                                                   \
-	m_class(const char *p_godot_class) : m_inherits(p_godot_class) {}                                              \
-	m_class(GodotObject *p_godot_object) : m_inherits(p_godot_object) {}                                           \
-                                                                                                                   \
-	static void (*_get_bind_methods())() {                                                                         \
-		return nullptr;                                                                                            \
-	}                                                                                                              \
-                                                                                                                   \
-	static void (Wrapped::*_get_notification())(int) {                                                             \
-		return nullptr;                                                                                            \
-	}                                                                                                              \
-                                                                                                                   \
-	static bool (Wrapped::*_get_set())(const ::godot::StringName &p_name, const Variant &p_property) {             \
-		return nullptr;                                                                                            \
-	}                                                                                                              \
-                                                                                                                   \
-	static bool (Wrapped::*_get_get())(const ::godot::StringName &p_name, Variant &r_ret) const {                  \
-		return nullptr;                                                                                            \
-	}                                                                                                              \
-                                                                                                                   \
-	static void (Wrapped::*_get_get_property_list())(List<PropertyInfo> * p_list) const {                          \
-		return nullptr;                                                                                            \
-	}                                                                                                              \
-                                                                                                                   \
-	static bool (Wrapped::*_get_property_can_revert())(const ::godot::StringName &p_name) {                        \
-		return nullptr;                                                                                            \
-	}                                                                                                              \
-                                                                                                                   \
-	static bool (Wrapped::*_get_property_get_revert())(const ::godot::StringName &p_name, Variant &) {             \
-		return nullptr;                                                                                            \
-	}                                                                                                              \
-                                                                                                                   \
-	static String (Wrapped::*_get_to_string())() {                                                                 \
-		return nullptr;                                                                                            \
-	}                                                                                                              \
-                                                                                                                   \
-public:                                                                                                            \
-	static void initialize_class() {}                                                                              \
-                                                                                                                   \
-	static ::godot::StringName &get_class_static() {                                                               \
-		static ::godot::StringName string_name = ::godot::StringName(#m_class);                                    \
-		return string_name;                                                                                        \
-	}                                                                                                              \
-                                                                                                                   \
-	static ::godot::StringName &get_parent_class_static() {                                                        \
-		return m_inherits::get_class_static();                                                                     \
-	}                                                                                                              \
-                                                                                                                   \
-	static void *___binding_create_callback(void *p_token, void *p_instance) {                                     \
-		/* Do not call memnew here, we don't want the postinitializer to be called */                              \
-		return new ("") m_class((GodotObject *)p_instance);                                                        \
-	}                                                                                                              \
-	static void ___binding_free_callback(void *p_token, void *p_instance, void *p_binding) {                       \
-		/* Explicitly call the deconstructor to ensure proper lifecycle for non-trivial members */                 \
-		reinterpret_cast<m_class *>(p_binding)->~m_class();                                                        \
-		Memory::free_static(reinterpret_cast<m_class *>(p_binding));                                               \
-	}                                                                                                              \
-	static GDNativeBool ___binding_reference_callback(void *p_token, void *p_instance, GDNativeBool p_reference) { \
-		return true;                                                                                               \
-	}                                                                                                              \
-	static constexpr GDNativeInstanceBindingCallbacks ___binding_callbacks = {                                     \
-		___binding_create_callback,                                                                                \
-		___binding_free_callback,                                                                                  \
-		___binding_reference_callback,                                                                             \
-	};                                                                                                             \
+#define GDEXTENSION_CLASS(m_class, m_inherits)                                                                           \
+private:                                                                                                                 \
+	void operator=(const m_class &p_rval) {}                                                                             \
+                                                                                                                         \
+protected:                                                                                                               \
+	virtual const GDExtensionInstanceBindingCallbacks *_get_bindings_callbacks() const override {                        \
+		return &___binding_callbacks;                                                                                    \
+	}                                                                                                                    \
+                                                                                                                         \
+	m_class(const char *p_godot_class) : m_inherits(p_godot_class) {}                                                    \
+	m_class(GodotObject *p_godot_object) : m_inherits(p_godot_object) {}                                                 \
+                                                                                                                         \
+	static void (*_get_bind_methods())() {                                                                               \
+		return nullptr;                                                                                                  \
+	}                                                                                                                    \
+                                                                                                                         \
+	static void (Wrapped::*_get_notification())(int) {                                                                   \
+		return nullptr;                                                                                                  \
+	}                                                                                                                    \
+                                                                                                                         \
+	static bool (Wrapped::*_get_set())(const ::godot::StringName &p_name, const Variant &p_property) {                   \
+		return nullptr;                                                                                                  \
+	}                                                                                                                    \
+                                                                                                                         \
+	static bool (Wrapped::*_get_get())(const ::godot::StringName &p_name, Variant &r_ret) const {                        \
+		return nullptr;                                                                                                  \
+	}                                                                                                                    \
+                                                                                                                         \
+	static void (Wrapped::*_get_get_property_list())(List<PropertyInfo> * p_list) const {                                \
+		return nullptr;                                                                                                  \
+	}                                                                                                                    \
+                                                                                                                         \
+	static bool (Wrapped::*_get_property_can_revert())(const ::godot::StringName &p_name) {                              \
+		return nullptr;                                                                                                  \
+	}                                                                                                                    \
+                                                                                                                         \
+	static bool (Wrapped::*_get_property_get_revert())(const ::godot::StringName &p_name, Variant &) {                   \
+		return nullptr;                                                                                                  \
+	}                                                                                                                    \
+                                                                                                                         \
+	static String (Wrapped::*_get_to_string())() {                                                                       \
+		return nullptr;                                                                                                  \
+	}                                                                                                                    \
+                                                                                                                         \
+public:                                                                                                                  \
+	static void initialize_class() {}                                                                                    \
+                                                                                                                         \
+	static ::godot::StringName &get_class_static() {                                                                     \
+		static ::godot::StringName string_name = ::godot::StringName(#m_class);                                          \
+		return string_name;                                                                                              \
+	}                                                                                                                    \
+                                                                                                                         \
+	static ::godot::StringName &get_parent_class_static() {                                                              \
+		return m_inherits::get_class_static();                                                                           \
+	}                                                                                                                    \
+                                                                                                                         \
+	static void *___binding_create_callback(void *p_token, void *p_instance) {                                           \
+		/* Do not call memnew here, we don't want the postinitializer to be called */                                    \
+		return new ("") m_class((GodotObject *)p_instance);                                                              \
+	}                                                                                                                    \
+	static void ___binding_free_callback(void *p_token, void *p_instance, void *p_binding) {                             \
+		/* Explicitly call the deconstructor to ensure proper lifecycle for non-trivial members */                       \
+		reinterpret_cast<m_class *>(p_binding)->~m_class();                                                              \
+		Memory::free_static(reinterpret_cast<m_class *>(p_binding));                                                     \
+	}                                                                                                                    \
+	static GDExtensionBool ___binding_reference_callback(void *p_token, void *p_instance, GDExtensionBool p_reference) { \
+		return true;                                                                                                     \
+	}                                                                                                                    \
+	static constexpr GDExtensionInstanceBindingCallbacks ___binding_callbacks = {                                        \
+		___binding_create_callback,                                                                                      \
+		___binding_free_callback,                                                                                        \
+		___binding_reference_callback,                                                                                   \
+	};                                                                                                                   \
 	m_class() : m_class(#m_class) {}
 
 #endif // GODOT_WRAPPED_HPP
