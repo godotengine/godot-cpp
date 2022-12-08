@@ -75,6 +75,11 @@ public:
 		ANSWER_TO_EVERYTHING = 42,
 	};
 
+	enum Flags {
+		FLAG_ONE = 1,
+		FLAG_TWO = 2,
+	};
+
 	enum {
 		CONSTANT_WITHOUT_ENUM = 314,
 	};
@@ -104,6 +109,8 @@ public:
 	String test_string_ops() const;
 	int test_vector_ops() const;
 
+	BitField<Flags> test_bitfield(BitField<Flags> flags);
+
 	// Property.
 	void set_custom_position(const Vector2 &pos);
 	Vector2 get_custom_position() const;
@@ -117,7 +124,13 @@ public:
 	virtual bool _has_point(const Vector2 &point) const override;
 };
 
-VARIANT_ENUM_CAST(Example, Constants);
+VARIANT_ENUM_CAST(Example::Constants);
+VARIANT_BITFIELD_CAST(Example::Flags);
+
+enum EnumWithoutClass {
+	OUTSIDE_OF_CLASS = 512
+};
+VARIANT_ENUM_CAST(EnumWithoutClass);
 
 class ExampleVirtual : public Object {
 	GDCLASS(ExampleVirtual, Object);

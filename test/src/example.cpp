@@ -126,6 +126,8 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_string_ops"), &Example::test_string_ops);
 	ClassDB::bind_method(D_METHOD("test_vector_ops"), &Example::test_vector_ops);
 
+	ClassDB::bind_method(D_METHOD("test_bitfield", "flags"), &Example::test_bitfield);
+
 	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
 
 	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
@@ -169,7 +171,11 @@ void Example::_bind_methods() {
 	BIND_ENUM_CONSTANT(FIRST);
 	BIND_ENUM_CONSTANT(ANSWER_TO_EVERYTHING);
 
+	BIND_BITFIELD_FLAG(FLAG_ONE);
+	BIND_BITFIELD_FLAG(FLAG_TWO);
+
 	BIND_CONSTANT(CONSTANT_WITHOUT_ENUM);
+	BIND_ENUM_CONSTANT(OUTSIDE_OF_CLASS);
 }
 
 Example::Example() {
@@ -302,6 +308,11 @@ Dictionary Example::test_dictionary() const {
 	dict["foo"] = "bar";
 
 	return dict;
+}
+
+BitField<Example::Flags> Example::test_bitfield(BitField<Flags> flags) {
+	UtilityFunctions::print("  Got BitField: ", String::num(flags));
+	return flags;
 }
 
 // Properties.

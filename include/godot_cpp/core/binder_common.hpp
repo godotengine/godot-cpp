@@ -41,46 +41,46 @@
 
 namespace godot {
 
-#define VARIANT_ENUM_CAST(m_class, m_enum)                                      \
-	namespace godot {                                                           \
-	MAKE_ENUM_TYPE_INFO(m_class, m_enum)                                        \
-	template <>                                                                 \
-	struct VariantCaster<m_class::m_enum> {                                     \
-		static _FORCE_INLINE_ m_class::m_enum cast(const Variant &p_variant) {  \
-			return (m_class::m_enum)p_variant.operator int64_t();               \
-		}                                                                       \
-	};                                                                          \
-	template <>                                                                 \
-	struct PtrToArg<m_class::m_enum> {                                          \
-		_FORCE_INLINE_ static m_class::m_enum convert(const void *p_ptr) {      \
-			return m_class::m_enum(*reinterpret_cast<const int64_t *>(p_ptr));  \
-		}                                                                       \
-		typedef int64_t EncodeT;                                                \
-		_FORCE_INLINE_ static void encode(m_class::m_enum p_val, void *p_ptr) { \
-			*reinterpret_cast<int64_t *>(p_ptr) = p_val;                        \
-		}                                                                       \
-	};                                                                          \
+#define VARIANT_ENUM_CAST(m_enum)                                      \
+	namespace godot {                                                  \
+	MAKE_ENUM_TYPE_INFO(m_enum)                                        \
+	template <>                                                        \
+	struct VariantCaster<m_enum> {                                     \
+		static _FORCE_INLINE_ m_enum cast(const Variant &p_variant) {  \
+			return (m_enum)p_variant.operator int64_t();               \
+		}                                                              \
+	};                                                                 \
+	template <>                                                        \
+	struct PtrToArg<m_enum> {                                          \
+		_FORCE_INLINE_ static m_enum convert(const void *p_ptr) {      \
+			return m_enum(*reinterpret_cast<const int64_t *>(p_ptr));  \
+		}                                                              \
+		typedef int64_t EncodeT;                                       \
+		_FORCE_INLINE_ static void encode(m_enum p_val, void *p_ptr) { \
+			*reinterpret_cast<int64_t *>(p_ptr) = p_val;               \
+		}                                                              \
+	};                                                                 \
 	}
 
-#define VARIANT_BITFIELD_CAST(m_class, m_enum)                                            \
-	namespace godot {                                                                     \
-	MAKE_BITFIELD_TYPE_INFO(m_class, m_enum)                                              \
-	template <>                                                                           \
-	struct VariantCaster<BitField<m_class::m_enum>> {                                     \
-		static _FORCE_INLINE_ BitField<m_class::m_enum> cast(const Variant &p_variant) {  \
-			return BitField<m_class::m_enum>(p_variant.operator int64_t());               \
-		}                                                                                 \
-	};                                                                                    \
-	template <>                                                                           \
-	struct PtrToArg<BitField<m_class::m_enum>> {                                          \
-		_FORCE_INLINE_ static BitField<m_class::m_enum> convert(const void *p_ptr) {      \
-			return BitField<m_class::m_enum>(*reinterpret_cast<const int64_t *>(p_ptr));  \
-		}                                                                                 \
-		typedef int64_t EncodeT;                                                          \
-		_FORCE_INLINE_ static void encode(BitField<m_class::m_enum> p_val, void *p_ptr) { \
-			*reinterpret_cast<int64_t *>(p_ptr) = p_val;                                  \
-		}                                                                                 \
-	};                                                                                    \
+#define VARIANT_BITFIELD_CAST(m_enum)                                            \
+	namespace godot {                                                            \
+	MAKE_BITFIELD_TYPE_INFO(m_enum)                                              \
+	template <>                                                                  \
+	struct VariantCaster<BitField<m_enum>> {                                     \
+		static _FORCE_INLINE_ BitField<m_enum> cast(const Variant &p_variant) {  \
+			return BitField<m_enum>(p_variant.operator int64_t());               \
+		}                                                                        \
+	};                                                                           \
+	template <>                                                                  \
+	struct PtrToArg<BitField<m_enum>> {                                          \
+		_FORCE_INLINE_ static BitField<m_enum> convert(const void *p_ptr) {      \
+			return BitField<m_enum>(*reinterpret_cast<const int64_t *>(p_ptr));  \
+		}                                                                        \
+		typedef int64_t EncodeT;                                                 \
+		_FORCE_INLINE_ static void encode(BitField<m_enum> p_val, void *p_ptr) { \
+			*reinterpret_cast<int64_t *>(p_ptr) = p_val;                         \
+		}                                                                        \
+	};                                                                           \
 	}
 
 template <class T>
