@@ -1,5 +1,5 @@
 # cmake arguments
-# CMAKE_BUILD_TYPE:			Compilation target (Debug or Release defaults to Debug)
+# CMAKE_BUILD_TYPE:			Compilation target for single-configuration generators (Debug or Release - defaults to Debug)
 #
 # godot-cpp cmake arguments
 # GODOT_GDEXTENSION_DIR:	Path to the directory containing GDExtension interface header and API JSON file
@@ -16,13 +16,13 @@
 #
 # Examples
 #
-# Builds a debug version:
-# cmake .
-# cmake --build .
-#
 # Builds a release version with clang
 # CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" .
 # cmake --build .
+#
+# Builds a release version with MSVC
+# cmake -G"Visual Studio 16 2019" .
+# cmake --build . --config Release
 #
 # Builds an android armeabi-v7a debug version:
 # cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_NDK=$ANDROID_NDK \
@@ -42,10 +42,6 @@ cmake_minimum_required(VERSION 3.12)
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
 option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." OFF)
 
-# Default build type is Debug in the SConstruct
-if("${CMAKE_BUILD_TYPE}" STREQUAL "")
-	set(CMAKE_BUILD_TYPE Debug)
-endif()
 
 if(NOT DEFINED BITS)
 	set(BITS 32)
@@ -72,33 +68,19 @@ set(GODOT_LINKER_FLAGS )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	# using Visual Studio C++
-	set(GODOT_COMPILE_FLAGS "/EHsc /WX") # /GF /MP
-
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MDd") # /Od /RTC1 /Zi
-	else()
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MD /O2") # /Oy /GL /Gy
-		STRING(REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-		string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
-	endif(CMAKE_BUILD_TYPE MATCHES Debug)
+	set(GODOT_COMPILE_FLAGS "/WX")
 
 	# Disable conversion warning, truncation, unreferenced var, signed mismatch, different type
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /wd4244 /wd4305 /wd4101 /wd4018 /wd4267 /wd4099")
 
 	add_definitions(-DNOMINMAX)
-
-	# Unkomment for warning level 4
-	#if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-	#	string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	#endif()
-
 else()  # GCC/Clang
 	set(GODOT_LINKER_FLAGS "-static-libgcc -static-libstdc++ -Wl,-R,'$$ORIGIN'")
 
 	if(NOT CMAKE_SYSTEM_NAME MATCHES "Windows")
 		set(GODOT_COMPILE_FLAGS "-fPIC")
 	endif()
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -g -Wwrite-strings")
+	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wwrite-strings")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wchar-subscripts -Wcomment -Wdisabled-optimization")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wformat -Wformat=2 -Wformat-security -Wformat-y2k")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wimport -Winit-self -Winline -Winvalid-pch")
@@ -109,18 +91,9 @@ else()  # GCC/Clang
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wuninitialized -Wunknown-pragmas -Wunreachable-code -Wunused-label")
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wunused-value -Wvariadic-macros -Wvolatile-register-var -Wno-error=attributes")
 
-	# -Wshadow -Wextra -Wall -Weffc++ -Wfloat-equal -Wstack-protector -Wunused-parameter -Wsign-compare -Wunused-variable -Wcast-align
-	# -Wunused-function -Wstrict-aliasing -Wstrict-aliasing=2 -Wmissing-field-initializers
-
 	if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
 		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wno-ignored-attributes")
 	endif()
-
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -fno-omit-frame-pointer -O0")
-	else()
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -O3")
-	endif(CMAKE_BUILD_TYPE MATCHES Debug)
 endif()
 
 # Generate source from the bindings file
@@ -194,9 +167,9 @@ target_include_directories(${PROJECT_NAME}
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS ${GODOT_LINKER_FLAGS})
 
-# Create the correct name (godot.os.build_type.system_bits)
-string(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME)
-string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+# Create the correct name (godot-cpp.os.build_type.system_bits)
+set(SYSTEM_NAME "$<LOWER_CASE:$<PLATFORM_ID>>")
+set(BUILD_TYPE "$<LOWER_CASE:$<CONFIG>>")
 
 if(ANDROID)
 	# Added the android abi after system name
