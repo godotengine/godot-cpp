@@ -240,13 +240,24 @@ public:
 template <class T>
 struct PtrToArg<Ref<T>> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr)), godot::internal::token, &T::___binding_callbacks)));
+		GDExtensionRefPtr ref = (GDExtensionRefPtr)p_ptr;
+		ERR_FAIL_NULL_V(ref, Ref<T>());
+
+		T *obj = reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(godot::internal::gde_interface->ref_get_object(ref), godot::internal::token, &T::___binding_callbacks));
+		return Ref<T>(obj);
 	}
 
 	typedef Ref<T> EncodeT;
 
 	_FORCE_INLINE_ static void encode(Ref<T> p_val, void *p_ptr) {
-		*reinterpret_cast<const GodotObject **>(p_ptr) = p_val->_owner;
+		GDExtensionRefPtr ref = (GDExtensionRefPtr)p_ptr;
+		ERR_FAIL_NULL(ref);
+
+		// This code assumes that p_ptr points to an unset Ref<T> variable on the Godot side
+		// so we only set it if we have an object to set.
+		if (p_val.is_valid()) {
+			godot::internal::gde_interface->ref_set_object(ref, p_val->_owner);
+		}
 	}
 };
 
