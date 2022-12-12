@@ -36,7 +36,7 @@
 
 #include <godot_cpp/core/memory.hpp>
 
-#include <godot/gdnative_interface.h>
+#include <godot/gdextension_interface.h>
 
 #include <godot_cpp/classes/global_constants.hpp>
 
@@ -59,11 +59,11 @@ class MethodBind {
 	bool _vararg = false;
 
 	std::vector<StringName> argument_names;
-	GDNativeVariantType *argument_types = nullptr;
+	GDExtensionVariantType *argument_types = nullptr;
 	std::vector<Variant> default_arguments;
 
 protected:
-	virtual GDNativeVariantType gen_argument_type(int p_arg) const = 0;
+	virtual GDExtensionVariantType gen_argument_type(int p_arg) const = 0;
 	virtual PropertyInfo gen_argument_type_info(int p_arg) const = 0;
 	void generate_argument_types(int p_count);
 	void set_const(bool p_const);
@@ -103,19 +103,19 @@ public:
 	_FORCE_INLINE_ bool is_static() const { return _static; }
 	_FORCE_INLINE_ bool is_vararg() const { return _vararg; }
 	_FORCE_INLINE_ bool has_return() const { return _has_return; }
-	_FORCE_INLINE_ uint32_t get_hint_flags() const { return hint_flags | (is_const() ? GDNATIVE_EXTENSION_METHOD_FLAG_CONST : 0) | (is_vararg() ? GDNATIVE_EXTENSION_METHOD_FLAG_VARARG : 0) | (is_static() ? GDNATIVE_EXTENSION_METHOD_FLAG_STATIC : 0); }
+	_FORCE_INLINE_ uint32_t get_hint_flags() const { return hint_flags | (is_const() ? GDEXTENSION_METHOD_FLAG_CONST : 0) | (is_vararg() ? GDEXTENSION_METHOD_FLAG_VARARG : 0) | (is_static() ? GDEXTENSION_METHOD_FLAG_STATIC : 0); }
 	_FORCE_INLINE_ void set_hint_flags(uint32_t p_hint_flags) { hint_flags = p_hint_flags; }
 	void set_argument_names(const std::vector<StringName> &p_names);
 	std::vector<StringName> get_argument_names() const;
 	void set_default_arguments(const std::vector<Variant> &p_default_arguments) { default_arguments = p_default_arguments; }
 
-	_FORCE_INLINE_ GDNativeVariantType get_argument_type(int p_argument) const {
-		ERR_FAIL_COND_V(p_argument < -1 || p_argument > argument_count, GDNATIVE_VARIANT_TYPE_NIL);
+	_FORCE_INLINE_ GDExtensionVariantType get_argument_type(int p_argument) const {
+		ERR_FAIL_COND_V(p_argument < -1 || p_argument > argument_count, GDEXTENSION_VARIANT_TYPE_NIL);
 		return argument_types[p_argument + 1];
 	}
 
 	PropertyInfo get_argument_info(int p_argument) const;
-	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const = 0;
+	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const = 0;
 
 	std::vector<PropertyInfo> get_arguments_info_list() const {
 		std::vector<PropertyInfo> vec;
@@ -126,8 +126,8 @@ public:
 		}
 		return vec;
 	}
-	std::vector<GDNativeExtensionClassMethodArgumentMetadata> get_arguments_metadata_list() const {
-		std::vector<GDNativeExtensionClassMethodArgumentMetadata> vec;
+	std::vector<GDExtensionClassMethodArgumentMetadata> get_arguments_metadata_list() const {
+		std::vector<GDExtensionClassMethodArgumentMetadata> vec;
 		// First element is return value
 		vec.reserve(argument_count + 1);
 		for (int i = 0; i < argument_count; i++) {
@@ -136,11 +136,11 @@ public:
 		return vec;
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDNativeConstVariantPtr *p_args, GDNativeInt p_argument_count, GDNativeCallError &r_error) const = 0;
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDNativeConstTypePtr *p_args, GDNativeTypePtr r_return) const = 0;
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const = 0;
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) const = 0;
 
-	static void bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDNativeConstVariantPtr *p_args, GDNativeInt p_argument_count, GDNativeVariantPtr r_return, GDNativeCallError *r_error);
-	static void bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDNativeConstTypePtr *p_args, GDNativeTypePtr r_return);
+	static void bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error);
+	static void bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return);
 
 	virtual ~MethodBind();
 };
@@ -149,7 +149,7 @@ template <class Derived, class T, class R, bool should_returns>
 class MethodBindVarArgBase : public MethodBind {
 protected:
 	R(T::*method)
-	(const Variant **, GDNativeInt, GDNativeCallError &);
+	(const Variant **, GDExtensionInt, GDExtensionCallError &);
 	std::vector<PropertyInfo> arguments;
 
 public:
@@ -163,20 +163,20 @@ public:
 		}
 	}
 
-	virtual GDNativeVariantType gen_argument_type(int p_arg) const {
-		return static_cast<GDNativeVariantType>(gen_argument_type_info(p_arg).type);
+	virtual GDExtensionVariantType gen_argument_type(int p_arg) const {
+		return static_cast<GDExtensionVariantType>(gen_argument_type_info(p_arg).type);
 	}
 
-	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int) const {
-		return GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int) const {
+		return GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	}
 
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDNativeConstTypePtr *p_args, GDNativeTypePtr r_return) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) const {
 		ERR_FAIL(); // Can't call.
 	}
 
 	MethodBindVarArgBase(
-			R (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &),
+			R (T::*p_method)(const Variant **, GDExtensionInt, GDExtensionCallError &),
 			const MethodInfo &p_method_info,
 			bool p_return_nil_is_variant) :
 			method(p_method) {
@@ -211,13 +211,13 @@ class MethodBindVarArgT : public MethodBindVarArgBase<MethodBindVarArgT<T>, T, v
 	friend class MethodBindVarArgBase<MethodBindVarArgT<T>, T, void, false>;
 
 public:
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDNativeConstVariantPtr *p_args, GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 		(static_cast<T *>(p_instance)->*MethodBindVarArgBase<MethodBindVarArgT<T>, T, void, false>::method)((const Variant **)p_args, p_argument_count, r_error);
 		return {};
 	}
 
 	MethodBindVarArgT(
-			void (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &),
+			void (T::*p_method)(const Variant **, GDExtensionInt, GDExtensionCallError &),
 			const MethodInfo &p_method_info,
 			bool p_return_nil_is_variant) :
 			MethodBindVarArgBase<MethodBindVarArgT<T>, T, void, false>(p_method, p_method_info, p_return_nil_is_variant) {
@@ -230,7 +230,7 @@ private:
 };
 
 template <class T>
-MethodBind *create_vararg_method_bind(void (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
+MethodBind *create_vararg_method_bind(void (T::*p_method)(const Variant **, GDExtensionInt, GDExtensionCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
 	MethodBind *a = memnew((MethodBindVarArgT<T>)(p_method, p_info, p_return_nil_is_variant));
 	a->set_instance_class(T::get_class_static());
 	return a;
@@ -241,12 +241,12 @@ class MethodBindVarArgTR : public MethodBindVarArgBase<MethodBindVarArgTR<T, R>,
 	friend class MethodBindVarArgBase<MethodBindVarArgTR<T, R>, T, R, true>;
 
 public:
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDNativeConstVariantPtr *p_args, GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 		return (static_cast<T *>(p_instance)->*MethodBindVarArgBase<MethodBindVarArgTR<T, R>, T, R, true>::method)((const Variant **)p_args, p_argument_count, r_error);
 	}
 
 	MethodBindVarArgTR(
-			R (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &),
+			R (T::*p_method)(const Variant **, GDExtensionInt, GDExtensionCallError &),
 			const MethodInfo &p_info,
 			bool p_return_nil_is_variant) :
 			MethodBindVarArgBase<MethodBindVarArgTR<T, R>, T, R, true>(p_method, p_info, p_return_nil_is_variant) {
@@ -259,7 +259,7 @@ private:
 };
 
 template <class T, class R>
-MethodBind *create_vararg_method_bind(R (T::*p_method)(const Variant **, GDNativeInt, GDNativeCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
+MethodBind *create_vararg_method_bind(R (T::*p_method)(const Variant **, GDExtensionInt, GDExtensionCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
 	MethodBind *a = memnew((MethodBindVarArgTR<T, R>)(p_method, p_info, p_return_nil_is_variant));
 	a->set_instance_class(T::get_class_static());
 	return a;
@@ -288,11 +288,11 @@ protected:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wlogical-op"
 #endif
-	virtual GDNativeVariantType gen_argument_type(int p_arg) const {
+	virtual GDExtensionVariantType gen_argument_type(int p_arg) const {
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			return call_get_argument_type<P...>(p_arg);
 		} else {
-			return GDNATIVE_VARIANT_TYPE_NIL;
+			return GDEXTENSION_VARIANT_TYPE_NIL;
 		}
 	}
 
@@ -310,11 +310,11 @@ protected:
 #endif
 
 public:
-	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const {
+	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const {
 		return call_get_argument_metadata<P...>(p_argument);
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDNativeConstVariantPtr *p_args, GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_variant_args_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, r_error, get_default_arguments());
 #else
@@ -322,7 +322,7 @@ public:
 #endif
 		return Variant();
 	}
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDNativeConstTypePtr *p_args, GDNativeTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, P...>(static_cast<T *>(p_instance), method, p_args, nullptr);
 #else
@@ -364,11 +364,11 @@ protected:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wlogical-op"
 #endif
-	virtual GDNativeVariantType gen_argument_type(int p_arg) const {
+	virtual GDExtensionVariantType gen_argument_type(int p_arg) const {
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			return call_get_argument_type<P...>(p_arg);
 		} else {
-			return GDNATIVE_VARIANT_TYPE_NIL;
+			return GDEXTENSION_VARIANT_TYPE_NIL;
 		}
 	}
 
@@ -386,11 +386,11 @@ protected:
 #endif
 
 public:
-	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const {
+	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const {
 		return call_get_argument_metadata<P...>(p_argument);
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDNativeConstVariantPtr *p_args, GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_variant_argsc_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, r_error, get_default_arguments());
 #else
@@ -398,7 +398,7 @@ public:
 #endif
 		return Variant();
 	}
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDNativeConstTypePtr *p_args, GDNativeTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, P...>(static_cast<T *>(p_instance), method, p_args, nullptr);
 #else
@@ -441,11 +441,11 @@ protected:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wlogical-op"
 #endif
-	virtual GDNativeVariantType gen_argument_type(int p_arg) const {
+	virtual GDExtensionVariantType gen_argument_type(int p_arg) const {
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			return call_get_argument_type<P...>(p_arg);
 		} else {
-			return GDNativeVariantType(GetTypeInfo<R>::VARIANT_TYPE);
+			return GDExtensionVariantType(GetTypeInfo<R>::VARIANT_TYPE);
 		}
 	}
 
@@ -463,7 +463,7 @@ protected:
 #endif
 
 public:
-	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const {
+	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const {
 		if (p_argument >= 0) {
 			return call_get_argument_metadata<P...>(p_argument);
 		} else {
@@ -471,7 +471,7 @@ public:
 		}
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDNativeConstVariantPtr *p_args, GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 		Variant ret;
 #ifdef TYPED_METHOD_BIND
 		call_with_variant_args_ret_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, ret, r_error, get_default_arguments());
@@ -480,7 +480,7 @@ public:
 #endif
 		return ret;
 	}
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDNativeConstTypePtr *p_args, GDNativeTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, R, P...>(static_cast<T *>(p_instance), method, p_args, r_ret);
 #else
@@ -524,11 +524,11 @@ protected:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wlogical-op"
 #endif
-	virtual GDNativeVariantType gen_argument_type(int p_arg) const {
+	virtual GDExtensionVariantType gen_argument_type(int p_arg) const {
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			return call_get_argument_type<P...>(p_arg);
 		} else {
-			return GDNativeVariantType(GetTypeInfo<R>::VARIANT_TYPE);
+			return GDExtensionVariantType(GetTypeInfo<R>::VARIANT_TYPE);
 		}
 	}
 
@@ -546,7 +546,7 @@ protected:
 #endif
 
 public:
-	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const {
+	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const {
 		if (p_argument >= 0) {
 			return call_get_argument_metadata<P...>(p_argument);
 		} else {
@@ -554,7 +554,7 @@ public:
 		}
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDNativeConstVariantPtr *p_args, GDNativeInt p_argument_count, GDNativeCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 		Variant ret;
 #ifdef TYPED_METHOD_BIND
 		call_with_variant_args_retc_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, ret, r_error, get_default_arguments());
@@ -563,7 +563,7 @@ public:
 #endif
 		return ret;
 	}
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDNativeConstTypePtr *p_args, GDNativeTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, R, P...>(static_cast<T *>(p_instance), method, p_args, r_ret);
 #else
@@ -604,11 +604,11 @@ protected:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wlogical-op"
 #endif
-	virtual GDNativeVariantType gen_argument_type(int p_arg) const {
+	virtual GDExtensionVariantType gen_argument_type(int p_arg) const {
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			return call_get_argument_type<P...>(p_arg);
 		} else {
-			return GDNATIVE_VARIANT_TYPE_NIL;
+			return GDEXTENSION_VARIANT_TYPE_NIL;
 		}
 	}
 
@@ -626,17 +626,17 @@ protected:
 #endif
 
 public:
-	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int p_arg) const {
+	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_arg) const {
 		return call_get_argument_metadata<P...>(p_arg);
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_object, GDNativeConstVariantPtr *p_args, GDNativeInt p_arg_count, GDNativeCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_object, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_arg_count, GDExtensionCallError &r_error) const {
 		(void)p_object; // unused
 		call_with_variant_args_static_dv(function, p_args, p_arg_count, r_error, get_default_arguments());
 		return Variant();
 	}
 
-	virtual void ptrcall(GDExtensionClassInstancePtr p_object, GDNativeConstTypePtr *p_args, GDNativeTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_object, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 		(void)p_object;
 		(void)r_ret;
 		call_with_ptr_args_static_method(function, p_args);
@@ -669,11 +669,11 @@ protected:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wlogical-op"
 #endif
-	virtual GDNativeVariantType gen_argument_type(int p_arg) const {
+	virtual GDExtensionVariantType gen_argument_type(int p_arg) const {
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
 			return call_get_argument_type<P...>(p_arg);
 		} else {
-			return GDNativeVariantType(GetTypeInfo<R>::VARIANT_TYPE);
+			return GDExtensionVariantType(GetTypeInfo<R>::VARIANT_TYPE);
 		}
 	}
 
@@ -692,7 +692,7 @@ protected:
 #endif
 
 public:
-	virtual GDNativeExtensionClassMethodArgumentMetadata get_argument_metadata(int p_arg) const {
+	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_arg) const {
 		if (p_arg >= 0) {
 			return call_get_argument_metadata<P...>(p_arg);
 		} else {
@@ -700,13 +700,13 @@ public:
 		}
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_object, GDNativeConstVariantPtr *p_args, GDNativeInt p_arg_count, GDNativeCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_object, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_arg_count, GDExtensionCallError &r_error) const {
 		Variant ret;
 		call_with_variant_args_static_ret_dv(function, p_args, p_arg_count, ret, r_error, get_default_arguments());
 		return ret;
 	}
 
-	virtual void ptrcall(GDExtensionClassInstancePtr p_object, GDNativeConstTypePtr *p_args, GDNativeTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_object, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 		(void)p_object;
 		call_with_ptr_args_static_method_ret(function, p_args, r_ret);
 	}

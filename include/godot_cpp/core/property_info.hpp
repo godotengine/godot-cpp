@@ -39,7 +39,7 @@
 
 #include <godot_cpp/godot.hpp>
 
-#include <godot/gdnative_interface.h>
+#include <godot/gdextension_interface.h>
 
 namespace godot {
 
@@ -66,7 +66,7 @@ struct PropertyInfo {
 		}
 	}
 
-	PropertyInfo(GDNativeVariantType p_type, const StringName &p_name, PropertyHint p_hint = PROPERTY_HINT_NONE, const String &p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const StringName &p_class_name = "") :
+	PropertyInfo(GDExtensionVariantType p_type, const StringName &p_name, PropertyHint p_hint = PROPERTY_HINT_NONE, const String &p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const StringName &p_class_name = "") :
 			PropertyInfo((Variant::Type)p_type, p_name, p_hint, p_hint_string, p_usage, p_class_name) {}
 };
 

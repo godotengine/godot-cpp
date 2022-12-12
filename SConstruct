@@ -183,7 +183,7 @@ else:
 
 bindings = env.GenerateBindings(
     env.Dir("."),
-    [json_api_file, os.path.join(env["headers_dir"], "godot", "gdnative_interface.h"), "binding_generator.py"],
+    [json_api_file, os.path.join(env["headers_dir"], "godot", "gdextension_interface.h"), "binding_generator.py"],
 )
 
 scons_cache_path = os.environ.get("SCONS_CACHE")

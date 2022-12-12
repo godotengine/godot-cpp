@@ -75,7 +75,7 @@ void MethodBind::generate_argument_types(int p_count) {
 		memdelete_arr(argument_types);
 	}
 
-	argument_types = memnew_arr(GDNativeVariantType, p_count + 1);
+	argument_types = memnew_arr(GDExtensionVariantType, p_count + 1);
 
 	// -1 means return type.
 	for (int i = -1; i < p_count; i++) {
@@ -91,15 +91,15 @@ PropertyInfo MethodBind::get_argument_info(int p_argument) const {
 	return info;
 }
 
-void MethodBind::bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDNativeConstVariantPtr *p_args, GDNativeInt p_argument_count, GDNativeVariantPtr r_return, GDNativeCallError *r_error) {
+void MethodBind::bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error) {
 	const MethodBind *bind = reinterpret_cast<const MethodBind *>(p_method_userdata);
 	Variant ret = bind->call(p_instance, p_args, p_argument_count, *r_error);
 	// This assumes the return value is an empty Variant, so it doesn't need to call the destructor first.
-	// Since only NativeExtensionMethodBind calls this from the Godot side, it should always be the case.
-	internal::gdn_interface->variant_new_copy(r_return, ret._native_ptr());
+	// Since only GDExtensionMethodBind calls this from the Godot side, it should always be the case.
+	internal::gde_interface->variant_new_copy(r_return, ret._native_ptr());
 }
 
-void MethodBind::bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDNativeConstTypePtr *p_args, GDNativeTypePtr r_return) {
+void MethodBind::bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) {
 	const MethodBind *bind = reinterpret_cast<const MethodBind *>(p_method_userdata);
 	bind->ptrcall(p_instance, p_args, r_return);
 }

@@ -36,7 +36,7 @@
 #include <godot_cpp/variant/builtin_types.hpp>
 #include <godot_cpp/variant/variant_size.hpp>
 
-#include <godot/gdnative_interface.h>
+#include <godot/gdextension_interface.h>
 
 #include <array>
 
@@ -45,7 +45,7 @@ namespace godot {
 class Variant {
 	uint8_t opaque[GODOT_CPP_VARIANT_SIZE]{ 0 };
 
-	_FORCE_INLINE_ GDNativeVariantPtr _native_ptr() const { return const_cast<uint8_t(*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
+	_FORCE_INLINE_ GDExtensionVariantPtr _native_ptr() const { return const_cast<uint8_t(*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
 
 	friend class GDExtensionBinding;
 	friend class MethodBind;
@@ -138,14 +138,14 @@ public:
 	};
 
 private:
-	static GDNativeVariantFromTypeConstructorFunc from_type_constructor[VARIANT_MAX];
-	static GDNativeTypeFromVariantConstructorFunc to_type_constructor[VARIANT_MAX];
+	static GDExtensionVariantFromTypeConstructorFunc from_type_constructor[VARIANT_MAX];
+	static GDExtensionTypeFromVariantConstructorFunc to_type_constructor[VARIANT_MAX];
 
 public:
 	Variant();
 	Variant(std::nullptr_t n) :
 			Variant() {}
-	explicit Variant(GDNativeConstVariantPtr native_ptr);
+	explicit Variant(GDExtensionConstVariantPtr native_ptr);
 	Variant(const Variant &other);
 	Variant(Variant &&other);
 	Variant(bool v);
@@ -251,24 +251,24 @@ public:
 	bool operator!=(const Variant &other) const;
 	bool operator<(const Variant &other) const;
 
-	void call(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDNativeCallError &r_error);
+	void call(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
 
 	template <class... Args>
 	Variant call(const StringName &method, Args... args) {
 		Variant result;
-		GDNativeCallError error;
-		std::array<GDNativeConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
+		GDExtensionCallError error;
+		std::array<GDExtensionConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
 		call(method, call_args.data(), call_args.size(), result, error);
 		return result;
 	}
 
-	static void call_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDNativeCallError &r_error);
+	static void call_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
 
 	template <class... Args>
 	static Variant call_static(Variant::Type type, const StringName &method, Args... args) {
 		Variant result;
-		GDNativeCallError error;
-		std::array<GDNativeConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
+		GDExtensionCallError error;
+		std::array<GDExtensionConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
 		call_static(type, method, call_args.data(), call_args.size(), result, error);
 		return result;
 	}

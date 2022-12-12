@@ -41,18 +41,18 @@ namespace godot {
 
 namespace internal {
 
-const GDNativeInterface *gdn_interface = nullptr;
-GDNativeExtensionClassLibraryPtr library = nullptr;
+const GDExtensionInterface *gde_interface = nullptr;
+GDExtensionClassLibraryPtr library = nullptr;
 void *token = nullptr;
 
 } // namespace internal
 
 GDExtensionBinding::Callback GDExtensionBinding::init_callback = nullptr;
 GDExtensionBinding::Callback GDExtensionBinding::terminate_callback = nullptr;
-GDNativeInitializationLevel GDExtensionBinding::minimum_initialization_level = GDNATIVE_INITIALIZATION_CORE;
+GDExtensionInitializationLevel GDExtensionBinding::minimum_initialization_level = GDEXTENSION_INITIALIZATION_CORE;
 
-GDNativeBool GDExtensionBinding::init(const GDNativeInterface *p_interface, GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) {
-	internal::gdn_interface = p_interface;
+GDExtensionBool GDExtensionBinding::init(const GDExtensionInterface *p_interface, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
+	internal::gde_interface = p_interface;
 	internal::library = p_library;
 	internal::token = p_library;
 
@@ -67,7 +67,7 @@ GDNativeBool GDExtensionBinding::init(const GDNativeInterface *p_interface, GDNa
 	return true;
 }
 
-void GDExtensionBinding::initialize_level(void *userdata, GDNativeInitializationLevel p_level) {
+void GDExtensionBinding::initialize_level(void *userdata, GDExtensionInitializationLevel p_level) {
 	ClassDB::current_level = p_level;
 
 	if (init_callback) {
@@ -77,7 +77,7 @@ void GDExtensionBinding::initialize_level(void *userdata, GDNativeInitialization
 	ClassDB::initialize(p_level);
 }
 
-void GDExtensionBinding::deinitialize_level(void *userdata, GDNativeInitializationLevel p_level) {
+void GDExtensionBinding::deinitialize_level(void *userdata, GDExtensionInitializationLevel p_level) {
 	ClassDB::current_level = p_level;
 
 	if (terminate_callback) {
@@ -96,22 +96,22 @@ void GDExtensionBinding::InitObject::register_terminator(Callback p_terminate) c
 }
 
 void GDExtensionBinding::InitObject::set_minimum_library_initialization_level(ModuleInitializationLevel p_level) const {
-	GDExtensionBinding::minimum_initialization_level = static_cast<GDNativeInitializationLevel>(p_level);
+	GDExtensionBinding::minimum_initialization_level = static_cast<GDExtensionInitializationLevel>(p_level);
 }
 
-GDNativeBool GDExtensionBinding::InitObject::init() const {
-	return GDExtensionBinding::init(gdn_interface, library, initialization);
+GDExtensionBool GDExtensionBinding::InitObject::init() const {
+	return GDExtensionBinding::init(gde_interface, library, initialization);
 }
 
 } // namespace godot
 
 extern "C" {
 
-void GDN_EXPORT initialize_level(void *userdata, GDNativeInitializationLevel p_level) {
+void GDE_EXPORT initialize_level(void *userdata, GDExtensionInitializationLevel p_level) {
 	godot::GDExtensionBinding::initialize_level(userdata, p_level);
 }
 
-void GDN_EXPORT deinitialize_level(void *userdata, GDNativeInitializationLevel p_level) {
+void GDE_EXPORT deinitialize_level(void *userdata, GDExtensionInitializationLevel p_level) {
 	godot::GDExtensionBinding::deinitialize_level(userdata, p_level);
 }
 }

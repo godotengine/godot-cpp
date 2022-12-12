@@ -377,7 +377,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if len(fully_used_classes) > 0:
         result.append("")
 
-    result.append(f"#include <godot/gdnative_interface.h>")
+    result.append(f"#include <godot/gdextension_interface.h>")
     result.append("")
     result.append("namespace godot {")
     result.append("")
@@ -405,37 +405,37 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
-            result.append(f'\t\tGDNativePtrConstructor constructor_{constructor["index"]};')
+            result.append(f'\t\tGDExtensionPtrConstructor constructor_{constructor["index"]};')
 
     if builtin_api["has_destructor"]:
-        result.append("\t\tGDNativePtrDestructor destructor;")
+        result.append("\t\tGDExtensionPtrDestructor destructor;")
 
     if "methods" in builtin_api:
         for method in builtin_api["methods"]:
-            result.append(f'\t\tGDNativePtrBuiltInMethod method_{method["name"]};')
+            result.append(f'\t\tGDExtensionPtrBuiltInMethod method_{method["name"]};')
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
-            result.append(f'\t\tGDNativePtrSetter member_{member["name"]}_setter;')
-            result.append(f'\t\tGDNativePtrGetter member_{member["name"]}_getter;')
+            result.append(f'\t\tGDExtensionPtrSetter member_{member["name"]}_setter;')
+            result.append(f'\t\tGDExtensionPtrGetter member_{member["name"]}_getter;')
 
     if "indexing_return_type" in builtin_api:
-        result.append(f"\t\tGDNativePtrIndexedSetter indexed_setter;")
-        result.append(f"\t\tGDNativePtrIndexedGetter indexed_getter;")
+        result.append(f"\t\tGDExtensionPtrIndexedSetter indexed_setter;")
+        result.append(f"\t\tGDExtensionPtrIndexedGetter indexed_getter;")
 
     if "is_keyed" in builtin_api and builtin_api["is_keyed"]:
-        result.append(f"\t\tGDNativePtrKeyedSetter keyed_setter;")
-        result.append(f"\t\tGDNativePtrKeyedGetter keyed_getter;")
-        result.append(f"\t\tGDNativePtrKeyedChecker keyed_checker;")
+        result.append(f"\t\tGDExtensionPtrKeyedSetter keyed_setter;")
+        result.append(f"\t\tGDExtensionPtrKeyedGetter keyed_getter;")
+        result.append(f"\t\tGDExtensionPtrKeyedChecker keyed_checker;")
 
     if "operators" in builtin_api:
         for operator in builtin_api["operators"]:
             if "right_type" in operator:
                 result.append(
-                    f'\t\tGDNativePtrOperatorEvaluator operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]};'
+                    f'\t\tGDExtensionPtrOperatorEvaluator operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]};'
                 )
             else:
-                result.append(f'\t\tGDNativePtrOperatorEvaluator operator_{get_operator_id_name(operator["name"])};')
+                result.append(f'\t\tGDExtensionPtrOperatorEvaluator operator_{get_operator_id_name(operator["name"])};')
 
     result.append("\t} _method_bindings;")
 
@@ -447,7 +447,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("public:")
 
     result.append(
-        f"\t_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
+        f"\t_FORCE_INLINE_ GDExtensionTypePtr _native_ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
     )
 
     copy_constructor_index = -1
@@ -653,7 +653,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 
     class_name = builtin_api["name"]
     snake_class_name = camel_to_snake(class_name)
-    enum_type_name = f"GDNATIVE_VARIANT_TYPE_{snake_class_name.upper()}"
+    enum_type_name = f"GDEXTENSION_VARIANT_TYPE_{snake_class_name.upper()}"
 
     add_header(f"{snake_class_name}.cpp", result)
 
@@ -687,12 +687,12 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
             result.append(
-                f'\t_method_bindings.constructor_{constructor["index"]} = internal::gdn_interface->variant_get_ptr_constructor({enum_type_name}, {constructor["index"]});'
+                f'\t_method_bindings.constructor_{constructor["index"]} = internal::gde_interface->variant_get_ptr_constructor({enum_type_name}, {constructor["index"]});'
             )
 
     if builtin_api["has_destructor"]:
         result.append(
-            f"\t_method_bindings.destructor = internal::gdn_interface->variant_get_ptr_destructor({enum_type_name});"
+            f"\t_method_bindings.destructor = internal::gde_interface->variant_get_ptr_destructor({enum_type_name});"
         )
 
     result.append("}")
@@ -711,51 +711,53 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             # TODO: Add error check for hash mismatch.
             result.append(f'\t__name = StringName("{method["name"]}");')
             result.append(
-                f'\t_method_bindings.method_{method["name"]} = internal::gdn_interface->variant_get_ptr_builtin_method({enum_type_name}, __name._native_ptr(), {method["hash"]});'
+                f'\t_method_bindings.method_{method["name"]} = internal::gde_interface->variant_get_ptr_builtin_method({enum_type_name}, __name._native_ptr(), {method["hash"]});'
             )
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
             result.append(f'\t__name = StringName("{member["name"]}");')
             result.append(
-                f'\t_method_bindings.member_{member["name"]}_setter = internal::gdn_interface->variant_get_ptr_setter({enum_type_name}, __name._native_ptr());'
+                f'\t_method_bindings.member_{member["name"]}_setter = internal::gde_interface->variant_get_ptr_setter({enum_type_name}, __name._native_ptr());'
             )
             result.append(
-                f'\t_method_bindings.member_{member["name"]}_getter = internal::gdn_interface->variant_get_ptr_getter({enum_type_name}, __name._native_ptr());'
+                f'\t_method_bindings.member_{member["name"]}_getter = internal::gde_interface->variant_get_ptr_getter({enum_type_name}, __name._native_ptr());'
             )
 
     if "indexing_return_type" in builtin_api:
         result.append(
-            f"\t_method_bindings.indexed_setter = internal::gdn_interface->variant_get_ptr_indexed_setter({enum_type_name});"
+            f"\t_method_bindings.indexed_setter = internal::gde_interface->variant_get_ptr_indexed_setter({enum_type_name});"
         )
         result.append(
-            f"\t_method_bindings.indexed_getter = internal::gdn_interface->variant_get_ptr_indexed_getter({enum_type_name});"
+            f"\t_method_bindings.indexed_getter = internal::gde_interface->variant_get_ptr_indexed_getter({enum_type_name});"
         )
 
     if "is_keyed" in builtin_api and builtin_api["is_keyed"]:
         result.append(
-            f"\t_method_bindings.keyed_setter = internal::gdn_interface->variant_get_ptr_keyed_setter({enum_type_name});"
+            f"\t_method_bindings.keyed_setter = internal::gde_interface->variant_get_ptr_keyed_setter({enum_type_name});"
         )
         result.append(
-            f"\t_method_bindings.keyed_getter = internal::gdn_interface->variant_get_ptr_keyed_getter({enum_type_name});"
+            f"\t_method_bindings.keyed_getter = internal::gde_interface->variant_get_ptr_keyed_getter({enum_type_name});"
         )
         result.append(
-            f"\t_method_bindings.keyed_checker = internal::gdn_interface->variant_get_ptr_keyed_checker({enum_type_name});"
+            f"\t_method_bindings.keyed_checker = internal::gde_interface->variant_get_ptr_keyed_checker({enum_type_name});"
         )
 
     if "operators" in builtin_api:
         for operator in builtin_api["operators"]:
             if "right_type" in operator:
                 if operator["right_type"] == "Variant":
-                    right_type_variant_type = "GDNATIVE_VARIANT_TYPE_NIL"
+                    right_type_variant_type = "GDEXTENSION_VARIANT_TYPE_NIL"
                 else:
-                    right_type_variant_type = f"GDNATIVE_VARIANT_TYPE_{camel_to_snake(operator['right_type']).upper()}"
+                    right_type_variant_type = (
+                        f"GDEXTENSION_VARIANT_TYPE_{camel_to_snake(operator['right_type']).upper()}"
+                    )
                 result.append(
-                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]} = internal::gdn_interface->variant_get_ptr_operator_evaluator(GDNATIVE_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, {right_type_variant_type});'
+                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]} = internal::gde_interface->variant_get_ptr_operator_evaluator(GDEXTENSION_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, {right_type_variant_type});'
                 )
             else:
                 result.append(
-                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])} = internal::gdn_interface->variant_get_ptr_operator_evaluator(GDNATIVE_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, GDNATIVE_VARIANT_TYPE_NIL);'
+                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])} = internal::gde_interface->variant_get_ptr_operator_evaluator(GDEXTENSION_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, GDEXTENSION_VARIANT_TYPE_NIL);'
                 )
 
     result.append("}")
@@ -836,7 +838,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             if "is_static" in method and method["is_static"]:
                 method_call += "nullptr"
             else:
-                method_call += "(GDNativeTypePtr)&opaque"
+                method_call += "(GDExtensionTypePtr)&opaque"
 
             if "arguments" in method:
                 arguments = []
@@ -861,7 +863,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             if f'get_{member["name"]}' not in method_list:
                 result.append(f'{correct_type(member["type"])} {class_name}::get_{member["name"]}() const {{')
                 result.append(
-                    f'\treturn internal::_call_builtin_ptr_getter<{correct_type(member["type"])}>(_method_bindings.member_{member["name"]}_getter, (GDNativeConstTypePtr)&opaque);'
+                    f'\treturn internal::_call_builtin_ptr_getter<{correct_type(member["type"])}>(_method_bindings.member_{member["name"]}_getter, (GDExtensionConstTypePtr)&opaque);'
                 )
                 result.append("}")
 
@@ -870,7 +872,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                 (encode, arg_name) = get_encoded_arg("value", member["type"], None)
                 result += encode
                 result.append(
-                    f'\t_method_bindings.member_{member["name"]}_setter((GDNativeConstTypePtr)&opaque, (GDNativeConstTypePtr){arg_name});'
+                    f'\t_method_bindings.member_{member["name"]}_setter((GDExtensionConstTypePtr)&opaque, (GDExtensionConstTypePtr){arg_name});'
                 )
 
                 result.append("}")
@@ -886,7 +888,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                     (encode, arg_name) = get_encoded_arg("other", operator["right_type"], None)
                     result += encode
                     result.append(
-                        f'\treturn internal::_call_builtin_operator_ptr<{get_gdnative_type(correct_type(operator["return_type"]))}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]}, (GDNativeConstTypePtr)&opaque, (GDNativeConstTypePtr){arg_name});'
+                        f'\treturn internal::_call_builtin_operator_ptr<{get_gdextension_type(correct_type(operator["return_type"]))}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]}, (GDExtensionConstTypePtr)&opaque, (GDExtensionConstTypePtr){arg_name});'
                     )
                     result.append("}")
                 else:
@@ -894,7 +896,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                         f'{correct_type(operator["return_type"])} {class_name}::operator{operator["name"].replace("unary", "")}() const {{'
                     )
                     result.append(
-                        f'\treturn internal::_call_builtin_operator_ptr<{get_gdnative_type(correct_type(operator["return_type"]))}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}, (GDNativeConstTypePtr)&opaque, (GDNativeConstTypePtr)nullptr);'
+                        f'\treturn internal::_call_builtin_operator_ptr<{get_gdextension_type(correct_type(operator["return_type"]))}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}, (GDExtensionConstTypePtr)&opaque, (GDExtensionConstTypePtr)nullptr);'
                     )
                     result.append("}")
                 result.append("")
@@ -1166,7 +1168,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     inherits = class_api["inherits"] if "inherits" in class_api else "Wrapped"
     result.append(f"class {class_name} : public {inherits} {{")
 
-    result.append(f"\tGDNATIVE_CLASS({class_name}, {inherits})")
+    result.append(f"\tGDEXTENSION_CLASS({class_name}, {inherits})")
     result.append("")
 
     result.append("public:")
@@ -1315,13 +1317,13 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
         result.append(f"{class_name} *{class_name}::get_singleton() {{")
         result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
         result.append(
-            f"\tstatic GDNativeObjectPtr singleton_obj = internal::gdn_interface->global_get_singleton(__class_name._native_ptr());"
+            f"\tstatic GDExtensionObjectPtr singleton_obj = internal::gde_interface->global_get_singleton(__class_name._native_ptr());"
         )
         result.append("#ifdef DEBUG_ENABLED")
         result.append("\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
         result.append("#endif // DEBUG_ENABLED")
         result.append(
-            f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::gdn_interface->object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));"
+            f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::gde_interface->object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));"
         )
         result.append("\treturn singleton;")
         result.append("}")
@@ -1343,7 +1345,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
             result.append(f'\tconst StringName __method_name = "{method["name"]}";')
             result.append(
-                f'\tstatic GDNativeMethodBindPtr ___method_bind = internal::gdn_interface->classdb_get_method_bind(__class_name._native_ptr(), __method_name._native_ptr(), {method["hash"]});'
+                f'\tstatic GDExtensionMethodBindPtr ___method_bind = internal::gde_interface->classdb_get_method_bind(__class_name._native_ptr(), __method_name._native_ptr(), {method["hash"]});'
             )
             method_call = "\t"
             has_return = "return_value" in method and method["return_value"]["type"] != "void"
@@ -1362,9 +1364,9 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                     meta_type = method["return_value"]["meta"] if "meta" in method["return_value"] else None
                     if is_pod_type(return_type) or is_variant(return_type) or is_enum(return_type):
                         if method["is_static"]:
-                            method_call += f"return internal::_call_native_mb_ret<{get_gdnative_type(correct_type(return_type, meta_type))}>(___method_bind, nullptr"
+                            method_call += f"return internal::_call_native_mb_ret<{get_gdextension_type(correct_type(return_type, meta_type))}>(___method_bind, nullptr"
                         else:
-                            method_call += f"return internal::_call_native_mb_ret<{get_gdnative_type(correct_type(return_type, meta_type))}>(___method_bind, _owner"
+                            method_call += f"return internal::_call_native_mb_ret<{get_gdextension_type(correct_type(return_type, meta_type))}>(___method_bind, _owner"
                     elif is_refcounted(return_type):
                         if method["is_static"]:
                             method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, nullptr"
@@ -1399,9 +1401,9 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                         arguments.append(arg_name)
                     method_call += ", ".join(arguments)
             else:  # vararg.
-                result.append("\tGDNativeCallError error;")
+                result.append("\tGDExtensionCallError error;")
                 result.append("\tVariant ret;")
-                method_call += "internal::gdn_interface->object_method_bind_call(___method_bind, _owner, reinterpret_cast<GDNativeConstVariantPtr *>(args), arg_count, &ret, &error"
+                method_call += "internal::gde_interface->object_method_bind_call(___method_bind, _owner, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count, &ret, &error"
 
             if is_ref:
                 method_call += ")"  # Close Ref<> constructor.
@@ -1592,7 +1594,7 @@ def generate_utility_functions(api, output_dir):
 
         source.append(f'\tconst StringName __function_name = "{function["name"]}";')
         source.append(
-            f'\tstatic GDNativePtrUtilityFunction ___function = internal::gdn_interface->variant_get_ptr_utility_function(__function_name._native_ptr(), {function["hash"]});'
+            f'\tstatic GDExtensionPtrUtilityFunction ___function = internal::gde_interface->variant_get_ptr_utility_function(__function_name._native_ptr(), {function["hash"]});'
         )
         has_return = "return_type" in function and function["return_type"] != "void"
         if has_return:
@@ -1609,7 +1611,7 @@ def generate_utility_functions(api, output_dir):
                 if function["return_type"] == "Object":
                     function_call += "internal::_call_utility_ret_obj(___function"
                 else:
-                    function_call += f'internal::_call_utility_ret<{get_gdnative_type(correct_type(function["return_type"]))}>(___function'
+                    function_call += f'internal::_call_utility_ret<{get_gdextension_type(correct_type(function["return_type"]))}>(___function'
             else:
                 function_call += "internal::_call_utility_no_ret(___function"
 
@@ -1627,7 +1629,7 @@ def generate_utility_functions(api, output_dir):
                 function_call += ", ".join(arguments)
         else:
             source.append("\tVariant ret;")
-            function_call += "___function(&ret, reinterpret_cast<GDNativeConstVariantPtr *>(args), arg_count"
+            function_call += "___function(&ret, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count"
 
         function_call += ");"
         source.append(function_call)
@@ -1708,7 +1710,7 @@ def get_encoded_arg(arg_name, type_name, type_meta):
     name = escape_identifier(arg_name)
     arg_type = correct_type(type_name)
     if is_pod_type(arg_type):
-        result.append(f"\t{get_gdnative_type(arg_type)} {name}_encoded;")
+        result.append(f"\t{get_gdextension_type(arg_type)} {name}_encoded;")
         result.append(f"\tPtrToArg<{correct_type(type_name)}>::encode({name}, &{name}_encoded);")
         name = f"&{name}_encoded"
     elif is_engine_class(type_name):
@@ -1771,7 +1773,7 @@ def make_signature(
     if not is_vararg:
         function_signature += make_function_parameters(arguments, for_header, for_builtin, is_vararg)
     else:
-        function_signature += "const Variant **args, GDNativeInt arg_count"
+        function_signature += "const Variant **args, GDExtensionInt arg_count"
 
     function_signature += ")"
 
@@ -2060,7 +2062,7 @@ def correct_type(type_name, meta=None):
     return type_name
 
 
-def get_gdnative_type(type_name):
+def get_gdextension_type(type_name):
     type_conversion_map = {
         "bool": "int8_t",
         "uint8_t": "int64_t",

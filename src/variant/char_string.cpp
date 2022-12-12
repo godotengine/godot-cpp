@@ -153,19 +153,19 @@ CharWideString::~CharWideString() {
 // It's easier to have them written in C++ directly than in a Python script that generates them.
 
 String::String(const char *from) {
-	internal::gdn_interface->string_new_with_latin1_chars(_native_ptr(), from);
+	internal::gde_interface->string_new_with_latin1_chars(_native_ptr(), from);
 }
 
 String::String(const wchar_t *from) {
-	internal::gdn_interface->string_new_with_wide_chars(_native_ptr(), from);
+	internal::gde_interface->string_new_with_wide_chars(_native_ptr(), from);
 }
 
 String::String(const char16_t *from) {
-	internal::gdn_interface->string_new_with_utf16_chars(_native_ptr(), from);
+	internal::gde_interface->string_new_with_utf16_chars(_native_ptr(), from);
 }
 
 String::String(const char32_t *from) {
-	internal::gdn_interface->string_new_with_utf32_chars(_native_ptr(), from);
+	internal::gde_interface->string_new_with_utf32_chars(_native_ptr(), from);
 }
 
 String String::utf8(const char *from, int len) {
@@ -175,7 +175,7 @@ String String::utf8(const char *from, int len) {
 }
 
 void String::parse_utf8(const char *from, int len) {
-	internal::gdn_interface->string_new_with_utf8_chars_and_len(_native_ptr(), from, len);
+	internal::gde_interface->string_new_with_utf8_chars_and_len(_native_ptr(), from, len);
 }
 
 String String::utf16(const char16_t *from, int len) {
@@ -185,7 +185,7 @@ String String::utf16(const char16_t *from, int len) {
 }
 
 void String::parse_utf16(const char16_t *from, int len) {
-	internal::gdn_interface->string_new_with_utf16_chars_and_len(_native_ptr(), from, len);
+	internal::gde_interface->string_new_with_utf16_chars_and_len(_native_ptr(), from, len);
 }
 
 String String::num_real(double p_num, bool p_trailing) {
@@ -226,9 +226,9 @@ String rtoss(double p_val) {
 }
 
 CharString String::utf8() const {
-	int size = internal::gdn_interface->string_to_utf8_chars(_native_ptr(), nullptr, 0);
+	int size = internal::gde_interface->string_to_utf8_chars(_native_ptr(), nullptr, 0);
 	char *cstr = memnew_arr(char, size + 1);
-	internal::gdn_interface->string_to_utf8_chars(_native_ptr(), cstr, size + 1);
+	internal::gde_interface->string_to_utf8_chars(_native_ptr(), cstr, size + 1);
 
 	cstr[size] = '\0';
 
@@ -236,9 +236,9 @@ CharString String::utf8() const {
 }
 
 CharString String::ascii() const {
-	int size = internal::gdn_interface->string_to_latin1_chars(_native_ptr(), nullptr, 0);
+	int size = internal::gde_interface->string_to_latin1_chars(_native_ptr(), nullptr, 0);
 	char *cstr = memnew_arr(char, size + 1);
-	internal::gdn_interface->string_to_latin1_chars(_native_ptr(), cstr, size + 1);
+	internal::gde_interface->string_to_latin1_chars(_native_ptr(), cstr, size + 1);
 
 	cstr[size] = '\0';
 
@@ -246,9 +246,9 @@ CharString String::ascii() const {
 }
 
 Char16String String::utf16() const {
-	int size = internal::gdn_interface->string_to_utf16_chars(_native_ptr(), nullptr, 0);
+	int size = internal::gde_interface->string_to_utf16_chars(_native_ptr(), nullptr, 0);
 	char16_t *cstr = memnew_arr(char16_t, size + 1);
-	internal::gdn_interface->string_to_utf16_chars(_native_ptr(), cstr, size + 1);
+	internal::gde_interface->string_to_utf16_chars(_native_ptr(), cstr, size + 1);
 
 	cstr[size] = '\0';
 
@@ -256,9 +256,9 @@ Char16String String::utf16() const {
 }
 
 Char32String String::utf32() const {
-	int size = internal::gdn_interface->string_to_utf32_chars(_native_ptr(), nullptr, 0);
+	int size = internal::gde_interface->string_to_utf32_chars(_native_ptr(), nullptr, 0);
 	char32_t *cstr = memnew_arr(char32_t, size + 1);
-	internal::gdn_interface->string_to_utf32_chars(_native_ptr(), cstr, size + 1);
+	internal::gde_interface->string_to_utf32_chars(_native_ptr(), cstr, size + 1);
 
 	cstr[size] = '\0';
 
@@ -266,9 +266,9 @@ Char32String String::utf32() const {
 }
 
 CharWideString String::wide_string() const {
-	int size = internal::gdn_interface->string_to_wide_chars(_native_ptr(), nullptr, 0);
+	int size = internal::gde_interface->string_to_wide_chars(_native_ptr(), nullptr, 0);
 	wchar_t *cstr = memnew_arr(wchar_t, size + 1);
-	internal::gdn_interface->string_to_wide_chars(_native_ptr(), cstr, size + 1);
+	internal::gde_interface->string_to_wide_chars(_native_ptr(), cstr, size + 1);
 
 	cstr[size] = '\0';
 
@@ -344,19 +344,19 @@ String String::operator+(const char32_t *p_chr) {
 }
 
 const char32_t &String::operator[](int p_index) const {
-	return *internal::gdn_interface->string_operator_index_const((GDNativeStringPtr)this, p_index);
+	return *internal::gde_interface->string_operator_index_const((GDExtensionStringPtr)this, p_index);
 }
 
 char32_t &String::operator[](int p_index) {
-	return *internal::gdn_interface->string_operator_index((GDNativeStringPtr)this, p_index);
+	return *internal::gde_interface->string_operator_index((GDExtensionStringPtr)this, p_index);
 }
 
 const char32_t *String::ptr() const {
-	return internal::gdn_interface->string_operator_index_const((GDNativeStringPtr)this, 0);
+	return internal::gde_interface->string_operator_index_const((GDExtensionStringPtr)this, 0);
 }
 
 char32_t *String::ptrw() {
-	return internal::gdn_interface->string_operator_index((GDNativeStringPtr)this, 0);
+	return internal::gde_interface->string_operator_index((GDExtensionStringPtr)this, 0);
 }
 
 bool operator==(const char *p_chr, const String &p_str) {

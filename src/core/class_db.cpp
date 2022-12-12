@@ -40,7 +40,7 @@
 namespace godot {
 
 std::unordered_map<StringName, ClassDB::ClassInfo> ClassDB::classes;
-GDNativeInitializationLevel ClassDB::current_level = GDNATIVE_INITIALIZATION_CORE;
+GDExtensionInitializationLevel ClassDB::current_level = GDEXTENSION_INITIALIZATION_CORE;
 
 MethodDefinition D_METHOD(StringName p_name) {
 	return MethodDefinition(p_name);
@@ -55,13 +55,13 @@ MethodDefinition D_METHOD(StringName p_name, StringName p_arg1) {
 void ClassDB::add_property_group(const StringName &p_class, const String &p_name, const String &p_prefix) {
 	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), String("Trying to add property '{0}{1}' to non-existing class '{2}'.").format(Array::make(p_prefix, p_name, p_class)));
 
-	internal::gdn_interface->classdb_register_extension_class_property_group(internal::library, p_class._native_ptr(), p_name._native_ptr(), p_prefix._native_ptr());
+	internal::gde_interface->classdb_register_extension_class_property_group(internal::library, p_class._native_ptr(), p_name._native_ptr(), p_prefix._native_ptr());
 }
 
 void ClassDB::add_property_subgroup(const StringName &p_class, const String &p_name, const String &p_prefix) {
 	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), String("Trying to add property '{0}{1}' to non-existing class '{2}'.").format(Array::make(p_prefix, p_name, p_class)));
 
-	internal::gdn_interface->classdb_register_extension_class_property_subgroup(internal::library, p_class._native_ptr(), p_name._native_ptr(), p_prefix._native_ptr());
+	internal::gde_interface->classdb_register_extension_class_property_subgroup(internal::library, p_class._native_ptr(), p_name._native_ptr(), p_prefix._native_ptr());
 }
 
 void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinfo, const StringName &p_setter, const StringName &p_getter, int p_index) {
@@ -94,12 +94,12 @@ void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinf
 	info.property_names.insert(p_pinfo.name);
 
 	// register with Godot
-	GDNativePropertyInfo prop_info = {
-		static_cast<GDNativeVariantType>(p_pinfo.type), // GDNativeVariantType type;
-		p_pinfo.name._native_ptr(), // GDNativeStringNamePtr name;
-		p_pinfo.class_name._native_ptr(), // GDNativeStringNamePtr class_name;
+	GDExtensionPropertyInfo prop_info = {
+		static_cast<GDExtensionVariantType>(p_pinfo.type), // GDExtensionVariantType type;
+		p_pinfo.name._native_ptr(), // GDExtensionStringNamePtr name;
+		p_pinfo.class_name._native_ptr(), // GDExtensionStringNamePtr class_name;
 		p_pinfo.hint, // NONE //uint32_t hint;
-		p_pinfo.hint_string._native_ptr(), // GDNativeStringPtr hint_string;
+		p_pinfo.hint_string._native_ptr(), // GDExtensionStringPtr hint_string;
 		p_pinfo.usage, // DEFAULT //uint32_t usage;
 	};
 
@@ -111,7 +111,7 @@ void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinf
 	setget.index = p_index;
 	setget.type = p_pinfo.type;
 
-	internal::gdn_interface->classdb_register_extension_class_property(internal::library, info.name._native_ptr(), &prop_info, setget.setter._native_ptr(), setget.getter._native_ptr());
+	internal::gde_interface->classdb_register_extension_class_property(internal::library, info.name._native_ptr(), &prop_info, setget.setter._native_ptr(), setget.getter._native_ptr());
 }
 
 MethodBind *ClassDB::get_method(const StringName &p_class, const StringName &p_method) {
@@ -189,52 +189,52 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 }
 
 void ClassDB::bind_method_godot(const StringName &p_class_name, MethodBind *p_method) {
-	std::vector<GDNativeVariantPtr> def_args;
+	std::vector<GDExtensionVariantPtr> def_args;
 	const std::vector<Variant> &def_args_val = p_method->get_default_arguments();
 	def_args.resize(def_args_val.size());
 	for (int i = 0; i < def_args_val.size(); i++) {
-		def_args[i] = (GDNativeVariantPtr)&def_args_val[i];
+		def_args[i] = (GDExtensionVariantPtr)&def_args_val[i];
 	}
 
 	std::vector<PropertyInfo> return_value_and_arguments_info = p_method->get_arguments_info_list();
-	std::vector<GDNativeExtensionClassMethodArgumentMetadata> return_value_and_arguments_metadata = p_method->get_arguments_metadata_list();
+	std::vector<GDExtensionClassMethodArgumentMetadata> return_value_and_arguments_metadata = p_method->get_arguments_metadata_list();
 
-	std::vector<GDNativePropertyInfo> return_value_and_arguments_gdnative_info;
-	return_value_and_arguments_gdnative_info.reserve(return_value_and_arguments_info.size());
+	std::vector<GDExtensionPropertyInfo> return_value_and_arguments_gdextension_info;
+	return_value_and_arguments_gdextension_info.reserve(return_value_and_arguments_info.size());
 	for (std::vector<PropertyInfo>::iterator it = return_value_and_arguments_info.begin(); it != return_value_and_arguments_info.end(); it++) {
-		return_value_and_arguments_gdnative_info.push_back(
-				GDNativePropertyInfo{
-						static_cast<GDNativeVariantType>(it->type), // GDNativeVariantType type;
-						it->name._native_ptr(), // GDNativeStringNamePtr name;
-						it->class_name._native_ptr(), // GDNativeStringNamePtr class_name;
+		return_value_and_arguments_gdextension_info.push_back(
+				GDExtensionPropertyInfo{
+						static_cast<GDExtensionVariantType>(it->type), // GDExtensionVariantType type;
+						it->name._native_ptr(), // GDExtensionStringNamePtr name;
+						it->class_name._native_ptr(), // GDExtensionStringNamePtr class_name;
 						it->hint, // uint32_t hint;
-						it->hint_string._native_ptr(), // GDNativeStringPtr hint_string;
+						it->hint_string._native_ptr(), // GDExtensionStringPtr hint_string;
 						it->usage, // uint32_t usage;
 				});
 	}
 
-	GDNativePropertyInfo *return_value_info = return_value_and_arguments_gdnative_info.data();
-	GDNativeExtensionClassMethodArgumentMetadata *return_value_metadata = return_value_and_arguments_metadata.data();
-	GDNativePropertyInfo *arguments_info = return_value_and_arguments_gdnative_info.data() + 1;
-	GDNativeExtensionClassMethodArgumentMetadata *arguments_metadata = return_value_and_arguments_metadata.data() + 1;
+	GDExtensionPropertyInfo *return_value_info = return_value_and_arguments_gdextension_info.data();
+	GDExtensionClassMethodArgumentMetadata *return_value_metadata = return_value_and_arguments_metadata.data();
+	GDExtensionPropertyInfo *arguments_info = return_value_and_arguments_gdextension_info.data() + 1;
+	GDExtensionClassMethodArgumentMetadata *arguments_metadata = return_value_and_arguments_metadata.data() + 1;
 
 	StringName name = p_method->get_name();
-	GDNativeExtensionClassMethodInfo method_info = {
-		name._native_ptr(), // GDNativeStringNamePtr;
+	GDExtensionClassMethodInfo method_info = {
+		name._native_ptr(), // GDExtensionStringNamePtr;
 		p_method, // void *method_userdata;
-		MethodBind::bind_call, // GDNativeExtensionClassMethodCall call_func;
-		MethodBind::bind_ptrcall, // GDNativeExtensionClassMethodPtrCall ptrcall_func;
-		p_method->get_hint_flags(), // uint32_t method_flags; /* GDNativeExtensionClassMethodFlags */
-		(GDNativeBool)p_method->has_return(), // GDNativeBool has_return_value;
-		return_value_info, // GDNativePropertyInfo *
-		*return_value_metadata, // GDNativeExtensionClassMethodArgumentMetadata *
+		MethodBind::bind_call, // GDExtensionClassMethodCall call_func;
+		MethodBind::bind_ptrcall, // GDExtensionClassMethodPtrCall ptrcall_func;
+		p_method->get_hint_flags(), // uint32_t method_flags; /* GDExtensionClassMethodFlags */
+		(GDExtensionBool)p_method->has_return(), // GDExtensionBool has_return_value;
+		return_value_info, // GDExtensionPropertyInfo *
+		*return_value_metadata, // GDExtensionClassMethodArgumentMetadata *
 		(uint32_t)p_method->get_argument_count(), // uint32_t argument_count;
-		arguments_info, // GDNativePropertyInfo *
-		arguments_metadata, // GDNativeExtensionClassMethodArgumentMetadata *
+		arguments_info, // GDExtensionPropertyInfo *
+		arguments_metadata, // GDExtensionClassMethodArgumentMetadata *
 		(uint32_t)p_method->get_default_argument_count(), // uint32_t default_argument_count;
-		def_args.data(), // GDNativeVariantPtr *default_arguments;
+		def_args.data(), // GDExtensionVariantPtr *default_arguments;
 	};
-	internal::gdn_interface->classdb_register_extension_class_method(internal::library, p_class_name._native_ptr(), &method_info);
+	internal::gde_interface->classdb_register_extension_class_method(internal::library, p_class_name._native_ptr(), &method_info);
 }
 
 void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) {
@@ -255,24 +255,24 @@ void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) 
 	cl.signal_names.insert(p_signal.name);
 
 	// register our signal in godot
-	std::vector<GDNativePropertyInfo> parameters;
+	std::vector<GDExtensionPropertyInfo> parameters;
 	parameters.reserve(p_signal.arguments.size());
 
 	for (const PropertyInfo &par : p_signal.arguments) {
-		parameters.push_back(GDNativePropertyInfo{
-				static_cast<GDNativeVariantType>(par.type), // GDNativeVariantType type;
-				par.name._native_ptr(), // GDNativeStringNamePtr name;
-				par.class_name._native_ptr(), // GDNativeStringNamePtr class_name;
+		parameters.push_back(GDExtensionPropertyInfo{
+				static_cast<GDExtensionVariantType>(par.type), // GDExtensionVariantType type;
+				par.name._native_ptr(), // GDExtensionStringNamePtr name;
+				par.class_name._native_ptr(), // GDExtensionStringNamePtr class_name;
 				par.hint, // NONE //uint32_t hint;
-				par.hint_string._native_ptr(), // GDNativeStringPtr hint_string;
+				par.hint_string._native_ptr(), // GDExtensionStringPtr hint_string;
 				par.usage, // DEFAULT //uint32_t usage;
 		});
 	}
 
-	internal::gdn_interface->classdb_register_extension_class_signal(internal::library, cl.name._native_ptr(), p_signal.name._native_ptr(), parameters.data(), parameters.size());
+	internal::gde_interface->classdb_register_extension_class_signal(internal::library, cl.name._native_ptr(), p_signal.name._native_ptr(), parameters.data(), parameters.size());
 }
 
-void ClassDB::bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDNativeInt p_constant_value, bool p_is_bitfield) {
+void ClassDB::bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDExtensionInt p_constant_value, bool p_is_bitfield) {
 	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class_name);
 
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class_name)));
@@ -286,9 +286,9 @@ void ClassDB::bind_integer_constant(const StringName &p_class_name, const String
 	type.constant_names.insert(p_constant_name);
 
 	// Register it with Godot
-	internal::gdn_interface->classdb_register_extension_class_integer_constant(internal::library, p_class_name._native_ptr(), p_enum_name._native_ptr(), p_constant_name._native_ptr(), p_constant_value, p_is_bitfield);
+	internal::gde_interface->classdb_register_extension_class_integer_constant(internal::library, p_class_name._native_ptr(), p_enum_name._native_ptr(), p_constant_name._native_ptr(), p_constant_value, p_is_bitfield);
 }
-GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDNativeConstStringNamePtr p_name) {
+GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtensionConstStringNamePtr p_name) {
 	// This is called by Godot the first time it calls a virtual function, and it caches the result, per object instance.
 	// Because of this, it can happen from different threads at once.
 	// It should be ok not using any mutex as long as we only READ data.
@@ -302,7 +302,7 @@ GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GD
 
 	// Find method in current class, or any of its parent classes (Godot classes not included)
 	while (type != nullptr) {
-		std::unordered_map<StringName, GDNativeExtensionClassCallVirtual>::const_iterator method_it = type->virtual_methods.find(*name);
+		std::unordered_map<StringName, GDExtensionClassCallVirtual>::const_iterator method_it = type->virtual_methods.find(*name);
 
 		if (method_it != type->virtual_methods.end()) {
 			return method_it->second;
@@ -314,7 +314,7 @@ GDNativeExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GD
 	return nullptr;
 }
 
-void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p_method, GDNativeExtensionClassCallVirtual p_call) {
+void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p_method, GDExtensionClassCallVirtual p_call) {
 	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class);
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
 
@@ -329,7 +329,7 @@ void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p
 void ClassDB::initialize_class(const ClassInfo &p_cl) {
 }
 
-void ClassDB::initialize(GDNativeInitializationLevel p_level) {
+void ClassDB::initialize(GDExtensionInitializationLevel p_level) {
 	for (const std::pair<StringName, ClassInfo> pair : classes) {
 		const ClassInfo &cl = pair.second;
 		if (cl.level != p_level) {
@@ -340,14 +340,14 @@ void ClassDB::initialize(GDNativeInitializationLevel p_level) {
 	}
 }
 
-void ClassDB::deinitialize(GDNativeInitializationLevel p_level) {
+void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
 	for (const std::pair<StringName, ClassInfo> pair : classes) {
 		const ClassInfo &cl = pair.second;
 		if (cl.level != p_level) {
 			continue;
 		}
 
-		internal::gdn_interface->classdb_unregister_extension_class(internal::library, cl.name._native_ptr());
+		internal::gde_interface->classdb_unregister_extension_class(internal::library, cl.name._native_ptr());
 
 		for (auto method : cl.method_map) {
 			memdelete(method.second);

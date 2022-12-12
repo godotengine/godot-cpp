@@ -145,7 +145,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release .
           make -j $(nproc) VERBOSE=1
 
-      - name: Build test GDNative library
+      - name: Build test GDExtension library
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." .
           make -j $(nproc) VERBOSE=1
@@ -169,7 +169,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
           cmake --build . -j $(nproc) --verbose
 
-      - name: Build test GDNative library
+      - name: Build test GDExtension library
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -GNinja .
           cmake --build . -j $(nproc) --verbose
@@ -188,7 +188,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 16 2019" .
           cmake --build . --verbose
 
-      - name: Build test GDNative library
+      - name: Build test GDExtension library
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
           cmake --build . --verbose

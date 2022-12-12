@@ -2,8 +2,8 @@
 # CMAKE_BUILD_TYPE:			Compilation target (Debug or Release defaults to Debug)
 #
 # godot-cpp cmake arguments
-# GODOT_HEADERS_DIR:		This is where the gdnative include folder is (godot_source/modules/gdnative/include)
-# GODOT_CUSTOM_API_FILE:	This is if you have another path for the godot_api.json
+# GODOT_HEADERS_DIR:		Custom include path for the GDExtension. It should include interface header at this subpath: godot/gdextension_interface.h
+# GODOT_CUSTOM_API_FILE:	Custom path for extension_api.json
 # FLOAT_TYPE				Floating-point precision (32, 64)
 #
 # Android cmake arguments

@@ -81,9 +81,9 @@ public:
 	Viewport *return_something_const() const;
 	ExampleRef *return_extended_ref() const;
 	Ref<ExampleRef> extended_ref_checks(Ref<ExampleRef> p_ref) const;
-	Variant varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
-	int varargs_func_nv(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
-	void varargs_func_void(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
+	Variant varargs_func(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error);
+	int varargs_func_nv(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error);
+	void varargs_func_void(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error);
 	void emit_custom_signal(const String &name, int value);
 	int def_args(int p_a = 100, int p_b = 200);
 

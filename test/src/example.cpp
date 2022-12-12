@@ -197,17 +197,17 @@ Ref<ExampleRef> Example::extended_ref_checks(Ref<ExampleRef> p_ref) const {
 	return ref;
 }
 
-Variant Example::varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
+Variant Example::varargs_func(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error) {
 	UtilityFunctions::print("  Varargs (Variant return) called with ", String::num((double)arg_count), " arguments");
 	return arg_count;
 }
 
-int Example::varargs_func_nv(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
+int Example::varargs_func_nv(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error) {
 	UtilityFunctions::print("  Varargs (int return) called with ", String::num((double)arg_count), " arguments");
 	return 42;
 }
 
-void Example::varargs_func_void(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
+void Example::varargs_func_void(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error) {
 	UtilityFunctions::print("  Varargs (no return) called with ", String::num((double)arg_count), " arguments");
 }
 
