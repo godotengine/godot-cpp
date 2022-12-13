@@ -31,7 +31,7 @@
 #ifndef GODOT_BINDER_COMMON_HPP
 #define GODOT_BINDER_COMMON_HPP
 
-#include <godot/gdextension_interface.h>
+#include <gdextension_interface.h>
 
 #include <godot_cpp/core/method_ptrcall.hpp>
 #include <godot_cpp/core/type_info.hpp>

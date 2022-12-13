@@ -36,7 +36,7 @@
 
 #include <godot_cpp/core/memory.hpp>
 
-#include <godot/gdextension_interface.h>
+#include <gdextension_interface.h>
 
 #include <godot_cpp/classes/global_constants.hpp>
 

@@ -36,7 +36,7 @@
 #include <godot_cpp/variant/builtin_types.hpp>
 #include <godot_cpp/variant/variant_size.hpp>
 
-#include <godot/gdextension_interface.h>
+#include <gdextension_interface.h>
 
 #include <array>
 

@@ -31,7 +31,7 @@
 #ifndef GODOT_ENGINE_PTRCALL_HPP
 #define GODOT_ENGINE_PTRCALL_HPP
 
-#include <godot/gdextension_interface.h>
+#include <gdextension_interface.h>
 
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/object.hpp>

@@ -77,10 +77,20 @@ opts.Add(
 )
 opts.Add(
     PathVariable(
-        "headers_dir", "Path to the directory containing Godot headers", "godot-headers", PathVariable.PathIsDir
+        "gdextension_dir",
+        "Path to the directory containing GDExtension interface header and API JSON file",
+        "gdextension",
+        PathVariable.PathIsDir,
     )
 )
-opts.Add(PathVariable("custom_api_file", "Path to a custom JSON API file", None, PathVariable.PathIsFile))
+opts.Add(
+    PathVariable(
+        "custom_api_file",
+        "Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)",
+        None,
+        PathVariable.PathIsFile,
+    )
+)
 opts.Add(
     BoolVariable("generate_bindings", "Force GDExtension API bindings generation. Auto-detected by default.", False)
 )
@@ -179,11 +189,11 @@ json_api_file = ""
 if "custom_api_file" in env:
     json_api_file = env["custom_api_file"]
 else:
-    json_api_file = os.path.join(os.getcwd(), env["headers_dir"], "extension_api.json")
+    json_api_file = os.path.join(os.getcwd(), env["gdextension_dir"], "extension_api.json")
 
 bindings = env.GenerateBindings(
     env.Dir("."),
-    [json_api_file, os.path.join(env["headers_dir"], "godot", "gdextension_interface.h"), "binding_generator.py"],
+    [json_api_file, os.path.join(env["gdextension_dir"], "gdextension_interface.h"), "binding_generator.py"],
 )
 
 scons_cache_path = os.environ.get("SCONS_CACHE")
@@ -197,7 +207,7 @@ if env["generate_bindings"]:
     NoCache(bindings)
 
 # Includes
-env.Append(CPPPATH=[[env.Dir(d) for d in [env["headers_dir"], "include", os.path.join("gen", "include")]]])
+env.Append(CPPPATH=[[env.Dir(d) for d in [env["gdextension_dir"], "include", os.path.join("gen", "include")]]])
 
 # Sources to compile
 sources = []

@@ -33,7 +33,7 @@
 
 #include <godot_cpp/core/defs.hpp>
 
-#include <godot/gdextension_interface.h>
+#include <gdextension_interface.h>
 
 #include <cmath>
 
