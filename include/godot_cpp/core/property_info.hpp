@@ -39,7 +39,7 @@
 
 #include <godot_cpp/godot.hpp>
 
-#include <godot/gdextension_interface.h>
+#include <gdextension_interface.h>
 
 namespace godot {
 

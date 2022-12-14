@@ -31,7 +31,7 @@
 #ifndef GODOT_BUILTIN_PTRCALL_HPP
 #define GODOT_BUILTIN_PTRCALL_HPP
 
-#include <godot/gdextension_interface.h>
+#include <gdextension_interface.h>
 
 #include <array>
 

@@ -35,7 +35,7 @@
 #include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
-#include <godot/gdextension_interface.h>
+#include <gdextension_interface.h>
 
 namespace godot {
 

@@ -24,10 +24,9 @@ Stable releases are also tagged on this repository:
 this repository as a Git submodule, checking out the specific tag matching your
 Godot version.**
 
-> As the `master` and `3.x` branches are constantly getting updates, if you are
+> As the `master` branch of Godot is constantly getting updated, if you are
 > using `godot-cpp` against a more current version of Godot, see the instructions
-> in [**godot-headers**](https://github.com/godotengine/godot-headers) for
-> updating the relevant files.
+> in the `gdextension` folder to update the relevant files.
 
 ## Contributing
 

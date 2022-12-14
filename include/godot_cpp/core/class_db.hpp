@@ -31,7 +31,7 @@
 #ifndef GODOT_CLASS_DB_HPP
 #define GODOT_CLASS_DB_HPP
 
-#include <godot/gdextension_interface.h>
+#include <gdextension_interface.h>
 
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/core/error_macros.hpp>

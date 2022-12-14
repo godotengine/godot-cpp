@@ -2,8 +2,8 @@
 # CMAKE_BUILD_TYPE:			Compilation target (Debug or Release defaults to Debug)
 #
 # godot-cpp cmake arguments
-# GODOT_HEADERS_DIR:		Custom include path for the GDExtension. It should include interface header at this subpath: godot/gdextension_interface.h
-# GODOT_CUSTOM_API_FILE:	Custom path for extension_api.json
+# GODOT_GDEXTENSION_DIR:	Path to the directory containing GDExtension interface header and API JSON file
+# GODOT_CUSTOM_API_FILE:	Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
 # FLOAT_TYPE				Floating-point precision (32, 64)
 #
 # Android cmake arguments
@@ -57,9 +57,14 @@ if(NOT DEFINED BITS)
 	endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif()
 
-# Input from user for godot headers and the api file
-set(GODOT_HEADERS_DIR "godot-headers" CACHE STRING "")
-set(GODOT_CUSTOM_API_FILE "godot-headers/extension_api.json" CACHE STRING "")
+# Input from user for GDExtension interface header and the API JSON file
+set(GODOT_GDEXTENSION_DIR "gdextension" CACHE STRING "")
+set(GODOT_CUSTOM_API_FILE "" CACHE STRING "")
+
+set(GODOT_GDEXTENSION_API_FILE "${GODOT_GDEXTENSION_DIR}/extension_api.json")
+if (NOT "${GODOT_CUSTOM_API_FILE}" STREQUAL "")  # User-defined override.
+	set(GODOT_GDEXTENSION_API_FILE "${GODOT_CUSTOM_API_FILE}")
+endif()
 
 set(GODOT_COMPILE_FLAGS )
 set(GODOT_LINKER_FLAGS )
@@ -125,16 +130,16 @@ else()
 	set(GENERATE_BINDING_PARAMETERS "False")
 endif()
 
-execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_CUSTOM_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True, sources=True)"
+execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_GDEXTENSION_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True, sources=True)"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	OUTPUT_VARIABLE GENERATED_FILES_LIST
 )
 
 add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
-		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${BITS}\", \"${FLOAT_TYPE_FLAG}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
+		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_GDEXTENSION_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${BITS}\", \"${FLOAT_TYPE_FLAG}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
 		VERBATIM
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-		MAIN_DEPENDENCY ${GODOT_CUSTOM_API_FILE}
+		MAIN_DEPENDENCY ${GODOT_GDEXTENSION_API_FILE}
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/binding_generator.py
 		COMMENT "Generating bindings"
 )
@@ -173,7 +178,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 # Put godot headers as SYSTEM PUBLIC to exclude warnings from irrelevant headers
 target_include_directories(${PROJECT_NAME}
 	SYSTEM PUBLIC
-	${GODOT_HEADERS_DIR}
+	${GODOT_GDEXTENSION_DIR}
 )
 
 # Add the compile flags

@@ -377,7 +377,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if len(fully_used_classes) > 0:
         result.append("")
 
-    result.append(f"#include <godot/gdextension_interface.h>")
+    result.append(f"#include <gdextension_interface.h>")
     result.append("")
     result.append("namespace godot {")
     result.append("")
