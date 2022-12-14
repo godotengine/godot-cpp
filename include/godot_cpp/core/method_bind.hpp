@@ -136,11 +136,11 @@ public:
 		return vec;
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const = 0;
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) const = 0;
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const = 0;
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) const = 0;
 
-	static void bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error);
-	static void bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return);
+	static void bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error);
+	static void bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return);
 
 	virtual ~MethodBind();
 };
@@ -171,7 +171,7 @@ public:
 		return GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 	}
 
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) const {
 		ERR_FAIL(); // Can't call.
 	}
 
@@ -211,7 +211,7 @@ class MethodBindVarArgT : public MethodBindVarArgBase<MethodBindVarArgT<T>, T, v
 	friend class MethodBindVarArgBase<MethodBindVarArgT<T>, T, void, false>;
 
 public:
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 		(static_cast<T *>(p_instance)->*MethodBindVarArgBase<MethodBindVarArgT<T>, T, void, false>::method)((const Variant **)p_args, p_argument_count, r_error);
 		return {};
 	}
@@ -241,7 +241,7 @@ class MethodBindVarArgTR : public MethodBindVarArgBase<MethodBindVarArgTR<T, R>,
 	friend class MethodBindVarArgBase<MethodBindVarArgTR<T, R>, T, R, true>;
 
 public:
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 		return (static_cast<T *>(p_instance)->*MethodBindVarArgBase<MethodBindVarArgTR<T, R>, T, R, true>::method)((const Variant **)p_args, p_argument_count, r_error);
 	}
 
@@ -314,7 +314,7 @@ public:
 		return call_get_argument_metadata<P...>(p_argument);
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_variant_args_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, r_error, get_default_arguments());
 #else
@@ -322,7 +322,7 @@ public:
 #endif
 		return Variant();
 	}
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, P...>(static_cast<T *>(p_instance), method, p_args, nullptr);
 #else
@@ -390,7 +390,7 @@ public:
 		return call_get_argument_metadata<P...>(p_argument);
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_variant_argsc_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, r_error, get_default_arguments());
 #else
@@ -398,7 +398,7 @@ public:
 #endif
 		return Variant();
 	}
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, P...>(static_cast<T *>(p_instance), method, p_args, nullptr);
 #else
@@ -471,7 +471,7 @@ public:
 		}
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 		Variant ret;
 #ifdef TYPED_METHOD_BIND
 		call_with_variant_args_ret_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, ret, r_error, get_default_arguments());
@@ -480,7 +480,7 @@ public:
 #endif
 		return ret;
 	}
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, R, P...>(static_cast<T *>(p_instance), method, p_args, r_ret);
 #else
@@ -554,7 +554,7 @@ public:
 		}
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
 		Variant ret;
 #ifdef TYPED_METHOD_BIND
 		call_with_variant_args_retc_dv(static_cast<T *>(p_instance), method, p_args, (int)p_argument_count, ret, r_error, get_default_arguments());
@@ -563,7 +563,7 @@ public:
 #endif
 		return ret;
 	}
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 #ifdef TYPED_METHOD_BIND
 		call_with_ptr_args<T, R, P...>(static_cast<T *>(p_instance), method, p_args, r_ret);
 #else
@@ -630,13 +630,13 @@ public:
 		return call_get_argument_metadata<P...>(p_arg);
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_object, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_arg_count, GDExtensionCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_object, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_arg_count, GDExtensionCallError &r_error) const {
 		(void)p_object; // unused
 		call_with_variant_args_static_dv(function, p_args, p_arg_count, r_error, get_default_arguments());
 		return Variant();
 	}
 
-	virtual void ptrcall(GDExtensionClassInstancePtr p_object, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_object, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 		(void)p_object;
 		(void)r_ret;
 		call_with_ptr_args_static_method(function, p_args);
@@ -700,13 +700,13 @@ public:
 		}
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_object, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_arg_count, GDExtensionCallError &r_error) const {
+	virtual Variant call(GDExtensionClassInstancePtr p_object, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_arg_count, GDExtensionCallError &r_error) const {
 		Variant ret;
 		call_with_variant_args_static_ret_dv(function, p_args, p_arg_count, ret, r_error, get_default_arguments());
 		return ret;
 	}
 
-	virtual void ptrcall(GDExtensionClassInstancePtr p_object, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
+	virtual void ptrcall(GDExtensionClassInstancePtr p_object, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_ret) const {
 		(void)p_object;
 		call_with_ptr_args_static_method_ret(function, p_args, r_ret);
 	}
