@@ -226,53 +226,58 @@ String rtoss(double p_val) {
 }
 
 CharString String::utf8() const {
-	int size = internal::gde_interface->string_to_utf8_chars(_native_ptr(), nullptr, 0);
-	char *cstr = memnew_arr(char, size + 1);
-	internal::gde_interface->string_to_utf8_chars(_native_ptr(), cstr, size + 1);
+	int length = internal::gde_interface->string_to_utf8_chars(_native_ptr(), nullptr, 0);
+	int size = length + 1;
+	char *cstr = memnew_arr(char, size);
+	internal::gde_interface->string_to_utf8_chars(_native_ptr(), cstr, length);
 
-	cstr[size] = '\0';
+	cstr[length] = '\0';
 
-	return CharString(cstr, size + 1);
+	return CharString(cstr, length);
 }
 
 CharString String::ascii() const {
-	int size = internal::gde_interface->string_to_latin1_chars(_native_ptr(), nullptr, 0);
-	char *cstr = memnew_arr(char, size + 1);
-	internal::gde_interface->string_to_latin1_chars(_native_ptr(), cstr, size + 1);
+	int length = internal::gde_interface->string_to_latin1_chars(_native_ptr(), nullptr, 0);
+	int size = length + 1;
+	char *cstr = memnew_arr(char, size);
+	internal::gde_interface->string_to_latin1_chars(_native_ptr(), cstr, length);
 
-	cstr[size] = '\0';
+	cstr[length] = '\0';
 
-	return CharString(cstr, size + 1);
+	return CharString(cstr, length);
 }
 
 Char16String String::utf16() const {
-	int size = internal::gde_interface->string_to_utf16_chars(_native_ptr(), nullptr, 0);
-	char16_t *cstr = memnew_arr(char16_t, size + 1);
-	internal::gde_interface->string_to_utf16_chars(_native_ptr(), cstr, size + 1);
+	int length = internal::gde_interface->string_to_utf16_chars(_native_ptr(), nullptr, 0);
+	int size = length + 1;
+	char16_t *cstr = memnew_arr(char16_t, size);
+	internal::gde_interface->string_to_utf16_chars(_native_ptr(), cstr, length);
 
-	cstr[size] = '\0';
+	cstr[length] = '\0';
 
-	return Char16String(cstr, size + 1);
+	return Char16String(cstr, length);
 }
 
 Char32String String::utf32() const {
-	int size = internal::gde_interface->string_to_utf32_chars(_native_ptr(), nullptr, 0);
-	char32_t *cstr = memnew_arr(char32_t, size + 1);
-	internal::gde_interface->string_to_utf32_chars(_native_ptr(), cstr, size + 1);
+	int length = internal::gde_interface->string_to_utf32_chars(_native_ptr(), nullptr, 0);
+	int size = length + 1;
+	char32_t *cstr = memnew_arr(char32_t, size);
+	internal::gde_interface->string_to_utf32_chars(_native_ptr(), cstr, length);
 
-	cstr[size] = '\0';
+	cstr[length] = '\0';
 
-	return Char32String(cstr, size + 1);
+	return Char32String(cstr, length);
 }
 
 CharWideString String::wide_string() const {
-	int size = internal::gde_interface->string_to_wide_chars(_native_ptr(), nullptr, 0);
-	wchar_t *cstr = memnew_arr(wchar_t, size + 1);
-	internal::gde_interface->string_to_wide_chars(_native_ptr(), cstr, size + 1);
+	int length = internal::gde_interface->string_to_wide_chars(_native_ptr(), nullptr, 0);
+	int size = length + 1;
+	wchar_t *cstr = memnew_arr(wchar_t, size);
+	internal::gde_interface->string_to_wide_chars(_native_ptr(), cstr, length);
 
-	cstr[size] = '\0';
+	cstr[length] = '\0';
 
-	return CharWideString(cstr, size + 1);
+	return CharWideString(cstr, length);
 }
 
 String &String::operator=(const char *p_str) {
