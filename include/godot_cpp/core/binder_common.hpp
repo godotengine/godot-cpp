@@ -169,42 +169,42 @@ struct VariantCasterAndValidate<const T &> {
 };
 
 template <class T, class... P, size_t... Is>
-void call_with_ptr_args_helper(T *p_instance, void (T::*p_method)(P...), GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
+void call_with_ptr_args_helper(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
 	(p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...);
 }
 
 template <class T, class... P, size_t... Is>
-void call_with_ptr_argsc_helper(T *p_instance, void (T::*p_method)(P...) const, GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
+void call_with_ptr_argsc_helper(T *p_instance, void (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
 	(p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...);
 }
 
 template <class T, class R, class... P, size_t... Is>
-void call_with_ptr_args_ret_helper(T *p_instance, R (T::*p_method)(P...), GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
+void call_with_ptr_args_ret_helper(T *p_instance, R (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
 	PtrToArg<R>::encode((p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...), r_ret);
 }
 
 template <class T, class R, class... P, size_t... Is>
-void call_with_ptr_args_retc_helper(T *p_instance, R (T::*p_method)(P...) const, GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
+void call_with_ptr_args_retc_helper(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
 	PtrToArg<R>::encode((p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...), r_ret);
 }
 
 template <class T, class... P>
-void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...), GDExtensionConstTypePtr *p_args, void * /*ret*/) {
+void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, void * /*ret*/) {
 	call_with_ptr_args_helper<T, P...>(p_instance, p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 
 template <class T, class... P>
-void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...) const, GDExtensionConstTypePtr *p_args, void * /*ret*/) {
+void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, void * /*ret*/) {
 	call_with_ptr_argsc_helper<T, P...>(p_instance, p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 
 template <class T, class R, class... P>
-void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...), GDExtensionConstTypePtr *p_args, void *r_ret) {
+void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, void *r_ret) {
 	call_with_ptr_args_ret_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
 }
 
 template <class T, class R, class... P>
-void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...) const, GDExtensionConstTypePtr *p_args, void *r_ret) {
+void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, void *r_ret) {
 	call_with_ptr_args_retc_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
 }
 
@@ -256,7 +256,7 @@ void call_with_variant_args_retc_helper(T *p_instance, R (T::*p_method)(P...) co
 }
 
 template <class T, class... P>
-void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -291,7 +291,7 @@ void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), GDExten
 }
 
 template <class T, class... P>
-void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -326,7 +326,7 @@ void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, 
 }
 
 template <class T, class R, class... P>
-void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -361,7 +361,7 @@ void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), GDExte
 }
 
 template <class T, class R, class... P>
-void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const, GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -473,7 +473,7 @@ void call_with_variant_args_static(void (*p_method)(P...), const Variant **p_arg
 }
 
 template <class... P>
-void call_with_variant_args_static_dv(void (*p_method)(P...), GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_static_dv(void (*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -508,12 +508,12 @@ void call_with_variant_args_static_dv(void (*p_method)(P...), GDExtensionConstVa
 }
 
 template <class... P, size_t... Is>
-void call_with_ptr_args_static_method_helper(void (*p_method)(P...), GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
+void call_with_ptr_args_static_method_helper(void (*p_method)(P...), const GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
 	p_method(PtrToArg<P>::convert(p_args[Is])...);
 }
 
 template <class... P>
-void call_with_ptr_args_static_method(void (*p_method)(P...), GDExtensionConstTypePtr *p_args) {
+void call_with_ptr_args_static_method(void (*p_method)(P...), const GDExtensionConstTypePtr *p_args) {
 	call_with_ptr_args_static_method_helper<P...>(p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 
@@ -529,7 +529,7 @@ void call_with_variant_args_static_ret(R (*p_method)(P...), const Variant **p_ar
 }
 
 template <class R, class... P>
-void call_with_variant_args_static_ret_dv(R (*p_method)(P...), GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_static_ret_dv(R (*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -564,12 +564,12 @@ void call_with_variant_args_static_ret_dv(R (*p_method)(P...), GDExtensionConstV
 }
 
 template <class R, class... P, size_t... Is>
-void call_with_ptr_args_static_method_ret_helper(R (*p_method)(P...), GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
+void call_with_ptr_args_static_method_ret_helper(R (*p_method)(P...), const GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
 	PtrToArg<R>::encode(p_method(PtrToArg<P>::convert(p_args[Is])...), r_ret);
 }
 
 template <class R, class... P>
-void call_with_ptr_args_static_method_ret(R (*p_method)(P...), GDExtensionConstTypePtr *p_args, void *r_ret) {
+void call_with_ptr_args_static_method_ret(R (*p_method)(P...), const GDExtensionConstTypePtr *p_args, void *r_ret) {
 	call_with_ptr_args_static_method_ret_helper<R, P...>(p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
 }
 

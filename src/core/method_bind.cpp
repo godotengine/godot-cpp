@@ -91,7 +91,7 @@ PropertyInfo MethodBind::get_argument_info(int p_argument) const {
 	return info;
 }
 
-void MethodBind::bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error) {
+void MethodBind::bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error) {
 	const MethodBind *bind = reinterpret_cast<const MethodBind *>(p_method_userdata);
 	Variant ret = bind->call(p_instance, p_args, p_argument_count, *r_error);
 	// This assumes the return value is an empty Variant, so it doesn't need to call the destructor first.
@@ -99,7 +99,7 @@ void MethodBind::bind_call(void *p_method_userdata, GDExtensionClassInstancePtr 
 	internal::gde_interface->variant_new_copy(r_return, ret._native_ptr());
 }
 
-void MethodBind::bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) {
+void MethodBind::bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) {
 	const MethodBind *bind = reinterpret_cast<const MethodBind *>(p_method_userdata);
 	bind->ptrcall(p_instance, p_args, r_return);
 }
