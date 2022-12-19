@@ -5,6 +5,7 @@ import platform
 import sys
 import subprocess
 from binding_generator import scons_generate_bindings, scons_emit_files
+from SCons.Errors import UserError
 
 EnsureSConsVersion(4, 0)
 
@@ -13,6 +14,28 @@ def add_sources(sources, dir, extension):
     for f in os.listdir(dir):
         if f.endswith("." + extension):
             sources.append(dir + "/" + f)
+
+
+def normalize_path(val):
+    return val if os.path.isabs(val) else os.path.join(env.Dir("#").abspath, val)
+
+
+def validate_api_file(key, val, env):
+    if not os.path.isfile(normalize_path(val)):
+        raise UserError("GDExtension API file ('%s') does not exist: %s" % (key, val))
+
+
+def validate_gdextension_dir(key, val, env):
+    if not os.path.isdir(normalize_path(val)):
+        raise UserError("GDExtension directory ('%s') does not exist: %s" % (key, val))
+
+
+def get_gdextension_dir(env):
+    return normalize_path(env.get("gdextension_dir", env.Dir("gdextension").abspath))
+
+
+def get_api_file(env):
+    return normalize_path(env.get("custom_api_file", os.path.join(get_gdextension_dir(env), "extension_api.json")))
 
 
 # Try to detect the host platform automatically.
@@ -80,9 +103,9 @@ opts.Add(
 opts.Add(
     PathVariable(
         "gdextension_dir",
-        "Path to the directory containing GDExtension interface header and API JSON file",
-        "gdextension",
-        PathVariable.PathIsDir,
+        "Path to a custom directory containing GDExtension interface header and API JSON file",
+        None,
+        validate_gdextension_dir,
     )
 )
 opts.Add(
@@ -90,7 +113,7 @@ opts.Add(
         "custom_api_file",
         "Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)",
         None,
-        PathVariable.PathIsFile,
+        validate_api_file,
     )
 )
 opts.Add(
@@ -186,16 +209,10 @@ if env["float"] == "64":
 
 # Generate bindings
 env.Append(BUILDERS={"GenerateBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
-json_api_file = ""
-
-if "custom_api_file" in env:
-    json_api_file = env["custom_api_file"]
-else:
-    json_api_file = os.path.join(os.getcwd(), env["gdextension_dir"], "extension_api.json")
 
 bindings = env.GenerateBindings(
     env.Dir("."),
-    [json_api_file, os.path.join(env["gdextension_dir"], "gdextension_interface.h"), "binding_generator.py"],
+    [get_api_file(env), os.path.join(get_gdextension_dir(env), "gdextension_interface.h"), "binding_generator.py"],
 )
 
 scons_cache_path = os.environ.get("SCONS_CACHE")
@@ -209,7 +226,7 @@ if env["generate_bindings"]:
     NoCache(bindings)
 
 # Includes
-env.Append(CPPPATH=[[env.Dir(d) for d in [env["gdextension_dir"], "include", os.path.join("gen", "include")]]])
+env.Append(CPPPATH=[[env.Dir(d) for d in [get_gdextension_dir(env), "include", os.path.join("gen", "include")]]])
 
 # Sources to compile
 sources = []
