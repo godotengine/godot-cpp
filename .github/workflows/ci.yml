@@ -105,6 +105,11 @@ jobs:
         if: ${{ matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes' }}
         uses: egor-tensin/setup-mingw@v2
 
+      - name: Generate godot-cpp sources only
+        run: |
+          scons platform=${{ matrix.platform }} build_library=no ${{ matrix.flags }}
+          scons -c
+
       - name: Build godot-cpp (debug)
         run: |
           scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }}
