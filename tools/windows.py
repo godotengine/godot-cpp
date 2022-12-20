@@ -23,7 +23,12 @@ def generate(env):
         elif env["arch"] == "x86_32":
             env["TARGET_ARCH"] = "x86"
         env["is_msvc"] = True
+
+        # MSVC, linker, and archiver.
         msvc.generate(env)
+        env.Tool("mslib")
+        env.Tool("mslink")
+
         env.Append(CPPDEFINES=["TYPED_METHOD_BIND", "NOMINMAX"])
         env.Append(CCFLAGS=["/EHsc"])
         env.Append(LINKFLAGS=["/WX"])
