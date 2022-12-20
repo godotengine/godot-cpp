@@ -104,13 +104,15 @@ private:
 	static void bind_method_godot(const StringName &p_class_name, MethodBind *p_method);
 
 	template <class T, bool is_abstract>
-	static void _register_class(bool p_virtual = false);
+	static void _register_class(bool p_virtual = false, bool p_exposed = true);
 
 public:
 	template <class T>
 	static void register_class(bool p_virtual = false);
 	template <class T>
 	static void register_abstract_class();
+	template <class T>
+	static void register_internal_class();
 	template <class T>
 	static void register_engine_class();
 
@@ -157,7 +159,7 @@ public:
 	}
 
 template <class T, bool is_abstract>
-void ClassDB::_register_class(bool p_virtual) {
+void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
 	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
 
 	// Register this class within our plugin
@@ -177,6 +179,7 @@ void ClassDB::_register_class(bool p_virtual) {
 	GDExtensionClassCreationInfo2 class_info = {
 		p_virtual, // GDExtensionBool is_virtual;
 		is_abstract, // GDExtensionBool is_abstract;
+		p_exposed, // GDExtensionBool is_exposed;
 		T::set_bind, // GDExtensionClassSet set_func;
 		T::get_bind, // GDExtensionClassGet get_func;
 		T::has_get_property_list() ? T::get_property_list_bind : nullptr, // GDExtensionClassGetPropertyList get_property_list_func;
@@ -211,6 +214,11 @@ void ClassDB::register_class(bool p_virtual) {
 template <class T>
 void ClassDB::register_abstract_class() {
 	ClassDB::_register_class<T, true>();
+}
+
+template <class T>
+void ClassDB::register_internal_class() {
+	ClassDB::_register_class<T, false>(false, false);
 }
 
 template <class T>
@@ -276,6 +284,7 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p
 #define GDREGISTER_CLASS(m_class) ClassDB::register_class<m_class>();
 #define GDREGISTER_VIRTUAL_CLASS(m_class) ClassDB::register_class<m_class>(true);
 #define GDREGISTER_ABSTRACT_CLASS(m_class) ClassDB::register_abstract_class<m_class>();
+#define GDREGISTER_INTERNAL_CLASS(m_class) ClassDB::register_internal_class<m_class>();
 
 } // namespace godot
 
