@@ -28,7 +28,9 @@ elif ARGUMENTS.get("platform", ""):
 else:
     raise ValueError("Could not detect platform automatically, please specify with platform=<platform>")
 
-env = Environment(tools=["default"])
+# Default tools with no platform defaults to gnu toolchain.
+# We apply platform specific toolchains via our custom tools.
+env = Environment(tools=["default"], PLATFORM="")
 
 # Default num_jobs to local cpu count if not user specified.
 # SCons has a peculiarity where user-specified options won't be overridden
