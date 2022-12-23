@@ -1,9 +1,5 @@
 # Add warnings based on compiler & version
 # Set some helper variables for readability
-set( compiler_is_clang "$<OR:$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>>" )
-set( compiler_is_gnu "$<CXX_COMPILER_ID:GNU>" )
-set( compiler_is_msvc "$<CXX_COMPILER_ID:MSVC>" )
-
 set( compiler_less_than_v8 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,8>" )
 set( compiler_greater_than_or_equal_v9 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,9>" )
 set( compiler_greater_than_or_equal_v11 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,11>" )
