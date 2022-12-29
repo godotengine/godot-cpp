@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+from binding_generator import scons_generate_bindings, scons_emit_files
 
 if sys.version_info < (3,):
 
@@ -133,15 +134,7 @@ opts.Add(
     )
 )
 opts.Add(PathVariable("custom_api_file", "Path to a custom JSON API file", None, PathVariable.PathIsFile))
-opts.Add(
-    EnumVariable(
-        "generate_bindings",
-        "Generate GDNative API bindings",
-        "auto",
-        allowed_values=["yes", "no", "auto", "true"],
-        ignorecase=2,
-    )
-)
+opts.Add(BoolVariable("generate_bindings", "Force GDNative API bindings generation.", False))
 opts.Add(
     EnumVariable(
         "android_arch",
@@ -472,17 +465,14 @@ elif env["platform"] == "javascript":
     elif env["target"] == "release":
         env.Append(CCFLAGS=["-O3"])
 
-env.Append(
-    CPPPATH=[
-        ".",
-        env["headers_dir"],
-        "include",
-        "include/gen",
-        "include/core",
-    ]
-)
+# Cache
+scons_cache_path = os.environ.get("SCONS_CACHE")
+if scons_cache_path is not None:
+    CacheDir(scons_cache_path)
+    Decider("MD5")
 
-# Generate bindings?
+# Generate bindings
+env.Append(BUILDERS={"GenerateBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
 json_api_file = ""
 
 if "custom_api_file" in env:
@@ -490,22 +480,22 @@ if "custom_api_file" in env:
 else:
     json_api_file = os.path.join(os.getcwd(), env["headers_dir"], "api.json")
 
-if env["generate_bindings"] == "auto":
-    # Check if generated files exist
-    should_generate_bindings = not os.path.isfile(os.path.join(os.getcwd(), "src", "gen", "Object.cpp"))
-else:
-    should_generate_bindings = env["generate_bindings"] in ["yes", "true"]
+bindings = env.GenerateBindings(
+    env.Dir("."), [json_api_file, "binding_generator.py"]
+)
 
-if should_generate_bindings:
-    # Actually create the bindings here
-    import binding_generator
+# Forces bindings regeneration.
+if env["generate_bindings"]:
+    AlwaysBuild(bindings)
+    NoCache(bindings)
 
-    binding_generator.generate_bindings(json_api_file, env["generate_template_get_node"])
+# Includes
+env.Append(CPPPATH=[[env.Dir(d) for d in [".", env["headers_dir"], "include", "include/gen", "include/core"]]])
 
 # Sources to compile
 sources = []
 add_sources(sources, "src/core", "cpp")
-add_sources(sources, "src/gen", "cpp")
+sources.extend(f for f in bindings if str(f).endswith(".cpp"))
 
 arch_suffix = env["bits"]
 if env["platform"] == "android":
@@ -530,7 +520,6 @@ if env["build_library"]:
     library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
     Default(library)
 
-env.Append(CPPPATH=[env.Dir(f) for f in [env["headers_dir"], "include", "include/gen", "include/core"]])
 env.Append(LIBPATH=[env.Dir("bin")])
 env.Append(LIBS=library_name)
 Return("env")

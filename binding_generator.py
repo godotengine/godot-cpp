@@ -15,9 +15,9 @@ def correct_method_name(method_list):
 classes = []
 
 
-def print_file_list(api_filepath, output_dir, headers=False, sources=False):
+def get_file_list(api_filepath, output_dir, headers=False, sources=False):
     global classes
-    end = ";"
+    files = []
     with open(api_filepath) as api_file:
         classes = json.load(api_file)
     include_gen_folder = Path(output_dir) / "include" / "gen"
@@ -26,17 +26,35 @@ def print_file_list(api_filepath, output_dir, headers=False, sources=False):
         header_filename = include_gen_folder / (strip_name(_class["name"]) + ".hpp")
         source_filename = source_gen_folder / (strip_name(_class["name"]) + ".cpp")
         if headers:
-            print(str(header_filename.as_posix()), end=end)
+            files.append(str(header_filename.as_posix()))
         if sources:
-            print(str(source_filename.as_posix()), end=end)
+            files.append(str(source_filename.as_posix()))
     icall_header_filename = include_gen_folder / "__icalls.hpp"
     register_types_filename = source_gen_folder / "__register_types.cpp"
     init_method_bindings_filename = source_gen_folder / "__init_method_bindings.cpp"
     if headers:
-        print(str(icall_header_filename.as_posix()), end=end)
+        files.append(str(icall_header_filename.as_posix()))
     if sources:
-        print(str(register_types_filename.as_posix()), end=end)
-        print(str(init_method_bindings_filename.as_posix()), end=end)
+        files.append(str(register_types_filename.as_posix()))
+        files.append(str(init_method_bindings_filename.as_posix()))
+    return files
+
+
+def print_file_list(api_filepath, output_dir, headers=False, sources=False):
+    for f in get_file_list(api_filepath, output_dir, headers, sources):
+        print(f, end=";")
+
+
+def scons_emit_files(target, source, env):
+    files = [env.File(f) for f in get_file_list(str(source[0]), target[0].abspath, True, True)]
+    env.Clean(target, files)
+    env["godot_cpp_gen_dir"] = target[0].abspath
+    return files, source
+
+
+def scons_generate_bindings(target, source, env):
+    generate_bindings(str(source[0]), env["generate_template_get_node"], env["godot_cpp_gen_dir"])
+    return None
 
 
 def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
@@ -48,25 +66,12 @@ def generate_bindings(api_filepath, use_template_get_node, output_dir="."):
     include_gen_folder = Path(output_dir) / "include" / "gen"
     source_gen_folder = Path(output_dir) / "src" / "gen"
 
-    try:
-        include_gen_folder.mkdir(parents=True)
-    except os.error as e:
-        if e.errno == errno.EEXIST:
-            print(str(source_gen_folder) + ": " + os.strerror(e.errno))
-        else:
-            exit(1)
-
-    try:
-        source_gen_folder.mkdir(parents=True)
-    except os.error as e:
-        if e.errno == errno.EEXIST:
-            print(str(source_gen_folder) + ": " + os.strerror(e.errno))
-        else:
-            exit(1)
+    include_gen_folder.mkdir(parents=True, exist_ok=True)
+    source_gen_folder.mkdir(parents=True, exist_ok=True)
 
     for c in classes:
         # print(c['name'])
-        used_classes = get_used_classes(c)
+        used_classes = sorted(get_used_classes(c))
         if use_template_get_node and c["name"] == "Node":
             correct_method_name(c["methods"])
 
