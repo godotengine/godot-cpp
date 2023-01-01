@@ -42,6 +42,8 @@
 
 namespace godot {
 
+class ObjectID;
+
 class Variant {
 	uint8_t opaque[GODOT_CPP_VARIANT_SIZE]{ 0 };
 
@@ -187,6 +189,7 @@ public:
 	Variant(const StringName &v);
 	Variant(const NodePath &v);
 	Variant(const godot::RID &v);
+	Variant(const ObjectID &v);
 	Variant(const Object *v);
 	Variant(const Callable &v);
 	Variant(const Signal &v);
@@ -230,6 +233,7 @@ public:
 	operator StringName() const;
 	operator NodePath() const;
 	operator godot::RID() const;
+	operator ObjectID() const;
 	operator Object *() const;
 	operator Callable() const;
 	operator Signal() const;
