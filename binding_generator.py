@@ -1363,7 +1363,12 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                 if has_return:
                     return_type = method["return_value"]["type"]
                     meta_type = method["return_value"]["meta"] if "meta" in method["return_value"] else None
-                    if is_pod_type(return_type) or is_variant(return_type) or is_enum(return_type):
+                    if is_enum(return_type):
+                        if method["is_static"]:
+                            method_call += f"return ({get_gdextension_type(correct_type(return_type, meta_type))})internal::_call_native_mb_ret<int64_t>(___method_bind, nullptr"
+                        else:
+                            method_call += f"return ({get_gdextension_type(correct_type(return_type, meta_type))})internal::_call_native_mb_ret<int64_t>(___method_bind, _owner"
+                    elif is_pod_type(return_type) or is_variant(return_type):
                         if method["is_static"]:
                             method_call += f"return internal::_call_native_mb_ret<{get_gdextension_type(correct_type(return_type, meta_type))}>(___method_bind, nullptr"
                         else:
