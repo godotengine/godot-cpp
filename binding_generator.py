@@ -151,13 +151,13 @@ def scons_generate_bindings(target, source, env):
         str(source[0]),
         env["generate_template_get_node"],
         "32" if "32" in env["arch"] else "64",
-        "double" if (env["float"] == "64") else "float",
+        env["precision"],
         env["godot_cpp_gen_dir"],
     )
     return None
 
 
-def generate_bindings(api_filepath, use_template_get_node, bits="64", double="float", output_dir="."):
+def generate_bindings(api_filepath, use_template_get_node, bits="64", precision="single", output_dir="."):
     api = None
 
     target_dir = Path(output_dir) / "gen"
@@ -168,11 +168,12 @@ def generate_bindings(api_filepath, use_template_get_node, bits="64", double="fl
     shutil.rmtree(target_dir, ignore_errors=True)
     target_dir.mkdir(parents=True)
 
-    print("Built-in type config: " + double + "_" + bits)
+    real_t = "double" if precision == "double" else "float"
+    print("Built-in type config: " + real_t + "_" + bits)
 
     generate_global_constants(api, target_dir)
     generate_global_constant_binds(api, target_dir)
-    generate_builtin_bindings(api, target_dir, double + "_" + bits)
+    generate_builtin_bindings(api, target_dir, real_t + "_" + bits)
     generate_engine_classes_bindings(api, target_dir, use_template_get_node)
     generate_utility_functions(api, target_dir)
 

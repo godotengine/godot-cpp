@@ -99,7 +99,7 @@ opts.Add(
 opts.Add(BoolVariable("generate_template_get_node", "Generate a template version of the Node class's get_node.", True))
 
 opts.Add(BoolVariable("build_library", "Build the godot-cpp library.", True))
-opts.Add(EnumVariable("float", "Floating-point precision", "32", ("32", "64")))
+opts.Add(EnumVariable("precision", "Set the floating-point precision level", "single", ("single", "double")))
 
 # Add platform options
 tools = {}
@@ -181,7 +181,7 @@ if env.get("is_msvc", False):
 else:
     env.Append(CXXFLAGS=["-std=c++17"])
 
-if env["float"] == "64":
+if env["precision"] == "double":
     env.Append(CPPDEFINES=["REAL_T_IS_DOUBLE"])
 
 # Generate bindings
@@ -222,7 +222,7 @@ sources.extend([f for f in bindings if str(f).endswith(".cpp")])
 suffix = ".{}.{}".format(env["platform"], env["target"])
 if env.dev_build:
     suffix += ".dev"
-if env["float"] == "64":
+if env["precision"] == "double":
     suffix += ".double"
 suffix += "." + env["arch"]
 if env["ios_simulator"]:
