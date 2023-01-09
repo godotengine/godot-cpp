@@ -3,6 +3,9 @@ gen/*
 logs/*
 *.log
 
+# The default cache directory
+.scons_cache/
+
 # Binaries
 *.o
 *.os
