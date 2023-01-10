@@ -122,6 +122,7 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_tarray_arg", "array"), &Example::test_tarray_arg);
 	ClassDB::bind_method(D_METHOD("test_tarray"), &Example::test_tarray);
 	ClassDB::bind_method(D_METHOD("test_dictionary"), &Example::test_dictionary);
+	ClassDB::bind_method(D_METHOD("test_node_argument"), &Example::test_node_argument);
 
 	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
 
@@ -210,6 +211,11 @@ ExampleRef *Example::return_extended_ref() const {
 	// and it will be destroyed when all references are destroyed. If you store this pointer you run the risk of having a pointer
 	// to a destroyed object.
 	return memnew(ExampleRef());
+}
+
+Example *Example::test_node_argument(Example *p_node) const {
+	UtilityFunctions::print("  Test node argument called with ", p_node ? String::num(p_node->get_instance_id()) : "null");
+	return p_node;
 }
 
 Ref<ExampleRef> Example::extended_ref_checks(Ref<ExampleRef> p_ref) const {

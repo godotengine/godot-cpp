@@ -33,6 +33,7 @@ func _ready():
 	var ret_ref = $Example.return_extended_ref()
 	prints("  returned ref", ret_ref.get_instance_id(), ", id:", ret_ref.get_id())
 	prints("  returned ", $Example.get_v4())
+	prints("  test node argument", $Example.test_node_argument($Example))
 
 	prints("VarArg method calls")
 	var ref = ExampleRef.new()
