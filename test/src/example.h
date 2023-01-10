@@ -100,6 +100,7 @@ public:
 	void test_tarray_arg(const TypedArray<int64_t> &p_array);
 	TypedArray<Vector2> test_tarray() const;
 	Dictionary test_dictionary() const;
+	Example *test_node_argument(Example *p_node) const;
 
 	// Property.
 	void set_custom_position(const Vector2 &pos);

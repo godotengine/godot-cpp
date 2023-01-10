@@ -86,21 +86,36 @@ namespace godot {
 template <class T>
 struct VariantCaster {
 	static _FORCE_INLINE_ T cast(const Variant &p_variant) {
-		return p_variant;
+		using TStripped = std::remove_pointer_t<T>;
+		if constexpr (std::is_base_of<Object, TStripped>::value) {
+			return Object::cast_to<TStripped>(p_variant);
+		} else {
+			return p_variant;
+		}
 	}
 };
 
 template <class T>
 struct VariantCaster<T &> {
 	static _FORCE_INLINE_ T cast(const Variant &p_variant) {
-		return p_variant;
+		using TStripped = std::remove_pointer_t<T>;
+		if constexpr (std::is_base_of<Object, TStripped>::value) {
+			return Object::cast_to<TStripped>(p_variant);
+		} else {
+			return p_variant;
+		}
 	}
 };
 
 template <class T>
 struct VariantCaster<const T &> {
 	static _FORCE_INLINE_ T cast(const Variant &p_variant) {
-		return p_variant;
+		using TStripped = std::remove_pointer_t<T>;
+		if constexpr (std::is_base_of<Object, TStripped>::value) {
+			return Object::cast_to<TStripped>(p_variant);
+		} else {
+			return p_variant;
+		}
 	}
 };
 
