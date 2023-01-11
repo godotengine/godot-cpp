@@ -168,6 +168,9 @@ MAKE_PTRARG_BY_REFERENCE(Variant);
 template <class T>
 struct PtrToArg<T *> {
 	_FORCE_INLINE_ static T *convert(const void *p_ptr) {
+		if (*((T **)p_ptr) == nullptr) {
+			return nullptr;
+		}
 		return reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(
 				reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)),
 				godot::internal::token, &T::___binding_callbacks));
