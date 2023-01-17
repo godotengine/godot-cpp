@@ -31,6 +31,7 @@
 #ifndef GODOT_BASIS_HPP
 #define GODOT_BASIS_HPP
 
+#include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/quaternion.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 
@@ -57,15 +58,6 @@ struct _NO_DISCARD_ Basis {
 	Basis transposed() const;
 
 	_FORCE_INLINE_ real_t determinant() const;
-
-	enum EulerOrder {
-		EULER_ORDER_XYZ,
-		EULER_ORDER_XZY,
-		EULER_ORDER_YXZ,
-		EULER_ORDER_YZX,
-		EULER_ORDER_ZXY,
-		EULER_ORDER_ZYX
-	};
 
 	void from_z(const Vector3 &p_z);
 
