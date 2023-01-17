@@ -59,7 +59,7 @@ func _ready():
 	$Example.group_subgroup_custom_position = Vector2(50, 50)
 	prints("  custom position now is", $Example.group_subgroup_custom_position)
 
-	prints("Constnts")
+	prints("Constants")
 	prints("  FIRST", $Example.FIRST)
 	prints("  ANSWER_TO_EVERYTHING", $Example.ANSWER_TO_EVERYTHING)
 	prints("  CONSTANT_WITHOUT_ENUM", $Example.CONSTANT_WITHOUT_ENUM)
