@@ -332,20 +332,49 @@ bool String::operator!=(const char32_t *p_str) const {
 	return *this != String(p_str);
 }
 
-String String::operator+(const char *p_chr) {
-	return *this + String(p_chr);
+String String::operator+(const char *p_str) {
+	return *this + String(p_str);
 }
 
-String String::operator+(const wchar_t *p_chr) {
-	return *this + String(p_chr);
+String String::operator+(const wchar_t *p_str) {
+	return *this + String(p_str);
 }
 
-String String::operator+(const char16_t *p_chr) {
-	return *this + String(p_chr);
+String String::operator+(const char16_t *p_str) {
+	return *this + String(p_str);
 }
 
-String String::operator+(const char32_t *p_chr) {
-	return *this + String(p_chr);
+String String::operator+(const char32_t *p_str) {
+	return *this + String(p_str);
+}
+
+String String::operator+(const char32_t p_char) {
+	return *this + String::chr(p_char);
+}
+
+String &String::operator+=(const String &p_str) {
+	internal::gde_interface->string_operator_plus_eq_string((GDExtensionStringPtr)this, (const GDExtensionStringPtr)&p_str);
+	return *this;
+}
+
+String &String::operator+=(char32_t p_char) {
+	internal::gde_interface->string_operator_plus_eq_char((GDExtensionStringPtr)this, p_char);
+	return *this;
+}
+
+String &String::operator+=(const char *p_str) {
+	internal::gde_interface->string_operator_plus_eq_cstr((GDExtensionStringPtr)this, p_str);
+	return *this;
+}
+
+String &String::operator+=(const wchar_t *p_str) {
+	internal::gde_interface->string_operator_plus_eq_wcstr((GDExtensionStringPtr)this, p_str);
+	return *this;
+}
+
+String &String::operator+=(const char32_t *p_str) {
+	internal::gde_interface->string_operator_plus_eq_c32str((GDExtensionStringPtr)this, p_str);
+	return *this;
 }
 
 const char32_t &String::operator[](int p_index) const {
@@ -410,6 +439,10 @@ String operator+(const char16_t *p_chr, const String &p_str) {
 
 String operator+(const char32_t *p_chr, const String &p_str) {
 	return String(p_chr) + p_str;
+}
+
+String operator+(char32_t p_char, const String &p_str) {
+	return String::chr(p_char) + p_str;
 }
 
 StringName::StringName(const char *from) :

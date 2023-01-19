@@ -91,7 +91,7 @@ private:
 	}
 
 	_FORCE_INLINE_ size_t _get_alloc_size(size_t p_elements) const {
-		return Math::next_power_of_2(p_elements * sizeof(T));
+		return next_power_of_2(p_elements * sizeof(T));
 	}
 
 	_FORCE_INLINE_ bool _get_alloc_size_checked(size_t p_elements, size_t *out) const {
@@ -102,7 +102,7 @@ private:
 			*out = 0;
 			return false;
 		}
-		*out = Math::next_power_of_2(o);
+		*out = next_power_of_2(o);
 		if (__builtin_add_overflow(o, static_cast<size_t>(32), &p)) {
 			return false; // No longer allocated here.
 		}

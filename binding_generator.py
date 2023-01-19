@@ -367,6 +367,15 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("#include <godot_cpp/variant/char_utils.hpp>")
         result.append("#include <godot_cpp/variant/ucaps.hpp>")
 
+    if class_name == "PackedStringArray":
+        result.append("#include <godot_cpp/variant/string.hpp>")
+    if class_name == "PackedColorArray":
+        result.append("#include <godot_cpp/variant/color.hpp>")
+    if class_name == "PackedVector2Array":
+        result.append("#include <godot_cpp/variant/vector2.hpp>")
+    if class_name == "PackedVector3Array":
+        result.append("#include <godot_cpp/variant/vector3.hpp>")
+
     if class_name == "Array":
         result.append("#include <godot_cpp/variant/array_helpers.hpp>")
 
@@ -584,10 +593,17 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("\tbool operator!=(const wchar_t *p_str) const;")
         result.append("\tbool operator!=(const char16_t *p_str) const;")
         result.append("\tbool operator!=(const char32_t *p_str) const;")
-        result.append("\tString operator+(const char *p_chr);")
-        result.append("\tString operator+(const wchar_t *p_chr);")
-        result.append("\tString operator+(const char16_t *p_chr);")
-        result.append("\tString operator+(const char32_t *p_chr);")
+        result.append("\tString operator+(const char *p_str);")
+        result.append("\tString operator+(const wchar_t *p_str);")
+        result.append("\tString operator+(const char16_t *p_str);")
+        result.append("\tString operator+(const char32_t *p_str);")
+        result.append("\tString operator+(char32_t p_char);")
+        result.append("\tString &operator+=(const String &p_str);")
+        result.append("\tString &operator+=(char32_t p_char);")
+        result.append("\tString &operator+=(const char *p_str);")
+        result.append("\tString &operator+=(const wchar_t *p_str);")
+        result.append("\tString &operator+=(const char32_t *p_str);")
+
         result.append("\tconst char32_t &operator[](int p_index) const;")
         result.append("\tchar32_t &operator[](int p_index);")
         result.append("\tconst char32_t *ptr() const;")
@@ -611,6 +627,72 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append(f"\t" + return_type + f" &operator[](int p_index);")
         result.append(f"\tconst " + return_type + f" *ptr() const;")
         result.append(f"\t" + return_type + f" *ptrw();")
+        iterators = """
+    struct Iterator {
+		_FORCE_INLINE_ $TYPE &operator*() const {
+			return *elem_ptr;
+		}
+		_FORCE_INLINE_ $TYPE *operator->() const { return elem_ptr; }
+		_FORCE_INLINE_ Iterator &operator++() {
+			elem_ptr++;
+			return *this;
+		}
+		_FORCE_INLINE_ Iterator &operator--() {
+			elem_ptr--;
+			return *this;
+		}
+
+		_FORCE_INLINE_ bool operator==(const Iterator &b) const { return elem_ptr == b.elem_ptr; }
+		_FORCE_INLINE_ bool operator!=(const Iterator &b) const { return elem_ptr != b.elem_ptr; }
+
+		Iterator($TYPE *p_ptr) { elem_ptr = p_ptr; }
+		Iterator() {}
+		Iterator(const Iterator &p_it) { elem_ptr = p_it.elem_ptr; }
+
+	private:
+		$TYPE *elem_ptr = nullptr;
+	};
+
+	struct ConstIterator {
+		_FORCE_INLINE_ const $TYPE &operator*() const {
+			return *elem_ptr;
+		}
+		_FORCE_INLINE_ const $TYPE *operator->() const { return elem_ptr; }
+		_FORCE_INLINE_ ConstIterator &operator++() {
+			elem_ptr++;
+			return *this;
+		}
+		_FORCE_INLINE_ ConstIterator &operator--() {
+			elem_ptr--;
+			return *this;
+		}
+
+		_FORCE_INLINE_ bool operator==(const ConstIterator &b) const { return elem_ptr == b.elem_ptr; }
+		_FORCE_INLINE_ bool operator!=(const ConstIterator &b) const { return elem_ptr != b.elem_ptr; }
+
+		ConstIterator(const $TYPE *p_ptr) { elem_ptr = p_ptr; }
+		ConstIterator() {}
+		ConstIterator(const ConstIterator &p_it) { elem_ptr = p_it.elem_ptr; }
+
+	private:
+		const $TYPE *elem_ptr = nullptr;
+	};
+
+	_FORCE_INLINE_ Iterator begin() {
+		return Iterator(ptrw());
+	}
+	_FORCE_INLINE_ Iterator end() {
+		return Iterator(ptrw() + size());
+	}
+
+	_FORCE_INLINE_ ConstIterator begin() const {
+		return ConstIterator(ptr());
+	}
+	_FORCE_INLINE_ ConstIterator end() const {
+		return ConstIterator(ptr() + size());
+	}
+"""
+        result.append(iterators.replace("$TYPE", return_type))
 
     if class_name == "Array":
         result.append(f"\tconst Variant &operator[](int p_index) const;")
@@ -636,6 +718,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("String operator+(const wchar_t *p_chr, const String &p_str);")
         result.append("String operator+(const char16_t *p_chr, const String &p_str);")
         result.append("String operator+(const char32_t *p_chr, const String &p_str);")
+        result.append("String operator+(char32_t p_char, const String &p_str);")
 
         result.append("String itos(int64_t p_val);")
         result.append("String uitos(uint64_t p_val);")
@@ -1252,6 +1335,26 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("public:")
 
     # Special cases.
+    if class_name == "XMLParser":
+        result.append("\tError _open_buffer(const uint8_t *p_buffer, size_t p_size);")
+
+    if class_name == "FileAccess":
+        result.append("\tuint64_t get_buffer(uint8_t *p_dst, uint64_t p_length) const;")
+        result.append("\tvoid store_buffer(const uint8_t *p_src, uint64_t p_length);")
+
+    if class_name == "WorkerThreadPool":
+        result.append("\tenum {")
+        result.append("\tINVALID_TASK_ID = -1")
+        result.append("\t};")
+        result.append("\ttypedef int64_t TaskID;")
+        result.append("\ttypedef int64_t GroupID;")
+        result.append(
+            "\tTaskID add_native_task(void (*p_func)(void *), void *p_userdata, bool p_high_priority = false, const String &p_description = String());"
+        )
+        result.append(
+            "\tGroupID add_native_group_task(void (*p_func)(void *, uint32_t), void *p_userdata, int p_elements, int p_tasks = -1, bool p_high_priority = false, const String &p_description = String());"
+        )
+
     if class_name == "Object":
         result.append("")
 
