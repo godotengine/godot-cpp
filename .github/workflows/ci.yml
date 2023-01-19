@@ -90,6 +90,7 @@ jobs:
       SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
       EM_VERSION: 3.1.39
       EM_CACHE_FOLDER: "emsdk-cache"
+      SCONSFLAGS: warnings=extra werror=yes
 
     steps:
       - name: Checkout

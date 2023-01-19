@@ -229,6 +229,13 @@ void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...) const, const GDExt
 	call_with_ptr_args_retc_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
 }
 
+// GCC raises "parameter 'p_args' set but not used" when P = {},
+// it's not clever enough to treat other P values as making this branch valid.
+#if defined(DEBUG_METHODS_ENABLED) && defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
+#endif
+
 template <class T, class... P, size_t... Is>
 void call_with_variant_args_helper(T *p_instance, void (T::*p_method)(P...), const Variant **p_args, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
@@ -469,13 +476,6 @@ void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const,
 
 	call_with_variant_args_retc_helper(p_instance, p_method, argsp.data(), r_ret, r_error, BuildIndexSequence<sizeof...(P)>{});
 }
-
-// GCC raises "parameter 'p_args' set but not used" when P = {},
-// it's not clever enough to treat other P values as making this branch valid.
-#if defined(DEBUG_METHODS_ENABLED) && defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
-#endif
 
 template <class Q>
 void call_get_argument_type_helper(int p_arg, int &index, GDExtensionVariantType &type) {
