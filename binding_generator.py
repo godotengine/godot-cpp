@@ -365,7 +365,6 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if class_name == "String":
         result.append("#include <godot_cpp/variant/char_string.hpp>")
         result.append("#include <godot_cpp/variant/char_utils.hpp>")
-        result.append("#include <godot_cpp/variant/ucaps.hpp>")
 
     if class_name == "Array":
         result.append("#include <godot_cpp/variant/array_helpers.hpp>")
