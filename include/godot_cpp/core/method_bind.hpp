@@ -78,18 +78,20 @@ public:
 	_FORCE_INLINE_ int get_default_argument_count() const { return (int)default_arguments.size(); }
 	_FORCE_INLINE_ const std::vector<Variant> &get_default_arguments() const { return default_arguments; }
 	_FORCE_INLINE_ Variant has_default_argument(int p_arg) const {
-		int idx = p_arg - (argument_count - (int)default_arguments.size());
+		const int num_default_args = (int)(default_arguments.size());
+		const int idx = p_arg - (argument_count - num_default_args);
 
-		if (idx < 0 || idx >= default_arguments.size()) {
+		if (idx < 0 || idx >= num_default_args) {
 			return false;
 		} else {
 			return true;
 		}
 	}
 	_FORCE_INLINE_ Variant get_default_argument(int p_arg) const {
-		int idx = p_arg - (argument_count - (int)default_arguments.size());
+		const int num_default_args = (int)(default_arguments.size());
+		const int idx = p_arg - (argument_count - num_default_args);
 
-		if (idx < 0 || idx >= default_arguments.size()) {
+		if (idx < 0 || idx >= num_default_args) {
 			return Variant();
 		} else {
 			return default_arguments[idx];
@@ -156,7 +158,7 @@ public:
 	virtual PropertyInfo gen_argument_type_info(int p_arg) const {
 		if (p_arg < 0) {
 			return _gen_return_type_info();
-		} else if (p_arg < arguments.size()) {
+		} else if ((size_t)(p_arg) < arguments.size()) {
 			return arguments[p_arg];
 		} else {
 			return make_property_info(Variant::Type::NIL, "vararg", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
@@ -188,7 +190,7 @@ public:
 
 			std::vector<StringName> names;
 			names.reserve(p_method_info.arguments.size());
-			for (int i = 0; i < p_method_info.arguments.size(); i++) {
+			for (size_t i = 0; i < p_method_info.arguments.size(); i++) {
 				names.push_back(p_method_info.arguments[i].name);
 			}
 			set_argument_names(names);
