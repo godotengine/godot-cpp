@@ -78,7 +78,7 @@ void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinf
 		ERR_FAIL_COND_MSG(!setter, String("Setter method '{0}::{1}()' not found for property '{2}::{3}'.").format(Array::make(p_class, p_setter, p_class, p_pinfo.name)));
 
 		size_t exp_args = 1 + (p_index >= 0 ? 1 : 0);
-		ERR_FAIL_COND_MSG(exp_args != setter->get_argument_count(), String("Setter method '{0}::{1}()' must take a single argument.").format(Array::make(p_class, p_setter)));
+		ERR_FAIL_COND_MSG((int)exp_args != setter->get_argument_count(), String("Setter method '{0}::{1}()' must take a single argument.").format(Array::make(p_class, p_setter)));
 	}
 
 	ERR_FAIL_COND_MSG(p_getter == String(""), String("Getter method must be specified for '{0}::{1}'.").format(Array::make(p_class, p_pinfo.name)));
@@ -87,7 +87,7 @@ void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinf
 	ERR_FAIL_COND_MSG(!getter, String("Getter method '{0}::{1}()' not found for property '{2}::{3}'.").format(Array::make(p_class, p_getter, p_class, p_pinfo.name)));
 	{
 		size_t exp_args = 0 + (p_index >= 0 ? 1 : 0);
-		ERR_FAIL_COND_MSG(exp_args != getter->get_argument_count(), String("Getter method '{0}::{1}()' must not take any argument.").format(Array::make(p_class, p_getter)));
+		ERR_FAIL_COND_MSG((int)exp_args != getter->get_argument_count(), String("Getter method '{0}::{1}()' must not take any argument.").format(Array::make(p_class, p_getter)));
 	}
 
 	// register property with plugin
@@ -153,7 +153,7 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 
 	p_bind->set_name(method_name.name);
 
-	if (method_name.args.size() > p_bind->get_argument_count()) {
+	if ((int)method_name.args.size() > p_bind->get_argument_count()) {
 		memdelete(p_bind);
 		ERR_FAIL_V_MSG(nullptr, String("Method '{0}::{1}()' definition has more arguments than the actual method.").format(Array::make(instance_type, method_name.name)));
 	}
@@ -192,7 +192,7 @@ void ClassDB::bind_method_godot(const StringName &p_class_name, MethodBind *p_me
 	std::vector<GDExtensionVariantPtr> def_args;
 	const std::vector<Variant> &def_args_val = p_method->get_default_arguments();
 	def_args.resize(def_args_val.size());
-	for (int i = 0; i < def_args_val.size(); i++) {
+	for (size_t i = 0; i < def_args_val.size(); i++) {
 		def_args[i] = (GDExtensionVariantPtr)&def_args_val[i];
 	}
 
