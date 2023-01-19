@@ -77,6 +77,7 @@ protected:
 
 	Wrapped(const StringName p_godot_class);
 	Wrapped(GodotObject *p_godot_object);
+	virtual ~Wrapped() {}
 
 public:
 	static StringName &get_class_static() {
