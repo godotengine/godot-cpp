@@ -719,14 +719,12 @@ String Variant::get_type_name(Variant::Type type) {
 }
 
 bool Variant::can_convert(Variant::Type from, Variant::Type to) {
-	GDExtensionBool can;
-	internal::gde_interface->variant_can_convert(static_cast<GDExtensionVariantType>(from), static_cast<GDExtensionVariantType>(to));
+	GDExtensionBool can = internal::gde_interface->variant_can_convert(static_cast<GDExtensionVariantType>(from), static_cast<GDExtensionVariantType>(to));
 	return PtrToArg<bool>::convert(&can);
 }
 
 bool Variant::can_convert_strict(Variant::Type from, Variant::Type to) {
-	GDExtensionBool can;
-	internal::gde_interface->variant_can_convert_strict(static_cast<GDExtensionVariantType>(from), static_cast<GDExtensionVariantType>(to));
+	GDExtensionBool can = internal::gde_interface->variant_can_convert_strict(static_cast<GDExtensionVariantType>(from), static_cast<GDExtensionVariantType>(to));
 	return PtrToArg<bool>::convert(&can);
 }
 
