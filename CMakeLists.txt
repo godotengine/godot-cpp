@@ -3,6 +3,7 @@
 #
 # godot-cpp cmake arguments
 # GODOT_GDEXTENSION_DIR:	Path to the directory containing GDExtension interface header and API JSON file
+# GODOT_CPP_SYSTEM_HEADERS	Mark the header files as SYSTEM. This may be useful to supress warnings in projects including this one.
 # GODOT_CUSTOM_API_FILE:	Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
 # FLOAT_PRECISION:			Floating-point precision level ("single", "double")
 #
@@ -39,6 +40,7 @@ project(godot-cpp LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.12)
 
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
+option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." OFF)
 
 # Default build type is Debug in the SConstruct
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -169,10 +171,18 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	target_compile_definitions(${PROJECT_NAME} PUBLIC TYPED_METHOD_BIND)
 endif()
 
-target_include_directories(${PROJECT_NAME} PUBLIC
+# Optionally mark headers as SYSTEM
+set(GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE "")
+if (GODOT_CPP_SYSTEM_HEADERS)
+	set(GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE SYSTEM)
+endif ()
+
+target_include_directories(${PROJECT_NAME} ${GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE} PUBLIC
 	include
 	${CMAKE_CURRENT_BINARY_DIR}/gen/include
 )
+
+unset( GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE )
 
 # Put godot headers as SYSTEM PUBLIC to exclude warnings from irrelevant headers
 target_include_directories(${PROJECT_NAME}
