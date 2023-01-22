@@ -30,6 +30,8 @@
 
 #include <godot_cpp/variant/transform2d.hpp>
 
+#include <godot_cpp/variant/string.hpp>
+
 namespace godot {
 
 void Transform2D::invert() {
