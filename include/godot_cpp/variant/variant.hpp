@@ -262,7 +262,7 @@ public:
 		Variant result;
 		GDExtensionCallError error;
 		std::array<GDExtensionConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
-		call(method, call_args.data(), call_args.size(), result, error);
+		call(method, call_args.data(), static_cast<int<(call_args.size()), result, error);
 		return result;
 	}
 
@@ -273,7 +273,7 @@ public:
 		Variant result;
 		GDExtensionCallError error;
 		std::array<GDExtensionConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
-		call_static(type, method, call_args.data(), call_args.size(), result, error);
+		call_static(type, method, call_args.data(), static_cast<int>(call_args.size()), result, error);
 		return result;
 	}
 
