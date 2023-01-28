@@ -2,6 +2,9 @@ extends "res://test_base.gd"
 
 var custom_signal_emitted = null
 
+class TestClass:
+	func test(p_msg: String) -> String:
+		return p_msg + " world"
 
 func _ready():
 	var example: Example = $Example
@@ -139,6 +142,10 @@ func _ready():
 	example.test_set_tileset(new_tilemap, new_tileset)
 	assert_equal(new_tilemap.tile_set, new_tileset)
 	new_tilemap.queue_free()
+
+	# Test variant call.
+	var test_obj = TestClass.new()
+	assert_equal(example.test_variant_call(test_obj), "hello world")
 
 	# Constants.
 	assert_equal(Example.FIRST, 0)

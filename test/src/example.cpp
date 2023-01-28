@@ -153,6 +153,8 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_add_child", "node"), &Example::test_add_child);
 	ClassDB::bind_method(D_METHOD("test_set_tileset", "tilemap", "tileset"), &Example::test_set_tileset);
 
+	ClassDB::bind_method(D_METHOD("test_variant_call", "variant"), &Example::test_variant_call);
+
 	ClassDB::bind_method(D_METHOD("test_bitfield", "flags"), &Example::test_bitfield);
 
 	ClassDB::bind_method(D_METHOD("test_rpc", "value"), &Example::test_rpc);
@@ -400,6 +402,10 @@ void Example::test_add_child(Node *p_node) {
 
 void Example::test_set_tileset(TileMap *p_tilemap, const Ref<TileSet> &p_tileset) const {
 	p_tilemap->set_tileset(p_tileset);
+}
+
+Variant Example::test_variant_call(Variant p_variant) {
+	return p_variant.call("test", "hello");
 }
 
 BitField<Example::Flags> Example::test_bitfield(BitField<Flags> flags) {

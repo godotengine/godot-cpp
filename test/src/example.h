@@ -21,6 +21,7 @@
 #include <godot_cpp/classes/tile_map.hpp>
 #include <godot_cpp/classes/tile_set.hpp>
 #include <godot_cpp/classes/viewport.hpp>
+#include <godot_cpp/variant/variant.hpp>
 
 #include <godot_cpp/core/binder_common.hpp>
 
@@ -133,6 +134,8 @@ public:
 
 	void test_add_child(Node *p_node);
 	void test_set_tileset(TileMap *p_tilemap, const Ref<TileSet> &p_tileset) const;
+
+	Variant test_variant_call(Variant p_variant);
 
 	BitField<Flags> test_bitfield(BitField<Flags> flags);
 
