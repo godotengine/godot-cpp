@@ -548,11 +548,11 @@ bool Variant::operator<(const Variant &other) const {
 	return result.operator bool();
 }
 
-void Variant::call(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error) {
+void Variant::callp(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error) {
 	internal::gde_interface->variant_call(_native_ptr(), method._native_ptr(), reinterpret_cast<GDExtensionConstVariantPtr *>(args), argcount, r_ret._native_ptr(), &r_error);
 }
 
-void Variant::call_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error) {
+void Variant::callp_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error) {
 	internal::gde_interface->variant_call_static(static_cast<GDExtensionVariantType>(type), method._native_ptr(), reinterpret_cast<GDExtensionConstVariantPtr *>(args), argcount, r_ret._native_ptr(), &r_error);
 }
 
