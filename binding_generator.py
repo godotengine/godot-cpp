@@ -2129,6 +2129,8 @@ def correct_default_value(value, type_name):
         return value_map[value]
     if value == "":
         return f"{type_name}()"
+    if value.startswith("Array["):
+        return f"{{}}"
     return value
 
 
