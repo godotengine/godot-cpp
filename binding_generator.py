@@ -336,7 +336,7 @@ def generate_builtin_bindings(api, output_dir, build_config):
             if is_included_type(builtin_api["name"]):
                 if "enums" in builtin_api:
                     for enum_api in builtin_api["enums"]:
-                        builtin_binds.append(f"VARIANT_ENUM_CAST({builtin_api['name']}, {enum_api['name']});")
+                        builtin_binds.append(f"VARIANT_ENUM_CAST({builtin_api['name']}::{enum_api['name']});")
 
         builtin_binds.append("")
         builtin_binds.append("#endif // ! GODOT_CPP_BUILTIN_BINDS_HPP")
@@ -1381,9 +1381,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     if "enums" in class_api and class_name != "Object":
         for enum_api in class_api["enums"]:
             if enum_api["is_bitfield"]:
-                result.append(f'VARIANT_BITFIELD_CAST({class_name}, {class_name}::{enum_api["name"]});')
+                result.append(f'VARIANT_BITFIELD_CAST({class_name}::{enum_api["name"]});')
             else:
-                result.append(f'VARIANT_ENUM_CAST({class_name}, {class_name}::{enum_api["name"]});')
+                result.append(f'VARIANT_ENUM_CAST({class_name}::{enum_api["name"]});')
         result.append("")
 
     result.append(f"#endif // ! {header_guard}")
@@ -1621,7 +1621,7 @@ def generate_global_constant_binds(api, output_dir):
         if enum_def["name"].startswith("Variant."):
             continue
 
-        header.append(f'VARIANT_ENUM_CAST(, godot::{enum_def["name"]});')
+        header.append(f'VARIANT_ENUM_CAST(godot::{enum_def["name"]});')
 
     header.append("")
 

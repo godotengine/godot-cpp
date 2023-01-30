@@ -214,21 +214,31 @@ struct GetTypeInfo<const T *, typename EnableIf<TypeInherits<Object, T>::value>:
 	}
 };
 
-#define TEMPL_MAKE_ENUM_TYPE_INFO(m_class, m_enum, m_impl)                                                                                                          \
-	template <>                                                                                                                                                     \
-	struct GetTypeInfo<m_impl> {                                                                                                                                    \
-		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                                     \
-		static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                                   \
-		static inline PropertyInfo get_class_info() {                                                                                                               \
-			return make_property_info(Variant::Type::INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_ENUM, #m_class "." #m_enum); \
-		}                                                                                                                                                           \
+inline String enum_qualified_name_to_class_info_name(const String &p_qualified_name) {
+	PackedStringArray parts = p_qualified_name.split("::", false);
+	if (parts.size() <= 2) {
+		return String(".").join(parts);
+	}
+	// Contains namespace. We only want the class and enum names.
+	return parts[parts.size() - 2] + "." + parts[parts.size() - 1];
+}
+
+#define TEMPL_MAKE_ENUM_TYPE_INFO(m_enum, m_impl)                                                                                            \
+	template <>                                                                                                                              \
+	struct GetTypeInfo<m_impl> {                                                                                                             \
+		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                              \
+		static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;                            \
+		static inline PropertyInfo get_class_info() {                                                                                        \
+			return make_property_info(Variant::Type::INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_ENUM, \
+					enum_qualified_name_to_class_info_name(#m_enum));                                                                        \
+		}                                                                                                                                    \
 	};
 
-#define MAKE_ENUM_TYPE_INFO(m_class, m_enum)                          \
-	TEMPL_MAKE_ENUM_TYPE_INFO(m_class, m_enum, m_class::m_enum)       \
-	TEMPL_MAKE_ENUM_TYPE_INFO(m_class, m_enum, m_class::m_enum const) \
-	TEMPL_MAKE_ENUM_TYPE_INFO(m_class, m_enum, m_class::m_enum &)     \
-	TEMPL_MAKE_ENUM_TYPE_INFO(m_class, m_enum, const m_class::m_enum &)
+#define MAKE_ENUM_TYPE_INFO(m_enum)                 \
+	TEMPL_MAKE_ENUM_TYPE_INFO(m_enum, m_enum)       \
+	TEMPL_MAKE_ENUM_TYPE_INFO(m_enum, m_enum const) \
+	TEMPL_MAKE_ENUM_TYPE_INFO(m_enum, m_enum &)     \
+	TEMPL_MAKE_ENUM_TYPE_INFO(m_enum, const m_enum &)
 
 template <typename T>
 inline StringName __constant_get_enum_name(T param, StringName p_constant) {
@@ -251,14 +261,14 @@ public:
 	_FORCE_INLINE_ operator Variant() const { return value; }
 };
 
-#define TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, m_impl)                                                                                   \
+#define TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, m_impl)                                                                                            \
 	template <>                                                                                                                                  \
 	struct GetTypeInfo<m_impl> {                                                                                                                 \
 		static const Variant::Type VARIANT_TYPE = Variant::INT;                                                                                  \
 		static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                \
 		static inline PropertyInfo get_class_info() {                                                                                            \
 			return make_property_info(Variant::Type::INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_BITFIELD, \
-					#m_class "." #m_enum);                                                                                                       \
+					enum_qualified_name_to_class_info_name(#m_enum));                                                                            \
 		}                                                                                                                                        \
 	};                                                                                                                                           \
 	template <>                                                                                                                                  \
@@ -267,15 +277,15 @@ public:
 		static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;                                \
 		static inline PropertyInfo get_class_info() {                                                                                            \
 			return make_property_info(Variant::Type::INT, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_BITFIELD, \
-					#m_class "." #m_enum);                                                                                                       \
+					enum_qualified_name_to_class_info_name(#m_enum));                                                                            \
 		}                                                                                                                                        \
 	};
 
-#define MAKE_BITFIELD_TYPE_INFO(m_class, m_enum)                 \
-	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, m_enum)       \
-	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, m_enum const) \
-	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, m_enum &)     \
-	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_class, m_enum, const m_enum &)
+#define MAKE_BITFIELD_TYPE_INFO(m_enum)                 \
+	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, m_enum)       \
+	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, m_enum const) \
+	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, m_enum &)     \
+	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, const m_enum &)
 
 template <typename T>
 inline StringName __constant_get_bitfield_name(T param, StringName p_constant) {
