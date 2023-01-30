@@ -92,20 +92,6 @@ struct Comparator {
 	_ALWAYS_INLINE_ bool operator()(const T &p_a, const T &p_b) const { return (p_a < p_b); }
 };
 
-class DefaultAllocator {
-public:
-	_ALWAYS_INLINE_ static void *alloc(size_t p_memory) { return Memory::alloc_static(p_memory); }
-	_ALWAYS_INLINE_ static void free(void *p_ptr) { Memory::free_static(p_ptr); }
-};
-
-template <class T>
-class DefaultTypedAllocator {
-public:
-	template <class... Args>
-	_ALWAYS_INLINE_ T *new_allocation(const Args &&...p_args) { return memnew(T(p_args...)); }
-	_ALWAYS_INLINE_ void delete_allocation(T *p_allocation) { memdelete(p_allocation); }
-};
-
 template <class T>
 void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wrapped, T>>::type * = nullptr) {
 	if (!std::is_trivially_destructible<T>::value) {
@@ -128,6 +114,20 @@ void memdelete_allocator(T *p_class) {
 
 	A::free(p_class);
 }
+
+class DefaultAllocator {
+public:
+	_ALWAYS_INLINE_ static void *alloc(size_t p_memory) { return Memory::alloc_static(p_memory); }
+	_ALWAYS_INLINE_ static void free(void *p_ptr) { Memory::free_static(p_ptr); }
+};
+
+template <class T>
+class DefaultTypedAllocator {
+public:
+	template <class... Args>
+	_ALWAYS_INLINE_ T *new_allocation(const Args &&...p_args) { return memnew(T(p_args...)); }
+	_ALWAYS_INLINE_ void delete_allocation(T *p_allocation) { memdelete(p_allocation); }
+};
 
 #define memnew_arr(m_class, m_count) memnew_arr_template<m_class>(m_count)
 
