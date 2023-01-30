@@ -57,9 +57,6 @@ func _ready():
 	prints("String += operator")
 	prints("  test string +=", $Example.test_string_ops())
 
-	prints("WorkerThreadPool")
-	prints("  test worker_thread_pool", $Example.test_workpool_ops())
-
 	prints("PackedArray iterators")
 	prints("  test packed array iterators", $Example.test_vector_ops())
 

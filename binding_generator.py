@@ -696,6 +696,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if class_name == "Array":
         result.append(f"\tconst Variant &operator[](int p_index) const;")
         result.append(f"\tVariant &operator[](int p_index);")
+        result.append(f"\tvoid set_typed(uint32_t p_type, const StringName &p_class_name, const Variant &p_script);")
 
     if class_name == "Dictionary":
         result.append(f"\tconst Variant &operator[](const Variant &p_key) const;")
