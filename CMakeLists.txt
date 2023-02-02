@@ -40,7 +40,7 @@ project(godot-cpp LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.12)
 
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
-option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." OFF)
+option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." ON)
 
 # Default build type is Debug in the SConstruct
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -180,13 +180,6 @@ endif ()
 target_include_directories(${PROJECT_NAME} ${GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE} PUBLIC
 	include
 	${CMAKE_CURRENT_BINARY_DIR}/gen/include
-)
-
-unset( GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE )
-
-# Put godot headers as SYSTEM PUBLIC to exclude warnings from irrelevant headers
-target_include_directories(${PROJECT_NAME}
-	SYSTEM PUBLIC
 	${GODOT_GDEXTENSION_DIR}
 )
 
