@@ -16,7 +16,7 @@ using namespace godot;
 int ExampleRef::instance_count = 0;
 int ExampleRef::last_id = 0;
 
-int ExampleRef::get_id() {
+int ExampleRef::get_id() const {
 	return id;
 }
 
