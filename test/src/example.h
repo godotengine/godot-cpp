@@ -38,7 +38,7 @@ public:
 	ExampleRef();
 	~ExampleRef();
 
-	int get_id();
+	int get_id() const;
 };
 
 class ExampleMin : public Control {
