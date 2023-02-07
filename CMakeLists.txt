@@ -2,10 +2,11 @@
 # CMAKE_BUILD_TYPE:			Compilation target (Debug or Release defaults to Debug)
 #
 # godot-cpp cmake arguments
-# GODOT_GDEXTENSION_DIR:	Path to the directory containing GDExtension interface header and API JSON file
-# GODOT_CPP_SYSTEM_HEADERS	Mark the header files as SYSTEM. This may be useful to supress warnings in projects including this one.
-# GODOT_CUSTOM_API_FILE:	Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
-# FLOAT_PRECISION:			Floating-point precision level ("single", "double")
+# GODOT_GDEXTENSION_DIR:		Path to the directory containing GDExtension interface header and API JSON file
+# GODOT_CPP_SYSTEM_HEADERS		Mark the header files as SYSTEM. This may be useful to supress warnings in projects including this one.
+# GODOT_CPP_WARNING_AS_ERROR	Treat any warnings as errors
+# GODOT_CUSTOM_API_FILE:		Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
+# FLOAT_PRECISION:				Floating-point precision level ("single", "double")
 #
 # Android cmake arguments
 # CMAKE_TOOLCHAIN_FILE:		The path to the android cmake toolchain ($ANDROID_NDK/build/cmake/android.toolchain.cmake)
@@ -41,6 +42,15 @@ cmake_minimum_required(VERSION 3.12)
 
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
 option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." ON)
+option(GODOT_CPP_WARNING_AS_ERROR "Treat warnings as errors" OFF)
+
+# Add path to modules
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
+
+# Check if we are building ourself or being included
+if(${PROJECT_NAME} STREQUAL ${CMAKE_PROJECT_NAME})
+    set(GODOT_CPP_BUILDING_SELF ON)
+endif()
 
 # Default build type is Debug in the SConstruct
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -72,7 +82,7 @@ set(GODOT_LINKER_FLAGS )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	# using Visual Studio C++
-	set(GODOT_COMPILE_FLAGS "/EHsc /WX") # /GF /MP
+	set(GODOT_COMPILE_FLAGS "/EHsc") # /GF /MP
 
 	if(CMAKE_BUILD_TYPE MATCHES Debug)
 		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MDd") # /Od /RTC1 /Zi
@@ -82,39 +92,14 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
 	endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
-	# Disable conversion warning, truncation, unreferenced var, signed mismatch, different type
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /wd4244 /wd4305 /wd4101 /wd4018 /wd4267 /wd4099")
-
 	add_definitions(-DNOMINMAX)
-
-	# Unkomment for warning level 4
-	#if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-	#	string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	#endif()
-
 else()  # GCC/Clang
 	set(GODOT_LINKER_FLAGS "-static-libgcc -static-libstdc++ -Wl,-R,'$$ORIGIN'")
 
 	if(NOT CMAKE_SYSTEM_NAME MATCHES "Windows")
 		set(GODOT_COMPILE_FLAGS "-fPIC")
 	endif()
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -g -Wwrite-strings")
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wchar-subscripts -Wcomment -Wdisabled-optimization")
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wformat -Wformat=2 -Wformat-security -Wformat-y2k")
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wimport -Winit-self -Winline -Winvalid-pch")
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wmissing-braces -Wmissing-format-attribute")
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wmissing-include-dirs -Wmissing-noreturn -Wpacked -Wpointer-arith")
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wredundant-decls -Wreturn-type -Wsequence-point")
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wswitch -Wswitch-enum -Wtrigraphs")
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wuninitialized -Wunknown-pragmas -Wunreachable-code -Wunused-label")
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wunused-value -Wvariadic-macros -Wvolatile-register-var -Wno-error=attributes")
-
-	# -Wshadow -Wextra -Wall -Weffc++ -Wfloat-equal -Wstack-protector -Wunused-parameter -Wsign-compare -Wunused-variable -Wcast-align
-	# -Wunused-function -Wstrict-aliasing -Wstrict-aliasing=2 -Wmissing-field-initializers
-
-	if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -Wno-ignored-attributes")
-	endif()
+	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -g")
 
 	if(CMAKE_BUILD_TYPE MATCHES Debug)
 		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -fno-omit-frame-pointer -O0")
@@ -157,14 +142,24 @@ add_library(${PROJECT_NAME}
 )
 add_library(godot::cpp ALIAS ${PROJECT_NAME})
 
+include(GodotCompilerWarnings)
+
+# Treat warnings as errors if we are building ourself
+if(GODOT_CPP_BUILDING_SELF)
+    unset( GODOT_CPP_WARNING_AS_ERROR CACHE )
+    set_warning_as_error()
+endif()
+
 target_compile_features(${PROJECT_NAME}
 	PRIVATE
 		cxx_std_17
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC
-	$<$<CONFIG:Debug>:DEBUG_ENABLED>
-	$<$<CONFIG:Debug>:DEBUG_METHODS_ENABLED>
+	$<$<CONFIG:Debug>:
+		DEBUG_ENABLED
+		DEBUG_METHODS_ENABLED
+	>
 )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
