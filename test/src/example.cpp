@@ -311,7 +311,7 @@ Dictionary Example::test_dictionary() const {
 }
 
 BitField<Example::Flags> Example::test_bitfield(BitField<Flags> flags) {
-	UtilityFunctions::print("  Got BitField: ", String::num(flags));
+	UtilityFunctions::print("  Got BitField: ", String::num_int64(flags));
 	return flags;
 }
 
