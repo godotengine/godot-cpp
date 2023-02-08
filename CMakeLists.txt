@@ -52,6 +52,11 @@ if(${PROJECT_NAME} STREQUAL ${CMAKE_PROJECT_NAME})
     set(GODOT_CPP_BUILDING_SELF ON)
 endif()
 
+# Set some helper variables for readability
+set( compiler_is_clang "$<OR:$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>>" )
+set( compiler_is_gnu "$<CXX_COMPILER_ID:GNU>" )
+set( compiler_is_msvc "$<CXX_COMPILER_ID:MSVC>" )
+
 # Default build type is Debug in the SConstruct
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE Debug)
@@ -78,7 +83,6 @@ if (NOT "${GODOT_CUSTOM_API_FILE}" STREQUAL "")  # User-defined override.
 endif()
 
 set(GODOT_COMPILE_FLAGS )
-set(GODOT_LINKER_FLAGS )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	# using Visual Studio C++
@@ -94,11 +98,6 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
 	add_definitions(-DNOMINMAX)
 else()  # GCC/Clang
-	set(GODOT_LINKER_FLAGS "-static-libgcc -static-libstdc++ -Wl,-R,'$$ORIGIN'")
-
-	if(NOT CMAKE_SYSTEM_NAME MATCHES "Windows")
-		set(GODOT_COMPILE_FLAGS "-fPIC")
-	endif()
 	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -g")
 
 	if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -135,7 +134,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.c**)
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS include/*.h**)
 
 # Define our godot-cpp library
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} STATIC
 		${SOURCES}
 		${HEADERS}
 		${GENERATED_FILES_LIST}
@@ -160,11 +159,18 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 		DEBUG_ENABLED
 		DEBUG_METHODS_ENABLED
 	>
+	$<${compiler_is_msvc}:
+		TYPED_METHOD_BIND
+	>
 )
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-	target_compile_definitions(${PROJECT_NAME} PUBLIC TYPED_METHOD_BIND)
-endif()
+target_link_options(${PROJECT_NAME} PRIVATE
+	$<$<NOT:${compiler_is_msvc}>:
+		-static-libgcc
+		-static-libstdc++
+		-Wl,-R,'$$ORIGIN'
+	>
+)
 
 # Optionally mark headers as SYSTEM
 set(GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE "")
@@ -180,7 +186,6 @@ target_include_directories(${PROJECT_NAME} ${GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE}
 
 # Add the compile flags
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
-set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS ${GODOT_LINKER_FLAGS})
 
 # Create the correct name (godot.os.build_type.system_bits)
 string(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME)
@@ -199,6 +204,7 @@ endif()
 set_target_properties(${PROJECT_NAME}
 	PROPERTIES
 		CXX_EXTENSIONS OFF
+		POSITION_INDEPENDENT_CODE ON
 		ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
