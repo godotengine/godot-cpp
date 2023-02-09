@@ -209,7 +209,8 @@ Variant &Array::operator[](int p_index) {
 }
 
 void Array::set_typed(uint32_t p_type, const StringName &p_class_name, const Variant &p_script) {
-	internal::gde_interface->array_set_typed((GDExtensionTypePtr *)this, p_type, (GDExtensionConstStringNamePtr)&p_class_name, (GDExtensionConstVariantPtr)&p_script);
+	// p_type is not Variant::Type so that header doesn't depend on <variant.hpp>.
+	internal::gde_interface->array_set_typed((GDExtensionTypePtr *)this, (GDExtensionVariantType)p_type, (GDExtensionConstStringNamePtr)&p_class_name, (GDExtensionConstVariantPtr)&p_script);
 }
 
 void Array::_ref(const Array &p_from) const {
