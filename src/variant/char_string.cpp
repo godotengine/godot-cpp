@@ -353,7 +353,7 @@ String String::operator+(const char32_t p_char) {
 }
 
 String &String::operator+=(const String &p_str) {
-	internal::gde_interface->string_operator_plus_eq_string((GDExtensionStringPtr)this, (const GDExtensionStringPtr)&p_str);
+	internal::gde_interface->string_operator_plus_eq_string((GDExtensionStringPtr)this, (GDExtensionConstStringPtr)&p_str);
 	return *this;
 }
 

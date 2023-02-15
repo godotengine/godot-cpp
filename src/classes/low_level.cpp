@@ -48,11 +48,11 @@ void FileAccess::store_buffer(const uint8_t *p_src, uint64_t p_length) {
 }
 
 WorkerThreadPool::TaskID WorkerThreadPool::add_native_task(void (*p_func)(void *), void *p_userdata, bool p_high_priority, const String &p_description) {
-	return (TaskID)internal::gde_interface->worker_thread_pool_add_native_task(_owner, p_func, p_userdata, p_high_priority, (const GDExtensionStringPtr)&p_description);
+	return (TaskID)internal::gde_interface->worker_thread_pool_add_native_task(_owner, p_func, p_userdata, p_high_priority, (GDExtensionConstStringPtr)&p_description);
 }
 
 WorkerThreadPool::GroupID WorkerThreadPool::add_native_group_task(void (*p_func)(void *, uint32_t), void *p_userdata, int p_elements, int p_tasks, bool p_high_priority, const String &p_description) {
-	return (GroupID)internal::gde_interface->worker_thread_pool_add_native_group_task(_owner, p_func, p_userdata, p_elements, p_tasks, p_high_priority, (const GDExtensionStringPtr)&p_description);
+	return (GroupID)internal::gde_interface->worker_thread_pool_add_native_group_task(_owner, p_func, p_userdata, p_elements, p_tasks, p_high_priority, (GDExtensionConstStringPtr)&p_description);
 }
 
 } // namespace godot
