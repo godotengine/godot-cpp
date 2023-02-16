@@ -54,7 +54,7 @@ Object *get_object_instance_binding(GodotObject *p_engine_object) {
 		binding_callbacks = ClassDB::get_instance_binding_callbacks(class_name);
 	}
 	if (binding_callbacks == nullptr) {
-		binding_callbacks = &Object::___binding_callbacks;
+		binding_callbacks = &Object::_gde_binding_callbacks;
 	}
 
 	return reinterpret_cast<Object *>(gdextension_interface_object_get_instance_binding(p_engine_object, token, binding_callbacks));

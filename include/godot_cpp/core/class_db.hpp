@@ -150,22 +150,22 @@ public:
 	godot::ClassDB::bind_integer_constant(get_class_static(), "", #m_constant, m_constant);
 
 #define BIND_ENUM_CONSTANT(m_constant) \
-	godot::ClassDB::bind_integer_constant(get_class_static(), godot::__constant_get_enum_name(m_constant, #m_constant), #m_constant, m_constant);
+	godot::ClassDB::bind_integer_constant(get_class_static(), godot::_gde_constant_get_enum_name(m_constant, #m_constant), #m_constant, m_constant);
 
 #define BIND_BITFIELD_FLAG(m_constant) \
-	godot::ClassDB::bind_integer_constant(get_class_static(), godot::__constant_get_bitfield_name(m_constant, #m_constant), #m_constant, m_constant, true);
+	godot::ClassDB::bind_integer_constant(get_class_static(), godot::_gde_constant_get_bitfield_name(m_constant, #m_constant), #m_constant, m_constant, true);
 
-#define BIND_VIRTUAL_METHOD(m_class, m_method)                                                                                                  \
-	{                                                                                                                                           \
-		auto ___call##m_method = [](GDExtensionObjectPtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr p_ret) -> void { \
-			call_with_ptr_args(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret);                                     \
-		};                                                                                                                                      \
-		godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, ___call##m_method);                                         \
+#define BIND_VIRTUAL_METHOD(m_class, m_method)                                                                                                \
+	{                                                                                                                                         \
+		auto _call##m_method = [](GDExtensionObjectPtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr p_ret) -> void { \
+			call_with_ptr_args(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret);                                   \
+		};                                                                                                                                    \
+		godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, _call##m_method);                                         \
 	}
 
 template <class T, bool is_abstract>
 void ClassDB::_register_class(bool p_virtual) {
-	instance_binding_callbacks[T::get_class_static()] = &T::___binding_callbacks;
+	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
 
 	// Register this class within our plugin
 	ClassInfo cl;
@@ -221,7 +221,7 @@ void ClassDB::register_abstract_class() {
 
 template <class T>
 void ClassDB::register_engine_class() {
-	instance_binding_callbacks[T::get_class_static()] = &T::___binding_callbacks;
+	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
 }
 
 template <class N, class M, typename... VarArgs>
