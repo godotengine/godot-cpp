@@ -168,7 +168,9 @@ MAKE_PTRARG_BY_REFERENCE(Variant);
 template <class T>
 struct PtrToArg<T *> {
 	_FORCE_INLINE_ static T *convert(const void *p_ptr) {
-		return reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr)), godot::internal::token, &T::___binding_callbacks));
+		return reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(
+				reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)),
+				godot::internal::token, &T::___binding_callbacks));
 	}
 	typedef Object *EncodeT;
 	_FORCE_INLINE_ static void encode(T *p_var, void *p_ptr) {
@@ -179,7 +181,9 @@ struct PtrToArg<T *> {
 template <class T>
 struct PtrToArg<const T *> {
 	_FORCE_INLINE_ static const T *convert(const void *p_ptr) {
-		return reinterpret_cast<const T *>(godot::internal::gde_interface->object_get_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr)), godot::internal::token, &T::___binding_callbacks));
+		return reinterpret_cast<const T *>(godot::internal::gde_interface->object_get_instance_binding(
+				reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)),
+				godot::internal::token, &T::___binding_callbacks));
 	}
 	typedef const Object *EncodeT;
 	_FORCE_INLINE_ static void encode(T *p_var, void *p_ptr) {
