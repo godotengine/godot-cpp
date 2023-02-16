@@ -240,11 +240,11 @@ public:
 template <class T>
 struct PtrToArg<Ref<T>> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		GDExtensionRefPtr ref = (GDExtensionRefPtr)p_ptr;
-		ERR_FAIL_NULL_V(ref, Ref<T>());
-
-		T *obj = reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(godot::internal::gde_interface->ref_get_object(ref), godot::internal::token, &T::___binding_callbacks));
-		return Ref<T>(obj);
+		// Important: p_ptr is T*, not Ref<T>*, since Object* is what engine gives to ptrcall.
+		ERR_FAIL_NULL_V(p_ptr, Ref<T>());
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(
+				reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)),
+				godot::internal::token, &T::___binding_callbacks)));
 	}
 
 	typedef Ref<T> EncodeT;
@@ -266,7 +266,10 @@ struct PtrToArg<const Ref<T> &> {
 	typedef Ref<T> EncodeT;
 
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr)), godot::internal::token, &T::___binding_callbacks)));
+		ERR_FAIL_NULL_V(p_ptr, Ref<T>());
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(
+				reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)),
+				godot::internal::token, &T::___binding_callbacks)));
 	}
 };
 
