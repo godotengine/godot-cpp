@@ -41,6 +41,7 @@ namespace godot {
 
 std::unordered_map<StringName, ClassDB::ClassInfo> ClassDB::classes;
 std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *> ClassDB::instance_binding_callbacks;
+std::vector<StringName> ClassDB::class_register_order;
 GDExtensionInitializationLevel ClassDB::current_level = GDEXTENSION_INITIALIZATION_CORE;
 
 MethodDefinition D_METHOD(StringName p_name) {
@@ -348,13 +349,15 @@ void ClassDB::initialize(GDExtensionInitializationLevel p_level) {
 }
 
 void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
-	for (const std::pair<StringName, ClassInfo> pair : classes) {
-		const ClassInfo &cl = pair.second;
+	for (std::vector<StringName>::reverse_iterator i = class_register_order.rbegin(); i != class_register_order.rend(); ++i) {
+		const StringName &name = *i;
+		const ClassInfo &cl = classes[name];
+
 		if (cl.level != p_level) {
 			continue;
 		}
 
-		internal::gdextension_interface_classdb_unregister_extension_class(internal::library, cl.name._native_ptr());
+		internal::gdextension_interface_classdb_unregister_extension_class(internal::library, name._native_ptr());
 
 		for (auto method : cl.method_map) {
 			memdelete(method.second);

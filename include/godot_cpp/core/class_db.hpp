@@ -105,6 +105,8 @@ private:
 	// This may only contain custom classes, not Godot classes
 	static std::unordered_map<StringName, ClassInfo> classes;
 	static std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *> instance_binding_callbacks;
+	// Used to remember the custom class registration order.
+	static std::vector<StringName> class_register_order;
 
 	static MethodBind *bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount);
 	static void initialize_class(const ClassInfo &cl);
@@ -178,6 +180,7 @@ void ClassDB::_register_class(bool p_virtual) {
 		cl.parent_ptr = &parent_it->second;
 	}
 	classes[cl.name] = cl;
+	class_register_order.push_back(cl.name);
 
 	// Register this class with Godot
 	GDExtensionClassCreationInfo class_info = {
