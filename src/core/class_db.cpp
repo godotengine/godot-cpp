@@ -40,6 +40,7 @@
 namespace godot {
 
 std::unordered_map<StringName, ClassDB::ClassInfo> ClassDB::classes;
+std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *> ClassDB::instance_binding_callbacks;
 GDExtensionInitializationLevel ClassDB::current_level = GDEXTENSION_INITIALIZATION_CORE;
 
 MethodDefinition D_METHOD(StringName p_name) {
@@ -312,6 +313,12 @@ GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtens
 	}
 
 	return nullptr;
+}
+
+const GDExtensionInstanceBindingCallbacks *ClassDB::get_instance_binding_callbacks(const StringName &p_class) {
+	std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *>::iterator callbacks_it = instance_binding_callbacks.find(p_class);
+	ERR_FAIL_COND_V_MSG(callbacks_it == instance_binding_callbacks.end(), nullptr, String("Cannot find instance binding callbacks for class '{0}'.").format(Array::make(p_class)));
+	return callbacks_it->second;
 }
 
 void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p_method, GDExtensionClassCallVirtual p_call) {
