@@ -101,6 +101,10 @@ public:
 		ClassInfo *parent_ptr = nullptr;
 	};
 
+	static const std::unordered_map<StringName, ClassInfo> get_custom_classes() {
+		return classes;
+	}
+
 private:
 	// This may only contain custom classes, not Godot classes
 	static std::unordered_map<StringName, ClassInfo> classes;
