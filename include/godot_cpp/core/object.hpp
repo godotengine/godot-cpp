@@ -142,7 +142,7 @@ T *Object::cast_to(Object *p_object) {
 	if (casted == nullptr) {
 		return nullptr;
 	}
-	return dynamic_cast<T *>((Object *)internal::gde_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
+	return reinterpret_cast<T *>(internal::gde_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
 }
 
 template <class T>
@@ -155,7 +155,7 @@ const T *Object::cast_to(const Object *p_object) {
 	if (casted == nullptr) {
 		return nullptr;
 	}
-	return dynamic_cast<const T *>((Object *)internal::gde_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
+	return reinterpret_cast<const T *>(internal::gde_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
 }
 
 } // namespace godot
