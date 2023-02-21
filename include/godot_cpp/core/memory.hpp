@@ -40,6 +40,10 @@
 
 #include <type_traits>
 
+#ifndef PAD_ALIGN
+#define PAD_ALIGN 16 //must always be greater than this at much
+#endif
+
 void *operator new(size_t p_size, const char *p_description); ///< operator new that takes a description and uses MemoryStaticPool
 void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)); ///< operator new that takes a description and uses MemoryStaticPool
 void *operator new(size_t p_size, void *p_pointer, size_t check, const char *p_description); ///< operator new that takes a description and uses a pointer to the preallocated memory
@@ -64,9 +68,9 @@ class Memory {
 	Memory();
 
 public:
-	static void *alloc_static(size_t p_bytes);
-	static void *realloc_static(void *p_memory, size_t p_bytes);
-	static void free_static(void *p_ptr);
+	static void *alloc_static(size_t p_bytes, bool p_pad_align = false);
+	static void *realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align = false);
+	static void free_static(void *p_ptr, bool p_pad_align = false);
 };
 
 _ALWAYS_INLINE_ void postinitialize_handler(void *) {}
@@ -140,7 +144,7 @@ T *memnew_arr_template(size_t p_elements, const char *p_descr = "") {
 	same strategy used by std::vector, and the Vector class, so it should be safe.*/
 
 	size_t len = sizeof(T) * p_elements;
-	uint64_t *mem = (uint64_t *)Memory::alloc_static(len);
+	uint64_t *mem = (uint64_t *)Memory::alloc_static(len, true);
 	T *failptr = nullptr; // Get rid of a warning.
 	ERR_FAIL_COND_V(!mem, failptr);
 	*(mem - 1) = p_elements;
@@ -169,7 +173,7 @@ void memdelete_arr(T *p_class) {
 		}
 	}
 
-	Memory::free_static(ptr);
+	Memory::free_static(ptr, true);
 }
 
 struct _GlobalNil {

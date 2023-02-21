@@ -34,16 +34,63 @@
 
 namespace godot {
 
-void *Memory::alloc_static(size_t p_bytes) {
-	return internal::gde_interface->mem_alloc(p_bytes);
+void *Memory::alloc_static(size_t p_bytes, bool p_pad_align) {
+#ifdef DEBUG_ENABLED
+	bool prepad = false; // Alredy pre paded in the engine.
+#else
+	bool prepad = p_pad_align;
+#endif
+
+	void *mem = internal::gde_interface->mem_alloc(p_bytes + (prepad ? PAD_ALIGN : 0));
+	ERR_FAIL_COND_V(!mem, nullptr);
+
+	if (prepad) {
+		uint8_t *s8 = (uint8_t *)mem;
+		return s8 + PAD_ALIGN;
+	} else {
+		return mem;
+	}
 }
 
-void *Memory::realloc_static(void *p_memory, size_t p_bytes) {
-	return internal::gde_interface->mem_realloc(p_memory, p_bytes);
+void *Memory::realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align) {
+	if (p_memory == nullptr) {
+		return alloc_static(p_bytes, p_pad_align);
+	} else if (p_bytes == 0) {
+		free_static(p_memory, p_pad_align);
+		return nullptr;
+	}
+
+	uint8_t *mem = (uint8_t *)p_memory;
+
+#ifdef DEBUG_ENABLED
+	bool prepad = false; // Alredy pre paded in the engine.
+#else
+	bool prepad = p_pad_align;
+#endif
+
+	if (prepad) {
+		mem -= PAD_ALIGN;
+		mem = (uint8_t *)internal::gde_interface->mem_realloc(mem, p_bytes + PAD_ALIGN);
+		ERR_FAIL_COND_V(!mem, nullptr);
+		return mem + PAD_ALIGN;
+	} else {
+		return (uint8_t *)internal::gde_interface->mem_realloc(mem, p_bytes);
+	}
 }
 
-void Memory::free_static(void *p_ptr) {
-	internal::gde_interface->mem_free(p_ptr);
+void Memory::free_static(void *p_ptr, bool p_pad_align) {
+	uint8_t *mem = (uint8_t *)p_ptr;
+
+#ifdef DEBUG_ENABLED
+	bool prepad = false; // Alredy pre paded in the engine.
+#else
+	bool prepad = p_pad_align;
+#endif
+
+	if (prepad) {
+		mem -= PAD_ALIGN;
+	}
+	internal::gde_interface->mem_free(mem);
 }
 
 _GlobalNil::_GlobalNil() {
