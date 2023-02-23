@@ -204,7 +204,7 @@ architecture_aliases = {
 opts.Add(EnumVariable("arch", "CPU architecture", "", architecture_array, architecture_aliases))
 
 # Add Verbosity option for compilation
-# opts.Add(BoolVaraible("verbose", "Enable verbose output for the compilation", False))
+opts.Add(BoolVariable("verbose", "Enable verbose output for the compilation", False))
 
 if not ARGUMENTS.get("verbose"):
     no_verbose(sys, env)
