@@ -37,6 +37,59 @@ def get_gdextension_dir(env):
 def get_api_file(env):
     return normalize_path(env.get("custom_api_file", os.path.join(get_gdextension_dir(env), "extension_api.json")))
 
+def no_verbose(sys, env):
+
+    colors = {}
+
+    # Colors are disabled in non-TTY environments such as pipes. This means
+    # that if output is redirected to a file, it will not contain color codes
+    if sys.stdout.isatty():
+        colors["blue"] = "\033[0;94m"
+        colors["bold_blue"] = "\033[1;94m"
+        colors["reset"] = "\033[0m"
+    else:
+        colors["blue"] = ""
+        colors["bold_blue"] = ""
+        colors["reset"] = ""
+
+    # There is a space before "..." to ensure that source file names can be
+    # Ctrl + clicked in the VS Code terminal.
+    compile_source_message = "{}Compiling {}$SOURCE{} ...{}".format(
+        colors["blue"], colors["bold_blue"], colors["blue"], colors["reset"]
+    )
+    java_compile_source_message = "{}Compiling {}$SOURCE{} ...{}".format(
+        colors["blue"], colors["bold_blue"], colors["blue"], colors["reset"]
+    )
+    compile_shared_source_message = "{}Compiling shared {}$SOURCE{} ...{}".format(
+        colors["blue"], colors["bold_blue"], colors["blue"], colors["reset"]
+    )
+    link_program_message = "{}Linking Program {}$TARGET{} ...{}".format(
+        colors["blue"], colors["bold_blue"], colors["blue"], colors["reset"]
+    )
+    link_library_message = "{}Linking Static Library {}$TARGET{} ...{}".format(
+        colors["blue"], colors["bold_blue"], colors["blue"], colors["reset"]
+    )
+    ranlib_library_message = "{}Ranlib Library {}$TARGET{} ...{}".format(
+        colors["blue"], colors["bold_blue"], colors["blue"], colors["reset"]
+    )
+    link_shared_library_message = "{}Linking Shared Library {}$TARGET{} ...{}".format(
+        colors["blue"], colors["bold_blue"], colors["blue"], colors["reset"]
+    )
+    java_library_message = "{}Creating Java Archive {}$TARGET{} ...{}".format(
+        colors["blue"], colors["bold_blue"], colors["blue"], colors["reset"]
+    )
+
+    env.Append(CXXCOMSTR=[compile_source_message])
+    env.Append(CCCOMSTR=[compile_source_message])
+    env.Append(SHCCCOMSTR=[compile_shared_source_message])
+    env.Append(SHCXXCOMSTR=[compile_shared_source_message])
+    env.Append(ARCOMSTR=[link_library_message])
+    env.Append(RANLIBCOMSTR=[ranlib_library_message])
+    env.Append(SHLINKCOMSTR=[link_shared_library_message])
+    env.Append(LINKCOMSTR=[link_program_message])
+    env.Append(JARCOMSTR=[java_library_message])
+    env.Append(JAVACCOMSTR=[java_compile_source_message])
+
 
 # Try to detect the host platform automatically.
 # This is used if no `platform` argument is passed
@@ -149,6 +202,12 @@ architecture_aliases = {
     "ppc64le": "ppc64",
 }
 opts.Add(EnumVariable("arch", "CPU architecture", "", architecture_array, architecture_aliases))
+
+# Add Verbosity option for compilation
+# opts.Add(BoolVaraible("verbose", "Enable verbose output for the compilation", False))
+
+if not ARGUMENTS.get("verbose"):
+    no_verbose(sys, env)
 
 # Targets flags tool (optimizations, debug symbols)
 target_tool = Tool("targets", toolpath=["tools"])
