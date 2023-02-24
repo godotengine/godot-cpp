@@ -37,8 +37,8 @@ def get_gdextension_dir(env):
 def get_api_file(env):
     return normalize_path(env.get("custom_api_file", os.path.join(get_gdextension_dir(env), "extension_api.json")))
 
-def no_verbose(sys, env):
 
+def no_verbose(sys, env):
     colors = {}
 
     # Colors are disabled in non-TTY environments such as pipes. This means
