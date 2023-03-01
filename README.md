@@ -2,28 +2,30 @@
 
 > **Warning**
 >
-> This repository's `master` branch is only usable with Godot 4.0 ([GDExtension](https://godotengine.org/article/introducing-gd-extensions)).
+> This repository's `master` branch is only usable with Godot's ([GDExtension](https://godotengine.org/article/introducing-gd-extensions))
+> API (Godot 4.0 and later).
 >
-> Switch to the [`3.5` branch](https://github.com/godotengine/godot-cpp/tree/3.5)
-> if using Godot 3.5.x with GDNative,
-> or the [`3.x` branch](https://github.com/godotengine/godot-cpp/tree/3.x)
-> if using the Godot 3.x development branch with GDNative.
+> For GDNative users (Godot 3.x), switch to the [`3.x`](https://github.com/godotengine/godot-cpp/tree/3.x)
+> or the [`3.5`](https://github.com/godotengine/godot-cpp/tree/3.5) branch.
 
 This repository contains the  *C++ bindings* for the [**Godot Engine**](https://github.com/godotengine/godot)'s GDExtensions API.
 
 - [**Versioning**](#versioning)
+- [**Compatibility**](#compatibility)
 - [**Contributing**](#contributing)
-- [**Getting Started**](#getting-started)
-- [**Included Example**](#included-example)
+- [**Getting started**](#getting-started)
+- [**Included example**](#included-example)
 
 ## Versioning
 
 This repositories follows the same branch versioning as the main [Godot Engine
 repository](https://github.com/godotengine/godot):
 
-- `master` tracks the current development branch.
-- `3.x` tracks the development of the next 3.x minor release.
-- Other versioned branches (e.g. `3.3`, `3.2`) track the latest stable release
+- `master` tracks the current GDExtension development branch for the next Godot
+  4.x minor release.
+- `3.x` tracks the development of the GDNative plugin for the next 3.x minor
+  release.
+- Other versioned branches (e.g. `4.0`, `3.5`) track the latest stable release
   in the corresponding branch.
 
 Stable releases are also tagged on this repository:
@@ -37,18 +39,31 @@ Godot version.**
 > using `godot-cpp` against a more current version of Godot, see the instructions
 > in the `gdextension` folder to update the relevant files.
 
+## Compatibility
+
+**Warning:** The GDExtension API is brand new in Godot 4.0, and is still
+considered in **beta** stage, despite Godot 4.0 itself being released.
+
+This applies to both the GDExtension interface header, the API JSON, and this
+first-party `godot-cpp` extension.
+
+Some compatibility breakage is to be expected as GDExtension and `godot-cpp`
+get more used, documented, and critical issues get resolved. See the
+[issue tracker](https://github.com/godotengine/godot/issues) for a list of known
+issues, and be sure to provide feedback on issues and PRs which affect your use
+of this extension.
+
 ## Contributing
 
 We greatly appreciate help in maintaining and extending this project. If you
 wish to help out, ensure you have an account on GitHub and create a "fork" of
-this repository. Rémi "Akien" Verschelde wrote an excellent bit of documentation
-for the main Godot project on this:
-[Pull request workflow](https://docs.godotengine.org/en/stable/community/contributing/pr_workflow.html)
+this repository. See [Pull request workflow](https://docs.godotengine.org/en/stable/community/contributing/pr_workflow.html)
+for instructions.
 
 Please install clang-format and copy the files in `misc/hooks` into `.git/hooks`
 so formatting is done before your changes are submitted.
 
-## Getting Started
+## Getting started
 
 It's a bit similar to what it was for 3.x but also a bit different.
 This new approach is much more akin to how core Godot modules are structured.
@@ -110,6 +125,6 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 
 Any node and resource you register will be available in the corresponding `Create...` dialog. Any class will be available to scripting as well.
 
-## Included Example
+## Included example
 
 Check the project in the `test` folder for an example on how to use and register different things.
