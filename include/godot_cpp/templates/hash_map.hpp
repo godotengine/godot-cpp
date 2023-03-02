@@ -304,6 +304,17 @@ public:
 		return nullptr;
 	}
 
+	bool lookup(const TKey &p_key, TValue &r_data) const {
+		uint32_t pos = 0;
+		bool exists = _lookup_pos(p_key, pos);
+
+		if (exists) {
+			r_data = &elements[pos]->data.value;
+			return true;
+		}
+		return false;
+	}
+
 	_FORCE_INLINE_ bool has(const TKey &p_key) const {
 		uint32_t _pos = 0;
 		return _lookup_pos(p_key, _pos);
