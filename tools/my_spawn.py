@@ -11,34 +11,39 @@ def configure(env):
     import subprocess
 
     def mySubProcess(cmdline, env):
-        # print("SPAWNED: " + cmdline)
-        proc = subprocess.run(
-            args=cmdline,
-            shell=True,
-            env=env,
-        )
+        # print(cmdline)
+        proc = subprocess.run(args=cmdline, shell=True, env=env)
         rv = proc.returncode
         if rv:
             print("=====")
-            print(rv, "(", hex(rv), ")")
+            print("subprocess.run().returncode=", rv, "(", hex(rv), ")")
+            print("len(cmdline)=", len(cmdline))
             print("=====")
         return rv
 
     def mySpawn(sh, escape, cmd, args, env):
-
-        newargs = " ".join(args[1:])
-        cmdline = cmd + " " + newargs
-
-        rv = 0
-        if len(cmdline) > 32000 and cmd.endswith("ar"):
-            cmdline = cmd + " " + args[1] + " " + args[2] + " "
-            for i in range(3, len(args)):
-                rv = mySubProcess(cmdline + args[i], env)
-                if rv:
-                    break
+        if len(args) > 3 and cmd.endswith("ar"):
+            # print("Long ar command is split.\nargc=", len(args))
+            lead = len(" ".join(args[0:3]))
+            begin = 3
+            length = lead + 1 + len(args[begin])
+            rv = 0
+            for i in range(4, len(args)):
+                length += 1 + len(args[i])
+                if length >= 8 * 1024 - 32:
+                    cmdline = " ".join(args[0:3] + args[begin:i])
+                    # print("objs=", i - begin, ", length=", len(cmdline))
+                    rv = mySubProcess(cmdline, env)
+                    if rv:
+                        break
+                    begin = i
+                    length = lead + 1 + len(args[i])
+            if not rv:
+                cmdline = " ".join(args[0:3] + args[begin:])
+                # print("objs=", len(args) - begin, ", length=", len(cmdline))
+                rv = mySubProcess(cmdline, env)
         else:
-            rv = mySubProcess(cmdline, env)
-
+            rv = mySubProcess(args, env)
         return rv
 
     env["SPAWN"] = mySpawn
