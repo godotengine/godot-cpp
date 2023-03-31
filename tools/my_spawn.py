@@ -22,12 +22,12 @@ def configure(env):
         return rv
 
     def mySpawn(sh, escape, cmd, args, env):
-        if len(args) > 3 and cmd.endswith("ar"):
+        rv = 0
+        if len(args) > 4 and cmd.endswith("ar"):
             # print("Long ar command is split.\nargc=", len(args))
             lead = len(" ".join(args[0:3]))
             begin = 3
             length = lead + 1 + len(args[begin])
-            rv = 0
             for i in range(4, len(args)):
                 length += 1 + len(args[i])
                 if length >= 8 * 1024 - 32:
@@ -37,7 +37,7 @@ def configure(env):
                     if rv:
                         break
                     begin = i
-                    length = lead + 1 + len(args[i])
+                    length = lead + 1 + len(args[begin])
             if not rv:
                 cmdline = " ".join(args[0:3] + args[begin:])
                 # print("objs=", len(args) - begin, ", length=", len(cmdline))
