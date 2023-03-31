@@ -11,23 +11,16 @@ def configure(env):
     import subprocess
 
     def mySubProcess(cmdline, env):
-        # print "SPAWNED : " + cmdline
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        proc = subprocess.Popen(
-            cmdline,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            startupinfo=startupinfo,
-            shell=False,
+        # print("SPAWNED: " + cmdline)
+        proc = subprocess.run(
+            args=cmdline,
+            shell=True,
             env=env,
         )
-        data, err = proc.communicate()
-        rv = proc.wait()
+        rv = proc.returncode
         if rv:
             print("=====")
-            print(err.decode("utf-8"))
+            print(rv, "(", hex(rv), ")")
             print("=====")
         return rv
 
