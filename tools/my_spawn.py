@@ -43,7 +43,7 @@ def configure(env):
                 # print("objs=", len(args) - begin, ", length=", len(cmdline))
                 rv = mySubProcess(cmdline, env)
         else:
-            rv = mySubProcess(args, env)
+            rv = mySubProcess(" ".join(args), env)
         return rv
 
     env["SPAWN"] = mySpawn
