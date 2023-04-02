@@ -30,7 +30,7 @@ def configure(env):
             length = lead + 1 + len(args[begin])
             for i in range(4, len(args)):
                 length += 1 + len(args[i])
-                if length >= 8 * 1024 - 32:
+                if length > 8153:
                     cmdline = " ".join(args[0:3] + args[begin:i])
                     # print("objs=", i - begin, ", length=", len(cmdline))
                     rv = mySubProcess(cmdline, env)
