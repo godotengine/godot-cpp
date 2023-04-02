@@ -45,13 +45,27 @@ def generate(env):
         env["SHLIBPREFIX"] = ""
         # Want dll suffix
         env["SHLIBSUFFIX"] = ".dll"
+
+        # These options are for a release build even using target=template_debug
+        env.Append(CCFLAGS=["-O3", "-Wwrite-strings"])
+        env.Append(
+            LINKFLAGS=[
+                "-static",
+                "-Wl,--no-undefined",
+                "-static-libgcc",
+                "-static-libstdc++",
+            ]
+        )
+
         # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
         my_spawn.configure(env)
 
     else:
         env["use_mingw"] = True
         # Cross-compilation using MinGW
-        prefix = "i686" if env["arch"] == "x86_32" else env["arch"]
+        prefix = "i686"
+        if env["arch"] == "x86_64":
+            prefix = "x86_64"
         env["CXX"] = prefix + "-w64-mingw32-g++"
         env["CC"] = prefix + "-w64-mingw32-gcc"
         env["AR"] = prefix + "-w64-mingw32-ar"
@@ -60,11 +74,11 @@ def generate(env):
         # Want dll suffix
         env["SHLIBSUFFIX"] = ".dll"
 
-        # These options are for a release build even using target=debug
+        # These options are for a release build even using target=template_debug
         env.Append(CCFLAGS=["-O3", "-Wwrite-strings"])
         env.Append(
             LINKFLAGS=[
-                "--static",
+                "-static",
                 "-Wl,--no-undefined",
                 "-static-libgcc",
                 "-static-libstdc++",
