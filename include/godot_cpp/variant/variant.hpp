@@ -1,51 +1,53 @@
-/*************************************************************************/
-/*  variant.hpp                                                          */
-/*************************************************************************/
-/*                       This file is part of:                           */
-/*                           GODOT ENGINE                                */
-/*                      https://godotengine.org                          */
-/*************************************************************************/
-/* Copyright (c) 2007-2022 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2022 Godot Engine contributors (cf. AUTHORS.md).   */
-/*                                                                       */
-/* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the       */
-/* "Software"), to deal in the Software without restriction, including   */
-/* without limitation the rights to use, copy, modify, merge, publish,   */
-/* distribute, sublicense, and/or sell copies of the Software, and to    */
-/* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:                                             */
-/*                                                                       */
-/* The above copyright notice and this permission notice shall be        */
-/* included in all copies or substantial portions of the Software.       */
-/*                                                                       */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
-/*************************************************************************/
+/**************************************************************************/
+/*  variant.hpp                                                           */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             GODOT ENGINE                               */
+/*                        https://godotengine.org                         */
+/**************************************************************************/
+/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
 
-#ifndef GODOT_CPP_VARIANT_HPP
-#define GODOT_CPP_VARIANT_HPP
+#ifndef GODOT_VARIANT_HPP
+#define GODOT_VARIANT_HPP
 
 #include <godot_cpp/core/defs.hpp>
 
 #include <godot_cpp/variant/builtin_types.hpp>
 #include <godot_cpp/variant/variant_size.hpp>
 
-#include <godot/gdnative_interface.h>
+#include <gdextension_interface.h>
 
 #include <array>
 
 namespace godot {
 
+class ObjectID;
+
 class Variant {
 	uint8_t opaque[GODOT_CPP_VARIANT_SIZE]{ 0 };
 
-	_FORCE_INLINE_ GDNativeVariantPtr _native_ptr() const { return const_cast<uint8_t(*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
+	_FORCE_INLINE_ GDExtensionVariantPtr _native_ptr() const { return const_cast<uint8_t(*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
 
 	friend class GDExtensionBinding;
 	friend class MethodBind;
@@ -138,14 +140,14 @@ public:
 	};
 
 private:
-	static GDNativeVariantFromTypeConstructorFunc from_type_constructor[VARIANT_MAX];
-	static GDNativeTypeFromVariantConstructorFunc to_type_constructor[VARIANT_MAX];
+	static GDExtensionVariantFromTypeConstructorFunc from_type_constructor[VARIANT_MAX];
+	static GDExtensionTypeFromVariantConstructorFunc to_type_constructor[VARIANT_MAX];
 
 public:
 	Variant();
 	Variant(std::nullptr_t n) :
 			Variant() {}
-	explicit Variant(const GDNativeVariantPtr native_ptr);
+	explicit Variant(GDExtensionConstVariantPtr native_ptr);
 	Variant(const Variant &other);
 	Variant(Variant &&other);
 	Variant(bool v);
@@ -187,6 +189,7 @@ public:
 	Variant(const StringName &v);
 	Variant(const NodePath &v);
 	Variant(const godot::RID &v);
+	Variant(const ObjectID &v);
 	Variant(const Object *v);
 	Variant(const Callable &v);
 	Variant(const Signal &v);
@@ -230,6 +233,7 @@ public:
 	operator StringName() const;
 	operator NodePath() const;
 	operator godot::RID() const;
+	operator ObjectID() const;
 	operator Object *() const;
 	operator Callable() const;
 	operator Signal() const;
@@ -251,24 +255,24 @@ public:
 	bool operator!=(const Variant &other) const;
 	bool operator<(const Variant &other) const;
 
-	void call(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDNativeCallError &r_error);
+	void call(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
 
 	template <class... Args>
 	Variant call(const StringName &method, Args... args) {
 		Variant result;
-		GDNativeCallError error;
-		std::array<const GDNativeVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
+		GDExtensionCallError error;
+		std::array<GDExtensionConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
 		call(method, call_args.data(), call_args.size(), result, error);
 		return result;
 	}
 
-	static void call_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDNativeCallError &r_error);
+	static void call_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
 
 	template <class... Args>
 	static Variant call_static(Variant::Type type, const StringName &method, Args... args) {
 		Variant result;
-		GDNativeCallError error;
-		std::array<const GDNativeVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
+		GDExtensionCallError error;
+		std::array<GDExtensionConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
 		call_static(type, method, call_args.data(), call_args.size(), result, error);
 		return result;
 	}
@@ -318,6 +322,18 @@ struct VariantComparator {
 	static _FORCE_INLINE_ bool compare(const Variant &p_lhs, const Variant &p_rhs) { return p_lhs.hash_compare(p_rhs); }
 };
 
+template <typename... VarArgs>
+String vformat(const String &p_text, const VarArgs... p_args) {
+	Variant args[sizeof...(p_args) + 1] = { p_args..., Variant() }; // +1 makes sure zero sized arrays are also supported.
+	Array args_array;
+	args_array.resize(sizeof...(p_args));
+	for (uint32_t i = 0; i < sizeof...(p_args); i++) {
+		args_array[i] = args[i];
+	}
+
+	return p_text % args_array;
+}
+
 } // namespace godot
 
-#endif // ! GODOT_CPP_VARIANT_HPP
+#endif // GODOT_VARIANT_HPP

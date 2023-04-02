@@ -1,35 +1,35 @@
-/*************************************************************************/
-/*  ref.hpp                                                              */
-/*************************************************************************/
-/*                       This file is part of:                           */
-/*                           GODOT ENGINE                                */
-/*                      https://godotengine.org                          */
-/*************************************************************************/
-/* Copyright (c) 2007-2022 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2022 Godot Engine contributors (cf. AUTHORS.md).   */
-/*                                                                       */
-/* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the       */
-/* "Software"), to deal in the Software without restriction, including   */
-/* without limitation the rights to use, copy, modify, merge, publish,   */
-/* distribute, sublicense, and/or sell copies of the Software, and to    */
-/* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:                                             */
-/*                                                                       */
-/* The above copyright notice and this permission notice shall be        */
-/* included in all copies or substantial portions of the Software.       */
-/*                                                                       */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
-/*************************************************************************/
+/**************************************************************************/
+/*  ref.hpp                                                               */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             GODOT ENGINE                               */
+/*                        https://godotengine.org                         */
+/**************************************************************************/
+/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
 
-#ifndef GODOT_CPP_REF_HPP
-#define GODOT_CPP_REF_HPP
+#ifndef GODOT_REF_HPP
+#define GODOT_REF_HPP
 
 #include <godot_cpp/core/defs.hpp>
 
@@ -240,13 +240,24 @@ public:
 template <class T>
 struct PtrToArg<Ref<T>> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
+		GDExtensionRefPtr ref = (GDExtensionRefPtr)p_ptr;
+		ERR_FAIL_NULL_V(ref, Ref<T>());
+
+		T *obj = reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(godot::internal::gde_interface->ref_get_object(ref), godot::internal::token, &T::___binding_callbacks));
+		return Ref<T>(obj);
 	}
 
 	typedef Ref<T> EncodeT;
 
-	_FORCE_INLINE_ static void encode(Ref<T> p_val, const void *p_ptr) {
-		*(void **)p_ptr = p_val->_owner;
+	_FORCE_INLINE_ static void encode(Ref<T> p_val, void *p_ptr) {
+		GDExtensionRefPtr ref = (GDExtensionRefPtr)p_ptr;
+		ERR_FAIL_NULL(ref);
+
+		// This code assumes that p_ptr points to an unset Ref<T> variable on the Godot side
+		// so we only set it if we have an object to set.
+		if (p_val.is_valid()) {
+			godot::internal::gde_interface->ref_set_object(ref, p_val->_owner);
+		}
 	}
 };
 
@@ -255,30 +266,30 @@ struct PtrToArg<const Ref<T> &> {
 	typedef Ref<T> EncodeT;
 
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdn_interface->object_get_instance_binding(*(const GDNativeObjectPtr *)p_ptr, godot::internal::token, &T::___binding_callbacks)));
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr)), godot::internal::token, &T::___binding_callbacks)));
 	}
 };
 
 template <class T>
 struct GetTypeInfo<Ref<T>, typename EnableIf<TypeInherits<RefCounted, T>::value>::type> {
-	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
-	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static const GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_OBJECT;
+	static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 
-	static inline GDNativePropertyInfo get_class_info() {
-		return make_property_info(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+	static inline PropertyInfo get_class_info() {
+		return make_property_info(Variant::Type::OBJECT, "", PROPERTY_HINT_RESOURCE_TYPE, T::get_class_static());
 	}
 };
 
 template <class T>
 struct GetTypeInfo<const Ref<T> &, typename EnableIf<TypeInherits<RefCounted, T>::value>::type> {
-	static const GDNativeVariantType VARIANT_TYPE = GDNATIVE_VARIANT_TYPE_OBJECT;
-	static const GDNativeExtensionClassMethodArgumentMetadata METADATA = GDNATIVE_EXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	static const GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_OBJECT;
+	static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
 
-	static inline GDNativePropertyInfo get_class_info() {
-		return make_property_info(GDNATIVE_VARIANT_TYPE_OBJECT, T::get_class_static());
+	static inline PropertyInfo get_class_info() {
+		return make_property_info(Variant::Type::OBJECT, "", PROPERTY_HINT_RESOURCE_TYPE, T::get_class_static());
 	}
 };
 
 } // namespace godot
 
-#endif // ! GODOT_CPP_REF_HPP
+#endif // GODOT_REF_HPP

@@ -8,12 +8,12 @@ sys.path.insert(1, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from binding_generator import get_file_list, generate_bindings
 
-api_filepath = "godot-headers/extension_api.json"
+api_filepath = "gdextension/extension_api.json"
 bits = "64"
-double = "float"
+precision = "single"
 output_dir = "self_test"
 
-generate_bindings(api_filepath, use_template_get_node=False, bits=bits, double=double, output_dir=output_dir)
+generate_bindings(api_filepath, use_template_get_node=False, bits=bits, precision=precision, output_dir=output_dir)
 flist = get_file_list(api_filepath, output_dir, headers=True, sources=True)
 
 p = Path(output_dir) / "gen"

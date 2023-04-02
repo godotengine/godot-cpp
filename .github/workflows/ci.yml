@@ -18,32 +18,32 @@ jobs:
       matrix:
         include:
           - name: 🐧 Linux (GCC)
-            os: ubuntu-18.04
+            os: ubuntu-20.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
-            artifact-path: bin/libgodot-cpp.linux.release.x86_64.a
+            artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
             cache-name: linux-x86_64
 
           - name: 🐧 Linux (GCC, Double Precision)
-            os: ubuntu-18.04
+            os: ubuntu-20.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
-            artifact-path: bin/libgodot-cpp.linux.release.x86_64.a
-            flags: float=64
+            artifact-path: bin/libgodot-cpp.linux.template_release.double.x86_64.a
+            flags: precision=double
             cache-name: linux-x86_64-f64
 
           - name: 🏁 Windows (x86_64, MSVC)
             os: windows-2019
             platform: windows
             artifact-name: godot-cpp-windows-msvc2019-x86_64-release
-            artifact-path: bin/libgodot-cpp.windows.release.x86_64.lib
+            artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.lib
             cache-name: windows-x86_64-msvc
 
           - name: 🏁 Windows (x86_64, MinGW)
             os: windows-2019
             platform: windows
             artifact-name: godot-cpp-linux-mingw-x86_64-release
-            artifact-path: bin/libgodot-cpp.windows.release.x86_64.a
+            artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.a
             flags: use_mingw=yes
             cache-name: windows-x86_64-mingw
 
@@ -51,15 +51,15 @@ jobs:
             os: macos-11
             platform: macos
             artifact-name: godot-cpp-macos-universal-release
-            artifact-path: bin/libgodot-cpp.macos.release.universal.a
+            artifact-path: bin/libgodot-cpp.macos.template_release.universal.a
             flags: arch=universal
             cache-name: macos-universal
 
           - name: 🤖 Android (arm64)
-            os: ubuntu-18.04
+            os: ubuntu-20.04
             platform: android
             artifact-name: godot-cpp-android-arm64-release
-            artifact-path: bin/libgodot-cpp.android.release.arm64.a
+            artifact-path: bin/libgodot-cpp.android.template_release.arm64.a
             flags: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME arch=arm64
             cache-name: android-arm64
 
@@ -67,7 +67,7 @@ jobs:
             os: macos-11
             platform: ios
             artifact-name: godot-cpp-ios-arm64-release
-            artifact-path: bin/libgodot-cpp.ios.release.arm64.a
+            artifact-path: bin/libgodot-cpp.ios.template_release.arm64.a
             flags: arch=arm64
             cache-name: ios-arm64
 
@@ -105,19 +105,24 @@ jobs:
         if: ${{ matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes' }}
         uses: egor-tensin/setup-mingw@v2
 
+      - name: Generate godot-cpp sources only
+        run: |
+          scons platform=${{ matrix.platform }} build_library=no ${{ matrix.flags }}
+          scons -c
+
       - name: Build godot-cpp (debug)
         run: |
-          scons platform=${{ matrix.platform }} target=debug ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }}
 
       - name: Build test without rebuilding godot-cpp (debug)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} target=debug ${{ matrix.flags }} build_library=no
+          scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }} build_library=no
 
-      - name: Build test and godot-cpp (release, with debug symbols)
+      - name: Build test and godot-cpp (release)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} target=release debug_symbols=yes ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} target=template_release ${{ matrix.flags }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -128,7 +133,7 @@ jobs:
 
   linux-cmake:
     name: 🐧 Build (Linux, GCC, CMake)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -145,14 +150,14 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release .
           make -j $(nproc) VERBOSE=1
 
-      - name: Build test GDNative library
+      - name: Build test GDExtension library
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." .
           make -j $(nproc) VERBOSE=1
 
   linux-cmake-ninja:
     name: 🐧 Build (Linux, GCC, CMake Ninja)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -169,7 +174,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
           cmake --build . -j $(nproc) --verbose
 
-      - name: Build test GDNative library
+      - name: Build test GDExtension library
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -GNinja .
           cmake --build . -j $(nproc) --verbose
@@ -188,39 +193,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 16 2019" .
           cmake --build . --verbose
 
-      - name: Build test GDNative library
+      - name: Build test GDExtension library
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
           cmake --build . --verbose
-
-  static-checks:
-    name: 📊 Static Checks (clang-format)
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Make apt sources.list use the default Ubuntu repositories
-        run: |
-          sudo rm -f /etc/apt/sources.list.d/*
-          sudo cp -f misc/ci/sources.list /etc/apt/sources.list
-          sudo apt-get update
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get install -qq dos2unix recode clang-format-11
-          sudo update-alternatives --remove-all clang-format
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-11 100
-          python -m pip install black==22.3.0
-
-      - name: Style checks via clang-format
-        run: |
-          bash ./misc/scripts/clang_format.sh
-
-      - name: Python style checks via black (black_format.sh)
-        run: |
-          bash ./misc/scripts/black_format.sh
-
-      - name: Bindings generation checks (ensures get_file_list returns all generated files)
-        run: |
-          python ./misc/scripts/check_get_file_list.py

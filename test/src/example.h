@@ -25,12 +25,20 @@ using namespace godot;
 class ExampleRef : public RefCounted {
 	GDCLASS(ExampleRef, RefCounted);
 
+private:
+	static int instance_count;
+	static int last_id;
+
+	int id;
+
 protected:
-	static void _bind_methods() {}
+	static void _bind_methods();
 
 public:
 	ExampleRef();
 	~ExampleRef();
+
+	int get_id() const;
 };
 
 class ExampleMin : public Control {
@@ -67,6 +75,11 @@ public:
 		ANSWER_TO_EVERYTHING = 42,
 	};
 
+	enum Flags {
+		FLAG_ONE = 1,
+		FLAG_TWO = 2,
+	};
+
 	enum {
 		CONSTANT_WITHOUT_ENUM = 314,
 	};
@@ -79,11 +92,12 @@ public:
 	void simple_const_func() const;
 	String return_something(const String &base);
 	Viewport *return_something_const() const;
+	Ref<ExampleRef> return_empty_ref() const;
 	ExampleRef *return_extended_ref() const;
 	Ref<ExampleRef> extended_ref_checks(Ref<ExampleRef> p_ref) const;
-	Variant varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
-	int varargs_func_nv(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
-	void varargs_func_void(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error);
+	Variant varargs_func(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error);
+	int varargs_func_nv(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error);
+	void varargs_func_void(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error);
 	void emit_custom_signal(const String &name, int value);
 	int def_args(int p_a = 100, int p_b = 200);
 
@@ -91,6 +105,11 @@ public:
 	void test_tarray_arg(const TypedArray<int64_t> &p_array);
 	TypedArray<Vector2> test_tarray() const;
 	Dictionary test_dictionary() const;
+	Example *test_node_argument(Example *p_node) const;
+	String test_string_ops() const;
+	int test_vector_ops() const;
+
+	BitField<Flags> test_bitfield(BitField<Flags> flags);
 
 	// Property.
 	void set_custom_position(const Vector2 &pos);
@@ -105,6 +124,26 @@ public:
 	virtual bool _has_point(const Vector2 &point) const override;
 };
 
-VARIANT_ENUM_CAST(Example, Constants);
+VARIANT_ENUM_CAST(Example::Constants);
+VARIANT_BITFIELD_CAST(Example::Flags);
+
+enum EnumWithoutClass {
+	OUTSIDE_OF_CLASS = 512
+};
+VARIANT_ENUM_CAST(EnumWithoutClass);
+
+class ExampleVirtual : public Object {
+	GDCLASS(ExampleVirtual, Object);
+
+protected:
+	static void _bind_methods() {}
+};
+
+class ExampleAbstract : public Object {
+	GDCLASS(ExampleAbstract, Object);
+
+protected:
+	static void _bind_methods() {}
+};
 
 #endif // EXAMPLE_CLASS_H

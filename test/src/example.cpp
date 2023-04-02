@@ -13,12 +13,27 @@
 
 using namespace godot;
 
+int ExampleRef::instance_count = 0;
+int ExampleRef::last_id = 0;
+
+int ExampleRef::get_id() const {
+	return id;
+}
+
+void ExampleRef::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_id"), &ExampleRef::get_id);
+}
+
 ExampleRef::ExampleRef() {
-	UtilityFunctions::print("ExampleRef created.");
+	id = ++last_id;
+	instance_count++;
+
+	UtilityFunctions::print("ExampleRef ", itos(id), " created, current instance count: ", itos(instance_count));
 }
 
 ExampleRef::~ExampleRef() {
-	UtilityFunctions::print("ExampleRef destroyed.");
+	instance_count--;
+	UtilityFunctions::print("ExampleRef ", itos(id), " destroyed, current instance count: ", itos(instance_count));
 }
 
 int Example::test_static(int p_a, int p_b) {
@@ -40,7 +55,7 @@ void Example::_notification(int p_what) {
 bool Example::_set(const StringName &p_name, const Variant &p_value) {
 	String name = p_name;
 	if (name.begins_with("dproperty")) {
-		int index = name.get_slicec('_', 1).to_int();
+		int64_t index = name.get_slicec('_', 1).to_int();
 		dprop[index] = p_value;
 		return true;
 	}
@@ -54,7 +69,7 @@ bool Example::_set(const StringName &p_name, const Variant &p_value) {
 bool Example::_get(const StringName &p_name, Variant &r_ret) const {
 	String name = p_name;
 	if (name.begins_with("dproperty")) {
-		int index = name.get_slicec('_', 1).to_int();
+		int64_t index = name.get_slicec('_', 1).to_int();
 		r_ret = dprop[index];
 		return true;
 	}
@@ -66,7 +81,7 @@ bool Example::_get(const StringName &p_name, Variant &r_ret) const {
 }
 
 String Example::_to_string() const {
-	return "[ GDExtension::Example <--> Instance ID:" + itos(get_instance_id()) + " ]";
+	return "[ GDExtension::Example <--> Instance ID:" + uitos(get_instance_id()) + " ]";
 }
 
 void Example::_get_property_list(List<PropertyInfo> *p_list) const {
@@ -99,13 +114,19 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("simple_const_func"), &Example::simple_const_func);
 	ClassDB::bind_method(D_METHOD("return_something"), &Example::return_something);
 	ClassDB::bind_method(D_METHOD("return_something_const"), &Example::return_something_const);
+	ClassDB::bind_method(D_METHOD("return_empty_ref"), &Example::return_empty_ref);
 	ClassDB::bind_method(D_METHOD("return_extended_ref"), &Example::return_extended_ref);
-	ClassDB::bind_method(D_METHOD("extended_ref_checks"), &Example::extended_ref_checks);
+	ClassDB::bind_method(D_METHOD("extended_ref_checks", "ref"), &Example::extended_ref_checks);
 
 	ClassDB::bind_method(D_METHOD("test_array"), &Example::test_array);
 	ClassDB::bind_method(D_METHOD("test_tarray_arg", "array"), &Example::test_tarray_arg);
 	ClassDB::bind_method(D_METHOD("test_tarray"), &Example::test_tarray);
 	ClassDB::bind_method(D_METHOD("test_dictionary"), &Example::test_dictionary);
+	ClassDB::bind_method(D_METHOD("test_node_argument"), &Example::test_node_argument);
+	ClassDB::bind_method(D_METHOD("test_string_ops"), &Example::test_string_ops);
+	ClassDB::bind_method(D_METHOD("test_vector_ops"), &Example::test_vector_ops);
+
+	ClassDB::bind_method(D_METHOD("test_bitfield", "flags"), &Example::test_bitfield);
 
 	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
 
@@ -150,7 +171,11 @@ void Example::_bind_methods() {
 	BIND_ENUM_CONSTANT(FIRST);
 	BIND_ENUM_CONSTANT(ANSWER_TO_EVERYTHING);
 
+	BIND_BITFIELD_FLAG(FLAG_ONE);
+	BIND_BITFIELD_FLAG(FLAG_TWO);
+
 	BIND_CONSTANT(CONSTANT_WITHOUT_ENUM);
+	BIND_ENUM_CONSTANT(OUTSIDE_OF_CLASS);
 }
 
 Example::Example() {
@@ -184,30 +209,43 @@ Viewport *Example::return_something_const() const {
 	return nullptr;
 }
 
+Ref<ExampleRef> Example::return_empty_ref() const {
+	Ref<ExampleRef> ref;
+	return ref;
+}
+
 ExampleRef *Example::return_extended_ref() const {
+	// You can instance and return a refcounted object like this, but keep in mind that refcounting starts with the returned object
+	// and it will be destroyed when all references are destroyed. If you store this pointer you run the risk of having a pointer
+	// to a destroyed object.
 	return memnew(ExampleRef());
 }
 
+Example *Example::test_node_argument(Example *p_node) const {
+	UtilityFunctions::print("  Test node argument called with ", p_node ? String::num(p_node->get_instance_id()) : "null");
+	return p_node;
+}
+
 Ref<ExampleRef> Example::extended_ref_checks(Ref<ExampleRef> p_ref) const {
+	// This is therefor the prefered way of instancing and returning a refcounted object:
 	Ref<ExampleRef> ref;
 	ref.instantiate();
-	// TODO the returned value gets dereferenced too early and return a null object otherwise.
-	ref->reference();
+
 	UtilityFunctions::print("  Example ref checks called with value: ", p_ref->get_instance_id(), ", returning value: ", ref->get_instance_id());
 	return ref;
 }
 
-Variant Example::varargs_func(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
+Variant Example::varargs_func(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error) {
 	UtilityFunctions::print("  Varargs (Variant return) called with ", String::num((double)arg_count), " arguments");
 	return arg_count;
 }
 
-int Example::varargs_func_nv(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
+int Example::varargs_func_nv(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error) {
 	UtilityFunctions::print("  Varargs (int return) called with ", String::num((double)arg_count), " arguments");
 	return 42;
 }
 
-void Example::varargs_func_void(const Variant **args, GDNativeInt arg_count, GDNativeCallError &error) {
+void Example::varargs_func_void(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error) {
 	UtilityFunctions::print("  Varargs (no return) called with ", String::num((double)arg_count), " arguments");
 }
 
@@ -223,6 +261,28 @@ Array Example::test_array() const {
 	arr[1] = Variant(2);
 
 	return arr;
+}
+
+String Example::test_string_ops() const {
+	String s = String("A");
+	s += "B";
+	s += "C";
+	s += char32_t(0x010E);
+	s = s + "E";
+	return s;
+}
+
+int Example::test_vector_ops() const {
+	PackedInt32Array arr;
+	arr.push_back(10);
+	arr.push_back(20);
+	arr.push_back(30);
+	arr.push_back(45);
+	int ret = 0;
+	for (const int32_t &E : arr) {
+		ret += E;
+	}
+	return ret;
 }
 
 void Example::test_tarray_arg(const TypedArray<int64_t> &p_array) {
@@ -248,6 +308,11 @@ Dictionary Example::test_dictionary() const {
 	dict["foo"] = "bar";
 
 	return dict;
+}
+
+BitField<Example::Flags> Example::test_bitfield(BitField<Flags> flags) {
+	UtilityFunctions::print("  Got BitField: ", String::num_int64(flags));
+	return flags;
 }
 
 // Properties.

@@ -1,32 +1,32 @@
-/*************************************************************************/
-/*  vector4i.hpp                                                         */
-/*************************************************************************/
-/*                       This file is part of:                           */
-/*                           GODOT ENGINE                                */
-/*                      https://godotengine.org                          */
-/*************************************************************************/
-/* Copyright (c) 2007-2022 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2022 Godot Engine contributors (cf. AUTHORS.md).   */
-/*                                                                       */
-/* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the       */
-/* "Software"), to deal in the Software without restriction, including   */
-/* without limitation the rights to use, copy, modify, merge, publish,   */
-/* distribute, sublicense, and/or sell copies of the Software, and to    */
-/* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:                                             */
-/*                                                                       */
-/* The above copyright notice and this permission notice shall be        */
-/* included in all copies or substantial portions of the Software.       */
-/*                                                                       */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
-/*************************************************************************/
+/**************************************************************************/
+/*  vector4i.hpp                                                          */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             GODOT ENGINE                               */
+/*                        https://godotengine.org                         */
+/**************************************************************************/
+/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
 
 #ifndef GODOT_VECTOR4I_HPP
 #define GODOT_VECTOR4I_HPP
@@ -37,14 +37,11 @@
 namespace godot {
 
 class String;
-class Vector4;
+struct Vector4;
 
-class Vector4i {
-	_FORCE_INLINE_ GDNativeTypePtr _native_ptr() const { return (void *)this; }
+struct _NO_DISCARD_ Vector4i {
+	static const int AXIS_COUNT = 4;
 
-	friend class Variant;
-
-public:
 	enum Axis {
 		AXIS_X,
 		AXIS_Y,
@@ -64,15 +61,14 @@ public:
 	};
 
 	_FORCE_INLINE_ const int32_t &operator[](const int p_axis) const {
+		DEV_ASSERT((unsigned int)p_axis < 4);
 		return coord[p_axis];
 	}
 
 	_FORCE_INLINE_ int32_t &operator[](const int p_axis) {
+		DEV_ASSERT((unsigned int)p_axis < 4);
 		return coord[p_axis];
 	}
-
-	void set_axis(const int p_axis, const int32_t p_value);
-	int32_t get_axis(const int p_axis) const;
 
 	Vector4i::Axis min_axis_index() const;
 	Vector4i::Axis max_axis_index() const;
@@ -137,11 +133,11 @@ double Vector4i::length() const {
 }
 
 Vector4i Vector4i::abs() const {
-	return Vector4i(ABS(x), ABS(y), ABS(z), ABS(w));
+	return Vector4i(Math::abs(x), Math::abs(y), Math::abs(z), Math::abs(w));
 }
 
 Vector4i Vector4i::sign() const {
-	return Vector4i(SIGN(x), SIGN(y), SIGN(z), SIGN(w));
+	return Vector4i(Math::sign(x), Math::sign(y), Math::sign(z), Math::sign(w));
 }
 
 /* Operators */

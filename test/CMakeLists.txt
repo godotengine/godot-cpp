@@ -1,7 +1,7 @@
 project(godot-cpp-test)
 cmake_minimum_required(VERSION 3.6)
 
-set(GODOT_HEADERS_PATH ../godot-headers/ CACHE STRING "Path to Godot headers")
+set(GODOT_GDEXTENSION_DIR ../gdextension/ CACHE STRING "Path to GDExtension interface header directory")
 set(CPP_BINDINGS_PATH ../ CACHE STRING "Path to C++ bindings")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -102,8 +102,8 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} SYSTEM
 	PRIVATE
 		${CPP_BINDINGS_PATH}/include
-	${CPP_BINDINGS_PATH}/gen/include
-		${GODOT_HEADERS_PATH}
+		${CPP_BINDINGS_PATH}/gen/include
+		${GODOT_GDEXTENSION_DIR}
 )
 
 # Create the correct name (godot.os.build_type.system_bits)

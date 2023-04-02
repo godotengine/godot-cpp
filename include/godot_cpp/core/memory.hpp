@@ -1,35 +1,35 @@
-/*************************************************************************/
-/*  memory.hpp                                                           */
-/*************************************************************************/
-/*                       This file is part of:                           */
-/*                           GODOT ENGINE                                */
-/*                      https://godotengine.org                          */
-/*************************************************************************/
-/* Copyright (c) 2007-2022 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2022 Godot Engine contributors (cf. AUTHORS.md).   */
-/*                                                                       */
-/* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the       */
-/* "Software"), to deal in the Software without restriction, including   */
-/* without limitation the rights to use, copy, modify, merge, publish,   */
-/* distribute, sublicense, and/or sell copies of the Software, and to    */
-/* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:                                             */
-/*                                                                       */
-/* The above copyright notice and this permission notice shall be        */
-/* included in all copies or substantial portions of the Software.       */
-/*                                                                       */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
-/*************************************************************************/
+/**************************************************************************/
+/*  memory.hpp                                                            */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             GODOT ENGINE                               */
+/*                        https://godotengine.org                         */
+/**************************************************************************/
+/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
 
-#ifndef GODOT_CPP_MEMORY_HPP
-#define GODOT_CPP_MEMORY_HPP
+#ifndef GODOT_MEMORY_HPP
+#define GODOT_MEMORY_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -39,6 +39,10 @@
 #include <godot_cpp/godot.hpp>
 
 #include <type_traits>
+
+#ifndef PAD_ALIGN
+#define PAD_ALIGN 16 //must always be greater than this at much
+#endif
 
 void *operator new(size_t p_size, const char *p_description); ///< operator new that takes a description and uses MemoryStaticPool
 void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)); ///< operator new that takes a description and uses MemoryStaticPool
@@ -64,9 +68,9 @@ class Memory {
 	Memory();
 
 public:
-	static void *alloc_static(size_t p_bytes);
-	static void *realloc_static(void *p_memory, size_t p_bytes);
-	static void free_static(void *p_ptr);
+	static void *alloc_static(size_t p_bytes, bool p_pad_align = false);
+	static void *realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align = false);
+	static void free_static(void *p_ptr, bool p_pad_align = false);
 };
 
 _ALWAYS_INLINE_ void postinitialize_handler(void *) {}
@@ -92,6 +96,29 @@ struct Comparator {
 	_ALWAYS_INLINE_ bool operator()(const T &p_a, const T &p_b) const { return (p_a < p_b); }
 };
 
+template <class T>
+void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wrapped, T>>::type * = nullptr) {
+	if (!std::is_trivially_destructible<T>::value) {
+		p_class->~T();
+	}
+
+	Memory::free_static(p_class);
+}
+
+template <class T, std::enable_if_t<std::is_base_of_v<godot::Wrapped, T>, bool> = true>
+void memdelete(T *p_class) {
+	godot::internal::gde_interface->object_destroy(p_class->_owner);
+}
+
+template <class T, class A>
+void memdelete_allocator(T *p_class) {
+	if (!std::is_trivially_destructible<T>::value) {
+		p_class->~T();
+	}
+
+	A::free(p_class);
+}
+
 class DefaultAllocator {
 public:
 	_ALWAYS_INLINE_ static void *alloc(size_t p_memory) { return Memory::alloc_static(p_memory); }
@@ -106,29 +133,6 @@ public:
 	_ALWAYS_INLINE_ void delete_allocation(T *p_allocation) { memdelete(p_allocation); }
 };
 
-template <class T>
-void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wrapped, T>>::type * = 0) {
-	if (!__has_trivial_destructor(T)) {
-		p_class->~T();
-	}
-
-	Memory::free_static(p_class);
-}
-
-template <class T, std::enable_if_t<std::is_base_of_v<godot::Wrapped, T>, bool> = true>
-void memdelete(T *p_class) {
-	godot::internal::gdn_interface->object_destroy(p_class->_owner);
-}
-
-template <class T, class A>
-void memdelete_allocator(T *p_class) {
-	if (!__has_trivial_destructor(T)) {
-		p_class->~T();
-	}
-
-	A::free(p_class);
-}
-
 #define memnew_arr(m_class, m_count) memnew_arr_template<m_class>(m_count)
 
 template <typename T>
@@ -140,12 +144,12 @@ T *memnew_arr_template(size_t p_elements, const char *p_descr = "") {
 	same strategy used by std::vector, and the Vector class, so it should be safe.*/
 
 	size_t len = sizeof(T) * p_elements;
-	uint64_t *mem = (uint64_t *)Memory::alloc_static(len);
+	uint64_t *mem = (uint64_t *)Memory::alloc_static(len, true);
 	T *failptr = nullptr; // Get rid of a warning.
 	ERR_FAIL_COND_V(!mem, failptr);
 	*(mem - 1) = p_elements;
 
-	if (!__has_trivial_constructor(T)) {
+	if (!std::is_trivially_destructible<T>::value) {
 		T *elems = (T *)mem;
 
 		/* call operator new */
@@ -161,7 +165,7 @@ template <typename T>
 void memdelete_arr(T *p_class) {
 	uint64_t *ptr = (uint64_t *)p_class;
 
-	if (!__has_trivial_destructor(T)) {
+	if (!std::is_trivially_destructible<T>::value) {
 		uint64_t elem_count = *(ptr - 1);
 
 		for (uint64_t i = 0; i < elem_count; i++) {
@@ -169,7 +173,7 @@ void memdelete_arr(T *p_class) {
 		}
 	}
 
-	Memory::free_static(ptr);
+	Memory::free_static(ptr, true);
 }
 
 struct _GlobalNil {
@@ -187,4 +191,4 @@ struct _GlobalNilClass {
 
 } // namespace godot
 
-#endif // ! GODOT_CPP_MEMORY_HPP
+#endif // GODOT_MEMORY_HPP

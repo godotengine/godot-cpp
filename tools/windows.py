@@ -23,14 +23,15 @@ def generate(env):
         elif env["arch"] == "x86_32":
             env["TARGET_ARCH"] = "x86"
         env["is_msvc"] = True
+
+        # MSVC, linker, and archiver.
         msvc.generate(env)
+        env.Tool("mslib")
+        env.Tool("mslink")
+
         env.Append(CPPDEFINES=["TYPED_METHOD_BIND", "NOMINMAX"])
         env.Append(CCFLAGS=["/EHsc"])
         env.Append(LINKFLAGS=["/WX"])
-        if env["debug_symbols"] or env["target"] == "debug":
-            env.Append(CCFLAGS=["/MDd"])
-        else:
-            env.Append(CCFLAGS=["/MD"])
 
         if env["use_clang_cl"]:
             env["CC"] = "clang-cl"
@@ -39,8 +40,6 @@ def generate(env):
     elif sys.platform == "win32" or sys.platform == "msys":
         env["use_mingw"] = True
         mingw.generate(env)
-        # Still need to use C++17.
-        env.Append(CCFLAGS=["-std=c++17"])
         # Don't want lib prefixes
         env["IMPLIBPREFIX"] = ""
         env["SHLIBPREFIX"] = ""

@@ -1,32 +1,32 @@
-/*************************************************************************/
-/*  object.hpp                                                           */
-/*************************************************************************/
-/*                       This file is part of:                           */
-/*                           GODOT ENGINE                                */
-/*                      https://godotengine.org                          */
-/*************************************************************************/
-/* Copyright (c) 2007-2022 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2022 Godot Engine contributors (cf. AUTHORS.md).   */
-/*                                                                       */
-/* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the       */
-/* "Software"), to deal in the Software without restriction, including   */
-/* without limitation the rights to use, copy, modify, merge, publish,   */
-/* distribute, sublicense, and/or sell copies of the Software, and to    */
-/* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:                                             */
-/*                                                                       */
-/* The above copyright notice and this permission notice shall be        */
-/* included in all copies or substantial portions of the Software.       */
-/*                                                                       */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
-/*************************************************************************/
+/**************************************************************************/
+/*  object.hpp                                                            */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             GODOT ENGINE                               */
+/*                        https://godotengine.org                         */
+/**************************************************************************/
+/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
 
 #ifndef GODOT_OBJECT_HPP
 #define GODOT_OBJECT_HPP
@@ -41,7 +41,7 @@
 
 #include <godot_cpp/godot.hpp>
 
-#include <godot/gdnative_interface.h>
+#include <gdextension_interface.h>
 
 #include <vector>
 
@@ -53,7 +53,7 @@
 namespace godot {
 
 struct MethodInfo {
-	const char *name;
+	StringName name;
 	PropertyInfo return_val;
 	uint32_t flags;
 	int id = 0;
@@ -68,34 +68,34 @@ struct MethodInfo {
 	static MethodInfo from_dict(const Dictionary &p_dict);
 
 	MethodInfo();
-	MethodInfo(const char *p_name);
+	MethodInfo(StringName p_name);
 	template <class... Args>
-	MethodInfo(const char *p_name, const Args &...args);
+	MethodInfo(StringName p_name, const Args &...args);
 	MethodInfo(Variant::Type ret);
-	MethodInfo(Variant::Type ret, const char *p_name);
+	MethodInfo(Variant::Type ret, StringName p_name);
 	template <class... Args>
-	MethodInfo(Variant::Type ret, const char *p_name, const Args &...args);
-	MethodInfo(const PropertyInfo &p_ret, const char *p_name);
+	MethodInfo(Variant::Type ret, StringName p_name, const Args &...args);
+	MethodInfo(const PropertyInfo &p_ret, StringName p_name);
 	template <class... Args>
-	MethodInfo(const PropertyInfo &p_ret, const char *p_name, const Args &...);
+	MethodInfo(const PropertyInfo &p_ret, StringName p_name, const Args &...);
 };
 
 template <class... Args>
-MethodInfo::MethodInfo(const char *p_name, const Args &...args) :
-		name(p_name), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
+MethodInfo::MethodInfo(StringName p_name, const Args &...args) :
+		name(p_name), flags(GDEXTENSION_METHOD_FLAG_NORMAL) {
 	arguments = { args... };
 }
 
 template <class... Args>
-MethodInfo::MethodInfo(Variant::Type ret, const char *p_name, const Args &...args) :
-		name(p_name), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
+MethodInfo::MethodInfo(Variant::Type ret, StringName p_name, const Args &...args) :
+		name(p_name), flags(GDEXTENSION_METHOD_FLAG_NORMAL) {
 	return_val.type = ret;
 	arguments = { args... };
 }
 
 template <class... Args>
-MethodInfo::MethodInfo(const PropertyInfo &p_ret, const char *p_name, const Args &...args) :
-		name(p_name), return_val(p_ret), flags(GDNATIVE_EXTENSION_METHOD_FLAG_NORMAL) {
+MethodInfo::MethodInfo(const PropertyInfo &p_ret, StringName p_name, const Args &...args) :
+		name(p_name), return_val(p_ret), flags(GDEXTENSION_METHOD_FLAG_NORMAL) {
 	arguments = { args... };
 }
 
@@ -124,11 +124,11 @@ public:
 class ObjectDB {
 public:
 	static Object *get_instance(uint64_t p_object_id) {
-		GDNativeObjectPtr obj = internal::gdn_interface->object_get_instance_from_id(p_object_id);
+		GDExtensionObjectPtr obj = internal::gde_interface->object_get_instance_from_id(p_object_id);
 		if (obj == nullptr) {
 			return nullptr;
 		}
-		return reinterpret_cast<Object *>(internal::gdn_interface->object_get_instance_binding(obj, internal::token, &Object::___binding_callbacks));
+		return reinterpret_cast<Object *>(internal::gde_interface->object_get_instance_binding(obj, internal::token, &Object::___binding_callbacks));
 	}
 };
 
@@ -137,11 +137,12 @@ T *Object::cast_to(Object *p_object) {
 	if (p_object == nullptr) {
 		return nullptr;
 	}
-	GDNativeObjectPtr casted = internal::gdn_interface->object_cast_to(p_object->_owner, internal::gdn_interface->classdb_get_class_tag(T::get_class_static()));
+	StringName class_name = T::get_class_static();
+	GDExtensionObjectPtr casted = internal::gde_interface->object_cast_to(p_object->_owner, internal::gde_interface->classdb_get_class_tag(class_name._native_ptr()));
 	if (casted == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<T *>(internal::gdn_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
+	return reinterpret_cast<T *>(internal::gde_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
 }
 
 template <class T>
@@ -149,13 +150,14 @@ const T *Object::cast_to(const Object *p_object) {
 	if (p_object == nullptr) {
 		return nullptr;
 	}
-	GDNativeObjectPtr casted = internal::gdn_interface->object_cast_to(p_object->_owner, internal::gdn_interface->classdb_get_class_tag(T::get_class_static()));
+	StringName class_name = T::get_class_static();
+	GDExtensionObjectPtr casted = internal::gde_interface->object_cast_to(p_object->_owner, internal::gde_interface->classdb_get_class_tag(class_name._native_ptr()));
 	if (casted == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<const T *>(internal::gdn_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
+	return reinterpret_cast<const T *>(internal::gde_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
 }
 
 } // namespace godot
 
-#endif // ! GODOT_OBJECT_HPP
+#endif // GODOT_OBJECT_HPP

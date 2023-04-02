@@ -1,32 +1,32 @@
-/*************************************************************************/
-/*  char_string.cpp                                                      */
-/*************************************************************************/
-/*                       This file is part of:                           */
-/*                           GODOT ENGINE                                */
-/*                      https://godotengine.org                          */
-/*************************************************************************/
-/* Copyright (c) 2007-2022 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2022 Godot Engine contributors (cf. AUTHORS.md).   */
-/*                                                                       */
-/* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the       */
-/* "Software"), to deal in the Software without restriction, including   */
-/* without limitation the rights to use, copy, modify, merge, publish,   */
-/* distribute, sublicense, and/or sell copies of the Software, and to    */
-/* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:                                             */
-/*                                                                       */
-/* The above copyright notice and this permission notice shall be        */
-/* included in all copies or substantial portions of the Software.       */
-/*                                                                       */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
-/*************************************************************************/
+/**************************************************************************/
+/*  char_string.cpp                                                       */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             GODOT ENGINE                               */
+/*                        https://godotengine.org                         */
+/**************************************************************************/
+/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
 
 #include <godot_cpp/variant/char_string.hpp>
 
@@ -153,19 +153,19 @@ CharWideString::~CharWideString() {
 // It's easier to have them written in C++ directly than in a Python script that generates them.
 
 String::String(const char *from) {
-	internal::gdn_interface->string_new_with_latin1_chars(_native_ptr(), from);
+	internal::gde_interface->string_new_with_latin1_chars(_native_ptr(), from);
 }
 
 String::String(const wchar_t *from) {
-	internal::gdn_interface->string_new_with_wide_chars(_native_ptr(), from);
+	internal::gde_interface->string_new_with_wide_chars(_native_ptr(), from);
 }
 
 String::String(const char16_t *from) {
-	internal::gdn_interface->string_new_with_utf16_chars(_native_ptr(), from);
+	internal::gde_interface->string_new_with_utf16_chars(_native_ptr(), from);
 }
 
 String::String(const char32_t *from) {
-	internal::gdn_interface->string_new_with_utf32_chars(_native_ptr(), from);
+	internal::gde_interface->string_new_with_utf32_chars(_native_ptr(), from);
 }
 
 String String::utf8(const char *from, int len) {
@@ -175,7 +175,7 @@ String String::utf8(const char *from, int len) {
 }
 
 void String::parse_utf8(const char *from, int len) {
-	internal::gdn_interface->string_new_with_utf8_chars_and_len(_native_ptr(), from, len);
+	internal::gde_interface->string_new_with_utf8_chars_and_len(_native_ptr(), from, len);
 }
 
 String String::utf16(const char16_t *from, int len) {
@@ -185,7 +185,7 @@ String String::utf16(const char16_t *from, int len) {
 }
 
 void String::parse_utf16(const char16_t *from, int len) {
-	internal::gdn_interface->string_new_with_utf16_chars_and_len(_native_ptr(), from, len);
+	internal::gde_interface->string_new_with_utf16_chars_and_len(_native_ptr(), from, len);
 }
 
 String String::num_real(double p_num, bool p_trailing) {
@@ -226,53 +226,58 @@ String rtoss(double p_val) {
 }
 
 CharString String::utf8() const {
-	int size = internal::gdn_interface->string_to_utf8_chars(_native_ptr(), nullptr, 0);
-	char *cstr = memnew_arr(char, size + 1);
-	internal::gdn_interface->string_to_utf8_chars(_native_ptr(), cstr, size + 1);
+	int length = internal::gde_interface->string_to_utf8_chars(_native_ptr(), nullptr, 0);
+	int size = length + 1;
+	char *cstr = memnew_arr(char, size);
+	internal::gde_interface->string_to_utf8_chars(_native_ptr(), cstr, length);
 
-	cstr[size] = '\0';
+	cstr[length] = '\0';
 
-	return CharString(cstr, size + 1);
+	return CharString(cstr, length);
 }
 
 CharString String::ascii() const {
-	int size = internal::gdn_interface->string_to_latin1_chars(_native_ptr(), nullptr, 0);
-	char *cstr = memnew_arr(char, size + 1);
-	internal::gdn_interface->string_to_latin1_chars(_native_ptr(), cstr, size + 1);
+	int length = internal::gde_interface->string_to_latin1_chars(_native_ptr(), nullptr, 0);
+	int size = length + 1;
+	char *cstr = memnew_arr(char, size);
+	internal::gde_interface->string_to_latin1_chars(_native_ptr(), cstr, length);
 
-	cstr[size] = '\0';
+	cstr[length] = '\0';
 
-	return CharString(cstr, size + 1);
+	return CharString(cstr, length);
 }
 
 Char16String String::utf16() const {
-	int size = internal::gdn_interface->string_to_utf16_chars(_native_ptr(), nullptr, 0);
-	char16_t *cstr = memnew_arr(char16_t, size + 1);
-	internal::gdn_interface->string_to_utf16_chars(_native_ptr(), cstr, size + 1);
+	int length = internal::gde_interface->string_to_utf16_chars(_native_ptr(), nullptr, 0);
+	int size = length + 1;
+	char16_t *cstr = memnew_arr(char16_t, size);
+	internal::gde_interface->string_to_utf16_chars(_native_ptr(), cstr, length);
 
-	cstr[size] = '\0';
+	cstr[length] = '\0';
 
-	return Char16String(cstr, size + 1);
+	return Char16String(cstr, length);
 }
 
 Char32String String::utf32() const {
-	int size = internal::gdn_interface->string_to_utf32_chars(_native_ptr(), nullptr, 0);
-	char32_t *cstr = memnew_arr(char32_t, size + 1);
-	internal::gdn_interface->string_to_utf32_chars(_native_ptr(), cstr, size + 1);
+	int length = internal::gde_interface->string_to_utf32_chars(_native_ptr(), nullptr, 0);
+	int size = length + 1;
+	char32_t *cstr = memnew_arr(char32_t, size);
+	internal::gde_interface->string_to_utf32_chars(_native_ptr(), cstr, length);
 
-	cstr[size] = '\0';
+	cstr[length] = '\0';
 
-	return Char32String(cstr, size + 1);
+	return Char32String(cstr, length);
 }
 
 CharWideString String::wide_string() const {
-	int size = internal::gdn_interface->string_to_wide_chars(_native_ptr(), nullptr, 0);
-	wchar_t *cstr = memnew_arr(wchar_t, size + 1);
-	internal::gdn_interface->string_to_wide_chars(_native_ptr(), cstr, size + 1);
+	int length = internal::gde_interface->string_to_wide_chars(_native_ptr(), nullptr, 0);
+	int size = length + 1;
+	wchar_t *cstr = memnew_arr(wchar_t, size);
+	internal::gde_interface->string_to_wide_chars(_native_ptr(), cstr, length);
 
-	cstr[size] = '\0';
+	cstr[length] = '\0';
 
-	return CharWideString(cstr, size + 1);
+	return CharWideString(cstr, length);
 }
 
 String &String::operator=(const char *p_str) {
@@ -327,20 +332,65 @@ bool String::operator!=(const char32_t *p_str) const {
 	return *this != String(p_str);
 }
 
+String String::operator+(const char *p_str) {
+	return *this + String(p_str);
+}
+
+String String::operator+(const wchar_t *p_str) {
+	return *this + String(p_str);
+}
+
+String String::operator+(const char16_t *p_str) {
+	return *this + String(p_str);
+}
+
+String String::operator+(const char32_t *p_str) {
+	return *this + String(p_str);
+}
+
+String String::operator+(const char32_t p_char) {
+	return *this + String::chr(p_char);
+}
+
+String &String::operator+=(const String &p_str) {
+	internal::gde_interface->string_operator_plus_eq_string((GDExtensionStringPtr)this, (GDExtensionConstStringPtr)&p_str);
+	return *this;
+}
+
+String &String::operator+=(char32_t p_char) {
+	internal::gde_interface->string_operator_plus_eq_char((GDExtensionStringPtr)this, p_char);
+	return *this;
+}
+
+String &String::operator+=(const char *p_str) {
+	internal::gde_interface->string_operator_plus_eq_cstr((GDExtensionStringPtr)this, p_str);
+	return *this;
+}
+
+String &String::operator+=(const wchar_t *p_str) {
+	internal::gde_interface->string_operator_plus_eq_wcstr((GDExtensionStringPtr)this, p_str);
+	return *this;
+}
+
+String &String::operator+=(const char32_t *p_str) {
+	internal::gde_interface->string_operator_plus_eq_c32str((GDExtensionStringPtr)this, p_str);
+	return *this;
+}
+
 const char32_t &String::operator[](int p_index) const {
-	return *internal::gdn_interface->string_operator_index_const((GDNativeStringPtr)this, p_index);
+	return *internal::gde_interface->string_operator_index_const((GDExtensionStringPtr)this, p_index);
 }
 
 char32_t &String::operator[](int p_index) {
-	return *internal::gdn_interface->string_operator_index((GDNativeStringPtr)this, p_index);
+	return *internal::gde_interface->string_operator_index((GDExtensionStringPtr)this, p_index);
 }
 
 const char32_t *String::ptr() const {
-	return internal::gdn_interface->string_operator_index_const((GDNativeStringPtr)this, 0);
+	return internal::gde_interface->string_operator_index_const((GDExtensionStringPtr)this, 0);
 }
 
 char32_t *String::ptrw() {
-	return internal::gdn_interface->string_operator_index((GDNativeStringPtr)this, 0);
+	return internal::gde_interface->string_operator_index((GDExtensionStringPtr)this, 0);
 }
 
 bool operator==(const char *p_chr, const String &p_str) {
@@ -389,6 +439,10 @@ String operator+(const char16_t *p_chr, const String &p_str) {
 
 String operator+(const char32_t *p_chr, const String &p_str) {
 	return String(p_chr) + p_str;
+}
+
+String operator+(char32_t p_char, const String &p_str) {
+	return String::chr(p_char) + p_str;
 }
 
 StringName::StringName(const char *from) :
