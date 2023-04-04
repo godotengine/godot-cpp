@@ -12,8 +12,7 @@ def configure(env):
 
     def mySubProcess(cmdline, env):
         # print(cmdline)
-        proc = subprocess.run(args=cmdline, shell=True, env=env)
-        rv = proc.returncode
+        rv = subprocess.run(args=cmdline, shell=True, env=env).returncode
         if rv:
             print("=====")
             print("subprocess.run().returncode=", rv, "(", hex(rv), ")")
@@ -30,7 +29,7 @@ def configure(env):
             length = lead + 1 + len(args[begin])
             for i in range(4, len(args)):
                 length += 1 + len(args[i])
-                if length > 8153:
+                if length > 8158:
                     cmdline = " ".join(args[0:3] + args[begin:i])
                     # print("objs=", i - begin, ", length=", len(cmdline))
                     rv = mySubProcess(cmdline, env)
