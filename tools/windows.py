@@ -46,8 +46,7 @@ def generate(env):
         # Want dll suffix
         env["SHLIBSUFFIX"] = ".dll"
 
-        # These options are for a release build even using target=template_debug
-        env.Append(CCFLAGS=["-O3", "-Wwrite-strings"])
+        env.Append(CCFLAGS=["-Wwrite-strings"])
         env.Append(
             LINKFLAGS=[
                 "-static",
@@ -74,8 +73,7 @@ def generate(env):
         # Want dll suffix
         env["SHLIBSUFFIX"] = ".dll"
 
-        # These options are for a release build even using target=template_debug
-        env.Append(CCFLAGS=["-O3", "-Wwrite-strings"])
+        env.Append(CCFLAGS=["-Wwrite-strings"])
         env.Append(
             LINKFLAGS=[
                 "-static",
