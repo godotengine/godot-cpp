@@ -334,6 +334,8 @@ String vformat(const String &p_text, const VarArgs... p_args) {
 	return p_text % args_array;
 }
 
+#include <godot_cpp/variant/builtin_vararg_methods.hpp>
+
 } // namespace godot
 
 #endif // GODOT_VARIANT_HPP

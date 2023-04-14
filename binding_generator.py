@@ -121,6 +121,7 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
             include_gen_folder / "variant" / "builtin_binds.hpp",
             include_gen_folder / "variant" / "utility_functions.hpp",
             include_gen_folder / "variant" / "variant_size.hpp",
+            include_gen_folder / "variant" / "builtin_vararg_methods.hpp",
             include_gen_folder / "classes" / "global_constants.hpp",
             include_gen_folder / "classes" / "global_constants_binds.hpp",
         ]:
@@ -343,6 +344,40 @@ def generate_builtin_bindings(api, output_dir, build_config):
         builtin_binds.append("#endif // ! GODOT_CPP_BUILTIN_BINDS_HPP")
 
         builtin_binds_file.write("\n".join(builtin_binds))
+
+    # Create a header to implement all builtin class vararg methods and be included in "variant.hpp".
+    builtin_vararg_methods_header = include_gen_folder / "builtin_vararg_methods.hpp"
+    builtin_vararg_methods_header.open("w+").write(
+        generate_builtin_class_vararg_method_implements_header(api["builtin_classes"])
+    )
+
+
+def generate_builtin_class_vararg_method_implements_header(builtin_classes):
+    result = []
+
+    add_header("builtin_vararg_methods.hpp", result)
+
+    header_guard = "GODOT_CPP_BUILTIN_VARARG_METHODS_HPP"
+    result.append(f"#ifndef {header_guard}")
+    result.append(f"#define {header_guard}")
+    result.append("")
+    for builtin_api in builtin_classes:
+        if not "methods" in builtin_api:
+            continue
+        class_name = builtin_api["name"]
+        for method in builtin_api["methods"]:
+            if not method["is_vararg"]:
+                continue
+
+            result += make_varargs_template(
+                method, "is_static" in method and method["is_static"], class_name, False, False, True
+            )
+            result.append("")
+
+    result.append("")
+    result.append(f"#endif // ! {header_guard}")
+
+    return "\n".join(result)
 
 
 def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes):
@@ -1969,10 +2004,22 @@ def make_signature(
     return function_signature
 
 
-def make_varargs_template(function_data, static=False):
+def make_varargs_template(
+    function_data,
+    static=False,
+    class_befor_signature="",
+    with_public_declare=True,
+    with_indent=True,
+    for_builtin_classes=False,
+):
     result = []
 
-    function_signature = "\tpublic: template<class... Args> "
+    function_signature = ""
+
+    if with_public_declare:
+        function_signature = "public: "
+
+    function_signature += "template<class... Args> "
 
     if static:
         function_signature += "static "
@@ -1993,6 +2040,8 @@ def make_varargs_template(function_data, static=False):
     if not function_signature.endswith("*"):
         function_signature += " "
 
+    if len(class_befor_signature) > 0:
+        function_signature += class_befor_signature + "::"
     function_signature += f'{escape_identifier(function_data["name"])}'
 
     method_arguments = []
@@ -2013,7 +2062,7 @@ def make_varargs_template(function_data, static=False):
     function_signature += " {"
     result.append(function_signature)
 
-    args_array = f"\t\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args {{ "
+    args_array = f"\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args {{ "
     for argument in method_arguments:
         if argument["type"] == "Variant":
             args_array += argument["name"]
@@ -2023,19 +2072,42 @@ def make_varargs_template(function_data, static=False):
 
     args_array += "Variant(args)... };"
     result.append(args_array)
-    result.append(f"\t\tstd::array<const Variant *, {len(method_arguments)} + sizeof...(Args)> call_args;")
-    result.append("\t\tfor(size_t i = 0; i < variant_args.size(); i++) {")
-    result.append("\t\t\tcall_args[i] = &variant_args[i];")
-    result.append("\t\t}")
-
-    call_line = "\t\t"
-
-    if return_type != "void":
-        call_line += "return "
-
-    call_line += f'{escape_identifier(function_data["name"])}_internal(call_args.data(), variant_args.size());'
-    result.append(call_line)
+    result.append(f"\tstd::array<const Variant *, {len(method_arguments)} + sizeof...(Args)> call_args;")
+    result.append("\tfor(size_t i = 0; i < variant_args.size(); i++) {")
+    result.append("\t\tcall_args[i] = &variant_args[i];")
     result.append("\t}")
+
+    call_line = "\t"
+
+    if not for_builtin_classes:
+        if return_type != "void":
+            call_line += "return "
+
+        call_line += f'{escape_identifier(function_data["name"])}_internal(call_args.data(), variant_args.size());'
+        result.append(call_line)
+    else:
+        base = "(GDExtensionTypePtr)&opaque"
+        if static:
+            base = "nullptr"
+
+        ret = "nullptr"
+        if return_type != "void":
+            ret = "&ret"
+            result.append(f'\t{correct_type(function_data["return_type"])} ret;')
+
+        function_name = function_data["name"]
+        result.append(
+            f"\t_method_bindings.method_{function_name}({base}, reinterpret_cast<GDExtensionConstTypePtr *>(call_args.data()), {ret}, {len(method_arguments)} + sizeof...(Args));"
+        )
+
+        if return_type != "void":
+            result.append("\treturn ret;")
+
+    result.append("}")
+
+    if with_indent:
+        for i in range(len(result)):
+            result[i] = "\t" + result[i]
 
     return result
 
