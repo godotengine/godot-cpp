@@ -153,19 +153,19 @@ CharWideString::~CharWideString() {
 // It's easier to have them written in C++ directly than in a Python script that generates them.
 
 String::String(const char *from) {
-	internal::gde_interface->string_new_with_latin1_chars(_native_ptr(), from);
+	internal::gdextension_interface_string_new_with_latin1_chars(_native_ptr(), from);
 }
 
 String::String(const wchar_t *from) {
-	internal::gde_interface->string_new_with_wide_chars(_native_ptr(), from);
+	internal::gdextension_interface_string_new_with_wide_chars(_native_ptr(), from);
 }
 
 String::String(const char16_t *from) {
-	internal::gde_interface->string_new_with_utf16_chars(_native_ptr(), from);
+	internal::gdextension_interface_string_new_with_utf16_chars(_native_ptr(), from);
 }
 
 String::String(const char32_t *from) {
-	internal::gde_interface->string_new_with_utf32_chars(_native_ptr(), from);
+	internal::gdextension_interface_string_new_with_utf32_chars(_native_ptr(), from);
 }
 
 String String::utf8(const char *from, int len) {
@@ -175,7 +175,7 @@ String String::utf8(const char *from, int len) {
 }
 
 void String::parse_utf8(const char *from, int len) {
-	internal::gde_interface->string_new_with_utf8_chars_and_len(_native_ptr(), from, len);
+	internal::gdextension_interface_string_new_with_utf8_chars_and_len(_native_ptr(), from, len);
 }
 
 String String::utf16(const char16_t *from, int len) {
@@ -185,7 +185,7 @@ String String::utf16(const char16_t *from, int len) {
 }
 
 void String::parse_utf16(const char16_t *from, int len) {
-	internal::gde_interface->string_new_with_utf16_chars_and_len(_native_ptr(), from, len);
+	internal::gdextension_interface_string_new_with_utf16_chars_and_len(_native_ptr(), from, len);
 }
 
 String String::num_real(double p_num, bool p_trailing) {
@@ -226,10 +226,10 @@ String rtoss(double p_val) {
 }
 
 CharString String::utf8() const {
-	int length = internal::gde_interface->string_to_utf8_chars(_native_ptr(), nullptr, 0);
+	int length = internal::gdextension_interface_string_to_utf8_chars(_native_ptr(), nullptr, 0);
 	int size = length + 1;
 	char *cstr = memnew_arr(char, size);
-	internal::gde_interface->string_to_utf8_chars(_native_ptr(), cstr, length);
+	internal::gdextension_interface_string_to_utf8_chars(_native_ptr(), cstr, length);
 
 	cstr[length] = '\0';
 
@@ -237,10 +237,10 @@ CharString String::utf8() const {
 }
 
 CharString String::ascii() const {
-	int length = internal::gde_interface->string_to_latin1_chars(_native_ptr(), nullptr, 0);
+	int length = internal::gdextension_interface_string_to_latin1_chars(_native_ptr(), nullptr, 0);
 	int size = length + 1;
 	char *cstr = memnew_arr(char, size);
-	internal::gde_interface->string_to_latin1_chars(_native_ptr(), cstr, length);
+	internal::gdextension_interface_string_to_latin1_chars(_native_ptr(), cstr, length);
 
 	cstr[length] = '\0';
 
@@ -248,10 +248,10 @@ CharString String::ascii() const {
 }
 
 Char16String String::utf16() const {
-	int length = internal::gde_interface->string_to_utf16_chars(_native_ptr(), nullptr, 0);
+	int length = internal::gdextension_interface_string_to_utf16_chars(_native_ptr(), nullptr, 0);
 	int size = length + 1;
 	char16_t *cstr = memnew_arr(char16_t, size);
-	internal::gde_interface->string_to_utf16_chars(_native_ptr(), cstr, length);
+	internal::gdextension_interface_string_to_utf16_chars(_native_ptr(), cstr, length);
 
 	cstr[length] = '\0';
 
@@ -259,10 +259,10 @@ Char16String String::utf16() const {
 }
 
 Char32String String::utf32() const {
-	int length = internal::gde_interface->string_to_utf32_chars(_native_ptr(), nullptr, 0);
+	int length = internal::gdextension_interface_string_to_utf32_chars(_native_ptr(), nullptr, 0);
 	int size = length + 1;
 	char32_t *cstr = memnew_arr(char32_t, size);
-	internal::gde_interface->string_to_utf32_chars(_native_ptr(), cstr, length);
+	internal::gdextension_interface_string_to_utf32_chars(_native_ptr(), cstr, length);
 
 	cstr[length] = '\0';
 
@@ -270,10 +270,10 @@ Char32String String::utf32() const {
 }
 
 CharWideString String::wide_string() const {
-	int length = internal::gde_interface->string_to_wide_chars(_native_ptr(), nullptr, 0);
+	int length = internal::gdextension_interface_string_to_wide_chars(_native_ptr(), nullptr, 0);
 	int size = length + 1;
 	wchar_t *cstr = memnew_arr(wchar_t, size);
-	internal::gde_interface->string_to_wide_chars(_native_ptr(), cstr, length);
+	internal::gdextension_interface_string_to_wide_chars(_native_ptr(), cstr, length);
 
 	cstr[length] = '\0';
 
@@ -353,44 +353,44 @@ String String::operator+(const char32_t p_char) {
 }
 
 String &String::operator+=(const String &p_str) {
-	internal::gde_interface->string_operator_plus_eq_string((GDExtensionStringPtr)this, (GDExtensionConstStringPtr)&p_str);
+	internal::gdextension_interface_string_operator_plus_eq_string((GDExtensionStringPtr)this, (GDExtensionConstStringPtr)&p_str);
 	return *this;
 }
 
 String &String::operator+=(char32_t p_char) {
-	internal::gde_interface->string_operator_plus_eq_char((GDExtensionStringPtr)this, p_char);
+	internal::gdextension_interface_string_operator_plus_eq_char((GDExtensionStringPtr)this, p_char);
 	return *this;
 }
 
 String &String::operator+=(const char *p_str) {
-	internal::gde_interface->string_operator_plus_eq_cstr((GDExtensionStringPtr)this, p_str);
+	internal::gdextension_interface_string_operator_plus_eq_cstr((GDExtensionStringPtr)this, p_str);
 	return *this;
 }
 
 String &String::operator+=(const wchar_t *p_str) {
-	internal::gde_interface->string_operator_plus_eq_wcstr((GDExtensionStringPtr)this, p_str);
+	internal::gdextension_interface_string_operator_plus_eq_wcstr((GDExtensionStringPtr)this, p_str);
 	return *this;
 }
 
 String &String::operator+=(const char32_t *p_str) {
-	internal::gde_interface->string_operator_plus_eq_c32str((GDExtensionStringPtr)this, p_str);
+	internal::gdextension_interface_string_operator_plus_eq_c32str((GDExtensionStringPtr)this, p_str);
 	return *this;
 }
 
 const char32_t &String::operator[](int p_index) const {
-	return *internal::gde_interface->string_operator_index_const((GDExtensionStringPtr)this, p_index);
+	return *internal::gdextension_interface_string_operator_index_const((GDExtensionStringPtr)this, p_index);
 }
 
 char32_t &String::operator[](int p_index) {
-	return *internal::gde_interface->string_operator_index((GDExtensionStringPtr)this, p_index);
+	return *internal::gdextension_interface_string_operator_index((GDExtensionStringPtr)this, p_index);
 }
 
 const char32_t *String::ptr() const {
-	return internal::gde_interface->string_operator_index_const((GDExtensionStringPtr)this, 0);
+	return internal::gdextension_interface_string_operator_index_const((GDExtensionStringPtr)this, 0);
 }
 
 char32_t *String::ptrw() {
-	return internal::gde_interface->string_operator_index((GDExtensionStringPtr)this, 0);
+	return internal::gdextension_interface_string_operator_index((GDExtensionStringPtr)this, 0);
 }
 
 bool operator==(const char *p_chr, const String &p_str) {

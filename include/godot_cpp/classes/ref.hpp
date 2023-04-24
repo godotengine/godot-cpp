@@ -242,7 +242,7 @@ struct PtrToArg<Ref<T>> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
 		// Important: p_ptr is T*, not Ref<T>*, since Object* is what engine gives to ptrcall.
 		ERR_FAIL_NULL_V(p_ptr, Ref<T>());
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdextension_interface_object_get_instance_binding(
 				reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)),
 				godot::internal::token, &T::___binding_callbacks)));
 	}
@@ -256,7 +256,7 @@ struct PtrToArg<Ref<T>> {
 		// This code assumes that p_ptr points to an unset Ref<T> variable on the Godot side
 		// so we only set it if we have an object to set.
 		if (p_val.is_valid()) {
-			godot::internal::gde_interface->ref_set_object(ref, p_val->_owner);
+			godot::internal::gdextension_interface_ref_set_object(ref, p_val->_owner);
 		}
 	}
 };
@@ -267,7 +267,7 @@ struct PtrToArg<const Ref<T> &> {
 
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
 		ERR_FAIL_NULL_V(p_ptr, Ref<T>());
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::gde_interface->object_get_instance_binding(
+		return Ref<T>(reinterpret_cast<T *>(godot::internal::gdextension_interface_object_get_instance_binding(
 				reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)),
 				godot::internal::token, &T::___binding_callbacks)));
 	}

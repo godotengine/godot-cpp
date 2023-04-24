@@ -43,13 +43,13 @@ const StringName *Wrapped::_get_extension_class_name() const {
 void Wrapped::_postinitialize() {
 	const StringName *extension_class = _get_extension_class_name();
 	if (extension_class) {
-		godot::internal::gde_interface->object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(extension_class), this);
+		godot::internal::gdextension_interface_object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(extension_class), this);
 	}
-	godot::internal::gde_interface->object_set_instance_binding(_owner, godot::internal::token, this, _get_bindings_callbacks());
+	godot::internal::gdextension_interface_object_set_instance_binding(_owner, godot::internal::token, this, _get_bindings_callbacks());
 }
 
 Wrapped::Wrapped(const StringName p_godot_class) {
-	_owner = godot::internal::gde_interface->classdb_construct_object(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
+	_owner = godot::internal::gdextension_interface_classdb_construct_object(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
 }
 
 Wrapped::Wrapped(GodotObject *p_godot_object) {

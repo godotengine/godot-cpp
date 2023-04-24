@@ -194,7 +194,7 @@ void ClassDB::_register_class(bool p_virtual) {
 		(void *)&T::get_class_static(), // void *class_userdata;
 	};
 
-	internal::gde_interface->classdb_register_extension_class(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
+	internal::gdextension_interface_classdb_register_extension_class(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
 
 	// call bind_methods etc. to register all members of the class
 	T::initialize_class();

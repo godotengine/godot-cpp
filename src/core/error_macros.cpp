@@ -39,9 +39,9 @@ namespace godot {
 
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, bool p_editor_notify, bool p_is_warning) {
 	if (p_is_warning) {
-		internal::gde_interface->print_warning(p_error, p_function, p_file, p_line, p_editor_notify);
+		internal::gdextension_interface_print_warning(p_error, p_function, p_file, p_line, p_editor_notify);
 	} else {
-		internal::gde_interface->print_error(p_error, p_function, p_file, p_line, p_editor_notify);
+		internal::gdextension_interface_print_error(p_error, p_function, p_file, p_line, p_editor_notify);
 	}
 }
 
@@ -51,9 +51,9 @@ void _err_print_error(const char *p_function, const char *p_file, int p_line, co
 
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const char *p_message, bool p_editor_notify, bool p_is_warning) {
 	if (p_is_warning) {
-		internal::gde_interface->print_warning_with_message(p_error, p_message, p_function, p_file, p_line, p_editor_notify);
+		internal::gdextension_interface_print_warning_with_message(p_error, p_message, p_function, p_file, p_line, p_editor_notify);
 	} else {
-		internal::gde_interface->print_error_with_message(p_error, p_message, p_function, p_file, p_line, p_editor_notify);
+		internal::gdextension_interface_print_error_with_message(p_error, p_message, p_function, p_file, p_line, p_editor_notify);
 	}
 }
 

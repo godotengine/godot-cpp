@@ -47,25 +47,25 @@ template <class O, class... Args>
 O *_call_native_mb_ret_obj(const GDExtensionMethodBindPtr mb, void *instance, const Args &...args) {
 	GodotObject *ret = nullptr;
 	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
-	internal::gde_interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), &ret);
+	internal::gdextension_interface_object_method_bind_ptrcall(mb, instance, mb_args.data(), &ret);
 	if (ret == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<O *>(internal::gde_interface->object_get_instance_binding(ret, internal::token, &O::___binding_callbacks));
+	return reinterpret_cast<O *>(internal::gdextension_interface_object_get_instance_binding(ret, internal::token, &O::___binding_callbacks));
 }
 
 template <class R, class... Args>
 R _call_native_mb_ret(const GDExtensionMethodBindPtr mb, void *instance, const Args &...args) {
 	R ret;
 	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
-	internal::gde_interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), &ret);
+	internal::gdextension_interface_object_method_bind_ptrcall(mb, instance, mb_args.data(), &ret);
 	return ret;
 }
 
 template <class... Args>
 void _call_native_mb_no_ret(const GDExtensionMethodBindPtr mb, void *instance, const Args &...args) {
 	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
-	internal::gde_interface->object_method_bind_ptrcall(mb, instance, mb_args.data(), nullptr);
+	internal::gdextension_interface_object_method_bind_ptrcall(mb, instance, mb_args.data(), nullptr);
 }
 
 template <class R, class... Args>
@@ -81,7 +81,7 @@ Object *_call_utility_ret_obj(const GDExtensionPtrUtilityFunction func, void *in
 	GodotObject *ret = nullptr;
 	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
 	func(&ret, mb_args.data(), mb_args.size());
-	return (Object *)internal::gde_interface->object_get_instance_binding(ret, internal::token, &Object::___binding_callbacks);
+	return (Object *)internal::gdextension_interface_object_get_instance_binding(ret, internal::token, &Object::___binding_callbacks);
 }
 
 template <class... Args>
