@@ -4,4 +4,4 @@
 
 [resource]
 background_mode = 2
-sky = SubResource( "1" )
+sky = SubResource("1")
