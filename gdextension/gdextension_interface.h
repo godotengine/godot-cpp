@@ -135,6 +135,8 @@ typedef enum {
 
 	/* containment */
 	GDEXTENSION_VARIANT_OP_IN,
+	/* coalesce */
+	GDEXTENSION_VARIANT_OP_COALESCE,
 	GDEXTENSION_VARIANT_OP_MAX
 
 } GDExtensionVariantOperator;

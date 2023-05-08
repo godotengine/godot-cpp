@@ -2249,6 +2249,7 @@ def get_operator_id_name(op):
         "not": "not",
         "and": "and",
         "in": "in",
+        "??": "coalesce",
     }
     return op_id_map[op]
 

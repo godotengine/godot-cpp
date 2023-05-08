@@ -136,6 +136,8 @@ public:
 		OP_NOT,
 		// containment
 		OP_IN,
+		// coalesce
+		OP_COALESCE,
 		OP_MAX
 	};
 
