@@ -107,7 +107,7 @@ void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wra
 
 template <class T, std::enable_if_t<std::is_base_of_v<godot::Wrapped, T>, bool> = true>
 void memdelete(T *p_class) {
-	godot::internal::gde_interface->object_destroy(p_class->_owner);
+	godot::internal::gdextension_interface_object_destroy(p_class->_owner);
 }
 
 template <class T, class A>

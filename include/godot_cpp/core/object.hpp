@@ -124,11 +124,11 @@ public:
 class ObjectDB {
 public:
 	static Object *get_instance(uint64_t p_object_id) {
-		GDExtensionObjectPtr obj = internal::gde_interface->object_get_instance_from_id(p_object_id);
+		GDExtensionObjectPtr obj = internal::gdextension_interface_object_get_instance_from_id(p_object_id);
 		if (obj == nullptr) {
 			return nullptr;
 		}
-		return reinterpret_cast<Object *>(internal::gde_interface->object_get_instance_binding(obj, internal::token, &Object::___binding_callbacks));
+		return reinterpret_cast<Object *>(internal::gdextension_interface_object_get_instance_binding(obj, internal::token, &Object::___binding_callbacks));
 	}
 };
 
@@ -138,11 +138,11 @@ T *Object::cast_to(Object *p_object) {
 		return nullptr;
 	}
 	StringName class_name = T::get_class_static();
-	GDExtensionObjectPtr casted = internal::gde_interface->object_cast_to(p_object->_owner, internal::gde_interface->classdb_get_class_tag(class_name._native_ptr()));
+	GDExtensionObjectPtr casted = internal::gdextension_interface_object_cast_to(p_object->_owner, internal::gdextension_interface_classdb_get_class_tag(class_name._native_ptr()));
 	if (casted == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<T *>(internal::gde_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
+	return reinterpret_cast<T *>(internal::gdextension_interface_object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
 }
 
 template <class T>
@@ -151,11 +151,11 @@ const T *Object::cast_to(const Object *p_object) {
 		return nullptr;
 	}
 	StringName class_name = T::get_class_static();
-	GDExtensionObjectPtr casted = internal::gde_interface->object_cast_to(p_object->_owner, internal::gde_interface->classdb_get_class_tag(class_name._native_ptr()));
+	GDExtensionObjectPtr casted = internal::gdextension_interface_object_cast_to(p_object->_owner, internal::gdextension_interface_classdb_get_class_tag(class_name._native_ptr()));
 	if (casted == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<const T *>(internal::gde_interface->object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
+	return reinterpret_cast<const T *>(internal::gdextension_interface_object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
 }
 
 } // namespace godot

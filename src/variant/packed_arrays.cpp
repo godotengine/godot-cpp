@@ -47,183 +47,183 @@
 namespace godot {
 
 const uint8_t &PackedByteArray::operator[](int p_index) const {
-	return *internal::gde_interface->packed_byte_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
+	return *internal::gdextension_interface_packed_byte_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 }
 
 uint8_t &PackedByteArray::operator[](int p_index) {
-	return *internal::gde_interface->packed_byte_array_operator_index((GDExtensionTypePtr *)this, p_index);
+	return *internal::gdextension_interface_packed_byte_array_operator_index((GDExtensionTypePtr *)this, p_index);
 }
 
 const uint8_t *PackedByteArray::ptr() const {
-	return internal::gde_interface->packed_byte_array_operator_index_const((GDExtensionTypePtr *)this, 0);
+	return internal::gdextension_interface_packed_byte_array_operator_index_const((GDExtensionTypePtr *)this, 0);
 }
 
 uint8_t *PackedByteArray::ptrw() {
-	return internal::gde_interface->packed_byte_array_operator_index((GDExtensionTypePtr *)this, 0);
+	return internal::gdextension_interface_packed_byte_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
 const Color &PackedColorArray::operator[](int p_index) const {
-	const Color *color = (const Color *)internal::gde_interface->packed_color_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
+	const Color *color = (const Color *)internal::gdextension_interface_packed_color_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 	return *color;
 }
 
 Color &PackedColorArray::operator[](int p_index) {
-	Color *color = (Color *)internal::gde_interface->packed_color_array_operator_index((GDExtensionTypePtr *)this, p_index);
+	Color *color = (Color *)internal::gdextension_interface_packed_color_array_operator_index((GDExtensionTypePtr *)this, p_index);
 	return *color;
 }
 
 const Color *PackedColorArray::ptr() const {
-	return (const Color *)internal::gde_interface->packed_color_array_operator_index_const((GDExtensionTypePtr *)this, 0);
+	return (const Color *)internal::gdextension_interface_packed_color_array_operator_index_const((GDExtensionTypePtr *)this, 0);
 }
 
 Color *PackedColorArray::ptrw() {
-	return (Color *)internal::gde_interface->packed_color_array_operator_index((GDExtensionTypePtr *)this, 0);
+	return (Color *)internal::gdextension_interface_packed_color_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
 const float &PackedFloat32Array::operator[](int p_index) const {
-	return *internal::gde_interface->packed_float32_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
+	return *internal::gdextension_interface_packed_float32_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 }
 
 float &PackedFloat32Array::operator[](int p_index) {
-	return *internal::gde_interface->packed_float32_array_operator_index((GDExtensionTypePtr *)this, p_index);
+	return *internal::gdextension_interface_packed_float32_array_operator_index((GDExtensionTypePtr *)this, p_index);
 }
 
 const float *PackedFloat32Array::ptr() const {
-	return internal::gde_interface->packed_float32_array_operator_index_const((GDExtensionTypePtr *)this, 0);
+	return internal::gdextension_interface_packed_float32_array_operator_index_const((GDExtensionTypePtr *)this, 0);
 }
 
 float *PackedFloat32Array::ptrw() {
-	return internal::gde_interface->packed_float32_array_operator_index((GDExtensionTypePtr *)this, 0);
+	return internal::gdextension_interface_packed_float32_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
 const double &PackedFloat64Array::operator[](int p_index) const {
-	return *internal::gde_interface->packed_float64_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
+	return *internal::gdextension_interface_packed_float64_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 }
 
 double &PackedFloat64Array::operator[](int p_index) {
-	return *internal::gde_interface->packed_float64_array_operator_index((GDExtensionTypePtr *)this, p_index);
+	return *internal::gdextension_interface_packed_float64_array_operator_index((GDExtensionTypePtr *)this, p_index);
 }
 
 const double *PackedFloat64Array::ptr() const {
-	return internal::gde_interface->packed_float64_array_operator_index_const((GDExtensionTypePtr *)this, 0);
+	return internal::gdextension_interface_packed_float64_array_operator_index_const((GDExtensionTypePtr *)this, 0);
 }
 
 double *PackedFloat64Array::ptrw() {
-	return internal::gde_interface->packed_float64_array_operator_index((GDExtensionTypePtr *)this, 0);
+	return internal::gdextension_interface_packed_float64_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
 const int32_t &PackedInt32Array::operator[](int p_index) const {
-	return *internal::gde_interface->packed_int32_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
+	return *internal::gdextension_interface_packed_int32_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 }
 
 int32_t &PackedInt32Array::operator[](int p_index) {
-	return *internal::gde_interface->packed_int32_array_operator_index((GDExtensionTypePtr *)this, p_index);
+	return *internal::gdextension_interface_packed_int32_array_operator_index((GDExtensionTypePtr *)this, p_index);
 }
 
 const int32_t *PackedInt32Array::ptr() const {
-	return internal::gde_interface->packed_int32_array_operator_index_const((GDExtensionTypePtr *)this, 0);
+	return internal::gdextension_interface_packed_int32_array_operator_index_const((GDExtensionTypePtr *)this, 0);
 }
 
 int32_t *PackedInt32Array::ptrw() {
-	return internal::gde_interface->packed_int32_array_operator_index((GDExtensionTypePtr *)this, 0);
+	return internal::gdextension_interface_packed_int32_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
 const int64_t &PackedInt64Array::operator[](int p_index) const {
-	return *internal::gde_interface->packed_int64_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
+	return *internal::gdextension_interface_packed_int64_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 }
 
 int64_t &PackedInt64Array::operator[](int p_index) {
-	return *internal::gde_interface->packed_int64_array_operator_index((GDExtensionTypePtr *)this, p_index);
+	return *internal::gdextension_interface_packed_int64_array_operator_index((GDExtensionTypePtr *)this, p_index);
 }
 
 const int64_t *PackedInt64Array::ptr() const {
-	return internal::gde_interface->packed_int64_array_operator_index_const((GDExtensionTypePtr *)this, 0);
+	return internal::gdextension_interface_packed_int64_array_operator_index_const((GDExtensionTypePtr *)this, 0);
 }
 
 int64_t *PackedInt64Array::ptrw() {
-	return internal::gde_interface->packed_int64_array_operator_index((GDExtensionTypePtr *)this, 0);
+	return internal::gdextension_interface_packed_int64_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
 const String &PackedStringArray::operator[](int p_index) const {
-	const String *string = (const String *)internal::gde_interface->packed_string_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
+	const String *string = (const String *)internal::gdextension_interface_packed_string_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 	return *string;
 }
 
 String &PackedStringArray::operator[](int p_index) {
-	String *string = (String *)internal::gde_interface->packed_string_array_operator_index((GDExtensionTypePtr *)this, p_index);
+	String *string = (String *)internal::gdextension_interface_packed_string_array_operator_index((GDExtensionTypePtr *)this, p_index);
 	return *string;
 }
 
 const String *PackedStringArray::ptr() const {
-	return (const String *)internal::gde_interface->packed_string_array_operator_index_const((GDExtensionTypePtr *)this, 0);
+	return (const String *)internal::gdextension_interface_packed_string_array_operator_index_const((GDExtensionTypePtr *)this, 0);
 }
 
 String *PackedStringArray::ptrw() {
-	return (String *)internal::gde_interface->packed_string_array_operator_index((GDExtensionTypePtr *)this, 0);
+	return (String *)internal::gdextension_interface_packed_string_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
 const Vector2 &PackedVector2Array::operator[](int p_index) const {
-	const Vector2 *vec = (const Vector2 *)internal::gde_interface->packed_vector2_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
+	const Vector2 *vec = (const Vector2 *)internal::gdextension_interface_packed_vector2_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 	return *vec;
 }
 
 Vector2 &PackedVector2Array::operator[](int p_index) {
-	Vector2 *vec = (Vector2 *)internal::gde_interface->packed_vector2_array_operator_index((GDExtensionTypePtr *)this, p_index);
+	Vector2 *vec = (Vector2 *)internal::gdextension_interface_packed_vector2_array_operator_index((GDExtensionTypePtr *)this, p_index);
 	return *vec;
 }
 
 const Vector2 *PackedVector2Array::ptr() const {
-	return (const Vector2 *)internal::gde_interface->packed_vector2_array_operator_index_const((GDExtensionTypePtr *)this, 0);
+	return (const Vector2 *)internal::gdextension_interface_packed_vector2_array_operator_index_const((GDExtensionTypePtr *)this, 0);
 }
 
 Vector2 *PackedVector2Array::ptrw() {
-	return (Vector2 *)internal::gde_interface->packed_vector2_array_operator_index((GDExtensionTypePtr *)this, 0);
+	return (Vector2 *)internal::gdextension_interface_packed_vector2_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
 const Vector3 &PackedVector3Array::operator[](int p_index) const {
-	const Vector3 *vec = (const Vector3 *)internal::gde_interface->packed_vector3_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
+	const Vector3 *vec = (const Vector3 *)internal::gdextension_interface_packed_vector3_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 	return *vec;
 }
 
 Vector3 &PackedVector3Array::operator[](int p_index) {
-	Vector3 *vec = (Vector3 *)internal::gde_interface->packed_vector3_array_operator_index((GDExtensionTypePtr *)this, p_index);
+	Vector3 *vec = (Vector3 *)internal::gdextension_interface_packed_vector3_array_operator_index((GDExtensionTypePtr *)this, p_index);
 	return *vec;
 }
 
 const Vector3 *PackedVector3Array::ptr() const {
-	return (const Vector3 *)internal::gde_interface->packed_vector3_array_operator_index_const((GDExtensionTypePtr *)this, 0);
+	return (const Vector3 *)internal::gdextension_interface_packed_vector3_array_operator_index_const((GDExtensionTypePtr *)this, 0);
 }
 
 Vector3 *PackedVector3Array::ptrw() {
-	return (Vector3 *)internal::gde_interface->packed_vector3_array_operator_index((GDExtensionTypePtr *)this, 0);
+	return (Vector3 *)internal::gdextension_interface_packed_vector3_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
 const Variant &Array::operator[](int p_index) const {
-	const Variant *var = (const Variant *)internal::gde_interface->array_operator_index_const((GDExtensionTypePtr *)this, p_index);
+	const Variant *var = (const Variant *)internal::gdextension_interface_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 	return *var;
 }
 
 Variant &Array::operator[](int p_index) {
-	Variant *var = (Variant *)internal::gde_interface->array_operator_index((GDExtensionTypePtr *)this, p_index);
+	Variant *var = (Variant *)internal::gdextension_interface_array_operator_index((GDExtensionTypePtr *)this, p_index);
 	return *var;
 }
 
 void Array::set_typed(uint32_t p_type, const StringName &p_class_name, const Variant &p_script) {
 	// p_type is not Variant::Type so that header doesn't depend on <variant.hpp>.
-	internal::gde_interface->array_set_typed((GDExtensionTypePtr *)this, (GDExtensionVariantType)p_type, (GDExtensionConstStringNamePtr)&p_class_name, (GDExtensionConstVariantPtr)&p_script);
+	internal::gdextension_interface_array_set_typed((GDExtensionTypePtr *)this, (GDExtensionVariantType)p_type, (GDExtensionConstStringNamePtr)&p_class_name, (GDExtensionConstVariantPtr)&p_script);
 }
 
 void Array::_ref(const Array &p_from) const {
-	internal::gde_interface->array_ref((GDExtensionTypePtr *)this, (GDExtensionConstTypePtr *)&p_from);
+	internal::gdextension_interface_array_ref((GDExtensionTypePtr *)this, (GDExtensionConstTypePtr *)&p_from);
 }
 
 const Variant &Dictionary::operator[](const Variant &p_key) const {
-	const Variant *var = (const Variant *)internal::gde_interface->dictionary_operator_index_const((GDExtensionTypePtr *)this, (GDExtensionVariantPtr)&p_key);
+	const Variant *var = (const Variant *)internal::gdextension_interface_dictionary_operator_index_const((GDExtensionTypePtr *)this, (GDExtensionVariantPtr)&p_key);
 	return *var;
 }
 
 Variant &Dictionary::operator[](const Variant &p_key) {
-	Variant *var = (Variant *)internal::gde_interface->dictionary_operator_index((GDExtensionTypePtr *)this, (GDExtensionVariantPtr)&p_key);
+	Variant *var = (Variant *)internal::gdextension_interface_dictionary_operator_index((GDExtensionTypePtr *)this, (GDExtensionVariantPtr)&p_key);
 	return *var;
 }
 

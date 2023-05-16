@@ -41,7 +41,7 @@ void *Memory::alloc_static(size_t p_bytes, bool p_pad_align) {
 	bool prepad = p_pad_align;
 #endif
 
-	void *mem = internal::gde_interface->mem_alloc(p_bytes + (prepad ? PAD_ALIGN : 0));
+	void *mem = internal::gdextension_interface_mem_alloc(p_bytes + (prepad ? PAD_ALIGN : 0));
 	ERR_FAIL_COND_V(!mem, nullptr);
 
 	if (prepad) {
@@ -70,11 +70,11 @@ void *Memory::realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align) {
 
 	if (prepad) {
 		mem -= PAD_ALIGN;
-		mem = (uint8_t *)internal::gde_interface->mem_realloc(mem, p_bytes + PAD_ALIGN);
+		mem = (uint8_t *)internal::gdextension_interface_mem_realloc(mem, p_bytes + PAD_ALIGN);
 		ERR_FAIL_COND_V(!mem, nullptr);
 		return mem + PAD_ALIGN;
 	} else {
-		return (uint8_t *)internal::gde_interface->mem_realloc(mem, p_bytes);
+		return (uint8_t *)internal::gdextension_interface_mem_realloc(mem, p_bytes);
 	}
 }
 
@@ -90,7 +90,7 @@ void Memory::free_static(void *p_ptr, bool p_pad_align) {
 	if (prepad) {
 		mem -= PAD_ALIGN;
 	}
-	internal::gde_interface->mem_free(mem);
+	internal::gdextension_interface_mem_free(mem);
 }
 
 _GlobalNil::_GlobalNil() {

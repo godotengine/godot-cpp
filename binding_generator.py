@@ -772,12 +772,12 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
             result.append(
-                f'\t_method_bindings.constructor_{constructor["index"]} = internal::gde_interface->variant_get_ptr_constructor({enum_type_name}, {constructor["index"]});'
+                f'\t_method_bindings.constructor_{constructor["index"]} = internal::gdextension_interface_variant_get_ptr_constructor({enum_type_name}, {constructor["index"]});'
             )
 
     if builtin_api["has_destructor"]:
         result.append(
-            f"\t_method_bindings.destructor = internal::gde_interface->variant_get_ptr_destructor({enum_type_name});"
+            f"\t_method_bindings.destructor = internal::gdextension_interface_variant_get_ptr_destructor({enum_type_name});"
         )
 
     result.append("}")
@@ -796,36 +796,36 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             # TODO: Add error check for hash mismatch.
             result.append(f'\t__name = StringName("{method["name"]}");')
             result.append(
-                f'\t_method_bindings.method_{method["name"]} = internal::gde_interface->variant_get_ptr_builtin_method({enum_type_name}, __name._native_ptr(), {method["hash"]});'
+                f'\t_method_bindings.method_{method["name"]} = internal::gdextension_interface_variant_get_ptr_builtin_method({enum_type_name}, __name._native_ptr(), {method["hash"]});'
             )
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
             result.append(f'\t__name = StringName("{member["name"]}");')
             result.append(
-                f'\t_method_bindings.member_{member["name"]}_setter = internal::gde_interface->variant_get_ptr_setter({enum_type_name}, __name._native_ptr());'
+                f'\t_method_bindings.member_{member["name"]}_setter = internal::gdextension_interface_variant_get_ptr_setter({enum_type_name}, __name._native_ptr());'
             )
             result.append(
-                f'\t_method_bindings.member_{member["name"]}_getter = internal::gde_interface->variant_get_ptr_getter({enum_type_name}, __name._native_ptr());'
+                f'\t_method_bindings.member_{member["name"]}_getter = internal::gdextension_interface_variant_get_ptr_getter({enum_type_name}, __name._native_ptr());'
             )
 
     if "indexing_return_type" in builtin_api:
         result.append(
-            f"\t_method_bindings.indexed_setter = internal::gde_interface->variant_get_ptr_indexed_setter({enum_type_name});"
+            f"\t_method_bindings.indexed_setter = internal::gdextension_interface_variant_get_ptr_indexed_setter({enum_type_name});"
         )
         result.append(
-            f"\t_method_bindings.indexed_getter = internal::gde_interface->variant_get_ptr_indexed_getter({enum_type_name});"
+            f"\t_method_bindings.indexed_getter = internal::gdextension_interface_variant_get_ptr_indexed_getter({enum_type_name});"
         )
 
     if "is_keyed" in builtin_api and builtin_api["is_keyed"]:
         result.append(
-            f"\t_method_bindings.keyed_setter = internal::gde_interface->variant_get_ptr_keyed_setter({enum_type_name});"
+            f"\t_method_bindings.keyed_setter = internal::gdextension_interface_variant_get_ptr_keyed_setter({enum_type_name});"
         )
         result.append(
-            f"\t_method_bindings.keyed_getter = internal::gde_interface->variant_get_ptr_keyed_getter({enum_type_name});"
+            f"\t_method_bindings.keyed_getter = internal::gdextension_interface_variant_get_ptr_keyed_getter({enum_type_name});"
         )
         result.append(
-            f"\t_method_bindings.keyed_checker = internal::gde_interface->variant_get_ptr_keyed_checker({enum_type_name});"
+            f"\t_method_bindings.keyed_checker = internal::gdextension_interface_variant_get_ptr_keyed_checker({enum_type_name});"
         )
 
     if "operators" in builtin_api:
@@ -838,11 +838,11 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                         f"GDEXTENSION_VARIANT_TYPE_{camel_to_snake(operator['right_type']).upper()}"
                     )
                 result.append(
-                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]} = internal::gde_interface->variant_get_ptr_operator_evaluator(GDEXTENSION_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, {right_type_variant_type});'
+                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]} = internal::gdextension_interface_variant_get_ptr_operator_evaluator(GDEXTENSION_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, {right_type_variant_type});'
                 )
             else:
                 result.append(
-                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])} = internal::gde_interface->variant_get_ptr_operator_evaluator(GDEXTENSION_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, GDEXTENSION_VARIANT_TYPE_NIL);'
+                    f'\t_method_bindings.operator_{get_operator_id_name(operator["name"])} = internal::gdextension_interface_variant_get_ptr_operator_evaluator(GDEXTENSION_VARIANT_OP_{get_operator_id_name(operator["name"]).upper()}, {enum_type_name}, GDEXTENSION_VARIANT_TYPE_NIL);'
                 )
 
     result.append("}")
@@ -1421,13 +1421,13 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
         result.append(f"{class_name} *{class_name}::get_singleton() {{")
         result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
         result.append(
-            "\tstatic GDExtensionObjectPtr singleton_obj = internal::gde_interface->global_get_singleton(__class_name._native_ptr());"
+            "\tstatic GDExtensionObjectPtr singleton_obj = internal::gdextension_interface_global_get_singleton(__class_name._native_ptr());"
         )
         result.append("#ifdef DEBUG_ENABLED")
         result.append("\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
         result.append("#endif // DEBUG_ENABLED")
         result.append(
-            f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::gde_interface->object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));"
+            f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::gdextension_interface_object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));"
         )
         result.append("\treturn singleton;")
         result.append("}")
@@ -1449,7 +1449,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
             result.append(f'\tconst StringName __method_name = "{method["name"]}";')
             result.append(
-                f'\tstatic GDExtensionMethodBindPtr ___method_bind = internal::gde_interface->classdb_get_method_bind(__class_name._native_ptr(), __method_name._native_ptr(), {method["hash"]});'
+                f'\tstatic GDExtensionMethodBindPtr ___method_bind = internal::gdextension_interface_classdb_get_method_bind(__class_name._native_ptr(), __method_name._native_ptr(), {method["hash"]});'
             )
             method_call = "\t"
             has_return = "return_value" in method and method["return_value"]["type"] != "void"
@@ -1512,7 +1512,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             else:  # vararg.
                 result.append("\tGDExtensionCallError error;")
                 result.append("\tVariant ret;")
-                method_call += "internal::gde_interface->object_method_bind_call(___method_bind, _owner, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count, &ret, &error"
+                method_call += "internal::gdextension_interface_object_method_bind_call(___method_bind, _owner, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count, &ret, &error"
 
             if is_ref:
                 method_call += ")"  # Close Ref<> constructor.
@@ -1709,7 +1709,7 @@ def generate_utility_functions(api, output_dir):
 
         source.append(f'\tconst StringName __function_name = "{function["name"]}";')
         source.append(
-            f'\tstatic GDExtensionPtrUtilityFunction ___function = internal::gde_interface->variant_get_ptr_utility_function(__function_name._native_ptr(), {function["hash"]});'
+            f'\tstatic GDExtensionPtrUtilityFunction ___function = internal::gdextension_interface_variant_get_ptr_utility_function(__function_name._native_ptr(), {function["hash"]});'
         )
         has_return = "return_type" in function and function["return_type"] != "void"
         if has_return:
