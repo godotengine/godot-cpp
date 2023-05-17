@@ -2,8 +2,11 @@
 
 > **Warning**
 >
-> This repository's `master` branch is only usable with Godot's ([GDExtension](https://godotengine.org/article/introducing-gd-extensions))
-> API (Godot 4.0 and later).
+> This repository's `master` branch is only usable with the latest version of
+> Godot's ([GDExtension](https://godotengine.org/article/introducing-gd-extensions))
+> API (Godot 4.1 and later).
+>
+> For users of Godot 4.0.x, switch to the [`4.0`](https://github.com/godotengine/godot-cpp/tree/4.0) branch.
 >
 > For GDNative users (Godot 3.x), switch to the [`3.x`](https://github.com/godotengine/godot-cpp/tree/3.x)
 > or the [`3.5`](https://github.com/godotengine/godot-cpp/tree/3.5) branch.
@@ -79,6 +82,7 @@ Follow [the example](test/demo/example.gdextension):
 [configuration]
 
 entry_symbol = "example_library_init"
+compatibility_minimum = 4.1
 
 [libraries]
 
@@ -99,8 +103,8 @@ extern "C" {
 
 // Initialization.
 
-GDExtensionBool GDE_EXPORT example_library_init(const GDExtensionInterface *p_interface, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
-	godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
+GDExtensionBool GDE_EXPORT example_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
+	godot::GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
 
 	init_obj.register_initializer(initialize_example_module);
 	init_obj.register_terminator(uninitialize_example_module);
