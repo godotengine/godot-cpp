@@ -17,6 +17,7 @@
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/classes/input_event_key.hpp>
 #include <godot_cpp/classes/viewport.hpp>
 
 #include <godot_cpp/core/binder_common.hpp>
@@ -129,6 +130,7 @@ public:
 
 	// Virtual function override (no need to bind manually).
 	virtual bool _has_point(const Vector2 &point) const override;
+	virtual void _input(const Ref<InputEvent> &event) override;
 };
 
 VARIANT_ENUM_CAST(Example::Constants);

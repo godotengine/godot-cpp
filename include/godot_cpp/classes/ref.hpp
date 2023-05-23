@@ -226,12 +226,17 @@ public:
 	}
 };
 
-template <class T>
-struct PtrToArg<Ref<T>> {
+template <class T, bool is_virtual>
+struct PtrToArg<Ref<T>, is_virtual> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
-		// Important: p_ptr is T*, not Ref<T>*, since Object* is what engine gives to ptrcall.
 		ERR_FAIL_NULL_V(p_ptr, Ref<T>());
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::get_object_instance_binding(reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)))));
+		if constexpr (is_virtual) {
+			GDExtensionRefPtr ref = (GDExtensionRefPtr)p_ptr;
+			return Ref<T>(reinterpret_cast<T *>(godot::internal::get_object_instance_binding(godot::internal::gdextension_interface_ref_get_object(ref))));
+		} else {
+			// Important: p_ptr is T*, not Ref<T>*, since Object* is what engine gives to ptrcall.
+			return Ref<T>(reinterpret_cast<T *>(godot::internal::get_object_instance_binding(reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)))));
+		}
 	}
 
 	typedef Ref<T> EncodeT;
@@ -248,13 +253,18 @@ struct PtrToArg<Ref<T>> {
 	}
 };
 
-template <class T>
-struct PtrToArg<const Ref<T> &> {
+template <class T, bool is_virtual>
+struct PtrToArg<const Ref<T> &, is_virtual> {
 	typedef Ref<T> EncodeT;
 
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
 		ERR_FAIL_NULL_V(p_ptr, Ref<T>());
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::get_object_instance_binding(reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)))));
+		if constexpr (is_virtual) {
+			GDExtensionRefPtr ref = const_cast<GDExtensionRefPtr>(p_ptr);
+			return Ref<T>(reinterpret_cast<T *>(godot::internal::get_object_instance_binding(godot::internal::gdextension_interface_ref_get_object(ref))));
+		} else {
+			return Ref<T>(reinterpret_cast<T *>(godot::internal::get_object_instance_binding(reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr)))));
+		}
 	}
 };
 

@@ -348,3 +348,10 @@ bool Example::_has_point(const Vector2 &point) const {
 
 	return false;
 }
+
+void Example::_input(const Ref<InputEvent> &event) {
+	const InputEventKey *key_event = Object::cast_to<const InputEventKey>(*event);
+	if (key_event) {
+		emit_custom_signal(String("_input: ") + key_event->get_key_label(), key_event->get_unicode());
+	}
+}

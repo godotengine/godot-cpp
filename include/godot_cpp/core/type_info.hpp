@@ -295,8 +295,8 @@ inline StringName __constant_get_bitfield_name(T param, StringName p_constant) {
 	return GetTypeInfo<BitField<T>>::get_class_info().class_name;
 }
 
-template <class T>
-struct PtrToArg<TypedArray<T>> {
+template <class T, bool is_virtual>
+struct PtrToArg<TypedArray<T>, is_virtual> {
 	_FORCE_INLINE_ static TypedArray<T> convert(const void *p_ptr) {
 		return TypedArray<T>(*reinterpret_cast<const Array *>(p_ptr));
 	}
@@ -306,8 +306,8 @@ struct PtrToArg<TypedArray<T>> {
 	}
 };
 
-template <class T>
-struct PtrToArg<const TypedArray<T> &> {
+template <class T, bool is_virtual>
+struct PtrToArg<const TypedArray<T> &, is_virtual> {
 	typedef Array EncodeT;
 	_FORCE_INLINE_ static TypedArray<T>
 	convert(const void *p_ptr) {

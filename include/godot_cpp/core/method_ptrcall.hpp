@@ -39,12 +39,12 @@
 
 namespace godot {
 
-template <class T>
+template <class T, bool is_virtual = false>
 struct PtrToArg {};
 
 #define MAKE_PTRARG(m_type)                                            \
-	template <>                                                        \
-	struct PtrToArg<m_type> {                                          \
+	template <bool is_virtual>                                         \
+	struct PtrToArg<m_type, is_virtual> {                              \
 		_FORCE_INLINE_ static m_type convert(const void *p_ptr) {      \
 			return *reinterpret_cast<const m_type *>(p_ptr);           \
 		}                                                              \
@@ -53,8 +53,8 @@ struct PtrToArg {};
 			*reinterpret_cast<m_type *>(p_ptr) = p_val;                \
 		}                                                              \
 	};                                                                 \
-	template <>                                                        \
-	struct PtrToArg<const m_type &> {                                  \
+	template <bool is_virtual>                                         \
+	struct PtrToArg<const m_type &, is_virtual> {                      \
 		_FORCE_INLINE_ static m_type convert(const void *p_ptr) {      \
 			return *reinterpret_cast<const m_type *>(p_ptr);           \
 		}                                                              \
@@ -65,8 +65,8 @@ struct PtrToArg {};
 	}
 
 #define MAKE_PTRARGCONV(m_type, m_conv)                                           \
-	template <>                                                                   \
-	struct PtrToArg<m_type> {                                                     \
+	template <bool is_virtual>                                                    \
+	struct PtrToArg<m_type, is_virtual> {                                         \
 		_FORCE_INLINE_ static m_type convert(const void *p_ptr) {                 \
 			return static_cast<m_type>(*reinterpret_cast<const m_conv *>(p_ptr)); \
 		}                                                                         \
@@ -78,8 +78,8 @@ struct PtrToArg {};
 			return static_cast<m_conv>(p_val);                                    \
 		}                                                                         \
 	};                                                                            \
-	template <>                                                                   \
-	struct PtrToArg<const m_type &> {                                             \
+	template <bool is_virtual>                                                    \
+	struct PtrToArg<const m_type &, is_virtual> {                                 \
 		_FORCE_INLINE_ static m_type convert(const void *p_ptr) {                 \
 			return static_cast<m_type>(*reinterpret_cast<const m_conv *>(p_ptr)); \
 		}                                                                         \
@@ -93,8 +93,8 @@ struct PtrToArg {};
 	}
 
 #define MAKE_PTRARG_BY_REFERENCE(m_type)                                      \
-	template <>                                                               \
-	struct PtrToArg<m_type> {                                                 \
+	template <bool is_virtual>                                                \
+	struct PtrToArg<m_type, is_virtual> {                                     \
 		_FORCE_INLINE_ static m_type convert(const void *p_ptr) {             \
 			return *reinterpret_cast<const m_type *>(p_ptr);                  \
 		}                                                                     \
@@ -103,8 +103,8 @@ struct PtrToArg {};
 			*reinterpret_cast<m_type *>(p_ptr) = p_val;                       \
 		}                                                                     \
 	};                                                                        \
-	template <>                                                               \
-	struct PtrToArg<const m_type &> {                                         \
+	template <bool is_virtual>                                                \
+	struct PtrToArg<const m_type &, is_virtual> {                             \
 		_FORCE_INLINE_ static m_type convert(const void *p_ptr) {             \
 			return *reinterpret_cast<const m_type *>(p_ptr);                  \
 		}                                                                     \
@@ -166,10 +166,14 @@ MAKE_PTRARG_BY_REFERENCE(Variant);
 
 // This is for Object.
 
-template <class T>
-struct PtrToArg<T *> {
+template <class T, bool is_virtual>
+struct PtrToArg<T *, is_virtual> {
 	_FORCE_INLINE_ static T *convert(const void *p_ptr) {
-		return reinterpret_cast<T *>(godot::internal::get_object_instance_binding(reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr))));
+		if constexpr (is_virtual) {
+			return reinterpret_cast<T *>(godot::internal::get_object_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr))));
+		} else {
+			return reinterpret_cast<T *>(godot::internal::get_object_instance_binding(reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr))));
+		}
 	}
 	typedef Object *EncodeT;
 	_FORCE_INLINE_ static void encode(T *p_var, void *p_ptr) {
@@ -177,10 +181,14 @@ struct PtrToArg<T *> {
 	}
 };
 
-template <class T>
-struct PtrToArg<const T *> {
+template <class T, bool is_virtual>
+struct PtrToArg<const T *, is_virtual> {
 	_FORCE_INLINE_ static const T *convert(const void *p_ptr) {
-		return reinterpret_cast<const T *>(godot::internal::get_object_instance_binding(reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr))));
+		if constexpr (is_virtual) {
+			return reinterpret_cast<const T *>(godot::internal::get_object_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr))));
+		} else {
+			return reinterpret_cast<const T *>(godot::internal::get_object_instance_binding(reinterpret_cast<GDExtensionObjectPtr>(const_cast<void *>(p_ptr))));
+		}
 	}
 	typedef const Object *EncodeT;
 	_FORCE_INLINE_ static void encode(T *p_var, void *p_ptr) {
@@ -190,8 +198,8 @@ struct PtrToArg<const T *> {
 
 // Pointers.
 #define GDVIRTUAL_NATIVE_PTR(m_type)                                          \
-	template <>                                                               \
-	struct PtrToArg<m_type *> {                                               \
+	template <bool is_virtual>                                                \
+	struct PtrToArg<m_type *, is_virtual> {                                   \
 		_FORCE_INLINE_ static m_type *convert(const void *p_ptr) {            \
 			return (m_type *)(*(void **)p_ptr);                               \
 		}                                                                     \
@@ -201,8 +209,8 @@ struct PtrToArg<const T *> {
 		}                                                                     \
 	};                                                                        \
                                                                               \
-	template <>                                                               \
-	struct PtrToArg<const m_type *> {                                         \
+	template <bool is_virtual>                                                \
+	struct PtrToArg<const m_type *, is_virtual> {                             \
 		_FORCE_INLINE_ static const m_type *convert(const void *p_ptr) {      \
 			return (const m_type *)(*(const void **)p_ptr);                   \
 		}                                                                     \

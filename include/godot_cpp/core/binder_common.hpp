@@ -50,8 +50,8 @@ namespace godot {
 			return (m_enum)p_variant.operator int64_t();               \
 		}                                                              \
 	};                                                                 \
-	template <>                                                        \
-	struct PtrToArg<m_enum> {                                          \
+	template <bool is_virtual>                                         \
+	struct PtrToArg<m_enum, is_virtual> {                              \
 		_FORCE_INLINE_ static m_enum convert(const void *p_ptr) {      \
 			return m_enum(*reinterpret_cast<const int64_t *>(p_ptr));  \
 		}                                                              \
@@ -71,8 +71,8 @@ namespace godot {
 			return BitField<m_enum>(p_variant.operator int64_t());               \
 		}                                                                        \
 	};                                                                           \
-	template <>                                                                  \
-	struct PtrToArg<BitField<m_enum>> {                                          \
+	template <bool is_virtual>                                                   \
+	struct PtrToArg<BitField<m_enum>, is_virtual> {                              \
 		_FORCE_INLINE_ static BitField<m_enum> convert(const void *p_ptr) {      \
 			return BitField<m_enum>(*reinterpret_cast<const int64_t *>(p_ptr));  \
 		}                                                                        \
@@ -227,6 +227,46 @@ void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...), const GDExtension
 template <class T, class R, class... P>
 void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, void *r_ret) {
 	call_with_ptr_args_retc_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
+}
+
+template <class T, class... P, size_t... Is>
+void call_virtual_with_ptr_args_helper(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
+	(p_instance->*p_method)(PtrToArg<P, true>::convert(p_args[Is])...);
+}
+
+template <class T, class... P, size_t... Is>
+void call_virtual_with_ptr_argsc_helper(T *p_instance, void (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
+	(p_instance->*p_method)(PtrToArg<P, true>::convert(p_args[Is])...);
+}
+
+template <class T, class R, class... P, size_t... Is>
+void call_virtual_with_ptr_args_ret_helper(T *p_instance, R (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
+	PtrToArg<R, true>::encode((p_instance->*p_method)(PtrToArg<P, true>::convert(p_args[Is])...), r_ret);
+}
+
+template <class T, class R, class... P, size_t... Is>
+void call_virtual_with_ptr_args_retc_helper(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
+	PtrToArg<R, true>::encode((p_instance->*p_method)(PtrToArg<P, true>::convert(p_args[Is])...), r_ret);
+}
+
+template <class T, class... P>
+void call_virtual_with_ptr_args(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, void * /*ret*/) {
+	call_virtual_with_ptr_args_helper<T, P...>(p_instance, p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
+}
+
+template <class T, class... P>
+void call_virtual_with_ptr_args(T *p_instance, void (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, void * /*ret*/) {
+	call_virtual_with_ptr_argsc_helper<T, P...>(p_instance, p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
+}
+
+template <class T, class R, class... P>
+void call_virtual_with_ptr_args(T *p_instance, R (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, void *r_ret) {
+	call_virtual_with_ptr_args_ret_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
+}
+
+template <class T, class R, class... P>
+void call_virtual_with_ptr_args(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, void *r_ret) {
+	call_virtual_with_ptr_args_retc_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
 }
 
 template <class T, class... P, size_t... Is>
