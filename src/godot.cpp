@@ -163,6 +163,7 @@ GDExtensionInterfaceGlobalGetSingleton gdextension_interface_global_get_singleto
 GDExtensionInterfaceObjectGetInstanceBinding gdextension_interface_object_get_instance_binding = nullptr;
 GDExtensionInterfaceObjectSetInstanceBinding gdextension_interface_object_set_instance_binding = nullptr;
 GDExtensionInterfaceObjectSetInstance gdextension_interface_object_set_instance = nullptr;
+GDExtensionInterfaceObjectGetClassName gdextension_interface_object_get_class_name = nullptr;
 GDExtensionInterfaceObjectCastTo gdextension_interface_object_cast_to = nullptr;
 GDExtensionInterfaceObjectGetInstanceFromId gdextension_interface_object_get_instance_from_id = nullptr;
 GDExtensionInterfaceObjectGetInstanceId gdextension_interface_object_get_instance_id = nullptr;
@@ -342,6 +343,7 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	LOAD_PROC_ADDRESS(object_get_instance_binding, GDExtensionInterfaceObjectGetInstanceBinding);
 	LOAD_PROC_ADDRESS(object_set_instance_binding, GDExtensionInterfaceObjectSetInstanceBinding);
 	LOAD_PROC_ADDRESS(object_set_instance, GDExtensionInterfaceObjectSetInstance);
+	LOAD_PROC_ADDRESS(object_get_class_name, GDExtensionInterfaceObjectGetClassName);
 	LOAD_PROC_ADDRESS(object_cast_to, GDExtensionInterfaceObjectCastTo);
 	LOAD_PROC_ADDRESS(object_get_instance_from_id, GDExtensionInterfaceObjectGetInstanceFromId);
 	LOAD_PROC_ADDRESS(object_get_instance_id, GDExtensionInterfaceObjectGetInstanceId);
@@ -371,6 +373,7 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	ERR_FAIL_COND_V_MSG(init_callback == nullptr, false, "Initialization callback must be defined.");
 
 	Variant::init_bindings();
+	register_engine_classes();
 
 	return true;
 }

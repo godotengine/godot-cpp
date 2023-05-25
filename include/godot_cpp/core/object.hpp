@@ -52,6 +52,12 @@
 
 namespace godot {
 
+namespace internal {
+
+Object *get_object_instance_binding(GodotObject *);
+
+} // namespace internal
+
 struct MethodInfo {
 	StringName name;
 	PropertyInfo return_val;
@@ -128,7 +134,7 @@ public:
 		if (obj == nullptr) {
 			return nullptr;
 		}
-		return reinterpret_cast<Object *>(internal::gdextension_interface_object_get_instance_binding(obj, internal::token, &Object::___binding_callbacks));
+		return internal::get_object_instance_binding(obj);
 	}
 };
 
@@ -142,7 +148,7 @@ T *Object::cast_to(Object *p_object) {
 	if (casted == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<T *>(internal::gdextension_interface_object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
+	return dynamic_cast<T *>(internal::get_object_instance_binding(casted));
 }
 
 template <class T>
@@ -155,7 +161,7 @@ const T *Object::cast_to(const Object *p_object) {
 	if (casted == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<const T *>(internal::gdextension_interface_object_get_instance_binding(casted, internal::token, &T::___binding_callbacks));
+	return dynamic_cast<const T *>(internal::get_object_instance_binding(casted));
 }
 
 } // namespace godot

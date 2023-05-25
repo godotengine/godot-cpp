@@ -33,6 +33,7 @@
 #include <godot_cpp/godot.hpp>
 
 #include <godot_cpp/core/binder_common.hpp>
+#include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
 
 #include <utility>
@@ -411,7 +412,7 @@ Variant::operator Object *() const {
 	if (obj == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<Object *>(internal::gdextension_interface_object_get_instance_binding(obj, internal::token, &Object::___binding_callbacks));
+	return internal::get_object_instance_binding(obj);
 }
 
 Variant::operator ObjectID() const {

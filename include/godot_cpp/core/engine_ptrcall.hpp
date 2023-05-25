@@ -51,7 +51,7 @@ O *_call_native_mb_ret_obj(const GDExtensionMethodBindPtr mb, void *instance, co
 	if (ret == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<O *>(internal::gdextension_interface_object_get_instance_binding(ret, internal::token, &O::___binding_callbacks));
+	return reinterpret_cast<O *>(internal::get_object_instance_binding(ret));
 }
 
 template <class R, class... Args>
@@ -81,7 +81,7 @@ Object *_call_utility_ret_obj(const GDExtensionPtrUtilityFunction func, void *in
 	GodotObject *ret = nullptr;
 	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
 	func(&ret, mb_args.data(), mb_args.size());
-	return (Object *)internal::gdextension_interface_object_get_instance_binding(ret, internal::token, &Object::___binding_callbacks);
+	return (Object *)internal::get_object_instance_binding(ret);
 }
 
 template <class... Args>

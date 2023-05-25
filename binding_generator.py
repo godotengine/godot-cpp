@@ -128,6 +128,8 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
     if sources:
         utility_functions_source_path = source_gen_folder / "variant" / "utility_functions.cpp"
         files.append(str(utility_functions_source_path.as_posix()))
+        register_engine_classes_source_path = source_gen_folder / "register_engine_classes.cpp"
+        files.append(str(register_engine_classes_source_path.as_posix()))
 
     return files
 
@@ -1157,6 +1159,10 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                 generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node)
             )
 
+    register_engine_classes_filename = Path(output_dir) / "src" / "register_engine_classes.cpp"
+    with register_engine_classes_filename.open("w+") as source_file:
+        source_file.write(generate_register_engine_classes_source(api))
+
     for native_struct in api["native_structures"]:
         struct_name = native_struct["name"]
         snake_struct_name = camel_to_snake(struct_name)
@@ -1545,6 +1551,38 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                 result.append(method_signature)
             result.append("")
 
+    result.append("")
+    result.append("} // namespace godot ")
+
+    return "\n".join(result)
+
+
+def generate_register_engine_classes_source(api):
+    includes = []
+    registrations = []
+
+    for class_api in api["classes"]:
+        if class_api["name"] == "ClassDB":
+            continue
+
+        class_name = class_api["name"]
+        snake_class_name = camel_to_snake(class_name)
+
+        includes.append(f"#include <godot_cpp/classes/{snake_class_name}.hpp>")
+        registrations.append(f"\tClassDB::register_engine_class<{class_name}>();")
+
+    result = []
+    add_header(f"register_engine_classes.cpp", result)
+
+    result.append("#include <godot_cpp/godot.hpp>")
+    result.append("")
+    result = result + includes
+    result.append("")
+    result.append("namespace godot {")
+    result.append("")
+    result.append("void GDExtensionBinding::register_engine_classes() {")
+    result = result + registrations
+    result.append("}")
     result.append("")
     result.append("} // namespace godot ")
 

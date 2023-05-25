@@ -159,6 +159,7 @@ extern "C" GDExtensionInterfaceGlobalGetSingleton gdextension_interface_global_g
 extern "C" GDExtensionInterfaceObjectGetInstanceBinding gdextension_interface_object_get_instance_binding;
 extern "C" GDExtensionInterfaceObjectSetInstanceBinding gdextension_interface_object_set_instance_binding;
 extern "C" GDExtensionInterfaceObjectSetInstance gdextension_interface_object_set_instance;
+extern "C" GDExtensionInterfaceObjectGetClassName gdextension_interface_object_get_class_name;
 extern "C" GDExtensionInterfaceObjectCastTo gdextension_interface_object_cast_to;
 extern "C" GDExtensionInterfaceObjectGetInstanceFromId gdextension_interface_object_get_instance_from_id;
 extern "C" GDExtensionInterfaceObjectGetInstanceId gdextension_interface_object_get_instance_id;
@@ -188,6 +189,9 @@ enum ModuleInitializationLevel {
 };
 
 class GDExtensionBinding {
+private:
+	static void register_engine_classes();
+
 public:
 	using Callback = void (*)(ModuleInitializationLevel p_level);
 
