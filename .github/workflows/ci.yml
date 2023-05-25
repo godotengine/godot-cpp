@@ -22,6 +22,7 @@ jobs:
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
+            run-tests: true
             cache-name: linux-x86_64
 
           - name: 🐧 Linux (GCC, Double Precision)
@@ -30,6 +31,7 @@ jobs:
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
             artifact-path: bin/libgodot-cpp.linux.template_release.double.x86_64.a
             flags: precision=double
+            run-tests: false
             cache-name: linux-x86_64-f64
 
           - name: 🏁 Windows (x86_64, MSVC)
@@ -37,6 +39,7 @@ jobs:
             platform: windows
             artifact-name: godot-cpp-windows-msvc2019-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.lib
+            run-tests: false
             cache-name: windows-x86_64-msvc
 
           - name: 🏁 Windows (x86_64, MinGW)
@@ -45,6 +48,7 @@ jobs:
             artifact-name: godot-cpp-linux-mingw-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.a
             flags: use_mingw=yes
+            run-tests: false
             cache-name: windows-x86_64-mingw
 
           - name: 🍎 macOS (universal)
@@ -53,6 +57,7 @@ jobs:
             artifact-name: godot-cpp-macos-universal-release
             artifact-path: bin/libgodot-cpp.macos.template_release.universal.a
             flags: arch=universal
+            run-tests: false
             cache-name: macos-universal
 
           - name: 🤖 Android (arm64)
@@ -61,6 +66,7 @@ jobs:
             artifact-name: godot-cpp-android-arm64-release
             artifact-path: bin/libgodot-cpp.android.template_release.arm64.a
             flags: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME arch=arm64
+            run-tests: false
             cache-name: android-arm64
 
           - name: 🍏 iOS (arm64)
@@ -69,6 +75,7 @@ jobs:
             artifact-name: godot-cpp-ios-arm64-release
             artifact-path: bin/libgodot-cpp.ios.template_release.arm64.a
             flags: arch=arm64
+            run-tests: false
             cache-name: ios-arm64
 
     env:
@@ -123,6 +130,31 @@ jobs:
         run: |
           cd test
           scons platform=${{ matrix.platform }} target=template_release ${{ matrix.flags }}
+
+      - name: Download latest Godot artifacts
+        uses: dsnopek/action-download-artifact@1322f74e2dac9feed2ee76a32d9ae1ca3b4cf4e9
+        if: ${{ matrix.run-tests }}
+        with:
+          repo: godotengine/godot
+          branch: master
+          event: push
+          workflow: linux_builds.yml
+          workflow_conclusion: success
+          name: linux-editor-mono
+          search_artifacts: true
+          check_artifacts: true
+          ensure_latest: true
+          path: godot-artifacts
+
+      - name: Run tests
+        if: ${{ matrix.run-tests }}
+        run: |
+          chmod +x ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono
+          ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono --headless --version
+          cd test
+          # Need to run the editor so .godot is generated... but it crashes! Ignore that :-)
+          (cd project && (../../godot-artifacts/godot.linuxbsd.editor.x86_64.mono --editor --headless --quit >/dev/null 2>&1 || true))
+          GODOT=../godot-artifacts/godot.linuxbsd.editor.x86_64.mono ./run-tests.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3

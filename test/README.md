@@ -1,10 +1,7 @@
-# godot-cpp example / integration test
+# godot-cpp integration test
 
 This project is used to perform integration testing of the godot-cpp
 extension, to validate PRs and implemented APIs.
-
-It can also be used as a quick example of how to set up a godot-cpp
-project, both on the C++ side and in the Godot project itself.
 
 ## License
 
