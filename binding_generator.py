@@ -1382,6 +1382,24 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("};")
     result.append("")
 
+    if class_name == "EditorPlugin":
+        result.append("class EditorPlugins {")
+        result.append("public:")
+        result.append("")
+
+        result.append("\ttemplate <class T>")
+        result.append("\tstatic void add_by_type() {")
+        result.append("\t\tinternal::gdextension_interface_editor_add_plugin(T::get_class_static()._native_ptr());")
+        result.append("\t}")
+
+        result.append("\ttemplate <class T>")
+        result.append("\tstatic void remove_by_type() {")
+        result.append("\t\tinternal::gdextension_interface_editor_remove_plugin(T::get_class_static()._native_ptr());")
+        result.append("\t}")
+
+        result.append("};")
+        result.append("")
+
     result.append("} // namespace godot")
     result.append("")
 

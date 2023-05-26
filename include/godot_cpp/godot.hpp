@@ -178,6 +178,8 @@ extern "C" GDExtensionInterfaceClassdbRegisterExtensionClassPropertySubgroup gde
 extern "C" GDExtensionInterfaceClassdbRegisterExtensionClassSignal gdextension_interface_classdb_register_extension_class_signal;
 extern "C" GDExtensionInterfaceClassdbUnregisterExtensionClass gdextension_interface_classdb_unregister_extension_class;
 extern "C" GDExtensionInterfaceGetLibraryPath gdextension_interface_get_library_path;
+extern "C" GDExtensionInterfaceEditorAddPlugin gdextension_interface_editor_add_plugin;
+extern "C" GDExtensionInterfaceEditorRemovePlugin gdextension_interface_editor_remove_plugin;
 
 } // namespace internal
 

@@ -182,6 +182,8 @@ GDExtensionInterfaceClassdbRegisterExtensionClassPropertySubgroup gdextension_in
 GDExtensionInterfaceClassdbRegisterExtensionClassSignal gdextension_interface_classdb_register_extension_class_signal = nullptr;
 GDExtensionInterfaceClassdbUnregisterExtensionClass gdextension_interface_classdb_unregister_extension_class = nullptr;
 GDExtensionInterfaceGetLibraryPath gdextension_interface_get_library_path = nullptr;
+GDExtensionInterfaceEditorAddPlugin gdextension_interface_editor_add_plugin = nullptr;
+GDExtensionInterfaceEditorRemovePlugin gdextension_interface_editor_remove_plugin = nullptr;
 
 } // namespace internal
 
@@ -362,6 +364,8 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	LOAD_PROC_ADDRESS(classdb_register_extension_class_signal, GDExtensionInterfaceClassdbRegisterExtensionClassSignal);
 	LOAD_PROC_ADDRESS(classdb_unregister_extension_class, GDExtensionInterfaceClassdbUnregisterExtensionClass);
 	LOAD_PROC_ADDRESS(get_library_path, GDExtensionInterfaceGetLibraryPath);
+	LOAD_PROC_ADDRESS(editor_add_plugin, GDExtensionInterfaceEditorAddPlugin);
+	LOAD_PROC_ADDRESS(editor_remove_plugin, GDExtensionInterfaceEditorRemovePlugin);
 
 	// Load the Godot version.
 	internal::gdextension_interface_get_godot_version(&internal::godot_version);
