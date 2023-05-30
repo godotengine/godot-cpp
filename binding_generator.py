@@ -1799,7 +1799,10 @@ def generate_utility_functions(api, output_dir):
                     arguments.append(arg_name)
                 function_call += ", ".join(arguments)
         else:
-            source.append("\tVariant ret;")
+            if has_return:
+                source.append(f'\t{get_gdextension_type(correct_type(function["return_type"]))} ret;')
+            else:
+                source.append("\tVariant ret;")
             function_call += "___function(&ret, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count"
 
         function_call += ");"
