@@ -217,7 +217,7 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 		// Use the legacy interface only to give a nice error.
 		LegacyGDExtensionInterface *legacy_interface = (LegacyGDExtensionInterface *)p_get_proc_address;
 		internal::gdextension_interface_print_error_with_message = (GDExtensionInterfacePrintErrorWithMessage)legacy_interface->print_error_with_message;
-		ERR_FAIL_V_MSG(false, "Cannot load a GDExtension built for Godot 4.1+ in legacy Godot 4.0 mode.");
+		ERR_FAIL_V_MSG(false, "Cannot load a GDExtension built for Godot 4.1+ in Godot 4.0.");
 	}
 
 	// Load the "print_error_with_message" function first (needed by the ERR_FAIL_NULL_V_MSG() macro).
