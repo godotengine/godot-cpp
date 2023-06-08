@@ -79,6 +79,9 @@ func _ready():
 	# String += operator
 	assert_equal(example.test_string_ops(), "ABCĎE")
 
+	# UtilityFunctions::str()
+	assert_equal(example.test_str_utility(), "Hello, World! The answer is 42")
+
 	# PackedArray iterators
 	assert_equal(example.test_vector_ops(), 105)
 

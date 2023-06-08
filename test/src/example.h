@@ -115,6 +115,7 @@ public:
 	Dictionary test_dictionary() const;
 	Example *test_node_argument(Example *p_node) const;
 	String test_string_ops() const;
+	String test_str_utility() const;
 	int test_vector_ops() const;
 
 	BitField<Flags> test_bitfield(BitField<Flags> flags);
