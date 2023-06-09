@@ -44,7 +44,7 @@ if sys.platform.startswith("linux"):
     default_platform = "linux"
 elif sys.platform == "darwin":
     default_platform = "macos"
-elif sys.platform == "win32" or sys.platform == "msys":
+elif sys.platform in ["win32", "msys", "cygwin"]:
     default_platform = "windows"
 elif ARGUMENTS.get("platform", ""):
     default_platform = ARGUMENTS.get("platform")
