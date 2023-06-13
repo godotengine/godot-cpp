@@ -1235,6 +1235,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         else:
             result.append(f"#include <godot_cpp/{get_include_path(included)}>")
 
+    if class_name == "EditorPlugin":
+        result.append("#include <godot_cpp/templates/vector.hpp>")
+
     if len(fully_used_classes) > 0:
         result.append("")
 
@@ -1384,17 +1387,23 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     if class_name == "EditorPlugin":
         result.append("class EditorPlugins {")
+        result.append("private:")
+        result.append("\tstatic Vector<StringName> plugin_classes;")
+        result.append("")
         result.append("public:")
+        result.append("\tstatic void add_plugin_class(const StringName &p_class_name);")
+        result.append("\tstatic void remove_plugin_class(const StringName &p_class_name);")
+        result.append("\tstatic void deinitialize(GDExtensionInitializationLevel p_level);")
         result.append("")
 
         result.append("\ttemplate <class T>")
         result.append("\tstatic void add_by_type() {")
-        result.append("\t\tinternal::gdextension_interface_editor_add_plugin(T::get_class_static()._native_ptr());")
+        result.append("\t\tadd_plugin_class(T::get_class_static());")
         result.append("\t}")
 
         result.append("\ttemplate <class T>")
         result.append("\tstatic void remove_by_type() {")
-        result.append("\t\tinternal::gdextension_interface_editor_remove_plugin(T::get_class_static()._native_ptr());")
+        result.append("\t\tremove_plugin_class(T::get_class_static());")
         result.append("\t}")
 
         result.append("};")

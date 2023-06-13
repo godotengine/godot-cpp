@@ -30,6 +30,7 @@
 
 #include <godot_cpp/godot.hpp>
 
+#include <godot_cpp/classes/editor_plugin.hpp>
 #include <godot_cpp/classes/wrapped.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/memory.hpp>
@@ -401,6 +402,7 @@ void GDExtensionBinding::deinitialize_level(void *userdata, GDExtensionInitializ
 		terminate_callback(static_cast<ModuleInitializationLevel>(p_level));
 	}
 
+	EditorPlugins::deinitialize(p_level);
 	ClassDB::deinitialize(p_level);
 }
 GDExtensionBinding::InitObject::InitObject(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
