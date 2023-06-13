@@ -97,9 +97,6 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
             files.append(str(source_filename.as_posix()))
 
     for engine_class in api["classes"]:
-        # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
-        if engine_class["name"] == "ClassDB":
-            continue
         header_filename = include_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".hpp")
         source_filename = source_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".cpp")
         if headers:
@@ -1036,9 +1033,6 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
     # First create map of classes and singletons.
     for class_api in api["classes"]:
-        # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
-        if class_api["name"] == "ClassDB":
-            continue
         engine_classes[class_api["name"]] = class_api["is_refcounted"]
     for native_struct in api["native_structures"]:
         engine_classes[native_struct["name"]] = False
@@ -1048,9 +1042,6 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         singletons.append(singleton["name"])
 
     for class_api in api["classes"]:
-        # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
-        if class_api["name"] == "ClassDB":
-            continue
         # Check used classes for header include.
         used_classes = set()
         fully_used_classes = set()
@@ -1219,6 +1210,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     class_name = class_api["name"]
     snake_class_name = camel_to_snake(class_name).upper()
     is_singleton = class_name in singletons
+    is_class_db = class_name == "ClassDB"
 
     add_header(f"{snake_class_name.lower()}.hpp", result)
 
@@ -1239,13 +1231,17 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append("")
 
     if class_name != "Object":
-        result.append("#include <godot_cpp/core/class_db.hpp>")
-        result.append("")
-        result.append("#include <type_traits>")
-        result.append("")
+        if not is_class_db:
+            result.append("#include <godot_cpp/core/class_db.hpp>")
+            result.append("")
+            result.append("#include <type_traits>")
+            result.append("")
 
     result.append("namespace godot {")
     result.append("")
+
+    if is_class_db:
+        result.append("#define CLASSDB_HEADER_DECLARE()")
 
     for type_name in used_classes:
         if is_struct_type(type_name):
@@ -1257,7 +1253,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append("")
 
     inherits = class_api["inherits"] if "inherits" in class_api else "Wrapped"
-    result.append(f"class {class_name} : public {inherits} {{")
+    if not is_class_db:
+        result.append(f"class {class_name} : public {inherits} {{")
 
     result.append(f"\tGDEXTENSION_CLASS({class_name}, {inherits})")
     result.append("")
@@ -1338,7 +1335,12 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     result.append("\t}")
     result.append("")
-    result.append("public:")
+
+    if is_class_db:
+        result.append("private:")
+        result.append(get_class_db_macro_end_mark_line("CLASSDB_HEADER_DECLARE"))
+    else:
+        result.append("public:")
 
     # Special cases.
     if class_name == "XMLParser":
@@ -1378,8 +1380,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
             "\tT *get_node(const NodePath &p_path) const { return Object::cast_to<T>(get_node_internal(p_path)); }"
         )
 
-    result.append("")
-    result.append("};")
+    if not is_class_db:
+        result.append("")
+        result.append("};")
     result.append("")
 
     if class_name == "EditorPlugin":
@@ -1403,6 +1406,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("} // namespace godot")
     result.append("")
 
+    if is_class_db:
+        result.append("#define CLASSDB_HEADER_ENUM()")
+
     if "enums" in class_api and class_name != "Object":
         for enum_api in class_api["enums"]:
             if enum_api["is_bitfield"]:
@@ -1411,7 +1417,16 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 result.append(f'VARIANT_ENUM_CAST({class_name}::{enum_api["name"]});')
         result.append("")
 
+    if is_class_db:
+        result.append(get_class_db_macro_end_mark_line("CLASSDB_HEADER_ENUM"))
+        result.append("")
+        result.append(f"#include <godot_cpp/../../src/classes/{snake_class_name.lower()}.cpp>")
+        result.append("")
+
     result.append(f"#endif // ! {header_guard}")
+
+    if is_class_db:
+        append_backslash_to_class_db_macro(result)
 
     return "\n".join(result)
 
@@ -1423,13 +1438,16 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
     class_name = class_api["name"]
     snake_class_name = camel_to_snake(class_name)
     is_singleton = class_name in singletons
+    is_class_db = class_name == "ClassDB"
 
     add_header(f"{snake_class_name}.cpp", result)
 
-    result.append(f"#include <godot_cpp/classes/{snake_class_name}.hpp>")
-    result.append("")
-    result.append("#include <godot_cpp/core/engine_ptrcall.hpp>")
-    result.append("#include <godot_cpp/core/error_macros.hpp>")
+    if not is_class_db:
+        result.append(f"#include <godot_cpp/classes/{snake_class_name}.hpp>")
+        result.append("")
+        result.append("#include <godot_cpp/core/engine_ptrcall.hpp>")
+        result.append("#include <godot_cpp/core/error_macros.hpp>")
+
     result.append("")
 
     for included in used_classes:
@@ -1442,21 +1460,43 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
     result.append("")
 
     if is_singleton:
-        result.append(f"{class_name} *{class_name}::get_singleton() {{")
-        result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
-        result.append(
-            "\tstatic GDExtensionObjectPtr singleton_obj = internal::gdextension_interface_global_get_singleton(__class_name._native_ptr());"
-        )
-        result.append("#ifdef DEBUG_ENABLED")
-        result.append("\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
-        result.append("#endif // DEBUG_ENABLED")
-        result.append(
-            f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::gdextension_interface_object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));"
-        )
-        result.append("\treturn singleton;")
-        result.append("}")
+        for i in range(2 if is_class_db else 1):
+            if is_class_db:
+                if i == 0:
+                    result.append("#define CLASSDB_GET_SINGLETON_DEBUG()")
+                else:
+                    result.append("#define CLASSDB_GET_SINGLETON()")
+
+            result.append(f"{class_name} *{class_name}::get_singleton() {{")
+            result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
+            result.append(
+                "\tstatic GDExtensionObjectPtr singleton_obj = internal::gdextension_interface_global_get_singleton(__class_name._native_ptr());",
+            )
+            if not is_class_db:
+                result.append("#ifdef DEBUG_ENABLED")
+            if i == 0:
+                result.append("\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
+            if not is_class_db:
+                result.append("#endif // DEBUG_ENABLED")
+
+            result.append(
+                f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::gdextension_interface_object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));",
+            )
+            result.append("\treturn singleton;")
+            result.append("}")
+
+            if is_class_db:
+                result.append(
+                    get_class_db_macro_end_mark_line(
+                        "CLASSDB_GET_SINGLETON_DEBUG" if i == 0 else "CLASSDB_GET_SINGLETON"
+                    )
+                )
+            result.append("")
+
         result.append("")
 
+    if is_class_db:
+        result.append("#define CLASSDB_SOURCE_IMPLEMENT()")
     if "methods" in class_api:
         for method in class_api["methods"]:
             if method["is_virtual"]:
@@ -1569,8 +1609,14 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                 result.append(method_signature)
             result.append("")
 
+    if is_class_db:
+        result.append(get_class_db_macro_end_mark_line("CLASSDB_SOURCE_IMPLEMENT"))
+
     result.append("")
     result.append("} // namespace godot ")
+
+    if is_class_db:
+        append_backslash_to_class_db_macro(result)
 
     return "\n".join(result)
 
@@ -2275,6 +2321,7 @@ def escape_identifier(id):
         "operator": "_operator",
         "typeof": "type_of",
         "typename": "type_name",
+        "enum": "_enum",
     }
     if id in cpp_keywords_map:
         return cpp_keywords_map[id]
@@ -2376,3 +2423,60 @@ def add_header(filename, lines):
 
     lines.append("// THIS FILE IS GENERATED. EDITS WILL BE LOST.")
     lines.append("")
+
+
+def calculate_line_length_with_table(line, tab_len):
+    tabs_len = 0
+    for c in line:
+        if c == "\t":
+            tabs_len += tab_len - 1
+    return len(line) + tabs_len
+
+
+def add_backslash(line, backslash_pos, tab_len):
+    for i in range(calculate_line_length_with_table(line, tab_len), backslash_pos):
+        line += " "
+    return line + "\\"
+
+
+def get_class_db_macro_end_mark():
+    return "// Macro end mark: "
+
+
+def get_class_db_macro_end_mark_line(macros_name):
+    return get_class_db_macro_end_mark() + macros_name
+
+
+def append_backslash_to_class_db_macro(lines, tab_len=4):
+    for i in range(len(lines)):
+        if lines[i].startswith("#define CLASSDB_"):
+            # Find finish mark.
+            finish_mark_line = -1
+            for j in range(i, len(lines)):
+                if lines[j].startswith(get_class_db_macro_end_mark()):
+                    finish_mark_line = j
+                    break
+            if finish_mark_line - i < 2:
+                continue
+
+            # Find backslash slash end line.
+            backslash_end_line = finish_mark_line - 1
+            for j in range(backslash_end_line, i, -1):
+                if lines[j] != "":
+                    backslash_end_line = j
+                    break
+
+            # Find the max length of code block.
+            backslash_pos = 0
+            for j in range(i, backslash_end_line):
+                length = calculate_line_length_with_table(lines[j], tab_len)
+                if length > backslash_pos:
+                    backslash_pos = length
+            backslash_pos += tab_len - (backslash_pos % tab_len)
+
+            # Add backslash.
+            for j in range(i, backslash_end_line):
+                lines[j] = add_backslash(lines[j], backslash_pos, tab_len)
+
+            # Skip to finish mark line.
+            i = finish_mark_line

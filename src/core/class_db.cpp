@@ -35,9 +35,19 @@
 
 #include <godot_cpp/core/memory.hpp>
 
+#include <godot_cpp/core/engine_ptrcall.hpp>
+
 #include <algorithm>
 
 namespace godot {
+
+#ifdef DEBUG_ENABLED
+CLASSDB_GET_SINGLETON_DEBUG()
+#else
+CLASSDB_GET_SINGLETON()
+#endif
+
+CLASSDB_SOURCE_IMPLEMENT()
 
 std::unordered_map<StringName, ClassDB::ClassInfo> ClassDB::classes;
 std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *> ClassDB::instance_binding_callbacks;

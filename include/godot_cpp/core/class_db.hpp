@@ -44,6 +44,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <godot_cpp/classes/class_db.hpp>
+
 // Needed to use StringName as key in `std::unordered_map`
 template <>
 struct std::hash<godot::StringName> {
@@ -73,7 +75,9 @@ MethodDefinition D_METHOD(StringName p_name, StringName p_arg1, Args... args) {
 	return md;
 }
 
-class ClassDB {
+class ClassDB : public Object {
+	CLASSDB_HEADER_DECLARE()
+private:
 	static GDExtensionInitializationLevel current_level;
 
 	friend class godot::GDExtensionBinding;
@@ -145,6 +149,7 @@ public:
 	static void initialize(GDExtensionInitializationLevel p_level);
 	static void deinitialize(GDExtensionInitializationLevel p_level);
 };
+CLASSDB_HEADER_ENUM()
 
 #define BIND_CONSTANT(m_constant) \
 	godot::ClassDB::bind_integer_constant(get_class_static(), "", #m_constant, m_constant);
