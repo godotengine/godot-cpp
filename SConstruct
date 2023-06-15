@@ -54,6 +54,7 @@ else:
 # Default tools with no platform defaults to gnu toolchain.
 # We apply platform specific toolchains via our custom tools.
 env = Environment(tools=["default"], PLATFORM="")
+env.PrependENVPath("PATH", os.getenv("PATH"))
 
 # Default num_jobs to local cpu count if not user specified.
 # SCons has a peculiarity where user-specified options won't be overridden
