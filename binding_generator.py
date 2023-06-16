@@ -66,14 +66,14 @@ def generate_wrappers(target):
 
     txt += "\n#endif\n"
 
-    with open(target, "w") as f:
+    with open(target, "w", encoding="utf-8") as f:
         f.write(txt)
 
 
 def get_file_list(api_filepath, output_dir, headers=False, sources=False):
     api = {}
     files = []
-    with open(api_filepath) as api_file:
+    with open(api_filepath, encoding="utf-8") as api_file:
         api = json.load(api_file)
 
     core_gen_folder = Path(output_dir) / "gen" / "include" / "godot_cpp" / "core"
@@ -163,7 +163,7 @@ def generate_bindings(api_filepath, use_template_get_node, bits="64", precision=
 
     target_dir = Path(output_dir) / "gen"
 
-    with open(api_filepath) as api_file:
+    with open(api_filepath, encoding="utf-8") as api_file:
         api = json.load(api_file)
 
     shutil.rmtree(target_dir, ignore_errors=True)
@@ -219,7 +219,7 @@ def generate_builtin_bindings(api, output_dir, build_config):
 
     # Create a file for Variant size, since that class isn't generated.
     variant_size_filename = include_gen_folder / "variant_size.hpp"
-    with variant_size_filename.open("+w") as variant_size_file:
+    with variant_size_filename.open("+w", encoding="utf-8") as variant_size_file:
         variant_size_source = []
         add_header("variant_size.hpp", variant_size_source)
 
@@ -295,15 +295,15 @@ def generate_builtin_bindings(api, output_dir, build_config):
         fully_used_classes = list(fully_used_classes)
         fully_used_classes.sort()
 
-        with header_filename.open("w+") as header_file:
+        with header_filename.open("w+", encoding="utf-8") as header_file:
             header_file.write(generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes))
 
-        with source_filename.open("w+") as source_file:
+        with source_filename.open("w+", encoding="utf-8") as source_file:
             source_file.write(generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes))
 
     # Create a header with all builtin types for convenience.
     builtin_header_filename = include_gen_folder / "builtin_types.hpp"
-    with builtin_header_filename.open("w+") as builtin_header_file:
+    with builtin_header_filename.open("w+", encoding="utf-8") as builtin_header_file:
         builtin_header = []
         add_header("builtin_types.hpp", builtin_header)
 
@@ -323,7 +323,7 @@ def generate_builtin_bindings(api, output_dir, build_config):
 
     # Create a header with bindings for builtin types.
     builtin_binds_filename = include_gen_folder / "builtin_binds.hpp"
-    with builtin_binds_filename.open("w+") as builtin_binds_file:
+    with builtin_binds_filename.open("w+", encoding="utf-8") as builtin_binds_file:
         builtin_binds = []
         add_header("builtin_binds.hpp", builtin_binds)
 
@@ -1149,18 +1149,18 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         fully_used_classes = list(fully_used_classes)
         fully_used_classes.sort()
 
-        with header_filename.open("w+") as header_file:
+        with header_filename.open("w+", encoding="utf-8") as header_file:
             header_file.write(
                 generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node)
             )
 
-        with source_filename.open("w+") as source_file:
+        with source_filename.open("w+", encoding="utf-8") as source_file:
             source_file.write(
                 generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node)
             )
 
     register_engine_classes_filename = Path(output_dir) / "src" / "register_engine_classes.cpp"
-    with register_engine_classes_filename.open("w+") as source_file:
+    with register_engine_classes_filename.open("w+", encoding="utf-8") as source_file:
         source_file.write(generate_register_engine_classes_source(api))
 
     for native_struct in api["native_structures"]:
@@ -1208,7 +1208,7 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         result.append("")
         result.append(f"#endif // ! {header_guard}")
 
-        with header_filename.open("w+") as header_file:
+        with header_filename.open("w+", encoding="utf-8") as header_file:
             header_file.write("\n".join(result))
 
 
@@ -1648,7 +1648,7 @@ def generate_global_constants(api, output_dir):
     header.append("")
     header.append(f"#endif // ! {header_guard}")
 
-    with header_filename.open("w+") as header_file:
+    with header_filename.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))
 
 
@@ -1689,7 +1689,7 @@ def generate_global_constant_binds(api, output_dir):
 
     header.append(f"#endif // ! {header_guard}")
 
-    with header_filename.open("w+") as header_file:
+    with header_filename.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))
 
 
@@ -1738,7 +1738,7 @@ def generate_utility_functions(api, output_dir):
     header.append("")
     header.append(f"#endif // ! {header_guard}")
 
-    with header_filename.open("w+") as header_file:
+    with header_filename.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))
 
     # Generate source.
@@ -1816,7 +1816,7 @@ def generate_utility_functions(api, output_dir):
 
     source.append("} // namespace godot")
 
-    with source_filename.open("w+") as source_file:
+    with source_filename.open("w+", encoding="utf-8") as source_file:
         source_file.write("\n".join(source))
 
 
