@@ -38,6 +38,11 @@ def get_api_file(env):
     return normalize_path(env.get("custom_api_file", os.path.join(get_gdextension_dir(env), "extension_api.json")))
 
 
+def dump_env(env):
+    with open(".scons_env.json", "w", encoding="utf-8") as f:
+        f.writelines(env.Dump(format="json"))
+
+
 # Try to detect the host platform automatically.
 # This is used if no `platform` argument is passed
 if sys.platform.startswith("linux"):
@@ -259,4 +264,5 @@ if env["build_library"]:
 
 env.Append(LIBPATH=[env.Dir("bin")])
 env.Append(LIBS=library_name)
+dump_env(env)
 Return("env")
