@@ -791,24 +791,24 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
         result.append("\tString::_init_bindings_constructors_destructor();")
     result.append(f"\t{class_name}::_init_bindings_constructors_destructor();")
 
-    result.append("\tStringName __name;")
+    result.append("\tStringName _gde_name;")
 
     if "methods" in builtin_api:
         for method in builtin_api["methods"]:
             # TODO: Add error check for hash mismatch.
-            result.append(f'\t__name = StringName("{method["name"]}");')
+            result.append(f'\t_gde_name = StringName("{method["name"]}");')
             result.append(
-                f'\t_method_bindings.method_{method["name"]} = internal::gdextension_interface_variant_get_ptr_builtin_method({enum_type_name}, __name._native_ptr(), {method["hash"]});'
+                f'\t_method_bindings.method_{method["name"]} = internal::gdextension_interface_variant_get_ptr_builtin_method({enum_type_name}, _gde_name._native_ptr(), {method["hash"]});'
             )
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
-            result.append(f'\t__name = StringName("{member["name"]}");')
+            result.append(f'\t_gde_name = StringName("{member["name"]}");')
             result.append(
-                f'\t_method_bindings.member_{member["name"]}_setter = internal::gdextension_interface_variant_get_ptr_setter({enum_type_name}, __name._native_ptr());'
+                f'\t_method_bindings.member_{member["name"]}_setter = internal::gdextension_interface_variant_get_ptr_setter({enum_type_name}, _gde_name._native_ptr());'
             )
             result.append(
-                f'\t_method_bindings.member_{member["name"]}_getter = internal::gdextension_interface_variant_get_ptr_getter({enum_type_name}, __name._native_ptr());'
+                f'\t_method_bindings.member_{member["name"]}_getter = internal::gdextension_interface_variant_get_ptr_getter({enum_type_name}, _gde_name._native_ptr());'
             )
 
     if "indexing_return_type" in builtin_api:
@@ -1443,15 +1443,15 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
 
     if is_singleton:
         result.append(f"{class_name} *{class_name}::get_singleton() {{")
-        result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
+        result.append(f"\tconst StringName _gde_class_name = {class_name}::get_class_static();")
         result.append(
-            "\tstatic GDExtensionObjectPtr singleton_obj = internal::gdextension_interface_global_get_singleton(__class_name._native_ptr());"
+            "\tstatic GDExtensionObjectPtr singleton_obj = internal::gdextension_interface_global_get_singleton(_gde_class_name._native_ptr());"
         )
         result.append("#ifdef DEBUG_ENABLED")
         result.append("\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
         result.append("#endif // DEBUG_ENABLED")
         result.append(
-            f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::gdextension_interface_object_get_instance_binding(singleton_obj, internal::token, &{class_name}::___binding_callbacks));"
+            f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::gdextension_interface_object_get_instance_binding(singleton_obj, internal::token, &{class_name}::_gde_binding_callbacks));"
         )
         result.append("\treturn singleton;")
         result.append("}")
@@ -1470,20 +1470,20 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             result.append(method_signature + " {")
 
             # Method body.
-            result.append(f"\tconst StringName __class_name = {class_name}::get_class_static();")
-            result.append(f'\tconst StringName __method_name = "{method["name"]}";')
+            result.append(f"\tconst StringName _gde_class_name = {class_name}::get_class_static();")
+            result.append(f'\tconst StringName _gde_method_name = "{method["name"]}";')
             result.append(
-                f'\tstatic GDExtensionMethodBindPtr ___method_bind = internal::gdextension_interface_classdb_get_method_bind(__class_name._native_ptr(), __method_name._native_ptr(), {method["hash"]});'
+                f'\tstatic GDExtensionMethodBindPtr _gde_method_bind = internal::gdextension_interface_classdb_get_method_bind(_gde_class_name._native_ptr(), _gde_method_name._native_ptr(), {method["hash"]});'
             )
             method_call = "\t"
             has_return = "return_value" in method and method["return_value"]["type"] != "void"
 
             if has_return:
                 result.append(
-                    f'\tCHECK_METHOD_BIND_RET(___method_bind, {get_default_value_for_type(method["return_value"]["type"])});'
+                    f'\tCHECK_METHOD_BIND_RET(_gde_method_bind, {get_default_value_for_type(method["return_value"]["type"])});'
                 )
             else:
-                result.append("\tCHECK_METHOD_BIND(___method_bind);")
+                result.append("\tCHECK_METHOD_BIND(_gde_method_bind);")
 
             is_ref = False
             if not vararg:
@@ -1492,34 +1492,34 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                     meta_type = method["return_value"]["meta"] if "meta" in method["return_value"] else None
                     if is_enum(return_type):
                         if method["is_static"]:
-                            method_call += f"return ({get_gdextension_type(correct_type(return_type, meta_type))})internal::_call_native_mb_ret<int64_t>(___method_bind, nullptr"
+                            method_call += f"return ({get_gdextension_type(correct_type(return_type, meta_type))})internal::_call_native_mb_ret<int64_t>(_gde_method_bind, nullptr"
                         else:
-                            method_call += f"return ({get_gdextension_type(correct_type(return_type, meta_type))})internal::_call_native_mb_ret<int64_t>(___method_bind, _owner"
+                            method_call += f"return ({get_gdextension_type(correct_type(return_type, meta_type))})internal::_call_native_mb_ret<int64_t>(_gde_method_bind, _owner"
                     elif is_pod_type(return_type) or is_variant(return_type):
                         if method["is_static"]:
-                            method_call += f"return internal::_call_native_mb_ret<{get_gdextension_type(correct_type(return_type, meta_type))}>(___method_bind, nullptr"
+                            method_call += f"return internal::_call_native_mb_ret<{get_gdextension_type(correct_type(return_type, meta_type))}>(_gde_method_bind, nullptr"
                         else:
-                            method_call += f"return internal::_call_native_mb_ret<{get_gdextension_type(correct_type(return_type, meta_type))}>(___method_bind, _owner"
+                            method_call += f"return internal::_call_native_mb_ret<{get_gdextension_type(correct_type(return_type, meta_type))}>(_gde_method_bind, _owner"
                     elif is_refcounted(return_type):
                         if method["is_static"]:
-                            method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, nullptr"
+                            method_call += f"return Ref<{return_type}>::_gde_internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(_gde_method_bind, nullptr"
                         else:
-                            method_call += f"return Ref<{return_type}>::___internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
+                            method_call += f"return Ref<{return_type}>::_gde_internal_constructor(internal::_call_native_mb_ret_obj<{return_type}>(_gde_method_bind, _owner"
                         is_ref = True
                     else:
                         if method["is_static"]:
                             method_call += (
-                                f"return internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, nullptr"
+                                f"return internal::_call_native_mb_ret_obj<{return_type}>(_gde_method_bind, nullptr"
                             )
                         else:
                             method_call += (
-                                f"return internal::_call_native_mb_ret_obj<{return_type}>(___method_bind, _owner"
+                                f"return internal::_call_native_mb_ret_obj<{return_type}>(_gde_method_bind, _owner"
                             )
                 else:
                     if method["is_static"]:
-                        method_call += "internal::_call_native_mb_no_ret(___method_bind, nullptr"
+                        method_call += "internal::_call_native_mb_no_ret(_gde_method_bind, nullptr"
                     else:
-                        method_call += "internal::_call_native_mb_no_ret(___method_bind, _owner"
+                        method_call += "internal::_call_native_mb_no_ret(_gde_method_bind, _owner"
 
                 if "arguments" in method:
                     method_call += ", "
@@ -1536,7 +1536,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             else:  # vararg.
                 result.append("\tGDExtensionCallError error;")
                 result.append("\tVariant ret;")
-                method_call += "internal::gdextension_interface_object_method_bind_call(___method_bind, _owner, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count, &ret, &error"
+                method_call += "internal::gdextension_interface_object_method_bind_call(_gde_method_bind, _owner, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count, &ret, &error"
 
             if is_ref:
                 method_call += ")"  # Close Ref<> constructor.
@@ -1763,28 +1763,28 @@ def generate_utility_functions(api, output_dir):
 
         # Function body.
 
-        source.append(f'\tconst StringName __function_name = "{function["name"]}";')
+        source.append(f'\tconst StringName _gde_function_name = "{function["name"]}";')
         source.append(
-            f'\tstatic GDExtensionPtrUtilityFunction ___function = internal::gdextension_interface_variant_get_ptr_utility_function(__function_name._native_ptr(), {function["hash"]});'
+            f'\tstatic GDExtensionPtrUtilityFunction _gde_function = internal::gdextension_interface_variant_get_ptr_utility_function(_gde_function_name._native_ptr(), {function["hash"]});'
         )
         has_return = "return_type" in function and function["return_type"] != "void"
         if has_return:
             source.append(
-                f'\tCHECK_METHOD_BIND_RET(___function, {get_default_value_for_type(function["return_type"])});'
+                f'\tCHECK_METHOD_BIND_RET(_gde_function, {get_default_value_for_type(function["return_type"])});'
             )
         else:
-            source.append("\tCHECK_METHOD_BIND(___function);")
+            source.append("\tCHECK_METHOD_BIND(_gde_function);")
 
         function_call = "\t"
         if not vararg:
             if has_return:
                 function_call += "return "
                 if function["return_type"] == "Object":
-                    function_call += "internal::_call_utility_ret_obj(___function"
+                    function_call += "internal::_call_utility_ret_obj(_gde_function"
                 else:
-                    function_call += f'internal::_call_utility_ret<{get_gdextension_type(correct_type(function["return_type"]))}>(___function'
+                    function_call += f'internal::_call_utility_ret<{get_gdextension_type(correct_type(function["return_type"]))}>(_gde_function'
             else:
-                function_call += "internal::_call_utility_no_ret(___function"
+                function_call += "internal::_call_utility_no_ret(_gde_function"
 
             if "arguments" in function:
                 function_call += ", "
@@ -1803,7 +1803,7 @@ def generate_utility_functions(api, output_dir):
                 source.append(f'\t{get_gdextension_type(correct_type(function["return_type"]))} ret;')
             else:
                 source.append("\tVariant ret;")
-            function_call += "___function(&ret, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count"
+            function_call += "_gde_function(&ret, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count"
 
         function_call += ");"
         source.append(function_call)
