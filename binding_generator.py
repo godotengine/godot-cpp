@@ -1189,8 +1189,9 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         for included in used_classes:
             result.append(f"#include <godot_cpp/{get_include_path(included)}>")
 
-        if len(used_classes) > 0:
-            result.append("")
+        if len(used_classes) == 0:
+            result.append("#include <godot_cpp/core/method_ptrcall.hpp>")
+        result.append("")
 
         result.append("namespace godot {")
         result.append("")
