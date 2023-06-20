@@ -128,6 +128,7 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_node_argument"), &Example::test_node_argument);
 	ClassDB::bind_method(D_METHOD("test_string_ops"), &Example::test_string_ops);
 	ClassDB::bind_method(D_METHOD("test_str_utility"), &Example::test_str_utility);
+	ClassDB::bind_method(D_METHOD("test_string_is_fourty_two"), &Example::test_string_is_fourty_two);
 	ClassDB::bind_method(D_METHOD("test_vector_ops"), &Example::test_vector_ops);
 
 	ClassDB::bind_method(D_METHOD("test_bitfield", "flags"), &Example::test_bitfield);
@@ -283,6 +284,10 @@ String Example::test_string_ops() const {
 
 String Example::test_str_utility() const {
 	return UtilityFunctions::str("Hello, ", "World", "! The answer is ", 42);
+}
+
+bool Example::test_string_is_fourty_two(const String &p_string) const {
+	return strcmp(p_string.utf8().ptr(), "fourty two") == 0;
 }
 
 int Example::test_vector_ops() const {
