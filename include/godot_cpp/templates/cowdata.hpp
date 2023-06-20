@@ -32,13 +32,13 @@
 #define GODOT_COWDATA_HPP
 
 #include <godot_cpp/classes/global_constants.hpp>
-#include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/templates/safe_refcount.hpp>
 
 #include <cstring>
+#include <new>
 
 namespace godot {
 
@@ -47,6 +47,9 @@ class Vector;
 
 template <class T, class V>
 class VMap;
+
+template <class T>
+class CharStringT;
 
 // Silence a false positive warning (see GH-52119).
 #if defined(__GNUC__) && !defined(__clang__)
@@ -61,6 +64,9 @@ class CowData {
 
 	template <class TV, class VV>
 	friend class VMap;
+
+	template <class TS>
+	friend class CharStringT;
 
 private:
 	mutable T *_ptr = nullptr;

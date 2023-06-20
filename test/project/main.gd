@@ -82,6 +82,10 @@ func _ready():
 	# UtilityFunctions::str()
 	assert_equal(example.test_str_utility(), "Hello, World! The answer is 42")
 
+	# Test converting string to char* and doing comparison.
+	assert_equal(example.test_string_is_fourty_two("blah"), false)
+	assert_equal(example.test_string_is_fourty_two("fourty two"), true)
+
 	# PackedArray iterators
 	assert_equal(example.test_vector_ops(), 105)
 
