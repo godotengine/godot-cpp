@@ -69,6 +69,15 @@ struct PairSort {
 	}
 };
 
+template <class F, class S>
+struct PairHash {
+	static uint32_t hash(const Pair<F, S> &P) {
+		uint64_t h1 = HashMapHasherDefault::hash(P.first);
+		uint64_t h2 = HashMapHasherDefault::hash(P.second);
+		return hash_one_uint64((h1 << 32) | h2);
+	}
+};
+
 template <class K, class V>
 struct KeyValue {
 	const K key;

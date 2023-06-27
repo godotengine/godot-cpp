@@ -31,6 +31,7 @@
 #ifndef GODOT_RID_OWNER_HPP
 #define GODOT_RID_OWNER_HPP
 
+#include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/godot.hpp>
 #include <godot_cpp/templates/list.hpp>
@@ -54,7 +55,7 @@ class RID_Alloc {
 
 	const char *description = nullptr;
 
-	SpinLock spin_lock;
+	mutable SpinLock spin_lock;
 
 	_FORCE_INLINE_ RID _allocate_rid() {
 		if (THREAD_SAFE) {
@@ -67,7 +68,7 @@ class RID_Alloc {
 
 			// grow chunks
 			chunks = (T **)memrealloc(chunks, sizeof(T *) * (chunk_count + 1));
-			chunks[chunk_count] = (T *)memalloc(sizeof(T) * elements_in_chunk); // but don't initialize
+			chunks[chunk_count] = (T *)memalloc(sizeof(T) * elements_in_chunk); //but don't initialize
 
 			// grow validators
 			validator_chunks = (uint32_t **)memrealloc(validator_chunks, sizeof(uint32_t *) * (chunk_count + 1));
@@ -92,6 +93,7 @@ class RID_Alloc {
 		uint32_t free_element = free_index % elements_in_chunk;
 
 		uint32_t validator = (uint32_t)(UtilityFunctions::rid_allocate_id() & 0x7FFFFFFF);
+		CRASH_COND_MSG(validator == 0x7FFFFFFF, "Overflow in RID validator");
 		uint64_t id = validator;
 		id <<= 32;
 		id |= free_index;
@@ -161,7 +163,6 @@ public:
 					spin_lock.unlock();
 				}
 				ERR_FAIL_V_MSG(nullptr, "Attempting to initialize the wrong RID");
-				return nullptr;
 			}
 
 			validator_chunks[idx_chunk][idx_element] &= 0x7FFFFFFF; // initialized
@@ -173,7 +174,6 @@ public:
 			if ((validator_chunks[idx_chunk][idx_element] & 0x80000000) && validator_chunks[idx_chunk][idx_element] != 0xFFFFFFFF) {
 				ERR_FAIL_V_MSG(nullptr, "Attempting to use an uninitialized RID");
 			}
-			return nullptr;
 		}
 
 		T *ptr = &chunks[idx_chunk][idx_element];
@@ -195,7 +195,7 @@ public:
 		memnew_placement(mem, T(p_value));
 	}
 
-	_FORCE_INLINE_ bool owns(const RID &p_rid) {
+	_FORCE_INLINE_ bool owns(const RID &p_rid) const {
 		if (THREAD_SAFE) {
 			spin_lock.lock();
 		}
@@ -214,7 +214,7 @@ public:
 
 		uint32_t validator = uint32_t(id >> 32);
 
-		bool owned = (validator_chunks[idx_chunk][idx_element] & 0x7FFFFFFF) == validator;
+		bool owned = (validator != 0x7FFFFFFF) && (validator_chunks[idx_chunk][idx_element] & 0x7FFFFFFF) == validator;
 
 		if (THREAD_SAFE) {
 			spin_lock.unlock();
@@ -267,8 +267,7 @@ public:
 	_FORCE_INLINE_ uint32_t get_rid_count() const {
 		return alloc_count;
 	}
-
-	void get_owned_list(List<RID> *p_owned) {
+	void get_owned_list(List<RID> *p_owned) const {
 		if (THREAD_SAFE) {
 			spin_lock.lock();
 		}
@@ -284,7 +283,7 @@ public:
 	}
 
 	// used for fast iteration in the elements or RIDs
-	void fill_owned_buffer(RID *p_rid_buffer) {
+	void fill_owned_buffer(RID *p_rid_buffer) const {
 		if (THREAD_SAFE) {
 			spin_lock.lock();
 		}
@@ -311,15 +310,8 @@ public:
 
 	~RID_Alloc() {
 		if (alloc_count) {
-			if (description) {
-				printf("ERROR: %d  RID allocations of type '%s' were leaked at exit.", alloc_count, description);
-			} else {
-#ifdef NO_SAFE_CAST
-				printf("ERROR: %d RID allocations of type 'unknown' were leaked at exit.", alloc_count);
-#else
-				printf("ERROR: %d RID allocations of type '%s' were leaked at exit.", alloc_count, typeid(T).name());
-#endif
-			}
+			ERR_PRINT(vformat("ERROR: %d RID allocations of type '%s' were leaked at exit.",
+					alloc_count, description ? description : typeid(T).name()));
 
 			for (size_t i = 0; i < max_alloc; i++) {
 				uint64_t validator = validator_chunks[i / elements_in_chunk][i % elements_in_chunk];
@@ -378,7 +370,7 @@ public:
 		*ptr = p_new_ptr;
 	}
 
-	_FORCE_INLINE_ bool owns(const RID &p_rid) {
+	_FORCE_INLINE_ bool owns(const RID &p_rid) const {
 		return alloc.owns(p_rid);
 	}
 
@@ -390,11 +382,11 @@ public:
 		return alloc.get_rid_count();
 	}
 
-	_FORCE_INLINE_ void get_owned_list(List<RID> *p_owned) {
+	_FORCE_INLINE_ void get_owned_list(List<RID> *p_owned) const {
 		return alloc.get_owned_list(p_owned);
 	}
 
-	void fill_owned_buffer(RID *p_rid_buffer) {
+	void fill_owned_buffer(RID *p_rid_buffer) const {
 		alloc.fill_owned_buffer(p_rid_buffer);
 	}
 
@@ -434,7 +426,7 @@ public:
 		return alloc.get_or_null(p_rid);
 	}
 
-	_FORCE_INLINE_ bool owns(const RID &p_rid) {
+	_FORCE_INLINE_ bool owns(const RID &p_rid) const {
 		return alloc.owns(p_rid);
 	}
 
@@ -446,10 +438,10 @@ public:
 		return alloc.get_rid_count();
 	}
 
-	_FORCE_INLINE_ void get_owned_list(List<RID> *p_owned) {
+	_FORCE_INLINE_ void get_owned_list(List<RID> *p_owned) const {
 		return alloc.get_owned_list(p_owned);
 	}
-	void fill_owned_buffer(RID *p_rid_buffer) {
+	void fill_owned_buffer(RID *p_rid_buffer) const {
 		alloc.fill_owned_buffer(p_rid_buffer);
 	}
 

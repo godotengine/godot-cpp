@@ -31,10 +31,10 @@
 #ifndef GODOT_LOCAL_VECTOR_HPP
 #define GODOT_LOCAL_VECTOR_HPP
 
-#include "godot_cpp/core/error_macros.hpp"
-#include "godot_cpp/core/memory.hpp"
-#include "godot_cpp/templates/sort_array.hpp"
-#include "godot_cpp/templates/vector.hpp"
+#include <godot_cpp/core/error_macros.hpp>
+#include <godot_cpp/core/memory.hpp>
+#include <godot_cpp/templates/sort_array.hpp>
+#include <godot_cpp/templates/vector.hpp>
 
 #include <initializer_list>
 #include <type_traits>
@@ -61,11 +61,7 @@ public:
 
 	_FORCE_INLINE_ void push_back(T p_elem) {
 		if (unlikely(count == capacity)) {
-			if (capacity == 0) {
-				capacity = 1;
-			} else {
-				capacity <<= 1;
-			}
+			capacity = tight ? (capacity + 1) : MAX((U)1, capacity << 1);
 			data = (T *)memrealloc(data, capacity * sizeof(T));
 			CRASH_COND_MSG(!data, "Out of memory");
 		}
@@ -89,7 +85,7 @@ public:
 	}
 
 	/// Removes the item copying the last value into the position of the one to
-	/// remove. It's generally faster than `remove`.
+	/// remove. It's generally faster than `remove_at`.
 	void remove_at_unordered(U p_index) {
 		ERR_FAIL_INDEX(p_index, count);
 		count--;
@@ -101,11 +97,13 @@ public:
 		}
 	}
 
-	void erase(const T &p_val) {
+	_FORCE_INLINE_ bool erase(const T &p_val) {
 		int64_t idx = find(p_val);
 		if (idx >= 0) {
 			remove_at(idx);
+			return true;
 		}
+		return false;
 	}
 
 	void invert() {
@@ -145,12 +143,7 @@ public:
 			count = p_size;
 		} else if (p_size > count) {
 			if (unlikely(p_size > capacity)) {
-				if (capacity == 0) {
-					capacity = 1;
-				}
-				while (capacity < p_size) {
-					capacity <<= 1;
-				}
+				capacity = tight ? p_size : nearest_power_of_2_templated(p_size);
 				data = (T *)memrealloc(data, capacity * sizeof(T));
 				CRASH_COND_MSG(!data, "Out of memory");
 			}

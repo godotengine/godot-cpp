@@ -67,10 +67,11 @@ namespace godot {
 static _FORCE_INLINE_ uint32_t hash_djb2(const char *p_cstr) {
 	const unsigned char *chr = (const unsigned char *)p_cstr;
 	uint32_t hash = 5381;
-	uint32_t c;
+	uint32_t c = *chr++;
 
-	while ((c = *chr++)) {
+	while (c) {
 		hash = ((hash << 5) + hash) ^ c; /* hash * 33 ^ c */
+		c = *chr++;
 	}
 
 	return hash;
@@ -388,6 +389,12 @@ struct HashMapHasherDefault {
 		h = hash_murmur3_one_real(p_aabb.size.z, h);
 		return hash_fmix32(h);
 	}
+};
+
+// TODO: Fold this into HashMapHasherDefault once C++20 concepts are allowed
+template <class T>
+struct HashableHasher {
+	static _FORCE_INLINE_ uint32_t hash(const T &hashable) { return hashable.hash(); }
 };
 
 template <typename T>
