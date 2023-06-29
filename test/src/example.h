@@ -138,6 +138,18 @@ public:
 
 	Variant test_variant_call(Variant p_variant);
 
+	Callable test_callable_mp();
+	Callable test_callable_mp_ret();
+	Callable test_callable_mp_retc() const;
+	Callable test_callable_mp_static() const;
+	Callable test_callable_mp_static_ret() const;
+
+	void unbound_method1(Object *p_object, String p_string, int p_int);
+	String unbound_method2(Object *p_object, String p_string, int p_int);
+	String unbound_method3(Object *p_object, String p_string, int p_int) const;
+	static void unbound_static_method1(Example *p_object, String p_string, int p_int);
+	static String unbound_static_method2(Object *p_object, String p_string, int p_int);
+
 	BitField<Flags> test_bitfield(BitField<Flags> flags);
 
 	// RPC

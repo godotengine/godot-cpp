@@ -40,6 +40,10 @@
 
 #include <godot_cpp/classes/class_db_singleton.hpp>
 
+// Makes callable_mp readily available in all classes connecting signals.
+// Needs to come after method_bind and object have been included.
+#include <godot_cpp/variant/callable_method_pointer.hpp>
+
 #include <list>
 #include <set>
 #include <string>
