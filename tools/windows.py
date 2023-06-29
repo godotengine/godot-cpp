@@ -45,6 +45,15 @@ def generate(env):
         env["SHLIBPREFIX"] = ""
         # Want dll suffix
         env["SHLIBSUFFIX"] = ".dll"
+        env.Append(CCFLAGS=["-O2", "-Wwrite-strings"])
+        env.Append(
+            LINKFLAGS=[
+                "--static",
+                "-Wl,--no-undefined",
+                "-static-libgcc",
+                "-static-libstdc++",
+            ]
+        )
         # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
         my_spawn.configure(env)
 
