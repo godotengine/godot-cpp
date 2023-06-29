@@ -185,6 +185,10 @@ GDExtensionInterfaceClassdbUnregisterExtensionClass gdextension_interface_classd
 GDExtensionInterfaceGetLibraryPath gdextension_interface_get_library_path = nullptr;
 GDExtensionInterfaceEditorAddPlugin gdextension_interface_editor_add_plugin = nullptr;
 GDExtensionInterfaceEditorRemovePlugin gdextension_interface_editor_remove_plugin = nullptr;
+GDExtensionInterfaceAndroidGetEnv gdextension_interface_android_get_env = nullptr;
+GDExtensionInterfaceAndroidGetActivity gdextension_interface_android_get_activity = nullptr;
+GDExtensionInterfaceAndroidGetSurface gdextension_interface_android_get_surface = nullptr;
+GDExtensionInterfaceAndroidIsActivityResumed gdextension_interface_android_is_activity_resumed = nullptr;
 
 } // namespace internal
 
@@ -367,6 +371,10 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	LOAD_PROC_ADDRESS(get_library_path, GDExtensionInterfaceGetLibraryPath);
 	LOAD_PROC_ADDRESS(editor_add_plugin, GDExtensionInterfaceEditorAddPlugin);
 	LOAD_PROC_ADDRESS(editor_remove_plugin, GDExtensionInterfaceEditorRemovePlugin);
+	LOAD_PROC_ADDRESS(android_get_env, GDExtensionInterfaceAndroidGetEnv);
+	LOAD_PROC_ADDRESS(android_get_activity, GDExtensionInterfaceAndroidGetActivity);
+	LOAD_PROC_ADDRESS(android_get_surface, GDExtensionInterfaceAndroidGetSurface);
+	LOAD_PROC_ADDRESS(android_is_activity_resumed, GDExtensionInterfaceAndroidIsActivityResumed);
 
 	// Load the Godot version.
 	internal::gdextension_interface_get_godot_version(&internal::godot_version);

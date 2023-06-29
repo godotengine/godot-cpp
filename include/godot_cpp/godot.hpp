@@ -180,6 +180,10 @@ extern "C" GDExtensionInterfaceClassdbUnregisterExtensionClass gdextension_inter
 extern "C" GDExtensionInterfaceGetLibraryPath gdextension_interface_get_library_path;
 extern "C" GDExtensionInterfaceEditorAddPlugin gdextension_interface_editor_add_plugin;
 extern "C" GDExtensionInterfaceEditorRemovePlugin gdextension_interface_editor_remove_plugin;
+extern "C" GDExtensionInterfaceAndroidGetEnv gdextension_interface_android_get_env;
+extern "C" GDExtensionInterfaceAndroidGetActivity gdextension_interface_android_get_activity;
+extern "C" GDExtensionInterfaceAndroidGetSurface gdextension_interface_android_get_surface;
+extern "C" GDExtensionInterfaceAndroidIsActivityResumed gdextension_interface_android_is_activity_resumed;
 
 } // namespace internal
 
