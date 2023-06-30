@@ -70,6 +70,7 @@ private:
 	Vector2 custom_position;
 	Vector3 property_from_list;
 	Vector2 dprop[3];
+	int last_rpc_arg = 0;
 
 public:
 	// Constants.
@@ -119,6 +120,11 @@ public:
 	int test_vector_ops() const;
 
 	BitField<Flags> test_bitfield(BitField<Flags> flags);
+
+	// RPC
+	void test_rpc(int p_value);
+	void test_send_rpc(int p_value);
+	int return_last_rpc_arg();
 
 	// Property.
 	void set_custom_position(const Vector2 &pos);

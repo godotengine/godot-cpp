@@ -101,6 +101,13 @@ func _ready():
 	assert_equal(example.test_bitfield(0), 0)
 	assert_equal(example.test_bitfield(Example.FLAG_ONE | Example.FLAG_TWO), 3)
 
+	# RPCs.
+	assert_equal(example.return_last_rpc_arg(), 0)
+	example.test_rpc(42)
+	assert_equal(example.return_last_rpc_arg(), 42)
+	example.test_send_rpc(100)
+	assert_equal(example.return_last_rpc_arg(), 100)
+
 	# Virtual method.
 	var event = InputEventKey.new()
 	event.key_label = KEY_H

@@ -9,6 +9,8 @@
 
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/label.hpp>
+#include <godot_cpp/classes/multiplayer_api.hpp>
+#include <godot_cpp/classes/multiplayer_peer.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
@@ -48,6 +50,14 @@ int Example::def_args(int p_a, int p_b) {
 }
 
 void Example::_notification(int p_what) {
+	if (p_what == NOTIFICATION_READY) {
+		Dictionary opts;
+		opts["rpc_mode"] = MultiplayerAPI::RPC_MODE_AUTHORITY;
+		opts["transfer_mode"] = MultiplayerPeer::TRANSFER_MODE_RELIABLE;
+		opts["call_local"] = true;
+		opts["channel"] = 0;
+		rpc_config("test_rpc", opts);
+	}
 	//UtilityFunctions::print("Notification: ", String::num(p_what));
 }
 
@@ -131,6 +141,10 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_vector_ops"), &Example::test_vector_ops);
 
 	ClassDB::bind_method(D_METHOD("test_bitfield", "flags"), &Example::test_bitfield);
+
+	ClassDB::bind_method(D_METHOD("test_rpc", "value"), &Example::test_rpc);
+	ClassDB::bind_method(D_METHOD("test_send_rpc", "value"), &Example::test_send_rpc);
+	ClassDB::bind_method(D_METHOD("return_last_rpc_arg"), &Example::return_last_rpc_arg);
 
 	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
 
@@ -331,6 +345,18 @@ Example *Example::test_node_argument(Example *p_node) const {
 
 BitField<Example::Flags> Example::test_bitfield(BitField<Flags> flags) {
 	return flags;
+}
+
+void Example::test_rpc(int p_value) {
+	last_rpc_arg = p_value;
+}
+
+void Example::test_send_rpc(int p_value) {
+	rpc("test_rpc", p_value);
+}
+
+int Example::return_last_rpc_arg() {
+	return last_rpc_arg;
 }
 
 // Properties.
