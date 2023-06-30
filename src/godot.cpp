@@ -428,14 +428,3 @@ GDExtensionBool GDExtensionBinding::InitObject::init() const {
 }
 
 } // namespace godot
-
-extern "C" {
-
-void GDE_EXPORT initialize_level(void *userdata, GDExtensionInitializationLevel p_level) {
-	godot::GDExtensionBinding::initialize_level(userdata, p_level);
-}
-
-void GDE_EXPORT deinitialize_level(void *userdata, GDExtensionInitializationLevel p_level) {
-	godot::GDExtensionBinding::deinitialize_level(userdata, p_level);
-}
-}
