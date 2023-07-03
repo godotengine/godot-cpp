@@ -129,6 +129,8 @@ public:
 	int test_tarray_arg(const TypedArray<int64_t> &p_array);
 	TypedArray<Vector2> test_tarray() const;
 	Dictionary test_dictionary() const;
+	int test_tdictionary_arg(const TypedDictionary<String, int64_t> &p_dictionary);
+	TypedDictionary<Vector2, Vector2i> test_tdictionary() const;
 	Example *test_node_argument(Example *p_node) const;
 	String test_string_ops() const;
 	String test_str_utility() const;
