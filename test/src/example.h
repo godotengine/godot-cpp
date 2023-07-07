@@ -118,6 +118,7 @@ public:
 	String test_string_ops() const;
 	String test_str_utility() const;
 	bool test_string_is_fourty_two(const String &p_str) const;
+	String test_string_resize(String p_original) const;
 	int test_vector_ops() const;
 
 	BitField<Flags> test_bitfield(BitField<Flags> flags);
