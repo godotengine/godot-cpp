@@ -1,0 +1,16 @@
+{
+	"enabled_classes": [
+		"Control",
+		"Viewport",
+		"InputEventKey",
+		"TileMap",
+		"Label",
+		"Texture2D",
+		"Material",
+		"StyleBox",
+		"SceneTree",
+		"Mesh",
+		"Window",
+		"Shader"
+	]
+}

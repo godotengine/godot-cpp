@@ -198,6 +198,15 @@ def options(opts, env):
         )
     )
 
+    opts.Add(
+        PathVariable(
+            "build_profile",
+            "Path to a file containing a feature build profile",
+            default=env.get("build_profile", None),
+            validator=validate_file,
+        )
+    )
+
     # Add platform options
     for pl in platforms:
         tool = Tool(pl, toolpath=["tools"])
