@@ -318,7 +318,18 @@ GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtens
 
 const GDExtensionInstanceBindingCallbacks *ClassDB::get_instance_binding_callbacks(const StringName &p_class) {
 	std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *>::iterator callbacks_it = instance_binding_callbacks.find(p_class);
-	ERR_FAIL_COND_V_MSG(callbacks_it == instance_binding_callbacks.end(), nullptr, String("Cannot find instance binding callbacks for class '{0}'.").format(Array::make(p_class)));
+	if (likely(callbacks_it != instance_binding_callbacks.end())) {
+		return callbacks_it->second;
+	}
+
+	// If we don't have an instance binding callback for the given class, find the closest parent where we do.
+	StringName class_name = p_class;
+	do {
+		class_name = get_parent_class(class_name);
+		ERR_FAIL_COND_V_MSG(class_name == StringName(), nullptr, String("Cannot find instance binding callbacks for class '{0}'.").format(Array::make(p_class)));
+		callbacks_it = instance_binding_callbacks.find(class_name);
+	} while (callbacks_it == instance_binding_callbacks.end());
+
 	return callbacks_it->second;
 }
 
