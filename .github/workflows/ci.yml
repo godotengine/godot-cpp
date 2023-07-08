@@ -10,7 +10,7 @@ jobs:
       matrix:
         include:
           - name: 🐧 Linux (GCC)
-            os: ubuntu-18.04
+            os: ubuntu-20.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.release.64.a
@@ -40,7 +40,7 @@ jobs:
             executable: Godot.app/Contents/MacOS/Godot
 
           - name: 🤖 Android (arm64)
-            os: ubuntu-18.04
+            os: ubuntu-20.04
             platform: android
             artifact-name: godot-cpp-android-arm64-release
             artifact-path: bin/libgodot-cpp.android.release.arm64v8.a
