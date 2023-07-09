@@ -1,8 +1,45 @@
 #!/usr/bin/env python
 import os
 import sys
+from SCons.Script import *  # type: ignore
+from SCons.Errors import UserError
+from SCons.Variables import BoolVariable, PathVariable
 
-env = SConscript("../SConstruct")
+# TO GENERATE "compile_commands.json", RUN THIS COMMAND:
+# `scons compiledb=yes -Q compiledb`
+
+
+def normalize_path(val):
+    return val if os.path.isabs(val) else os.path.join(env.Dir("#").abspath, val)
+
+
+def validate_compiledb_file(key, val, env):
+    if not os.path.isdir(os.path.dirname(normalize_path(val))):
+        raise UserError("Directory ('%s') does not exist: %s" % (key, os.path.dirname(val)))
+
+
+def get_compiledb_file(env):
+    return normalize_path(env.get("compiledb_file", "compile_commands.json"))
+
+
+env = Environment()
+customs = ["custom.py"]
+opts = Variables(customs, ARGUMENTS)
+opts.Add(BoolVariable("compiledb", "Generate compilation DB (`compile_commands.json`) for external tools", False))
+opts.Add(
+    PathVariable(
+        "compiledb_file",
+        help="Path to a custom compile_commands.json",
+        default=normalize_path("compile_commands.json"),
+        validator=validate_compiledb_file,
+    )
+)
+opts.Update(env)
+
+# Override the `compiledb` option for "../SConstruct" to make sure it's off
+clonedEnv = env.Clone()
+clonedEnv["compiledb"] = False
+env = SConscript("../SConstruct", {"env": clonedEnv})
 
 # For the reference:
 # - CCFLAGS are compilation flags shared between C and C++
@@ -15,6 +52,11 @@ env = SConscript("../SConstruct")
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 env.Append(CPPPATH=["src/"])
 sources = Glob("src/*.cpp")
+
+# "compile_commands.json" generation
+if env.get("compiledb", False):
+    env.Tool("compilation_db")
+    env.Alias("compiledb", env.CompilationDatabase(env.get("compiledb_file", None)))
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(

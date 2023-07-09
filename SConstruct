@@ -25,6 +25,10 @@ def validate_api_file(key, val, env):
         raise UserError("GDExtension API file ('%s') does not exist: %s" % (key, val))
 
 
+def get_api_file(env):
+    return normalize_path(env.get("custom_api_file", os.path.join(get_gdextension_dir(env), "extension_api.json")))
+
+
 def validate_gdextension_dir(key, val, env):
     if not os.path.isdir(normalize_path(val)):
         raise UserError("GDExtension directory ('%s') does not exist: %s" % (key, val))
@@ -34,8 +38,13 @@ def get_gdextension_dir(env):
     return normalize_path(env.get("gdextension_dir", env.Dir("gdextension").abspath))
 
 
-def get_api_file(env):
-    return normalize_path(env.get("custom_api_file", os.path.join(get_gdextension_dir(env), "extension_api.json")))
+def validate_compiledb_file(key, val, env):
+    if not os.path.isdir(os.path.dirname(normalize_path(val))):
+        raise UserError("Directory ('%s') does not exist: %s" % (key, os.path.dirname(val)))
+
+
+def get_compiledb_file(env):
+    return normalize_path(env.get("compiledb_file", "compile_commands.json"))
 
 
 # Try to detect the host platform automatically.
@@ -185,6 +194,23 @@ opts.Add(
     )
 )
 
+# compiledb
+opts.Add(
+    BoolVariable(
+        key="compiledb",
+        help="Generate compilation DB (`compile_commands.json`) for external tools",
+        default=env.get("compiledb", False),
+    )
+)
+opts.Add(
+    PathVariable(
+        key="compiledb_file",
+        help="Path to a custom `compile_commands.json` file",
+        default=env.get("compiledb_file", None),
+        validator=validate_compiledb_file,
+    )
+)
+
 # Targets flags tool (optimizations, debug symbols)
 target_tool = Tool("targets", toolpath=["tools"])
 target_tool.options(opts)
@@ -241,6 +267,11 @@ else:
 
 if env["precision"] == "double":
     env.Append(CPPDEFINES=["REAL_T_IS_DOUBLE"])
+
+# compile_commands.json
+if env.get("compiledb", False):
+    env.Tool("compilation_db")
+    env.Alias("compiledb", env.CompilationDatabase(env.get("compiledb_file", None)))
 
 # Generate bindings
 env.Append(BUILDERS={"GenerateBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
