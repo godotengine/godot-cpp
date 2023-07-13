@@ -1453,9 +1453,8 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
 
     if is_singleton:
         result.append(f"{class_name} *{class_name}::get_singleton() {{")
-        result.append(f"\tconst StringName _gde_class_name = {class_name}::get_class_static();")
         result.append(
-            "\tstatic GDExtensionObjectPtr singleton_obj = internal::gdextension_interface_global_get_singleton(_gde_class_name._native_ptr());"
+            f"\tstatic GDExtensionObjectPtr singleton_obj = internal::gdextension_interface_global_get_singleton({class_name}::get_class_static()._native_ptr());"
         )
         result.append("#ifdef DEBUG_ENABLED")
         result.append("\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
@@ -1480,10 +1479,8 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             result.append(method_signature + " {")
 
             # Method body.
-            result.append(f"\tconst StringName _gde_class_name = {class_name}::get_class_static();")
-            result.append(f'\tconst StringName _gde_method_name = "{method["name"]}";')
             result.append(
-                f'\tstatic GDExtensionMethodBindPtr _gde_method_bind = internal::gdextension_interface_classdb_get_method_bind(_gde_class_name._native_ptr(), _gde_method_name._native_ptr(), {method["hash"]});'
+                f'\tstatic GDExtensionMethodBindPtr _gde_method_bind = internal::gdextension_interface_classdb_get_method_bind({class_name}::get_class_static()._native_ptr(), StringName("{method["name"]}")._native_ptr(), {method["hash"]});'
             )
             method_call = "\t"
             has_return = "return_value" in method and method["return_value"]["type"] != "void"
@@ -1773,9 +1770,8 @@ def generate_utility_functions(api, output_dir):
 
         # Function body.
 
-        source.append(f'\tconst StringName _gde_function_name = "{function["name"]}";')
         source.append(
-            f'\tstatic GDExtensionPtrUtilityFunction _gde_function = internal::gdextension_interface_variant_get_ptr_utility_function(_gde_function_name._native_ptr(), {function["hash"]});'
+            f'\tstatic GDExtensionPtrUtilityFunction _gde_function = internal::gdextension_interface_variant_get_ptr_utility_function(StringName("{function["name"]}")._native_ptr(), {function["hash"]});'
         )
         has_return = "return_type" in function and function["return_type"] != "void"
         if has_return:
