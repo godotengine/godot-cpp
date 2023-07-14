@@ -51,9 +51,13 @@ elif ARGUMENTS.get("platform", ""):
 else:
     raise ValueError("Could not detect platform automatically, please specify with platform=<platform>")
 
-# Default tools with no platform defaults to gnu toolchain.
-# We apply platform specific toolchains via our custom tools.
-env = Environment(tools=["default"], PLATFORM="")
+try:
+    Import("env")
+except:
+    # Default tools with no platform defaults to gnu toolchain.
+    # We apply platform specific toolchains via our custom tools.
+    env = Environment(tools=["default"], PLATFORM="")
+
 env.PrependENVPath("PATH", os.getenv("PATH"))
 
 # Default num_jobs to local cpu count if not user specified.
@@ -87,9 +91,9 @@ opts = Variables(customs, ARGUMENTS)
 platforms = ("linux", "macos", "windows", "android", "ios", "javascript")
 opts.Add(
     EnumVariable(
-        "platform",
-        "Target platform",
-        default_platform,
+        key="platform",
+        help="Target platform",
+        default=env.get("platform", default_platform),
         allowed_values=platforms,
         ignorecase=2,
     )
@@ -99,31 +103,53 @@ opts.Add(
 # Godot release templates are only compatible with "template_release" builds.
 # For this reason, we default to template_debug builds, unlike Godot which defaults to editor builds.
 opts.Add(
-    EnumVariable("target", "Compilation target", "template_debug", ("editor", "template_release", "template_debug"))
-)
-opts.Add(
-    PathVariable(
-        "gdextension_dir",
-        "Path to a custom directory containing GDExtension interface header and API JSON file",
-        None,
-        validate_gdextension_dir,
+    EnumVariable(
+        key="target",
+        help="Compilation target",
+        default=env.get("target", "template_debug"),
+        allowed_values=("editor", "template_release", "template_debug"),
     )
 )
 opts.Add(
     PathVariable(
-        "custom_api_file",
-        "Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)",
-        None,
-        validate_api_file,
+        key="gdextension_dir",
+        help="Path to a custom directory containing GDExtension interface header and API JSON file",
+        default=env.get("gdextension_dir", None),
+        validator=validate_gdextension_dir,
     )
 )
 opts.Add(
-    BoolVariable("generate_bindings", "Force GDExtension API bindings generation. Auto-detected by default.", False)
+    PathVariable(
+        key="custom_api_file",
+        help="Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)",
+        default=env.get("custom_api_file", None),
+        validator=validate_api_file,
+    )
 )
-opts.Add(BoolVariable("generate_template_get_node", "Generate a template version of the Node class's get_node.", True))
+opts.Add(
+    BoolVariable(
+        key="generate_bindings",
+        help="Force GDExtension API bindings generation. Auto-detected by default.",
+        default=env.get("generate_bindings", False),
+    )
+)
+opts.Add(
+    BoolVariable(
+        key="generate_template_get_node",
+        help="Generate a template version of the Node class's get_node.",
+        default=env.get("generate_template_get_node", True),
+    )
+)
 
-opts.Add(BoolVariable("build_library", "Build the godot-cpp library.", True))
-opts.Add(EnumVariable("precision", "Set the floating-point precision level", "single", ("single", "double")))
+opts.Add(BoolVariable(key="build_library", help="Build the godot-cpp library.", default=env.get("build_library", True)))
+opts.Add(
+    EnumVariable(
+        key="precision",
+        help="Set the floating-point precision level",
+        default=env.get("precision", "single"),
+        allowed_values=("single", "double"),
+    )
+)
 
 # Add platform options
 tools = {}
@@ -149,7 +175,15 @@ architecture_aliases = {
     "ppc": "ppc32",
     "ppc64le": "ppc64",
 }
-opts.Add(EnumVariable("arch", "CPU architecture", "", architecture_array, architecture_aliases))
+opts.Add(
+    EnumVariable(
+        key="arch",
+        help="CPU architecture",
+        default=env.get("arch", ""),
+        allowed_values=architecture_array,
+        map=architecture_aliases,
+    )
+)
 
 # Targets flags tool (optimizations, debug symbols)
 target_tool = Tool("targets", toolpath=["tools"])
