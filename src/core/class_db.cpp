@@ -105,15 +105,7 @@ void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinf
 		p_pinfo.usage, // DEFAULT //uint32_t usage;
 	};
 
-	PropertySetGet setget;
-	setget.setter = p_setter;
-	setget.getter = p_getter;
-	setget._setptr = setter;
-	setget._getptr = getter;
-	setget.index = p_index;
-	setget.type = p_pinfo.type;
-
-	internal::gdextension_interface_classdb_register_extension_class_property(internal::library, info.name._native_ptr(), &prop_info, setget.setter._native_ptr(), setget.getter._native_ptr());
+	internal::gdextension_interface_classdb_register_extension_class_property_indexed(internal::library, info.name._native_ptr(), &prop_info, p_setter._native_ptr(), p_getter._native_ptr(), p_index);
 }
 
 MethodBind *ClassDB::get_method(const StringName &p_class, const StringName &p_method) {

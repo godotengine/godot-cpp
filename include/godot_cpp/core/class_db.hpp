@@ -79,15 +79,6 @@ class ClassDB {
 	friend class godot::GDExtensionBinding;
 
 public:
-	struct PropertySetGet {
-		int index;
-		StringName setter;
-		StringName getter;
-		MethodBind *_setptr;
-		MethodBind *_getptr;
-		Variant::Type type;
-	};
-
 	struct ClassInfo {
 		StringName name;
 		StringName parent_name;
