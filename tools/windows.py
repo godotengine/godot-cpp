@@ -70,3 +70,5 @@ def generate(env):
                 "-static-libstdc++",
             ]
         )
+
+    env.Append(CPPDEFINES=["WINDOWS_ENABLED"])
