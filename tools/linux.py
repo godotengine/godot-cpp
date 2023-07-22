@@ -32,3 +32,5 @@ def generate(env):
     elif env["arch"] == "rv64":
         env.Append(CCFLAGS=["-march=rv64gc"])
         env.Append(LINKFLAGS=["-march=rv64gc"])
+
+    env.Append(CPPDEFINES=["LINUX_ENABLED", "UNIX_ENABLED"])

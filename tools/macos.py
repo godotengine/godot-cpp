@@ -48,3 +48,5 @@ def generate(env):
             "-Wl,-undefined,dynamic_lookup",
         ]
     )
+
+    env.Append(CPPDEFINES=["MACOS_ENABLED", "UNIX_ENABLED"])

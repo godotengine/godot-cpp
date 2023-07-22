@@ -43,3 +43,5 @@ def generate(env):
         env.Append(CCFLAGS=["-O0", "-g"])
     elif env["target"] == "release":
         env.Append(CCFLAGS=["-O3"])
+
+    env.Append(CPPDEFINES=["WEB_ENABLED", "UNIX_ENABLED"])
