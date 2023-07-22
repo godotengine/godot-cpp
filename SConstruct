@@ -20,14 +20,19 @@ def normalize_path(val):
     return val if os.path.isabs(val) else os.path.join(env.Dir("#").abspath, val)
 
 
-def validate_api_file(key, val, env):
+def validate_file(key, val, env):
     if not os.path.isfile(normalize_path(val)):
-        raise UserError("GDExtension API file ('%s') does not exist: %s" % (key, val))
+        raise UserError("'%s' is not a file: %s" % (key, val))
 
 
-def validate_gdextension_dir(key, val, env):
+def validate_dir(key, val, env):
     if not os.path.isdir(normalize_path(val)):
-        raise UserError("GDExtension directory ('%s') does not exist: %s" % (key, val))
+        raise UserError("'%s' is not a directory: %s" % (key, val))
+
+
+def validate_parent_dir(key, val, env):
+    if not os.path.isdir(normalize_path(os.path.dirname(val))):
+        raise UserError("'%s' is not a directory: %s" % (key, os.path.dirname(val)))
 
 
 def get_gdextension_dir(env):
@@ -115,7 +120,7 @@ opts.Add(
         key="gdextension_dir",
         help="Path to a custom directory containing GDExtension interface header and API JSON file",
         default=env.get("gdextension_dir", None),
-        validator=validate_gdextension_dir,
+        validator=validate_dir,
     )
 )
 opts.Add(
@@ -123,7 +128,7 @@ opts.Add(
         key="custom_api_file",
         help="Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)",
         default=env.get("custom_api_file", None),
-        validator=validate_api_file,
+        validator=validate_file,
     )
 )
 opts.Add(
@@ -148,6 +153,23 @@ opts.Add(
         help="Set the floating-point precision level",
         default=env.get("precision", "single"),
         allowed_values=("single", "double"),
+    )
+)
+
+# compiledb
+opts.Add(
+    BoolVariable(
+        key="compiledb",
+        help="Generate compilation DB (`compile_commands.json`) for external tools",
+        default=env.get("compiledb", False),
+    )
+)
+opts.Add(
+    PathVariable(
+        key="compiledb_file",
+        help="Path to a custom `compile_commands.json` file",
+        default=env.get("compiledb_file", "compile_commands.json"),
+        validator=validate_parent_dir,
     )
 )
 
@@ -241,6 +263,11 @@ else:
 
 if env["precision"] == "double":
     env.Append(CPPDEFINES=["REAL_T_IS_DOUBLE"])
+
+# compile_commands.json
+if env.get("compiledb", False):
+    env.Tool("compilation_db")
+    env.Alias("compiledb", env.CompilationDatabase(normalize_path(env["compiledb_file"])))
 
 # Generate bindings
 env.Append(BUILDERS={"GenerateBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
