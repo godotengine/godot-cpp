@@ -1453,15 +1453,22 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
 
     if is_singleton:
         result.append(f"{class_name} *{class_name}::get_singleton() {{")
+        # We assume multi-threaded access is OK because each assignment will assign the same value every time
+        result.append(f"\tstatic {class_name} *singleton = nullptr;")
+        result.append("\tif (unlikely(singleton == nullptr)) {")
         result.append(
-            f"\tstatic GDExtensionObjectPtr singleton_obj = internal::gdextension_interface_global_get_singleton({class_name}::get_class_static()._native_ptr());"
+            f"\t\tGDExtensionObjectPtr singleton_obj = internal::gdextension_interface_global_get_singleton({class_name}::get_class_static()._native_ptr());"
         )
         result.append("#ifdef DEBUG_ENABLED")
-        result.append("\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
+        result.append("\t\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
         result.append("#endif // DEBUG_ENABLED")
         result.append(
-            f"\tstatic {class_name} *singleton = reinterpret_cast<{class_name} *>(internal::gdextension_interface_object_get_instance_binding(singleton_obj, internal::token, &{class_name}::_gde_binding_callbacks));"
+            f"\t\tsingleton = reinterpret_cast<{class_name} *>(internal::gdextension_interface_object_get_instance_binding(singleton_obj, internal::token, &{class_name}::_gde_binding_callbacks));"
         )
+        result.append("#ifdef DEBUG_ENABLED")
+        result.append("\t\tERR_FAIL_COND_V(singleton == nullptr, nullptr);")
+        result.append("#endif // DEBUG_ENABLED")
+        result.append("\t}")
         result.append("\treturn singleton;")
         result.append("}")
         result.append("")
