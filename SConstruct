@@ -35,7 +35,12 @@ def get_gdextension_dir(env):
 
 
 def get_api_file(env):
-    return normalize_path(env.get("custom_api_file", os.path.join(get_gdextension_dir(env), "extension_api.json")))
+    return normalize_path(
+        env.get(
+            "custom_api_file",
+            os.path.join(get_gdextension_dir(env), "extension_api.json"),
+        )
+    )
 
 
 # Try to detect the host platform automatically.
@@ -141,7 +146,13 @@ opts.Add(
     )
 )
 
-opts.Add(BoolVariable(key="build_library", help="Build the godot-cpp library.", default=env.get("build_library", True)))
+opts.Add(
+    BoolVariable(
+        key="build_library",
+        help="Build the godot-cpp library.",
+        default=env.get("build_library", True),
+    )
+)
 opts.Add(
     EnumVariable(
         key="precision",
@@ -150,6 +161,16 @@ opts.Add(
         allowed_values=("single", "double"),
     )
 )
+
+# Debug
+opts.Add(
+    BoolVariable(
+        "dev_build",
+        "Developer build with dev-only debugging code (DEV_ENABLED)",
+        env.get("dev_build", False),
+    )
+)
+opts.Add(BoolVariable("debug_symbols", "Build with debugging symbols", env.get("debug_symbols", False)))
 
 # Add platform options
 tools = {}
@@ -160,7 +181,18 @@ for pl in platforms:
     tools[pl] = tool
 
 # CPU architecture options.
-architecture_array = ["", "universal", "x86_32", "x86_64", "arm32", "arm64", "rv64", "ppc32", "ppc64", "wasm32"]
+architecture_array = [
+    "",
+    "universal",
+    "x86_32",
+    "x86_64",
+    "arm32",
+    "arm64",
+    "rv64",
+    "ppc32",
+    "ppc64",
+    "wasm32",
+]
 architecture_aliases = {
     "x64": "x86_64",
     "amd64": "x86_64",
@@ -188,6 +220,18 @@ opts.Add(
 # Targets flags tool (optimizations, debug symbols)
 target_tool = Tool("targets", toolpath=["tools"])
 target_tool.options(opts)
+
+if env.get("is_msvc", False):
+    pass
+else:
+    if env.get("debug_symbols", False):
+        # Adding dwarf-4 explicitly makes stacktraces work with clang builds,
+        # otherwise addr2line doesn't understand them
+        env.Append(CCFLAGS=["-gdwarf-4"])
+        if env.get("dev_build", False):
+            env.Append(CCFLAGS=["-g3"])
+        else:
+            env.Append(CCFLAGS=["-g2"])
 
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
@@ -247,7 +291,11 @@ env.Append(BUILDERS={"GenerateBindings": Builder(action=scons_generate_bindings,
 
 bindings = env.GenerateBindings(
     env.Dir("."),
-    [get_api_file(env), os.path.join(get_gdextension_dir(env), "gdextension_interface.h"), "binding_generator.py"],
+    [
+        get_api_file(env),
+        os.path.join(get_gdextension_dir(env), "gdextension_interface.h"),
+        "binding_generator.py",
+    ],
 )
 
 scons_cache_path = os.environ.get("SCONS_CACHE")
@@ -261,7 +309,18 @@ if env["generate_bindings"]:
     NoCache(bindings)
 
 # Includes
-env.Append(CPPPATH=[[env.Dir(d) for d in [get_gdextension_dir(env), "include", os.path.join("gen", "include")]]])
+env.Append(
+    CPPPATH=[
+        [
+            env.Dir(d)
+            for d in [
+                get_gdextension_dir(env),
+                "include",
+                os.path.join("gen", "include"),
+            ]
+        ]
+    ]
+)
 
 # Sources to compile
 sources = []
