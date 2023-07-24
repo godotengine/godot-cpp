@@ -1,26 +1,34 @@
-import os
+import os, sys, subprocess
 
 
 def exists(env):
-    return os.name == "nt"
+    return os.name == "nt" or sys.platform == "cygwin"
 
 
-# Workaround for MinGW. See:
-# http://www.scons.org/wiki/LongCmdLinesOnWin32
-def configure(env):
-    import subprocess
+def generate(env):
+    if env.get("is_msvc", False):
+        # Applied by MSVC tool.
+        return
 
+    # Workaround for long command lines on Windows. See:
+    # http://www.scons.org/wiki/LongCmdLinesOnWin32
     def mySubProcess(cmdline, env):
         # print "SPAWNED : " + cmdline
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        if os.name == "nt":
+            shell = False
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        else:
+            shell = True  # Needed when os is posix (windows + cygwin/msys2).
+            startupinfo = None
+
         proc = subprocess.Popen(
             cmdline,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             startupinfo=startupinfo,
-            shell=False,
+            shell=shell,
             env=env,
         )
         data, err = proc.communicate()

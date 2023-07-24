@@ -1,6 +1,6 @@
 import os
 import sys
-import my_spawn
+import win32_long_line_fix
 from SCons.Script import ARGUMENTS
 
 
@@ -31,8 +31,8 @@ def generate(env):
         print("Only arm64, x86_64, arm32, and x86_32 are supported on Android. Exiting.")
         Exit()
 
-    if sys.platform == "win32" or sys.platform == "msys":
-        my_spawn.configure(env)
+    if win32_long_line_fix.exists(env):
+        win32_long_line_fix.generate(env)
 
     # Validate API level
     api_level = int(env["android_api_level"])
@@ -43,7 +43,7 @@ def generate(env):
 
     # Setup toolchain
     toolchain = env["ANDROID_NDK_ROOT"] + "/toolchains/llvm/prebuilt/"
-    if sys.platform == "win32" or sys.platform == "msys":
+    if sys.platform in ["win32", "msys", "cygwin"]:
         toolchain += "windows"
         import platform as pltfm
 
