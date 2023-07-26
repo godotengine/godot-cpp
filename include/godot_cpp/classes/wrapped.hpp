@@ -71,9 +71,9 @@ protected:
 	static GDExtensionBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionVariantPtr r_ret) { return false; }
 	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDExtensionBool *r_is_valid, GDExtensionStringPtr r_out) {}
 
+	// The only reason this has to be held here, is when we return results of `_get_property_list` to Godot, we pass
+	// pointers to strings in this list. They have to remain valid to pass the bridge, until the list is freed by Godot...
 	::godot::List<::godot::PropertyInfo> plist_owned;
-	GDExtensionPropertyInfo *plist = nullptr;
-	uint32_t plist_size = 0;
 
 	void _postinitialize();
 
@@ -95,9 +95,19 @@ public:
 	GodotObject *_owner = nullptr;
 };
 
+namespace internal {
+
+GDExtensionPropertyInfo *create_c_property_list(const ::godot::List<::godot::PropertyInfo> &plist_cpp, uint32_t *r_size);
+void free_c_property_list(GDExtensionPropertyInfo *plist);
+
+} // namespace internal
+
 } // namespace godot
 
-#define GDCLASS(m_class, m_inherits)                                                                                                                                                   \
+// Use this on top of your own classes.
+// Note: the trail of `***` is to keep sane diffs in PRs, because clang-format otherwise moves every `\` which makes
+// every line of the macro different
+#define GDCLASS(m_class, m_inherits) /***********************************************************************************************************************************************/ \
 private:                                                                                                                                                                               \
 	void operator=(const m_class &p_rval) {}                                                                                                                                           \
 	friend class ::godot::ClassDB;                                                                                                                                                     \
@@ -209,40 +219,29 @@ public:                                                                         
 		return false;                                                                                                                                                                  \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
+	static inline bool has_get_property_list() {                                                                                                                                       \
+		return m_class::_get_get_property_list() && m_class::_get_get_property_list() != m_inherits::_get_get_property_list();                                                         \
+	}                                                                                                                                                                                  \
+                                                                                                                                                                                       \
 	static const GDExtensionPropertyInfo *get_property_list_bind(GDExtensionClassInstancePtr p_instance, uint32_t *r_count) {                                                          \
-		if (p_instance && m_class::_get_get_property_list()) {                                                                                                                         \
-			if (m_class::_get_get_property_list() != m_inherits::_get_get_property_list()) {                                                                                           \
-				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
-				ERR_FAIL_COND_V_MSG(!cls->plist_owned.is_empty() || cls->plist != nullptr || cls->plist_size != 0, nullptr, "Internal error, property list was not freed by engine!"); \
-				cls->_get_property_list(&cls->plist_owned);                                                                                                                            \
-				cls->plist = reinterpret_cast<GDExtensionPropertyInfo *>(memalloc(sizeof(GDExtensionPropertyInfo) * cls->plist_owned.size()));                                         \
-				cls->plist_size = 0;                                                                                                                                                   \
-				for (const ::godot::PropertyInfo &E : cls->plist_owned) {                                                                                                              \
-					cls->plist[cls->plist_size].type = static_cast<GDExtensionVariantType>(E.type);                                                                                    \
-					cls->plist[cls->plist_size].name = E.name._native_ptr();                                                                                                           \
-					cls->plist[cls->plist_size].hint = E.hint;                                                                                                                         \
-					cls->plist[cls->plist_size].hint_string = E.hint_string._native_ptr();                                                                                             \
-					cls->plist[cls->plist_size].class_name = E.class_name._native_ptr();                                                                                               \
-					cls->plist[cls->plist_size].usage = E.usage;                                                                                                                       \
-					cls->plist_size++;                                                                                                                                                 \
-				}                                                                                                                                                                      \
-				if (r_count)                                                                                                                                                           \
-					*r_count = cls->plist_size;                                                                                                                                        \
-				return cls->plist;                                                                                                                                                     \
-			}                                                                                                                                                                          \
-			return m_inherits::get_property_list_bind(p_instance, r_count);                                                                                                            \
+		if (!p_instance) {                                                                                                                                                             \
+			if (r_count)                                                                                                                                                               \
+				*r_count = 0;                                                                                                                                                          \
+			return nullptr;                                                                                                                                                            \
 		}                                                                                                                                                                              \
-		return nullptr;                                                                                                                                                                \
+		m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                        \
+		::godot::List<::godot::PropertyInfo> &plist_cpp = cls->plist_owned;                                                                                                            \
+		ERR_FAIL_COND_V_MSG(!plist_cpp.is_empty(), nullptr, "Internal error, property list was not freed by engine!");                                                                 \
+		cls->_get_property_list(&plist_cpp);                                                                                                                                           \
+		return ::godot::internal::create_c_property_list(plist_cpp, r_count);                                                                                                          \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDExtensionPropertyInfo *p_list) {                                                               \
 		if (p_instance) {                                                                                                                                                              \
 			m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
-			ERR_FAIL_COND_MSG(cls->plist == nullptr, "Internal error, property list double free!");                                                                                    \
-			memfree(cls->plist);                                                                                                                                                       \
-			cls->plist = nullptr;                                                                                                                                                      \
-			cls->plist_size = 0;                                                                                                                                                       \
 			cls->plist_owned.clear();                                                                                                                                                  \
+			/* TODO `GDExtensionClassFreePropertyList` is ill-defined, we need a non-const pointer to free this. */                                                                    \
+			::godot::internal::free_c_property_list(const_cast<GDExtensionPropertyInfo *>(p_list));                                                                                    \
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
