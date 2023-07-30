@@ -80,6 +80,10 @@ if env.GetOption("num_jobs") == altered_num_jobs:
 
 # Custom options and profile flags.
 customs = ["custom.py"]
+try:
+    customs += Import("customs")
+except:
+    pass
 profile = ARGUMENTS.get("profile", "")
 if profile:
     if os.path.isfile(profile):

@@ -2,7 +2,8 @@
 import os
 import sys
 
-env = SConscript("../SConstruct")
+customs = ["custom.py"]
+env = SConscript("../SConstruct", {"customs": [os.path.abspath(custom) for custom in customs]})
 
 # For the reference:
 # - CCFLAGS are compilation flags shared between C and C++

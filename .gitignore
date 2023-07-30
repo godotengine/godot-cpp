@@ -10,6 +10,7 @@ src/gen
 
 # Build configuarion.
 /custom.py
+/test/custom.py
 
 # Misc
 logs/*
