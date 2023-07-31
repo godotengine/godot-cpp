@@ -100,3 +100,5 @@ def generate(env):
     )
     env.Append(CCFLAGS=arch_info["ccflags"])
     env.Append(LINKFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"]])
+
+    env.Append(CPPDEFINES=["ANDROID_ENABLED", "UNIX_ENABLED"])

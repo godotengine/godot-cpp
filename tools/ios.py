@@ -79,3 +79,5 @@ def generate(env):
 
     env.Append(CCFLAGS=["-isysroot", env["IOS_SDK_PATH"]])
     env.Append(LINKFLAGS=["-isysroot", env["IOS_SDK_PATH"], "-F" + env["IOS_SDK_PATH"]])
+
+    env.Append(CPPDEFINES=["IOS_ENABLED", "UNIX_ENABLED"])
