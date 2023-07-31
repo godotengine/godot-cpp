@@ -86,6 +86,9 @@ func _ready():
 	assert_equal(example.test_string_is_fourty_two("blah"), false)
 	assert_equal(example.test_string_is_fourty_two("fourty two"), true)
 
+	# String::resize().
+	assert_equal(example.test_string_resize("What"), "What!?")
+
 	# PackedArray iterators
 	assert_equal(example.test_vector_ops(), 105)
 
