@@ -175,6 +175,14 @@ def options(opts, env):
         )
     )
 
+    opts.Add(
+        BoolVariable(
+            key="use_hot_reload",
+            help="Enable the extra accounting required to support hot reload.",
+            default=(env.get("target", "template_debug") != "template_release"),
+        )
+    )
+
     # Add platform options
     for pl in platforms:
         tool = Tool(pl, toolpath=["tools"])
@@ -230,6 +238,9 @@ def generate(env):
                 env.Exit(1)
 
     print("Building for architecture " + env["arch"] + " on platform " + env["platform"])
+
+    if env["use_hot_reload"]:
+        env.Append(CPPDEFINES=["HOT_RELOAD_ENABLED"])
 
     tool = Tool(env["platform"], toolpath=["tools"])
 

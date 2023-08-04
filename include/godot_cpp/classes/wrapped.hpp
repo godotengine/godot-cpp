@@ -51,6 +51,15 @@ class Wrapped {
 	friend void postinitialize_handler(Wrapped *);
 
 protected:
+#ifdef HOT_RELOAD_ENABLED
+	struct RecreateInstance {
+		GDExtensionClassInstancePtr wrapper;
+		GDExtensionObjectPtr owner;
+		RecreateInstance *next;
+	};
+	inline static RecreateInstance *recreate_instance = nullptr;
+#endif
+
 	virtual const StringName *_get_extension_class_name() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
 	virtual const GDExtensionInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
 
@@ -105,6 +114,17 @@ void free_c_property_list(GDExtensionPropertyInfo *plist);
 } // namespace internal
 
 } // namespace godot
+
+#ifdef HOT_RELOAD_ENABLED
+#define _GDCLASS_RECREATE(m_class, m_inherits)                                                   \
+	m_class *new_instance = (m_class *)memalloc(sizeof(m_class));                                \
+	Wrapped::RecreateInstance recreate_data = { new_instance, obj, Wrapped::recreate_instance }; \
+	Wrapped::recreate_instance = &recreate_data;                                                 \
+	memnew_placement(new_instance, m_class);                                                     \
+	return new_instance;
+#else
+#define _GDCLASS_RECREATE(m_class, m_inherits) return nullptr;
+#endif
 
 // Use this on top of your own classes.
 // Note: the trail of `***` is to keep sane diffs in PRs, because clang-format otherwise moves every `\` which makes
@@ -191,6 +211,10 @@ public:                                                                         
 	static GDExtensionObjectPtr create(void *data) {                                                                                                                                   \
 		m_class *new_object = memnew(m_class);                                                                                                                                         \
 		return new_object->_owner;                                                                                                                                                     \
+	}                                                                                                                                                                                  \
+                                                                                                                                                                                       \
+	static GDExtensionClassInstancePtr recreate(void *data, GDExtensionObjectPtr obj) {                                                                                                \
+		_GDCLASS_RECREATE(m_class, m_inherits);                                                                                                                                        \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, GDExtensionBool p_reversed) {                                                                \

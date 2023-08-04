@@ -365,6 +365,9 @@ void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
 		for (auto method : cl.method_map) {
 			memdelete(method.second);
 		}
+
+		classes.erase(*i);
+		class_register_order.erase((i + 1).base());
 	}
 }
 

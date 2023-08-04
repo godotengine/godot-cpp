@@ -14,6 +14,9 @@ def generate(env):
     if env["use_llvm"]:
         clang.generate(env)
         clangxx.generate(env)
+    elif env["use_hot_reload"]:
+        # Required for extensions to truly unload.
+        env.Append(CXXFLAGS=["-fno-gnu-unique"])
 
     env.Append(CCFLAGS=["-fPIC", "-Wwrite-strings"])
     env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
