@@ -60,17 +60,17 @@ def generate(env):
             env.Append(CCFLAGS=["/Zi", "/FS"])
             env.Append(LINKFLAGS=["/DEBUG:FULL"])
 
-        if env["optimize"] == "speed" or env["optimize"] == "speed_trace":
+        if env["optimize"] == "speed":
             env.Append(CCFLAGS=["/O2"])
             env.Append(LINKFLAGS=["/OPT:REF"])
+        elif env["optimize"] == "speed_trace":
+            env.Append(CCFLAGS=["/O2"])
+            env.Append(LINKFLAGS=["/OPT:REF", "/OPT:NOICF"])
         elif env["optimize"] == "size":
             env.Append(CCFLAGS=["/O1"])
             env.Append(LINKFLAGS=["/OPT:REF"])
-
-        if env["optimize"] == "debug" or env["optimize"] == "none":
-            env.Append(CCFLAGS=["/MDd", "/Od"])
-        else:
-            env.Append(CCFLAGS=["/MD"])
+        elif env["optimize"] == "debug" or env["optimize"] == "none":
+            env.Append(CCFLAGS=["/Od"])
 
     else:
         if env["debug_symbols"]:

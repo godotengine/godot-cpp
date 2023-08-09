@@ -9,6 +9,7 @@ from SCons.Variables import *
 def options(opts):
     opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
     opts.Add(BoolVariable("use_clang_cl", "Use the clang driver instead of MSVC - only effective on Windows", False))
+    opts.Add(BoolVariable("use_static_cpp", "Link MinGW/MSVC C++ runtime libraries statically", True))
 
 
 def exists(env):
@@ -37,6 +38,11 @@ def generate(env):
             env["CC"] = "clang-cl"
             env["CXX"] = "clang-cl"
 
+        if env["use_static_cpp"]:
+            env.Append(CCFLAGS=["/MT"])
+        else:
+            env.Append(CCFLAGS=["/MD"])
+
     elif sys.platform == "win32" or sys.platform == "msys":
         env["use_mingw"] = True
         mingw.generate(env)
@@ -45,6 +51,18 @@ def generate(env):
         env["SHLIBPREFIX"] = ""
         # Want dll suffix
         env["SHLIBSUFFIX"] = ".dll"
+
+        env.Append(CCFLAGS=["-Wwrite-strings"])
+        env.Append(LINKFLAGS=["-Wl,--no-undefined"])
+        if env["use_static_cpp"]:
+            env.Append(
+                LINKFLAGS=[
+                    "-static",
+                    "-static-libgcc",
+                    "-static-libstdc++",
+                ]
+            )
+
         # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
         my_spawn.configure(env)
 
@@ -60,15 +78,15 @@ def generate(env):
         # Want dll suffix
         env["SHLIBSUFFIX"] = ".dll"
 
-        # These options are for a release build even using target=debug
-        env.Append(CCFLAGS=["-O3", "-Wwrite-strings"])
-        env.Append(
-            LINKFLAGS=[
-                "--static",
-                "-Wl,--no-undefined",
-                "-static-libgcc",
-                "-static-libstdc++",
-            ]
-        )
+        env.Append(CCFLAGS=["-Wwrite-strings"])
+        env.Append(LINKFLAGS=["-Wl,--no-undefined"])
+        if env["use_static_cpp"]:
+            env.Append(
+                LINKFLAGS=[
+                    "-static",
+                    "-static-libgcc",
+                    "-static-libstdc++",
+                ]
+            )
 
     env.Append(CPPDEFINES=["WINDOWS_ENABLED"])
