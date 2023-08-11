@@ -117,6 +117,7 @@ public:
 	Example *test_node_argument(Example *p_node) const;
 	String test_string_ops() const;
 	String test_str_utility() const;
+	bool test_string_is_fourty_two(const String &p_str) const;
 	int test_vector_ops() const;
 
 	BitField<Flags> test_bitfield(BitField<Flags> flags);
