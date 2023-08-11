@@ -123,6 +123,7 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
             include_gen_folder / "variant" / "variant_size.hpp",
             include_gen_folder / "classes" / "global_constants.hpp",
             include_gen_folder / "classes" / "global_constants_binds.hpp",
+            include_gen_folder / "core" / "version.hpp",
         ]:
             files.append(str(path.as_posix()))
     if sources:
@@ -173,6 +174,7 @@ def generate_bindings(api_filepath, use_template_get_node, bits="64", precision=
     print("Built-in type config: " + real_t + "_" + bits)
 
     generate_global_constants(api, target_dir)
+    generate_version_header(api, target_dir)
     generate_global_constant_binds(api, target_dir)
     generate_builtin_bindings(api, target_dir, real_t + "_" + bits)
     generate_engine_classes_bindings(api, target_dir, use_template_get_node)
@@ -1665,6 +1667,35 @@ def generate_global_constants(api, output_dir):
     header.append(f"#endif // ! {header_guard}")
 
     with header_filename.open("w+", encoding="utf-8") as header_file:
+        header_file.write("\n".join(header))
+
+
+def generate_version_header(api, output_dir):
+    header = []
+    header_filename = "version.hpp"
+    add_header(header_filename, header)
+
+    include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "core"
+    include_gen_folder.mkdir(parents=True, exist_ok=True)
+
+    header_file_path = include_gen_folder / header_filename
+
+    header_guard = "GODOT_CPP_VERSION_HPP"
+    header.append(f"#ifndef {header_guard}")
+    header.append(f"#define {header_guard}")
+    header.append("")
+
+    header.append(f"#define GODOT_VERSION_MAJOR {api['header']['version_major']}")
+    header.append(f"#define GODOT_VERSION_MINOR {api['header']['version_minor']}")
+    header.append(f"#define GODOT_VERSION_PATCH {api['header']['version_patch']}")
+    header.append(f"#define GODOT_VERSION_STATUS \"{api['header']['version_status']}\"")
+    header.append(f"#define GODOT_VERSION_BUILD \"{api['header']['version_build']}\"")
+
+    header.append("")
+    header.append(f"#endif // {header_guard}")
+    header.append("")
+
+    with header_file_path.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))
 
 
