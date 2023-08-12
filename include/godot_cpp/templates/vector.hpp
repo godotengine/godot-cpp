@@ -73,12 +73,15 @@ public:
 	void fill(T p_elem);
 
 	void remove_at(int p_index) { _cowdata.remove_at(p_index); }
-	void erase(const T &p_val) {
+	_FORCE_INLINE_ bool erase(const T &p_val) {
 		int idx = find(p_val);
 		if (idx >= 0) {
 			remove_at(idx);
+			return true;
 		}
+		return false;
 	}
+
 	void reverse();
 
 	_FORCE_INLINE_ T *ptrw() { return _cowdata.ptrw(); }
@@ -91,32 +94,40 @@ public:
 	_FORCE_INLINE_ void set(int p_index, const T &p_elem) { _cowdata.set(p_index, p_elem); }
 	_FORCE_INLINE_ int size() const { return _cowdata.size(); }
 	Error resize(int p_size) { return _cowdata.resize(p_size); }
+	Error resize_zeroed(int p_size) { return _cowdata.template resize<true>(p_size); }
 	_FORCE_INLINE_ const T &operator[](int p_index) const { return _cowdata.get(p_index); }
 	Error insert(int p_pos, T p_val) { return _cowdata.insert(p_pos, p_val); }
 	int find(const T &p_val, int p_from = 0) const { return _cowdata.find(p_val, p_from); }
+	int rfind(const T &p_val, int p_from = -1) const { return _cowdata.rfind(p_val, p_from); }
+	int count(const T &p_val) const { return _cowdata.count(p_val); }
 
 	void append_array(Vector<T> p_other);
 
 	_FORCE_INLINE_ bool has(const T &p_val) const { return find(p_val) != -1; }
 
-	template <class C>
-	void sort_custom() {
+	void sort() {
+		sort_custom<_DefaultComparator<T>>();
+	}
+
+	template <class Comparator, bool Validate = SORT_ARRAY_VALIDATE_ENABLED, class... Args>
+	void sort_custom(Args &&...args) {
 		int len = _cowdata.size();
 		if (len == 0) {
 			return;
 		}
 
 		T *data = ptrw();
-		SortArray<T, C> sorter;
+		SortArray<T, Comparator, Validate> sorter{ args... };
 		sorter.sort(data, len);
 	}
 
-	void sort() {
-		sort_custom<_DefaultComparator<T>>();
+	int bsearch(const T &p_value, bool p_before) {
+		return bsearch_custom<_DefaultComparator<T>>(p_value, p_before);
 	}
 
-	int bsearch(const T &p_value, bool p_before) {
-		SearchArray<T> search;
+	template <class Comparator, class Value, class... Args>
+	int bsearch_custom(const Value &p_value, bool p_before, Args &&...args) {
+		SearchArray<T, Comparator> search{ args... };
 		return search.bisect(ptrw(), size(), p_value, p_before);
 	}
 
@@ -140,6 +151,9 @@ public:
 
 	Vector<uint8_t> to_byte_array() const {
 		Vector<uint8_t> ret;
+		if (is_empty()) {
+			return ret;
+		}
 		ret.resize(size() * sizeof(T));
 		memcpy(ret.ptrw(), ptr(), sizeof(T) * size());
 		return ret;
