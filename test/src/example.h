@@ -18,6 +18,8 @@
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/input_event_key.hpp>
+#include <godot_cpp/classes/tile_map.hpp>
+#include <godot_cpp/classes/tile_set.hpp>
 #include <godot_cpp/classes/viewport.hpp>
 
 #include <godot_cpp/core/binder_common.hpp>
@@ -119,6 +121,17 @@ public:
 	String test_str_utility() const;
 	bool test_string_is_fourty_two(const String &p_str) const;
 	int test_vector_ops() const;
+
+	bool test_object_cast_to_node(Object *p_object) const;
+	bool test_object_cast_to_control(Object *p_object) const;
+	bool test_object_cast_to_example(Object *p_object) const;
+
+	Vector2i test_variant_vector2i_conversion(const Variant &p_variant) const;
+	int test_variant_int_conversion(const Variant &p_variant) const;
+	float test_variant_float_conversion(const Variant &p_variant) const;
+
+	void test_add_child(Node *p_node);
+	void test_set_tileset(TileMap *p_tilemap, const Ref<TileSet> &p_tileset) const;
 
 	BitField<Flags> test_bitfield(BitField<Flags> flags);
 

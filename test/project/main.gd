@@ -94,6 +94,49 @@ func _ready():
 	example.group_subgroup_custom_position = Vector2(50, 50)
 	assert_equal(example.group_subgroup_custom_position, Vector2(50, 50))
 
+	# Test Object::cast_to<>() and that correct wrappers are being used.
+	var control = Control.new()
+	var sprite = Sprite2D.new()
+	var example_ref = ExampleRef.new()
+
+	assert_equal(example.test_object_cast_to_node(control), true)
+	assert_equal(example.test_object_cast_to_control(control), true)
+	assert_equal(example.test_object_cast_to_example(control), false)
+
+	assert_equal(example.test_object_cast_to_node(example), true)
+	assert_equal(example.test_object_cast_to_control(example), true)
+	assert_equal(example.test_object_cast_to_example(example), true)
+
+	assert_equal(example.test_object_cast_to_node(sprite), true)
+	assert_equal(example.test_object_cast_to_control(sprite), false)
+	assert_equal(example.test_object_cast_to_example(sprite), false)
+
+	assert_equal(example.test_object_cast_to_node(example_ref), false)
+	assert_equal(example.test_object_cast_to_control(example_ref), false)
+	assert_equal(example.test_object_cast_to_example(example_ref), false)
+
+	control.queue_free()
+	sprite.queue_free()
+
+	# Test conversions to and from Variant.
+	assert_equal(example.test_variant_vector2i_conversion(Vector2i(1, 1)), Vector2i(1, 1))
+	assert_equal(example.test_variant_vector2i_conversion(Vector2(1.0, 1.0)), Vector2i(1, 1))
+	assert_equal(example.test_variant_int_conversion(10), 10)
+	assert_equal(example.test_variant_int_conversion(10.0), 10)
+	assert_equal(example.test_variant_float_conversion(10.0), 10.0)
+	assert_equal(example.test_variant_float_conversion(10), 10.0)
+
+	# Test that ptrcalls from GDExtension to the engine are correctly encoding Object and RefCounted.
+	var new_node = Node.new()
+	example.test_add_child(new_node)
+	assert_equal(new_node.get_parent(), example)
+
+	var new_tileset = TileSet.new()
+	var new_tilemap = TileMap.new()
+	example.test_set_tileset(new_tilemap, new_tileset)
+	assert_equal(new_tilemap.tile_set, new_tileset)
+	new_tilemap.queue_free()
+
 	# Constants.
 	assert_equal(Example.FIRST, 0)
 	assert_equal(Example.ANSWER_TO_EVERYTHING, 42)
