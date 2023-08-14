@@ -34,6 +34,7 @@
 #include <godot_cpp/classes/wrapped.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/memory.hpp>
+#include <godot_cpp/core/version.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
 #include <godot_cpp/core/error_macros.hpp>
@@ -194,9 +195,15 @@ GDExtensionBinding::Callback GDExtensionBinding::init_callback = nullptr;
 GDExtensionBinding::Callback GDExtensionBinding::terminate_callback = nullptr;
 GDExtensionInitializationLevel GDExtensionBinding::minimum_initialization_level = GDEXTENSION_INITIALIZATION_CORE;
 
-#define LOAD_PROC_ADDRESS(m_name, m_type)                                           \
-	internal::gdextension_interface_##m_name = (m_type)p_get_proc_address(#m_name); \
-	ERR_FAIL_NULL_V_MSG(internal::gdextension_interface_##m_name, false, "Unable to load GDExtension interface function " #m_name "()")
+#define ERR_PRINT_EARLY(m_msg) \
+	internal::gdextension_interface_print_error(m_msg, FUNCTION_STR, __FILE__, __LINE__, false)
+
+#define LOAD_PROC_ADDRESS(m_name, m_type)                                               \
+	internal::gdextension_interface_##m_name = (m_type)p_get_proc_address(#m_name);     \
+	if (!internal::gdextension_interface_##m_name) {                                    \
+		ERR_PRINT_EARLY("Unable to load GDExtension interface function " #m_name "()"); \
+		return false;                                                                   \
+	}
 
 // Partial definition of the legacy interface so we can detect it and show an error.
 typedef struct {
@@ -219,14 +226,15 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	if (raw_interface[0] == 4 && raw_interface[1] == 0) {
 		// Use the legacy interface only to give a nice error.
 		LegacyGDExtensionInterface *legacy_interface = (LegacyGDExtensionInterface *)p_get_proc_address;
-		internal::gdextension_interface_print_error_with_message = (GDExtensionInterfacePrintErrorWithMessage)legacy_interface->print_error_with_message;
-		ERR_FAIL_V_MSG(false, "Cannot load a GDExtension built for Godot 4.1+ in Godot 4.0.");
+		internal::gdextension_interface_print_error = (GDExtensionInterfacePrintError)legacy_interface->print_error;
+		ERR_PRINT_EARLY("Cannot load a GDExtension built for Godot 4.1+ in Godot 4.0.");
+		return false;
 	}
 
-	// Load the "print_error_with_message" function first (needed by the ERR_FAIL_NULL_V_MSG() macro).
-	internal::gdextension_interface_print_error_with_message = (GDExtensionInterfacePrintErrorWithMessage)p_get_proc_address("print_error_with_message");
-	if (!internal::gdextension_interface_print_error_with_message) {
-		printf("ERROR: Unable to load GDExtension interface function print_error_with_message().\n");
+	// Load the "print_error" function first (needed by the ERR_PRINT_EARLY() macro).
+	internal::gdextension_interface_print_error = (GDExtensionInterfacePrintError)p_get_proc_address("print_error");
+	if (!internal::gdextension_interface_print_error) {
+		printf("ERROR: Unable to load GDExtension interface function print_error().\n");
 		return false;
 	}
 
@@ -235,6 +243,29 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	internal::token = p_library;
 
 	LOAD_PROC_ADDRESS(get_godot_version, GDExtensionInterfaceGetGodotVersion);
+	internal::gdextension_interface_get_godot_version(&internal::godot_version);
+
+	// Check that godot-cpp was compiled using an extension_api.json older or at the
+	// same version as the Godot that is loading it.
+	bool compatible;
+	if (internal::godot_version.major != GODOT_VERSION_MAJOR) {
+		compatible = internal::godot_version.major > GODOT_VERSION_MAJOR;
+	} else if (internal::godot_version.minor != GODOT_VERSION_MINOR) {
+		compatible = internal::godot_version.minor > GODOT_VERSION_MINOR;
+	} else {
+		compatible = internal::godot_version.patch >= GODOT_VERSION_PATCH;
+	}
+	if (!compatible) {
+		// We need to use snprintf() here because vformat() uses Variant, and we haven't loaded
+		// the GDExtension interface far enough to use Variants yet.
+		char msg[128];
+		snprintf(msg, 128, "Cannot load a GDExtension built for Godot %d.%d.%d using an older version of Godot (%d.%d.%d).",
+				GODOT_VERSION_MAJOR, GODOT_VERSION_MINOR, GODOT_VERSION_PATCH,
+				internal::godot_version.major, internal::godot_version.minor, internal::godot_version.patch);
+		ERR_PRINT_EARLY(msg);
+		return false;
+	}
+
 	LOAD_PROC_ADDRESS(mem_alloc, GDExtensionInterfaceMemAlloc);
 	LOAD_PROC_ADDRESS(mem_realloc, GDExtensionInterfaceMemRealloc);
 	LOAD_PROC_ADDRESS(mem_free, GDExtensionInterfaceMemFree);
@@ -372,9 +403,6 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	LOAD_PROC_ADDRESS(editor_add_plugin, GDExtensionInterfaceEditorAddPlugin);
 	LOAD_PROC_ADDRESS(editor_remove_plugin, GDExtensionInterfaceEditorRemovePlugin);
 
-	// Load the Godot version.
-	internal::gdextension_interface_get_godot_version(&internal::godot_version);
-
 	r_initialization->initialize = initialize_level;
 	r_initialization->deinitialize = deinitialize_level;
 	r_initialization->minimum_initialization_level = minimum_initialization_level;
@@ -388,6 +416,7 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 }
 
 #undef LOAD_PROC_ADDRESS
+#undef ERR_PRINT_EARLY
 
 void GDExtensionBinding::initialize_level(void *userdata, GDExtensionInitializationLevel p_level) {
 	ClassDB::current_level = p_level;
