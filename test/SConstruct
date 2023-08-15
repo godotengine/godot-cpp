@@ -1,8 +1,49 @@
 #!/usr/bin/env python
 import os
 import sys
+from SCons.Errors import UserError
 
-env = SConscript("../SConstruct")
+
+def normalize_path(val, env):
+    return val if os.path.isabs(val) else os.path.join(env.Dir("#").abspath, val)
+
+
+def validate_parent_dir(key, val, env):
+    if not os.path.isdir(normalize_path(os.path.dirname(val), env)):
+        raise UserError("'%s' is not a directory: %s" % (key, os.path.dirname(val)))
+
+
+localEnv = Environment()
+customs = ["custom.py"]
+opts = Variables(customs, ARGUMENTS)
+
+opts.Add(
+    BoolVariable(
+        key="compiledb",
+        help="Generate compilation DB (`compile_commands.json`) for external tools",
+        default=localEnv.get("compiledb", False),
+    )
+)
+opts.Add(
+    PathVariable(
+        key="compiledb_file",
+        help="Path to a custom `compile_commands.json` file",
+        default=localEnv.get("compiledb_file", "compile_commands.json"),
+        validator=validate_parent_dir,
+    )
+)
+
+opts.Update(localEnv)
+
+env = localEnv.Clone()
+env["compiledb"] = False
+env = SConscript("../SConstruct", {"env": env, "customs": customs})
+
+compilation_db = None
+if localEnv.get("compiledb", False):
+    env.Tool("compilation_db")
+    compilation_db = env.CompilationDatabase(normalize_path(env["compiledb_file"], env))
+    env.Alias("compiledb", compilation_db)
 
 # For the reference:
 # - CCFLAGS are compilation flags shared between C and C++
@@ -29,4 +70,8 @@ else:
         source=sources,
     )
 
-Default(library)
+default_args = [library]
+if not compilation_db is None:
+    default_args += [compilation_db]
+
+Default(*default_args)
