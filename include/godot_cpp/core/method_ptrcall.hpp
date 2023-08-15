@@ -168,6 +168,7 @@ MAKE_PTRARG_BY_REFERENCE(Variant);
 
 template <class T>
 struct PtrToArg<T *> {
+	static_assert(std::is_base_of<Object, T>::value, "Cannot encode non-Object value as an Object");
 	_FORCE_INLINE_ static T *convert(const void *p_ptr) {
 		return reinterpret_cast<T *>(godot::internal::get_object_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr))));
 	}
@@ -179,6 +180,7 @@ struct PtrToArg<T *> {
 
 template <class T>
 struct PtrToArg<const T *> {
+	static_assert(std::is_base_of<Object, T>::value, "Cannot encode non-Object value as an Object");
 	_FORCE_INLINE_ static const T *convert(const void *p_ptr) {
 		return reinterpret_cast<const T *>(godot::internal::get_object_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr))));
 	}
