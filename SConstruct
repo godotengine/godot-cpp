@@ -85,6 +85,11 @@ if env.GetOption("num_jobs") == altered_num_jobs:
 
 # Custom options and profile flags.
 customs = ["custom.py"]
+try:
+    customs += Import("customs")
+except:
+    pass
+
 profile = ARGUMENTS.get("profile", "")
 if profile:
     if os.path.isfile(profile):
@@ -267,7 +272,8 @@ if env["precision"] == "double":
 # compile_commands.json
 if env.get("compiledb", False):
     env.Tool("compilation_db")
-    env.Alias("compiledb", env.CompilationDatabase(normalize_path(env["compiledb_file"])))
+    compilation_db = env.CompilationDatabase(normalize_path(env["compiledb_file"]))
+    env.Alias("compiledb", compilation_db)
 
 # Generate bindings
 env.Append(BUILDERS={"GenerateBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
@@ -316,6 +322,10 @@ library_name = "libgodot-cpp{}{}".format(suffix, env["LIBSUFFIX"])
 
 if env["build_library"]:
     library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
+
+    if env.get("compiledb", False):
+        Depends(compilation_db, library)
+
     Default(library)
 
 env.Append(LIBPATH=[env.Dir("bin")])
