@@ -39,6 +39,7 @@
 
 #include <cstring>
 #include <new>
+#include <type_traits>
 
 namespace godot {
 
@@ -210,9 +211,9 @@ void CowData<T>::_unref(void *p_data) {
 	if (refc->decrement() > 0) {
 		return; // still in use
 	}
-	// clean up
 
-	if (!__has_trivial_destructor(T)) {
+	// clean up
+	if (std::is_trivially_destructible<T>::value) {
 		uint32_t *count = _get_size();
 		T *data = (T *)(count + 1);
 
@@ -247,7 +248,7 @@ uint32_t CowData<T>::_copy_on_write() {
 		T *_data = (T *)(mem_new);
 
 		// initialize new elements
-		if (__has_trivial_copy(T)) {
+		if (std::is_trivially_copyable<T>::value) {
 			memcpy(mem_new, _ptr, current_size * sizeof(T));
 
 		} else {
@@ -310,7 +311,7 @@ Error CowData<T>::resize(int p_size) {
 
 		// construct the newly created elements
 
-		if (!__has_trivial_constructor(T)) {
+		if (!std::is_trivially_constructible<T>::value) {
 			T *elems = _get_data();
 
 			for (int i = *_get_size(); i < p_size; i++) {
@@ -321,7 +322,7 @@ Error CowData<T>::resize(int p_size) {
 		*_get_size() = p_size;
 
 	} else if (p_size < current_size) {
-		if (!__has_trivial_destructor(T)) {
+		if (!std::is_trivially_destructible<T>::value) {
 			// deinitialize no longer needed elements
 			for (uint32_t i = p_size; i < *_get_size(); i++) {
 				T *t = &_get_data()[i];
