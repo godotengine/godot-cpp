@@ -72,21 +72,22 @@ endif()
 # Input from user for GDExtension interface header and the API JSON file
 set(GODOT_GDEXTENSION_DIR "gdextension" CACHE STRING "")
 set(GODOT_CUSTOM_API_FILE "" CACHE STRING "")
-set(FLOAT_PRECISION "single" CACHE STRING "")
-if ("${FLOAT_PRECISION}" STREQUAL "double")
-	add_definitions(-DREAL_T_IS_DOUBLE)
-endif()
 
 set(GODOT_GDEXTENSION_API_FILE "${GODOT_GDEXTENSION_DIR}/extension_api.json")
 if (NOT "${GODOT_CUSTOM_API_FILE}" STREQUAL "")  # User-defined override.
 	set(GODOT_GDEXTENSION_API_FILE "${GODOT_CUSTOM_API_FILE}")
 endif()
 
+set(FLOAT_PRECISION "single" CACHE STRING "")
+if ("${FLOAT_PRECISION}" STREQUAL "double")
+	add_definitions(-DREAL_T_IS_DOUBLE)
+endif()
+
 set(GODOT_COMPILE_FLAGS )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	# using Visual Studio C++
-	set(GODOT_COMPILE_FLAGS "/EHsc /utf-8") # /GF /MP
+	set(GODOT_COMPILE_FLAGS "/utf-8") # /GF /MP
 
 	if(CMAKE_BUILD_TYPE MATCHES Debug)
 		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MDd") # /Od /RTC1 /Zi
@@ -105,6 +106,21 @@ else()  # GCC/Clang
 	else()
 		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -O3")
 	endif(CMAKE_BUILD_TYPE MATCHES Debug)
+endif()
+
+# Disable exception handling. Godot doesn't use exceptions anywhere, and this
+# saves around 20% of binary size and very significant build time (GH-80513).
+option(GODOT_DISABLE_EXCEPTIONS ON "Force disabling exception handling code")
+if (GODOT_DISABLE_EXCEPTIONS)
+	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -D_HAS_EXCEPTIONS=0")
+	else()
+		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -fno-exceptions")
+	endif()
+else()
+	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /EHsc")
+	endif()
 endif()
 
 # Generate source from the bindings file
