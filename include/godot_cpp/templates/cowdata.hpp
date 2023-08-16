@@ -213,7 +213,7 @@ void CowData<T>::_unref(void *p_data) {
 	}
 
 	// clean up
-	if (std::is_trivially_destructible<T>::value) {
+	if (!std::is_trivially_destructible<T>::value) {
 		uint32_t *count = _get_size();
 		T *data = (T *)(count + 1);
 
