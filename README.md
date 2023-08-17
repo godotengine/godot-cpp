@@ -76,7 +76,7 @@ just like before.
 
 To use the shared lib in your Godot project you'll need a `.gdextension`
 file, which replaces what was the `.gdnlib` before.
-Follow [the example](test/demo/example.gdextension):
+Follow [the example](test/project/example.gdextension):
 
 ```ini
 [configuration]
@@ -86,12 +86,12 @@ compatibility_minimum = 4.1
 
 [libraries]
 
-macos.debug = "bin/libgdexample.macos.debug.framework"
-macos.release = "bin/libgdexample.macos.release.framework"
-windows.debug.x86_64 = "bin/libgdexample.windows.debug.x86_64.dll"
-windows.release.x86_64 = "bin/libgdexample.windows.release.x86_64.dll"
-linux.debug.x86_64 = "bin/libgdexample.linux.debug.x86_64.so"
-linux.release.x86_64 = "bin/libgdexample.linux.release.x86_64.so"
+macos.debug = "res://bin/libgdexample.macos.debug.framework"
+macos.release = "res://bin/libgdexample.macos.release.framework"
+windows.debug.x86_64 = "res://bin/libgdexample.windows.debug.x86_64.dll"
+windows.release.x86_64 = "res://bin/libgdexample.windows.release.x86_64.dll"
+linux.debug.x86_64 = "res://bin/libgdexample.linux.debug.x86_64.so"
+linux.release.x86_64 = "res://bin/libgdexample.linux.release.x86_64.so"
 # Repeat for other architectures to support arm64, rv64, etc.
 ```
 
