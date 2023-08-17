@@ -22,6 +22,10 @@ env.PrependENVPath("PATH", os.getenv("PATH"))
 
 # Custom options and profile flags.
 customs = ["custom.py"]
+try:
+    customs += Import("customs")
+except:
+    pass
 profile = ARGUMENTS.get("profile", "")
 if profile:
     if os.path.isfile(profile):
