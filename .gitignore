@@ -66,6 +66,7 @@ logs/
 
 # for projects that use SCons for building: http://http://www.scons.org/
 .sconf_temp
+.scons_env.json
 .sconsign.dblite
 *.pyc
 
