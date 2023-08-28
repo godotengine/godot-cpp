@@ -314,6 +314,10 @@ const GDExtensionInstanceBindingCallbacks *ClassDB::get_instance_binding_callbac
 	return callbacks_it->second;
 }
 
+bool ClassDB::has_instance_binding_callbacks(const StringName &p_class) {
+	return instance_binding_callbacks.find(p_class) != instance_binding_callbacks.end();
+}
+
 void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p_method, GDExtensionClassCallVirtual p_call) {
 	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class);
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));

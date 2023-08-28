@@ -50,7 +50,7 @@ Object *get_object_instance_binding(GodotObject *p_engine_object) {
 	// Otherwise, try to look up the correct binding callbacks.
 	const GDExtensionInstanceBindingCallbacks *binding_callbacks = nullptr;
 	StringName class_name;
-	if (gdextension_interface_object_get_class_name(p_engine_object, library, reinterpret_cast<GDExtensionStringNamePtr>(class_name._native_ptr()))) {
+	if (gdextension_interface_object_get_class_name(p_engine_object, library, reinterpret_cast<GDExtensionStringNamePtr>(class_name._native_ptr())) && ClassDB::has_instance_binding_callbacks(class_name)) {
 		binding_callbacks = ClassDB::get_instance_binding_callbacks(class_name);
 	}
 	if (binding_callbacks == nullptr) {

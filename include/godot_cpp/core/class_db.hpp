@@ -134,6 +134,7 @@ public:
 
 	static GDExtensionClassCallVirtual get_virtual_func(void *p_userdata, GDExtensionConstStringNamePtr p_name);
 	static const GDExtensionInstanceBindingCallbacks *get_instance_binding_callbacks(const StringName &p_class);
+	static bool has_instance_binding_callbacks(const StringName &p_class);
 
 	static void initialize(GDExtensionInitializationLevel p_level);
 	static void deinitialize(GDExtensionInitializationLevel p_level);
