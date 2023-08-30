@@ -174,7 +174,7 @@ void ClassDB::_register_class(bool p_virtual) {
 	class_register_order.push_back(cl.name);
 
 	// Register this class with Godot
-	GDExtensionClassCreationInfo class_info = {
+	GDExtensionClassCreationInfo2 class_info = {
 		p_virtual, // GDExtensionBool is_virtual;
 		is_abstract, // GDExtensionBool is_abstract;
 		T::set_bind, // GDExtensionClassSet set_func;
@@ -183,7 +183,7 @@ void ClassDB::_register_class(bool p_virtual) {
 		T::free_property_list_bind, // GDExtensionClassFreePropertyList free_property_list_func;
 		T::property_can_revert_bind, // GDExtensionClassPropertyCanRevert property_can_revert_func;
 		T::property_get_revert_bind, // GDExtensionClassPropertyGetRevert property_get_revert_func;
-		T::notification_bind, // GDExtensionClassNotification notification_func;
+		T::notification_bind, // GDExtensionClassNotification2 notification_func;
 		T::to_string_bind, // GDExtensionClassToString to_string_func;
 		nullptr, // GDExtensionClassReference reference_func;
 		nullptr, // GDExtensionClassUnreference unreference_func;
@@ -194,7 +194,7 @@ void ClassDB::_register_class(bool p_virtual) {
 		(void *)&T::get_class_static(), // void *class_userdata;
 	};
 
-	internal::gdextension_interface_classdb_register_extension_class(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
+	internal::gdextension_interface_classdb_register_extension_class2(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
 
 	// call bind_methods etc. to register all members of the class
 	T::initialize_class();
