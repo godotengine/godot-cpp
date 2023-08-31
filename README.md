@@ -87,7 +87,7 @@ See [example.gdextension](test/project/example.gdextension) used in the test pro
 [configuration]
 
 entry_symbol = "example_library_init"
-compatibility_minimum = 4.1
+compatibility_minimum = "4.1"
 
 [libraries]
 
