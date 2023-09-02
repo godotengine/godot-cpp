@@ -62,7 +62,7 @@ protected:
 	bool _property_get_revert(const StringName &p_name, Variant &r_property) const { return false; }
 	String _to_string() const { return "[" + String(get_class_static()) + ":" + itos(get_instance_id()) + "]"; }
 
-	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, bool p_reversed) {}
+	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, GDExtensionBool p_reversed) {}
 	static GDExtensionBool set_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionConstVariantPtr p_value) { return false; }
 	static GDExtensionBool get_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionVariantPtr r_ret) { return false; }
 	static const GDExtensionPropertyInfo *get_property_list_bind(GDExtensionClassInstancePtr p_instance, uint32_t *r_count) { return nullptr; }
@@ -187,7 +187,7 @@ public:                                                                         
 		return new_object->_owner;                                                                                                                                                     \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, bool p_reversed) {                                                                           \
+	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, GDExtensionBool p_reversed) {                                                                \
 		if (p_instance && m_class::_get_notification()) {                                                                                                                              \
 			if (m_class::_get_notification() != m_inherits::_get_notification()) {                                                                                                     \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
