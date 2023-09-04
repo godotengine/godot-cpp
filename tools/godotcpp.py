@@ -263,9 +263,8 @@ def generate(env):
     env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
 
     # compile_commands.json
-    if env.get("compiledb", False):
-        env.Tool("compilation_db")
-        env.Alias("compiledb", env.CompilationDatabase(normalize_path(env["compiledb_file"], env)))
+    env.Tool("compilation_db")
+    env.Alias("compiledb", env.CompilationDatabase(normalize_path(env["compiledb_file"], env)))
 
     # Builders
     env.Append(BUILDERS={"GodotCPPBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
@@ -304,7 +303,13 @@ def _godot_cpp(env):
 
     if env["build_library"]:
         library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
-        env.Default(library)
+        default_args = [library]
+
+        # Add compiledb if the option is set
+        if env.get("compiledb", False):
+            default_args += ["compiledb"]
+
+        env.Default(*default_args)
 
     env.AppendUnique(LIBS=[env.File("bin/%s" % library_name)])
     return library
