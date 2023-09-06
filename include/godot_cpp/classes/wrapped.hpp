@@ -142,16 +142,16 @@ protected:                                                                      
 		return (void(::godot::Wrapped::*)(::godot::List<::godot::PropertyInfo> * p_list) const) & m_class::_get_property_list;                                                         \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static bool (::godot::Wrapped::*_get_property_can_revert())(const ::godot::StringName &p_name) {                                                                                   \
-		return (bool(::godot::Wrapped::*)(const ::godot::StringName &p_name)) & m_class::_property_can_revert;                                                                         \
+	static bool (::godot::Wrapped::*_get_property_can_revert())(const ::godot::StringName &p_name) const {                                                                             \
+		return (bool(::godot::Wrapped::*)(const ::godot::StringName &p_name) const) & m_class::_property_can_revert;                                                                   \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static bool (::godot::Wrapped::*_get_property_get_revert())(const ::godot::StringName &p_name, ::godot::Variant &) {                                                               \
-		return (bool(::godot::Wrapped::*)(const ::godot::StringName &p_name, ::godot::Variant &)) & m_class::_property_get_revert;                                                     \
+	static bool (::godot::Wrapped::*_get_property_get_revert())(const ::godot::StringName &p_name, ::godot::Variant &) const {                                                         \
+		return (bool(::godot::Wrapped::*)(const ::godot::StringName &p_name, ::godot::Variant &) const) & m_class::_property_get_revert;                                               \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static ::godot::String (::godot::Wrapped::*_get_to_string())() {                                                                                                                   \
-		return (::godot::String(::godot::Wrapped::*)()) & m_class::_to_string;                                                                                                         \
+	static ::godot::String (::godot::Wrapped::*_get_to_string())() const {                                                                                                             \
+		return (::godot::String(::godot::Wrapped::*)() const) & m_class::_to_string;                                                                                                   \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	template <class T, class B>                                                                                                                                                        \
@@ -337,15 +337,15 @@ protected:                                                                      
 		return nullptr;                                                                                                    \
 	}                                                                                                                      \
                                                                                                                            \
-	static bool (Wrapped::*_get_property_can_revert())(const ::godot::StringName &p_name) {                                \
+	static bool (Wrapped::*_get_property_can_revert())(const ::godot::StringName &p_name) const {                          \
 		return nullptr;                                                                                                    \
 	}                                                                                                                      \
                                                                                                                            \
-	static bool (Wrapped::*_get_property_get_revert())(const ::godot::StringName &p_name, Variant &) {                     \
+	static bool (Wrapped::*_get_property_get_revert())(const ::godot::StringName &p_name, Variant &) const {               \
 		return nullptr;                                                                                                    \
 	}                                                                                                                      \
                                                                                                                            \
-	static String (Wrapped::*_get_to_string())() {                                                                         \
+	static String (Wrapped::*_get_to_string())() const {                                                                   \
 		return nullptr;                                                                                                    \
 	}                                                                                                                      \
                                                                                                                            \
