@@ -1179,6 +1179,12 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         else:
             fully_used_classes.add("Wrapped")
 
+        # In order to ensure that PtrToArg specializations for native structs are
+        # always used, let's move any of them into 'fully_used_classes'.
+        for type_name in used_classes:
+            if is_struct_type(type_name) and not is_included_struct_type(type_name):
+                fully_used_classes.add(type_name)
+
         for type_name in fully_used_classes:
             if type_name in used_classes:
                 used_classes.remove(type_name)
