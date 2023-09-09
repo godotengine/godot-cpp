@@ -60,6 +60,7 @@ protected:
 	void _get_property_list(List<PropertyInfo> *p_list) const {}
 	bool _property_can_revert(const StringName &p_name) const { return false; }
 	bool _property_get_revert(const StringName &p_name, Variant &r_property) const { return false; }
+	void _validate_property(PropertyInfo &p_property) const {}
 	String _to_string() const { return "[" + String(get_class_static()) + ":" + itos(get_instance_id()) + "]"; }
 
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, GDExtensionBool p_reversed) {}
@@ -69,6 +70,7 @@ protected:
 	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDExtensionPropertyInfo *p_list) {}
 	static GDExtensionBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name) { return false; }
 	static GDExtensionBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionVariantPtr r_ret) { return false; }
+	static GDExtensionBool validate_property_bind(GDExtensionClassInstancePtr p_instance, GDExtensionPropertyInfo *p_property) { return false; }
 	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDExtensionBool *r_is_valid, GDExtensionStringPtr r_out) {}
 
 	// The only reason this has to be held here, is when we return results of `_get_property_list` to Godot, we pass
@@ -148,6 +150,10 @@ protected:                                                                      
                                                                                                                                                                                        \
 	static bool (::godot::Wrapped::*_get_property_get_revert())(const ::godot::StringName &p_name, ::godot::Variant &) const {                                                         \
 		return (bool(::godot::Wrapped::*)(const ::godot::StringName &p_name, ::godot::Variant &) const) & m_class::_property_get_revert;                                               \
+	}                                                                                                                                                                                  \
+                                                                                                                                                                                       \
+	static void (::godot::Wrapped::*_get_validate_property())(::godot::PropertyInfo & p_property) const {                                                                              \
+		return (void(::godot::Wrapped::*)(::godot::PropertyInfo & p_property) const) & m_class::_validate_property;                                                                    \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	static ::godot::String (::godot::Wrapped::*_get_to_string())() const {                                                                                                             \
@@ -267,6 +273,21 @@ public:                                                                         
 		return false;                                                                                                                                                                  \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
+	static GDExtensionBool validate_property_bind(GDExtensionClassInstancePtr p_instance, GDExtensionPropertyInfo *p_property) {                                                       \
+		bool ret = false;                                                                                                                                                              \
+		if (p_instance && m_class::_get_validate_property()) {                                                                                                                         \
+			ret = m_inherits::validate_property_bind(p_instance, p_property);                                                                                                          \
+			if (m_class::_get_validate_property() != m_inherits::_get_validate_property()) {                                                                                           \
+				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
+				::godot::PropertyInfo info(p_property);                                                                                                                                \
+				cls->_validate_property(info);                                                                                                                                         \
+				info._update(p_property);                                                                                                                                              \
+				return true;                                                                                                                                                           \
+			}                                                                                                                                                                          \
+		}                                                                                                                                                                              \
+		return ret;                                                                                                                                                                    \
+	}                                                                                                                                                                                  \
+                                                                                                                                                                                       \
 	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDExtensionBool *r_is_valid, GDExtensionStringPtr r_out) {                                                      \
 		if (p_instance && m_class::_get_to_string()) {                                                                                                                                 \
 			if (m_class::_get_to_string() != m_inherits::_get_to_string()) {                                                                                                           \
@@ -342,6 +363,10 @@ protected:                                                                      
 	}                                                                                                                      \
                                                                                                                            \
 	static bool (Wrapped::*_get_property_get_revert())(const ::godot::StringName &p_name, Variant &) const {               \
+		return nullptr;                                                                                                    \
+	}                                                                                                                      \
+                                                                                                                           \
+	static void (Wrapped::*_get_validate_property())(::godot::PropertyInfo & p_property) const {                           \
 		return nullptr;                                                                                                    \
 	}                                                                                                                      \
                                                                                                                            \
