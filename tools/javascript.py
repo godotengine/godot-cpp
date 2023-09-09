@@ -8,7 +8,7 @@ def exists(env):
 def generate(env):
     if env["arch"] not in ("wasm32"):
         print("Only wasm32 supported on web. Exiting.")
-        Exit()
+        env.Exit(1)
 
     if "EM_CONFIG" in os.environ:
         env["ENV"] = os.environ

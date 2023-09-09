@@ -20,7 +20,7 @@ def exists(env):
 def generate(env):
     if env["arch"] not in ("universal", "arm64", "x86_64"):
         print("Only universal, arm64, and x86_64 are supported on macOS. Exiting.")
-        Exit()
+        env.Exit(1)
 
     if sys.platform == "darwin":
         # Use clang on macOS by default
