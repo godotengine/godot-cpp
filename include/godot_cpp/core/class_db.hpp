@@ -103,16 +103,12 @@ private:
 	static void initialize_class(const ClassInfo &cl);
 	static void bind_method_godot(const StringName &p_class_name, MethodBind *p_method);
 
-	template <class T, bool is_abstract>
-	static void _register_class(bool p_virtual = false, bool p_exposed = true);
+	template <class T, bool is_virtual = false, bool is_abstract = false, bool is_exposed = true>
+	static void _register_class();
 
 public:
-	template <class T>
-	static void register_class(bool p_virtual = false);
-	template <class T>
-	static void register_abstract_class();
-	template <class T>
-	static void register_internal_class();
+	template <class T, bool is_virtual = false, bool is_abstract = false, bool is_exposed = true>
+	static void register_class();
 	template <class T>
 	static void register_engine_class();
 
@@ -158,8 +154,8 @@ public:
 		godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, _call##m_method);                                         \
 	}
 
-template <class T, bool is_abstract>
-void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
+template <class T, bool is_virtual, bool is_abstract, bool is_exposed>
+void ClassDB::_register_class() {
 	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
 
 	// Register this class within our plugin
@@ -177,9 +173,9 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
 
 	// Register this class with Godot
 	GDExtensionClassCreationInfo2 class_info = {
-		p_virtual, // GDExtensionBool is_virtual;
+		is_virtual, // GDExtensionBool is_virtual;
 		is_abstract, // GDExtensionBool is_abstract;
-		p_exposed, // GDExtensionBool is_exposed;
+		is_exposed, // GDExtensionBool is_exposed;
 		T::set_bind, // GDExtensionClassSet set_func;
 		T::get_bind, // GDExtensionClassGet get_func;
 		T::has_get_property_list() ? T::get_property_list_bind : nullptr, // GDExtensionClassGetPropertyList get_property_list_func;
@@ -206,19 +202,9 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
 	initialize_class(classes[cl.name]);
 }
 
-template <class T>
-void ClassDB::register_class(bool p_virtual) {
-	ClassDB::_register_class<T, false>(p_virtual);
-}
-
-template <class T>
-void ClassDB::register_abstract_class() {
-	ClassDB::_register_class<T, true>();
-}
-
-template <class T>
-void ClassDB::register_internal_class() {
-	ClassDB::_register_class<T, false>(false, false);
+template <class T, bool is_virtual, bool is_abstract, bool is_exposed>
+void ClassDB::register_class() {
+	ClassDB::_register_class<T, is_virtual, is_exposed, is_exposed>();
 }
 
 template <class T>
@@ -282,9 +268,9 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p
 }
 
 #define GDREGISTER_CLASS(m_class) ClassDB::register_class<m_class>();
-#define GDREGISTER_VIRTUAL_CLASS(m_class) ClassDB::register_class<m_class>(true);
-#define GDREGISTER_ABSTRACT_CLASS(m_class) ClassDB::register_abstract_class<m_class>();
-#define GDREGISTER_INTERNAL_CLASS(m_class) ClassDB::register_internal_class<m_class>();
+#define GDREGISTER_VIRTUAL_CLASS(m_class) ClassDB::register_class<m_class, true>();
+#define GDREGISTER_ABSTRACT_CLASS(m_class) ClassDB::register_class<m_class, false, true>();
+#define GDREGISTER_INTERNAL_CLASS(m_class) ClassDB::register_class<m_class, false, false, false>();
 
 } // namespace godot
 

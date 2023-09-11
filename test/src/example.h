@@ -177,4 +177,11 @@ protected:
 	static void _bind_methods() {}
 };
 
+class ExampleInternal : public Object {
+	GDCLASS(ExampleInternal, Object);
+
+protected:
+	static void _bind_methods() {}
+};
+
 #endif // EXAMPLE_CLASS_H
