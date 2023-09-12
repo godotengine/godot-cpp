@@ -186,12 +186,12 @@ public:
 	}
 	void initialize_rid(RID p_rid) {
 		T *mem = get_or_null(p_rid, true);
-		ERR_FAIL_COND(!mem);
+		ERR_FAIL_NULL(mem);
 		memnew_placement(mem, T);
 	}
 	void initialize_rid(RID p_rid, const T &p_value) {
 		T *mem = get_or_null(p_rid, true);
-		ERR_FAIL_COND(!mem);
+		ERR_FAIL_NULL(mem);
 		memnew_placement(mem, T(p_value));
 	}
 
@@ -374,7 +374,7 @@ public:
 
 	_FORCE_INLINE_ void replace(const RID &p_rid, T *p_new_ptr) {
 		T **ptr = alloc.get_or_null(p_rid);
-		ERR_FAIL_COND(!ptr);
+		ERR_FAIL_NULL(ptr);
 		*ptr = p_new_ptr;
 	}
 

@@ -1505,13 +1505,13 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             f"\t\tGDExtensionObjectPtr singleton_obj = internal::gdextension_interface_global_get_singleton({class_name}::get_class_static()._native_ptr());"
         )
         result.append("#ifdef DEBUG_ENABLED")
-        result.append("\t\tERR_FAIL_COND_V(singleton_obj == nullptr, nullptr);")
+        result.append("\t\tERR_FAIL_NULL_V(singleton_obj, nullptr);")
         result.append("#endif // DEBUG_ENABLED")
         result.append(
             f"\t\tsingleton = reinterpret_cast<{class_name} *>(internal::gdextension_interface_object_get_instance_binding(singleton_obj, internal::token, &{class_name}::_gde_binding_callbacks));"
         )
         result.append("#ifdef DEBUG_ENABLED")
-        result.append("\t\tERR_FAIL_COND_V(singleton == nullptr, nullptr);")
+        result.append("\t\tERR_FAIL_NULL_V(singleton, nullptr);")
         result.append("#endif // DEBUG_ENABLED")
         result.append("\t}")
         result.append("\treturn singleton;")

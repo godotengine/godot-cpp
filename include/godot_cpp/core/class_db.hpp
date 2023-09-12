@@ -253,7 +253,7 @@ MethodBind *ClassDB::bind_static_method(StringName p_class, N p_method_name, M p
 template <class M>
 MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info, const std::vector<Variant> &p_default_args, bool p_return_nil_is_variant) {
 	MethodBind *bind = create_vararg_method_bind(p_method, p_info, p_return_nil_is_variant);
-	ERR_FAIL_COND_V(!bind, nullptr);
+	ERR_FAIL_NULL_V(bind, nullptr);
 
 	bind->set_name(p_name);
 	bind->set_default_arguments(p_default_args);
