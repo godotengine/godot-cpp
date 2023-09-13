@@ -117,6 +117,14 @@ bool Example::_property_get_revert(const StringName &p_name, Variant &r_property
 	}
 };
 
+void Example::_validate_property(PropertyInfo &p_property) const {
+	String name = p_property.name;
+	// Test hiding the "mouse_filter" property from the editor.
+	if (name == "mouse_filter") {
+		p_property.usage = PROPERTY_USAGE_NO_EDITOR;
+	}
+}
+
 void Example::_bind_methods() {
 	// Methods.
 	ClassDB::bind_method(D_METHOD("simple_func"), &Example::simple_func);

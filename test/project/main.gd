@@ -23,6 +23,10 @@ func _ready():
 	# Property list.
 	example.property_from_list = Vector3(100, 200, 300)
 	assert_equal(example.property_from_list, Vector3(100, 200, 300))
+	var prop_list = example.get_property_list()
+	for prop_info in prop_list:
+		if prop_info['name'] == 'mouse_filter':
+			assert_equal(prop_info['usage'], PROPERTY_USAGE_NO_EDITOR)
 
 	# Call simple methods.
 	example.simple_func()
