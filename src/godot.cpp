@@ -271,7 +271,7 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	LOAD_PROC_ADDRESS(mem_alloc, GDExtensionInterfaceMemAlloc);
 	LOAD_PROC_ADDRESS(mem_realloc, GDExtensionInterfaceMemRealloc);
 	LOAD_PROC_ADDRESS(mem_free, GDExtensionInterfaceMemFree);
-	LOAD_PROC_ADDRESS(print_error, GDExtensionInterfacePrintError);
+	LOAD_PROC_ADDRESS(print_error_with_message, GDExtensionInterfacePrintErrorWithMessage);
 	LOAD_PROC_ADDRESS(print_warning, GDExtensionInterfacePrintWarning);
 	LOAD_PROC_ADDRESS(print_warning_with_message, GDExtensionInterfacePrintWarningWithMessage);
 	LOAD_PROC_ADDRESS(print_script_error, GDExtensionInterfacePrintScriptError);
