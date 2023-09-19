@@ -326,7 +326,7 @@ public:                                                                         
 	};
 
 // Don't use this for your classes, use GDCLASS() instead.
-#define GDEXTENSION_CLASS(m_class, m_inherits)                                                                             \
+#define GDEXTENSION_CLASS_ALIAS(m_class, m_alias_for, m_inherits)                                                          \
 private:                                                                                                                   \
 	void operator=(const m_class &p_rval) {}                                                                               \
                                                                                                                            \
@@ -378,7 +378,7 @@ public:                                                                         
 	static void initialize_class() {}                                                                                      \
                                                                                                                            \
 	static ::godot::StringName &get_class_static() {                                                                       \
-		static ::godot::StringName string_name = ::godot::StringName(#m_class);                                            \
+		static ::godot::StringName string_name = ::godot::StringName(#m_alias_for);                                        \
 		return string_name;                                                                                                \
 	}                                                                                                                      \
                                                                                                                            \
@@ -403,6 +403,9 @@ public:                                                                         
 		_gde_binding_free_callback,                                                                                        \
 		_gde_binding_reference_callback,                                                                                   \
 	};                                                                                                                     \
-	m_class() : m_class(#m_class) {}
+	m_class() : m_class(#m_alias_for) {}
+
+// Don't use this for your classes, use GDCLASS() instead.
+#define GDEXTENSION_CLASS(m_class, m_inherits) GDEXTENSION_CLASS_ALIAS(m_class, m_class, m_inherits)
 
 #endif // GODOT_WRAPPED_HPP

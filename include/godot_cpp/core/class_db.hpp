@@ -38,6 +38,8 @@
 #include <godot_cpp/core/method_bind.hpp>
 #include <godot_cpp/core/object.hpp>
 
+#include <godot_cpp/classes/class_db_singleton.hpp>
+
 #include <list>
 #include <set>
 #include <string>
@@ -139,6 +141,8 @@ public:
 
 	static void initialize(GDExtensionInitializationLevel p_level);
 	static void deinitialize(GDExtensionInitializationLevel p_level);
+
+	CLASSDB_SINGLETON_FORWARD_METHODS;
 };
 
 #define BIND_CONSTANT(m_constant) \
