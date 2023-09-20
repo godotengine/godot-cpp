@@ -3,6 +3,7 @@ import os, sys, platform
 from SCons.Variables import EnumVariable, PathVariable, BoolVariable
 from SCons.Tool import Tool
 from SCons.Builder import Builder
+from SCons.Errors import UserError
 
 from binding_generator import scons_generate_bindings, scons_emit_files
 
@@ -226,7 +227,7 @@ def generate(env):
                 env["arch"] = "x86_32"
             else:
                 print("Unsupported CPU architecture: " + host_machine)
-                Exit()
+                env.Exit(1)
 
     print("Building for architecture " + env["arch"] + " on platform " + env["platform"])
 
@@ -284,8 +285,8 @@ def _godot_cpp(env):
     )
     # Forces bindings regeneration.
     if env["generate_bindings"]:
-        AlwaysBuild(bindings)
-        NoCache(bindings)
+        env.AlwaysBuild(bindings)
+        env.NoCache(bindings)
 
     # Sources to compile
     sources = []

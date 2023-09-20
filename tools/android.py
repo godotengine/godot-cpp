@@ -29,7 +29,7 @@ def generate(env):
 
     if env["arch"] not in ("arm64", "x86_64", "arm32", "x86_32"):
         print("Only arm64, x86_64, arm32, and x86_32 are supported on Android. Exiting.")
-        Exit()
+        env.Exit(1)
 
     if sys.platform == "win32" or sys.platform == "msys":
         my_spawn.configure(env)

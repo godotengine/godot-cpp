@@ -97,9 +97,10 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
             files.append(str(source_filename.as_posix()))
 
     for engine_class in api["classes"]:
-        # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
+        # Generate code for the ClassDB singleton under a different name.
         if engine_class["name"] == "ClassDB":
-            continue
+            engine_class["name"] = "ClassDBSingleton"
+            engine_class["alias_for"] = "ClassDB"
         header_filename = include_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".hpp")
         source_filename = source_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".cpp")
         if headers:
@@ -1038,21 +1039,23 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
     # First create map of classes and singletons.
     for class_api in api["classes"]:
-        # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
+        # Generate code for the ClassDB singleton under a different name.
         if class_api["name"] == "ClassDB":
-            continue
+            class_api["name"] = "ClassDBSingleton"
+            class_api["alias_for"] = "ClassDB"
         engine_classes[class_api["name"]] = class_api["is_refcounted"]
     for native_struct in api["native_structures"]:
         engine_classes[native_struct["name"]] = False
         native_structures.append(native_struct["name"])
 
     for singleton in api["singletons"]:
+        # Generate code for the ClassDB singleton under a different name.
+        if singleton["name"] == "ClassDB":
+            singleton["name"] = "ClassDBSingleton"
+            singleton["alias_for"] = "ClassDB"
         singletons.append(singleton["name"])
 
     for class_api in api["classes"]:
-        # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
-        if class_api["name"] == "ClassDB":
-            continue
         # Check used classes for header include.
         used_classes = set()
         fully_used_classes = set()
@@ -1141,6 +1144,12 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                 fully_used_classes.add("Ref")
         else:
             fully_used_classes.add("Wrapped")
+
+        # In order to ensure that PtrToArg specializations for native structs are
+        # always used, let's move any of them into 'fully_used_classes'.
+        for type_name in used_classes:
+            if is_struct_type(type_name) and not is_included_struct_type(type_name):
+                fully_used_classes.add(type_name)
 
         for type_name in fully_used_classes:
             if type_name in used_classes:
@@ -1244,7 +1253,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     if len(fully_used_classes) > 0:
         result.append("")
 
-    if class_name != "Object":
+    if class_name != "Object" and class_name != "ClassDBSingleton":
         result.append("#include <godot_cpp/core/class_db.hpp>")
         result.append("")
         result.append("#include <type_traits>")
@@ -1265,7 +1274,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     inherits = class_api["inherits"] if "inherits" in class_api else "Wrapped"
     result.append(f"class {class_name} : public {inherits} {{")
 
-    result.append(f"\tGDEXTENSION_CLASS({class_name}, {inherits})")
+    if "alias_for" in class_api:
+        result.append(f"\tGDEXTENSION_CLASS_ALIAS({class_name}, {class_api['alias_for']}, {inherits})")
+    else:
+        result.append(f"\tGDEXTENSION_CLASS({class_name}, {inherits})")
     result.append("")
 
     result.append("public:")
@@ -1421,6 +1433,51 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 result.append(f'VARIANT_BITFIELD_CAST({class_name}::{enum_api["name"]});')
             else:
                 result.append(f'VARIANT_ENUM_CAST({class_name}::{enum_api["name"]});')
+        result.append("")
+
+    if class_name == "ClassDBSingleton":
+        result.append("#define CLASSDB_SINGLETON_FORWARD_METHODS \\")
+        for method in class_api["methods"]:
+            # ClassDBSingleton shouldn't have any static or vararg methods, but if some appear later, lets skip them.
+            if vararg:
+                continue
+            if "is_static" in method and method["is_static"]:
+                continue
+
+            method_signature = "\tstatic "
+            if "return_type" in method:
+                method_signature += f'{correct_type(method["return_type"])} '
+            elif "return_value" in method:
+                method_signature += (
+                    correct_type(method["return_value"]["type"], method["return_value"].get("meta", None)) + " "
+                )
+            else:
+                method_signature += "void "
+
+            method_signature += f'{method["name"]}('
+
+            method_arguments = []
+            if "arguments" in method:
+                method_arguments = method["arguments"]
+
+            method_signature += make_function_parameters(
+                method_arguments, include_default=True, for_builtin=True, is_vararg=False
+            )
+
+            method_signature += ") { \\"
+
+            result.append(method_signature)
+
+            method_body = "\t\t"
+            if "return_type" in method or "return_value" in method:
+                method_body += "return "
+            method_body += f'ClassDBSingleton::get_singleton()->{method["name"]}('
+            method_body += ", ".join(map(lambda x: escape_identifier(x["name"]), method_arguments))
+            method_body += "); \\"
+
+            result.append(method_body)
+            result.append("\t} \\")
+        result.append("\t;")
         result.append("")
 
     result.append(f"#endif // ! {header_guard}")
@@ -2319,6 +2376,7 @@ def escape_identifier(id):
         "operator": "_operator",
         "typeof": "type_of",
         "typename": "type_name",
+        "enum": "_enum",
     }
     if id in cpp_keywords_map:
         return cpp_keywords_map[id]
