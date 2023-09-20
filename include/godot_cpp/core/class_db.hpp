@@ -198,6 +198,8 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
 		T::create, // GDExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
 		T::free, // GDExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
 		&ClassDB::get_virtual_func, // GDExtensionClassGetVirtual get_virtual_func;
+		nullptr, // GDExtensionClassGetVirtualCallData get_virtual_call_data_func;
+		nullptr, // GDExtensionClassCallVirtualWithData call_virtual_func;
 		nullptr, // GDExtensionClassGetRID get_rid;
 		(void *)&T::get_class_static(), // void *class_userdata;
 	};
