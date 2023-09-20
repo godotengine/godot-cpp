@@ -42,7 +42,7 @@ void *Memory::alloc_static(size_t p_bytes, bool p_pad_align) {
 #endif
 
 	void *mem = internal::gdextension_interface_mem_alloc(p_bytes + (prepad ? PAD_ALIGN : 0));
-	ERR_FAIL_COND_V(!mem, nullptr);
+	ERR_FAIL_NULL_V(mem, nullptr);
 
 	if (prepad) {
 		uint8_t *s8 = (uint8_t *)mem;
@@ -71,7 +71,7 @@ void *Memory::realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align) {
 	if (prepad) {
 		mem -= PAD_ALIGN;
 		mem = (uint8_t *)internal::gdextension_interface_mem_realloc(mem, p_bytes + PAD_ALIGN);
-		ERR_FAIL_COND_V(!mem, nullptr);
+		ERR_FAIL_NULL_V(mem, nullptr);
 		return mem + PAD_ALIGN;
 	} else {
 		return (uint8_t *)internal::gdextension_interface_mem_realloc(mem, p_bytes);
