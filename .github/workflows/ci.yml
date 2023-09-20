@@ -78,8 +78,18 @@ jobs:
             run-tests: false
             cache-name: ios-arm64
 
+          - name: 🌐 Web (wasm32)
+            os: ubuntu-20.04
+            platform: javascript
+            artifact-name: godot-cpp-javascript-wasm32-release
+            artifact-path: bin/libgodot-cpp.javascript.template_release.wasm32.a
+            run-tests: false
+            cache-name: javascript-wasm32
+
     env:
       SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
+      EM_VERSION: 3.1.45
+      EM_CACHE_FOLDER: "emsdk-cache"
 
     steps:
       - name: Checkout
@@ -103,6 +113,13 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qqq build-essential pkg-config
+
+      - name: Web dependencies
+        if: ${{ matrix.platform == 'javascript' }}
+        uses: mymindstorm/setup-emsdk@v12
+        with:
+          version: ${{env.EM_VERSION}}
+          actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
 
       - name: Install scons
         run: |
