@@ -110,4 +110,9 @@ MethodBind::~MethodBind() {
 	}
 }
 
+MethodBind *create_vararg_method_bind(void (*p_function)(const Variant **, GDExtensionInt, GDExtensionCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
+	MethodBind *a = memnew((MethodBindVarArgTS)(p_function, p_info, p_return_nil_is_variant));
+	return a;
+}
+
 } // namespace godot

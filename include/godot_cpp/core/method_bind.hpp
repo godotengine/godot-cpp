@@ -267,6 +267,120 @@ MethodBind *create_vararg_method_bind(R (T::*p_method)(const Variant **, GDExten
 	return a;
 }
 
+template <class Derived, class R, bool should_returns>
+class MethodBindVarArgBaseS : public MethodBind {
+protected:
+	R(*function)
+	(const Variant **, GDExtensionInt, GDExtensionCallError &);
+	std::vector<PropertyInfo> arguments;
+
+public:
+	virtual PropertyInfo gen_argument_type_info(int p_arg) const {
+		if (p_arg < 0) {
+			return _gen_return_type_info();
+		} else if ((size_t)(p_arg) < arguments.size()) {
+			return arguments[p_arg];
+		} else {
+			return make_property_info(Variant::Type::NIL, "vararg", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
+		}
+	}
+
+	virtual GDExtensionVariantType gen_argument_type(int p_arg) const {
+		return static_cast<GDExtensionVariantType>(gen_argument_type_info(p_arg).type);
+	}
+
+	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int) const {
+		return GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	}
+
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) const {
+		ERR_FAIL(); // Can't call.
+	}
+
+	MethodBindVarArgBaseS(
+			R (*p_function)(const Variant **, GDExtensionInt, GDExtensionCallError &),
+			const MethodInfo &p_method_info,
+			bool p_return_nil_is_variant) :
+			function(p_function) {
+		set_vararg(true);
+		set_argument_count(p_method_info.arguments.size());
+		if (p_method_info.arguments.size()) {
+			arguments = p_method_info.arguments;
+
+			std::vector<StringName> names;
+			names.reserve(p_method_info.arguments.size());
+			for (size_t i = 0; i < p_method_info.arguments.size(); i++) {
+				names.push_back(p_method_info.arguments[i].name);
+			}
+			set_argument_names(names);
+		}
+		generate_argument_types((int)p_method_info.arguments.size());
+		set_return(should_returns);
+		set_static(true);
+	}
+
+	~MethodBindVarArgBaseS() {}
+
+private:
+	PropertyInfo _gen_return_type_info() const {
+		return reinterpret_cast<const Derived *>(this)->_gen_return_type_info_impl();
+	}
+};
+
+class MethodBindVarArgTS : public MethodBindVarArgBaseS<MethodBindVarArgTS, void, false> {
+	friend class MethodBindVarArgBaseS<MethodBindVarArgTS, void, false>;
+
+public:
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
+		(void)p_instance; // unused
+		MethodBindVarArgBaseS<MethodBindVarArgTS, void, false>::function((const Variant **)p_args, p_argument_count, r_error);
+		return {};
+	}
+
+	MethodBindVarArgTS(
+			void (*p_function)(const Variant **, GDExtensionInt, GDExtensionCallError &),
+			const MethodInfo &p_method_info,
+			bool p_return_nil_is_variant) :
+			MethodBindVarArgBaseS<MethodBindVarArgTS, void, false>(p_function, p_method_info, p_return_nil_is_variant) {
+	}
+
+private:
+	PropertyInfo _gen_return_type_info_impl() const {
+		return {};
+	}
+};
+
+MethodBind *create_vararg_method_bind(void (*p_function)(const Variant **, GDExtensionInt, GDExtensionCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant);
+
+template <class R>
+class MethodBindVarArgTRS : public MethodBindVarArgBaseS<MethodBindVarArgTRS<R>, R, true> {
+	friend class MethodBindVarArgBaseS<MethodBindVarArgTRS, R, true>;
+
+public:
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const {
+		call_with_variant_args_static_dv(MethodBindVarArgBaseS<MethodBindVarArgTRS<R>, R, true>::function, p_args, p_argument_count, r_error);
+		return {};
+	}
+
+	MethodBindVarArgTRS(
+			void (*p_function)(const Variant **, GDExtensionInt, GDExtensionCallError &),
+			const MethodInfo &p_method_info,
+			bool p_return_nil_is_variant) :
+			MethodBindVarArgBaseS<MethodBindVarArgTRS<R>, R, true>(p_function, p_method_info, p_return_nil_is_variant) {
+	}
+
+private:
+	PropertyInfo _gen_return_type_info_impl() const {
+		return {};
+	}
+};
+
+template <class R>
+MethodBind *create_vararg_method_bind(R (*p_function)(const Variant **, GDExtensionInt, GDExtensionCallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
+	MethodBind *a = memnew((MethodBindVarArgTRS<R>)(p_function, p_info, p_return_nil_is_variant));
+	return a;
+}
+
 #ifndef TYPED_METHOD_BIND
 class _gde_UnexistingClass;
 #define MB_T _gde_UnexistingClass
