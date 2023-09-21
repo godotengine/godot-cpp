@@ -96,6 +96,28 @@ func _ready():
 	# String::resize().
 	assert_equal(example.test_string_resize("What"), "What!?")
 
+	# mp_callable() with void method.
+	var mp_callable: Callable = example.test_callable_mp()
+	mp_callable.call(example, "void", 36)
+	assert_equal(custom_signal_emitted, ["unbound_method1: Example - void", 36])
+
+	# mp_callable() with return value.
+	var mp_callable_ret: Callable = example.test_callable_mp_ret()
+	assert_equal(mp_callable_ret.call(example, "test", 77), "unbound_method2: Example - test - 77")
+
+	# mp_callable() with const method and return value.
+	var mp_callable_retc: Callable = example.test_callable_mp_retc()
+	assert_equal(mp_callable_retc.call(example, "const", 101), "unbound_method3: Example - const - 101")
+
+	# mp_callable_static() with void method.
+	var mp_callable_static: Callable = example.test_callable_mp_static()
+	mp_callable_static.call(example, "static", 83)
+	assert_equal(custom_signal_emitted, ["unbound_static_method1: Example - static", 83])
+
+	# mp_callable_static() with return value.
+	var mp_callable_static_ret: Callable = example.test_callable_mp_static_ret()
+	assert_equal(mp_callable_static_ret.call(example, "static-ret", 84), "unbound_static_method2: Example - static-ret - 84")
+
 	# PackedArray iterators
 	assert_equal(example.test_vector_ops(), 105)
 

@@ -277,6 +277,60 @@ void call_with_variant_args_retc_helper(T *p_instance, R (T::*p_method)(P...) co
 }
 
 template <class T, class... P>
+void call_with_variant_args(T *p_instance, void (T::*p_method)(P...), const Variant **p_args, int p_argcount, GDExtensionCallError &r_error) {
+#ifdef DEBUG_ENABLED
+	if ((size_t)p_argcount > sizeof...(P)) {
+		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
+		r_error.argument = (int32_t)sizeof...(P);
+		return;
+	}
+
+	if ((size_t)p_argcount < sizeof...(P)) {
+		r_error.error = GDEXTENSION_CALL_ERROR_TOO_FEW_ARGUMENTS;
+		r_error.argument = (int32_t)sizeof...(P);
+		return;
+	}
+#endif
+	call_with_variant_args_helper<T, P...>(p_instance, p_method, p_args, r_error, BuildIndexSequence<sizeof...(P)>{});
+}
+
+template <class T, class R, class... P>
+void call_with_variant_args_ret(T *p_instance, R (T::*p_method)(P...), const Variant **p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error) {
+#ifdef DEBUG_ENABLED
+	if ((size_t)p_argcount > sizeof...(P)) {
+		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
+		r_error.argument = (int32_t)sizeof...(P);
+		return;
+	}
+
+	if ((size_t)p_argcount < sizeof...(P)) {
+		r_error.error = GDEXTENSION_CALL_ERROR_TOO_FEW_ARGUMENTS;
+		r_error.argument = (int32_t)sizeof...(P);
+		return;
+	}
+#endif
+	call_with_variant_args_ret_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, r_error, BuildIndexSequence<sizeof...(P)>{});
+}
+
+template <class T, class R, class... P>
+void call_with_variant_args_retc(T *p_instance, R (T::*p_method)(P...) const, const Variant **p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error) {
+#ifdef DEBUG_ENABLED
+	if ((size_t)p_argcount > sizeof...(P)) {
+		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
+		r_error.argument = (int32_t)sizeof...(P);
+		return;
+	}
+
+	if ((size_t)p_argcount < sizeof...(P)) {
+		r_error.error = GDEXTENSION_CALL_ERROR_TOO_FEW_ARGUMENTS;
+		r_error.argument = (int32_t)sizeof...(P);
+		return;
+	}
+#endif
+	call_with_variant_args_retc_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, r_error, BuildIndexSequence<sizeof...(P)>{});
+}
+
+template <class T, class... P>
 void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
@@ -536,6 +590,42 @@ void call_with_ptr_args_static_method_helper(void (*p_method)(P...), const GDExt
 template <class... P>
 void call_with_ptr_args_static_method(void (*p_method)(P...), const GDExtensionConstTypePtr *p_args) {
 	call_with_ptr_args_static_method_helper<P...>(p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
+}
+
+template <class R, class... P>
+void call_with_variant_args_static_ret(R (*p_method)(P...), const Variant **p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error) {
+#ifdef DEBUG_ENABLED
+	if ((size_t)p_argcount > sizeof...(P)) {
+		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
+		r_error.argument = (int32_t)sizeof...(P);
+		return;
+	}
+
+	if ((size_t)p_argcount < sizeof...(P)) {
+		r_error.error = GDEXTENSION_CALL_ERROR_TOO_FEW_ARGUMENTS;
+		r_error.argument = (int32_t)sizeof...(P);
+		return;
+	}
+#endif
+	call_with_variant_args_static_ret<R, P...>(p_method, p_args, r_ret, r_error, BuildIndexSequence<sizeof...(P)>{});
+}
+
+template <class... P>
+void call_with_variant_args_static_ret(void (*p_method)(P...), const Variant **p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error) {
+#ifdef DEBUG_ENABLED
+	if ((size_t)p_argcount > sizeof...(P)) {
+		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
+		r_error.argument = (int32_t)sizeof...(P);
+		return;
+	}
+
+	if ((size_t)p_argcount < sizeof...(P)) {
+		r_error.error = GDEXTENSION_CALL_ERROR_TOO_FEW_ARGUMENTS;
+		r_error.argument = (int32_t)sizeof...(P);
+		return;
+	}
+#endif
+	call_with_variant_args_static<P...>(p_method, p_args, r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
 template <class R, class... P, size_t... Is>

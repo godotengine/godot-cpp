@@ -163,6 +163,12 @@ void Example::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("test_variant_call", "variant"), &Example::test_variant_call);
 
+	ClassDB::bind_method(D_METHOD("test_callable_mp"), &Example::test_callable_mp);
+	ClassDB::bind_method(D_METHOD("test_callable_mp_ret"), &Example::test_callable_mp_ret);
+	ClassDB::bind_method(D_METHOD("test_callable_mp_retc"), &Example::test_callable_mp_retc);
+	ClassDB::bind_method(D_METHOD("test_callable_mp_static"), &Example::test_callable_mp_static);
+	ClassDB::bind_method(D_METHOD("test_callable_mp_static_ret"), &Example::test_callable_mp_static_ret);
+
 	ClassDB::bind_method(D_METHOD("test_bitfield", "flags"), &Example::test_bitfield);
 
 	ClassDB::bind_method(D_METHOD("test_rpc", "value"), &Example::test_rpc);
@@ -347,6 +353,64 @@ int Example::test_vector_ops() const {
 		ret += E;
 	}
 	return ret;
+}
+
+Callable Example::test_callable_mp() {
+	return callable_mp(this, &Example::unbound_method1);
+}
+
+Callable Example::test_callable_mp_ret() {
+	return callable_mp(this, &Example::unbound_method2);
+}
+
+Callable Example::test_callable_mp_retc() const {
+	return callable_mp(this, &Example::unbound_method3);
+}
+
+Callable Example::test_callable_mp_static() const {
+	return callable_mp_static(&Example::unbound_static_method1);
+}
+
+Callable Example::test_callable_mp_static_ret() const {
+	return callable_mp_static(&Example::unbound_static_method2);
+}
+
+void Example::unbound_method1(Object *p_object, String p_string, int p_int) {
+	String test = "unbound_method1: ";
+	test += p_object->get_class();
+	test += " - " + p_string;
+	emit_custom_signal(test, p_int);
+}
+
+String Example::unbound_method2(Object *p_object, String p_string, int p_int) {
+	String test = "unbound_method2: ";
+	test += p_object->get_class();
+	test += " - " + p_string;
+	test += " - " + itos(p_int);
+	return test;
+}
+
+String Example::unbound_method3(Object *p_object, String p_string, int p_int) const {
+	String test = "unbound_method3: ";
+	test += p_object->get_class();
+	test += " - " + p_string;
+	test += " - " + itos(p_int);
+	return test;
+}
+
+void Example::unbound_static_method1(Example *p_object, String p_string, int p_int) {
+	String test = "unbound_static_method1: ";
+	test += p_object->get_class();
+	test += " - " + p_string;
+	p_object->emit_custom_signal(test, p_int);
+}
+
+String Example::unbound_static_method2(Object *p_object, String p_string, int p_int) {
+	String test = "unbound_static_method2: ";
+	test += p_object->get_class();
+	test += " - " + p_string;
+	test += " - " + itos(p_int);
+	return test;
 }
 
 int Example::test_tarray_arg(const TypedArray<int64_t> &p_array) {
