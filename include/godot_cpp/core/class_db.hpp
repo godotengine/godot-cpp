@@ -201,6 +201,7 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
 		nullptr, // GDExtensionClassUnreference unreference_func;
 		T::create, // GDExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
 		T::free, // GDExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
+		T::recreate, // GDExtensionClassRecreateInstance recreate_instance_func;
 		&ClassDB::get_virtual_func, // GDExtensionClassGetVirtual get_virtual_func;
 		nullptr, // GDExtensionClassGetVirtualCallData get_virtual_call_data_func;
 		nullptr, // GDExtensionClassCallVirtualWithData call_virtual_func;

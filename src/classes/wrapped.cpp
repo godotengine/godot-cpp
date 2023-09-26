@@ -49,6 +49,25 @@ void Wrapped::_postinitialize() {
 }
 
 Wrapped::Wrapped(const StringName p_godot_class) {
+#ifdef HOT_RELOAD_ENABLED
+	if (unlikely(Wrapped::recreate_instance)) {
+		RecreateInstance *recreate_data = Wrapped::recreate_instance;
+		RecreateInstance *previous = nullptr;
+		while (recreate_data) {
+			if (recreate_data->wrapper == this) {
+				_owner = recreate_data->owner;
+				if (previous) {
+					previous->next = recreate_data->next;
+				} else {
+					Wrapped::recreate_instance = recreate_data->next;
+				}
+				return;
+			}
+			previous = recreate_data;
+			recreate_data = recreate_data->next;
+		}
+	}
+#endif
 	_owner = godot::internal::gdextension_interface_classdb_construct_object(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
 }
 
