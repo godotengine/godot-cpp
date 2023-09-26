@@ -4,10 +4,10 @@ on: [push, pull_request]
 jobs:
   linux:
     name: Build (Linux, GCC)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -48,12 +48,12 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
@@ -66,7 +66,7 @@ jobs:
           scons target=release generate_bindings=yes -j $env:NUMBER_OF_PROCESSORS
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: godot-cpp-windows-msvc2019-x86_64-release
           path: bin/libgodot-cpp.windows.release.64.lib
@@ -77,12 +77,12 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
@@ -100,7 +100,7 @@ jobs:
           scons target=release generate_bindings=yes use_mingw=yes -j $env:NUMBER_OF_PROCESSORS
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: godot-cpp-linux-mingw-x86_64-release
           path: bin/libgodot-cpp.windows.release.64.a
@@ -111,12 +111,12 @@ jobs:
     runs-on: macos-11
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
@@ -131,7 +131,7 @@ jobs:
           scons target=release generate_bindings=yes -j $(sysctl -n hw.logicalcpu)
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: godot-cpp-macos-universal-release
           path: bin/libgodot-cpp.osx.release.64.a
@@ -150,7 +150,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Make apt sources.list use the default Ubuntu repositories
         run: |
