@@ -12,26 +12,26 @@ jobs:
           - name: 🐧 Linux (GCC)
             os: ubuntu-20.04
             platform: linux
-            artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
+            artifact-name: godot-cpp-linux-glibc2.31-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.release.64.a
             godot_zip: Godot_v3.5-stable_linux_server.64.zip
             executable: Godot_v3.5-stable_linux_server.64
 
           - name: 🏁 Windows (x86_64, MSVC)
-            os: windows-2019
+            os: windows-2022
             platform: windows
             artifact-name: godot-cpp-windows-msvc2019-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.release.64.lib
 
           - name: 🏁 Windows (x86_64, MinGW)
-            os: windows-2019
+            os: windows-2022
             platform: windows
             artifact-name: godot-cpp-linux-mingw-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.release.64.a
             flags: use_mingw=yes
 
           - name: 🍎 macOS (universal)
-            os: macos-11
+            os: macos-13
             platform: osx
             artifact-name: godot-cpp-macos-universal-release
             artifact-path: bin/libgodot-cpp.osx.release.64.a
@@ -47,14 +47,14 @@ jobs:
             flags: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME android_arch=arm64v8
 
           - name: 🍏 iOS (arm64)
-            os: macos-11
+            os: macos-13
             platform: ios
             artifact-name: godot-cpp-ios-arm64-release
             artifact-path: bin/libgodot-cpp.ios.release.arm64.a
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -110,7 +110,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Make apt sources.list use the default Ubuntu repositories
         run: |
