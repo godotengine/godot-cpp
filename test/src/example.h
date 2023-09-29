@@ -220,4 +220,20 @@ protected:
 	virtual int test_function() override { return 25; }
 };
 
+class ExampleRuntime : public Node {
+	GDCLASS(ExampleRuntime, Node);
+
+	int prop_value = 12;
+
+protected:
+	static void _bind_methods();
+
+public:
+	void set_prop_value(int p_prop_value);
+	int get_prop_value() const;
+
+	ExampleRuntime();
+	~ExampleRuntime();
+};
+
 #endif // EXAMPLE_CLASS_H

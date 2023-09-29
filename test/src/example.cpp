@@ -637,3 +637,23 @@ String Example::test_virtual_implemented_in_script(const String &p_name, int p_v
 	}
 	return "Unimplemented";
 }
+
+void ExampleRuntime::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("set_prop_value", "value"), &ExampleRuntime::set_prop_value);
+	ClassDB::bind_method(D_METHOD("get_prop_value"), &ExampleRuntime::get_prop_value);
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "prop_value"), "set_prop_value", "get_prop_value");
+}
+
+void ExampleRuntime::set_prop_value(int p_prop_value) {
+	prop_value = p_prop_value;
+}
+
+int ExampleRuntime::get_prop_value() const {
+	return prop_value;
+}
+
+ExampleRuntime::ExampleRuntime() {
+}
+
+ExampleRuntime::~ExampleRuntime() {
+}
