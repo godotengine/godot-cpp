@@ -284,8 +284,8 @@ def generate(env):
 
 
 def _godot_cpp(env):
-    api_file = normalize_path(env.get("custom_api_file", env.File("gdextension/extension_api.json").abspath), env)
     extension_dir = normalize_path(env.get("gdextension_dir", env.Dir("gdextension").abspath), env)
+    api_file = normalize_path(env.get("custom_api_file", env.File(extension_dir + "/extension_api.json").abspath), env)
     bindings = env.GodotCPPBindings(
         env.Dir("."),
         [
