@@ -104,6 +104,8 @@ jobs:
       - name: Setup MinGW for Windows/MinGW build
         if: ${{ matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes' }}
         uses: egor-tensin/setup-mingw@v2
+        with:
+          version: 12.2.0
 
       - name: Generate godot-cpp sources only
         run: |
