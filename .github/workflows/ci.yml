@@ -99,6 +99,8 @@ jobs:
       - name: Windows dependency (MinGW)
         if: ${{ matrix.platform == 'windows' }}
         uses: egor-tensin/setup-mingw@v2
+        with:
+          version: 12.2.0
 
       - name: Build godot-cpp (debug)
         run: |
