@@ -352,6 +352,7 @@ void ClassDB::initialize(GDExtensionInitializationLevel p_level) {
 }
 
 void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
+	std::set<StringName> to_erase;
 	for (std::vector<StringName>::reverse_iterator i = class_register_order.rbegin(); i != class_register_order.rend(); ++i) {
 		const StringName &name = *i;
 		const ClassInfo &cl = classes[name];
@@ -362,12 +363,20 @@ void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
 
 		internal::gdextension_interface_classdb_unregister_extension_class(internal::library, name._native_ptr());
 
-		for (auto method : cl.method_map) {
+		for (const std::pair<const StringName, MethodBind *> &method : cl.method_map) {
 			memdelete(method.second);
 		}
 
-		classes.erase(*i);
-		class_register_order.erase((i + 1).base());
+		classes.erase(name);
+		to_erase.insert(name);
+	}
+
+	{
+		// The following is equivalent to c++20 `std::erase_if(class_register_order, [&](const StringName& name){ return to_erase.contains(name); });`
+		std::vector<StringName>::iterator it = std::remove_if(class_register_order.begin(), class_register_order.end(), [&](const StringName &p_name) {
+			return to_erase.count(p_name) > 0;
+		});
+		class_register_order.erase(it, class_register_order.end());
 	}
 }
 
