@@ -458,8 +458,9 @@ String operator+(char32_t p_char, const String &p_str) {
 	return String::chr(p_char) + p_str;
 }
 
-StringName::StringName(const char *from) :
-		StringName(String(from)) {}
+StringName::StringName(const char *from, bool p_static) {
+	internal::gdextension_interface_string_name_new_with_latin1_chars(&opaque, from, p_static);
+}
 
 StringName::StringName(const wchar_t *from) :
 		StringName(String(from)) {}
