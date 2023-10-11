@@ -31,6 +31,8 @@
 #include <Godot.hpp>
 #include <Reference.hpp>
 
+#include "godot_profiler.h"
+
 using namespace godot;
 
 class SimpleClass : public Reference {
@@ -41,15 +43,18 @@ public:
 
 	/** `_init` must exist as it is called by Godot. */
 	void _init() {
+		TRACE_EVENT("app_main", "SimpleClass::_init");
 		_name = String("SimpleClass");
 		_value = 0;
 	}
 
 	void test_void_method() {
+		TRACE_EVENT("app_main", "SimpleClass::test_void_method");
 		Godot::print("This is test");
 	}
 
 	Variant method(Variant arg) {
+		TRACE_EVENT("app_main", "SimpleClass::method");
 		Variant ret;
 		ret = arg;
 
@@ -57,6 +62,7 @@ public:
 	}
 
 	static void _register_methods() {
+		TRACE_EVENT("app_main", "_register_methods");
 		register_method("method", &SimpleClass::method);
 
 		/**
