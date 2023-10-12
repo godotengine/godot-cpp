@@ -255,25 +255,33 @@ public:
 	bool operator!=(const Variant &other) const;
 	bool operator<(const Variant &other) const;
 
-	void call(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
+	void callp(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
 
 	template <class... Args>
 	Variant call(const StringName &method, Args... args) {
+		std::array<Variant, sizeof...(args)> vargs = { args... };
+		std::array<const Variant *, sizeof...(args)> argptrs;
+		for (size_t i = 0; i < vargs.size(); i++) {
+			argptrs[i] = &vargs[i];
+		}
 		Variant result;
 		GDExtensionCallError error;
-		std::array<GDExtensionConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
-		call(method, call_args.data(), call_args.size(), result, error);
+		callp(method, argptrs.data(), argptrs.size(), result, error);
 		return result;
 	}
 
-	static void call_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
+	static void callp_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
 
 	template <class... Args>
 	static Variant call_static(Variant::Type type, const StringName &method, Args... args) {
+		std::array<Variant, sizeof...(args)> vargs = { args... };
+		std::array<const Variant *, sizeof...(args)> argptrs;
+		for (size_t i = 0; i < vargs.size(); i++) {
+			argptrs[i] = &vargs[i];
+		}
 		Variant result;
 		GDExtensionCallError error;
-		std::array<GDExtensionConstVariantPtr, sizeof...(Args)> call_args = { Variant(args)... };
-		call_static(type, method, call_args.data(), call_args.size(), result, error);
+		callp_static(type, method, argptrs.data(), argptrs.size(), sizeof...(args), result, error);
 		return result;
 	}
 

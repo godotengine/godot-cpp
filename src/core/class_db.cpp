@@ -77,7 +77,7 @@ void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinf
 	if (p_setter != String("")) {
 		setter = get_method(p_class, p_setter);
 
-		ERR_FAIL_COND_MSG(!setter, String("Setter method '{0}::{1}()' not found for property '{2}::{3}'.").format(Array::make(p_class, p_setter, p_class, p_pinfo.name)));
+		ERR_FAIL_NULL_MSG(setter, String("Setter method '{0}::{1}()' not found for property '{2}::{3}'.").format(Array::make(p_class, p_setter, p_class, p_pinfo.name)));
 
 		size_t exp_args = 1 + (p_index >= 0 ? 1 : 0);
 		ERR_FAIL_COND_MSG((int)exp_args != setter->get_argument_count(), String("Setter method '{0}::{1}()' must take a single argument.").format(Array::make(p_class, p_setter)));
@@ -86,7 +86,7 @@ void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinf
 	ERR_FAIL_COND_MSG(p_getter == String(""), String("Getter method must be specified for '{0}::{1}'.").format(Array::make(p_class, p_pinfo.name)));
 
 	MethodBind *getter = get_method(p_class, p_getter);
-	ERR_FAIL_COND_MSG(!getter, String("Getter method '{0}::{1}()' not found for property '{2}::{3}'.").format(Array::make(p_class, p_getter, p_class, p_pinfo.name)));
+	ERR_FAIL_NULL_MSG(getter, String("Getter method '{0}::{1}()' not found for property '{2}::{3}'.").format(Array::make(p_class, p_getter, p_class, p_pinfo.name)));
 	{
 		size_t exp_args = 0 + (p_index >= 0 ? 1 : 0);
 		ERR_FAIL_COND_MSG((int)exp_args != getter->get_argument_count(), String("Getter method '{0}::{1}()' must not take any argument.").format(Array::make(p_class, p_getter)));
@@ -318,7 +318,18 @@ GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtens
 
 const GDExtensionInstanceBindingCallbacks *ClassDB::get_instance_binding_callbacks(const StringName &p_class) {
 	std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *>::iterator callbacks_it = instance_binding_callbacks.find(p_class);
-	ERR_FAIL_COND_V_MSG(callbacks_it == instance_binding_callbacks.end(), nullptr, String("Cannot find instance binding callbacks for class '{0}'.").format(Array::make(p_class)));
+	if (likely(callbacks_it != instance_binding_callbacks.end())) {
+		return callbacks_it->second;
+	}
+
+	// If we don't have an instance binding callback for the given class, find the closest parent where we do.
+	StringName class_name = p_class;
+	do {
+		class_name = get_parent_class(class_name);
+		ERR_FAIL_COND_V_MSG(class_name == StringName(), nullptr, String("Cannot find instance binding callbacks for class '{0}'.").format(Array::make(p_class)));
+		callbacks_it = instance_binding_callbacks.find(class_name);
+	} while (callbacks_it == instance_binding_callbacks.end());
+
 	return callbacks_it->second;
 }
 

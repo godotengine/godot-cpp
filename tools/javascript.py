@@ -1,17 +1,15 @@
 import os
+from SCons.Util import WhereIs
 
 
 def exists(env):
-    return "EM_CONFIG" in os.environ
+    return WhereIs("emcc") is not None
 
 
 def generate(env):
     if env["arch"] not in ("wasm32"):
         print("Only wasm32 supported on web. Exiting.")
         env.Exit(1)
-
-    if "EM_CONFIG" in os.environ:
-        env["ENV"] = os.environ
 
     env["CC"] = "emcc"
     env["CXX"] = "em++"
@@ -26,6 +24,10 @@ def generate(env):
     env["ARCOM_POSIX"] = env["ARCOM"].replace("$TARGET", "$TARGET.posix").replace("$SOURCES", "$SOURCES.posix")
     env["ARCOM"] = "${TEMPFILE(ARCOM_POSIX)}"
 
+    # Thread support (via SharedArrayBuffer).
+    env.Append(CCFLAGS=["-s", "USE_PTHREADS=1"])
+    env.Append(LINKFLAGS=["-s", "USE_PTHREADS=1"])
+
     # All intermediate files are just LLVM bitcode.
     env["OBJPREFIX"] = ""
     env["OBJSUFFIX"] = ".bc"
@@ -38,10 +40,5 @@ def generate(env):
     env["LIBSUFFIXES"] = ["$LIBSUFFIX"]
     env.Replace(SHLINKFLAGS="$LINKFLAGS")
     env.Replace(SHLINKFLAGS="$LINKFLAGS")
-
-    if env["target"] == "debug":
-        env.Append(CCFLAGS=["-O0", "-g"])
-    elif env["target"] == "release":
-        env.Append(CCFLAGS=["-O3"])
 
     env.Append(CPPDEFINES=["WEB_ENABLED", "UNIX_ENABLED"])
