@@ -120,6 +120,18 @@ protected:
 	void copy_from(const T *p_cstr);
 };
 
+template <>
+const char *CharStringT<char>::get_data() const;
+
+template <>
+const char16_t *CharStringT<char16_t>::get_data() const;
+
+template <>
+const char32_t *CharStringT<char32_t>::get_data() const;
+
+template <>
+const wchar_t *CharStringT<wchar_t>::get_data() const;
+
 typedef CharStringT<char> CharString;
 typedef CharStringT<char16_t> Char16String;
 typedef CharStringT<char32_t> Char32String;
