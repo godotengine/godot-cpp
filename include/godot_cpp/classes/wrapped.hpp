@@ -95,6 +95,26 @@ public:
 	GodotObject *_owner = nullptr;
 };
 
+namespace internal {
+
+typedef void (*EngineClassRegistrationCallback)();
+void add_engine_class_registration_callback(EngineClassRegistrationCallback p_callback);
+void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks);
+void register_engine_classes();
+
+template <class T>
+struct EngineClassRegistration {
+	EngineClassRegistration() {
+		add_engine_class_registration_callback(&EngineClassRegistration<T>::callback);
+	}
+
+	static void callback() {
+		register_engine_class(T::get_class_static(), &T::_gde_binding_callbacks);
+	}
+};
+
+} // namespace internal
+
 } // namespace godot
 
 #define GDCLASS(m_class, m_inherits)                                                                                                                                                   \
@@ -308,6 +328,7 @@ public:                                                                         
 // Don't use this for your classes, use GDCLASS() instead.
 #define GDEXTENSION_CLASS_ALIAS(m_class, m_alias_for, m_inherits)                                                          \
 private:                                                                                                                   \
+	inline static ::godot::internal::EngineClassRegistration<m_class> _gde_engine_class_registration_helper;               \
 	void operator=(const m_class &p_rval) {}                                                                               \
                                                                                                                            \
 protected:                                                                                                                 \

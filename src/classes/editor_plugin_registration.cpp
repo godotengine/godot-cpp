@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  wrapped.cpp                                                           */
+/*  editor_plugin_registration.cpp                                        */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,65 +28,34 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include <vector>
+#include <godot_cpp/classes/editor_plugin_registration.hpp>
 
-#include <godot_cpp/classes/wrapped.hpp>
-
-#include <godot_cpp/variant/builtin_types.hpp>
-
-#include <godot_cpp/classes/object.hpp>
-
-#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/variant/variant.hpp>
 
 namespace godot {
 
-const StringName *Wrapped::_get_extension_class_name() const {
-	return nullptr;
+Vector<StringName> EditorPlugins::plugin_classes;
+
+void EditorPlugins::add_plugin_class(const StringName &p_class_name) {
+	ERR_FAIL_COND_MSG(plugin_classes.find(p_class_name) != -1, vformat("Editor plugin already registered: %s", p_class_name));
+	plugin_classes.push_back(p_class_name);
+	internal::gdextension_interface_editor_add_plugin(p_class_name._native_ptr());
 }
 
-void Wrapped::_postinitialize() {
-	const StringName *extension_class = _get_extension_class_name();
-	if (extension_class) {
-		godot::internal::gdextension_interface_object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(extension_class), this);
+void EditorPlugins::remove_plugin_class(const StringName &p_class_name) {
+	int index = plugin_classes.find(p_class_name);
+	ERR_FAIL_COND_MSG(index == -1, vformat("Editor plugin is not registered: %s", p_class_name));
+	plugin_classes.remove_at(index);
+	internal::gdextension_interface_editor_remove_plugin(p_class_name._native_ptr());
+}
+
+void EditorPlugins::deinitialize(GDExtensionInitializationLevel p_level) {
+	if (p_level == GDEXTENSION_INITIALIZATION_EDITOR) {
+		for (const StringName &class_name : plugin_classes) {
+			internal::gdextension_interface_editor_remove_plugin(class_name._native_ptr());
+		}
+		plugin_classes.clear();
 	}
-	godot::internal::gdextension_interface_object_set_instance_binding(_owner, godot::internal::token, this, _get_bindings_callbacks());
 }
-
-Wrapped::Wrapped(const StringName p_godot_class) {
-	_owner = godot::internal::gdextension_interface_classdb_construct_object(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
-}
-
-Wrapped::Wrapped(GodotObject *p_godot_object) {
-	_owner = p_godot_object;
-}
-
-void postinitialize_handler(Wrapped *p_wrapped) {
-	p_wrapped->_postinitialize();
-}
-
-namespace internal {
-
-std::vector<EngineClassRegistrationCallback> &get_engine_class_registration_callbacks() {
-	static std::vector<EngineClassRegistrationCallback> engine_class_registration_callbacks;
-	return engine_class_registration_callbacks;
-}
-
-void add_engine_class_registration_callback(EngineClassRegistrationCallback p_callback) {
-	get_engine_class_registration_callbacks().push_back(p_callback);
-}
-
-void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks) {
-	ClassDB::_register_engine_class(p_name, p_callbacks);
-}
-
-void register_engine_classes() {
-	std::vector<EngineClassRegistrationCallback> &engine_class_registration_callbacks = get_engine_class_registration_callbacks();
-	for (EngineClassRegistrationCallback cb : engine_class_registration_callbacks) {
-		cb();
-	}
-	engine_class_registration_callbacks.clear();
-}
-
-} // namespace internal
 
 } // namespace godot
