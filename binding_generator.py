@@ -520,7 +520,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     # Special cases.
     if class_name == "String" or class_name == "StringName" or class_name == "NodePath":
-        result.append(f"\t{class_name}(const char *from);")
+        if class_name == "StringName":
+            result.append(f"\t{class_name}(const char *from, bool p_static = false);")
+        else:
+            result.append(f"\t{class_name}(const char *from);")
         result.append(f"\t{class_name}(const wchar_t *from);")
         result.append(f"\t{class_name}(const char16_t *from);")
         result.append(f"\t{class_name}(const char32_t *from);")
