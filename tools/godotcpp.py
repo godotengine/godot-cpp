@@ -33,7 +33,7 @@ def validate_parent_dir(key, val, env):
         raise UserError("'%s' is not a directory: %s" % (key, os.path.dirname(val)))
 
 
-platforms = ("linux", "macos", "windows", "android", "ios", "javascript")
+platforms = ("linux", "macos", "windows", "android", "ios", "web")
 
 # CPU architecture options.
 architecture_array = [
@@ -214,7 +214,7 @@ def generate(env):
             env["arch"] = "universal"
         elif env["platform"] == "android":
             env["arch"] = "arm64"
-        elif env["platform"] == "javascript":
+        elif env["platform"] == "web":
             env["arch"] = "wasm32"
         else:
             host_machine = platform.machine().lower()
