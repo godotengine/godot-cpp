@@ -80,11 +80,11 @@ jobs:
 
           - name: 🌐 Web (wasm32)
             os: ubuntu-20.04
-            platform: javascript
-            artifact-name: godot-cpp-javascript-wasm32-release
-            artifact-path: bin/libgodot-cpp.javascript.template_release.wasm32.a
+            platform: web
+            artifact-name: godot-cpp-web-wasm32-release
+            artifact-path: bin/libgodot-cpp.web.template_release.wasm32.a
             run-tests: false
-            cache-name: javascript-wasm32
+            cache-name: web-wasm32
 
     env:
       SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
@@ -115,7 +115,7 @@ jobs:
           sudo apt-get install -qqq build-essential pkg-config
 
       - name: Web dependencies
-        if: ${{ matrix.platform == 'javascript' }}
+        if: ${{ matrix.platform == 'web' }}
         uses: mymindstorm/setup-emsdk@v12
         with:
           version: ${{env.EM_VERSION}}
