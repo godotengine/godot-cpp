@@ -21,11 +21,12 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 		return;
 	}
 
-	ClassDB::register_class<ExampleRef>();
-	ClassDB::register_class<ExampleMin>();
-	ClassDB::register_class<Example>();
-	ClassDB::register_class<ExampleVirtual>(true);
-	ClassDB::register_abstract_class<ExampleAbstract>();
+	GDREGISTER_CLASS(ExampleRef);
+	GDREGISTER_CLASS(ExampleMin);
+	GDREGISTER_CLASS(Example);
+	GDREGISTER_VIRTUAL_CLASS(ExampleVirtual);
+	GDREGISTER_ABSTRACT_CLASS(ExampleAbstract);
+	GDREGISTER_INTERNAL_CLASS(ExampleInternal);
 }
 
 void uninitialize_example_module(ModuleInitializationLevel p_level) {
