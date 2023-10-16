@@ -197,9 +197,6 @@ enum ModuleInitializationLevel {
 };
 
 class GDExtensionBinding {
-private:
-	static void register_engine_classes();
-
 public:
 	using Callback = void (*)(ModuleInitializationLevel p_level);
 

@@ -119,8 +119,10 @@ public:
 	static void register_abstract_class();
 	template <class T>
 	static void register_internal_class();
-	template <class T>
-	static void register_engine_class();
+
+	_FORCE_INLINE_ static void _register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks) {
+		instance_binding_callbacks[p_name] = p_callbacks;
+	}
 
 	template <class N, class M, typename... VarArgs>
 	static MethodBind *bind_method(N p_method_name, M p_method, VarArgs... p_args);
@@ -231,11 +233,6 @@ void ClassDB::register_abstract_class() {
 template <class T>
 void ClassDB::register_internal_class() {
 	ClassDB::_register_class<T, false>(false, false);
-}
-
-template <class T>
-void ClassDB::register_engine_class() {
-	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
 }
 
 template <class N, class M, typename... VarArgs>
