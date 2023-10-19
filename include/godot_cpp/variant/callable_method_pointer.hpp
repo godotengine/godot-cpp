@@ -40,6 +40,7 @@ class CallableCustomMethodPointerBase {
 public:
 	virtual Object *get_object() const = 0;
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const = 0;
+	virtual ~CallableCustomMethodPointerBase() {}
 };
 
 namespace internal {
