@@ -170,6 +170,7 @@ public:
 
 template <class T, bool is_abstract>
 void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
+	static_assert(TypesAreSame<typename T::self_type, T>::value, "Class not declared properly, please use GDCLASS.");
 	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
 
 	// Register this class within our plugin
