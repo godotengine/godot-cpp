@@ -170,6 +170,8 @@ protected:                                                                      
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 public:                                                                                                                                                                                \
+	typedef m_class self_type;                                                                                                                                                         \
+                                                                                                                                                                                       \
 	static void initialize_class() {                                                                                                                                                   \
 		static bool initialized = false;                                                                                                                                               \
 		if (initialized) {                                                                                                                                                             \
@@ -372,6 +374,8 @@ protected:                                                                      
 	}                                                                                                                      \
                                                                                                                            \
 public:                                                                                                                    \
+	typedef m_class self_type;                                                                                             \
+                                                                                                                           \
 	static void initialize_class() {}                                                                                      \
                                                                                                                            \
 	static ::godot::StringName &get_class_static() {                                                                       \
@@ -381,6 +385,17 @@ public:                                                                         
                                                                                                                            \
 	static ::godot::StringName &get_parent_class_static() {                                                                \
 		return m_inherits::get_class_static();                                                                             \
+	}                                                                                                                      \
+                                                                                                                           \
+	static GDExtensionObjectPtr create(void *data) {                                                                       \
+		return nullptr;                                                                                                    \
+	}                                                                                                                      \
+                                                                                                                           \
+	static GDExtensionClassInstancePtr recreate(void *data, GDExtensionObjectPtr obj) {                                    \
+		return nullptr;                                                                                                    \
+	}                                                                                                                      \
+                                                                                                                           \
+	static void free(void *data, GDExtensionClassInstancePtr ptr) {                                                        \
 	}                                                                                                                      \
                                                                                                                            \
 	static void *_gde_binding_create_callback(void *p_token, void *p_instance) {                                           \
