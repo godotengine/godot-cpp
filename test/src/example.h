@@ -157,6 +157,8 @@ public:
 	void test_send_rpc(int p_value);
 	int return_last_rpc_arg();
 
+	void callable_bind();
+
 	// Property.
 	void set_custom_position(const Vector2 &pos);
 	Vector2 get_custom_position() const;

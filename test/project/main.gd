@@ -83,6 +83,9 @@ func _ready():
 	var array: Array[int] = [1, 2, 3]
 	assert_equal(example.test_tarray_arg(array), 6)
 
+	example.callable_bind()
+	assert_equal(custom_signal_emitted, ["bound", 11])
+
 	# String += operator
 	assert_equal(example.test_string_ops(), "ABCĎE")
 
