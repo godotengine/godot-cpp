@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  callable_method_pointer.cpp                                           */
+/*  object_id.hpp                                                         */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,35 +28,35 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include <godot_cpp/variant/callable_method_pointer.hpp>
+#ifndef GODOT_OBJECT_ID_HPP
+#define GODOT_OBJECT_ID_HPP
+
+#include <godot_cpp/core/defs.hpp>
 
 namespace godot {
 
-static void custom_callable_mp_call(void *userdata, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error) {
-	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)userdata;
-	callable_method_pointer->call((const Variant **)p_args, p_argument_count, *(Variant *)r_return, *r_error);
-}
+class ObjectID {
+	uint64_t id = 0;
 
-static void custom_callable_mp_free(void *userdata) {
-	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)userdata;
-	memdelete(callable_method_pointer);
-}
+public:
+	_FORCE_INLINE_ bool is_ref_counted() const { return (id & (uint64_t(1) << 63)) != 0; }
+	_FORCE_INLINE_ bool is_valid() const { return id != 0; }
+	_FORCE_INLINE_ bool is_null() const { return id == 0; }
+	_FORCE_INLINE_ operator uint64_t() const { return id; }
+	_FORCE_INLINE_ operator int64_t() const { return id; }
 
-namespace internal {
+	_FORCE_INLINE_ bool operator==(const ObjectID &p_id) const { return id == p_id.id; }
+	_FORCE_INLINE_ bool operator!=(const ObjectID &p_id) const { return id != p_id.id; }
+	_FORCE_INLINE_ bool operator<(const ObjectID &p_id) const { return id < p_id.id; }
 
-Callable create_callable_from_ccmp(CallableCustomMethodPointerBase *p_callable_method_pointer) {
-	GDExtensionCallableCustomInfo info = {};
-	info.callable_userdata = p_callable_method_pointer;
-	info.token = internal::token;
-	info.object_id = p_callable_method_pointer->get_object();
-	info.call_func = &custom_callable_mp_call;
-	info.free_func = &custom_callable_mp_free;
+	_FORCE_INLINE_ void operator=(int64_t p_int64) { id = p_int64; }
+	_FORCE_INLINE_ void operator=(uint64_t p_uint64) { id = p_uint64; }
 
-	Callable callable;
-	::godot::internal::gdextension_interface_callable_custom_create(callable._native_ptr(), &info);
-	return callable;
-}
-
-} // namespace internal
+	_FORCE_INLINE_ ObjectID() {}
+	_FORCE_INLINE_ explicit ObjectID(const uint64_t p_id) { id = p_id; }
+	_FORCE_INLINE_ explicit ObjectID(const int64_t p_id) { id = p_id; }
+};
 
 } // namespace godot
+
+#endif // GODOT_OBJECT_ID_HPP

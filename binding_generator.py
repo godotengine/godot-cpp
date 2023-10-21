@@ -110,6 +110,8 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
 
     for native_struct in api["native_structures"]:
         struct_name = native_struct["name"]
+        if struct_name == "ObjectID":
+            continue
         snake_struct_name = camel_to_snake(struct_name)
 
         header_filename = include_gen_folder / "classes" / (snake_struct_name + ".hpp")
@@ -416,6 +418,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if class_name == "Array":
         result.append("#include <godot_cpp/variant/array_helpers.hpp>")
 
+    if class_name == "Callable":
+        result.append("#include <godot_cpp/variant/callable_custom.hpp>")
+
     for include in fully_used_classes:
         if include == "TypedArray":
             result.append("#include <godot_cpp/variant/typed_array.hpp>")
@@ -525,6 +530,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append(f"\t{class_name}(const wchar_t *from);")
         result.append(f"\t{class_name}(const char16_t *from);")
         result.append(f"\t{class_name}(const char32_t *from);")
+    if class_name == "Callable":
+        result.append("\tCallable(CallableCustom *p_custom);")
+        result.append("\tCallableCustom *get_custom() const;")
 
     if "constants" in builtin_api:
         axis_constants_count = 0
@@ -1083,6 +1091,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
             class_api["alias_for"] = "ClassDB"
         engine_classes[class_api["name"]] = class_api["is_refcounted"]
     for native_struct in api["native_structures"]:
+        if native_struct["name"] == "ObjectID":
+            continue
         engine_classes[native_struct["name"]] = False
         native_structures.append(native_struct["name"])
 
@@ -1210,6 +1220,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
     for native_struct in api["native_structures"]:
         struct_name = native_struct["name"]
+        if struct_name == "ObjectID":
+            continue
         snake_struct_name = camel_to_snake(struct_name)
 
         header_filename = include_gen_folder / (snake_struct_name + ".hpp")

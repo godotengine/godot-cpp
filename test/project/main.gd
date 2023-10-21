@@ -121,6 +121,16 @@ func _ready():
 	var mp_callable_static_ret: Callable = example.test_callable_mp_static_ret()
 	assert_equal(mp_callable_static_ret.call(example, "static-ret", 84), "unbound_static_method2: Example - static-ret - 84")
 
+	# CallableCustom.
+	var custom_callable: Callable = example.test_custom_callable();
+	assert_equal(custom_callable.is_custom(), true);
+	assert_equal(custom_callable.is_valid(), true);
+	assert_equal(custom_callable.call(), "Hi")
+	assert_equal(custom_callable.hash(), 27);
+	assert_equal(custom_callable.get_object(), null);
+	assert_equal(custom_callable.get_method(), "");
+	assert_equal(str(custom_callable), "<MyCallableCustom>");
+
 	# PackedArray iterators
 	assert_equal(example.test_vector_ops(), 105)
 

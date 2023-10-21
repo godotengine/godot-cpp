@@ -143,6 +143,7 @@ public:
 	Callable test_callable_mp_retc() const;
 	Callable test_callable_mp_static() const;
 	Callable test_callable_mp_static_ret() const;
+	Callable test_custom_callable() const;
 
 	void unbound_method1(Object *p_object, String p_string, int p_int);
 	String unbound_method2(Object *p_object, String p_string, int p_int);
