@@ -176,6 +176,7 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("return_last_rpc_arg"), &Example::return_last_rpc_arg);
 
 	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
+	ClassDB::bind_method(D_METHOD("callable_bind"), &Example::callable_bind);
 
 	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
 	ClassDB::bind_static_method("Example", D_METHOD("test_static2"), &Example::test_static2);
@@ -494,6 +495,11 @@ void Example::test_send_rpc(int p_value) {
 
 int Example::return_last_rpc_arg() {
 	return last_rpc_arg;
+}
+
+void Example::callable_bind() {
+	Callable c = Callable(this, "emit_custom_signal").bind("bound", 11);
+	c.call();
 }
 
 // Properties.
