@@ -6,7 +6,7 @@
 # GODOT_CPP_SYSTEM_HEADERS		Mark the header files as SYSTEM. This may be useful to supress warnings in projects including this one.
 # GODOT_CPP_WARNING_AS_ERROR	Treat any warnings as errors
 # GODOT_CUSTOM_API_FILE:		Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
-# FLOAT_PRECISION:				Floating-point precision level ("single", "double")
+# GODOT_FLOAT_PRECISION:		Floating-point precision level ("single", "double")
 #
 # Android cmake arguments
 # CMAKE_TOOLCHAIN_FILE:		The path to the android cmake toolchain ($ANDROID_NDK/build/cmake/android.toolchain.cmake)
@@ -72,11 +72,7 @@ endif()
 # Input from user for GDExtension interface header and the API JSON file
 set(GODOT_GDEXTENSION_DIR "gdextension" CACHE STRING "")
 set(GODOT_CUSTOM_API_FILE "" CACHE STRING "")
-set(FLOAT_PRECISION "single" CACHE STRING "")
-if ("${FLOAT_PRECISION}" STREQUAL "double")
-	add_definitions(-DREAL_T_IS_DOUBLE)
-endif()
-
+set(GODOT_FLOAT_PRECISION "single" CACHE STRING "")
 set(GODOT_GDEXTENSION_API_FILE "${GODOT_GDEXTENSION_DIR}/extension_api.json")
 if (NOT "${GODOT_CUSTOM_API_FILE}" STREQUAL "")  # User-defined override.
 	set(GODOT_GDEXTENSION_API_FILE "${GODOT_CUSTOM_API_FILE}")
@@ -121,7 +117,7 @@ execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; 
 )
 
 add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
-		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_GDEXTENSION_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${BITS}\", \"${FLOAT_PRECISION}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
+		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_GDEXTENSION_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${BITS}\", \"${GODOT_FLOAT_PRECISION}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
 		VERBATIM
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		MAIN_DEPENDENCY ${GODOT_GDEXTENSION_API_FILE}
@@ -163,6 +159,12 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 		TYPED_METHOD_BIND
 	>
 )
+
+if("${GODOT_FLOAT_PRECISION}" STREQUAL "double")
+	target_compile_definitions( ${PROJECT_NAME} PUBLIC
+		REAL_T_IS_DOUBLE
+	)
+endif()
 
 target_link_options(${PROJECT_NAME} PRIVATE
 	$<$<NOT:${compiler_is_msvc}>:
