@@ -183,6 +183,12 @@ def options(opts, env):
         )
     )
 
+    opts.Add(
+        BoolVariable(
+            "disable_exceptions", "Force disabling exception handling code", default=env.get("disable_exceptions", True)
+        )
+    )
+
     # Add platform options
     for pl in platforms:
         tool = Tool(pl, toolpath=["tools"])
@@ -241,6 +247,16 @@ def generate(env):
 
     if env["use_hot_reload"]:
         env.Append(CPPDEFINES=["HOT_RELOAD_ENABLED"])
+
+    # Disable exception handling. Godot doesn't use exceptions anywhere, and this
+    # saves around 20% of binary size and very significant build time.
+    if env["disable_exceptions"]:
+        if env.get("is_msvc", False):
+            env.Append(CPPDEFINES=[("_HAS_EXCEPTIONS", 0)])
+        else:
+            env.Append(CXXFLAGS=["-fno-exceptions"])
+    elif env.get("is_msvc", False):
+        env.Append(CXXFLAGS=["/EHsc"])
 
     tool = Tool(env["platform"], toolpath=["tools"])
 

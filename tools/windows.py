@@ -31,7 +31,7 @@ def generate(env):
         env.Tool("mslink")
 
         env.Append(CPPDEFINES=["TYPED_METHOD_BIND", "NOMINMAX"])
-        env.Append(CCFLAGS=["/EHsc", "/utf-8"])
+        env.Append(CCFLAGS=["/utf-8"])
         env.Append(LINKFLAGS=["/WX"])
 
         if env["use_clang_cl"]:
