@@ -171,6 +171,8 @@ void Example::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("test_bitfield", "flags"), &Example::test_bitfield);
 
+	ClassDB::bind_method(D_METHOD("test_variant_iterator", "input"), &Example::test_variant_iterator);
+
 	ClassDB::bind_method(D_METHOD("test_rpc", "value"), &Example::test_rpc);
 	ClassDB::bind_method(D_METHOD("test_send_rpc", "value"), &Example::test_send_rpc);
 	ClassDB::bind_method(D_METHOD("return_last_rpc_arg"), &Example::return_last_rpc_arg);
@@ -483,6 +485,41 @@ Variant Example::test_variant_call(Variant p_variant) {
 
 BitField<Example::Flags> Example::test_bitfield(BitField<Flags> flags) {
 	return flags;
+}
+
+Variant Example::test_variant_iterator(const Variant &p_input) {
+	Array output;
+
+	Variant iter;
+
+	bool is_init_valid = true;
+	if (!p_input.iter_init(iter, is_init_valid)) {
+		if (!is_init_valid) {
+			return "iter_init: not valid";
+		}
+		return output;
+	}
+
+	bool is_iter_next_valid = true;
+	bool is_iter_get_valid = true;
+	do {
+		if (!is_iter_next_valid) {
+			return "iter_next: not valid";
+		}
+
+		Variant value = p_input.iter_get(iter, is_iter_get_valid);
+		if (!is_iter_get_valid) {
+			return "iter_get: not valid";
+		}
+		output.push_back(((int)value) + 5);
+
+	} while (p_input.iter_next(iter, is_iter_next_valid));
+
+	if (!is_iter_next_valid) {
+		return "iter_next: not valid";
+	}
+
+	return output;
 }
 
 void Example::test_rpc(int p_value) {

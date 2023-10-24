@@ -152,6 +152,8 @@ public:
 
 	BitField<Flags> test_bitfield(BitField<Flags> flags);
 
+	Variant test_variant_iterator(const Variant &p_input);
+
 	// RPC
 	void test_rpc(int p_value);
 	void test_send_rpc(int p_value);

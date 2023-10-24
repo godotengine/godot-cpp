@@ -187,6 +187,10 @@ func _ready():
 	assert_equal(example.test_bitfield(0), 0)
 	assert_equal(example.test_bitfield(Example.FLAG_ONE | Example.FLAG_TWO), 3)
 
+	# Test variant iterator.
+	assert_equal(example.test_variant_iterator([10, 20, 30]), [15, 25, 35])
+	assert_equal(example.test_variant_iterator(null), "iter_init: not valid")
+
 	# RPCs.
 	assert_equal(example.return_last_rpc_arg(), 0)
 	example.test_rpc(42)
