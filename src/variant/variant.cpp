@@ -638,14 +638,16 @@ bool Variant::in(const Variant &index, bool *r_valid) const {
 
 bool Variant::iter_init(Variant &r_iter, bool &r_valid) const {
 	GDExtensionBool valid;
-	internal::gdextension_interface_variant_iter_init(_native_ptr(), r_iter._native_ptr(), &valid);
-	return PtrToArg<bool>::convert(&valid);
+	GDExtensionBool result = internal::gdextension_interface_variant_iter_init(_native_ptr(), r_iter._native_ptr(), &valid);
+	r_valid = PtrToArg<bool>::convert(&valid);
+	return PtrToArg<bool>::convert(&result);
 }
 
 bool Variant::iter_next(Variant &r_iter, bool &r_valid) const {
 	GDExtensionBool valid;
-	internal::gdextension_interface_variant_iter_next(_native_ptr(), r_iter._native_ptr(), &valid);
-	return PtrToArg<bool>::convert(&valid);
+	GDExtensionBool result = internal::gdextension_interface_variant_iter_next(_native_ptr(), r_iter._native_ptr(), &valid);
+	r_valid = PtrToArg<bool>::convert(&valid);
+	return PtrToArg<bool>::convert(&result);
 }
 
 Variant Variant::iter_get(const Variant &r_iter, bool &r_valid) const {

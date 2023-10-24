@@ -95,6 +95,26 @@ public:
 	GodotObject *_owner = nullptr;
 };
 
+namespace internal {
+
+typedef void (*EngineClassRegistrationCallback)();
+void add_engine_class_registration_callback(EngineClassRegistrationCallback p_callback);
+void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks);
+void register_engine_classes();
+
+template <class T>
+struct EngineClassRegistration {
+	EngineClassRegistration() {
+		add_engine_class_registration_callback(&EngineClassRegistration<T>::callback);
+	}
+
+	static void callback() {
+		register_engine_class(T::get_class_static(), &T::_gde_binding_callbacks);
+	}
+};
+
+} // namespace internal
+
 } // namespace godot
 
 #define GDCLASS(m_class, m_inherits)                                                                                                                                                   \
@@ -150,6 +170,8 @@ protected:                                                                      
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 public:                                                                                                                                                                                \
+	typedef m_class self_type;                                                                                                                                                         \
+                                                                                                                                                                                       \
 	static void initialize_class() {                                                                                                                                                   \
 		static bool initialized = false;                                                                                                                                               \
 		if (initialized) {                                                                                                                                                             \
@@ -308,6 +330,7 @@ public:                                                                         
 // Don't use this for your classes, use GDCLASS() instead.
 #define GDEXTENSION_CLASS_ALIAS(m_class, m_alias_for, m_inherits)                                                          \
 private:                                                                                                                   \
+	inline static ::godot::internal::EngineClassRegistration<m_class> _gde_engine_class_registration_helper;               \
 	void operator=(const m_class &p_rval) {}                                                                               \
                                                                                                                            \
 protected:                                                                                                                 \
@@ -351,6 +374,8 @@ protected:                                                                      
 	}                                                                                                                      \
                                                                                                                            \
 public:                                                                                                                    \
+	typedef m_class self_type;                                                                                             \
+                                                                                                                           \
 	static void initialize_class() {}                                                                                      \
                                                                                                                            \
 	static ::godot::StringName &get_class_static() {                                                                       \
@@ -360,6 +385,17 @@ public:                                                                         
                                                                                                                            \
 	static ::godot::StringName &get_parent_class_static() {                                                                \
 		return m_inherits::get_class_static();                                                                             \
+	}                                                                                                                      \
+                                                                                                                           \
+	static GDExtensionObjectPtr create(void *data) {                                                                       \
+		return nullptr;                                                                                                    \
+	}                                                                                                                      \
+                                                                                                                           \
+	static GDExtensionClassInstancePtr recreate(void *data, GDExtensionObjectPtr obj) {                                    \
+		return nullptr;                                                                                                    \
+	}                                                                                                                      \
+                                                                                                                           \
+	static void free(void *data, GDExtensionClassInstancePtr ptr) {                                                        \
 	}                                                                                                                      \
                                                                                                                            \
 	static void *_gde_binding_create_callback(void *p_token, void *p_instance) {                                           \

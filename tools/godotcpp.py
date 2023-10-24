@@ -33,7 +33,7 @@ def validate_parent_dir(key, val, env):
         raise UserError("'%s' is not a directory: %s" % (key, os.path.dirname(val)))
 
 
-platforms = ("linux", "macos", "windows", "android", "ios", "javascript")
+platforms = ("linux", "macos", "windows", "android", "ios", "web")
 
 # CPU architecture options.
 architecture_array = [
@@ -175,6 +175,14 @@ def options(opts, env):
         )
     )
 
+    opts.Add(
+        BoolVariable(
+            "disable_exceptions",
+            "Force disabling exception handling code",
+            default=env.get("disable_exceptions", False),
+        )
+    )
+
     # Add platform options
     for pl in platforms:
         tool = Tool(pl, toolpath=["tools"])
@@ -214,7 +222,7 @@ def generate(env):
             env["arch"] = "universal"
         elif env["platform"] == "android":
             env["arch"] = "arm64"
-        elif env["platform"] == "javascript":
+        elif env["platform"] == "web":
             env["arch"] = "wasm32"
         else:
             host_machine = platform.machine().lower()
@@ -230,6 +238,16 @@ def generate(env):
                 env.Exit(1)
 
     print("Building for architecture " + env["arch"] + " on platform " + env["platform"])
+
+    # Disable exception handling. Godot doesn't use exceptions anywhere, and this
+    # saves around 20% of binary size and very significant build time.
+    if env["disable_exceptions"]:
+        if env.get("is_msvc", False):
+            env.Append(CPPDEFINES=[("_HAS_EXCEPTIONS", 0)])
+        else:
+            env.Append(CXXFLAGS=["-fno-exceptions"])
+    elif env.get("is_msvc", False):
+        env.Append(CXXFLAGS=["/EHsc"])
 
     tool = Tool(env["platform"], toolpath=["tools"])
 
@@ -263,9 +281,8 @@ def generate(env):
     env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
 
     # compile_commands.json
-    if env.get("compiledb", False):
-        env.Tool("compilation_db")
-        env.Alias("compiledb", env.CompilationDatabase(normalize_path(env["compiledb_file"], env)))
+    env.Tool("compilation_db")
+    env.Alias("compiledb", env.CompilationDatabase(normalize_path(env["compiledb_file"], env)))
 
     # Builders
     env.Append(BUILDERS={"GodotCPPBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
@@ -273,8 +290,8 @@ def generate(env):
 
 
 def _godot_cpp(env):
-    api_file = normalize_path(env.get("custom_api_file", env.File("gdextension/extension_api.json").abspath), env)
     extension_dir = normalize_path(env.get("gdextension_dir", env.Dir("gdextension").abspath), env)
+    api_file = normalize_path(env.get("custom_api_file", env.File(extension_dir + "/extension_api.json").abspath), env)
     bindings = env.GodotCPPBindings(
         env.Dir("."),
         [
@@ -304,7 +321,13 @@ def _godot_cpp(env):
 
     if env["build_library"]:
         library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
-        env.Default(library)
+        default_args = [library]
+
+        # Add compiledb if the option is set
+        if env.get("compiledb", False):
+            default_args += ["compiledb"]
+
+        env.Default(*default_args)
 
     env.AppendUnique(LIBS=[env.File("bin/%s" % library_name)])
     return library
