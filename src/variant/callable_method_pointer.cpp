@@ -52,7 +52,7 @@ Callable create_custom_callable(CallableCustomMethodPointerBase *p_callable_meth
 	GDExtensionCallableCustomInfo info = {};
 	info.callable_userdata = p_callable_method_pointer;
 	info.token = internal::token;
-	info.object = object != nullptr ? object->_owner : nullptr;
+	info.object_id = object ? object->get_instance_id() : 0;
 	info.call_func = &call_custom_callable;
 	info.free_func = &free_custom_callable;
 
