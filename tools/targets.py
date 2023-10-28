@@ -99,7 +99,9 @@ def generate(env):
 
     # Set optimize and debug_symbols flags.
     # "custom" means do nothing and let users set their own optimization flags.
-    if env.get("is_msvc", False):
+    if not env.get("is_msvc"):
+        env["is_msvc"] = False
+    if env["is_msvc"]:
         if env["debug_symbols"]:
             env.Append(CCFLAGS=["/Zi", "/FS"])
             env.Append(LINKFLAGS=["/DEBUG:FULL"])

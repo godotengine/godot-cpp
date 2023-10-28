@@ -86,7 +86,7 @@ def options(opts, env):
         EnumVariable(
             key="platform",
             help="Target platform",
-            default=env.get("platform", default_platform),
+            default=default_platform,
             allowed_values=platforms,
             ignorecase=2,
         )
@@ -99,7 +99,7 @@ def options(opts, env):
         EnumVariable(
             key="target",
             help="Compilation target",
-            default=env.get("target", "template_debug"),
+            default="template_debug",
             allowed_values=("editor", "template_release", "template_debug"),
         )
     )
@@ -107,7 +107,7 @@ def options(opts, env):
         PathVariable(
             key="gdextension_dir",
             help="Path to a custom directory containing GDExtension interface header and API JSON file",
-            default=env.get("gdextension_dir", None),
+            default=None,
             validator=validate_dir,
         )
     )
@@ -115,7 +115,7 @@ def options(opts, env):
         PathVariable(
             key="custom_api_file",
             help="Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)",
-            default=env.get("custom_api_file", None),
+            default=None,
             validator=validate_file,
         )
     )
@@ -123,28 +123,28 @@ def options(opts, env):
         BoolVariable(
             key="generate_bindings",
             help="Force GDExtension API bindings generation. Auto-detected by default.",
-            default=env.get("generate_bindings", False),
+            default=False,
         )
     )
     opts.Add(
         BoolVariable(
             key="generate_template_get_node",
             help="Generate a template version of the Node class's get_node.",
-            default=env.get("generate_template_get_node", True),
+            default=True,
         )
     )
     opts.Add(
         BoolVariable(
             key="build_library",
             help="Build the godot-cpp library.",
-            default=env.get("build_library", True),
+            default=True,
         )
     )
     opts.Add(
         EnumVariable(
             key="precision",
             help="Set the floating-point precision level",
-            default=env.get("precision", "single"),
+            default="single",
             allowed_values=("single", "double"),
         )
     )
@@ -152,7 +152,7 @@ def options(opts, env):
         EnumVariable(
             key="arch",
             help="CPU architecture",
-            default=env.get("arch", ""),
+            default="",
             allowed_values=architecture_array,
             map=architecture_aliases,
         )
@@ -163,14 +163,14 @@ def options(opts, env):
         BoolVariable(
             key="compiledb",
             help="Generate compilation DB (`compile_commands.json`) for external tools",
-            default=env.get("compiledb", False),
+            default=False,
         )
     )
     opts.Add(
         PathVariable(
             key="compiledb_file",
             help="Path to a custom `compile_commands.json` file",
-            default=env.get("compiledb_file", "compile_commands.json"),
+            default="compile_commands.json",
             validator=validate_parent_dir,
         )
     )
@@ -179,13 +179,15 @@ def options(opts, env):
         BoolVariable(
             key="use_hot_reload",
             help="Enable the extra accounting required to support hot reload.",
-            default=(env.get("target", "template_debug") != "template_release"),
+            default=None,
         )
     )
 
     opts.Add(
         BoolVariable(
-            "disable_exceptions", "Force disabling exception handling code", default=env.get("disable_exceptions", True)
+            key="disable_exceptions",
+            help="Force disabling exception handling code",
+            default=True,
         )
     )
 
@@ -245,18 +247,10 @@ def generate(env):
 
     print("Building for architecture " + env["arch"] + " on platform " + env["platform"])
 
+    if not env.get("use_hot_reload"):
+        env["use_hot_reload"] = env["target"] != "template_release"
     if env["use_hot_reload"]:
         env.Append(CPPDEFINES=["HOT_RELOAD_ENABLED"])
-
-    # Disable exception handling. Godot doesn't use exceptions anywhere, and this
-    # saves around 20% of binary size and very significant build time.
-    if env["disable_exceptions"]:
-        if env.get("is_msvc", False):
-            env.Append(CPPDEFINES=[("_HAS_EXCEPTIONS", 0)])
-        else:
-            env.Append(CXXFLAGS=["-fno-exceptions"])
-    elif env.get("is_msvc", False):
-        env.Append(CXXFLAGS=["/EHsc"])
 
     tool = Tool(env["platform"], toolpath=["tools"])
 
@@ -267,8 +261,18 @@ def generate(env):
     target_tool = Tool("targets", toolpath=["tools"])
     target_tool.generate(env)
 
+    # Disable exception handling. Godot doesn't use exceptions anywhere, and this
+    # saves around 20% of binary size and very significant build time.
+    if env["disable_exceptions"]:
+        if env["is_msvc"]:
+            env.Append(CPPDEFINES=[("_HAS_EXCEPTIONS", 0)])
+        else:
+            env.Append(CXXFLAGS=["-fno-exceptions"])
+    elif env["is_msvc"]:
+        env.Append(CXXFLAGS=["/EHsc"])
+
     # Require C++17
-    if env.get("is_msvc", False):
+    if env["is_msvc"]:
         env.Append(CXXFLAGS=["/std:c++17"])
     else:
         env.Append(CXXFLAGS=["-std=c++17"])
@@ -333,7 +337,7 @@ def _godot_cpp(env):
         default_args = [library]
 
         # Add compiledb if the option is set
-        if env.get("compiledb", False):
+        if env["compiledb"]:
             default_args += ["compiledb"]
 
         env.Default(*default_args)
