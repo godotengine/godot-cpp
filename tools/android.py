@@ -11,20 +11,32 @@ def options(opts):
         "18" if "32" in ARGUMENTS.get("arch", "arm64") else "21",
     )
     opts.Add(
-        "ANDROID_NDK_ROOT",
-        "Path to your Android NDK installation. By default, uses ANDROID_NDK_ROOT from your defined environment variables.",
-        os.environ.get("ANDROID_NDK_ROOT", None),
+        "ANDROID_HOME",
+        "Path to your Android SDK installation. By default, uses ANDROID_HOME from your defined environment variables.",
+        os.environ.get("ANDROID_HOME", os.environ.get("ANDROID_SDK_ROOT")),
     )
 
 
 def exists(env):
-    return "ANDROID_NDK_ROOT" in os.environ or "ANDROID_NDK_ROOT" in ARGUMENTS
+    return get_android_ndk_root(env) is not None
+
+
+# This must be kept in sync with the value in https://github.com/godotengine/godot/blob/master/platform/android/detect.py#L58.
+def get_ndk_version():
+    return "23.2.8568313"
+
+
+def get_android_ndk_root(env):
+    if env["ANDROID_HOME"]:
+        return env["ANDROID_HOME"] + "/ndk/" + get_ndk_version()
+    else:
+        return os.environ.get("ANDROID_NDK_ROOT")
 
 
 def generate(env):
-    if "ANDROID_NDK_ROOT" not in env:
+    if get_android_ndk_root(env) is None:
         raise ValueError(
-            "To build for Android, ANDROID_NDK_ROOT must be defined. Please set ANDROID_NDK_ROOT to the root folder of your Android NDK installation."
+            "To build for Android, the path to the NDK must be defined. Please set ANDROID_HOME to the root folder of your Android SDK installation."
         )
 
     if env["arch"] not in ("arm64", "x86_64", "arm32", "x86_32"):
@@ -42,7 +54,7 @@ def generate(env):
         api_level = 21
 
     # Setup toolchain
-    toolchain = env["ANDROID_NDK_ROOT"] + "/toolchains/llvm/prebuilt/"
+    toolchain = get_android_ndk_root(env) + "/toolchains/llvm/prebuilt/"
     if sys.platform == "win32" or sys.platform == "msys":
         toolchain += "windows"
         import platform as pltfm
