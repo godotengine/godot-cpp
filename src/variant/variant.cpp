@@ -268,12 +268,28 @@ Variant::operator int32_t() const {
 	return static_cast<int32_t>(operator int64_t());
 }
 
+Variant::operator int16_t() const {
+	return static_cast<int16_t>(operator int64_t());
+}
+
+Variant::operator int8_t() const {
+	return static_cast<int8_t>(operator int64_t());
+}
+
 Variant::operator uint64_t() const {
 	return static_cast<uint64_t>(operator int64_t());
 }
 
 Variant::operator uint32_t() const {
 	return static_cast<uint32_t>(operator int64_t());
+}
+
+Variant::operator uint16_t() const {
+	return static_cast<uint16_t>(operator int64_t());
+}
+
+Variant::operator uint8_t() const {
+	return static_cast<uint8_t>(operator int64_t());
 }
 
 Variant::operator double() const {
