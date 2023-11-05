@@ -450,7 +450,7 @@ public:                                                                         
                                                                                                                                                                                        \
 	static void *_gde_binding_create_callback(void *p_token, void *p_instance) {                                                                                                       \
 		/* Do not call memnew here, we don't want the post-initializer to be called */                                                                                                 \
-		return new ("") m_class((GodotObject *)p_instance);                                                                                                                            \
+		return new ("", "") m_class((GodotObject *)p_instance);                                                                                                                        \
 	}                                                                                                                                                                                  \
 	static void _gde_binding_free_callback(void *p_token, void *p_instance, void *p_binding) {                                                                                         \
 		/* Explicitly call the deconstructor to ensure proper lifecycle for non-trivial members */                                                                                     \
