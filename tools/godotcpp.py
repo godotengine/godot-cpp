@@ -179,7 +179,7 @@ def options(opts, env):
         BoolVariable(
             key="use_hot_reload",
             help="Enable the extra accounting required to support hot reload.",
-            default=(env.get("target", "template_debug") != "template_release"),
+            default=env.get("use_hot_reload", None),
         )
     )
 
@@ -245,8 +245,19 @@ def generate(env):
 
     print("Building for architecture " + env["arch"] + " on platform " + env["platform"])
 
+    if env.get("use_hot_reload") is None:
+        env["use_hot_reload"] = env["target"] != "template_release"
     if env["use_hot_reload"]:
         env.Append(CPPDEFINES=["HOT_RELOAD_ENABLED"])
+
+    tool = Tool(env["platform"], toolpath=["tools"])
+
+    if tool is None or not tool.exists(env):
+        raise ValueError("Required toolchain not found for platform " + env["platform"])
+
+    tool.generate(env)
+    target_tool = Tool("targets", toolpath=["tools"])
+    target_tool.generate(env)
 
     # Disable exception handling. Godot doesn't use exceptions anywhere, and this
     # saves around 20% of binary size and very significant build time.
@@ -257,15 +268,6 @@ def generate(env):
             env.Append(CXXFLAGS=["-fno-exceptions"])
     elif env.get("is_msvc", False):
         env.Append(CXXFLAGS=["/EHsc"])
-
-    tool = Tool(env["platform"], toolpath=["tools"])
-
-    if tool is None or not tool.exists(env):
-        raise ValueError("Required toolchain not found for platform " + env["platform"])
-
-    tool.generate(env)
-    target_tool = Tool("targets", toolpath=["tools"])
-    target_tool.generate(env)
 
     # Require C++17
     if env.get("is_msvc", False):
