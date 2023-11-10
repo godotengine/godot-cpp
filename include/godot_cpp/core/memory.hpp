@@ -44,20 +44,21 @@
 #define PAD_ALIGN 16 //must always be greater than this at much
 #endif
 
-void *operator new(size_t p_size, const char *p_description); ///< operator new that takes a description and uses MemoryStaticPool
-void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)); ///< operator new that takes a description and uses MemoryStaticPool
-void *operator new(size_t p_size, void *p_pointer, size_t check, const char *p_description); ///< operator new that takes a description and uses a pointer to the preallocated memory
+// p_dummy argument is added to avoid conflicts with the engine functions when both engine and GDExtension are built as a static library on iOS.
+void *operator new(size_t p_size, const char *p_dummy, const char *p_description); ///< operator new that takes a description and uses MemoryStaticPool
+void *operator new(size_t p_size, const char *p_dummy, void *(*p_allocfunc)(size_t p_size)); ///< operator new that takes a description and uses MemoryStaticPool
+void *operator new(size_t p_size, const char *p_dummy, void *p_pointer, size_t check, const char *p_description); ///< operator new that takes a description and uses a pointer to the preallocated memory
 
-_ALWAYS_INLINE_ void *operator new(size_t p_size, void *p_pointer, size_t check, const char *p_description) {
+_ALWAYS_INLINE_ void *operator new(size_t p_size, const char *p_dummy, void *p_pointer, size_t check, const char *p_description) {
 	return p_pointer;
 }
 
 #ifdef _MSC_VER
 // When compiling with VC++ 2017, the above declarations of placement new generate many irrelevant warnings (C4291).
 // The purpose of the following definitions is to muffle these warnings, not to provide a usable implementation of placement delete.
-void operator delete(void *p_mem, const char *p_description);
-void operator delete(void *p_mem, void *(*p_allocfunc)(size_t p_size));
-void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_description);
+void operator delete(void *p_mem, const char *p_dummy, const char *p_description);
+void operator delete(void *p_mem, const char *p_dummy, void *(*p_allocfunc)(size_t p_size));
+void operator delete(void *p_mem, const char *p_dummy, void *p_pointer, size_t check, const char *p_description);
 #endif
 
 namespace godot {
@@ -85,10 +86,10 @@ _ALWAYS_INLINE_ T *_post_initialize(T *p_obj) {
 #define memrealloc(m_mem, m_size) ::godot::Memory::realloc_static(m_mem, m_size)
 #define memfree(m_mem) ::godot::Memory::free_static(m_mem)
 
-#define memnew(m_class) ::godot::_post_initialize(new ("") m_class)
+#define memnew(m_class) ::godot::_post_initialize(new ("", "") m_class)
 
-#define memnew_allocator(m_class, m_allocator) ::godot::_post_initialize(new (m_allocator::alloc) m_class)
-#define memnew_placement(m_placement, m_class) ::godot::_post_initialize(new (m_placement, sizeof(m_class), "") m_class)
+#define memnew_allocator(m_class, m_allocator) ::godot::_post_initialize(new ("", m_allocator::alloc) m_class)
+#define memnew_placement(m_placement, m_class) ::godot::_post_initialize(new ("", m_placement, sizeof(m_class), "") m_class)
 
 // Generic comparator used in Map, List, etc.
 template <class T>
@@ -154,7 +155,7 @@ T *memnew_arr_template(size_t p_elements, const char *p_descr = "") {
 
 		/* call operator new */
 		for (size_t i = 0; i < p_elements; i++) {
-			new (&elems[i], sizeof(T), p_descr) T;
+			new ("", &elems[i], sizeof(T), p_descr) T;
 		}
 	}
 

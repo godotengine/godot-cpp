@@ -103,28 +103,29 @@ _GlobalNil _GlobalNilClass::_nil;
 
 } // namespace godot
 
-void *operator new(size_t p_size, const char *p_description) {
+// p_dummy argument is added to avoid conflicts with the engine functions when both engine and GDExtension are built as a static library on iOS.
+void *operator new(size_t p_size, const char *p_dummy, const char *p_description) {
 	return godot::Memory::alloc_static(p_size);
 }
 
-void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)) {
+void *operator new(size_t p_size, const char *p_dummy, void *(*p_allocfunc)(size_t p_size)) {
 	return p_allocfunc(p_size);
 }
 
 using namespace godot;
 
 #ifdef _MSC_VER
-void operator delete(void *p_mem, const char *p_description) {
+void operator delete(void *p_mem, const char *p_dummy, const char *p_description) {
 	ERR_PRINT("Call to placement delete should not happen.");
 	CRASH_NOW();
 }
 
-void operator delete(void *p_mem, void *(*p_allocfunc)(size_t p_size)) {
+void operator delete(void *p_mem, const char *p_dummy, void *(*p_allocfunc)(size_t p_size)) {
 	ERR_PRINT("Call to placement delete should not happen.");
 	CRASH_NOW();
 }
 
-void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_description) {
+void operator delete(void *p_mem, const char *p_dummy, void *p_pointer, size_t check, const char *p_description) {
 	ERR_PRINT("Call to placement delete should not happen.");
 	CRASH_NOW();
 }
