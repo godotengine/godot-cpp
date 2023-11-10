@@ -171,8 +171,8 @@ jobs:
           chmod +x ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono
           ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono --headless --version
           cd test
-          # Need to run the editor twice so .godot is generated... but it crashes! Ignore that :-)
-          (cd project && (../../godot-artifacts/godot.linuxbsd.editor.x86_64.mono --editor --headless --quit-after 100 >/dev/null 2>&1 || true))
+          # Need to run the editor so .godot is generated... but it crashes! Ignore that :-)
+          (cd project && (../../godot-artifacts/godot.linuxbsd.editor.x86_64.mono --editor --headless --quit >/dev/null 2>&1 || true))
           GODOT=../godot-artifacts/godot.linuxbsd.editor.x86_64.mono ./run-tests.sh
 
       - name: Upload artifact
