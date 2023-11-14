@@ -6,6 +6,7 @@
 # GODOT_CPP_SYSTEM_HEADERS		Mark the header files as SYSTEM. This may be useful to supress warnings in projects including this one.
 # GODOT_CPP_WARNING_AS_ERROR	Treat any warnings as errors
 # GODOT_CUSTOM_API_FILE:		Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
+# GODOT_CPP_INSTALL:		    Enables target install for exporting godot-cpp cmake configuration
 # FLOAT_PRECISION:				Floating-point precision level ("single", "double")
 #
 # Android cmake arguments
@@ -43,6 +44,8 @@ project(godot-cpp LANGUAGES CXX)
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
 option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." ON)
 option(GODOT_CPP_WARNING_AS_ERROR "Treat warnings as errors" OFF)
+option(GODOT_CPP_INSTALL "Enables target install for exporting godot-cpp cmake configuration" ON)
+
 
 # Add path to modules
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
@@ -70,7 +73,7 @@ if(NOT DEFINED BITS)
 endif()
 
 # Input from user for GDExtension interface header and the API JSON file
-set(GODOT_GDEXTENSION_DIR "gdextension" CACHE STRING "")
+set(GODOT_GDEXTENSION_DIR "${CMAKE_CURRENT_SOURCE_DIR}/gdextension" CACHE STRING "")
 set(GODOT_CUSTOM_API_FILE "" CACHE STRING "")
 
 set(GODOT_GDEXTENSION_API_FILE "${GODOT_GDEXTENSION_DIR}/extension_api.json")
@@ -195,9 +198,10 @@ if (GODOT_CPP_SYSTEM_HEADERS)
 endif ()
 
 target_include_directories(${PROJECT_NAME} ${GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE} PUBLIC
-	include
-	${CMAKE_CURRENT_BINARY_DIR}/gen/include
-	${GODOT_GDEXTENSION_DIR}
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen/include>
+	$<BUILD_INTERFACE:${GODOT_GDEXTENSION_DIR}>
+	$<INSTALL_INTERFACE:include>
 )
 
 # Add the compile flags
@@ -226,3 +230,43 @@ set_target_properties(${PROJECT_NAME}
 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		OUTPUT_NAME "${OUTPUT_NAME}"
 )
+
+if ($CACHE{GODOT_CPP_INSTALL})
+	install(TARGETS ${PROJECT_NAME}
+			EXPORT GodotCppTargets
+	)
+
+	install(EXPORT GodotCppTargets
+			FILE GodotCppTargets.cmake
+			NAMESPACE godot::
+			DESTINATION lib/cmake/GodotCpp
+	)
+
+	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+			DESTINATION include
+	)
+
+	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen/include/
+			DESTINATION include
+	)
+
+	if (GODOT_GDEXTENSION_DIR AND EXISTS ${GODOT_GDEXTENSION_DIR})
+		install(DIRECTORY ${GODOT_GDEXTENSION_DIR}/
+				DESTINATION include
+		)
+	endif ()
+
+	include(CMakePackageConfigHelpers)
+
+	configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/GodotCppConfig.cmake.in
+			"${CMAKE_CURRENT_BINARY_DIR}/GodotCppConfig.cmake"
+			INSTALL_DESTINATION "lib/cmake/GodotCpp"
+			NO_SET_AND_CHECK_MACRO
+			NO_CHECK_REQUIRED_COMPONENTS_MACRO
+	)
+
+	install(FILES
+			${CMAKE_CURRENT_BINARY_DIR}/GodotCppConfig.cmake
+			DESTINATION lib/cmake/GodotCpp
+	)
+endif ()
