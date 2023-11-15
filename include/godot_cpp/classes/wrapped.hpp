@@ -146,8 +146,13 @@ struct EngineClassRegistration {
 // Note: the trail of `***` is to keep sane diffs in PRs, because clang-format otherwise moves every `\` which makes
 // every line of the macro different
 #define GDCLASS(m_class, m_inherits) /***********************************************************************************************************************************************/ \
+public:                                                                                                                                                                                \
+	m_class(const m_class &) = delete;                                                                                                                                                 \
+	m_class(m_class &&) = delete;                                                                                                                                                      \
+	m_class &operator=(const m_class &) = delete;                                                                                                                                      \
+	m_class &operator=(m_class &&) = delete;                                                                                                                                           \
+                                                                                                                                                                                       \
 private:                                                                                                                                                                               \
-	void operator=(const m_class &p_rval) {}                                                                                                                                           \
 	friend class ::godot::ClassDB;                                                                                                                                                     \
                                                                                                                                                                                        \
 protected:                                                                                                                                                                             \
@@ -238,7 +243,7 @@ public:                                                                         
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, GDExtensionBool p_reversed) {                                                                \
 		if (p_instance && m_class::_get_notification()) {                                                                                                                              \
 			if (m_class::_get_notification() != m_inherits::_get_notification()) {                                                                                                     \
-				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
+				auto cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
 				return cls->_notification(p_what);                                                                                                                                     \
 			}                                                                                                                                                                          \
 			m_inherits::notification_bind(p_instance, p_what, p_reversed);                                                                                                             \
@@ -248,7 +253,7 @@ public:                                                                         
 	static GDExtensionBool set_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionConstVariantPtr p_value) {                                \
 		if (p_instance && m_class::_get_set()) {                                                                                                                                       \
 			if (m_class::_get_set() != m_inherits::_get_set()) {                                                                                                                       \
-				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
+				auto cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
 				return cls->_set(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<const ::godot::Variant *>(p_value));                                        \
 			}                                                                                                                                                                          \
 			return m_inherits::set_bind(p_instance, p_name, p_value);                                                                                                                  \
@@ -259,7 +264,7 @@ public:                                                                         
 	static GDExtensionBool get_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionVariantPtr r_ret) {                                       \
 		if (p_instance && m_class::_get_get()) {                                                                                                                                       \
 			if (m_class::_get_get() != m_inherits::_get_get()) {                                                                                                                       \
-				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
+				auto cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
 				return cls->_get(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                                \
 			}                                                                                                                                                                          \
 			return m_inherits::get_bind(p_instance, p_name, r_ret);                                                                                                                    \
@@ -277,7 +282,7 @@ public:                                                                         
 				*r_count = 0;                                                                                                                                                          \
 			return nullptr;                                                                                                                                                            \
 		}                                                                                                                                                                              \
-		m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                        \
+		auto cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                            \
 		::godot::List<::godot::PropertyInfo> &plist_cpp = cls->plist_owned;                                                                                                            \
 		ERR_FAIL_COND_V_MSG(!plist_cpp.is_empty(), nullptr, "Internal error, property list was not freed by engine!");                                                                 \
 		cls->_get_property_list(&plist_cpp);                                                                                                                                           \
@@ -286,7 +291,7 @@ public:                                                                         
                                                                                                                                                                                        \
 	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDExtensionPropertyInfo *p_list) {                                                               \
 		if (p_instance) {                                                                                                                                                              \
-			m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
+			auto cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                        \
 			cls->plist_owned.clear();                                                                                                                                                  \
 			/* TODO `GDExtensionClassFreePropertyList` is ill-defined, we need a non-const pointer to free this. */                                                                    \
 			::godot::internal::free_c_property_list(const_cast<GDExtensionPropertyInfo *>(p_list));                                                                                    \
@@ -296,7 +301,7 @@ public:                                                                         
 	static GDExtensionBool property_can_revert_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name) {                                                    \
 		if (p_instance && m_class::_get_property_can_revert()) {                                                                                                                       \
 			if (m_class::_get_property_can_revert() != m_inherits::_get_property_can_revert()) {                                                                                       \
-				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
+				auto cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
 				return cls->_property_can_revert(*reinterpret_cast<const ::godot::StringName *>(p_name));                                                                              \
 			}                                                                                                                                                                          \
 			return m_inherits::property_can_revert_bind(p_instance, p_name);                                                                                                           \
@@ -307,7 +312,7 @@ public:                                                                         
 	static GDExtensionBool property_get_revert_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionVariantPtr r_ret) {                       \
 		if (p_instance && m_class::_get_property_get_revert()) {                                                                                                                       \
 			if (m_class::_get_property_get_revert() != m_inherits::_get_property_get_revert()) {                                                                                       \
-				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
+				auto cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
 				return cls->_property_get_revert(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                \
 			}                                                                                                                                                                          \
 			return m_inherits::property_get_revert_bind(p_instance, p_name, r_ret);                                                                                                    \
@@ -320,7 +325,7 @@ public:                                                                         
 		if (p_instance && m_class::_get_validate_property()) {                                                                                                                         \
 			ret = m_inherits::validate_property_bind(p_instance, p_property);                                                                                                          \
 			if (m_class::_get_validate_property() != m_inherits::_get_validate_property()) {                                                                                           \
-				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
+				auto cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
 				::godot::PropertyInfo info(p_property);                                                                                                                                \
 				cls->_validate_property(info);                                                                                                                                         \
 				info._update(p_property);                                                                                                                                              \
@@ -333,7 +338,7 @@ public:                                                                         
 	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDExtensionBool *r_is_valid, GDExtensionStringPtr r_out) {                                                      \
 		if (p_instance && m_class::_get_to_string()) {                                                                                                                                 \
 			if (m_class::_get_to_string() != m_inherits::_get_to_string()) {                                                                                                           \
-				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
+				auto cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
 				*reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                                                       \
 				*r_is_valid = true;                                                                                                                                                    \
 				return;                                                                                                                                                                \
@@ -344,7 +349,7 @@ public:                                                                         
                                                                                                                                                                                        \
 	static void free(void *data, GDExtensionClassInstancePtr ptr) {                                                                                                                    \
 		if (ptr) {                                                                                                                                                                     \
-			m_class *cls = reinterpret_cast<m_class *>(ptr);                                                                                                                           \
+			auto cls = reinterpret_cast<m_class *>(ptr);                                                                                                                               \
 			cls->~m_class();                                                                                                                                                           \
 			::godot::Memory::free_static(cls);                                                                                                                                         \
 		}                                                                                                                                                                              \
