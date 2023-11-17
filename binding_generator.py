@@ -3,6 +3,7 @@
 import json
 import re
 import shutil
+import textwrap
 from pathlib import Path
 
 
@@ -383,6 +384,37 @@ def generate_builtin_class_vararg_method_implements_header(builtin_classes):
     return "\n".join(result)
 
 
+bbcode_to_doxygen = {
+    "[codeblock]": "@code",
+    "[/codeblock]": "@endcode",
+    "[code]": "`",
+    "[/code]": "`",
+    "[b]": "**",
+    "[/b]": "**",
+}
+
+
+def generate_docs(description, brief_description=None, indent=''):
+    lines = []
+    for line in description.split("\n"):
+        for s, r in bbcode_to_doxygen.items():
+            line = line.replace(s, r)
+
+        lines.extend(textwrap.wrap(line, width=75))
+        lines.append('')
+    lines = lines[:-1]
+
+    result = []
+    result.append("/**")
+    if brief_description:
+        result.append(" * @brief " + brief_description)
+        result.append(" * ")
+    result = result + [" * " + x for x in lines]
+    result.append(" */")
+
+    return [(indent + x).rstrip() for x in result]
+
+
 def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes):
     result = []
 
@@ -444,6 +476,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if len(used_classes) > 0:
         result.append("")
 
+    if "description" in builtin_api:
+        result = result + generate_docs(builtin_api["description"], builtin_api.get("brief_description"))
     result.append(f"class {class_name} {{")
     result.append(f"\tstatic constexpr size_t {snake_class_name}_SIZE = {size};")
     result.append(f"\tuint8_t opaque[{snake_class_name}_SIZE] = {{}};")
@@ -507,6 +541,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
+            if "description" in constructor:
+                result = result + [''] + generate_docs(constructor["description"], constructor.get("brief_description"), indent="\t")
             method_signature = f"\t{class_name}("
             if "arguments" in constructor:
                 method_signature += make_function_parameters(
@@ -537,6 +573,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if "constants" in builtin_api:
         axis_constants_count = 0
         for constant in builtin_api["constants"]:
+            if "description" in constant:
+                result = result + [''] + generate_docs(constant["description"], constant.get("brief_description"), indent="\t")
             # Special case: Vector3.Axis is the only enum in the bindings.
             # It's technically not supported by Variant but works for direct access.
             if class_name == "Vector3" and constant["name"].startswith("AXIS"):
@@ -557,6 +595,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if "methods" in builtin_api:
         for method in builtin_api["methods"]:
             method_list.append(method["name"])
+
+            if "description" in method:
+                result = result + [''] + generate_docs(method["description"], method.get("brief_description"), indent="\t")
 
             vararg = method["is_vararg"]
             if vararg:
@@ -604,6 +645,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
+            if "description" in member:
+                result = result + [''] + generate_docs(member["description"], member.get("brief_description"), indent="\t")
             if f'get_{member["name"]}' not in method_list:
                 result.append(f'\t{correct_type(member["type"])} get_{member["name"]}() const;')
             if f'set_{member["name"]}' not in method_list:
@@ -612,6 +655,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if "operators" in builtin_api:
         for operator in builtin_api["operators"]:
             if operator["name"] not in ["in", "xor"]:
+                if "description" in operator:
+                    result = result + [''] + generate_docs(operator["description"], operator.get("brief_description"), indent="\t")
                 if "right_type" in operator:
                     result.append(
                         f'\t{correct_type(operator["return_type"])} operator{operator["name"]}({type_for_parameter(operator["right_type"])}other) const;'
