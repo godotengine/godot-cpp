@@ -101,8 +101,19 @@ func _ready():
 
 	# mp_callable() with void method.
 	var mp_callable: Callable = example.test_callable_mp()
+	assert_equal(mp_callable.is_valid(), true)
 	mp_callable.call(example, "void", 36)
 	assert_equal(custom_signal_emitted, ["unbound_method1: Example - void", 36])
+
+	# Check that it works with is_connected().
+	assert_equal(example.renamed.is_connected(mp_callable), false)
+	example.renamed.connect(mp_callable)
+	assert_equal(example.renamed.is_connected(mp_callable), true)
+	# Make sure a new object is still treated as equivalent.
+	assert_equal(example.renamed.is_connected(example.test_callable_mp()), true)
+	assert_equal(mp_callable.hash(), example.test_callable_mp().hash())
+	example.renamed.disconnect(mp_callable)
+	assert_equal(example.renamed.is_connected(mp_callable), false)
 
 	# mp_callable() with return value.
 	var mp_callable_ret: Callable = example.test_callable_mp_ret()
@@ -116,6 +127,16 @@ func _ready():
 	var mp_callable_static: Callable = example.test_callable_mp_static()
 	mp_callable_static.call(example, "static", 83)
 	assert_equal(custom_signal_emitted, ["unbound_static_method1: Example - static", 83])
+
+	# Check that it works with is_connected().
+	assert_equal(example.renamed.is_connected(mp_callable_static), false)
+	example.renamed.connect(mp_callable_static)
+	assert_equal(example.renamed.is_connected(mp_callable_static), true)
+	# Make sure a new object is still treated as equivalent.
+	assert_equal(example.renamed.is_connected(example.test_callable_mp_static()), true)
+	assert_equal(mp_callable_static.hash(), example.test_callable_mp_static().hash())
+	example.renamed.disconnect(mp_callable_static)
+	assert_equal(example.renamed.is_connected(mp_callable_static), false)
 
 	# mp_callable_static() with return value.
 	var mp_callable_static_ret: Callable = example.test_callable_mp_static_ret()
