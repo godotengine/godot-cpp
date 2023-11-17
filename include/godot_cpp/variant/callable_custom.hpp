@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  callable_method_pointer.cpp                                           */
+/*  callable_custom.hpp                                                   */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,35 +28,37 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include <godot_cpp/variant/callable_method_pointer.hpp>
+#ifndef GODOT_CALLABLE_CUSTOM_HPP
+#define GODOT_CALLABLE_CUSTOM_HPP
+
+#include <godot_cpp/core/object_id.hpp>
+#include <godot_cpp/variant/string_name.hpp>
 
 namespace godot {
 
-static void custom_callable_mp_call(void *userdata, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error) {
-	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)userdata;
-	callable_method_pointer->call((const Variant **)p_args, p_argument_count, *(Variant *)r_return, *r_error);
-}
+class Object;
 
-static void custom_callable_mp_free(void *userdata) {
-	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)userdata;
-	memdelete(callable_method_pointer);
-}
+class CallableCustomBase {
+public:
+	virtual ObjectID get_object() const = 0;
+	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const = 0;
+	virtual ~CallableCustomBase() {}
+};
 
-namespace internal {
+class CallableCustom : public CallableCustomBase {
+public:
+	typedef bool (*CompareEqualFunc)(const CallableCustom *p_a, const CallableCustom *p_b);
+	typedef bool (*CompareLessFunc)(const CallableCustom *p_a, const CallableCustom *p_b);
 
-Callable create_callable_from_ccmp(CallableCustomMethodPointerBase *p_callable_method_pointer) {
-	GDExtensionCallableCustomInfo info = {};
-	info.callable_userdata = p_callable_method_pointer;
-	info.token = internal::token;
-	info.object_id = p_callable_method_pointer->get_object();
-	info.call_func = &custom_callable_mp_call;
-	info.free_func = &custom_callable_mp_free;
-
-	Callable callable;
-	::godot::internal::gdextension_interface_callable_custom_create(callable._native_ptr(), &info);
-	return callable;
-}
-
-} // namespace internal
+	virtual uint32_t hash() const = 0;
+	virtual String get_as_text() const = 0;
+	virtual CompareEqualFunc get_compare_equal_func() const = 0;
+	virtual CompareLessFunc get_compare_less_func() const = 0;
+	virtual bool is_valid() const;
+	virtual ObjectID get_object() const = 0;
+	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const = 0;
+};
 
 } // namespace godot
+
+#endif // GODOT_CALLABLE_CUSTOM_HPP
