@@ -293,6 +293,15 @@ def options(opts, env):
 
     opts.Add(
         EnumVariable(
+            key="symbols_visibility",
+            help="Symbols visibility on GNU platforms. Use 'auto' to apply the default value.",
+            default=env.get("symbols_visibility", "hidden"),
+            allowed_values=["auto", "visible", "hidden"],
+        )
+    )
+
+    opts.Add(
+        EnumVariable(
             "optimize",
             "The desired optimization flags",
             "speed_trace",

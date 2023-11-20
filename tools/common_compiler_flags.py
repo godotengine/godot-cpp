@@ -39,6 +39,14 @@ def generate(env):
     elif env.get("is_msvc", False):
         env.Append(CXXFLAGS=["/EHsc"])
 
+    if not env.get("is_msvc", False):
+        if env["symbols_visibility"] == "visible":
+            env.Append(CCFLAGS=["-fvisibility=default"])
+            env.Append(LINKFLAGS=["-fvisibility=default"])
+        elif env["symbols_visibility"] == "hidden":
+            env.Append(CCFLAGS=["-fvisibility=hidden"])
+            env.Append(LINKFLAGS=["-fvisibility=hidden"])
+
     # Set optimize and debug_symbols flags.
     # "custom" means do nothing and let users set their own optimization flags.
     if env.get("is_msvc", False):
