@@ -189,9 +189,9 @@ GDExtensionInterfaceEditorRemovePlugin gdextension_interface_editor_remove_plugi
 
 } // namespace internal
 
-GDExtensionBinding::Callback GDExtensionBinding::init_callback = nullptr;
-GDExtensionBinding::Callback GDExtensionBinding::terminate_callback = nullptr;
-GDExtensionInitializationLevel GDExtensionBinding::minimum_initialization_level = GDEXTENSION_INITIALIZATION_CORE;
+bool GDExtensionBinding::api_initialized = false;
+int GDExtensionBinding::level_initialized[MODULE_INITIALIZATION_LEVEL_MAX] = { 0 };
+GDExtensionBinding::InitDataList GDExtensionBinding::initdata;
 
 #define ERR_PRINT_EARLY(m_msg) \
 	internal::gdextension_interface_print_error(m_msg, FUNCTION_STR, __FILE__, __LINE__, false)
@@ -218,7 +218,20 @@ typedef struct {
 	GDExtensionInterfacePrintErrorWithMessage print_error_with_message;
 } LegacyGDExtensionInterface;
 
-GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
+GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, InitData *p_init_data, GDExtensionInitialization *r_initialization) {
+	if (!p_init_data || !p_init_data->init_callback) {
+		ERR_FAIL_V_MSG(false, "Initialization callback must be defined.");
+	}
+
+	if (api_initialized) {
+		r_initialization->initialize = initialize_level;
+		r_initialization->deinitialize = deinitialize_level;
+		r_initialization->userdata = p_init_data;
+		r_initialization->minimum_initialization_level = p_init_data->minimum_initialization_level;
+
+		return true;
+	}
+
 	// Make sure we weren't passed the legacy struct.
 	uint32_t *raw_interface = (uint32_t *)(void *)p_get_proc_address;
 	if (raw_interface[0] == 4 && raw_interface[1] == 0) {
@@ -401,59 +414,96 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 
 	r_initialization->initialize = initialize_level;
 	r_initialization->deinitialize = deinitialize_level;
-	r_initialization->minimum_initialization_level = minimum_initialization_level;
-
-	ERR_FAIL_NULL_V_MSG(init_callback, false, "Initialization callback must be defined.");
+	r_initialization->userdata = p_init_data;
+	r_initialization->minimum_initialization_level = p_init_data->minimum_initialization_level;
 
 	Variant::init_bindings();
 	godot::internal::register_engine_classes();
 
+	api_initialized = true;
 	return true;
 }
 
 #undef LOAD_PROC_ADDRESS
 #undef ERR_PRINT_EARLY
 
-void GDExtensionBinding::initialize_level(void *userdata, GDExtensionInitializationLevel p_level) {
+void GDExtensionBinding::initialize_level(void *p_userdata, GDExtensionInitializationLevel p_level) {
+	ERR_FAIL_COND(static_cast<ModuleInitializationLevel>(p_level) >= MODULE_INITIALIZATION_LEVEL_MAX);
 	ClassDB::current_level = p_level;
 
-	if (init_callback) {
-		init_callback(static_cast<ModuleInitializationLevel>(p_level));
+	InitData *init_data = static_cast<InitData *>(p_userdata);
+	if (init_data && init_data->init_callback) {
+		init_data->init_callback(static_cast<ModuleInitializationLevel>(p_level));
 	}
 
-	ClassDB::initialize(p_level);
+	if (level_initialized[p_level] == 0) {
+		ClassDB::initialize(p_level);
+	}
+	level_initialized[p_level]++;
 }
 
-void GDExtensionBinding::deinitialize_level(void *userdata, GDExtensionInitializationLevel p_level) {
+void GDExtensionBinding::deinitialize_level(void *p_userdata, GDExtensionInitializationLevel p_level) {
+	ERR_FAIL_COND(static_cast<ModuleInitializationLevel>(p_level) >= MODULE_INITIALIZATION_LEVEL_MAX);
 	ClassDB::current_level = p_level;
 
-	if (terminate_callback) {
-		terminate_callback(static_cast<ModuleInitializationLevel>(p_level));
+	InitData *init_data = static_cast<InitData *>(p_userdata);
+	if (init_data && init_data->terminate_callback) {
+		init_data->terminate_callback(static_cast<ModuleInitializationLevel>(p_level));
 	}
 
-	EditorPlugins::deinitialize(p_level);
-	ClassDB::deinitialize(p_level);
+	level_initialized[p_level]--;
+	if (level_initialized[p_level] == 0) {
+		EditorPlugins::deinitialize(p_level);
+		ClassDB::deinitialize(p_level);
+	}
 }
+
+void GDExtensionBinding::InitDataList::add(InitData *p_data) {
+	if (data_count == data_capacity) {
+		void *new_ptr = realloc(data, sizeof(InitData *) * (data_capacity + 32));
+		if (new_ptr) {
+			data = (InitData **)(new_ptr);
+			data_capacity += 32;
+		} else {
+			ERR_FAIL_MSG("Unable to allocate memory for extension callbacks.");
+		}
+	}
+	data[data_count++] = p_data;
+}
+
+GDExtensionBinding::InitDataList::~InitDataList() {
+	for (int i = 0; i < data_count; i++) {
+		if (data[i]) {
+			delete data[i];
+		}
+	}
+	if (data) {
+		free(data);
+	}
+}
+
 GDExtensionBinding::InitObject::InitObject(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
 	get_proc_address = p_get_proc_address;
 	library = p_library;
 	initialization = r_initialization;
+	init_data = new InitData();
+	GDExtensionBinding::initdata.add(init_data);
 }
 
 void GDExtensionBinding::InitObject::register_initializer(Callback p_init) const {
-	GDExtensionBinding::init_callback = p_init;
+	init_data->init_callback = p_init;
 }
 
 void GDExtensionBinding::InitObject::register_terminator(Callback p_terminate) const {
-	GDExtensionBinding::terminate_callback = p_terminate;
+	init_data->terminate_callback = p_terminate;
 }
 
 void GDExtensionBinding::InitObject::set_minimum_library_initialization_level(ModuleInitializationLevel p_level) const {
-	GDExtensionBinding::minimum_initialization_level = static_cast<GDExtensionInitializationLevel>(p_level);
+	init_data->minimum_initialization_level = static_cast<GDExtensionInitializationLevel>(p_level);
 }
 
 GDExtensionBool GDExtensionBinding::InitObject::init() const {
-	return GDExtensionBinding::init(get_proc_address, library, initialization);
+	return GDExtensionBinding::init(get_proc_address, library, init_data, initialization);
 }
 
 } // namespace godot
