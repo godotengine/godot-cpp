@@ -99,10 +99,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
 	add_definitions(-DNOMINMAX)
 else()  # GCC/Clang
-	set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -g")
-
 	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -fno-omit-frame-pointer -O0")
+		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -fno-omit-frame-pointer -O0 -g")
 	else()
 		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -O3")
 	endif(CMAKE_BUILD_TYPE MATCHES Debug)
