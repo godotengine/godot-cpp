@@ -132,6 +132,7 @@ endif()
 execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_GDEXTENSION_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True, sources=True)"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	OUTPUT_VARIABLE GENERATED_FILES_LIST
+	OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 add_custom_command(OUTPUT ${GENERATED_FILES_LIST}

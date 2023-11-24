@@ -138,9 +138,7 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
 
 
 def print_file_list(api_filepath, output_dir, headers=False, sources=False):
-    end = ";"
-    for f in get_file_list(api_filepath, output_dir, headers, sources):
-        print(f, end=end)
+    print(*get_file_list(api_filepath, output_dir, headers, sources), sep=";", end=None)
 
 
 def scons_emit_files(target, source, env):
