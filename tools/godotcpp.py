@@ -189,6 +189,15 @@ def options(opts, env):
         )
     )
 
+    opts.Add(
+        EnumVariable(
+            key="symbols_visibility",
+            help="Symbols visibility on GNU platforms. Use 'auto' to apply the default value.",
+            default=env.get("symbols_visibility", "hidden"),
+            allowed_values=["auto", "visible", "hidden"],
+        )
+    )
+
     # Add platform options
     for pl in platforms:
         tool = Tool(pl, toolpath=["tools"])
@@ -268,6 +277,14 @@ def generate(env):
             env.Append(CXXFLAGS=["-fno-exceptions"])
     elif env.get("is_msvc", False):
         env.Append(CXXFLAGS=["/EHsc"])
+
+    if not env.get("is_msvc", False):
+        if env["symbols_visibility"] == "visible":
+            env.Append(CCFLAGS=["-fvisibility=default"])
+            env.Append(LINKFLAGS=["-fvisibility=default"])
+        elif env["symbols_visibility"] == "hidden":
+            env.Append(CCFLAGS=["-fvisibility=hidden"])
+            env.Append(LINKFLAGS=["-fvisibility=hidden"])
 
     # Require C++17
     if env.get("is_msvc", False):
