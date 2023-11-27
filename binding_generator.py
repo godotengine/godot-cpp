@@ -1329,7 +1329,11 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     if "enums" in class_api:
         for enum_api in class_api["enums"]:
-            result.append(f'\tenum {enum_api["name"]} {{')
+            if enum_api["is_bitfield"]:
+                result.append(f'\tenum {enum_api["name"]} : uint64_t {{')
+            else:
+                result.append(f'\tenum {enum_api["name"]} {{')
+
             for value in enum_api["values"]:
                 result.append(f'\t\t{value["name"]} = {value["value"]},')
             result.append("\t};")
@@ -1686,6 +1690,8 @@ def generate_global_constants(api, output_dir):
     header.append(f"#ifndef {header_guard}")
     header.append(f"#define {header_guard}")
     header.append("")
+    header.append("#include <cstdint>")
+    header.append("")
     header.append("namespace godot {")
     header.append("")
 
@@ -1698,7 +1704,11 @@ def generate_global_constants(api, output_dir):
         if enum_def["name"].startswith("Variant."):
             continue
 
-        header.append(f'\tenum {enum_def["name"]} {{')
+        if enum_def["is_bitfield"]:
+            header.append(f'\tenum {enum_def["name"]} : uint64_t {{')
+        else:
+            header.append(f'\tenum {enum_def["name"]} {{')
+
         for value in enum_def["values"]:
             header.append(f'\t\t{value["name"]} = {value["value"]},')
         header.append("\t};")
