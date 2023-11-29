@@ -63,9 +63,17 @@ int ExampleRef::get_id() const {
 	return id;
 }
 
+void ExampleRef::_notification(int p_what) {
+	if (p_what == NOTIFICATION_POSTINITIALIZE) {
+		post_initialized = true;
+	}
+}
+
 void ExampleRef::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_id", "id"), &ExampleRef::set_id);
 	ClassDB::bind_method(D_METHOD("get_id"), &ExampleRef::get_id);
+
+	ClassDB::bind_method(D_METHOD("was_post_initialized"), &ExampleRef::was_post_initialized);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "id"), "set_id", "get_id");
 }
@@ -220,6 +228,7 @@ void Example::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
 	ClassDB::bind_method(D_METHOD("callable_bind"), &Example::callable_bind);
+	ClassDB::bind_method(D_METHOD("test_post_initialize"), &Example::test_post_initialize);
 
 	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
 	ClassDB::bind_static_method("Example", D_METHOD("test_static2"), &Example::test_static2);
@@ -595,6 +604,12 @@ Vector2 Example::get_custom_position() const {
 
 Vector4 Example::get_v4() const {
 	return Vector4(1.2, 3.4, 5.6, 7.8);
+}
+
+bool Example::test_post_initialize() const {
+	Ref<ExampleRef> new_example_ref;
+	new_example_ref.instantiate();
+	return new_example_ref->was_post_initialized();
 }
 
 // Virtual function override.
