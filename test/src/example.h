@@ -35,9 +35,12 @@ private:
 	static int last_id;
 
 	int id;
+	bool post_initialized = false;
 
 protected:
 	static void _bind_methods();
+
+	void _notification(int p_what);
 
 public:
 	ExampleRef();
@@ -45,6 +48,8 @@ public:
 
 	void set_id(int p_id);
 	int get_id() const;
+
+	bool was_post_initialized() const { return post_initialized; }
 };
 
 class ExampleMin : public Control {
@@ -166,6 +171,8 @@ public:
 	void set_custom_position(const Vector2 &pos);
 	Vector2 get_custom_position() const;
 	Vector4 get_v4() const;
+
+	bool test_post_initialize() const;
 
 	// Static method.
 	static int test_static(int p_a, int p_b);

@@ -236,6 +236,11 @@ func _ready():
 	get_viewport().push_input(event)
 	assert_equal(custom_signal_emitted, ["_input: H", 72])
 
+	# Check NOTIFICATION_POST_INITIALIZED, both when created from GDScript and godot-cpp.
+	var new_example_ref = ExampleRef.new()
+	assert_equal(new_example_ref.was_post_initialized(), true)
+	assert_equal(example.test_post_initialize(), true)
+
 	exit_with_status()
 
 func _on_Example_custom_signal(signal_name, value):
