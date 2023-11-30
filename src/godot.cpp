@@ -271,7 +271,12 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	} else if (internal::godot_version.minor != GODOT_VERSION_MINOR) {
 		compatible = internal::godot_version.minor > GODOT_VERSION_MINOR;
 	} else {
+#if GODOT_VERSION_PATCH > 0
 		compatible = internal::godot_version.patch >= GODOT_VERSION_PATCH;
+#else
+		// Prevent -Wtype-limits warning due to unsigned comparison.
+		compatible = true;
+#endif
 	}
 	if (!compatible) {
 		// We need to use snprintf() here because vformat() uses Variant, and we haven't loaded
