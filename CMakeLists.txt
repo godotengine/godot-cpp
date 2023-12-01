@@ -47,11 +47,6 @@ option(GODOT_CPP_WARNING_AS_ERROR "Treat warnings as errors" OFF)
 # Add path to modules
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
 
-# Check if we are building ourself or being included
-if(${PROJECT_NAME} STREQUAL ${CMAKE_PROJECT_NAME})
-    set(GODOT_CPP_BUILDING_SELF ON)
-endif()
-
 # Set some helper variables for readability
 set( compiler_is_clang "$<OR:$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>>" )
 set( compiler_is_gnu "$<CXX_COMPILER_ID:GNU>" )
@@ -157,12 +152,6 @@ add_library(${PROJECT_NAME} STATIC
 add_library(godot::cpp ALIAS ${PROJECT_NAME})
 
 include(GodotCompilerWarnings)
-
-# Treat warnings as errors if we are building ourself
-if(GODOT_CPP_BUILDING_SELF)
-    unset( GODOT_CPP_WARNING_AS_ERROR CACHE )
-    set_warning_as_error()
-endif()
 
 target_compile_features(${PROJECT_NAME}
 	PRIVATE
