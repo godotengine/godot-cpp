@@ -174,7 +174,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 		DEBUG_ENABLED
 		DEBUG_METHODS_ENABLED
 	>
-    $<$<AND:$<BOOL:${WIN32}>,$<NOT:${compiler_is_gnu}>>:
+	$<$<AND:$<BOOL:${WIN32}>,$<NOT:${compiler_is_gnu}>>:
 		TYPED_METHOD_BIND
 	>
 )
