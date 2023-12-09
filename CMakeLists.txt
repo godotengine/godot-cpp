@@ -43,6 +43,7 @@ project(godot-cpp LANGUAGES CXX)
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
 option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." ON)
 option(GODOT_CPP_WARNING_AS_ERROR "Treat warnings as errors" OFF)
+option(GODOT_ENABLE_HOT_RELOAD "Build with hot reload support" OFF)
 
 # Add path to modules
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
@@ -114,6 +115,10 @@ else()
 	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /EHsc")
 	endif()
+endif()
+
+if (GODOT_ENABLE_HOT_RELOAD)
+    set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -D HOT_RELOAD_ENABLED")
 endif()
 
 # Generate source from the bindings file
