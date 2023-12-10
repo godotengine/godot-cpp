@@ -5,6 +5,7 @@
 # GODOT_GDEXTENSION_DIR:		Path to the directory containing GDExtension interface header and API JSON file
 # GODOT_CPP_SYSTEM_HEADERS		Mark the header files as SYSTEM. This may be useful to supress warnings in projects including this one.
 # GODOT_CPP_WARNING_AS_ERROR	Treat any warnings as errors
+# GODOT_ENABLE_HOT_RELOAD       Build with hot reload support. Defaults to YES for Debug-builds and NO for Release-builds.
 # GODOT_CUSTOM_API_FILE:		Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
 # FLOAT_PRECISION:				Floating-point precision level ("single", "double")
 #
@@ -43,7 +44,6 @@ project(godot-cpp LANGUAGES CXX)
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
 option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." ON)
 option(GODOT_CPP_WARNING_AS_ERROR "Treat warnings as errors" OFF)
-option(GODOT_ENABLE_HOT_RELOAD "Build with hot reload support" OFF)
 
 # Add path to modules
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
@@ -56,6 +56,13 @@ set( compiler_is_msvc "$<CXX_COMPILER_ID:MSVC>" )
 # Default build type is Debug in the SConstruct
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+# Hot reload is enabled by default in Debug-builds
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    option(GODOT_ENABLE_HOT_RELOAD "Build with hot reload support" ON)
+else()
+    option(GODOT_ENABLE_HOT_RELOAD "Build with hot reload support" OFF)
 endif()
 
 if(NOT DEFINED BITS)
