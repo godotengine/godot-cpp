@@ -1060,6 +1060,8 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &other);"
         )
     else:
+        if builtin_api["has_destructor"]:
+            result.append("\t_method_bindings.destructor(&opaque);")
         result.append("\tstd::swap(opaque, other.opaque);")
     result.append("\treturn *this;")
     result.append("}")

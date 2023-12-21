@@ -531,6 +531,7 @@ Variant &Variant::operator=(const Variant &other) {
 }
 
 Variant &Variant::operator=(Variant &&other) {
+	clear();
 	std::swap(opaque, other.opaque);
 	return *this;
 }
