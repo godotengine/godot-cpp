@@ -101,8 +101,19 @@ func _ready():
 
 	# mp_callable() with void method.
 	var mp_callable: Callable = example.test_callable_mp()
+	assert_equal(mp_callable.is_valid(), true)
 	mp_callable.call(example, "void", 36)
 	assert_equal(custom_signal_emitted, ["unbound_method1: Example - void", 36])
+
+	# Check that it works with is_connected().
+	assert_equal(example.renamed.is_connected(mp_callable), false)
+	example.renamed.connect(mp_callable)
+	assert_equal(example.renamed.is_connected(mp_callable), true)
+	# Make sure a new object is still treated as equivalent.
+	assert_equal(example.renamed.is_connected(example.test_callable_mp()), true)
+	assert_equal(mp_callable.hash(), example.test_callable_mp().hash())
+	example.renamed.disconnect(mp_callable)
+	assert_equal(example.renamed.is_connected(mp_callable), false)
 
 	# mp_callable() with return value.
 	var mp_callable_ret: Callable = example.test_callable_mp_ret()
@@ -117,9 +128,29 @@ func _ready():
 	mp_callable_static.call(example, "static", 83)
 	assert_equal(custom_signal_emitted, ["unbound_static_method1: Example - static", 83])
 
+	# Check that it works with is_connected().
+	assert_equal(example.renamed.is_connected(mp_callable_static), false)
+	example.renamed.connect(mp_callable_static)
+	assert_equal(example.renamed.is_connected(mp_callable_static), true)
+	# Make sure a new object is still treated as equivalent.
+	assert_equal(example.renamed.is_connected(example.test_callable_mp_static()), true)
+	assert_equal(mp_callable_static.hash(), example.test_callable_mp_static().hash())
+	example.renamed.disconnect(mp_callable_static)
+	assert_equal(example.renamed.is_connected(mp_callable_static), false)
+
 	# mp_callable_static() with return value.
 	var mp_callable_static_ret: Callable = example.test_callable_mp_static_ret()
 	assert_equal(mp_callable_static_ret.call(example, "static-ret", 84), "unbound_static_method2: Example - static-ret - 84")
+
+	# CallableCustom.
+	var custom_callable: Callable = example.test_custom_callable();
+	assert_equal(custom_callable.is_custom(), true);
+	assert_equal(custom_callable.is_valid(), true);
+	assert_equal(custom_callable.call(), "Hi")
+	assert_equal(custom_callable.hash(), 27);
+	assert_equal(custom_callable.get_object(), null);
+	assert_equal(custom_callable.get_method(), "");
+	assert_equal(str(custom_callable), "<MyCallableCustom>");
 
 	# PackedArray iterators
 	assert_equal(example.test_vector_ops(), 105)
@@ -204,6 +235,11 @@ func _ready():
 	event.unicode = 72
 	get_viewport().push_input(event)
 	assert_equal(custom_signal_emitted, ["_input: H", 72])
+
+	# Check NOTIFICATION_POST_INITIALIZED, both when created from GDScript and godot-cpp.
+	var new_example_ref = ExampleRef.new()
+	assert_equal(new_example_ref.was_post_initialized(), true)
+	assert_equal(example.test_post_initialize(), true)
 
 	exit_with_status()
 

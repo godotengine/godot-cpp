@@ -166,6 +166,7 @@ extern "C" GDExtensionInterfaceObjectCastTo gdextension_interface_object_cast_to
 extern "C" GDExtensionInterfaceObjectGetInstanceFromId gdextension_interface_object_get_instance_from_id;
 extern "C" GDExtensionInterfaceObjectGetInstanceId gdextension_interface_object_get_instance_id;
 extern "C" GDExtensionInterfaceCallableCustomCreate gdextension_interface_callable_custom_create;
+extern "C" GDExtensionInterfaceCallableCustomGetUserData gdextension_interface_callable_custom_get_userdata;
 extern "C" GDExtensionInterfaceRefGetObject gdextension_interface_ref_get_object;
 extern "C" GDExtensionInterfaceRefSetObject gdextension_interface_ref_set_object;
 extern "C" GDExtensionInterfaceScriptInstanceCreate2 gdextension_interface_script_instance_create2;
@@ -193,26 +194,44 @@ enum ModuleInitializationLevel {
 	MODULE_INITIALIZATION_LEVEL_CORE = GDEXTENSION_INITIALIZATION_CORE,
 	MODULE_INITIALIZATION_LEVEL_SERVERS = GDEXTENSION_INITIALIZATION_SERVERS,
 	MODULE_INITIALIZATION_LEVEL_SCENE = GDEXTENSION_INITIALIZATION_SCENE,
-	MODULE_INITIALIZATION_LEVEL_EDITOR = GDEXTENSION_INITIALIZATION_EDITOR
+	MODULE_INITIALIZATION_LEVEL_EDITOR = GDEXTENSION_INITIALIZATION_EDITOR,
+	MODULE_INITIALIZATION_LEVEL_MAX
 };
 
 class GDExtensionBinding {
 public:
 	using Callback = void (*)(ModuleInitializationLevel p_level);
 
-	static Callback init_callback;
-	static Callback terminate_callback;
-	static GDExtensionInitializationLevel minimum_initialization_level;
-	static GDExtensionBool init(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization);
+	struct InitData {
+		GDExtensionInitializationLevel minimum_initialization_level = GDEXTENSION_INITIALIZATION_CORE;
+		Callback init_callback = nullptr;
+		Callback terminate_callback = nullptr;
+	};
+
+	class InitDataList {
+		int data_count = 0;
+		int data_capacity = 0;
+		InitData **data = nullptr;
+
+	public:
+		void add(InitData *p_cb);
+		~InitDataList();
+	};
+
+	static bool api_initialized;
+	static int level_initialized[MODULE_INITIALIZATION_LEVEL_MAX];
+	static InitDataList initdata;
+	static GDExtensionBool init(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, InitData *p_init_data, GDExtensionInitialization *r_initialization);
 
 public:
-	static void initialize_level(void *userdata, GDExtensionInitializationLevel p_level);
-	static void deinitialize_level(void *userdata, GDExtensionInitializationLevel p_level);
+	static void initialize_level(void *p_userdata, GDExtensionInitializationLevel p_level);
+	static void deinitialize_level(void *p_userdata, GDExtensionInitializationLevel p_level);
 
 	class InitObject {
 		GDExtensionInterfaceGetProcAddress get_proc_address;
 		GDExtensionClassLibraryPtr library;
 		GDExtensionInitialization *initialization;
+		mutable InitData *init_data = nullptr;
 
 	public:
 		InitObject(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization);

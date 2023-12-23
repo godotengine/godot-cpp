@@ -30,31 +30,79 @@
 
 #include <godot_cpp/variant/callable_method_pointer.hpp>
 
-//#include <godot_cpp/godot.hpp>
+#include <godot_cpp/templates/hashfuncs.hpp>
 
 namespace godot {
 
-static void call_custom_callable(void *userdata, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error) {
-	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)userdata;
+static void custom_callable_mp_call(void *p_userdata, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error) {
+	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)p_userdata;
 	callable_method_pointer->call((const Variant **)p_args, p_argument_count, *(Variant *)r_return, *r_error);
 }
 
-static void free_custom_callable(void *userdata) {
-	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)userdata;
+static GDExtensionBool custom_callable_mp_is_valid(void *p_userdata) {
+	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)p_userdata;
+	ObjectID object = callable_method_pointer->get_object();
+	return object == ObjectID() || ObjectDB::get_instance(object);
+}
+
+static void custom_callable_mp_free(void *p_userdata) {
+	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)p_userdata;
 	memdelete(callable_method_pointer);
+}
+
+static uint32_t custom_callable_mp_hash(void *p_userdata) {
+	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)p_userdata;
+	return callable_method_pointer->get_hash();
+}
+
+static GDExtensionBool custom_callable_mp_equal_func(void *p_a, void *p_b) {
+	CallableCustomMethodPointerBase *a = (CallableCustomMethodPointerBase *)p_a;
+	CallableCustomMethodPointerBase *b = (CallableCustomMethodPointerBase *)p_b;
+
+	if (a->get_comp_size() != b->get_comp_size()) {
+		return false;
+	}
+
+	return memcmp(a->get_comp_ptr(), b->get_comp_ptr(), a->get_comp_size() * 4) == 0;
+}
+
+static GDExtensionBool custom_callable_mp_less_than_func(void *p_a, void *p_b) {
+	CallableCustomMethodPointerBase *a = (CallableCustomMethodPointerBase *)p_a;
+	CallableCustomMethodPointerBase *b = (CallableCustomMethodPointerBase *)p_b;
+
+	if (a->get_comp_size() != b->get_comp_size()) {
+		return a->get_comp_size() < b->get_comp_size();
+	}
+
+	return memcmp(a->get_comp_ptr(), b->get_comp_ptr(), a->get_comp_size() * 4) < 0;
+}
+
+void CallableCustomMethodPointerBase::_setup(uint32_t *p_base_ptr, uint32_t p_ptr_size) {
+	comp_ptr = p_base_ptr;
+	comp_size = p_ptr_size / 4;
+
+	for (uint32_t i = 0; i < comp_size; i++) {
+		if (i == 0) {
+			h = hash_murmur3_one_32(comp_ptr[i]);
+		} else {
+			h = hash_murmur3_one_32(comp_ptr[i], h);
+		}
+	}
 }
 
 namespace internal {
 
-Callable create_custom_callable(CallableCustomMethodPointerBase *p_callable_method_pointer) {
-	Object *object = p_callable_method_pointer->get_object();
-
+Callable create_callable_from_ccmp(CallableCustomMethodPointerBase *p_callable_method_pointer) {
 	GDExtensionCallableCustomInfo info = {};
 	info.callable_userdata = p_callable_method_pointer;
 	info.token = internal::token;
-	info.object_id = object ? object->get_instance_id() : 0;
-	info.call_func = &call_custom_callable;
-	info.free_func = &free_custom_callable;
+	info.object_id = p_callable_method_pointer->get_object();
+	info.call_func = &custom_callable_mp_call;
+	info.is_valid_func = &custom_callable_mp_is_valid;
+	info.free_func = &custom_callable_mp_free;
+	info.hash_func = &custom_callable_mp_hash;
+	info.equal_func = &custom_callable_mp_equal_func;
+	info.less_than_func = &custom_callable_mp_less_than_func;
 
 	Callable callable;
 	::godot::internal::gdextension_interface_callable_custom_create(callable._native_ptr(), &info);

@@ -36,16 +36,23 @@
 
 namespace godot {
 
-class CallableCustomMethodPointerBase {
+class CallableCustomMethodPointerBase : public CallableCustomBase {
+	uint32_t *comp_ptr = nullptr;
+	uint32_t comp_size;
+	uint32_t h;
+
+protected:
+	void _setup(uint32_t *p_base_ptr, uint32_t p_ptr_size);
+
 public:
-	virtual Object *get_object() const = 0;
-	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const = 0;
-	virtual ~CallableCustomMethodPointerBase() {}
+	_FORCE_INLINE_ const uint32_t *get_comp_ptr() const { return comp_ptr; }
+	_FORCE_INLINE_ uint32_t get_comp_size() const { return comp_size; }
+	_FORCE_INLINE_ uint32_t get_hash() const { return h; }
 };
 
 namespace internal {
 
-Callable create_custom_callable(CallableCustomMethodPointerBase *p_callable_method_pointer);
+Callable create_callable_from_ccmp(CallableCustomMethodPointerBase *p_callable_method_pointer);
 
 } // namespace internal
 
@@ -55,21 +62,26 @@ Callable create_custom_callable(CallableCustomMethodPointerBase *p_callable_meth
 
 template <class T, class... P>
 class CallableCustomMethodPointer : public CallableCustomMethodPointerBase {
-	T *instance;
-	void (T::*method)(P...);
+	struct Data {
+		T *instance;
+		void (T::*method)(P...);
+	} data;
+	static_assert(sizeof(Data) % 4 == 0);
 
 public:
-	virtual Object *get_object() const override {
-		return instance;
+	virtual ObjectID get_object() const override {
+		return ObjectID(data.instance->get_instance_id());
 	}
 
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const override {
-		call_with_variant_args(instance, method, p_arguments, p_argcount, r_call_error);
+		call_with_variant_args(data.instance, data.method, p_arguments, p_argcount, r_call_error);
 	}
 
 	CallableCustomMethodPointer(T *p_instance, void (T::*p_method)(P...)) {
-		instance = p_instance;
-		method = p_method;
+		memset(&data, 0, sizeof(Data));
+		data.instance = p_instance;
+		data.method = p_method;
+		_setup((uint32_t *)&data, sizeof(Data));
 	}
 };
 
@@ -77,7 +89,7 @@ template <class T, class... P>
 Callable create_custom_callable_function_pointer(T *p_instance, void (T::*p_method)(P...)) {
 	typedef CallableCustomMethodPointer<T, P...> CCMP;
 	CCMP *ccmp = memnew(CCMP(p_instance, p_method));
-	return ::godot::internal::create_custom_callable(ccmp);
+	return ::godot::internal::create_callable_from_ccmp(ccmp);
 }
 
 //
@@ -86,22 +98,27 @@ Callable create_custom_callable_function_pointer(T *p_instance, void (T::*p_meth
 
 template <class T, class R, class... P>
 class CallableCustomMethodPointerRet : public CallableCustomMethodPointerBase {
-	T *instance;
-	R(T::*method)
-	(P...);
+	struct Data {
+		T *instance;
+		R(T::*method)
+		(P...);
+	} data;
+	static_assert(sizeof(Data) % 4 == 0);
 
 public:
-	virtual Object *get_object() const override {
-		return instance;
+	virtual ObjectID get_object() const override {
+		return ObjectID(data.instance->get_instance_id());
 	}
 
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const override {
-		call_with_variant_args_ret(instance, method, p_arguments, p_argcount, r_return_value, r_call_error);
+		call_with_variant_args_ret(data.instance, data.method, p_arguments, p_argcount, r_return_value, r_call_error);
 	}
 
 	CallableCustomMethodPointerRet(T *p_instance, R (T::*p_method)(P...)) {
-		instance = p_instance;
-		method = p_method;
+		memset(&data, 0, sizeof(Data));
+		data.instance = p_instance;
+		data.method = p_method;
+		_setup((uint32_t *)&data, sizeof(Data));
 	}
 };
 
@@ -109,7 +126,7 @@ template <class T, class R, class... P>
 Callable create_custom_callable_function_pointer(T *p_instance, R (T::*p_method)(P...)) {
 	typedef CallableCustomMethodPointerRet<T, R, P...> CCMP; // Messes with memnew otherwise.
 	CCMP *ccmp = memnew(CCMP(p_instance, p_method));
-	return ::godot::internal::create_custom_callable(ccmp);
+	return ::godot::internal::create_callable_from_ccmp(ccmp);
 }
 
 //
@@ -118,22 +135,27 @@ Callable create_custom_callable_function_pointer(T *p_instance, R (T::*p_method)
 
 template <class T, class R, class... P>
 class CallableCustomMethodPointerRetC : public CallableCustomMethodPointerBase {
-	T *instance;
-	R(T::*method)
-	(P...) const;
+	struct Data {
+		T *instance;
+		R(T::*method)
+		(P...) const;
+	} data;
+	static_assert(sizeof(Data) % 4 == 0);
 
 public:
-	virtual Object *get_object() const override {
-		return instance;
+	virtual ObjectID get_object() const override {
+		return ObjectID(data.instance->get_instance_id());
 	}
 
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const override {
-		call_with_variant_args_retc(instance, method, p_arguments, p_argcount, r_return_value, r_call_error);
+		call_with_variant_args_retc(data.instance, data.method, p_arguments, p_argcount, r_return_value, r_call_error);
 	}
 
 	CallableCustomMethodPointerRetC(const T *p_instance, R (T::*p_method)(P...) const) {
-		instance = const_cast<T *>(p_instance);
-		method = p_method;
+		memset(&data, 0, sizeof(Data));
+		data.instance = const_cast<T *>(p_instance);
+		data.method = p_method;
+		_setup((uint32_t *)&data, sizeof(Data));
 	}
 };
 
@@ -141,7 +163,7 @@ template <class T, class R, class... P>
 Callable create_custom_callable_function_pointer(const T *p_instance, R (T::*p_method)(P...) const) {
 	typedef CallableCustomMethodPointerRetC<T, R, P...> CCMP; // Messes with memnew otherwise.
 	CCMP *ccmp = memnew(CCMP(p_instance, p_method));
-	return ::godot::internal::create_custom_callable(ccmp);
+	return ::godot::internal::create_callable_from_ccmp(ccmp);
 }
 
 //
@@ -150,20 +172,25 @@ Callable create_custom_callable_function_pointer(const T *p_instance, R (T::*p_m
 
 template <class... P>
 class CallableCustomStaticMethodPointer : public CallableCustomMethodPointerBase {
-	void (*method)(P...);
+	struct Data {
+		void (*method)(P...);
+	} data;
+	static_assert(sizeof(Data) % 4 == 0);
 
 public:
-	virtual Object *get_object() const override {
-		return nullptr;
+	virtual ObjectID get_object() const override {
+		return ObjectID();
 	}
 
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const override {
-		call_with_variant_args_static_ret(method, p_arguments, p_argcount, r_return_value, r_call_error);
+		call_with_variant_args_static_ret(data.method, p_arguments, p_argcount, r_return_value, r_call_error);
 		r_return_value = Variant();
 	}
 
 	CallableCustomStaticMethodPointer(void (*p_method)(P...)) {
-		method = p_method;
+		memset(&data, 0, sizeof(Data));
+		data.method = p_method;
+		_setup((uint32_t *)&data, sizeof(Data));
 	}
 };
 
@@ -171,7 +198,7 @@ template <class... P>
 Callable create_custom_callable_static_function_pointer(void (*p_method)(P...)) {
 	typedef CallableCustomStaticMethodPointer<P...> CCMP;
 	CCMP *ccmp = memnew(CCMP(p_method));
-	return ::godot::internal::create_custom_callable(ccmp);
+	return ::godot::internal::create_callable_from_ccmp(ccmp);
 }
 
 //
@@ -180,20 +207,25 @@ Callable create_custom_callable_static_function_pointer(void (*p_method)(P...)) 
 
 template <class R, class... P>
 class CallableCustomStaticMethodPointerRet : public CallableCustomMethodPointerBase {
-	R(*method)
-	(P...);
+	struct Data {
+		R(*method)
+		(P...);
+	} data;
+	static_assert(sizeof(Data) % 4 == 0);
 
 public:
-	virtual Object *get_object() const override {
-		return nullptr;
+	virtual ObjectID get_object() const override {
+		return ObjectID();
 	}
 
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const override {
-		call_with_variant_args_static_ret(method, p_arguments, p_argcount, r_return_value, r_call_error);
+		call_with_variant_args_static_ret(data.method, p_arguments, p_argcount, r_return_value, r_call_error);
 	}
 
 	CallableCustomStaticMethodPointerRet(R (*p_method)(P...)) {
-		method = p_method;
+		memset(&data, 0, sizeof(Data));
+		data.method = p_method;
+		_setup((uint32_t *)&data, sizeof(Data));
 	}
 };
 
@@ -201,7 +233,7 @@ template <class R, class... P>
 Callable create_custom_callable_static_function_pointer(R (*p_method)(P...)) {
 	typedef CallableCustomStaticMethodPointerRet<R, P...> CCMP;
 	CCMP *ccmp = memnew(CCMP(p_method));
-	return ::godot::internal::create_custom_callable(ccmp);
+	return ::godot::internal::create_callable_from_ccmp(ccmp);
 }
 
 //

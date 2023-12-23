@@ -7,8 +7,9 @@
 > from Godot's `master` branch.
 >
 > For users of stable branches, switch to the branch matching your target Godot version:
-> - [`4.0`](https://github.com/godotengine/godot-cpp/tree/4.0)
+> - [`4.2`](https://github.com/godotengine/godot-cpp/tree/4.2)
 > - [`4.1`](https://github.com/godotengine/godot-cpp/tree/4.1)
+> - [`4.0`](https://github.com/godotengine/godot-cpp/tree/4.0)
 >
 > Or check out the Git tag matching your Godot version (e.g. `godot-4.1.1-stable`).
 >

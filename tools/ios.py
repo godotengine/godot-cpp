@@ -21,7 +21,7 @@ def has_ios_osxcross():
 
 def options(opts):
     opts.Add(BoolVariable("ios_simulator", "Target iOS Simulator", False))
-    opts.Add("ios_min_version", "Target minimum iphoneos/iphonesimulator version", "10.0")
+    opts.Add("ios_min_version", "Target minimum iphoneos/iphonesimulator version", "12.0")
     opts.Add(
         "IOS_TOOLCHAIN_PATH",
         "Path to iOS toolchain",

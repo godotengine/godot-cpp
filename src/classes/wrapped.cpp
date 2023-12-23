@@ -50,6 +50,12 @@ void Wrapped::_postinitialize() {
 		godot::internal::gdextension_interface_object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(extension_class), this);
 	}
 	godot::internal::gdextension_interface_object_set_instance_binding(_owner, godot::internal::token, this, _get_bindings_callbacks());
+	if (extension_class) {
+		Object *obj = dynamic_cast<Object *>(this);
+		if (obj) {
+			obj->notification(Object::NOTIFICATION_POSTINITIALIZE);
+		}
+	}
 }
 
 Wrapped::Wrapped(const StringName p_godot_class) {
