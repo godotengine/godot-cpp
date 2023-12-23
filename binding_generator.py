@@ -1696,7 +1696,12 @@ def generate_global_constants(api, output_dir):
     header.append("")
 
     for constant in api["global_constants"]:
-        header.append(f'\tconst int {escape_identifier(constant["name"])} = {constant["value"]};')
+        if constant["value"] == -9223372036854775808:
+            # INT64_MIN is an special case here. In C++ it has to be specified like this to avoid warnings
+            # because 9223372036854775808 can't fit inside a `long long`, so it'll be turned into a `uint64_t`.
+            header.append(f'\tconst int64_t {escape_identifier(constant["name"])} = -9223372036854775807 - 1;')
+        else:
+            header.append(f'\tconst int64_t {escape_identifier(constant["name"])} = {constant["value"]};')
 
     header.append("")
 
@@ -2415,6 +2420,8 @@ def escape_identifier(id):
     }
     if id in cpp_keywords_map:
         return cpp_keywords_map[id]
+    if re.match(r"U?INT\d*_(MIN|MAX)", id):
+        return "_" + id
     return id
 
 
