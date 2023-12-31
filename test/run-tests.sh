@@ -5,6 +5,9 @@ GODOT=${GODOT:-godot}
 END_STRING="==== TESTS FINISHED ===="
 FAILURE_STRING="******** FAILED ********"
 
+# Import to get GDExtension library working
+$GODOT --headless --path project --export-pack '<null>' /dev/null
+
 OUTPUT=$($GODOT --path project --debug --headless --quit)
 ERRCODE=$?
 
