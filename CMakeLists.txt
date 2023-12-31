@@ -1,140 +1,79 @@
 # cmake arguments
-# CMAKE_BUILD_TYPE:			Compilation target (Debug or Release defaults to Debug)
+# CMAKE_BUILD_TYPE:			Compilation target (editor, template_debug, template_release)
 #
-# godot-cpp cmake arguments
-# GODOT_GDEXTENSION_DIR:		Path to the directory containing GDExtension interface header and API JSON file
-# GODOT_CPP_SYSTEM_HEADERS		Mark the header files as SYSTEM. This may be useful to supress warnings in projects including this one.
-# GODOT_CPP_WARNING_AS_ERROR	Treat any warnings as errors
-# GODOT_CUSTOM_API_FILE:		Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
-# FLOAT_PRECISION:				Floating-point precision level ("single", "double")
+# PLATFORM:	Platform type (LINUX, MACOS, WINDOWS, ANDROID, IOS, WEB)
+# Auto-detected by default depending on current OS or chosen toolchain
 #
-# Android cmake arguments
-# CMAKE_TOOLCHAIN_FILE:		The path to the android cmake toolchain ($ANDROID_NDK/build/cmake/android.toolchain.cmake)
-# ANDROID_NDK:				The path to the android ndk root folder
-# ANDROID_TOOLCHAIN_NAME:	The android toolchain (arm-linux-androideabi-4.9 or aarch64-linux-android-4.9 or x86-4.9 or x86_64-4.9)
-# ANDROID_PLATFORM:			The android platform version (android-23)
-# More info here: https://godot.readthedocs.io/en/latest/development/compiling/compiling_for_android.html
+# other global and chosen platform-specific options:
+#
+# cmake -LH
+#
+# Note: use -Bbuild_dir option to build in separate directories
+# for different configurations
+#
+# cmake -Bbuild && cmake --build build
 #
 # Examples
 #
-# Builds a debug version:
+# Builds default configuration:
 # cmake .
 # cmake --build .
 #
-# Builds a release version with clang
-# CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" .
+# Builds template_release version
+#
+# cmake -DCMAKE_BUILD_TYPE=template_release .
 # cmake --build .
+#
+# Creates multi-config setup and builds 2 library versions (example for Linux)
+#
+# cmake -G "Ninja Multi-Config" .
+# cmake --build . --config editor
+# cmake --build . --config template_release
+#
+# Builds web version, using Emscripten toolchain
+#
+# cmake --toolchain /usr/lib/emscripten/cmake/Modules/Platform/Emscripten.cmake .
+# cmake --build .
+#
 #
 # Builds an android armeabi-v7a debug version:
-# cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_NDK=$ANDROID_NDK \
-#		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 -DANDROID_PLATFORM=android-23 -DCMAKE_BUILD_TYPE=Debug .
+# cmake --toolchain $ANDROID_NDK/build/cmake/android.toolchain.cmake \
+# 	-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 -DANDROID_TOOLCHAIN=clang -DANDROID_PLATFORM=21 .
 # cmake --build .
 #
-# Protip
-# Generate the buildfiles in a sub directory to not clutter the root directory with build files:
-# mkdir build && cd build && cmake -G "Unix Makefiles" .. && cmake --build .
 #
 # Todo
 # Test build for Windows, Mac and mingw.
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.24)
 project(godot-cpp LANGUAGES CXX)
 
-option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
-option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." ON)
-option(GODOT_CPP_WARNING_AS_ERROR "Treat warnings as errors" OFF)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
-# Add path to modules
-list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
-
-# Set some helper variables for readability
-set( compiler_is_clang "$<OR:$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>>" )
-set( compiler_is_gnu "$<CXX_COMPILER_ID:GNU>" )
-set( compiler_is_msvc "$<CXX_COMPILER_ID:MSVC>" )
-
-# Default build type is Debug in the SConstruct
-if("${CMAKE_BUILD_TYPE}" STREQUAL "")
-	set(CMAKE_BUILD_TYPE Debug)
-endif()
-
-if(NOT DEFINED BITS)
-	set(BITS 32)
-	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-		set(BITS 64)
-	endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-endif()
-
-# Input from user for GDExtension interface header and the API JSON file
-set(GODOT_GDEXTENSION_DIR "gdextension" CACHE STRING "")
-set(GODOT_CUSTOM_API_FILE "" CACHE STRING "")
-
-set(GODOT_GDEXTENSION_API_FILE "${GODOT_GDEXTENSION_DIR}/extension_api.json")
-if (NOT "${GODOT_CUSTOM_API_FILE}" STREQUAL "")  # User-defined override.
-	set(GODOT_GDEXTENSION_API_FILE "${GODOT_CUSTOM_API_FILE}")
-endif()
-
-set(FLOAT_PRECISION "single" CACHE STRING "")
-if ("${FLOAT_PRECISION}" STREQUAL "double")
-	add_definitions(-DREAL_T_IS_DOUBLE)
-endif()
-
-set(GODOT_COMPILE_FLAGS )
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-	# using Visual Studio C++
-	set(GODOT_COMPILE_FLAGS "/utf-8") # /GF /MP
-
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MDd") # /Od /RTC1 /Zi
-	else()
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MD /O2") # /Oy /GL /Gy
-		STRING(REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-		string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
-	endif(CMAKE_BUILD_TYPE MATCHES Debug)
-
-	add_definitions(-DNOMINMAX)
-else()  # GCC/Clang
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -fno-omit-frame-pointer -O0 -g")
-	else()
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -O3")
-	endif(CMAKE_BUILD_TYPE MATCHES Debug)
-endif()
-
-# Disable exception handling. Godot doesn't use exceptions anywhere, and this
-# saves around 20% of binary size and very significant build time (GH-80513).
-option(GODOT_DISABLE_EXCEPTIONS ON "Force disabling exception handling code")
-if (GODOT_DISABLE_EXCEPTIONS)
-	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -D_HAS_EXCEPTIONS=0")
-	else()
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -fno-exceptions")
-	endif()
-else()
-	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /EHsc")
-	endif()
-endif()
+# Handles all global and platform-specific variables
+include(godotcpp)
 
 # Generate source from the bindings file
 find_package(Python3 3.4 REQUIRED) # pathlib should be present
+
+execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GDEXTENSION_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True, sources=True)"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	OUTPUT_VARIABLE GENERATED_FILES_LIST
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+string(TOLOWER ${FLOAT_PRECISION} FLOAT_PRECISION_ARG)
 if(GENERATE_TEMPLATE_GET_NODE)
 	set(GENERATE_BINDING_PARAMETERS "True")
 else()
 	set(GENERATE_BINDING_PARAMETERS "False")
 endif()
 
-execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list(\"${GODOT_GDEXTENSION_API_FILE}\", \"${CMAKE_CURRENT_BINARY_DIR}\", headers=True, sources=True)"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	OUTPUT_VARIABLE GENERATED_FILES_LIST
-	OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
 add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
-		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_GDEXTENSION_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${BITS}\", \"${FLOAT_PRECISION}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
+		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GDEXTENSION_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${BITS}\", \"${FLOAT_PRECISION_ARG}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
 		VERBATIM
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-		MAIN_DEPENDENCY ${GODOT_GDEXTENSION_API_FILE}
+		MAIN_DEPENDENCY ${GDEXTENSION_API_FILE}
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/binding_generator.py
 		COMMENT "Generating bindings"
 )
@@ -144,73 +83,41 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.c**)
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS include/*.h**)
 
 # Define our godot-cpp library
-add_library(${PROJECT_NAME} STATIC
+add_library(${PROJECT_NAME} ${GODOT_CPP_LIBRARY_TYPE}
 		${SOURCES}
 		${HEADERS}
 		${GENERATED_FILES_LIST}
 )
 add_library(godot::cpp ALIAS ${PROJECT_NAME})
 
-include(GodotCompilerWarnings)
-
-target_compile_features(${PROJECT_NAME}
-	PRIVATE
-		cxx_std_17
-)
-
-target_compile_definitions(${PROJECT_NAME} PUBLIC
-	$<$<CONFIG:Debug>:
-		DEBUG_ENABLED
-		DEBUG_METHODS_ENABLED
-	>
-	$<${compiler_is_msvc}:
-		TYPED_METHOD_BIND
-	>
-)
-
-target_link_options(${PROJECT_NAME} PRIVATE
-	$<$<NOT:${compiler_is_msvc}>:
-		-static-libgcc
-		-static-libstdc++
-		-Wl,-R,'$$ORIGIN'
-	>
-)
-
-# Optionally mark headers as SYSTEM
-set(GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE "")
-if (GODOT_CPP_SYSTEM_HEADERS)
-	set(GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE SYSTEM)
-endif ()
-
 target_include_directories(${PROJECT_NAME} ${GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE} PUBLIC
 	include
 	${CMAKE_CURRENT_BINARY_DIR}/gen/include
-	${GODOT_GDEXTENSION_DIR}
+	${GDEXTENSION_DIR}
 )
 
-# Add the compile flags
-set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
+target_compile_features(${PROJECT_NAME} PUBLIC
+	cxx_std_17
+)
 
-# Create the correct name (godot.os.build_type.system_bits)
-string(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME)
-string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+target_compile_options(${PROJECT_NAME} PRIVATE
+	${GODOT_CC_FLAGS}
+	${GODOT_CXX_FLAGS}
+	${GODOT_COMPILE_WARNING_FLAGS}
+)
 
-if(ANDROID)
-	# Added the android abi after system name
-	set(SYSTEM_NAME ${SYSTEM_NAME}.${ANDROID_ABI})
+target_link_options(${PROJECT_NAME} PRIVATE ${GODOT_LINK_FLAGS})
 
-	# Android does not have the bits at the end if you look at the main godot repo build
-	set(OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}")
-else()
-	set(OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}.${BITS}")
-endif()
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${GODOT_DEFINITIONS})
 
 set_target_properties(${PROJECT_NAME}
 	PROPERTIES
 		CXX_EXTENSIONS OFF
+                COMPILE_WARNING_AS_ERROR ${GODOT_CPP_WARNING_AS_ERROR}
 		POSITION_INDEPENDENT_CODE ON
 		ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
-		OUTPUT_NAME "${OUTPUT_NAME}"
+		OUTPUT_NAME "${PROJECT_NAME}${LIBRARY_SUFFIX}"
 )
+
