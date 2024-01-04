@@ -117,6 +117,9 @@ struct _NO_DISCARD_ Vector2i {
 	int64_t length_squared() const;
 	double length() const;
 
+	int64_t distance_squared_to(const Vector2i &p_to) const;
+	double distance_to(const Vector2i &p_to) const;
+
 	real_t aspect() const { return width / (real_t)height; }
 	Vector2i sign() const { return Vector2i(SIGN(x), SIGN(y)); }
 	Vector2i abs() const { return Vector2i(Math::abs(x), Math::abs(y)); }
