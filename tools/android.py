@@ -64,6 +64,12 @@ def generate(env):
     elif sys.platform == "darwin":
         toolchain += "darwin-x86_64"
         env.Append(LINKFLAGS=["-shared"])
+
+    if not os.path.exists(toolchain):
+        print("ERROR: Could not find NDK toolchain at " + toolchain + ".")
+        print("Make sure NDK version " + get_ndk_version() + " is installed.")
+        env.Exit(1)
+
     env.PrependENVPath("PATH", toolchain + "/bin")  # This does nothing half of the time, but we'll put it here anyways
 
     # Get architecture info
