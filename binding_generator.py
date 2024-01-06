@@ -2334,6 +2334,7 @@ def get_operator_id_name(op):
         "unary-": "negate",
         "unary+": "positive",
         "%": "module",
+        "**": "power",
         "<<": "shift_left",
         ">>": "shift_right",
         "&": "bit_and",
