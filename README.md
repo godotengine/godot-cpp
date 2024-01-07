@@ -74,7 +74,10 @@ so formatting is done before your changes are submitted.
 
 ## Getting started
 
-It's a bit similar to what it was for 3.x but also a bit different.
+You need the same C++ pre-requisites installed that are required for the `godot` repository. Follow the [official build instructions for your target platform](https://docs.godotengine.org/en/latest/contributing/development/compiling/index.html#building-for-target-platforms).
+
+Getting started with GDExtensions is a bit similar to what it was for 3.x but also a bit different.
+
 This new approach is much more akin to how core Godot modules are structured.
 
 Compiling this repository generates a static library to be linked with your shared lib,
