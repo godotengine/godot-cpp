@@ -1716,9 +1716,9 @@ def generate_global_constant_binds(api, output_dir):
             continue
 
         if enum_def["is_bitfield"]:
-            header.append(f'VARIANT_BITFIELD_CAST(godot::{enum_def["name"]});')
+            header.append(f'VARIANT_BITFIELD_CAST({enum_def["name"]});')
         else:
-            header.append(f'VARIANT_ENUM_CAST(godot::{enum_def["name"]});')
+            header.append(f'VARIANT_ENUM_CAST({enum_def["name"]});')
 
     # Variant::Type is not a global enum, but only one line, it is worth to place in this file instead of creating new file.
     header.append(f"VARIANT_ENUM_CAST(godot::Variant::Type);")
