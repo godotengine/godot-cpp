@@ -241,7 +241,7 @@ MethodBind *ClassDB::bind_method(N p_method_name, M p_method, VarArgs... p_args)
 	Variant args[sizeof...(p_args) + 1] = { p_args..., Variant() }; // +1 makes sure zero sized arrays are also supported.
 	const Variant *argptrs[sizeof...(p_args) + 1];
 	for (uint32_t i = 0; i < sizeof...(p_args); i++) {
-		argptrs[i] = &args[i];
+		argptrs[sizeof...(p_args) - i - 1] = &args[i];
 	}
 	MethodBind *bind = create_method_bind(p_method);
 	return bind_methodfi(METHOD_FLAGS_DEFAULT, bind, p_method_name, sizeof...(p_args) == 0 ? nullptr : (const void **)argptrs, sizeof...(p_args));
@@ -252,7 +252,7 @@ MethodBind *ClassDB::bind_static_method(StringName p_class, N p_method_name, M p
 	Variant args[sizeof...(p_args) + 1] = { p_args..., Variant() }; // +1 makes sure zero sized arrays are also supported.
 	const Variant *argptrs[sizeof...(p_args) + 1];
 	for (uint32_t i = 0; i < sizeof...(p_args); i++) {
-		argptrs[i] = &args[i];
+		argptrs[sizeof...(p_args) - i - 1] = &args[i];
 	}
 	MethodBind *bind = create_static_method_bind(p_method);
 	bind->set_instance_class(p_class);

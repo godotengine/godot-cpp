@@ -76,6 +76,15 @@ func _ready():
 	assert_equal(example.def_args(50), 250)
 	assert_equal(example.def_args(50, 100), 150)
 
+	# Method calls with partial default values.
+	assert_equal(example.partial_def_args(50), 250)
+	assert_equal(example.partial_def_args(50, 100), 150)
+
+	# Method calls with default values of different types.
+	assert_equal(example.mixed_def_args(), 201)
+	assert_equal(example.mixed_def_args("aa"), 202)
+	assert_equal(example.mixed_def_args("aaa", 100), 103)
+
 	# Array and Dictionary
 	assert_equal(example.test_array(), [1, 2])
 	assert_equal(example.test_tarray(), [ Vector2(1, 2), Vector2(2, 3) ])

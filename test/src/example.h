@@ -118,6 +118,8 @@ public:
 	void varargs_func_void(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error);
 	void emit_custom_signal(const String &name, int value);
 	int def_args(int p_a = 100, int p_b = 200);
+	int partial_def_args(int p_a, int p_b = 200);
+	int mixed_def_args(String p_a = "a", int p_b = 200);
 
 	Array test_array() const;
 	int test_tarray_arg(const TypedArray<int64_t> &p_array);

@@ -97,6 +97,14 @@ int Example::def_args(int p_a, int p_b) {
 	return p_a + p_b;
 }
 
+int Example::partial_def_args(int p_a, int p_b) {
+	return p_a + p_b;
+}
+
+int Example::mixed_def_args(String p_a, int p_b) {
+	return p_a.length() + p_b;
+}
+
 void Example::_notification(int p_what) {
 	if (p_what == NOTIFICATION_READY) {
 		Dictionary opts;
@@ -226,7 +234,9 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_send_rpc", "value"), &Example::test_send_rpc);
 	ClassDB::bind_method(D_METHOD("return_last_rpc_arg"), &Example::return_last_rpc_arg);
 
-	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
+	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(200), DEFVAL(100));
+	ClassDB::bind_method(D_METHOD("partial_def_args", "a", "b"), &Example::partial_def_args, DEFVAL(200));
+	ClassDB::bind_method(D_METHOD("mixed_def_args", "a", "b"), &Example::mixed_def_args, DEFVAL(200), DEFVAL("a"));
 	ClassDB::bind_method(D_METHOD("callable_bind"), &Example::callable_bind);
 	ClassDB::bind_method(D_METHOD("test_post_initialize"), &Example::test_post_initialize);
 
