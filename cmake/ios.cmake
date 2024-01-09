@@ -60,9 +60,3 @@ list(APPEND GODOT_LINK_FLAGS
 	>
 )
 
-string(APPEND LIBRARY_SUFFIX ".${ARCH}")
-
-if(${IOS_SIMULATOR})
-	string(APPEND LIBRARY_SUFFIX ".simulator")
-endif()
-

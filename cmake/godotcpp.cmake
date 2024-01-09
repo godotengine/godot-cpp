@@ -2,12 +2,14 @@
 
 ### Options
 
-set(CMAKE_CONFIGURATION_TYPES "template_debug;editor;template_release")
+set(CONFIGS_WITH_DEBUG "Debug;RelWithDebInfo" CACHE STRING "Configurations that should have debug symbols (Modify if support for custom configurations is needed)")
 
+# Default config
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
-	set(CMAKE_BUILD_TYPE template_debug)
+	set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
+set(TARGET "TEMPLATE_DEBUG" CACHE STRING "Target platform (EDITOR, TEMPLATE_DEBUG, TEMPLATE_RELEASE)")
 # Auto-detect platform
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(DEFAULT_PLATFORM "LINUX")
@@ -40,7 +42,7 @@ set(GODOT_CPP_LIBRARY_TYPE "STATIC" CACHE STRING "[Experimental] Library type (S
 
 option(DEV_BUILD "Developer build with dev-only debugging code" OFF)
 
-option(DEBUG_SYMBOLS "Build with debugging symbols" ON)
+option(DEBUG_SYMBOLS "Force build with debugging symbols" OFF)
 
 option(USE_HOT_RELOAD "Enable the extra accounting required to support hot reload" ON)
 
@@ -69,7 +71,8 @@ option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class
 # Compiler warnings and compiler check generators
 include(GodotCompilerWarnings)
 
-# Create the correct name (godot-cpp.platform.target.arch)
+# Create the correct name (godot-cpp.platform.target)
+# See more prefix appends in platform-specific configs
 if(${DEV_BUILD})
 	string(APPEND LIBRARY_SUFFIX ".dev")
 endif()
@@ -81,13 +84,21 @@ endif()
 # Workaround of $<CONFIG> expanding to "" when default build set
 set(CONFIG "$<IF:$<STREQUAL:,$<CONFIG>>,${CMAKE_BUILD_TYPE},$<CONFIG>>")
 
-string(TOLOWER ".${PLATFORM}" platform)
-string(PREPEND LIBRARY_SUFFIX "${platform}.${CONFIG}")
+string(TOLOWER ".${PLATFORM}.${TARGET}" platform_target)
+string(PREPEND LIBRARY_SUFFIX ${platform_target})
 
 # Default optimization levels if OPTIMIZE=AUTO, for multi-config support
-set(DEFAULT_OPTIMIZATION_DEV "$<AND:$<STREQUAL:${OPTIMIZE},AUTO>,$<BOOL:${DEV_BUILD}>>")
-set(DEFAULT_OPTIMIZATION_DEBUG_FEATURES "$<AND:$<NOT:${DEFAULT_OPTIMIZATION_DEV}>,$<STREQUAL:${OPTIMIZE},AUTO>,$<OR:$<STREQUAL:${CONFIG},editor>,$<STREQUAL:${CONFIG},template_debug>>>")
-set(DEFAULT_OPTIMIZATION "$<$<AND:$<NOT:$<OR:${DEFAULT_OPTIMIZATION_DEV},${DEFAULT_OPTIMIZATION_DEBUG_FEATURES}>>,STREQUAL:${OPTIMIZE},AUTO>>")
+set(DEFAULT_OPTIMIZATION_DEBUG_FEATURES "$<OR:$<STREQUAL:${TARGET},EDITOR>,$<STREQUAL:${TARGET},TEMPLATE_DEBUG>>")
+set(DEFAULT_OPTIMIZATION "$<NOT:${DEFAULT_OPTIMIZATION_DEBUG_FEATURES}>")
+
+set(DEBUG_SYMBOLS_ENABLED "$<OR:$<BOOL:${DEBUG_SYMBOLS}>,$<IN_LIST:${CONFIG},${CONFIGS_WITH_DEBUG}>>")
+
+# Clean default options
+set(CMAKE_CXX_FLAGS "")
+set(CMAKE_CXX_FLAGS_DEBUG "")
+set(CMAKE_CXX_FLAGS_RELEASE "")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "")
+set(CMAKE_CXX_FLAGS_MINSIZEREL "")
 
 list(APPEND GODOT_DEFINITIONS
 	GDEXTENSION
@@ -101,10 +112,10 @@ list(APPEND GODOT_DEFINITIONS
 	$<$<STREQUAL:${FLOAT_PRECISION},DOUBLE>:
 		REAL_T_IS_DOUBLE
 	>
-	$<$<AND:$<NOT:$<STREQUAL:${CONFIG},template_release>>,$<BOOL:${USE_HOT_RELOAD}>>:
+	$<$<AND:$<NOT:$<STREQUAL:${TARGET},TEMPLATE_RELEASE>>,$<BOOL:${USE_HOT_RELOAD}>>:
 		HOT_RELOAD_ENABLE
 	>
-	$<$<STREQUAL:${CONFIG},editor>:
+	$<$<STREQUAL:${TARGET},EDITOR>:
 		TOOLS_ENABLED
 	>
 
@@ -115,7 +126,7 @@ list(APPEND GODOT_DEFINITIONS
 		NDEBUG
 	>
 
-	$<$<NOT:$<STREQUAL:${CONFIG},template_release>>:
+	$<$<NOT:$<STREQUAL:${TARGET},TEMPLATE_RELEASE>>:
 		DEBUG_ENABLED
 		DEBUG_METHODS_ENABLED
 	>
@@ -123,28 +134,40 @@ list(APPEND GODOT_DEFINITIONS
 
 list(APPEND GODOT_CC_FLAGS
 	$<${compiler_is_msvc}:
-		$<$<BOOL:${DEBUG_SYMBOLS}>:
+		$<${DEBUG_SYMBOLS_ENABLED}:
 			/Zi
 			/FS
 		>
 
-		$<$<OR:$<STREQUAL:${OPTIMIZE},SPEED>,${DEFAULT_OPTIMIZATION}>:
-			/O2
+		$<$<STREQUAL:${OPTIMIZE},AUTO>:
+			$<$<CONFIG:Release,RelWithDebInfo>:
+				$<${DEFAULT_OPTIMIZATION}:
+					/O2
+				>
+				$<${DEFAULT_OPTIMIZATION_DEBUG_FEATURES}:
+					/O2
+				>
+			>
+			$<$<CONFIG:MinSizeRel>:
+				/O1
+			>
+			$<$<CONFIG:Debug,>:
+				/Od
+			>
 		>
-		$<$<OR:$<STREQUAL:${OPTIMIZE},SPEED_TRACE>,${DEFAULT_OPTIMIZATION_DEBUG_FEATURES}>:
-			/O2
+		$<$<NOT:$<STREQUAL:${OPTIMIZE},AUTO>>:
+			$<$<STREQUAL:${OPTIMIZE},SPEED>:/O2>
+			$<$<STREQUAL:${OPTIMIZE},SPEED_TRACE>:/O2>
+			$<$<STREQUAL:${OPTIMIZE},SIZE>:/O1>
+			$<$<STREQUAL:${OPTIMIZE},DEBUG>:/Od>
+			$<$<STREQUAL:${OPTIMIZE},NONE>:/Od>
 		>
-		$<$<STREQUAL:${OPTIMIZE},SIZE>:
-			/O1
-		>
-		$<$<OR:$<STREQUAL:${OPTIMIZE},DEBUG>,$<STREQUAL:${OPTIMIZE},NONE>,${DEFAULT_OPTIMIZATION_DEV}>:
-			/Od
-		>
+
 	>
 	$<$<NOT:${compiler_is_msvc}>:
-		$<$<BOOL:${DEBUG_SYMBOLS}>:
+		$<${DEBUG_SYMBOLS_ENABLED}:
 			-gdwarf-4
-		
+
 			$<$<BOOL:${DEV_BUILD}>:
 				-g3
 			>
@@ -160,20 +183,28 @@ list(APPEND GODOT_CC_FLAGS
 			-fvisibility=hidden
 		>
 
-		$<$<OR:$<STREQUAL:${OPTIMIZE},SPEED>>:
-			-O3
+		$<$<STREQUAL:${OPTIMIZE},AUTO>:
+			$<$<CONFIG:Release,RelWithDebInfo>:
+				$<${DEFAULT_OPTIMIZATION}:
+					-O3
+				>
+				$<${DEFAULT_OPTIMIZATION_DEBUG_FEATURES}:
+					-O2
+				>
+			>
+			$<$<CONFIG:MinSizeRel>:
+				-Os
+			>
+			$<$<CONFIG:Debug,>:
+				-Og
+			>
 		>
-		$<$<OR:$<STREQUAL:${OPTIMIZE},SPEED_TRACE>,${DEFAULT_OPTIMIZATION_DEBUG_FEATURES}>:
-			-O2
-		>
-		$<$<STREQUAL:${OPTIMIZE},SIZE>:
-			-Os
-		>
-		$<$<STREQUAL:${OPTIMIZE},DEBUG>:
-			-Og
-		>
-		$<$<OR:$<STREQUAL:${OPTIMIZE},NONE>,${DEFAULT_OPTIMIZATION_DEV}>:
-			-O0
+		$<$<NOT:$<STREQUAL:${OPTIMIZE},AUTO>>:
+			$<$<STREQUAL:${OPTIMIZE},SPEED>:-O3>
+			$<$<STREQUAL:${OPTIMIZE},SPEED_TRACE>:-O2>
+			$<$<STREQUAL:${OPTIMIZE},SIZE>:-Os>
+			$<$<STREQUAL:${OPTIMIZE},DEBUG>:-Og>
+			$<$<STREQUAL:${OPTIMIZE},NONE>:-O0>
 		>
 	>
 )
@@ -186,26 +217,35 @@ list(APPEND GODOT_CXX_FLAGS
 	>
 	$<$<NOT:${compiler_is_msvc}>:
 		$<$<BOOL:${GODOT_DISABLE_EXCEPTIONS}>:
-			-fno-exceptions	
+			-fno-exceptions
 		>
 	>
 )
 
 list(APPEND GODOT_LINK_FLAGS
 	$<${compiler_is_msvc}:
-		$<$<BOOL:${DEBUG_SYMBOLS}>:
+		$<${DEBUG_SYMBOLS_ENABLED}:
 			/DEBUG:FULL
 		>
 
-		$<$<STREQUAL:${OPTIMIZE},SPEED>:
-			/OPT:REF
+		$<$<STREQUAL:${OPTIMIZE},AUTO>:
+			$<$<CONFIG:Release,RelWithDebInfo>:
+				$<${DEFAULT_OPTIMIZATION}:
+					/OPT:REF
+				>
+				$<${DEFAULT_OPTIMIZATION_DEBUG_FEATURES}:
+					/OPT:REF
+					/OPT:NOICF
+				>
+			>
+			$<$<CONFIG:MinSizeRel>:
+				/OPT:REF
+			>
 		>
-		$<$<OR:$<STREQUAL:${OPTIMIZE},SPEED_TRACE>,${DEFAULT_OPTIMIZATION_DEBUG_FEATURES}>:
-			/OPT:REF
-			/OPT:NOICF
-		>
-		$<$<STREQUAL:${OPTIMIZE},SIZE>:
-			/OPT:REF
+		$<$<NOT:$<STREQUAL:${OPTIMIZE},AUTO>>:
+			$<$<STREQUAL:${OPTIMIZE},SPEED>:/OPT:REF>
+			$<$<STREQUAL:${OPTIMIZE},SPEED_TRACE>:/OPT:REF /OPT:NOICF>
+			$<$<STREQUAL:${OPTIMIZE},SIZE>:/OPT:REF>
 		>
 	>
 	$<$<NOT:${compiler_is_msvc}>:
@@ -216,7 +256,7 @@ list(APPEND GODOT_LINK_FLAGS
 			-fvisibility=hidden
 		>
 
-		$<$<NOT:$<BOOL:${DEBUG_SYMBOLS}>>:
+		$<$<NOT:${DEBUG_SYMBOLS_ENABLED}>:
 			$<$<CXX_COMPILER_ID:AppleClang>: # SCons: not is_vanilla_clang(env)
 				"-Wl,-S"
 				"-Wl,-x"
@@ -246,9 +286,15 @@ else()
 	message(FATAL_ERROR "Platform not supported: ${PLATFORM}")
 endif()
 
+string(APPEND LIBRARY_SUFFIX ".${ARCH}")
+
+if(${IOS_SIMULATOR})
+	string(APPEND LIBRARY_SUFFIX ".simulator")
+endif()
+
 # Write all flags to file for cmake configuration debug
-file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/flags.txt"
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/flags-${CONFIG}.txt"
 	CONTENT
-	"C_FLAGS '${GODOT_CC_FLAGS}'\nCXX_FLAGS '${GODOT_CXX_FLAGS}'\nLINK_FLAGS '${GODOT_LINK_FLAGS}'\nCOMPILE_WARNING_FLAGS '${GODOT_COMPILE_WARNING_FLAGS}'\n"
+	"C_FLAGS '${GODOT_CC_FLAGS}'\nCXX_FLAGS '${GODOT_CXX_FLAGS}'\nLINK_FLAGS '${GODOT_LINK_FLAGS}'\nCOMPILE_WARNING_FLAGS '${GODOT_COMPILE_WARNING_FLAGS}'\nDEFINITIONS '${GODOT_DEFINITIONS}'"
 	TARGET ${PROJECT_NAME}
 )

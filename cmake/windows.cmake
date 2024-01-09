@@ -18,7 +18,7 @@ list(APPEND GODOT_DEFINITIONS
 list(APPEND GODOT_CC_FLAGS
 	$<${compiler_is_msvc}:
 		/utf-8
-		
+
 		$<$<BOOL:${USE_STATIC_CPP}>:
 			/MT
 		>
@@ -48,6 +48,4 @@ list(APPEND GODOT_COMPILE_WARNING_FLAGS
 		-Wwrite-strings
 	>
 )
-
-string(APPEND LIBRARY_SUFFIX ".${ARCH}")
 

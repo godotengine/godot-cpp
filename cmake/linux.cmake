@@ -10,7 +10,7 @@ list(APPEND GODOT_DEFINITIONS
 )
 
 list(APPEND GODOT_CC_FLAGS
-	# -fPIC is controlled by POSITION_INDEPENDENT_CODE property 
+	# -fPIC is controlled by POSITION_INDEPENDENT_CODE property
 
 	$<$<STREQUAL:${ARCH},x86_64>:
 		-m64
@@ -56,6 +56,4 @@ list(APPEND GODOT_LINK_FLAGS
 list(APPEND GODOT_COMPILE_WARNING_FLAGS
 	-Wwrite-strings
 )
-
-string(APPEND LIBRARY_SUFFIX ".${ARCH}")
 

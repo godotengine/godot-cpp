@@ -76,3 +76,20 @@ list(APPEND GODOT_COMPILE_WARNING_FLAGS
         -Wno-return-type
     >
 )
+
+# Treat warnings as errors
+function(set_warning_as_error TARGET_NAME)
+    message(STATUS "[${TARGET_NAME}] Treating warnings as errors")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
+        set_target_properties(${TARGET_NAME}
+            PROPERTIES
+                COMPILE_WARNING_AS_ERROR ON
+        )
+    else()
+        target_compile_options(${TARGET_NAME}
+            PRIVATE
+                $<${compiler_is_msvc}:/WX>
+                $<$<OR:${compiler_is_clang},${compiler_is_gnu}>:-Werror>
+        )
+    endif()
+endfunction()

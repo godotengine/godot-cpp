@@ -63,5 +63,3 @@ list(APPEND GODOT_LINK_FLAGS
 	>
 )
 
-string(APPEND LIBRARY_SUFFIX ".${ARCH}")
-
