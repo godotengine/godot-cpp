@@ -98,6 +98,10 @@ public:
 		return string_name;
 	}
 
+	virtual bool is_class_static(const StringName &p_string_name) const {
+		return p_string_name == get_class_static();
+	}
+
 	uint64_t get_instance_id() const {
 		return 0;
 	}
@@ -220,6 +224,10 @@ public:                                                                         
 	static ::godot::StringName &get_class_static() {                                                                                                                                   \
 		static ::godot::StringName string_name = ::godot::StringName(#m_class);                                                                                                        \
 		return string_name;                                                                                                                                                            \
+	}                                                                                                                                                                                  \
+                                                                                                                                                                                       \
+	virtual bool is_class_static(const StringName &p_string_name) const override {                                                                                                     \
+		return get_class_static() == p_string_name;                                                                                                                                    \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	static ::godot::StringName &get_parent_class_static() {                                                                                                                            \
