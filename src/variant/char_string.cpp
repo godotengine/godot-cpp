@@ -76,7 +76,7 @@ bool CharStringT<T>::operator<(const CharStringT<T> &p_right) const {
 
 template <class T>
 CharStringT<T> &CharStringT<T>::operator+=(T p_char) {
-	const int lhs_len = length();
+	const int64_t lhs_len = length();
 	resize(lhs_len + 2);
 
 	T *dst = ptrw();
@@ -172,23 +172,23 @@ String::String(const char32_t *from) {
 	internal::gdextension_interface_string_new_with_utf32_chars(_native_ptr(), from);
 }
 
-String String::utf8(const char *from, int len) {
+String String::utf8(const char *from, int64_t len) {
 	String ret;
 	ret.parse_utf8(from, len);
 	return ret;
 }
 
-void String::parse_utf8(const char *from, int len) {
+void String::parse_utf8(const char *from, int64_t len) {
 	internal::gdextension_interface_string_new_with_utf8_chars_and_len(_native_ptr(), from, len);
 }
 
-String String::utf16(const char16_t *from, int len) {
+String String::utf16(const char16_t *from, int64_t len) {
 	String ret;
 	ret.parse_utf16(from, len);
 	return ret;
 }
 
-void String::parse_utf16(const char16_t *from, int len) {
+void String::parse_utf16(const char16_t *from, int64_t len) {
 	internal::gdextension_interface_string_new_with_utf16_chars_and_len(_native_ptr(), from, len);
 }
 
@@ -230,8 +230,8 @@ String rtoss(double p_val) {
 }
 
 CharString String::utf8() const {
-	int length = internal::gdextension_interface_string_to_utf8_chars(_native_ptr(), nullptr, 0);
-	int size = length + 1;
+	int64_t length = internal::gdextension_interface_string_to_utf8_chars(_native_ptr(), nullptr, 0);
+	int64_t size = length + 1;
 	CharString str;
 	str.resize(size);
 	internal::gdextension_interface_string_to_utf8_chars(_native_ptr(), str.ptrw(), length);
@@ -242,8 +242,8 @@ CharString String::utf8() const {
 }
 
 CharString String::ascii() const {
-	int length = internal::gdextension_interface_string_to_latin1_chars(_native_ptr(), nullptr, 0);
-	int size = length + 1;
+	int64_t length = internal::gdextension_interface_string_to_latin1_chars(_native_ptr(), nullptr, 0);
+	int64_t size = length + 1;
 	CharString str;
 	str.resize(size);
 	internal::gdextension_interface_string_to_latin1_chars(_native_ptr(), str.ptrw(), length);
@@ -254,8 +254,8 @@ CharString String::ascii() const {
 }
 
 Char16String String::utf16() const {
-	int length = internal::gdextension_interface_string_to_utf16_chars(_native_ptr(), nullptr, 0);
-	int size = length + 1;
+	int64_t length = internal::gdextension_interface_string_to_utf16_chars(_native_ptr(), nullptr, 0);
+	int64_t size = length + 1;
 	Char16String str;
 	str.resize(size);
 	internal::gdextension_interface_string_to_utf16_chars(_native_ptr(), str.ptrw(), length);
@@ -266,8 +266,8 @@ Char16String String::utf16() const {
 }
 
 Char32String String::utf32() const {
-	int length = internal::gdextension_interface_string_to_utf32_chars(_native_ptr(), nullptr, 0);
-	int size = length + 1;
+	int64_t length = internal::gdextension_interface_string_to_utf32_chars(_native_ptr(), nullptr, 0);
+	int64_t size = length + 1;
 	Char32String str;
 	str.resize(size);
 	internal::gdextension_interface_string_to_utf32_chars(_native_ptr(), str.ptrw(), length);
@@ -278,8 +278,8 @@ Char32String String::utf32() const {
 }
 
 CharWideString String::wide_string() const {
-	int length = internal::gdextension_interface_string_to_wide_chars(_native_ptr(), nullptr, 0);
-	int size = length + 1;
+	int64_t length = internal::gdextension_interface_string_to_wide_chars(_native_ptr(), nullptr, 0);
+	int64_t size = length + 1;
 	CharWideString str;
 	str.resize(size);
 	internal::gdextension_interface_string_to_wide_chars(_native_ptr(), str.ptrw(), length);
@@ -386,11 +386,11 @@ String &String::operator+=(const char32_t *p_str) {
 	return *this;
 }
 
-const char32_t &String::operator[](int p_index) const {
+const char32_t &String::operator[](int64_t p_index) const {
 	return *internal::gdextension_interface_string_operator_index_const((GDExtensionStringPtr)this, p_index);
 }
 
-char32_t &String::operator[](int p_index) {
+char32_t &String::operator[](int64_t p_index) {
 	return *internal::gdextension_interface_string_operator_index((GDExtensionStringPtr)this, p_index);
 }
 
