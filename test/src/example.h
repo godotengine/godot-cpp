@@ -198,11 +198,22 @@ protected:
 	static void _bind_methods() {}
 };
 
-class ExampleAbstract : public Object {
-	GDCLASS(ExampleAbstract, Object);
+class ExampleAbstractBase : public Object {
+	GDCLASS(ExampleAbstractBase, Object);
 
 protected:
 	static void _bind_methods() {}
+
+	virtual int test_function() = 0;
+};
+
+class ExampleConcrete : public ExampleAbstractBase {
+	GDCLASS(ExampleConcrete, ExampleAbstractBase);
+
+protected:
+	static void _bind_methods() {}
+
+	virtual int test_function() override { return 25; }
 };
 
 #endif // EXAMPLE_CLASS_H
