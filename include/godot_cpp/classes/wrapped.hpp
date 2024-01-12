@@ -48,6 +48,7 @@ typedef void GodotObject;
 // Base for all engine classes, to contain the pointer to the engine instance.
 class Wrapped {
 	friend class GDExtensionBinding;
+	friend class ClassDB;
 	friend void postinitialize_handler(Wrapped *);
 
 protected:
@@ -131,17 +132,6 @@ struct EngineClassRegistration {
 
 } // namespace godot
 
-#ifdef HOT_RELOAD_ENABLED
-#define _GDCLASS_RECREATE(m_class, m_inherits)                                                   \
-	m_class *new_instance = (m_class *)memalloc(sizeof(m_class));                                \
-	Wrapped::RecreateInstance recreate_data = { new_instance, obj, Wrapped::recreate_instance }; \
-	Wrapped::recreate_instance = &recreate_data;                                                 \
-	memnew_placement(new_instance, m_class);                                                     \
-	return new_instance;
-#else
-#define _GDCLASS_RECREATE(m_class, m_inherits) return nullptr;
-#endif
-
 // Use this on top of your own classes.
 // Note: the trail of `***` is to keep sane diffs in PRs, because clang-format otherwise moves every `\` which makes
 // every line of the macro different
@@ -224,15 +214,6 @@ public:                                                                         
                                                                                                                                                                                        \
 	static ::godot::StringName &get_parent_class_static() {                                                                                                                            \
 		return m_inherits::get_class_static();                                                                                                                                         \
-	}                                                                                                                                                                                  \
-                                                                                                                                                                                       \
-	static GDExtensionObjectPtr create(void *data) {                                                                                                                                   \
-		m_class *new_object = memnew(m_class);                                                                                                                                         \
-		return new_object->_owner;                                                                                                                                                     \
-	}                                                                                                                                                                                  \
-                                                                                                                                                                                       \
-	static GDExtensionClassInstancePtr recreate(void *data, GDExtensionObjectPtr obj) {                                                                                                \
-		_GDCLASS_RECREATE(m_class, m_inherits);                                                                                                                                        \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, GDExtensionBool p_reversed) {                                                                \
@@ -435,14 +416,6 @@ public:                                                                         
                                                                                                                                                                                        \
 	static ::godot::StringName &get_parent_class_static() {                                                                                                                            \
 		return m_inherits::get_class_static();                                                                                                                                         \
-	}                                                                                                                                                                                  \
-                                                                                                                                                                                       \
-	static GDExtensionObjectPtr create(void *data) {                                                                                                                                   \
-		return nullptr;                                                                                                                                                                \
-	}                                                                                                                                                                                  \
-                                                                                                                                                                                       \
-	static GDExtensionClassInstancePtr recreate(void *data, GDExtensionObjectPtr obj) {                                                                                                \
-		return nullptr;                                                                                                                                                                \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	static void free(void *data, GDExtensionClassInstancePtr ptr) {                                                                                                                    \
