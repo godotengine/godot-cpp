@@ -1,10 +1,12 @@
+# Configuration for building godot-cpp only
+# See `tests/CMakeLists.txt` for example configuration
+#
 # Main cmake arguments
 #
 # CMAKE_BUILD_TYPE			Compilation target (Debug, Release, RelWithDebInfo, MinSizeRel)
 #
 # CMAKE_CONFIGURATION_TYPES 		Set to "Debug;Release;RelWithDebInfo;MinSizeRel"
-#					if not all needed configurations are created in multi-config generator
-#					(Setting it in script causes crash on Ninja Multi-Config)
+#					in top project config or via cmdline (see `test/CMakeLists.txt`)
 #
 # TARGET				Godot build target (EDITOR, TEMPLATE_DEBUG, TEMPLATE_RELEASE)
 #
@@ -31,9 +33,11 @@
 # cmake -DTARGET=TEMPLATE_RELEASE -Bbuild
 # cmake --build build
 #
-# Creates multi-config setup and builds Release version (example for Linux)
+# Creates multi-config setup and builds Release version
 #
-# cmake -G "Ninja Multi-Config" -Bbuild
+# cmake -G "Ninja Multi-Config" -Bbuild 		# For Linux/non-MSVC
+# 							OR
+# cmake -G "Visual Studio 16 2019" -A x64 -Bbuild 	# For Windows/MSVC
 # cmake --build build --config Release
 #
 # Builds web version, using Emscripten toolchain
