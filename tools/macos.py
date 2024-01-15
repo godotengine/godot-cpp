@@ -10,7 +10,8 @@ def options(opts):
     opts.Add("macos_deployment_target", "macOS deployment target", "default")
     opts.Add("macos_sdk_path", "macOS SDK path", "")
     if has_osxcross():
-        opts.Add("osxcross_sdk", "OSXCross SDK version", "darwin16")
+        osxcross_sdk = os.environ.get("OSXCROSS_TARGET", "darwin16")
+        opts.Add("osxcross_sdk", "OSXCross SDK version", osxcross_sdk)
 
 
 def exists(env):
