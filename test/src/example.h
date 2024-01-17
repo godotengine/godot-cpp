@@ -205,4 +205,20 @@ protected:
 	static void _bind_methods() {}
 };
 
+template <class T>
+class ExampleTemplated : public Object {
+	GDCLASS_TEMPLATE(ExampleTemplated, Object);
+
+	T number = (T)42;
+
+protected:
+	static void _bind_methods();
+
+	T get_number();
+};
+
+// To suppress warning: instantiation of variable 'ExampleTemplated<int>::_template_class_name' required here, but no definition is available [-Wundefined-var-template]
+template <typename T>
+const char *ExampleTemplated<T>::_template_class_name;
+
 #endif // EXAMPLE_CLASS_H
