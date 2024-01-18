@@ -964,8 +964,19 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             result.append(method_signature + "{")
 
             method_call = "\t"
+            is_ref = False
+
             if "return_type" in method:
-                method_call += f'return internal::_call_builtin_method_ptr_ret<{correct_type(method["return_type"])}>('
+                return_type = method["return_type"]
+                if is_enum(return_type):
+                    method_call += f"return ({get_gdextension_type(correct_type(return_type))})internal::_call_builtin_method_ptr_ret<int64_t>("
+                elif is_pod_type(return_type) or is_variant(return_type):
+                    method_call += f"return internal::_call_builtin_method_ptr_ret<{get_gdextension_type(correct_type(return_type))}>("
+                elif is_refcounted(return_type):
+                    method_call += f"return Ref<{return_type}>::_gde_internal_constructor(internal::_call_builtin_method_ptr_ret_obj<{return_type}>("
+                    is_ref = True
+                else:
+                    method_call += f"return internal::_call_builtin_method_ptr_ret_obj<{return_type}>("
             else:
                 method_call += "internal::_call_builtin_method_ptr_no_ret("
             method_call += f'_method_bindings.method_{method["name"]}, '
@@ -986,6 +997,9 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                     result += encode
                     arguments.append(arg_name)
                 method_call += ", ".join(arguments)
+
+            if is_ref:
+                method_call += ")"  # Close Ref<> constructor.
             method_call += ");"
 
             result.append(method_call)
