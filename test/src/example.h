@@ -205,4 +205,16 @@ protected:
 	static void _bind_methods() {}
 };
 
+template <class T>
+class ExampleTemplated : public Object {
+	GDCLASS_TEMPLATE(ExampleTemplated, Object);
+
+	T number = (T)42;
+
+protected:
+	static void _bind_methods();
+
+	T get_number();
+};
+
 #endif // EXAMPLE_CLASS_H

@@ -142,10 +142,9 @@ struct EngineClassRegistration {
 #define _GDCLASS_RECREATE(m_class, m_inherits) return nullptr;
 #endif
 
-// Use this on top of your own classes.
 // Note: the trail of `***` is to keep sane diffs in PRs, because clang-format otherwise moves every `\` which makes
 // every line of the macro different
-#define GDCLASS(m_class, m_inherits) /***********************************************************************************************************************************************/ \
+#define GDCLASS_NAME(m_class, m_inherits, m_class_name) /****************************************************************************************************************************/ \
 private:                                                                                                                                                                               \
 	void operator=(const m_class &p_rval) {}                                                                                                                                           \
 	friend class ::godot::ClassDB;                                                                                                                                                     \
@@ -196,9 +195,9 @@ protected:                                                                      
 		return (::godot::String(::godot::Wrapped::*)() const) & m_class::_to_string;                                                                                                   \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	template <class T, class B>                                                                                                                                                        \
+	template <class GODOTCPP_T, class GODOTCPP_B>                                                                                                                                      \
 	static void register_virtuals() {                                                                                                                                                  \
-		m_inherits::register_virtuals<T, B>();                                                                                                                                         \
+		m_inherits::register_virtuals<GODOTCPP_T, GODOTCPP_B>();                                                                                                                       \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 public:                                                                                                                                                                                \
@@ -218,7 +217,7 @@ public:                                                                         
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	static ::godot::StringName &get_class_static() {                                                                                                                                   \
-		static ::godot::StringName string_name = ::godot::StringName(#m_class);                                                                                                        \
+		static ::godot::StringName string_name = ::godot::StringName(m_class_name);                                                                                                    \
 		return string_name;                                                                                                                                                            \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
@@ -368,6 +367,32 @@ public:                                                                         
 	};                                                                                                                                                                                 \
                                                                                                                                                                                        \
 private:
+
+// Use this on top of your own classes.
+#define GDCLASS(m_class, m_inherits) GDCLASS_NAME(m_class, m_inherits, #m_class)
+
+/* Use this to create templated class
+You need to initialize `static const char *_template_class_name` with custom name
+outside of class for every template instatiation you use
+
+Example:
+
+// in .h:
+template<class T>
+class ExampleTemplated : public Object {
+	GDCLASS_TEMPLATED(ExampleTemplated, Object);
+};
+
+// in .cpp:
+template<>
+const char * ExampleTemplated<int>::_template_class_name = "ExampleTemplatedInt";
+template<>
+const char * ExampleTemplated<float>::_template_class_name = "ExampleTemplatedFloat";
+*/
+#define GDCLASS_TEMPLATE(m_class, m_inherits) /*************************/ \
+private:                                                                  \
+	static const char *_template_class_name;                              \
+	GDCLASS_NAME(m_class, m_inherits, _template_class_name)
 
 // Don't use this for your classes, use GDCLASS() instead.
 #define GDEXTENSION_CLASS_ALIAS(m_class, m_alias_for, m_inherits) /******************************************************************************************************************/ \

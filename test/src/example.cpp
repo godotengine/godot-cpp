@@ -626,3 +626,21 @@ void Example::_input(const Ref<InputEvent> &event) {
 		emit_custom_signal(String("_input: ") + key_event->get_key_label(), key_event->get_unicode());
 	}
 }
+
+template <>
+const char *ExampleTemplated<int>::_template_class_name = "ExampleTemplatedInt";
+template class ExampleTemplated<int>;
+
+template <>
+const char *ExampleTemplated<float>::_template_class_name = "ExampleTemplatedFloat";
+template class ExampleTemplated<float>;
+
+template <class T>
+void ExampleTemplated<T>::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_number"), &ExampleTemplated::get_number);
+}
+
+template <class T>
+T ExampleTemplated<T>::get_number() {
+	return number;
+}

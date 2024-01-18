@@ -241,6 +241,10 @@ func _ready():
 	assert_equal(new_example_ref.was_post_initialized(), true)
 	assert_equal(example.test_post_initialize(), true)
 
+	# Check templated classes
+	var i = ExampleTemplatedInt.new()
+	var f = ExampleTemplatedFloat.new()
+	assert_equal(i.get_number() == 42 and is_equal_approx(f.get_number(), 42), true)
 	exit_with_status()
 
 func _on_Example_custom_signal(signal_name, value):
