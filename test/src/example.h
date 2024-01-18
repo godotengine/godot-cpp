@@ -217,8 +217,4 @@ protected:
 	T get_number();
 };
 
-// To suppress warning: instantiation of variable 'ExampleTemplated<int>::_template_class_name' required here, but no definition is available [-Wundefined-var-template]
-template <typename T>
-const char *ExampleTemplated<T>::_template_class_name;
-
 #endif // EXAMPLE_CLASS_H
