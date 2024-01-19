@@ -588,17 +588,17 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     # Special cases.
     if class_name == "String":
-        result.append("\tstatic String utf8(const char *from, int len = -1);")
-        result.append("\tvoid parse_utf8(const char *from, int len = -1);")
-        result.append("\tstatic String utf16(const char16_t *from, int len = -1);")
-        result.append("\tvoid parse_utf16(const char16_t *from, int len = -1);")
+        result.append("\tstatic String utf8(const char *from, int64_t len = -1);")
+        result.append("\tvoid parse_utf8(const char *from, int64_t len = -1);")
+        result.append("\tstatic String utf16(const char16_t *from, int64_t len = -1);")
+        result.append("\tvoid parse_utf16(const char16_t *from, int64_t len = -1);")
         result.append("\tCharString utf8() const;")
         result.append("\tCharString ascii() const;")
         result.append("\tChar16String utf16() const;")
         result.append("\tChar32String utf32() const;")
         result.append("\tCharWideString wide_string() const;")
         result.append("\tstatic String num_real(double p_num, bool p_trailing = true);")
-        result.append("\tError resize(int p_size);")
+        result.append("\tError resize(int64_t p_size);")
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
@@ -651,8 +651,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("\tString &operator+=(const wchar_t *p_str);")
         result.append("\tString &operator+=(const char32_t *p_str);")
 
-        result.append("\tconst char32_t &operator[](int p_index) const;")
-        result.append("\tchar32_t &operator[](int p_index);")
+        result.append("\tconst char32_t &operator[](int64_t p_index) const;")
+        result.append("\tchar32_t &operator[](int64_t p_index);")
         result.append("\tconst char32_t *ptr() const;")
         result.append("\tchar32_t *ptrw();")
 
@@ -670,8 +670,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
             return_type = "int32_t"
         elif class_name == "PackedFloat32Array":
             return_type = "float"
-        result.append(f"\tconst {return_type} &operator[](int p_index) const;")
-        result.append(f"\t{return_type} &operator[](int p_index);")
+        result.append(f"\tconst {return_type} &operator[](int64_t p_index) const;")
+        result.append(f"\t{return_type} &operator[](int64_t p_index);")
         result.append(f"\tconst {return_type} *ptr() const;")
         result.append(f"\t{return_type} *ptrw();")
         iterators = """
@@ -742,8 +742,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append(iterators.replace("$TYPE", return_type))
 
     if class_name == "Array":
-        result.append("\tconst Variant &operator[](int p_index) const;")
-        result.append("\tVariant &operator[](int p_index);")
+        result.append("\tconst Variant &operator[](int64_t p_index) const;")
+        result.append("\tVariant &operator[](int64_t p_index);")
         result.append("\tvoid set_typed(uint32_t p_type, const StringName &p_class_name, const Variant &p_script);")
         result.append("\tvoid _ref(const Array &p_from) const;")
 
@@ -1696,7 +1696,7 @@ def generate_global_constants(api, output_dir):
     header.append("")
 
     for constant in api["global_constants"]:
-        header.append(f'\tconst int {escape_identifier(constant["name"])} = {constant["value"]};')
+        header.append(f'\tconst int64_t {escape_identifier(constant["name"])} = {constant["value"]};')
 
     header.append("")
 
