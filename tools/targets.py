@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import sys
 from SCons.Script import ARGUMENTS
@@ -7,6 +8,37 @@ from SCons.Variables.BoolVariable import _text2bool
 
 
 # Helper methods
+
+
+def get_compiler_version(env):
+    """
+    Returns an array of version numbers as ints: [major, minor, patch].
+    The return array should have at least two values (major, minor).
+    """
+    if not env.get("is_msvc", False):
+        # Not using -dumpversion as some GCC distros only return major, and
+        # Clang used to return hardcoded 4.2.1: # https://reviews.llvm.org/D56803
+        try:
+            version = subprocess.check_output([env.subst(env["CXX"]), "--version"]).strip().decode("utf-8")
+        except (subprocess.CalledProcessError, OSError):
+            print("Couldn't parse CXX environment variable to infer compiler version.")
+            return None
+    else:  # TODO: Implement for MSVC
+        return None
+    match = re.search(
+        "(?:(?<=version )|(?<=\) )|(?<=^))"
+        "(?P<major>\d+)"
+        "(?:\.(?P<minor>\d*))?"
+        "(?:\.(?P<patch>\d*))?"
+        "(?:-(?P<metadata1>[0-9a-zA-Z-]*))?"
+        "(?:\+(?P<metadata2>[0-9a-zA-Z-]*))?"
+        "(?: (?P<date>[0-9]{8}|[0-9]{6})(?![0-9a-zA-Z]))?",
+        version,
+    )
+    if match is not None:
+        return match.groupdict()
+    else:
+        return None
 
 
 def get_cmdline_bool(option, default):
@@ -18,6 +50,14 @@ def get_cmdline_bool(option, default):
         return _text2bool(cmdline_val)
     else:
         return default
+
+
+def using_gcc(env):
+    return "gcc" in os.path.basename(env["CC"])
+
+
+def using_emcc(env):
+    return "emcc" in os.path.basename(env["CC"])
 
 
 def using_clang(env):
@@ -49,6 +89,8 @@ def options(opts):
     )
     opts.Add(BoolVariable("debug_symbols", "Build with debugging symbols", True))
     opts.Add(BoolVariable("dev_build", "Developer build with dev-only debugging code (DEV_ENABLED)", False))
+    opts.Add(EnumVariable("warnings", "Level of compilation warnings", "all", ("extra", "all", "moderate", "no")))
+    opts.Add(BoolVariable("werror", "Treat compiler warnings as errors", False))
 
 
 def exists(env):
@@ -115,6 +157,37 @@ def generate(env):
             env.Append(LINKFLAGS=["/OPT:REF"])
         elif env["optimize"] == "debug" or env["optimize"] == "none":
             env.Append(CCFLAGS=["/Od"])
+
+        # Warnings
+        if env["warnings"] == "no":
+            env.Append(CCFLAGS=["/w"])
+        else:
+            if env["warnings"] == "extra":
+                env.Append(CCFLAGS=["/W4"])
+            elif env["warnings"] == "all":
+                env.Append(CCFLAGS=["/W3"])
+            elif env["warnings"] == "moderate":
+                env.Append(CCFLAGS=["/W2"])
+            # Disable warnings which we don't plan to fix.
+
+            env.Append(
+                CCFLAGS=[
+                    "/wd4100",  # C4100 (unreferenced formal parameter): Doesn't play nice with polymorphism.
+                    "/wd4127",  # C4127 (conditional expression is constant)
+                    "/wd4201",  # C4201 (non-standard nameless struct/union): Only relevant for C89.
+                    "/wd4244",  # C4244 C4245 C4267 (narrowing conversions): Unavoidable at this scale.
+                    "/wd4245",
+                    "/wd4267",
+                    "/wd4305",  # C4305 (truncation): double to float or real_t, too hard to avoid.
+                    "/wd4514",  # C4514 (unreferenced inline function has been removed)
+                    "/wd4714",  # C4714 (function marked as __forceinline not inlined)
+                    "/wd4820",  # C4820 (padding added after construct)
+                ]
+            )
+
+        if env["werror"]:
+            env.Append(CCFLAGS=["/WX"])
+
     else:
         if env["debug_symbols"]:
             # Adding dwarf-4 explicitly makes stacktraces work with clang builds,
@@ -142,3 +215,64 @@ def generate(env):
             env.Append(CCFLAGS=["-Og"])
         elif env["optimize"] == "none":
             env.Append(CCFLAGS=["-O0"])
+
+        # Warnings
+        cc_version = get_compiler_version(env) or {
+            "major": None,
+            "minor": None,
+            "patch": None,
+            "metadata1": None,
+            "metadata2": None,
+            "date": None,
+        }
+        cc_version_major = int(cc_version["major"] or -1)
+        cc_version_minor = int(cc_version["minor"] or -1)
+
+        common_warnings = []
+
+        if using_gcc(env):
+            common_warnings += ["-Wshadow-local", "-Wno-misleading-indentation"]
+            if cc_version_major == 7:  # Bogus warning fixed in 8+.
+                common_warnings += ["-Wno-strict-overflow"]
+            if cc_version_major < 11:
+                # Regression in GCC 9/10, spams so much in our variadic templates
+                # that we need to outright disable it.
+                common_warnings += ["-Wno-type-limits"]
+            if cc_version_major >= 12:  # False positives in our error macros, see GH-58747.
+                common_warnings += ["-Wno-return-type"]
+        elif using_clang(env) or using_emcc(env):
+            # We often implement `operator<` for structs of pointers as a requirement
+            # for putting them in `Set` or `Map`. We don't mind about unreliable ordering.
+            common_warnings += ["-Wno-ordered-compare-function-pointers"]
+
+        if env["warnings"] == "extra":
+            env.Append(CCFLAGS=["-Wall", "-Wextra", "-Wwrite-strings", "-Wno-unused-parameter"] + common_warnings)
+            env.Append(CXXFLAGS=["-Wctor-dtor-privacy", "-Wnon-virtual-dtor"])
+            if using_gcc(env):
+                env.Append(
+                    CCFLAGS=[
+                        "-Walloc-zero",
+                        "-Wduplicated-branches",
+                        "-Wduplicated-cond",
+                        "-Wstringop-overflow=4",
+                    ]
+                )
+                env.Append(CXXFLAGS=["-Wplacement-new=1"])
+                # Need to fix a warning with AudioServer lambdas before enabling.
+                # if cc_version_major != 9:  # GCC 9 had a regression (GH-36325).
+                #    env.Append(CXXFLAGS=["-Wnoexcept"])
+                if cc_version_major >= 9:
+                    env.Append(CCFLAGS=["-Wattribute-alias=2"])
+                if cc_version_major >= 11:  # Broke on MethodBind templates before GCC 11.
+                    env.Append(CCFLAGS=["-Wlogical-op"])
+            elif using_clang(env) or using_emcc(env):
+                env.Append(CCFLAGS=["-Wimplicit-fallthrough"])
+        elif env["warnings"] == "all":
+            env.Append(CCFLAGS=["-Wall"] + common_warnings)
+        elif env["warnings"] == "moderate":
+            env.Append(CCFLAGS=["-Wall", "-Wno-unused"] + common_warnings)
+        else:  # 'no'
+            env.Append(CCFLAGS=["-w"])
+
+        if env["werror"]:
+            env.Append(CCFLAGS=["-Werror"])

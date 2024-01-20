@@ -605,6 +605,7 @@ protected:
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wlogical-op"
+#pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
 #endif
 	virtual GDExtensionVariantType gen_argument_type(int p_arg) const {
 		if (p_arg >= 0 && p_arg < (int)sizeof...(P)) {
