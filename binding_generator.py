@@ -70,11 +70,13 @@ def generate_wrappers(target):
         f.write(txt)
 
 
-def get_file_list(api_filepath, output_dir, headers=False, sources=False):
+def get_file_list(api_filepath, output_dir, headers=False, sources=False, profile_filepath=""):
     api = {}
     files = []
     with open(api_filepath, encoding="utf-8") as api_file:
         api = json.load(api_file)
+
+    build_profile = parse_build_profile(profile_filepath, api)
 
     core_gen_folder = Path(output_dir) / "gen" / "include" / "godot_cpp" / "core"
     include_gen_folder = Path(output_dir) / "gen" / "include" / "godot_cpp"
@@ -105,7 +107,7 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
         source_filename = source_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".cpp")
         if headers:
             files.append(str(header_filename.as_posix()))
-        if sources:
+        if sources and is_class_included(engine_class["name"], build_profile):
             files.append(str(source_filename.as_posix()))
 
     for native_struct in api["native_structures"]:
@@ -137,12 +139,72 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
     return files
 
 
-def print_file_list(api_filepath, output_dir, headers=False, sources=False):
-    print(*get_file_list(api_filepath, output_dir, headers, sources), sep=";", end=None)
+def print_file_list(api_filepath, output_dir, headers=False, sources=False, profile_filepath=""):
+    print(*get_file_list(api_filepath, output_dir, headers, sources, profile_filepath), sep=";", end=None)
+
+
+def parse_build_profile(profile_filepath, api):
+    if profile_filepath == "":
+        return {}
+    print("Using feature build profile: " + profile_filepath)
+
+    with open(profile_filepath, encoding="utf-8") as profile_file:
+        profile = json.load(profile_file)
+
+    parents = {}
+    children = {}
+    for engine_class in api["classes"]:
+        parent = engine_class.get("inherits", "")
+        child = engine_class["name"]
+        parents[child] = parent
+        if parent == "":
+            continue
+        children[parent] = children.get(parent, [])
+        children[parent].append(child)
+
+    included = []
+    front = list(profile.get("enabled_classes", []))
+    while front:
+        cls = front.pop()
+        if cls in included:
+            continue
+        included.append(cls)
+        parent = parents.get(cls, "")
+        if parent:
+            front.append(parent)
+
+    excluded = []
+    front = list(profile.get("disabled_classes", []))
+    while front:
+        cls = front.pop()
+        if cls in excluded:
+            continue
+        excluded.append(cls)
+        front += children.get(cls, [])
+
+    if included and excluded:
+        print(
+            "WARNING: Cannot specify both 'enabled_classes' and 'disabled_classes' in build profile. 'disabled_classes' will be ignored."
+        )
+
+    if included:
+        # These must always be included
+        included.append("ClassDB")
+        included.append("ClassDBSingleton")
+        included.append("FileAccess")
+
+    return {
+        "enabled_classes": included,
+        "disabled_classes": excluded,
+    }
 
 
 def scons_emit_files(target, source, env):
-    files = [env.File(f) for f in get_file_list(str(source[0]), target[0].abspath, True, True)]
+    profile_filepath = env.get("build_profile", "")
+    if profile_filepath and not Path(profile_filepath).is_absolute():
+        profile_filepath = str((Path(env.Dir("#").abspath) / profile_filepath).as_posix())
+
+    files = [env.File(f) for f in get_file_list(str(source[0]), target[0].abspath, True, True, profile_filepath)]
     env.Clean(target, files)
     env["godot_cpp_gen_dir"] = target[0].abspath
     return files, source
@@ -2299,6 +2361,20 @@ def is_struct_type(type_name):
 
 def is_refcounted(type_name):
     return type_name in engine_classes and engine_classes[type_name]
+
+
+def is_class_included(class_name, build_profile):
+    """
+    Check if an engine class should be included.
+    This removes classes according to a build profile of enabled or disabled classes.
+    """
+    included = build_profile.get("enabled_classes", [])
+    excluded = build_profile.get("disabled_classes", [])
+    if included:
+        return class_name in included
+    if excluded:
+        return class_name not in excluded
+    return True
 
 
 def is_included(type_name, current_type):
