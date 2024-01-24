@@ -4,9 +4,10 @@ import json
 import re
 import shutil
 from pathlib import Path
+from typing import Tuple, Set, Dict, List, Any
 
 
-def generate_mod_version(argcount, const=False, returns=False):
+def generate_mod_version(argcount: int, const: bool = False, returns: bool = False) -> str:
     s = """
 #define MODBIND$VER($RETTYPE m_name$ARG) \\
 virtual $RETVAL _##m_name($FUNCARGS) $CONST override; \\
@@ -48,7 +49,7 @@ virtual $RETVAL _##m_name($FUNCARGS) $CONST override; \\
     return s
 
 
-def generate_wrappers(target):
+def generate_wrappers(target: Path) -> None:
     max_versions = 12
 
     txt = """
@@ -70,7 +71,7 @@ def generate_wrappers(target):
         f.write(txt)
 
 
-def get_file_list(api_filepath, output_dir, headers=False, sources=False):
+def get_file_list(api_filepath: str, output_dir: str, headers: bool = False, sources: bool = False) -> List[str]:
     api = {}
     files = []
     with open(api_filepath, encoding="utf-8") as api_file:
@@ -137,18 +138,18 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
     return files
 
 
-def print_file_list(api_filepath, output_dir, headers=False, sources=False):
+def print_file_list(api_filepath: str, output_dir: str, headers: bool = False, sources: bool = False) -> None:
     print(*get_file_list(api_filepath, output_dir, headers, sources), sep=";", end=None)
 
 
-def scons_emit_files(target, source, env):
+def scons_emit_files(target: Any, source: Any, env: Any) -> Tuple[List[Any], Any]:
     files = [env.File(f) for f in get_file_list(str(source[0]), target[0].abspath, True, True)]
     env.Clean(target, files)
     env["godot_cpp_gen_dir"] = target[0].abspath
     return files, source
 
 
-def scons_generate_bindings(target, source, env):
+def scons_generate_bindings(target: Any, source: Any, env: Any) -> None:
     generate_bindings(
         str(source[0]),
         env["generate_template_get_node"],
@@ -159,9 +160,9 @@ def scons_generate_bindings(target, source, env):
     return None
 
 
-def generate_bindings(api_filepath, use_template_get_node, bits="64", precision="single", output_dir="."):
-    api = None
-
+def generate_bindings(
+    api_filepath: str, use_template_get_node: bool, bits: str = "64", precision: str = "single", output_dir: str = "."
+) -> None:
     target_dir = Path(output_dir) / "gen"
 
     with open(api_filepath, encoding="utf-8") as api_file:
@@ -192,7 +193,7 @@ native_structures = []
 singletons = []
 
 
-def generate_builtin_bindings(api, output_dir, build_config):
+def generate_builtin_bindings(api: Dict[str, Any], output_dir: Path, build_config: str) -> None:
     global builtin_classes
 
     core_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "core"
@@ -222,7 +223,7 @@ def generate_builtin_bindings(api, output_dir, build_config):
     # Create a file for Variant size, since that class isn't generated.
     variant_size_filename = include_gen_folder / "variant_size.hpp"
     with variant_size_filename.open("+w", encoding="utf-8") as variant_size_file:
-        variant_size_source = []
+        variant_size_source: List[str] = []
         add_header("variant_size.hpp", variant_size_source)
 
         header_guard = "GODOT_CPP_VARIANT_SIZE_HPP"
@@ -245,8 +246,8 @@ def generate_builtin_bindings(api, output_dir, build_config):
         source_filename = source_gen_folder / (camel_to_snake(builtin_api["name"]) + ".cpp")
 
         # Check used classes for header include
-        used_classes = set()
-        fully_used_classes = set()
+        used_classes: Set[str] = set()
+        fully_used_classes: Set[str] = set()
 
         class_name = builtin_api["name"]
 
@@ -292,21 +293,25 @@ def generate_builtin_bindings(api, output_dir, build_config):
             if type_name in used_classes:
                 used_classes.remove(type_name)
 
-        used_classes = list(used_classes)
-        used_classes.sort()
-        fully_used_classes = list(fully_used_classes)
-        fully_used_classes.sort()
+        used_classes_list: List[str] = list(used_classes)
+        used_classes_list.sort()
+        fully_used_classes_list: List[str] = list(fully_used_classes)
+        fully_used_classes_list.sort()
 
         with header_filename.open("w+", encoding="utf-8") as header_file:
-            header_file.write(generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes))
+            header_file.write(
+                generate_builtin_class_header(builtin_api, size, used_classes_list, fully_used_classes_list)
+            )
 
         with source_filename.open("w+", encoding="utf-8") as source_file:
-            source_file.write(generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes))
+            source_file.write(
+                generate_builtin_class_source(builtin_api, size, used_classes_list, fully_used_classes_list)
+            )
 
     # Create a header with all builtin types for convenience.
     builtin_header_filename = include_gen_folder / "builtin_types.hpp"
     with builtin_header_filename.open("w+", encoding="utf-8") as builtin_header_file:
-        builtin_header = []
+        builtin_header: List[str] = []
         add_header("builtin_types.hpp", builtin_header)
 
         builtin_header.append("#ifndef GODOT_CPP_BUILTIN_TYPES_HPP")
@@ -326,7 +331,7 @@ def generate_builtin_bindings(api, output_dir, build_config):
     # Create a header with bindings for builtin types.
     builtin_binds_filename = include_gen_folder / "builtin_binds.hpp"
     with builtin_binds_filename.open("w+", encoding="utf-8") as builtin_binds_file:
-        builtin_binds = []
+        builtin_binds: List[str] = []
         add_header("builtin_binds.hpp", builtin_binds)
 
         builtin_binds.append("#ifndef GODOT_CPP_BUILTIN_BINDS_HPP")
@@ -353,8 +358,8 @@ def generate_builtin_bindings(api, output_dir, build_config):
     )
 
 
-def generate_builtin_class_vararg_method_implements_header(builtin_classes):
-    result = []
+def generate_builtin_class_vararg_method_implements_header(builtin_classes: List[Dict[str, Any]]) -> str:
+    result: List[str] = []
 
     add_header("builtin_vararg_methods.hpp", result)
 
@@ -381,8 +386,10 @@ def generate_builtin_class_vararg_method_implements_header(builtin_classes):
     return "\n".join(result)
 
 
-def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes):
-    result = []
+def generate_builtin_class_header(
+    builtin_api: Dict[str, Any], size: int, used_classes: List[str], fully_used_classes: List[str]
+) -> str:
+    result: List[str] = []
 
     class_name = builtin_api["name"]
     snake_class_name = camel_to_snake(class_name).upper()
@@ -782,8 +789,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     return "\n".join(result)
 
 
-def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes):
-    result = []
+def generate_builtin_class_source(
+    builtin_api: Dict[str, Any], size: int, used_classes: List[str], fully_used_classes: List[str]
+) -> str:
+    result: List[str] = []
 
     class_name = builtin_api["name"]
     snake_class_name = camel_to_snake(class_name)
@@ -922,7 +931,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                     (encode, arg_name) = get_encoded_arg(
                         argument["name"],
                         argument["type"],
-                        argument["meta"] if "meta" in argument else None,
+                        argument["meta"] if "meta" in argument else "",
                     )
                     result += encode
                     arguments.append(arg_name)
@@ -981,7 +990,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                     (encode, arg_name) = get_encoded_arg(
                         argument["name"],
                         argument["type"],
-                        argument["meta"] if "meta" in argument else None,
+                        argument["meta"] if "meta" in argument else "",
                     )
                     result += encode
                     arguments.append(arg_name)
@@ -1003,7 +1012,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 
             if f'set_{member["name"]}' not in method_list:
                 result.append(f'void {class_name}::set_{member["name"]}({type_for_parameter(member["type"])}value) {{')
-                (encode, arg_name) = get_encoded_arg("value", member["type"], None)
+                (encode, arg_name) = get_encoded_arg("value", member["type"])
                 result += encode
                 result.append(
                     f'\t_method_bindings.member_{member["name"]}_setter((GDExtensionConstTypePtr)&opaque, (GDExtensionConstTypePtr){arg_name});'
@@ -1019,7 +1028,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                     result.append(
                         f'{correct_type(operator["return_type"])} {class_name}::operator{operator["name"]}({type_for_parameter(operator["right_type"])}other) const {{'
                     )
-                    (encode, arg_name) = get_encoded_arg("other", operator["right_type"], None)
+                    (encode, arg_name) = get_encoded_arg("other", operator["right_type"])
                     result += encode
                     result.append(
                         f'\treturn internal::_call_builtin_operator_ptr<{get_gdextension_type(correct_type(operator["return_type"]))}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}_{operator["right_type"]}, (GDExtensionConstTypePtr)&opaque, (GDExtensionConstTypePtr){arg_name});'
@@ -1043,7 +1052,6 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
         (encode, arg_name) = get_encoded_arg(
             "other",
             class_name,
-            None,
         )
         result += encode
         result.append(
@@ -1070,7 +1078,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     return "\n".join(result)
 
 
-def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
+def generate_engine_classes_bindings(api: Dict[str, Any], output_dir: Path, use_template_get_node: bool) -> None:
     global engine_classes
     global singletons
     global native_structures
@@ -1103,8 +1111,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
     for class_api in api["classes"]:
         # Check used classes for header include.
-        used_classes = set()
-        fully_used_classes = set()
+        used_classes: Set[str] = set()
+        fully_used_classes: Set[str] = set()
 
         class_name = class_api["name"]
 
@@ -1201,19 +1209,23 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
             if type_name in used_classes:
                 used_classes.remove(type_name)
 
-        used_classes = list(used_classes)
-        used_classes.sort()
-        fully_used_classes = list(fully_used_classes)
-        fully_used_classes.sort()
+        used_classes_list: List[str] = list(used_classes)
+        used_classes_list.sort()
+        fully_used_classes_list: List[str] = list(fully_used_classes)
+        fully_used_classes_list.sort()
 
         with header_filename.open("w+", encoding="utf-8") as header_file:
             header_file.write(
-                generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node)
+                generate_engine_class_header(
+                    class_api, used_classes_list, fully_used_classes_list, use_template_get_node
+                )
             )
 
         with source_filename.open("w+", encoding="utf-8") as source_file:
             source_file.write(
-                generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node)
+                generate_engine_class_source(
+                    class_api, used_classes_list, fully_used_classes_list, use_template_get_node
+                )
             )
 
     for native_struct in api["native_structures"]:
@@ -1224,27 +1236,27 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
         header_filename = include_gen_folder / (snake_struct_name + ".hpp")
 
-        result = []
+        result: List[str] = []
         add_header(f"{snake_struct_name}.hpp", result)
 
         header_guard = f"GODOT_CPP_{snake_struct_name.upper()}_HPP"
         result.append(f"#ifndef {header_guard}")
         result.append(f"#define {header_guard}")
 
-        used_classes = []
+        used_classes_list = []
         expanded_format = native_struct["format"].replace("(", " ").replace(")", ";").replace(",", ";")
         for field in expanded_format.split(";"):
             field_type = field.strip().split(" ")[0].split("::")[0]
             if field_type != "" and not is_included_type(field_type) and not is_pod_type(field_type):
-                if not field_type in used_classes:
-                    used_classes.append(field_type)
+                if not field_type in used_classes_list:
+                    used_classes_list.append(field_type)
 
         result.append("")
 
-        for included in used_classes:
+        for included in used_classes_list:
             result.append(f"#include <godot_cpp/{get_include_path(included)}>")
 
-        if len(used_classes) == 0:
+        if len(used_classes_list) == 0:
             result.append("#include <godot_cpp/core/method_ptrcall.hpp>")
         result.append("")
 
@@ -1268,9 +1280,11 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
             header_file.write("\n".join(result))
 
 
-def generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node):
+def generate_engine_class_header(
+    class_api: Dict[str, Any], used_classes: List[str], fully_used_classes: List[str], use_template_get_node: bool
+) -> str:
     global singletons
-    result = []
+    result: List[str] = []
 
     class_name = class_api["name"]
     snake_class_name = camel_to_snake(class_name).upper()
@@ -1473,7 +1487,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 method_signature += f'{correct_type(method["return_type"])} '
             elif "return_value" in method:
                 method_signature += (
-                    correct_type(method["return_value"]["type"], method["return_value"].get("meta", None)) + " "
+                    correct_type(method["return_value"]["type"], method["return_value"].get("meta", "")) + " "
                 )
             else:
                 method_signature += "void "
@@ -1509,9 +1523,11 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     return "\n".join(result)
 
 
-def generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node):
+def generate_engine_class_source(
+    class_api: Dict[str, Any], used_classes: List[str], fully_used_classes: List[str], use_template_get_node: bool
+) -> str:
     global singletons
-    result = []
+    result: List[str] = []
 
     class_name = class_api["name"]
     snake_class_name = camel_to_snake(class_name)
@@ -1586,7 +1602,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             if not vararg:
                 if has_return:
                     return_type = method["return_value"]["type"]
-                    meta_type = method["return_value"]["meta"] if "meta" in method["return_value"] else None
+                    meta_type = method["return_value"]["meta"] if "meta" in method["return_value"] else ""
                     if is_enum(return_type):
                         if method["is_static"]:
                             method_call += f"return ({get_gdextension_type(correct_type(return_type, meta_type))})internal::_call_native_mb_ret<int64_t>(_gde_method_bind, nullptr"
@@ -1625,7 +1641,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                         (encode, arg_name) = get_encoded_arg(
                             argument["name"],
                             argument["type"],
-                            argument["meta"] if "meta" in argument else None,
+                            argument["meta"] if "meta" in argument else "",
                         )
                         result += encode
                         arguments.append(arg_name)
@@ -1672,7 +1688,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
     return "\n".join(result)
 
 
-def generate_global_constants(api, output_dir):
+def generate_global_constants(api: Dict[str, Any], output_dir: Path) -> None:
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
     source_gen_folder = Path(output_dir) / "src" / "classes"
 
@@ -1681,7 +1697,7 @@ def generate_global_constants(api, output_dir):
 
     # Generate header
 
-    header = []
+    header: List[str] = []
     add_header("global_constants.hpp", header)
 
     header_filename = include_gen_folder / "global_constants.hpp"
@@ -1723,8 +1739,8 @@ def generate_global_constants(api, output_dir):
         header_file.write("\n".join(header))
 
 
-def generate_version_header(api, output_dir):
-    header = []
+def generate_version_header(api: Dict[str, Any], output_dir: Path) -> None:
+    header: List[str] = []
     header_filename = "version.hpp"
     add_header(header_filename, header)
 
@@ -1752,7 +1768,7 @@ def generate_version_header(api, output_dir):
         header_file.write("\n".join(header))
 
 
-def generate_global_constant_binds(api, output_dir):
+def generate_global_constant_binds(api: Dict[str, Any], output_dir: Path) -> None:
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
     source_gen_folder = Path(output_dir) / "src" / "classes"
 
@@ -1761,7 +1777,7 @@ def generate_global_constant_binds(api, output_dir):
 
     # Generate header
 
-    header = []
+    header: List[str] = []
     add_header("global_constants_binds.hpp", header)
 
     header_filename = include_gen_folder / "global_constants_binds.hpp"
@@ -1793,7 +1809,7 @@ def generate_global_constant_binds(api, output_dir):
         header_file.write("\n".join(header))
 
 
-def generate_utility_functions(api, output_dir):
+def generate_utility_functions(api: Dict[str, Any], output_dir: Path) -> None:
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "variant"
     source_gen_folder = Path(output_dir) / "src" / "variant"
 
@@ -1802,7 +1818,7 @@ def generate_utility_functions(api, output_dir):
 
     # Generate header.
 
-    header = []
+    header: List[str] = []
     add_header("utility_functions.hpp", header)
 
     header_filename = include_gen_folder / "utility_functions.hpp"
@@ -1843,7 +1859,7 @@ def generate_utility_functions(api, output_dir):
 
     # Generate source.
 
-    source = []
+    source: List[str] = []
     add_header("utility_functions.cpp", source)
     source_filename = source_gen_folder / "utility_functions.cpp"
 
@@ -1892,7 +1908,7 @@ def generate_utility_functions(api, output_dir):
                     (encode, arg_name) = get_encoded_arg(
                         argument["name"],
                         argument["type"],
-                        argument["meta"] if "meta" in argument else None,
+                        argument["meta"] if "meta" in argument else "",
                     )
                     source += encode
                     arguments.append(arg_name)
@@ -1922,17 +1938,19 @@ def generate_utility_functions(api, output_dir):
 # Helper functions.
 
 
-def camel_to_snake(name):
+def camel_to_snake(name: str) -> str:
     name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     name = re.sub("([a-z0-9])([A-Z])", r"\1_\2", name)
     return name.replace("2_D", "2D").replace("3_D", "3D").lower()
 
 
-def make_function_parameters(parameters, include_default=False, for_builtin=False, is_vararg=False):
+def make_function_parameters(
+    parameters: List[Dict[str, Any]], include_default: bool = False, for_builtin: bool = False, is_vararg: bool = False
+) -> str:
     signature = []
 
     for index, par in enumerate(parameters):
-        parameter = type_for_parameter(par["type"], par["meta"] if "meta" in par else None)
+        parameter = type_for_parameter(par["type"], par["meta"] if "meta" in par else "")
         parameter_name = escape_identifier(par["name"])
         if len(parameter_name) == 0:
             parameter_name = "arg_" + str(index + 1)
@@ -1954,7 +1972,7 @@ def make_function_parameters(parameters, include_default=False, for_builtin=Fals
     return ", ".join(signature)
 
 
-def type_for_parameter(type_name, meta=None):
+def type_for_parameter(type_name: str, meta: str = "") -> str:
     if type_name == "void":
         return "Variant "
     elif is_pod_type(type_name) and type_name != "Nil" or is_enum(type_name):
@@ -1965,7 +1983,7 @@ def type_for_parameter(type_name, meta=None):
         return f"{correct_type(type_name)}"
 
 
-def get_include_path(type_name):
+def get_include_path(type_name: str) -> str:
     base_dir = ""
     if type_name == "Object":
         base_dir = "core"
@@ -1977,8 +1995,8 @@ def get_include_path(type_name):
     return f"{base_dir}/{camel_to_snake(type_name)}.hpp"
 
 
-def get_encoded_arg(arg_name, type_name, type_meta):
-    result = []
+def get_encoded_arg(arg_name: str, type_name: str, type_meta: str = "") -> Tuple[List[str], str]:
+    result: List[str] = []
 
     name = escape_identifier(arg_name)
     arg_type = correct_type(type_name)
@@ -1997,8 +2015,13 @@ def get_encoded_arg(arg_name, type_name, type_meta):
 
 
 def make_signature(
-    class_name, function_data, for_header=False, use_template_get_node=True, for_builtin=False, static=False
-):
+    class_name: str,
+    function_data: Dict[str, Any],
+    for_header: bool = False,
+    use_template_get_node: bool = True,
+    for_builtin: bool = False,
+    static: bool = False,
+) -> str:
     function_signature = ""
 
     is_vararg = "is_vararg" in function_data and function_data["is_vararg"]
@@ -2014,12 +2037,12 @@ def make_signature(
             function_signature += "static "
 
     return_type = "void"
-    return_meta = None
+    return_meta = ""
     if "return_type" in function_data:
         return_type = correct_type(function_data["return_type"])
     elif "return_value" in function_data:
         return_type = function_data["return_value"]["type"]
-        return_meta = function_data["return_value"]["meta"] if "meta" in function_data["return_value"] else None
+        return_meta = function_data["return_value"]["meta"] if "meta" in function_data["return_value"] else ""
 
     function_signature += correct_type(
         return_type,
@@ -2059,14 +2082,14 @@ def make_signature(
 
 
 def make_varargs_template(
-    function_data,
-    static=False,
-    class_befor_signature="",
-    with_public_declare=True,
-    with_indent=True,
-    for_builtin_classes=False,
-):
-    result = []
+    function_data: Dict[str, Any],
+    static: bool = False,
+    class_before_signature: str = "",
+    with_public_declare: bool = True,
+    with_indent: bool = True,
+    for_builtin_classes: bool = False,
+) -> List[str]:
+    result: List[str] = []
 
     function_signature = ""
 
@@ -2079,12 +2102,12 @@ def make_varargs_template(
         function_signature += "static "
 
     return_type = "void"
-    return_meta = None
+    return_meta = ""
     if "return_type" in function_data:
         return_type = correct_type(function_data["return_type"])
     elif "return_value" in function_data:
         return_type = function_data["return_value"]["type"]
-        return_meta = function_data["return_value"]["meta"] if "meta" in function_data["return_value"] else None
+        return_meta = function_data["return_value"]["meta"] if "meta" in function_data["return_value"] else ""
 
     function_signature += correct_type(
         return_type,
@@ -2094,8 +2117,8 @@ def make_varargs_template(
     if not function_signature.endswith("*"):
         function_signature += " "
 
-    if len(class_befor_signature) > 0:
-        function_signature += class_befor_signature + "::"
+    if len(class_before_signature) > 0:
+        function_signature += class_before_signature + "::"
     function_signature += f'{escape_identifier(function_data["name"])}'
 
     method_arguments = []
@@ -2169,7 +2192,7 @@ def make_varargs_template(
 # Engine idiosyncrasies.
 
 
-def is_pod_type(type_name):
+def is_pod_type(type_name: str) -> bool:
     """
     Those are types for which no class should be generated.
     """
@@ -2192,12 +2215,12 @@ def is_pod_type(type_name):
     ]
 
 
-def is_included_type(type_name):
+def is_included_type(type_name: str) -> bool:
     # Types which we already have implemented.
     return is_included_struct_type(type_name) or type_name in ["ObjectID"]
 
 
-def is_included_struct_type(type_name):
+def is_included_struct_type(type_name: str) -> bool:
     # Struct types which we already have implemented.
     return type_name in [
         "AABB",
@@ -2219,7 +2242,7 @@ def is_included_struct_type(type_name):
     ]
 
 
-def is_packed_array(type_name):
+def is_packed_array(type_name: str) -> bool:
     """
     Those are types for which we add our extra packed array functions.
     """
@@ -2236,7 +2259,7 @@ def is_packed_array(type_name):
     ]
 
 
-def needs_copy_instead_of_move(type_name):
+def needs_copy_instead_of_move(type_name: str) -> bool:
     """
     Those are types which need initialised data or we'll get warning spam so need a copy instead of move.
     """
@@ -2245,15 +2268,15 @@ def needs_copy_instead_of_move(type_name):
     ]
 
 
-def is_enum(type_name):
+def is_enum(type_name: str) -> bool:
     return type_name.startswith("enum::") or type_name.startswith("bitfield::")
 
 
-def is_bitfield(type_name):
+def is_bitfield(type_name: str) -> bool:
     return type_name.startswith("bitfield::")
 
 
-def get_enum_class(enum_name: str):
+def get_enum_class(enum_name: str) -> str:
     if "." in enum_name:
         if is_bitfield(enum_name):
             return enum_name.replace("bitfield::", "").split(".")[0]
@@ -2263,21 +2286,21 @@ def get_enum_class(enum_name: str):
         return "GlobalConstants"
 
 
-def get_enum_fullname(enum_name: str):
+def get_enum_fullname(enum_name: str) -> str:
     if is_bitfield(enum_name):
         return enum_name.replace("bitfield::", "BitField<") + ">"
     else:
         return enum_name.replace("enum::", "")
 
 
-def get_enum_name(enum_name: str):
+def get_enum_name(enum_name: str) -> str:
     if is_bitfield(enum_name):
         return enum_name.replace("bitfield::", "").split(".")[-1]
     else:
         return enum_name.replace("enum::", "").split(".")[-1]
 
 
-def is_variant(type_name):
+def is_variant(type_name: str) -> bool:
     return (
         type_name == "Variant"
         or type_name in builtin_classes
@@ -2286,22 +2309,22 @@ def is_variant(type_name):
     )
 
 
-def is_engine_class(type_name):
+def is_engine_class(type_name: str) -> bool:
     global engine_classes
     return type_name == "Object" or type_name in engine_classes
 
 
-def is_struct_type(type_name):
+def is_struct_type(type_name: str) -> bool:
     # This is used to determine which keyword to use for forward declarations.
     global native_structures
     return is_included_struct_type(type_name) or type_name in native_structures
 
 
-def is_refcounted(type_name):
+def is_refcounted(type_name: str) -> bool:
     return type_name in engine_classes and engine_classes[type_name]
 
 
-def is_included(type_name, current_type):
+def is_included(type_name: str, current_type: str) -> bool:
     """
     Check if a builtin type should be included.
     This removes Variant and POD types from inclusion, and the current type.
@@ -2316,7 +2339,7 @@ def is_included(type_name, current_type):
     return is_engine_class(to_include) or is_variant(to_include)
 
 
-def correct_default_value(value, type_name):
+def correct_default_value(value: str, type_name: str) -> str:
     value_map = {
         "null": "nullptr",
         '""': "String()",
@@ -2335,15 +2358,15 @@ def correct_default_value(value, type_name):
     return value
 
 
-def correct_typed_array(type_name):
+def correct_typed_array(type_name: str) -> str:
     if type_name.startswith("typedarray::"):
         return type_name.replace("typedarray::", "TypedArray<") + ">"
     return type_name
 
 
-def correct_type(type_name, meta=None):
+def correct_type(type_name: str, meta: str = "") -> str:
     type_conversion = {"float": "double", "int": "int64_t", "Nil": "Variant"}
-    if meta != None:
+    if meta:
         if "int" in meta:
             return f"{meta}_t"
         elif meta in type_conversion:
@@ -2374,7 +2397,7 @@ def correct_type(type_name, meta=None):
     return type_name
 
 
-def get_gdextension_type(type_name):
+def get_gdextension_type(type_name: str) -> str:
     type_conversion_map = {
         "bool": "int8_t",
         "uint8_t": "int64_t",
@@ -2395,7 +2418,7 @@ def get_gdextension_type(type_name):
     return type_name
 
 
-def escape_identifier(id):
+def escape_identifier(id: str) -> str:
     cpp_keywords_map = {
         "class": "_class",
         "char": "_char",
@@ -2418,7 +2441,7 @@ def escape_identifier(id):
     return id
 
 
-def get_operator_id_name(op):
+def get_operator_id_name(op: str) -> str:
     op_id_map = {
         "==": "equal",
         "!=": "not_equal",
@@ -2450,7 +2473,7 @@ def get_operator_id_name(op):
     return op_id_map[op]
 
 
-def get_default_value_for_type(type_name):
+def get_default_value_for_type(type_name: str) -> str:
     if type_name == "int":
         return "0"
     if type_name == "float":
@@ -2501,7 +2524,7 @@ header = """\
 """
 
 
-def add_header(filename, lines):
+def add_header(filename: str, lines: List[str]) -> None:
     desired_length = len(header.split("\n")[0])
     pad_spaces = desired_length - 6 - len(filename)
 
