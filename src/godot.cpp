@@ -193,6 +193,8 @@ GDExtensionInterfaceClassdbUnregisterExtensionClass gdextension_interface_classd
 GDExtensionInterfaceGetLibraryPath gdextension_interface_get_library_path = nullptr;
 GDExtensionInterfaceEditorAddPlugin gdextension_interface_editor_add_plugin = nullptr;
 GDExtensionInterfaceEditorRemovePlugin gdextension_interface_editor_remove_plugin = nullptr;
+GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8Chars gdextension_interface_editor_help_load_xml_from_utf8_chars = nullptr;
+GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8CharsAndLen gdextension_interface_editor_help_load_xml_from_utf8_chars_and_len = nullptr;
 
 } // namespace internal
 
@@ -430,6 +432,8 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	LOAD_PROC_ADDRESS(get_library_path, GDExtensionInterfaceGetLibraryPath);
 	LOAD_PROC_ADDRESS(editor_add_plugin, GDExtensionInterfaceEditorAddPlugin);
 	LOAD_PROC_ADDRESS(editor_remove_plugin, GDExtensionInterfaceEditorRemovePlugin);
+	LOAD_PROC_ADDRESS(editor_help_load_xml_from_utf8_chars, GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8Chars);
+	LOAD_PROC_ADDRESS(editor_help_load_xml_from_utf8_chars_and_len, GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8CharsAndLen);
 
 	r_initialization->initialize = initialize_level;
 	r_initialization->deinitialize = deinitialize_level;
