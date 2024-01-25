@@ -190,6 +190,13 @@ extern "C" GDExtensionInterfaceClassdbUnregisterExtensionClass gdextension_inter
 extern "C" GDExtensionInterfaceGetLibraryPath gdextension_interface_get_library_path;
 extern "C" GDExtensionInterfaceEditorAddPlugin gdextension_interface_editor_add_plugin;
 extern "C" GDExtensionInterfaceEditorRemovePlugin gdextension_interface_editor_remove_plugin;
+extern "C" GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8Chars gdextension_interface_editor_help_load_xml_from_utf8_chars;
+extern "C" GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8CharsAndLen gdextension_interface_editor_help_load_xml_from_utf8_chars_and_len;
+
+class DocDataRegistration {
+public:
+	DocDataRegistration(const char *p_hash, int p_uncompressed_size, int p_compressed_size, const unsigned char *p_data);
+};
 
 } // namespace internal
 

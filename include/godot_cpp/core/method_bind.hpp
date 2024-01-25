@@ -412,6 +412,7 @@ public:
 		method = p_method;
 		generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
+		set_const(true);
 	}
 };
 
@@ -578,6 +579,7 @@ public:
 		generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
 		set_return(true);
+		set_const(true);
 	}
 };
 
