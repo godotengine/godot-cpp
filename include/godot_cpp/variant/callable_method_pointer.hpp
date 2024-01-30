@@ -73,6 +73,11 @@ public:
 		return ObjectID(data.instance->get_instance_id());
 	}
 
+	virtual int get_argument_count(bool &r_is_valid) const override {
+		r_is_valid = true;
+		return sizeof...(P);
+	}
+
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const override {
 		call_with_variant_args(data.instance, data.method, p_arguments, p_argcount, r_call_error);
 	}
@@ -108,6 +113,11 @@ class CallableCustomMethodPointerRet : public CallableCustomMethodPointerBase {
 public:
 	virtual ObjectID get_object() const override {
 		return ObjectID(data.instance->get_instance_id());
+	}
+
+	virtual int get_argument_count(bool &r_is_valid) const override {
+		r_is_valid = true;
+		return sizeof...(P);
 	}
 
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const override {
@@ -147,6 +157,11 @@ public:
 		return ObjectID(data.instance->get_instance_id());
 	}
 
+	virtual int get_argument_count(bool &r_is_valid) const override {
+		r_is_valid = true;
+		return sizeof...(P);
+	}
+
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const override {
 		call_with_variant_args_retc(data.instance, data.method, p_arguments, p_argcount, r_return_value, r_call_error);
 	}
@@ -180,6 +195,11 @@ class CallableCustomStaticMethodPointer : public CallableCustomMethodPointerBase
 public:
 	virtual ObjectID get_object() const override {
 		return ObjectID();
+	}
+
+	virtual int get_argument_count(bool &r_is_valid) const override {
+		r_is_valid = true;
+		return sizeof...(P);
 	}
 
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const override {
@@ -216,6 +236,11 @@ class CallableCustomStaticMethodPointerRet : public CallableCustomMethodPointerB
 public:
 	virtual ObjectID get_object() const override {
 		return ObjectID();
+	}
+
+	virtual int get_argument_count(bool &r_is_valid) const override {
+		r_is_valid = true;
+		return sizeof...(P);
 	}
 
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const override {
