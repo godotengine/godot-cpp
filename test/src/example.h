@@ -24,6 +24,7 @@
 #include <godot_cpp/variant/variant.hpp>
 
 #include <godot_cpp/core/binder_common.hpp>
+#include <godot_cpp/core/gdvirtual.gen.inc>
 
 using namespace godot;
 
@@ -181,6 +182,9 @@ public:
 	// Virtual function override (no need to bind manually).
 	virtual bool _has_point(const Vector2 &point) const override;
 	virtual void _input(const Ref<InputEvent> &event) override;
+
+	GDVIRTUAL2R(String, _do_something_virtual, String, int);
+	String test_virtual_implemented_in_script(const String &p_name, int p_value);
 };
 
 VARIANT_ENUM_CAST(Example::Constants);

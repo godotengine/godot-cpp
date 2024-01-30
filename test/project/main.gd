@@ -241,6 +241,10 @@ func _ready():
 	assert_equal(new_example_ref.was_post_initialized(), true)
 	assert_equal(example.test_post_initialize(), true)
 
+	# Test a virtual method defined in GDExtension and implemented in script.
+	assert_equal(example.test_virtual_implemented_in_script("Virtual", 939), "Implemented")
+	assert_equal(custom_signal_emitted, ["Virtual", 939])
+
 	exit_with_status()
 
 func _on_Example_custom_signal(signal_name, value):

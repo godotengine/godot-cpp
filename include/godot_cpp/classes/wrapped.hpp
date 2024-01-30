@@ -36,6 +36,7 @@
 #include <godot_cpp/core/property_info.hpp>
 
 #include <godot_cpp/templates/list.hpp>
+#include <godot_cpp/templates/vector.hpp>
 
 #include <godot_cpp/godot.hpp>
 
@@ -106,6 +107,26 @@ public:
 	// Must be public but you should not touch this.
 	GodotObject *_owner = nullptr;
 };
+
+_FORCE_INLINE_ void snarray_add_str(Vector<StringName> &arr) {
+}
+
+_FORCE_INLINE_ void snarray_add_str(Vector<StringName> &arr, const StringName &p_str) {
+	arr.push_back(p_str);
+}
+
+template <class... P>
+_FORCE_INLINE_ void snarray_add_str(Vector<StringName> &arr, const StringName &p_str, P... p_args) {
+	arr.push_back(p_str);
+	snarray_add_str(arr, p_args...);
+}
+
+template <class... P>
+_FORCE_INLINE_ Vector<StringName> snarray(P... p_args) {
+	Vector<StringName> arr;
+	snarray_add_str(arr, p_args...);
+	return arr;
+}
 
 namespace internal {
 
@@ -444,5 +465,15 @@ private:
 
 // Don't use this for your classes, use GDCLASS() instead.
 #define GDEXTENSION_CLASS(m_class, m_inherits) GDEXTENSION_CLASS_ALIAS(m_class, m_class, m_inherits)
+
+#define GDVIRTUAL_CALL(m_name, ...) _gdvirtual_##m_name##_call<false>(__VA_ARGS__)
+#define GDVIRTUAL_CALL_PTR(m_obj, m_name, ...) m_obj->_gdvirtual_##m_name##_call<false>(__VA_ARGS__)
+
+#define GDVIRTUAL_REQUIRED_CALL(m_name, ...) _gdvirtual_##m_name##_call<true>(__VA_ARGS__)
+#define GDVIRTUAL_REQUIRED_CALL_PTR(m_obj, m_name, ...) m_obj->_gdvirtual_##m_name##_call<true>(__VA_ARGS__)
+
+#define GDVIRTUAL_BIND(m_name, ...) ::godot::ClassDB::add_virtual_method(get_class_static(), _gdvirtual_##m_name##_get_method_info(), ::godot::snarray(__VA_ARGS__));
+#define GDVIRTUAL_IS_OVERRIDDEN(m_name) _gdvirtual_##m_name##_overridden()
+#define GDVIRTUAL_IS_OVERRIDDEN_PTR(m_obj, m_name) m_obj->_gdvirtual_##m_name##_overridden()
 
 #endif // GODOT_WRAPPED_HPP

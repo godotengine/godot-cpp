@@ -70,6 +70,136 @@ def generate_wrappers(target):
         f.write(txt)
 
 
+def generate_virtual_version(argcount, const=False, returns=False):
+    s = """#define GDVIRTUAL$VER($RET m_name $ARG)\\
+	StringName _gdvirtual_##m_name##_sn = #m_name;\\
+	template <bool required>\\
+	_FORCE_INLINE_ bool _gdvirtual_##m_name##_call($CALLARGS) $CONST {\\
+		if (::godot::internal::gdextension_interface_object_has_script_method(_owner, &_gdvirtual_##m_name##_sn)) { \\
+			GDExtensionCallError ce;\\
+			$CALLSIARGS\\
+			$CALLSIBEGIN::godot::internal::gdextension_interface_object_call_script_method(_owner, &_gdvirtual_##m_name##_sn, $CALLSIARGPASS, $CALLSIRETPASS, &ce);\\
+			if (ce.error == GDEXTENSION_CALL_OK) {\\
+				$CALLSIRET\\
+				return true;\\
+			}\\
+		}\\
+		if (required) {\\
+			ERR_PRINT_ONCE("Required virtual method " + get_class() + "::" + #m_name + " must be overridden before calling.");\\
+			$RVOID\\
+		}\\
+		return false;\\
+	}\\
+	_FORCE_INLINE_ bool _gdvirtual_##m_name##_overridden() const {\\
+		return godot::internal::gdextension_interface_object_has_script_method(_owner, &_gdvirtual_##m_name##_sn); \\
+	}\\
+	_FORCE_INLINE_ static MethodInfo _gdvirtual_##m_name##_get_method_info() {\\
+		MethodInfo method_info;\\
+		method_info.name = #m_name;\\
+		method_info.flags = $METHOD_FLAGS;\\
+		$FILL_METHOD_INFO\\
+		return method_info;\\
+	}
+
+"""
+
+    sproto = str(argcount)
+    method_info = ""
+    if returns:
+        sproto += "R"
+        s = s.replace("$RET", "m_ret,")
+        s = s.replace("$RVOID", "(void)r_ret;")  # If required, may lead to uninitialized errors
+        method_info += "method_info.return_val = GetTypeInfo<m_ret>::get_class_info();\\\n"
+        method_info += "\t\tmethod_info.return_val_metadata = GetTypeInfo<m_ret>::METADATA;"
+    else:
+        s = s.replace("$RET ", "")
+        s = s.replace("\t\t\t$RVOID\\\n", "")
+
+    if const:
+        sproto += "C"
+        s = s.replace("$CONST", "const")
+        s = s.replace("$METHOD_FLAGS", "METHOD_FLAG_VIRTUAL | METHOD_FLAG_CONST")
+    else:
+        s = s.replace("$CONST ", "")
+        s = s.replace("$METHOD_FLAGS", "METHOD_FLAG_VIRTUAL")
+
+    s = s.replace("$VER", sproto)
+    argtext = ""
+    callargtext = ""
+    callsiargs = ""
+    callsiargptrs = ""
+    if argcount > 0:
+        argtext += ", "
+        callsiargs = f"Variant vargs[{argcount}] = {{ "
+        callsiargptrs = f"\t\t\tconst Variant *vargptrs[{argcount}] = {{ "
+    for i in range(argcount):
+        if i > 0:
+            argtext += ", "
+            callargtext += ", "
+            callsiargs += ", "
+            callsiargptrs += ", "
+        argtext += f"m_type{i + 1}"
+        callargtext += f"m_type{i + 1} arg{i + 1}"
+        callsiargs += f"Variant(arg{i + 1})"
+        callsiargptrs += f"&vargs[{i}]"
+        if method_info:
+            method_info += "\\\n\t\t"
+        method_info += f"method_info.arguments.push_back(GetTypeInfo<m_type{i + 1}>::get_class_info());\\\n"
+        method_info += f"\t\tmethod_info.arguments_metadata.push_back(GetTypeInfo<m_type{i + 1}>::METADATA);"
+
+    if argcount:
+        callsiargs += " };\\\n"
+        callsiargptrs += " };"
+        s = s.replace("$CALLSIARGS", callsiargs + callsiargptrs)
+        s = s.replace("$CALLSIARGPASS", f"(const GDExtensionConstVariantPtr *)vargptrs, {argcount}")
+    else:
+        s = s.replace("\t\t\t$CALLSIARGS\\\n", "")
+        s = s.replace("$CALLSIARGPASS", "nullptr, 0")
+
+    if returns:
+        if argcount > 0:
+            callargtext += ", "
+        callargtext += "m_ret &r_ret"
+        s = s.replace("$CALLSIBEGIN", "Variant ret;\\\n\t\t\t")
+        s = s.replace("$CALLSIRETPASS", "&ret")
+        s = s.replace("$CALLSIRET", "r_ret = VariantCaster<m_ret>::cast(ret);")
+    else:
+        s = s.replace("$CALLSIBEGIN", "")
+        s = s.replace("$CALLSIRETPASS", "nullptr")
+        s = s.replace("\t\t\t\t$CALLSIRET\\\n", "")
+
+    s = s.replace(" $ARG", argtext)
+    s = s.replace("$CALLARGS", callargtext)
+    if method_info:
+        s = s.replace("$FILL_METHOD_INFO", method_info)
+    else:
+        s = s.replace("\t\t$FILL_METHOD_INFO\\\n", method_info)
+
+    return s
+
+
+def generate_virtuals(target):
+    max_versions = 12
+
+    txt = """/* THIS FILE IS GENERATED DO NOT EDIT */
+#ifndef GDEXTENSION_GDVIRTUAL_GEN_H
+#define GDEXTENSION_GDVIRTUAL_GEN_H
+
+"""
+
+    for i in range(max_versions + 1):
+        txt += f"/* {i} Arguments */\n\n"
+        txt += generate_virtual_version(i, False, False)
+        txt += generate_virtual_version(i, False, True)
+        txt += generate_virtual_version(i, True, False)
+        txt += generate_virtual_version(i, True, True)
+
+    txt += "#endif // GDEXTENSION_GDVIRTUAL_GEN_H\n"
+
+    with open(target, "w", encoding="utf-8") as f:
+        f.write(txt)
+
+
 def get_file_list(api_filepath, output_dir, headers=False, sources=False):
     api = {}
     files = []
@@ -81,6 +211,7 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
     source_gen_folder = Path(output_dir) / "gen" / "src"
 
     files.append(str((core_gen_folder / "ext_wrappers.gen.inc").as_posix()))
+    files.append(str((core_gen_folder / "gdvirtual.gen.inc").as_posix()))
 
     for builtin_class in api["builtin_classes"]:
         if is_pod_type(builtin_class["name"]):
@@ -204,6 +335,7 @@ def generate_builtin_bindings(api, output_dir, build_config):
     source_gen_folder.mkdir(parents=True, exist_ok=True)
 
     generate_wrappers(core_gen_folder / "ext_wrappers.gen.inc")
+    generate_virtuals(core_gen_folder / "gdvirtual.gen.inc")
 
     # Store types beforehand.
     for builtin_api in api["builtin_classes"]:
