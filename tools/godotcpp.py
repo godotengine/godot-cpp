@@ -2,6 +2,7 @@ import os, sys, platform
 
 from SCons.Variables import EnumVariable, PathVariable, BoolVariable
 from SCons.Tool import Tool
+from SCons.Action import Action
 from SCons.Builder import Builder
 from SCons.Errors import UserError
 
@@ -198,6 +199,14 @@ def options(opts, env):
         )
     )
 
+    opts.Add(
+        BoolVariable(
+            key="verbose",
+            help="Enable verbose output for the compilation",
+            default=False,
+        )
+    )
+
     # Add platform options
     for pl in platforms:
         tool = Tool(pl, toolpath=["tools"])
@@ -315,8 +324,31 @@ def generate(env):
     env.Tool("compilation_db")
     env.Alias("compiledb", env.CompilationDatabase(normalize_path(env["compiledb_file"], env)))
 
+    # Formatting
+    if not env["verbose"] and sys.stdout.isatty():
+        BLUE = "\033[0;94m"
+        BOLD_BLUE = "\033[1;94m"
+        RESET = "\033[0m"
+
+        env.Append(CCCOMSTR=f"{BLUE}Compiling {BOLD_BLUE}$SOURCE{BLUE} ...{RESET}")
+        env.Append(CXXCOMSTR="$CCCOMSTR")
+        env.Append(SHCCCOMSTR=f"{BLUE}Compiling Shared {BOLD_BLUE}$SOURCE{BLUE} ...{RESET}")
+        env.Append(SHCXXCOMSTR="$SHCCCOMSTR")
+        env.Append(LINKCOMSTR=f"{BLUE}Linking Static Library {BOLD_BLUE}$TARGET{BLUE} ...{RESET}")
+        env.Append(ARCOMSTR="$LINKCOMSTR")
+        env.Append(RANLIBCOMSTR=f"{BLUE}RanLib Library {BOLD_BLUE}$TARGET{BLUE} ...{RESET}")
+        env.Append(SHLINKCOMSTR=f"{BLUE}Linking Shared Library {BOLD_BLUE}$TARGET{BLUE} ...{RESET}")
+        env.Append(JARCOMSTR=f"{BLUE}Creating Java Archive {BOLD_BLUE}$TARGET{BLUE} ...{RESET}")
+        env.Append(JAVACCOMSTR="$CCCOMSTR")
+        env.Append(RCCOMSTR=f"{BLUE}Creating Compiled Resource {BOLD_BLUE}$TARGET{BLUE} ...{RESET}")
+        env.Append(GENCOMSTR=f"{BLUE}Generating {BOLD_BLUE}$TARGET{BLUE} ...{RESET}")
+
     # Builders
-    env.Append(BUILDERS={"GodotCPPBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
+    env.Append(
+        BUILDERS={
+            "GodotCPPBindings": Builder(action=Action(scons_generate_bindings, "$GENCOMSTR"), emitter=scons_emit_files)
+        }
+    )
     env.AddMethod(_godot_cpp, "GodotCPP")
 
 
