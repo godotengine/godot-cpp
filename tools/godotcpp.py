@@ -33,7 +33,26 @@ def validate_parent_dir(key, val, env):
         raise UserError("'%s' is not a directory: %s" % (key, os.path.dirname(val)))
 
 
-platforms = ("linux", "macos", "windows", "android", "ios", "web")
+def get_platform_tools_paths(env):
+    path = env.get("custom_tools", None)
+    if path is None:
+        return ["tools"]
+    return [normalize_path(path, env), "tools"]
+
+
+def get_custom_platforms(env):
+    path = env.get("custom_tools", None)
+    if path is None:
+        return []
+    platforms = []
+    for x in os.listdir(normalize_path(path, env)):
+        if not x.endswith(".py"):
+            continue
+        platforms.append(x.removesuffix(".py"))
+    return platforms
+
+
+platforms = ["linux", "macos", "windows", "android", "ios", "web"]
 
 # CPU architecture options.
 architecture_array = [
@@ -83,11 +102,24 @@ def options(opts, env):
         raise ValueError("Could not detect platform automatically, please specify with platform=<platform>")
 
     opts.Add(
+        PathVariable(
+            key="custom_tools",
+            help="Path to directory containing custom tools",
+            default=env.get("custom_tools", None),
+            validator=validate_dir,
+        )
+    )
+
+    opts.Update(env)
+
+    custom_platforms = get_custom_platforms(env)
+
+    opts.Add(
         EnumVariable(
             key="platform",
             help="Target platform",
             default=env.get("platform", default_platform),
-            allowed_values=platforms,
+            allowed_values=platforms + custom_platforms,
             ignorecase=2,
         )
     )
@@ -183,9 +215,9 @@ def options(opts, env):
         )
     )
 
-    # Add platform options
-    for pl in platforms:
-        tool = Tool(pl, toolpath=["tools"])
+    # Add platform options (custom tools can override platforms)
+    for pl in sorted(set(platforms + custom_platforms)):
+        tool = Tool(pl, toolpath=get_platform_tools_paths(env))
         if hasattr(tool, "options"):
             tool.options(opts)
 
@@ -239,7 +271,7 @@ def generate(env):
 
     print("Building for architecture " + env["arch"] + " on platform " + env["platform"])
 
-    tool = Tool(env["platform"], toolpath=["tools"])
+    tool = Tool(env["platform"], toolpath=get_platform_tools_paths(env))
 
     if tool is None or not tool.exists(env):
         raise ValueError("Required toolchain not found for platform " + env["platform"])
