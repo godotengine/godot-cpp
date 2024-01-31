@@ -190,6 +190,34 @@ struct _GlobalNilClass {
 	static _GlobalNil _nil;
 };
 
+// This is for allocating uninitialized memory for passing to GDExtension functions that
+// will use placement new to construct a new object.
+//
+// NOTE: You MUST make sure that the value is initialized before the object goes out of
+// scope, otherwise the destructor will be run on junk memory and "bad things" will happen.
+template <class T, size_t Alignment = alignof(T)>
+class ManuallyInitializedValue {
+	typename std::aligned_storage<sizeof(T), Alignment>::type data;
+
+public:
+	ManuallyInitializedValue() {}
+
+	ManuallyInitializedValue(const ManuallyInitializedValue &) = delete;
+	ManuallyInitializedValue &operator=(const ManuallyInitializedValue &) = delete;
+
+	~ManuallyInitializedValue() {
+		reinterpret_cast<T *>(&data)->~T();
+	}
+
+	T &get() {
+		return *reinterpret_cast<T *>(&data);
+	}
+
+	T *ptr() {
+		return reinterpret_cast<T *>(&data);
+	}
+};
+
 } // namespace godot
 
 #endif // GODOT_MEMORY_HPP

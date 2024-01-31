@@ -303,9 +303,9 @@ Variant::operator float() const {
 }
 
 Variant::operator String() const {
-	String result;
-	to_type_constructor[STRING](result._native_ptr(), _native_ptr());
-	return result;
+	ManuallyInitializedValue<String> result;
+	to_type_constructor[STRING](result.ptr(), _native_ptr());
+	return result.get();
 }
 
 Variant::operator Vector2() const {
@@ -405,9 +405,9 @@ Variant::operator Color() const {
 }
 
 Variant::operator StringName() const {
-	StringName result;
-	to_type_constructor[STRING_NAME](result._native_ptr(), _native_ptr());
-	return result;
+	ManuallyInitializedValue<StringName> result;
+	to_type_constructor[STRING_NAME](result.ptr(), _native_ptr());
+	return result.get();
 }
 
 Variant::operator NodePath() const {
@@ -459,15 +459,15 @@ Variant::operator Signal() const {
 }
 
 Variant::operator Dictionary() const {
-	Dictionary result;
-	to_type_constructor[DICTIONARY](result._native_ptr(), _native_ptr());
-	return result;
+	ManuallyInitializedValue<Dictionary> result;
+	to_type_constructor[DICTIONARY](result.ptr(), _native_ptr());
+	return result.get();
 }
 
 Variant::operator Array() const {
-	Array result;
-	to_type_constructor[ARRAY](result._native_ptr(), _native_ptr());
-	return result;
+	ManuallyInitializedValue<Array> result;
+	to_type_constructor[ARRAY](result.ptr(), _native_ptr());
+	return result.get();
 }
 
 Variant::operator PackedByteArray() const {
@@ -607,39 +607,39 @@ void Variant::set_keyed(const Variant &key, const Variant &value, bool &r_valid)
 }
 
 Variant Variant::get(const Variant &key, bool *r_valid) const {
-	Variant result;
+	ManuallyInitializedValue<Variant> result;
 	GDExtensionBool valid;
-	internal::gdextension_interface_variant_get(_native_ptr(), key._native_ptr(), result._native_ptr(), &valid);
+	internal::gdextension_interface_variant_get(_native_ptr(), key._native_ptr(), result.ptr(), &valid);
 	if (r_valid) {
 		*r_valid = PtrToArg<bool>::convert(&valid);
 	}
-	return result;
+	return result.get();
 }
 
 Variant Variant::get_named(const StringName &name, bool &r_valid) const {
-	Variant result;
+	ManuallyInitializedValue<Variant> result;
 	GDExtensionBool valid;
-	internal::gdextension_interface_variant_get_named(_native_ptr(), name._native_ptr(), result._native_ptr(), &valid);
+	internal::gdextension_interface_variant_get_named(_native_ptr(), name._native_ptr(), result.ptr(), &valid);
 	r_valid = PtrToArg<bool>::convert(&valid);
-	return result;
+	return result.get();
 }
 
 Variant Variant::get_indexed(int64_t index, bool &r_valid, bool &r_oob) const {
-	Variant result;
+	ManuallyInitializedValue<Variant> result;
 	GDExtensionBool valid;
 	GDExtensionBool oob;
-	internal::gdextension_interface_variant_get_indexed(_native_ptr(), index, result._native_ptr(), &valid, &oob);
+	internal::gdextension_interface_variant_get_indexed(_native_ptr(), index, result.ptr(), &valid, &oob);
 	r_valid = PtrToArg<bool>::convert(&valid);
 	r_oob = PtrToArg<bool>::convert(&oob);
-	return result;
+	return result.get();
 }
 
 Variant Variant::get_keyed(const Variant &key, bool &r_valid) const {
-	Variant result;
+	ManuallyInitializedValue<Variant> result;
 	GDExtensionBool valid;
-	internal::gdextension_interface_variant_get_keyed(_native_ptr(), key._native_ptr(), result._native_ptr(), &valid);
+	internal::gdextension_interface_variant_get_keyed(_native_ptr(), key._native_ptr(), result.ptr(), &valid);
 	r_valid = PtrToArg<bool>::convert(&valid);
-	return result;
+	return result.get();
 }
 
 bool Variant::in(const Variant &index, bool *r_valid) const {
