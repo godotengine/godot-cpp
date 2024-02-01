@@ -458,6 +458,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("")
     result.append("\tstatic struct _MethodBindings {")
 
+    result.append("\t\tGDExtensionTypeFromVariantConstructorFunc from_variant_constructor;")
+
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
             result.append(f'\t\tGDExtensionPtrConstructor constructor_{constructor["index"]};')
@@ -497,6 +499,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("")
     result.append("\tstatic void init_bindings();")
     result.append("\tstatic void _init_bindings_constructors_destructor();")
+
+    result.append("")
+    result.append(f"\t{class_name}(const Variant *p_variant);")
 
     result.append("")
     result.append("public:")
@@ -833,6 +838,10 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 
     result.append(f"void {class_name}::_init_bindings_constructors_destructor() {{")
 
+    result.append(
+        f"\t_method_bindings.from_variant_constructor = internal::gdextension_interface_get_variant_to_type_constructor({enum_type_name});"
+    )
+
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
             result.append(
@@ -913,6 +922,11 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     result.append("")
 
     copy_constructor_index = -1
+
+    result.append(f"{class_name}::{class_name}(const Variant *p_variant) {{")
+    result.append("\t_method_bindings.from_variant_constructor(&opaque, p_variant->_native_ptr());")
+    result.append("}")
+    result.append("")
 
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
