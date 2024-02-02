@@ -186,4 +186,29 @@ protected:
 	static void _bind_methods() {}
 };
 
+class ExampleBase : public Node {
+	GDCLASS(ExampleBase, Node);
+
+protected:
+	int value1 = 0;
+	int value2 = 0;
+
+	static void _bind_methods();
+
+	void _notification(int p_what);
+
+public:
+	int get_value1() { return value1; }
+	int get_value2() { return value2; }
+};
+
+class ExampleChild : public ExampleBase {
+	GDCLASS(ExampleChild, ExampleBase);
+
+protected:
+	static void _bind_methods() {}
+
+	void _notification(int p_what);
+};
+
 #endif // EXAMPLE_CLASS_H
