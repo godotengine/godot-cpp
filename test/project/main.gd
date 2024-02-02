@@ -245,6 +245,14 @@ func _ready():
 	assert_equal(example.test_virtual_implemented_in_script("Virtual", 939), "Implemented")
 	assert_equal(custom_signal_emitted, ["Virtual", 939])
 
+	# Test that notifications happen on both parent and child classes.
+	var example_child = $ExampleChild
+	assert_equal(example_child.get_value1(), 11)
+	assert_equal(example_child.get_value2(), 33)
+	example_child.notification(NOTIFICATION_ENTER_TREE, true)
+	assert_equal(example_child.get_value1(), 11)
+	assert_equal(example_child.get_value2(), 22)
+
 	exit_with_status()
 
 func _on_Example_custom_signal(signal_name, value):
