@@ -138,6 +138,7 @@ add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/binding_generator.py
 		COMMENT "Generating bindings"
 )
+add_custom_target(godotcpp_generated_files DEPENDS ${GENERATED_FILES_LIST})
 
 # Get Sources
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.c**)
