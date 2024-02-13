@@ -68,6 +68,8 @@ struct MethodInfo {
 	int id = 0;
 	std::vector<PropertyInfo> arguments;
 	std::vector<Variant> default_arguments;
+	GDExtensionClassMethodArgumentMetadata return_val_metadata;
+	std::vector<GDExtensionClassMethodArgumentMetadata> arguments_metadata;
 
 	inline bool operator==(const MethodInfo &p_method) const { return id == p_method.id; }
 	inline bool operator<(const MethodInfo &p_method) const { return id == p_method.id ? (name < p_method.name) : (id < p_method.id); }

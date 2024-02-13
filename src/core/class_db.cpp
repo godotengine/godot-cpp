@@ -32,6 +32,7 @@
 
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/godot.hpp>
+#include <godot_cpp/templates/vector.hpp>
 
 #include <godot_cpp/core/memory.hpp>
 
@@ -335,6 +336,46 @@ void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p
 	ERR_FAIL_COND_MSG(type.virtual_methods.find(p_method) != type.virtual_methods.end(), String("Virtual '{0}::{1}()' method already registered.").format(Array::make(p_class, p_method)));
 
 	type.virtual_methods[p_method] = p_call;
+}
+
+void ClassDB::add_virtual_method(const StringName &p_class, const MethodInfo &p_method, const Vector<StringName> &p_arg_names) {
+	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class);
+	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
+
+	GDExtensionClassVirtualMethodInfo mi;
+	mi.name = (GDExtensionStringNamePtr)&p_method.name;
+	mi.method_flags = p_method.flags;
+	mi.return_value = p_method.return_val._to_gdextension();
+	mi.return_value_metadata = p_method.return_val_metadata;
+	mi.argument_count = p_method.arguments.size();
+	if (mi.argument_count > 0) {
+		mi.arguments = (GDExtensionPropertyInfo *)memalloc(sizeof(GDExtensionPropertyInfo) * mi.argument_count);
+		mi.arguments_metadata = (GDExtensionClassMethodArgumentMetadata *)memalloc(sizeof(GDExtensionClassMethodArgumentMetadata) * mi.argument_count);
+		for (int i = 0; i < mi.argument_count; i++) {
+			mi.arguments[i] = p_method.arguments[i]._to_gdextension();
+			mi.arguments_metadata[i] = p_method.arguments_metadata[i];
+		}
+	} else {
+		mi.arguments = nullptr;
+		mi.arguments_metadata = nullptr;
+	}
+
+	if (p_arg_names.size() != mi.argument_count) {
+		WARN_PRINT("Mismatch argument name count for virtual method: " + String(p_class) + "::" + p_method.name);
+	} else {
+		for (int i = 0; i < p_arg_names.size(); i++) {
+			mi.arguments[i].name = (GDExtensionStringNamePtr)&p_arg_names[i];
+		}
+	}
+
+	internal::gdextension_interface_classdb_register_extension_class_virtual_method(internal::library, &p_class, &mi);
+
+	if (mi.arguments) {
+		memfree(mi.arguments);
+	}
+	if (mi.arguments_metadata) {
+		memfree(mi.arguments_metadata);
+	}
 }
 
 void ClassDB::initialize_class(const ClassInfo &p_cl) {

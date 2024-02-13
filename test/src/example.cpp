@@ -230,6 +230,9 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("callable_bind"), &Example::callable_bind);
 	ClassDB::bind_method(D_METHOD("test_post_initialize"), &Example::test_post_initialize);
 
+	GDVIRTUAL_BIND(_do_something_virtual, "name", "value");
+	ClassDB::bind_method(D_METHOD("test_virtual_implemented_in_script"), &Example::test_virtual_implemented_in_script);
+
 	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
 	ClassDB::bind_static_method("Example", D_METHOD("test_static2"), &Example::test_static2);
 
@@ -625,4 +628,12 @@ void Example::_input(const Ref<InputEvent> &event) {
 	if (key_event) {
 		emit_custom_signal(String("_input: ") + key_event->get_key_label(), key_event->get_unicode());
 	}
+}
+
+String Example::test_virtual_implemented_in_script(const String &p_name, int p_value) {
+	String ret;
+	if (GDVIRTUAL_CALL(_do_something_virtual, p_name, p_value, ret)) {
+		return ret;
+	}
+	return "Unimplemented";
 }
