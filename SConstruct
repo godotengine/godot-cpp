@@ -21,16 +21,15 @@ env.PrependENVPath("PATH", os.getenv("PATH"))
 
 # Custom options and profile flags.
 customs = ["custom.py"]
-try:
-    customs += Import("customs")
-except:
-    pass
 profile = ARGUMENTS.get("profile", "")
 if profile:
-    if os.path.isfile(profile):
-        customs.append(profile)
-    elif os.path.isfile(profile + ".py"):
-        customs.append(profile + ".py")
+    if not profile.endswith('.py'):
+        profile += '.py'
+
+    path = str(Entry('#' + profile))
+
+    if (os.path.isfile(path)):
+        customs.append(path)
 opts = Variables(customs, ARGUMENTS)
 cpp_tool = Tool("godotcpp", toolpath=["tools"])
 cpp_tool.options(opts, env)
@@ -39,11 +38,13 @@ opts.Update(env)
 Help(opts.GenerateHelpText(env))
 
 # Detect and print a warning listing unknown SCons variables to ease troubleshooting.
-unknown = opts.UnknownVariables()
-if unknown:
-    print("WARNING: Unknown SCons variables were passed and will be ignored:")
-    for item in unknown.items():
-        print("    " + item[0] + "=" + item[1])
+# But only do that if this is top level SConstruct, not subsidiary
+if Dir("#").abspath == Dir(".").abspath:
+    unknown = opts.UnknownVariables()
+    if unknown:
+        print("WARNING: Unknown SCons variables were passed and will be ignored:")
+        for item in unknown.items():
+            print("    " + item[0] + "=" + item[1])
 
 scons_cache_path = os.environ.get("SCONS_CACHE")
 if scons_cache_path is not None:

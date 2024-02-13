@@ -198,6 +198,15 @@ def options(opts, env):
         )
     )
 
+    opts.Add(
+        PathVariable(
+            key="profile",
+            help="Allow specification of customization file other than `custom.py`.",
+            default=env.get("profile", None),
+            validator=validate_file,
+        )
+    )
+
     # Add platform options
     for pl in platforms:
         tool = Tool(pl, toolpath=["tools"])
