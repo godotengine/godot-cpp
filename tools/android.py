@@ -1,6 +1,7 @@
 import os
 import sys
 import my_spawn
+import common_compiler_flags
 from SCons.Script import ARGUMENTS
 
 
@@ -118,3 +119,5 @@ def generate(env):
     env.Append(LINKFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"]])
 
     env.Append(CPPDEFINES=["ANDROID_ENABLED", "UNIX_ENABLED"])
+
+    common_compiler_flags.generate(env)
