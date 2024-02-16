@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 from SCons.Script import ARGUMENTS
+from SCons.Tool import Tool
 from SCons.Variables import *
 from SCons.Variables.BoolVariable import _text2bool
 
@@ -24,7 +25,7 @@ def using_clang(env):
     return "clang" in os.path.basename(env["CC"])
 
 
-def is_vanilla_clang(env):
+def is_clang_type(env, family_string):
     if not using_clang(env):
         return False
     try:
@@ -32,7 +33,7 @@ def is_vanilla_clang(env):
     except (subprocess.CalledProcessError, OSError):
         print("Couldn't parse CXX environment variable to infer compiler version.")
         return False
-    return not version.startswith("Apple")
+    return version.startswith(family_string)
 
 
 # Main tool definition
@@ -125,10 +126,10 @@ def generate(env):
             else:
                 env.Append(CCFLAGS=["-g2"])
         else:
-            if using_clang(env) and not is_vanilla_clang(env):
+            if using_clang(env) and is_clang_type(env, "Apple"):
                 # Apple Clang, its linker doesn't like -s.
                 env.Append(LINKFLAGS=["-Wl,-S", "-Wl,-x", "-Wl,-dead_strip"])
-            else:
+            elif using_clang(env) and is_clang_type(env, "clang"):
                 env.Append(LINKFLAGS=["-s"])
 
         if env["optimize"] == "speed":
