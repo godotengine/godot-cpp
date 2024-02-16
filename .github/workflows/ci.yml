@@ -65,7 +65,7 @@ jobs:
             platform: android
             artifact-name: godot-cpp-android-arm64-release
             artifact-path: bin/libgodot-cpp.android.template_release.arm64.a
-            flags: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME arch=arm64
+            flags: arch=arm64
             run-tests: false
             cache-name: android-arm64
 
@@ -88,7 +88,7 @@ jobs:
 
     env:
       SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
-      EM_VERSION: 3.1.45
+      EM_VERSION: 3.1.39
       EM_CACHE_FOLDER: "emsdk-cache"
 
     steps:
@@ -104,32 +104,33 @@ jobs:
         continue-on-error: true
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      - name: Linux dependencies
-        if: ${{ matrix.platform == 'linux' }}
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -qqq build-essential pkg-config
+      - name: Android dependencies
+        if: ${{ matrix.platform == 'android' }}
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r23c
+          link-to-sdk: true
 
       - name: Web dependencies
         if: ${{ matrix.platform == 'web' }}
-        uses: mymindstorm/setup-emsdk@v12
+        uses: mymindstorm/setup-emsdk@v13
         with:
           version: ${{env.EM_VERSION}}
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
-
-      - name: Install scons
-        run: |
-          python -m pip install scons==4.0.0
 
       - name: Setup MinGW for Windows/MinGW build
         if: ${{ matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes' }}
         uses: egor-tensin/setup-mingw@v2
         with:
           version: 12.2.0
+
+      - name: Install scons
+        run: |
+          python -m pip install scons==4.0.0
 
       - name: Generate godot-cpp sources only
         run: |

@@ -8,7 +8,7 @@ def options(opts):
     opts.Add(
         "android_api_level",
         "Target Android API level",
-        "18" if "32" in ARGUMENTS.get("arch", "arm64") else "21",
+        "21",
     )
     opts.Add(
         "ANDROID_HOME",
@@ -47,11 +47,9 @@ def generate(env):
         my_spawn.configure(env)
 
     # Validate API level
-    api_level = int(env["android_api_level"])
-    if "64" in env["arch"] and api_level < 21:
-        print("WARN: 64-bit Android architectures require an API level of at least 21; setting android_api_level=21")
+    if int(env["android_api_level"]) < 21:
+        print("WARNING: minimum supported Android target api is 21. Forcing target api 21.")
         env["android_api_level"] = "21"
-        api_level = 21
 
     # Setup toolchain
     toolchain = get_android_ndk_root(env) + "/toolchains/llvm/prebuilt/"
@@ -66,6 +64,12 @@ def generate(env):
     elif sys.platform == "darwin":
         toolchain += "darwin-x86_64"
         env.Append(LINKFLAGS=["-shared"])
+
+    if not os.path.exists(toolchain):
+        print("ERROR: Could not find NDK toolchain at " + toolchain + ".")
+        print("Make sure NDK version " + get_ndk_version() + " is installed.")
+        env.Exit(1)
+
     env.PrependENVPath("PATH", toolchain + "/bin")  # This does nothing half of the time, but we'll put it here anyways
 
     # Get architecture info
