@@ -110,7 +110,7 @@ private:
 	static void bind_method_godot(const StringName &p_class_name, MethodBind *p_method);
 
 	template <class T, bool is_abstract>
-	static void _register_class(bool p_virtual = false, bool p_exposed = true);
+	static void _register_class(bool p_virtual = false, bool p_exposed = true, bool p_runtime = false);
 
 	template <class T>
 	static GDExtensionObjectPtr _create_instance_func(void *data) {
@@ -146,6 +146,8 @@ public:
 	static void register_abstract_class();
 	template <class T>
 	static void register_internal_class();
+	template <class T>
+	static void register_runtime_class();
 
 	_FORCE_INLINE_ static void _register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks) {
 		instance_binding_callbacks[p_name] = p_callbacks;
@@ -199,7 +201,7 @@ public:
 	}
 
 template <class T, bool is_abstract>
-void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
+void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 	static_assert(TypesAreSame<typename T::self_type, T>::value, "Class not declared properly, please use GDCLASS.");
 	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
 
@@ -217,10 +219,11 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
 	class_register_order.push_back(cl.name);
 
 	// Register this class with Godot
-	GDExtensionClassCreationInfo2 class_info = {
+	GDExtensionClassCreationInfo3 class_info = {
 		p_virtual, // GDExtensionBool is_virtual;
 		is_abstract, // GDExtensionBool is_abstract;
 		p_exposed, // GDExtensionBool is_exposed;
+		p_runtime, // GDExtensionBool is_runtime;
 		T::set_bind, // GDExtensionClassSet set_func;
 		T::get_bind, // GDExtensionClassGet get_func;
 		T::has_get_property_list() ? T::get_property_list_bind : nullptr, // GDExtensionClassGetPropertyList get_property_list_func;
@@ -242,7 +245,7 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
 		(void *)&T::get_class_static(), // void *class_userdata;
 	};
 
-	internal::gdextension_interface_classdb_register_extension_class2(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
+	internal::gdextension_interface_classdb_register_extension_class3(internal::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
 
 	// call bind_methods etc. to register all members of the class
 	T::initialize_class();
@@ -264,6 +267,11 @@ void ClassDB::register_abstract_class() {
 template <class T>
 void ClassDB::register_internal_class() {
 	ClassDB::_register_class<T, false>(false, false);
+}
+
+template <class T>
+void ClassDB::register_runtime_class() {
+	ClassDB::_register_class<T, false>(false, true, true);
 }
 
 template <class N, class M, typename... VarArgs>
@@ -325,6 +333,7 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p
 #define GDREGISTER_VIRTUAL_CLASS(m_class) ClassDB::register_class<m_class>(true);
 #define GDREGISTER_ABSTRACT_CLASS(m_class) ClassDB::register_abstract_class<m_class>();
 #define GDREGISTER_INTERNAL_CLASS(m_class) ClassDB::register_internal_class<m_class>();
+#define GDREGISTER_RUNTIME_CLASS(m_class) ClassDB::register_runtime_class<m_class>();
 
 } // namespace godot
 
