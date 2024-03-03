@@ -545,6 +545,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if class_name == "PackedVector3Array":
         result.append("#include <godot_cpp/variant/vector3.hpp>")
 
+    if is_packed_array(class_name):
+        result.append("#include <godot_cpp/core/error_macros.hpp>")
+        result.append("#include <initializer_list>")
+
     if class_name == "Array":
         result.append("#include <godot_cpp/variant/array_helpers.hpp>")
 
@@ -872,6 +876,17 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 	}
 """
         result.append(iterators.replace("$TYPE", return_type))
+        init_list = """
+    _FORCE_INLINE_ $CLASS(std::initializer_list<$TYPE> p_init) {
+		ERR_FAIL_COND(resize(p_init.size()) != 0);
+
+		size_t i = 0;
+		for (const $TYPE &element : p_init) {
+			set(i++, element);
+		}
+	}
+"""
+        result.append(init_list.replace("$TYPE", return_type).replace("$CLASS", class_name))
 
     if class_name == "Array":
         result.append("\tconst Variant &operator[](int64_t p_index) const;")
