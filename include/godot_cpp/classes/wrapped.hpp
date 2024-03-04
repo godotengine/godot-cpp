@@ -149,6 +149,15 @@ struct EngineClassRegistration {
 	}
 };
 
+template <typename>
+struct MemberPointerTraits;
+
+template <typename Result, typename Object>
+struct MemberPointerTraits<Result (Object::*)> {
+	using result_type = Result;
+	using object_type = Object;
+};
+
 } // namespace internal
 
 } // namespace godot
@@ -368,6 +377,12 @@ public:                                                                         
 		_gde_binding_free_callback,                                                                                                                                                    \
 		_gde_binding_reference_callback,                                                                                                                                               \
 	};                                                                                                                                                                                 \
+                                                                                                                                                                                       \
+	template <auto T>                                                                                                                                                                  \
+	typename internal::MemberPointerTraits<decltype(T)>::result_type _get_data_member() { return (this->*T); }                                                                                 \
+                                                                                                                                                                                       \
+	template <auto T>                                                                                                                                                                  \
+	void _set_data_member(typename internal::MemberPointerTraits<decltype(T)>::result_type t) { (this->*T) = t; }                                                                              \
                                                                                                                                                                                        \
 private:
 

@@ -51,6 +51,14 @@
 #define ADD_GROUP(m_name, m_prefix) godot::ClassDB::add_property_group(get_class_static(), m_name, m_prefix)
 #define ADD_SUBGROUP(m_name, m_prefix) godot::ClassDB::add_property_subgroup(get_class_static(), m_name, m_prefix)
 #define ADD_PROPERTY(m_property, m_setter, m_getter) godot::ClassDB::add_property(get_class_static(), m_property, m_setter, m_getter)
+#define AUTO_ADD_PROPERTY(p_property, p_method)                                                                \
+	{                                                                                                          \
+		auto get = &godot::detail::member_traits<decltype(p_method)>::object_type::_get_data_member<p_method>; \
+		auto set = &godot::detail::member_traits<decltype(p_method)>::object_type::_set_data_member<p_method>; \
+		ClassDB::bind_method(D_METHOD(&#p_method[1]), get);                                               \
+		ClassDB::bind_method(D_METHOD(&#p_method[1]), set);                                               \
+		ClassDB::add_property(get_class_static(), p_property, &#p_method[1], &#p_method[1]);         \
+	}
 #define ADD_PROPERTYI(m_property, m_setter, m_getter, m_index) godot::ClassDB::add_property(get_class_static(), m_property, m_setter, m_getter, m_index)
 
 namespace godot {
