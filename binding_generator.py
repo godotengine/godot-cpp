@@ -78,7 +78,8 @@ def generate_virtual_version(argcount, const=False, returns=False):
 		if (::godot::internal::gdextension_interface_object_has_script_method(_owner, &_gdvirtual_##m_name##_sn)) { \\
 			GDExtensionCallError ce;\\
 			$CALLSIARGS\\
-			$CALLSIBEGIN::godot::internal::gdextension_interface_object_call_script_method(_owner, &_gdvirtual_##m_name##_sn, $CALLSIARGPASS, $CALLSIRETPASS, &ce);\\
+			Variant ret;\\
+			::godot::internal::gdextension_interface_object_call_script_method(_owner, &_gdvirtual_##m_name##_sn, $CALLSIARGPASS, &ret, &ce);\\
 			if (ce.error == GDEXTENSION_CALL_OK) {\\
 				$CALLSIRET\\
 				return true;\\
@@ -160,12 +161,8 @@ def generate_virtual_version(argcount, const=False, returns=False):
         if argcount > 0:
             callargtext += ", "
         callargtext += "m_ret &r_ret"
-        s = s.replace("$CALLSIBEGIN", "Variant ret;\\\n\t\t\t")
-        s = s.replace("$CALLSIRETPASS", "&ret")
         s = s.replace("$CALLSIRET", "r_ret = VariantCaster<m_ret>::cast(ret);")
     else:
-        s = s.replace("$CALLSIBEGIN", "")
-        s = s.replace("$CALLSIRETPASS", "nullptr")
         s = s.replace("\t\t\t\t$CALLSIRET\\\n", "")
 
     s = s.replace(" $ARG", argtext)
