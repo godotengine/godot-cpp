@@ -27,6 +27,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<ExampleVirtual>(true);
 	ClassDB::register_abstract_class<ExampleAbstractBase>();
 	ClassDB::register_class<ExampleConcrete>();
+	ClassDB::register_class<ExampleBase>();
+	ClassDB::register_class<ExampleChild>();
 	ClassDB::register_runtime_class<ExampleRuntime>();
 }
 

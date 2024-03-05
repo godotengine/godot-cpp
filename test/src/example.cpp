@@ -630,6 +630,24 @@ void Example::_input(const Ref<InputEvent> &event) {
 	}
 }
 
+void ExampleBase::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_value1"), &ExampleBase::get_value1);
+	ClassDB::bind_method(D_METHOD("get_value2"), &ExampleBase::get_value2);
+}
+
+void ExampleBase::_notification(int p_what) {
+	if (p_what == NOTIFICATION_ENTER_TREE) {
+		value1 = 11;
+		value2 = 22;
+	}
+}
+
+void ExampleChild::_notification(int p_what) {
+	if (p_what == NOTIFICATION_ENTER_TREE) {
+		value2 = 33;
+	}
+}
+
 String Example::test_virtual_implemented_in_script(const String &p_name, int p_value) {
 	String ret;
 	if (GDVIRTUAL_CALL(_do_something_virtual, p_name, p_value, ret)) {

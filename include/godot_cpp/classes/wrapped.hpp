@@ -239,11 +239,16 @@ public:                                                                         
                                                                                                                                                                                        \
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, GDExtensionBool p_reversed) {                                                                \
 		if (p_instance && m_class::_get_notification()) {                                                                                                                              \
+			if (!p_reversed) {                                                                                                                                                         \
+				m_inherits::notification_bind(p_instance, p_what, p_reversed);                                                                                                         \
+			}                                                                                                                                                                          \
 			if (m_class::_get_notification() != m_inherits::_get_notification()) {                                                                                                     \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
-				return cls->_notification(p_what);                                                                                                                                     \
+				cls->_notification(p_what);                                                                                                                                            \
 			}                                                                                                                                                                          \
-			m_inherits::notification_bind(p_instance, p_what, p_reversed);                                                                                                             \
+			if (p_reversed) {                                                                                                                                                          \
+				m_inherits::notification_bind(p_instance, p_what, p_reversed);                                                                                                         \
+			}                                                                                                                                                                          \
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
