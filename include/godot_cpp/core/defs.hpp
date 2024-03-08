@@ -38,7 +38,7 @@
 #if !defined(GDE_EXPORT)
 #if defined(_WIN32)
 #define GDE_EXPORT __declspec(dllexport)
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && !defined(__MINGW32__)
 #define GDE_EXPORT __attribute__((visibility("default")))
 #else
 #define GDE_EXPORT
