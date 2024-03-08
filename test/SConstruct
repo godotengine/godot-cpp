@@ -35,8 +35,13 @@ elif env["platform"] == "ios":
             source=sources,
         )
 else:
+    library_path = "project/bin/libgdexample{}{}".format(env["suffix"], env["SHLIBSUFFIX"])
+
+    if env.get("is_msvc", False) and env["debug_symbols"] and env["use_hot_reload"]:
+        env.MSVCTryRenamePDB(library_path)
+
     library = env.SharedLibrary(
-        "project/bin/libgdexample{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        library_path,
         source=sources,
     )
 

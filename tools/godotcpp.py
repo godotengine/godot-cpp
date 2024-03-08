@@ -1,4 +1,5 @@
 import os, sys, platform
+import methods
 
 from SCons.Variables import EnumVariable, PathVariable, BoolVariable
 from SCons.Variables.BoolVariable import _text2bool
@@ -384,6 +385,9 @@ def generate(env):
     # Builders
     env.Append(BUILDERS={"GodotCPPBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
     env.AddMethod(_godot_cpp, "GodotCPP")
+
+    # Global methods
+    env.AddMethod(methods.msvc_try_rename_pdb, "MSVCTryRenamePDB")
 
 
 def _godot_cpp(env):
