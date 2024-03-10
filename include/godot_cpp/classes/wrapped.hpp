@@ -117,7 +117,7 @@ void add_engine_class_registration_callback(EngineClassRegistrationCallback p_ca
 void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks);
 void register_engine_classes();
 
-template <class T>
+template <typename T>
 struct EngineClassRegistration {
 	EngineClassRegistration() {
 		add_engine_class_registration_callback(&EngineClassRegistration<T>::callback);
@@ -186,7 +186,7 @@ protected:                                                                      
 		return (::godot::String(::godot::Wrapped::*)() const) & m_class::_to_string;                                                                                                   \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	template <class T, class B>                                                                                                                                                        \
+	template <typename T, typename B>                                                                                                                                                  \
 	static void register_virtuals() {                                                                                                                                                  \
 		m_inherits::register_virtuals<T, B>();                                                                                                                                         \
 	}                                                                                                                                                                                  \

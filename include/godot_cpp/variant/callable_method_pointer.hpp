@@ -60,7 +60,7 @@ Callable create_callable_from_ccmp(CallableCustomMethodPointerBase *p_callable_m
 // No return value.
 //
 
-template <class T, class... P>
+template <typename T, typename... P>
 class CallableCustomMethodPointer : public CallableCustomMethodPointerBase {
 	struct Data {
 		T *instance;
@@ -85,7 +85,7 @@ public:
 	}
 };
 
-template <class T, class... P>
+template <typename T, typename... P>
 Callable create_custom_callable_function_pointer(T *p_instance, void (T::*p_method)(P...)) {
 	typedef CallableCustomMethodPointer<T, P...> CCMP;
 	CCMP *ccmp = memnew(CCMP(p_instance, p_method));
@@ -96,7 +96,7 @@ Callable create_custom_callable_function_pointer(T *p_instance, void (T::*p_meth
 // With return value.
 //
 
-template <class T, class R, class... P>
+template <typename T, typename R, typename... P>
 class CallableCustomMethodPointerRet : public CallableCustomMethodPointerBase {
 	struct Data {
 		T *instance;
@@ -122,7 +122,7 @@ public:
 	}
 };
 
-template <class T, class R, class... P>
+template <typename T, typename R, typename... P>
 Callable create_custom_callable_function_pointer(T *p_instance, R (T::*p_method)(P...)) {
 	typedef CallableCustomMethodPointerRet<T, R, P...> CCMP; // Messes with memnew otherwise.
 	CCMP *ccmp = memnew(CCMP(p_instance, p_method));
@@ -133,7 +133,7 @@ Callable create_custom_callable_function_pointer(T *p_instance, R (T::*p_method)
 // Const with return value.
 //
 
-template <class T, class R, class... P>
+template <typename T, typename R, typename... P>
 class CallableCustomMethodPointerRetC : public CallableCustomMethodPointerBase {
 	struct Data {
 		T *instance;
@@ -159,7 +159,7 @@ public:
 	}
 };
 
-template <class T, class R, class... P>
+template <typename T, typename R, typename... P>
 Callable create_custom_callable_function_pointer(const T *p_instance, R (T::*p_method)(P...) const) {
 	typedef CallableCustomMethodPointerRetC<T, R, P...> CCMP; // Messes with memnew otherwise.
 	CCMP *ccmp = memnew(CCMP(p_instance, p_method));
@@ -170,7 +170,7 @@ Callable create_custom_callable_function_pointer(const T *p_instance, R (T::*p_m
 // Static method with no return value.
 //
 
-template <class... P>
+template <typename... P>
 class CallableCustomStaticMethodPointer : public CallableCustomMethodPointerBase {
 	struct Data {
 		void (*method)(P...);
@@ -194,7 +194,7 @@ public:
 	}
 };
 
-template <class... P>
+template <typename... P>
 Callable create_custom_callable_static_function_pointer(void (*p_method)(P...)) {
 	typedef CallableCustomStaticMethodPointer<P...> CCMP;
 	CCMP *ccmp = memnew(CCMP(p_method));
@@ -205,7 +205,7 @@ Callable create_custom_callable_static_function_pointer(void (*p_method)(P...)) 
 // Static method with return value.
 //
 
-template <class R, class... P>
+template <typename R, typename... P>
 class CallableCustomStaticMethodPointerRet : public CallableCustomMethodPointerBase {
 	struct Data {
 		R(*method)
@@ -229,7 +229,7 @@ public:
 	}
 };
 
-template <class R, class... P>
+template <typename R, typename... P>
 Callable create_custom_callable_static_function_pointer(R (*p_method)(P...)) {
 	typedef CallableCustomStaticMethodPointerRet<R, P...> CCMP;
 	CCMP *ccmp = memnew(CCMP(p_method));

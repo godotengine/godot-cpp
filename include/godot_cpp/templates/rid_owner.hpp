@@ -42,7 +42,7 @@
 
 namespace godot {
 
-template <class T, bool THREAD_SAFE = false>
+template <typename T, bool THREAD_SAFE = false>
 class RID_Alloc {
 	T **chunks = nullptr;
 	uint32_t **free_list_chunks = nullptr;
@@ -347,7 +347,7 @@ public:
 	}
 };
 
-template <class T, bool THREAD_SAFE = false>
+template <typename T, bool THREAD_SAFE = false>
 class RID_PtrOwner {
 	RID_Alloc<T *, THREAD_SAFE> alloc;
 
@@ -406,7 +406,7 @@ public:
 			alloc(p_target_chunk_byte_size) {}
 };
 
-template <class T, bool THREAD_SAFE = false>
+template <typename T, bool THREAD_SAFE = false>
 class RID_Owner {
 	RID_Alloc<T, THREAD_SAFE> alloc;
 

@@ -84,7 +84,7 @@ public:
 
 _ALWAYS_INLINE_ void postinitialize_handler(void *) {}
 
-template <class T>
+template <typename T>
 _ALWAYS_INLINE_ T *_post_initialize(T *p_obj) {
 	postinitialize_handler(p_obj);
 	return p_obj;
@@ -100,12 +100,12 @@ _ALWAYS_INLINE_ T *_post_initialize(T *p_obj) {
 #define memnew_placement(m_placement, m_class) ::godot::_post_initialize(new ("", m_placement, sizeof(m_class), "") m_class)
 
 // Generic comparator used in Map, List, etc.
-template <class T>
+template <typename T>
 struct Comparator {
 	_ALWAYS_INLINE_ bool operator()(const T &p_a, const T &p_b) const { return (p_a < p_b); }
 };
 
-template <class T>
+template <typename T>
 void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wrapped, T>>::type * = nullptr) {
 	if constexpr (!std::is_trivially_destructible_v<T>) {
 		p_class->~T();
@@ -114,12 +114,12 @@ void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wra
 	Memory::free_static(p_class);
 }
 
-template <class T, std::enable_if_t<std::is_base_of_v<godot::Wrapped, T>, bool> = true>
+template <typename T, std::enable_if_t<std::is_base_of_v<godot::Wrapped, T>, bool> = true>
 void memdelete(T *p_class) {
 	godot::internal::gdextension_interface_object_destroy(p_class->_owner);
 }
 
-template <class T, class A>
+template <typename T, typename A>
 void memdelete_allocator(T *p_class) {
 	if constexpr (!std::is_trivially_destructible_v<T>) {
 		p_class->~T();
@@ -134,10 +134,10 @@ public:
 	_ALWAYS_INLINE_ static void free(void *p_ptr) { Memory::free_static(p_ptr); }
 };
 
-template <class T>
+template <typename T>
 class DefaultTypedAllocator {
 public:
-	template <class... Args>
+	template <typename... Args>
 	_ALWAYS_INLINE_ T *new_allocation(const Args &&...p_args) { return memnew(T(p_args...)); }
 	_ALWAYS_INLINE_ void delete_allocation(T *p_allocation) { memdelete(p_allocation); }
 };
