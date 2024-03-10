@@ -52,7 +52,7 @@ namespace godot {
  * The assignment operator copy the pairs from one map to the other.
  */
 
-template <class TKey, class TValue>
+template <typename TKey, typename TValue>
 struct HashMapElement {
 	HashMapElement *next = nullptr;
 	HashMapElement *prev = nullptr;
@@ -62,10 +62,10 @@ struct HashMapElement {
 			data(p_key, p_value) {}
 };
 
-template <class TKey, class TValue,
-		class Hasher = HashMapHasherDefault,
-		class Comparator = HashMapComparatorDefault<TKey>,
-		class Allocator = DefaultTypedAllocator<HashMapElement<TKey, TValue>>>
+template <typename TKey, typename TValue,
+		typename Hasher = HashMapHasherDefault,
+		typename Comparator = HashMapComparatorDefault<TKey>,
+		typename Allocator = DefaultTypedAllocator<HashMapElement<TKey, TValue>>>
 class HashMap {
 public:
 	const uint32_t MIN_CAPACITY_INDEX = 2; // Use a prime.

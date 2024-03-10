@@ -38,12 +38,12 @@
 
 namespace godot {
 
-template <class T>
+template <typename T>
 class CharStringT;
 
-template <class T>
+template <typename T>
 class CharProxy {
-	template <class TS>
+	template <typename TS>
 	friend class CharStringT;
 
 	const int64_t _index;
@@ -80,7 +80,7 @@ public:
 	}
 };
 
-template <class T>
+template <typename T>
 class CharStringT {
 	friend class String;
 
