@@ -36,7 +36,7 @@
 
 namespace godot {
 
-template <class T>
+template <typename T>
 class TypedArray : public Array {
 public:
 	_FORCE_INLINE_ void operator=(const Array &p_array) {

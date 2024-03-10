@@ -269,7 +269,7 @@ public:
 
 	void callp(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
 
-	template <class... Args>
+	template <typename... Args>
 	Variant call(const StringName &method, Args... args) {
 		std::array<Variant, sizeof...(args)> vargs = { args... };
 		std::array<const Variant *, sizeof...(args)> argptrs;
@@ -284,7 +284,7 @@ public:
 
 	static void callp_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
 
-	template <class... Args>
+	template <typename... Args>
 	static Variant call_static(Variant::Type type, const StringName &method, Args... args) {
 		std::array<Variant, sizeof...(args)> vargs = { args... };
 		std::array<const Variant *, sizeof...(args)> argptrs;

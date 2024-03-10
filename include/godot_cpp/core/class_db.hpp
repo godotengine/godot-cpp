@@ -114,26 +114,26 @@ private:
 	static void initialize_class(const ClassInfo &cl);
 	static void bind_method_godot(const StringName &p_class_name, MethodBind *p_method);
 
-	template <class T, bool is_abstract>
+	template <typename T, bool is_abstract>
 	static void _register_class(bool p_virtual = false);
 
 public:
-	template <class T>
+	template <typename T>
 	static void register_class(bool p_virtual = false);
-	template <class T>
+	template <typename T>
 	static void register_abstract_class();
 
 	_FORCE_INLINE_ static void _register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks) {
 		instance_binding_callbacks[p_name] = p_callbacks;
 	}
 
-	template <class N, class M, typename... VarArgs>
+	template <typename N, typename M, typename... VarArgs>
 	static MethodBind *bind_method(N p_method_name, M p_method, VarArgs... p_args);
 
-	template <class N, class M, typename... VarArgs>
+	template <typename N, typename M, typename... VarArgs>
 	static MethodBind *bind_static_method(StringName p_class, N p_method_name, M p_method, VarArgs... p_args);
 
-	template <class M>
+	template <typename M>
 	static MethodBind *bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const std::vector<Variant> &p_default_args = std::vector<Variant>{}, bool p_return_nil_is_variant = true);
 
 	static void add_property_group(const StringName &p_class, const String &p_name, const String &p_prefix);
@@ -171,7 +171,7 @@ public:
 		::godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, _call##m_method);                                       \
 	}
 
-template <class T, bool is_abstract>
+template <typename T, bool is_abstract>
 void ClassDB::_register_class(bool p_virtual) {
 	static_assert(TypesAreSame<typename T::self_type, T>::value, "Class not declared properly, please use GDCLASS.");
 	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
@@ -219,17 +219,17 @@ void ClassDB::_register_class(bool p_virtual) {
 	initialize_class(classes[cl.name]);
 }
 
-template <class T>
+template <typename T>
 void ClassDB::register_class(bool p_virtual) {
 	ClassDB::_register_class<T, false>(p_virtual);
 }
 
-template <class T>
+template <typename T>
 void ClassDB::register_abstract_class() {
 	ClassDB::_register_class<T, true>();
 }
 
-template <class N, class M, typename... VarArgs>
+template <typename N, typename M, typename... VarArgs>
 MethodBind *ClassDB::bind_method(N p_method_name, M p_method, VarArgs... p_args) {
 	Variant args[sizeof...(p_args) + 1] = { p_args..., Variant() }; // +1 makes sure zero sized arrays are also supported.
 	const Variant *argptrs[sizeof...(p_args) + 1];
@@ -240,7 +240,7 @@ MethodBind *ClassDB::bind_method(N p_method_name, M p_method, VarArgs... p_args)
 	return bind_methodfi(METHOD_FLAGS_DEFAULT, bind, p_method_name, sizeof...(p_args) == 0 ? nullptr : (const void **)argptrs, sizeof...(p_args));
 }
 
-template <class N, class M, typename... VarArgs>
+template <typename N, typename M, typename... VarArgs>
 MethodBind *ClassDB::bind_static_method(StringName p_class, N p_method_name, M p_method, VarArgs... p_args) {
 	Variant args[sizeof...(p_args) + 1] = { p_args..., Variant() }; // +1 makes sure zero sized arrays are also supported.
 	const Variant *argptrs[sizeof...(p_args) + 1];
@@ -252,7 +252,7 @@ MethodBind *ClassDB::bind_static_method(StringName p_class, N p_method_name, M p
 	return bind_methodfi(0, bind, p_method_name, sizeof...(p_args) == 0 ? nullptr : (const void **)argptrs, sizeof...(p_args));
 }
 
-template <class M>
+template <typename M>
 MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info, const std::vector<Variant> &p_default_args, bool p_return_nil_is_variant) {
 	MethodBind *bind = create_vararg_method_bind(p_method, p_info, p_return_nil_is_variant);
 	ERR_FAIL_NULL_V(bind, nullptr);

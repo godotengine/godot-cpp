@@ -65,7 +65,7 @@ _FORCE_INLINE_ bool is_str_less(const L *l_ptr, const R *r_ptr) {
 	}
 }
 
-template <class T>
+template <typename T>
 bool CharStringT<T>::operator<(const CharStringT<T> &p_right) const {
 	if (length() == 0) {
 		return p_right.length() != 0;
@@ -74,7 +74,7 @@ bool CharStringT<T>::operator<(const CharStringT<T> &p_right) const {
 	return is_str_less(get_data(), p_right.get_data());
 }
 
-template <class T>
+template <typename T>
 CharStringT<T> &CharStringT<T>::operator+=(T p_char) {
 	const int64_t lhs_len = length();
 	resize(lhs_len + 2);
@@ -86,7 +86,7 @@ CharStringT<T> &CharStringT<T>::operator+=(T p_char) {
 	return *this;
 }
 
-template <class T>
+template <typename T>
 void CharStringT<T>::operator=(const T *p_cstr) {
 	copy_from(p_cstr);
 }
@@ -127,7 +127,7 @@ const wchar_t *CharStringT<wchar_t>::get_data() const {
 	}
 }
 
-template <class T>
+template <typename T>
 void CharStringT<T>::copy_from(const T *p_cstr) {
 	if (!p_cstr) {
 		resize(0);

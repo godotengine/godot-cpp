@@ -520,7 +520,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
             vararg = method["is_vararg"]
             if vararg:
-                result.append("\ttemplate<class... Args>")
+                result.append("\ttemplate<typename... Args>")
 
             method_signature = "\t"
             if "is_static" in method and method["is_static"]:
@@ -618,7 +618,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("\tchar32_t *ptrw();")
 
     if class_name == "Array":
-        result.append("\ttemplate <class... Args>")
+        result.append("\ttemplate <typename... Args>")
         result.append("\tstatic Array make(Args... args) {")
         result.append("\t\treturn helpers::append_all(Array(), args...);")
         result.append("\t}")
@@ -1371,7 +1371,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("protected:")
     # T is the custom class we want to register (from which the call initiates, going up the inheritance chain),
     # B is its base class (can be a custom class too, that's why we pass it).
-    result.append("\ttemplate <class T, class B>")
+    result.append("\ttemplate <typename T, typename B>")
     result.append("\tstatic void register_virtuals() {")
     if class_name != "Object":
         result.append(f"\t\t{inherits}::register_virtuals<T, B>();")
@@ -1417,16 +1417,16 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     if class_name == "Object":
         result.append("")
 
-        result.append("\ttemplate<class T>")
+        result.append("\ttemplate<typename T>")
         result.append("\tstatic T *cast_to(Object *p_object);")
 
-        result.append("\ttemplate<class T>")
+        result.append("\ttemplate<typename T>")
         result.append("\tstatic const T *cast_to(const Object *p_object);")
 
         result.append("\tvirtual ~Object() = default;")
 
     elif use_template_get_node and class_name == "Node":
-        result.append("\ttemplate<class T>")
+        result.append("\ttemplate<typename T>")
         result.append(
             "\tT *get_node(const NodePath &p_path) const { return Object::cast_to<T>(get_node_internal(p_path)); }"
         )
@@ -2042,7 +2042,7 @@ def make_signature(
 def make_varargs_template(function_data, static=False):
     result = []
 
-    function_signature = "\tpublic: template<class... Args> "
+    function_signature = "\tpublic: template<typename... Args> "
 
     if static:
         function_signature += "static "
