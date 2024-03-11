@@ -1,9 +1,12 @@
 import os, sys, platform
 
 from SCons.Variables import EnumVariable, PathVariable, BoolVariable
+from SCons.Variables.BoolVariable import _text2bool
 from SCons.Tool import Tool
 from SCons.Builder import Builder
 from SCons.Errors import UserError
+from SCons.Script import ARGUMENTS
+
 
 from binding_generator import scons_generate_bindings, scons_emit_files
 
@@ -12,6 +15,17 @@ def add_sources(sources, dir, extension):
     for f in os.listdir(dir):
         if f.endswith("." + extension):
             sources.append(dir + "/" + f)
+
+
+def get_cmdline_bool(option, default):
+    """We use `ARGUMENTS.get()` to check if options were manually overridden on the command line,
+    and SCons' _text2bool helper to convert them to booleans, otherwise they're handled as strings.
+    """
+    cmdline_val = ARGUMENTS.get(option)
+    if cmdline_val is not None:
+        return _text2bool(cmdline_val)
+    else:
+        return default
 
 
 def normalize_path(val, env):
@@ -33,7 +47,26 @@ def validate_parent_dir(key, val, env):
         raise UserError("'%s' is not a directory: %s" % (key, os.path.dirname(val)))
 
 
-platforms = ("linux", "macos", "windows", "android", "ios", "web")
+def get_platform_tools_paths(env):
+    path = env.get("custom_tools", None)
+    if path is None:
+        return ["tools"]
+    return [normalize_path(path, env), "tools"]
+
+
+def get_custom_platforms(env):
+    path = env.get("custom_tools", None)
+    if path is None:
+        return []
+    platforms = []
+    for x in os.listdir(normalize_path(path, env)):
+        if not x.endswith(".py"):
+            continue
+        platforms.append(x.removesuffix(".py"))
+    return platforms
+
+
+platforms = ["linux", "macos", "windows", "android", "ios", "web"]
 
 # CPU architecture options.
 architecture_array = [
@@ -83,11 +116,24 @@ def options(opts, env):
         raise ValueError("Could not detect platform automatically, please specify with platform=<platform>")
 
     opts.Add(
+        PathVariable(
+            key="custom_tools",
+            help="Path to directory containing custom tools",
+            default=env.get("custom_tools", None),
+            validator=validate_dir,
+        )
+    )
+
+    opts.Update(env)
+
+    custom_platforms = get_custom_platforms(env)
+
+    opts.Add(
         EnumVariable(
             key="platform",
             help="Target platform",
             default=env.get("platform", default_platform),
-            allowed_values=platforms,
+            allowed_values=platforms + custom_platforms,
             ignorecase=2,
         )
     )
@@ -183,15 +229,22 @@ def options(opts, env):
         )
     )
 
-    # Add platform options
-    for pl in platforms:
-        tool = Tool(pl, toolpath=["tools"])
+    opts.Add(
+        EnumVariable(
+            "optimize",
+            "The desired optimization flags",
+            "speed_trace",
+            ("none", "custom", "debug", "speed", "speed_trace", "size"),
+        )
+    )
+    opts.Add(BoolVariable("debug_symbols", "Build with debugging symbols", True))
+    opts.Add(BoolVariable("dev_build", "Developer build with dev-only debugging code (DEV_ENABLED)", False))
+
+    # Add platform options (custom tools can override platforms)
+    for pl in sorted(set(platforms + custom_platforms)):
+        tool = Tool(pl, toolpath=get_platform_tools_paths(env))
         if hasattr(tool, "options"):
             tool.options(opts)
-
-    # Targets flags tool (optimizations, debug symbols)
-    target_tool = Tool("targets", toolpath=["tools"])
-    target_tool.options(opts)
 
 
 def generate(env):
@@ -239,30 +292,52 @@ def generate(env):
 
     print("Building for architecture " + env["arch"] + " on platform " + env["platform"])
 
-    tool = Tool(env["platform"], toolpath=["tools"])
+    # These defaults may be needed by platform tools
+    env.editor_build = env["target"] == "editor"
+    env.dev_build = env["dev_build"]
+    env.debug_features = env["target"] in ["editor", "template_debug"]
+
+    if env.dev_build:
+        opt_level = "none"
+    elif env.debug_features:
+        opt_level = "speed_trace"
+    else:  # Release
+        opt_level = "speed"
+
+    env["optimize"] = ARGUMENTS.get("optimize", opt_level)
+    env["debug_symbols"] = get_cmdline_bool("debug_symbols", env.dev_build)
+
+    tool = Tool(env["platform"], toolpath=get_platform_tools_paths(env))
 
     if tool is None or not tool.exists(env):
         raise ValueError("Required toolchain not found for platform " + env["platform"])
 
     tool.generate(env)
-    target_tool = Tool("targets", toolpath=["tools"])
-    target_tool.generate(env)
 
-    # Disable exception handling. Godot doesn't use exceptions anywhere, and this
-    # saves around 20% of binary size and very significant build time.
-    if env["disable_exceptions"]:
-        if env.get("is_msvc", False):
-            env.Append(CPPDEFINES=[("_HAS_EXCEPTIONS", 0)])
-        else:
-            env.Append(CXXFLAGS=["-fno-exceptions"])
-    elif env.get("is_msvc", False):
-        env.Append(CXXFLAGS=["/EHsc"])
+    if env.editor_build:
+        env.Append(CPPDEFINES=["TOOLS_ENABLED"])
 
-    # Require C++17
-    if env.get("is_msvc", False):
-        env.Append(CXXFLAGS=["/std:c++17"])
+    # Configuration of build targets:
+    # - Editor or template
+    # - Debug features (DEBUG_ENABLED code)
+    # - Dev only code (DEV_ENABLED code)
+    # - Optimization level
+    # - Debug symbols for crash traces / debuggers
+    # Keep this configuration in sync with SConstruct in upstream Godot.
+    if env.debug_features:
+        # DEBUG_ENABLED enables debugging *features* and debug-only code, which is intended
+        # to give *users* extra debugging information for their game development.
+        env.Append(CPPDEFINES=["DEBUG_ENABLED"])
+        # In upstream Godot this is added in typedefs.h when DEBUG_ENABLED is set.
+        env.Append(CPPDEFINES=["DEBUG_METHODS_ENABLED"])
+
+    if env.dev_build:
+        # DEV_ENABLED enables *engine developer* code which should only be compiled for those
+        # working on the engine itself.
+        env.Append(CPPDEFINES=["DEV_ENABLED"])
     else:
-        env.Append(CXXFLAGS=["-std=c++17"])
+        # Disable assert() for production targets (only used in thirdparty code).
+        env.Append(CPPDEFINES=["NDEBUG"])
 
     if env["precision"] == "double":
         env.Append(CPPDEFINES=["REAL_T_IS_DOUBLE"])

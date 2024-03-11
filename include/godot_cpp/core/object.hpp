@@ -45,10 +45,10 @@
 
 #include <vector>
 
-#define ADD_SIGNAL(m_signal) godot::ClassDB::add_signal(get_class_static(), m_signal)
-#define ADD_GROUP(m_name, m_prefix) godot::ClassDB::add_property_group(get_class_static(), m_name, m_prefix)
-#define ADD_SUBGROUP(m_name, m_prefix) godot::ClassDB::add_property_subgroup(get_class_static(), m_name, m_prefix)
-#define ADD_PROPERTY(m_property, m_setter, m_getter) godot::ClassDB::add_property(get_class_static(), m_property, m_setter, m_getter)
+#define ADD_SIGNAL(m_signal) ::godot::ClassDB::add_signal(get_class_static(), m_signal)
+#define ADD_GROUP(m_name, m_prefix) ::godot::ClassDB::add_property_group(get_class_static(), m_name, m_prefix)
+#define ADD_SUBGROUP(m_name, m_prefix) ::godot::ClassDB::add_property_subgroup(get_class_static(), m_name, m_prefix)
+#define ADD_PROPERTY(m_property, m_setter, m_getter) ::godot::ClassDB::add_property(get_class_static(), m_property, m_setter, m_getter)
 
 namespace godot {
 

@@ -1,5 +1,6 @@
 import os
 import sys
+import common_compiler_flags
 
 
 def has_osxcross():
@@ -70,3 +71,5 @@ def generate(env):
     )
 
     env.Append(CPPDEFINES=["MACOS_ENABLED", "UNIX_ENABLED"])
+
+    common_compiler_flags.generate(env)

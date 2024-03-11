@@ -1,3 +1,4 @@
+import common_compiler_flags
 from SCons.Variables import *
 from SCons.Tool import clang, clangxx
 
@@ -34,3 +35,5 @@ def generate(env):
         env.Append(LINKFLAGS=["-march=rv64gc"])
 
     env.Append(CPPDEFINES=["LINUX_ENABLED", "UNIX_ENABLED"])
+
+    common_compiler_flags.generate(env)

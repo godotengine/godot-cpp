@@ -541,10 +541,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     # Special cases.
     if class_name == "String":
-        result.append("\tstatic String utf8(const char *from, int len = -1);")
-        result.append("\tvoid parse_utf8(const char *from, int len = -1);")
-        result.append("\tstatic String utf16(const char16_t *from, int len = -1);")
-        result.append("\tvoid parse_utf16(const char16_t *from, int len = -1);")
+        result.append("\tstatic String utf8(const char *from, int64_t len = -1);")
+        result.append("\tvoid parse_utf8(const char *from, int64_t len = -1);")
+        result.append("\tstatic String utf16(const char16_t *from, int64_t len = -1);")
+        result.append("\tvoid parse_utf16(const char16_t *from, int64_t len = -1);")
         result.append("\tCharString utf8() const;")
         result.append("\tCharString ascii() const;")
         result.append("\tChar16String utf16() const;")
@@ -603,8 +603,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("\tString &operator+=(const wchar_t *p_str);")
         result.append("\tString &operator+=(const char32_t *p_str);")
 
-        result.append("\tconst char32_t &operator[](int p_index) const;")
-        result.append("\tchar32_t &operator[](int p_index);")
+        result.append("\tconst char32_t &operator[](int64_t p_index) const;")
+        result.append("\tchar32_t &operator[](int64_t p_index);")
         result.append("\tconst char32_t *ptr() const;")
         result.append("\tchar32_t *ptrw();")
 
@@ -622,8 +622,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
             return_type = "int32_t"
         elif class_name == "PackedFloat32Array":
             return_type = "float"
-        result.append(f"\tconst {return_type} &operator[](int p_index) const;")
-        result.append(f"\t{return_type} &operator[](int p_index);")
+        result.append(f"\tconst {return_type} &operator[](int64_t p_index) const;")
+        result.append(f"\t{return_type} &operator[](int64_t p_index);")
         result.append(f"\tconst {return_type} *ptr() const;")
         result.append(f"\t{return_type} *ptrw();")
         iterators = """
@@ -694,8 +694,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append(iterators.replace("$TYPE", return_type))
 
     if class_name == "Array":
-        result.append("\tconst Variant &operator[](int p_index) const;")
-        result.append("\tVariant &operator[](int p_index);")
+        result.append("\tconst Variant &operator[](int64_t p_index) const;")
+        result.append("\tVariant &operator[](int64_t p_index);")
         result.append("\tvoid set_typed(uint32_t p_type, const StringName &p_class_name, const Variant &p_script);")
         result.append("\tvoid _ref(const Array &p_from) const;")
 
@@ -916,8 +916,19 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             result.append(method_signature + "{")
 
             method_call = "\t"
+            is_ref = False
+
             if "return_type" in method:
-                method_call += f'return internal::_call_builtin_method_ptr_ret<{correct_type(method["return_type"])}>('
+                return_type = method["return_type"]
+                if is_enum(return_type):
+                    method_call += f"return ({get_gdextension_type(correct_type(return_type))})internal::_call_builtin_method_ptr_ret<int64_t>("
+                elif is_pod_type(return_type) or is_variant(return_type):
+                    method_call += f"return internal::_call_builtin_method_ptr_ret<{get_gdextension_type(correct_type(return_type))}>("
+                elif is_refcounted(return_type):
+                    method_call += f"return Ref<{return_type}>::_gde_internal_constructor(internal::_call_builtin_method_ptr_ret_obj<{return_type}>("
+                    is_ref = True
+                else:
+                    method_call += f"return internal::_call_builtin_method_ptr_ret_obj<{return_type}>("
             else:
                 method_call += "internal::_call_builtin_method_ptr_no_ret("
             method_call += f'_method_bindings.method_{method["name"]}, '
@@ -938,6 +949,9 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                     result += encode
                     arguments.append(arg_name)
                 method_call += ", ".join(arguments)
+
+            if is_ref:
+                method_call += ")"  # Close Ref<> constructor.
             method_call += ");"
 
             result.append(method_call)
@@ -1638,7 +1652,7 @@ def generate_global_constants(api, output_dir):
     header.append("")
 
     for constant in api["global_constants"]:
-        header.append(f'\tconst int {escape_identifier(constant["name"])} = {constant["value"]};')
+        header.append(f'\tconst int64_t {escape_identifier(constant["name"])} = {constant["value"]};')
 
     header.append("")
 
