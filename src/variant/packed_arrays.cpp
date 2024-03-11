@@ -46,11 +46,11 @@
 
 namespace godot {
 
-const uint8_t &PackedByteArray::operator[](int p_index) const {
+const uint8_t &PackedByteArray::operator[](int64_t p_index) const {
 	return *internal::gdextension_interface_packed_byte_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 }
 
-uint8_t &PackedByteArray::operator[](int p_index) {
+uint8_t &PackedByteArray::operator[](int64_t p_index) {
 	return *internal::gdextension_interface_packed_byte_array_operator_index((GDExtensionTypePtr *)this, p_index);
 }
 
@@ -62,12 +62,12 @@ uint8_t *PackedByteArray::ptrw() {
 	return internal::gdextension_interface_packed_byte_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
-const Color &PackedColorArray::operator[](int p_index) const {
+const Color &PackedColorArray::operator[](int64_t p_index) const {
 	const Color *color = (const Color *)internal::gdextension_interface_packed_color_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 	return *color;
 }
 
-Color &PackedColorArray::operator[](int p_index) {
+Color &PackedColorArray::operator[](int64_t p_index) {
 	Color *color = (Color *)internal::gdextension_interface_packed_color_array_operator_index((GDExtensionTypePtr *)this, p_index);
 	return *color;
 }
@@ -80,11 +80,11 @@ Color *PackedColorArray::ptrw() {
 	return (Color *)internal::gdextension_interface_packed_color_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
-const float &PackedFloat32Array::operator[](int p_index) const {
+const float &PackedFloat32Array::operator[](int64_t p_index) const {
 	return *internal::gdextension_interface_packed_float32_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 }
 
-float &PackedFloat32Array::operator[](int p_index) {
+float &PackedFloat32Array::operator[](int64_t p_index) {
 	return *internal::gdextension_interface_packed_float32_array_operator_index((GDExtensionTypePtr *)this, p_index);
 }
 
@@ -96,11 +96,11 @@ float *PackedFloat32Array::ptrw() {
 	return internal::gdextension_interface_packed_float32_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
-const double &PackedFloat64Array::operator[](int p_index) const {
+const double &PackedFloat64Array::operator[](int64_t p_index) const {
 	return *internal::gdextension_interface_packed_float64_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 }
 
-double &PackedFloat64Array::operator[](int p_index) {
+double &PackedFloat64Array::operator[](int64_t p_index) {
 	return *internal::gdextension_interface_packed_float64_array_operator_index((GDExtensionTypePtr *)this, p_index);
 }
 
@@ -112,11 +112,11 @@ double *PackedFloat64Array::ptrw() {
 	return internal::gdextension_interface_packed_float64_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
-const int32_t &PackedInt32Array::operator[](int p_index) const {
+const int32_t &PackedInt32Array::operator[](int64_t p_index) const {
 	return *internal::gdextension_interface_packed_int32_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 }
 
-int32_t &PackedInt32Array::operator[](int p_index) {
+int32_t &PackedInt32Array::operator[](int64_t p_index) {
 	return *internal::gdextension_interface_packed_int32_array_operator_index((GDExtensionTypePtr *)this, p_index);
 }
 
@@ -128,11 +128,11 @@ int32_t *PackedInt32Array::ptrw() {
 	return internal::gdextension_interface_packed_int32_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
-const int64_t &PackedInt64Array::operator[](int p_index) const {
+const int64_t &PackedInt64Array::operator[](int64_t p_index) const {
 	return *internal::gdextension_interface_packed_int64_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 }
 
-int64_t &PackedInt64Array::operator[](int p_index) {
+int64_t &PackedInt64Array::operator[](int64_t p_index) {
 	return *internal::gdextension_interface_packed_int64_array_operator_index((GDExtensionTypePtr *)this, p_index);
 }
 
@@ -144,12 +144,12 @@ int64_t *PackedInt64Array::ptrw() {
 	return internal::gdextension_interface_packed_int64_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
-const String &PackedStringArray::operator[](int p_index) const {
+const String &PackedStringArray::operator[](int64_t p_index) const {
 	const String *string = (const String *)internal::gdextension_interface_packed_string_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 	return *string;
 }
 
-String &PackedStringArray::operator[](int p_index) {
+String &PackedStringArray::operator[](int64_t p_index) {
 	String *string = (String *)internal::gdextension_interface_packed_string_array_operator_index((GDExtensionTypePtr *)this, p_index);
 	return *string;
 }
@@ -162,12 +162,12 @@ String *PackedStringArray::ptrw() {
 	return (String *)internal::gdextension_interface_packed_string_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
-const Vector2 &PackedVector2Array::operator[](int p_index) const {
+const Vector2 &PackedVector2Array::operator[](int64_t p_index) const {
 	const Vector2 *vec = (const Vector2 *)internal::gdextension_interface_packed_vector2_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 	return *vec;
 }
 
-Vector2 &PackedVector2Array::operator[](int p_index) {
+Vector2 &PackedVector2Array::operator[](int64_t p_index) {
 	Vector2 *vec = (Vector2 *)internal::gdextension_interface_packed_vector2_array_operator_index((GDExtensionTypePtr *)this, p_index);
 	return *vec;
 }
@@ -180,12 +180,12 @@ Vector2 *PackedVector2Array::ptrw() {
 	return (Vector2 *)internal::gdextension_interface_packed_vector2_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
-const Vector3 &PackedVector3Array::operator[](int p_index) const {
+const Vector3 &PackedVector3Array::operator[](int64_t p_index) const {
 	const Vector3 *vec = (const Vector3 *)internal::gdextension_interface_packed_vector3_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 	return *vec;
 }
 
-Vector3 &PackedVector3Array::operator[](int p_index) {
+Vector3 &PackedVector3Array::operator[](int64_t p_index) {
 	Vector3 *vec = (Vector3 *)internal::gdextension_interface_packed_vector3_array_operator_index((GDExtensionTypePtr *)this, p_index);
 	return *vec;
 }
@@ -198,12 +198,12 @@ Vector3 *PackedVector3Array::ptrw() {
 	return (Vector3 *)internal::gdextension_interface_packed_vector3_array_operator_index((GDExtensionTypePtr *)this, 0);
 }
 
-const Variant &Array::operator[](int p_index) const {
+const Variant &Array::operator[](int64_t p_index) const {
 	const Variant *var = (const Variant *)internal::gdextension_interface_array_operator_index_const((GDExtensionTypePtr *)this, p_index);
 	return *var;
 }
 
-Variant &Array::operator[](int p_index) {
+Variant &Array::operator[](int64_t p_index) {
 	Variant *var = (Variant *)internal::gdextension_interface_array_operator_index((GDExtensionTypePtr *)this, p_index);
 	return *var;
 }

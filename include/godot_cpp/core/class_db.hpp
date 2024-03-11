@@ -179,20 +179,20 @@ public:
 };
 
 #define BIND_CONSTANT(m_constant) \
-	godot::ClassDB::bind_integer_constant(get_class_static(), "", #m_constant, m_constant);
+	::godot::ClassDB::bind_integer_constant(get_class_static(), "", #m_constant, m_constant);
 
 #define BIND_ENUM_CONSTANT(m_constant) \
-	godot::ClassDB::bind_integer_constant(get_class_static(), godot::_gde_constant_get_enum_name(m_constant, #m_constant), #m_constant, m_constant);
+	::godot::ClassDB::bind_integer_constant(get_class_static(), ::godot::_gde_constant_get_enum_name(m_constant, #m_constant), #m_constant, m_constant);
 
 #define BIND_BITFIELD_FLAG(m_constant) \
-	godot::ClassDB::bind_integer_constant(get_class_static(), godot::_gde_constant_get_bitfield_name(m_constant, #m_constant), #m_constant, m_constant, true);
+	::godot::ClassDB::bind_integer_constant(get_class_static(), ::godot::_gde_constant_get_bitfield_name(m_constant, #m_constant), #m_constant, m_constant, true);
 
 #define BIND_VIRTUAL_METHOD(m_class, m_method)                                                                                                \
 	{                                                                                                                                         \
 		auto _call##m_method = [](GDExtensionObjectPtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr p_ret) -> void { \
 			call_with_ptr_args(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret);                                   \
 		};                                                                                                                                    \
-		godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, _call##m_method);                                         \
+		::godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, _call##m_method);                                       \
 	}
 
 template <class T, bool is_abstract>

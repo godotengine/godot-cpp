@@ -241,6 +241,14 @@ func _ready():
 	assert_equal(new_example_ref.was_post_initialized(), true)
 	assert_equal(example.test_post_initialize(), true)
 
+	# Test that notifications happen on both parent and child classes.
+	var example_child = $ExampleChild
+	assert_equal(example_child.get_value1(), 11)
+	assert_equal(example_child.get_value2(), 33)
+	example_child.notification(NOTIFICATION_ENTER_TREE, true)
+	assert_equal(example_child.get_value1(), 11)
+	assert_equal(example_child.get_value2(), 22)
+
 	exit_with_status()
 
 func _on_Example_custom_signal(signal_name, value):

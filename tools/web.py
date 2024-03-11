@@ -1,4 +1,5 @@
 import os
+import common_compiler_flags
 from SCons.Util import WhereIs
 
 
@@ -42,3 +43,5 @@ def generate(env):
     env.Append(LINKFLAGS=["-s", "SIDE_MODULE=1"])
 
     env.Append(CPPDEFINES=["WEB_ENABLED", "UNIX_ENABLED"])
+
+    common_compiler_flags.generate(env)

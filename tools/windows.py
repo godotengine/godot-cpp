@@ -1,7 +1,6 @@
 import sys
-
 import my_spawn
-
+import common_compiler_flags
 from SCons.Tool import msvc, mingw
 from SCons.Variables import *
 
@@ -90,3 +89,5 @@ def generate(env):
             )
 
     env.Append(CPPDEFINES=["WINDOWS_ENABLED"])
+
+    common_compiler_flags.generate(env)

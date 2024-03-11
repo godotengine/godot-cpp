@@ -626,3 +626,21 @@ void Example::_input(const Ref<InputEvent> &event) {
 		emit_custom_signal(String("_input: ") + key_event->get_key_label(), key_event->get_unicode());
 	}
 }
+
+void ExampleBase::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_value1"), &ExampleBase::get_value1);
+	ClassDB::bind_method(D_METHOD("get_value2"), &ExampleBase::get_value2);
+}
+
+void ExampleBase::_notification(int p_what) {
+	if (p_what == NOTIFICATION_ENTER_TREE) {
+		value1 = 11;
+		value2 = 22;
+	}
+}
+
+void ExampleChild::_notification(int p_what) {
+	if (p_what == NOTIFICATION_ENTER_TREE) {
+		value2 = 33;
+	}
+}
