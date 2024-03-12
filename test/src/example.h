@@ -130,6 +130,7 @@ public:
 	bool test_string_is_fourty_two(const String &p_str) const;
 	String test_string_resize(String p_original) const;
 	int test_vector_ops() const;
+	int test_vector_init_list() const;
 
 	bool test_object_cast_to_node(Object *p_object) const;
 	bool test_object_cast_to_control(Object *p_object) const;
