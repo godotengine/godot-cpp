@@ -72,13 +72,13 @@ def generate_wrappers(target):
 
 def generate_virtual_version(argcount, const=False, returns=False):
     s = """#define GDVIRTUAL$VER($RET m_name $ARG)\\
-	StringName _gdvirtual_##m_name##_sn = #m_name;\\
+	::godot::StringName _gdvirtual_##m_name##_sn = #m_name;\\
 	template <bool required>\\
 	_FORCE_INLINE_ bool _gdvirtual_##m_name##_call($CALLARGS) $CONST {\\
 		if (::godot::internal::gdextension_interface_object_has_script_method(_owner, &_gdvirtual_##m_name##_sn)) { \\
 			GDExtensionCallError ce;\\
 			$CALLSIARGS\\
-			Variant ret;\\
+			::godot::Variant ret;\\
 			::godot::internal::gdextension_interface_object_call_script_method(_owner, &_gdvirtual_##m_name##_sn, $CALLSIARGPASS, &ret, &ce);\\
 			if (ce.error == GDEXTENSION_CALL_OK) {\\
 				$CALLSIRET\\
@@ -92,10 +92,10 @@ def generate_virtual_version(argcount, const=False, returns=False):
 		return false;\\
 	}\\
 	_FORCE_INLINE_ bool _gdvirtual_##m_name##_overridden() const {\\
-		return godot::internal::gdextension_interface_object_has_script_method(_owner, &_gdvirtual_##m_name##_sn); \\
+		return ::godot::internal::gdextension_interface_object_has_script_method(_owner, &_gdvirtual_##m_name##_sn); \\
 	}\\
-	_FORCE_INLINE_ static MethodInfo _gdvirtual_##m_name##_get_method_info() {\\
-		MethodInfo method_info;\\
+	_FORCE_INLINE_ static ::godot::MethodInfo _gdvirtual_##m_name##_get_method_info() {\\
+		::godot::MethodInfo method_info;\\
 		method_info.name = #m_name;\\
 		method_info.flags = $METHOD_FLAGS;\\
 		$FILL_METHOD_INFO\\
@@ -110,8 +110,8 @@ def generate_virtual_version(argcount, const=False, returns=False):
         sproto += "R"
         s = s.replace("$RET", "m_ret,")
         s = s.replace("$RVOID", "(void)r_ret;")  # If required, may lead to uninitialized errors
-        method_info += "method_info.return_val = GetTypeInfo<m_ret>::get_class_info();\\\n"
-        method_info += "\t\tmethod_info.return_val_metadata = GetTypeInfo<m_ret>::METADATA;"
+        method_info += "method_info.return_val = ::godot::GetTypeInfo<m_ret>::get_class_info();\\\n"
+        method_info += "\t\tmethod_info.return_val_metadata = ::godot::GetTypeInfo<m_ret>::METADATA;"
     else:
         s = s.replace("$RET ", "")
         s = s.replace("\t\t\t$RVOID\\\n", "")
@@ -119,10 +119,10 @@ def generate_virtual_version(argcount, const=False, returns=False):
     if const:
         sproto += "C"
         s = s.replace("$CONST", "const")
-        s = s.replace("$METHOD_FLAGS", "METHOD_FLAG_VIRTUAL | METHOD_FLAG_CONST")
+        s = s.replace("$METHOD_FLAGS", "::godot::METHOD_FLAG_VIRTUAL | ::godot::METHOD_FLAG_CONST")
     else:
         s = s.replace("$CONST ", "")
-        s = s.replace("$METHOD_FLAGS", "METHOD_FLAG_VIRTUAL")
+        s = s.replace("$METHOD_FLAGS", "::godot::METHOD_FLAG_VIRTUAL")
 
     s = s.replace("$VER", sproto)
     argtext = ""
@@ -131,8 +131,8 @@ def generate_virtual_version(argcount, const=False, returns=False):
     callsiargptrs = ""
     if argcount > 0:
         argtext += ", "
-        callsiargs = f"Variant vargs[{argcount}] = {{ "
-        callsiargptrs = f"\t\t\tconst Variant *vargptrs[{argcount}] = {{ "
+        callsiargs = f"::godot::Variant vargs[{argcount}] = {{ "
+        callsiargptrs = f"\t\t\tconst ::godot::Variant *vargptrs[{argcount}] = {{ "
     for i in range(argcount):
         if i > 0:
             argtext += ", "
@@ -141,12 +141,12 @@ def generate_virtual_version(argcount, const=False, returns=False):
             callsiargptrs += ", "
         argtext += f"m_type{i + 1}"
         callargtext += f"m_type{i + 1} arg{i + 1}"
-        callsiargs += f"Variant(arg{i + 1})"
+        callsiargs += f"::godot::Variant(arg{i + 1})"
         callsiargptrs += f"&vargs[{i}]"
         if method_info:
             method_info += "\\\n\t\t"
-        method_info += f"method_info.arguments.push_back(GetTypeInfo<m_type{i + 1}>::get_class_info());\\\n"
-        method_info += f"\t\tmethod_info.arguments_metadata.push_back(GetTypeInfo<m_type{i + 1}>::METADATA);"
+        method_info += f"method_info.arguments.push_back(::godot::GetTypeInfo<m_type{i + 1}>::get_class_info());\\\n"
+        method_info += f"\t\tmethod_info.arguments_metadata.push_back(::godot::GetTypeInfo<m_type{i + 1}>::METADATA);"
 
     if argcount:
         callsiargs += " };\\\n"
@@ -161,7 +161,7 @@ def generate_virtual_version(argcount, const=False, returns=False):
         if argcount > 0:
             callargtext += ", "
         callargtext += "m_ret &r_ret"
-        s = s.replace("$CALLSIRET", "r_ret = VariantCaster<m_ret>::cast(ret);")
+        s = s.replace("$CALLSIRET", "r_ret = ::godot::VariantCaster<m_ret>::cast(ret);")
     else:
         s = s.replace("\t\t\t\t$CALLSIRET\\\n", "")
 
