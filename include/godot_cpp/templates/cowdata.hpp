@@ -43,13 +43,13 @@
 
 namespace godot {
 
-template <class T>
+template <typename T>
 class Vector;
 
-template <class T, class V>
+template <typename T, typename V>
 class VMap;
 
-template <class T>
+template <typename T>
 class CharStringT;
 
 static_assert(std::is_trivially_destructible_v<std::atomic<uint64_t>>);
@@ -60,15 +60,15 @@ static_assert(std::is_trivially_destructible_v<std::atomic<uint64_t>>);
 #pragma GCC diagnostic ignored "-Wplacement-new"
 #endif
 
-template <class T>
+template <typename T>
 class CowData {
-	template <class TV>
+	template <typename TV>
 	friend class Vector;
 
-	template <class TV, class VV>
+	template <typename TV, typename VV>
 	friend class VMap;
 
-	template <class TS>
+	template <typename TS>
 	friend class CharStringT;
 
 public:
@@ -248,7 +248,7 @@ public:
 	_FORCE_INLINE_ CowData(CowData<T> &p_from) { _ref(p_from); };
 };
 
-template <class T>
+template <typename T>
 void CowData<T>::_unref(void *p_data) {
 	if (!p_data) {
 		return;
@@ -275,7 +275,7 @@ void CowData<T>::_unref(void *p_data) {
 	Memory::free_static(((uint8_t *)p_data) - DATA_OFFSET, false);
 }
 
-template <class T>
+template <typename T>
 typename CowData<T>::USize CowData<T>::_copy_on_write() {
 	if (!_ptr) {
 		return 0;
@@ -315,7 +315,7 @@ typename CowData<T>::USize CowData<T>::_copy_on_write() {
 	return rc;
 }
 
-template <class T>
+template <typename T>
 template <bool p_ensure_zero>
 Error CowData<T>::resize(Size p_size) {
 	ERR_FAIL_COND_V(p_size < 0, ERR_INVALID_PARAMETER);
@@ -407,7 +407,7 @@ Error CowData<T>::resize(Size p_size) {
 	return OK;
 }
 
-template <class T>
+template <typename T>
 typename CowData<T>::Size CowData<T>::find(const T &p_val, Size p_from) const {
 	Size ret = -1;
 
@@ -425,7 +425,7 @@ typename CowData<T>::Size CowData<T>::find(const T &p_val, Size p_from) const {
 	return ret;
 }
 
-template <class T>
+template <typename T>
 typename CowData<T>::Size CowData<T>::rfind(const T &p_val, Size p_from) const {
 	const Size s = size();
 
@@ -444,7 +444,7 @@ typename CowData<T>::Size CowData<T>::rfind(const T &p_val, Size p_from) const {
 	return -1;
 }
 
-template <class T>
+template <typename T>
 typename CowData<T>::Size CowData<T>::count(const T &p_val) const {
 	Size amount = 0;
 	for (Size i = 0; i < size(); i++) {
@@ -455,12 +455,12 @@ typename CowData<T>::Size CowData<T>::count(const T &p_val) const {
 	return amount;
 }
 
-template <class T>
+template <typename T>
 void CowData<T>::_ref(const CowData *p_from) {
 	_ref(*p_from);
 }
 
-template <class T>
+template <typename T>
 void CowData<T>::_ref(const CowData &p_from) {
 	if (_ptr == p_from._ptr) {
 		return; // self assign, do nothing.
@@ -478,7 +478,7 @@ void CowData<T>::_ref(const CowData &p_from) {
 	}
 }
 
-template <class T>
+template <typename T>
 CowData<T>::~CowData() {
 	_unref(_ptr);
 }

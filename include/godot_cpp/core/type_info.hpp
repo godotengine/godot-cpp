@@ -90,7 +90,7 @@ static PropertyInfo make_property_info(Variant::Type p_type, const StringName &p
 // instead of a forward declaration. You can always forward declare 'T' in a header file, and then
 // include the actual declaration of 'T' in the source file where 'GetTypeInfo<T>' is instantiated.
 
-template <class T, typename = void>
+template <typename T, typename = void>
 struct GetTypeInfo;
 
 #define MAKE_TYPE_INFO(m_type, m_var_type)                                                                            \
@@ -248,7 +248,7 @@ inline StringName _gde_constant_get_enum_name(T param, StringName p_constant) {
 	return GetTypeInfo<T>::get_class_info().class_name;
 }
 
-template <class T>
+template <typename T>
 class BitField {
 	int64_t value = 0;
 
@@ -295,7 +295,7 @@ inline StringName _gde_constant_get_bitfield_name(T param, StringName p_constant
 	return GetTypeInfo<BitField<T>>::get_class_info().class_name;
 }
 
-template <class T>
+template <typename T>
 struct PtrToArg<TypedArray<T>> {
 	_FORCE_INLINE_ static TypedArray<T> convert(const void *p_ptr) {
 		return TypedArray<T>(*reinterpret_cast<const Array *>(p_ptr));
@@ -306,7 +306,7 @@ struct PtrToArg<TypedArray<T>> {
 	}
 };
 
-template <class T>
+template <typename T>
 struct PtrToArg<const TypedArray<T> &> {
 	typedef Array EncodeT;
 	_FORCE_INLINE_ static TypedArray<T>

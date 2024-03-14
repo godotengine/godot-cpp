@@ -35,7 +35,7 @@
 
 namespace godot {
 
-template <class T, class V>
+template <typename T, typename V>
 class VMap {
 public:
 	struct Pair {

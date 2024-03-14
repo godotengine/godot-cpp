@@ -36,7 +36,7 @@
 
 namespace godot {
 
-template <class T>
+template <typename T>
 class SelfList {
 public:
 	class List {

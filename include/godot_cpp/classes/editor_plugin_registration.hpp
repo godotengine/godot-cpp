@@ -47,11 +47,11 @@ public:
 	static void remove_plugin_class(const StringName &p_class_name);
 	static void deinitialize(GDExtensionInitializationLevel p_level);
 
-	template <class T>
+	template <typename T>
 	static void add_by_type() {
 		add_plugin_class(T::get_class_static());
 	}
-	template <class T>
+	template <typename T>
 	static void remove_by_type() {
 		remove_plugin_class(T::get_class_static());
 	}

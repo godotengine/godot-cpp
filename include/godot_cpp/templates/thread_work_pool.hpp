@@ -52,7 +52,7 @@ class ThreadWorkPool {
 		virtual ~BaseWork() = default;
 	};
 
-	template <class C, class M, class U>
+	template <typename C, typename M, typename U>
 	struct Work : public BaseWork {
 		C *instance;
 		M method;
@@ -94,7 +94,7 @@ class ThreadWorkPool {
 	}
 
 public:
-	template <class C, class M, class U>
+	template <typename C, typename M, typename U>
 	void begin_work(uint32_t p_elements, C *p_instance, M p_method, U p_userdata) {
 		ERR_FAIL_NULL(threads); // Never initialized.
 		ERR_FAIL_COND(current_work != nullptr);
@@ -145,7 +145,7 @@ public:
 		current_work = nullptr;
 	}
 
-	template <class C, class M, class U>
+	template <typename C, typename M, typename U>
 	void do_work(uint32_t p_elements, C *p_instance, M p_method, U p_userdata) {
 		switch (p_elements) {
 			case 0:
