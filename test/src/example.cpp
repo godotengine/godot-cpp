@@ -49,6 +49,11 @@ public:
 		return ObjectID();
 	}
 
+	virtual int get_argument_count(bool &r_is_valid) const {
+		r_is_valid = true;
+		return 2;
+	}
+
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const {
 		r_return_value = "Hi";
 		r_call_error.error = GDEXTENSION_CALL_OK;

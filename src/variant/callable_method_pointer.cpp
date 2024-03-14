@@ -77,6 +77,14 @@ static GDExtensionBool custom_callable_mp_less_than_func(void *p_a, void *p_b) {
 	return memcmp(a->get_comp_ptr(), b->get_comp_ptr(), a->get_comp_size() * 4) < 0;
 }
 
+static GDExtensionInt custom_callable_mp_get_argument_count_func(void *p_userdata, GDExtensionBool *r_is_valid) {
+	CallableCustomMethodPointerBase *callable_method_pointer = (CallableCustomMethodPointerBase *)p_userdata;
+	bool valid = false;
+	int ret = callable_method_pointer->get_argument_count(valid);
+	*r_is_valid = valid;
+	return ret;
+}
+
 void CallableCustomMethodPointerBase::_setup(uint32_t *p_base_ptr, uint32_t p_ptr_size) {
 	comp_ptr = p_base_ptr;
 	comp_size = p_ptr_size / 4;
@@ -93,7 +101,7 @@ void CallableCustomMethodPointerBase::_setup(uint32_t *p_base_ptr, uint32_t p_pt
 namespace internal {
 
 Callable create_callable_from_ccmp(CallableCustomMethodPointerBase *p_callable_method_pointer) {
-	GDExtensionCallableCustomInfo info = {};
+	GDExtensionCallableCustomInfo2 info = {};
 	info.callable_userdata = p_callable_method_pointer;
 	info.token = internal::token;
 	info.object_id = p_callable_method_pointer->get_object();
@@ -103,9 +111,10 @@ Callable create_callable_from_ccmp(CallableCustomMethodPointerBase *p_callable_m
 	info.hash_func = &custom_callable_mp_hash;
 	info.equal_func = &custom_callable_mp_equal_func;
 	info.less_than_func = &custom_callable_mp_less_than_func;
+	info.get_argument_count_func = &custom_callable_mp_get_argument_count_func;
 
 	Callable callable;
-	::godot::internal::gdextension_interface_callable_custom_create(callable._native_ptr(), &info);
+	::godot::internal::gdextension_interface_callable_custom_create2(callable._native_ptr(), &info);
 	return callable;
 }
 

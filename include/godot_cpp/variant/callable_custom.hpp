@@ -41,6 +41,7 @@ class Object;
 class CallableCustomBase {
 public:
 	virtual ObjectID get_object() const = 0;
+	virtual int get_argument_count(bool &r_is_valid) const;
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const = 0;
 	virtual ~CallableCustomBase() {}
 };
