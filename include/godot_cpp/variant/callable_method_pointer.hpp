@@ -31,6 +31,10 @@
 #ifndef GODOT_CALLABLE_METHOD_POINTER_HPP
 #define GODOT_CALLABLE_METHOD_POINTER_HPP
 
+#ifdef GODOT_MODULE
+#include "core/object/callable_method_pointer.h"
+#else
+
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
@@ -270,4 +274,5 @@ Callable create_custom_callable_static_function_pointer(R (*p_method)(P...)) {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_CALLABLE_METHOD_POINTER_HPP

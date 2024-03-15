@@ -31,6 +31,10 @@
 #ifndef GODOT_CHAR_UTILS_HPP
 #define GODOT_CHAR_UTILS_HPP
 
+#ifdef GODOT_MODULE
+#include "core/string/char_utils.h"
+#else
+
 static _FORCE_INLINE_ bool is_ascii_upper_case(char32_t c) {
 	return (c >= 'A' && c <= 'Z');
 }
@@ -87,4 +91,5 @@ static _FORCE_INLINE_ bool is_underscore(char32_t p_char) {
 	return (p_char == '_');
 }
 
+#endif
 #endif // GODOT_CHAR_UTILS_HPP

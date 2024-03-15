@@ -31,6 +31,10 @@
 #ifndef GODOT_TRANSFORM3D_HPP
 #define GODOT_TRANSFORM3D_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/transform_3d.h"
+#else
+
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/aabb.hpp>
 #include <godot_cpp/variant/basis.hpp>
@@ -273,4 +277,5 @@ _FORCE_INLINE_ Plane Transform3D::xform_inv_fast(const Plane &p_plane, const Tra
 
 } // namespace godot
 
+#endif
 #endif // GODOT_TRANSFORM3D_HPP

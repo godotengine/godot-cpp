@@ -31,6 +31,10 @@
 #ifndef GODOT_ERROR_MACROS_HPP
 #define GODOT_ERROR_MACROS_HPP
 
+#ifdef GODOT_MODULE
+#include "core/error/error_macros.h"
+#else
+
 #include <godot_cpp/core/defs.hpp>
 
 #include <atomic>
@@ -803,4 +807,5 @@ void _err_flush_stdout();
 #define CHECK_METHOD_BIND(m_mb)
 #endif
 
+#endif
 #endif // GODOT_ERROR_MACROS_HPP

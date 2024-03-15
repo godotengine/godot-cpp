@@ -31,6 +31,9 @@
 #ifndef GODOT_ENGINE_PTRCALL_HPP
 #define GODOT_ENGINE_PTRCALL_HPP
 
+#ifdef GODOT_MODULE
+#else
+
 #include <gdextension_interface.h>
 
 #include <godot_cpp/core/binder_common.hpp>
@@ -94,4 +97,5 @@ void _call_utility_no_ret(const GDExtensionPtrUtilityFunction func, const Args &
 
 } // namespace godot
 
+#endif
 #endif // GODOT_ENGINE_PTRCALL_HPP

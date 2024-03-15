@@ -31,6 +31,10 @@
 #ifndef GODOT_VECTOR3I_HPP
 #define GODOT_VECTOR3I_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/vector3i.h"
+#else
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/math.hpp>
 
@@ -340,4 +344,5 @@ void Vector3i::zero() {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_VECTOR3I_HPP

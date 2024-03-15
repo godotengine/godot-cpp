@@ -31,6 +31,10 @@
 #ifndef GODOT_SELF_LIST_HPP
 #define GODOT_SELF_LIST_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/self_list.h"
+#else
+
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/core/error_macros.hpp>
 
@@ -140,4 +144,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_SELF_LIST_HPP

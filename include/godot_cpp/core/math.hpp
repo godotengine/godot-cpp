@@ -31,6 +31,11 @@
 #ifndef GODOT_MATH_HPP
 #define GODOT_MATH_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/math_defs.h"
+#include "core/typedefs.h"
+#else
+
 #include <godot_cpp/core/defs.hpp>
 
 #include <gdextension_interface.h>
@@ -816,4 +821,5 @@ inline float snap_scalar_separation(float p_offset, float p_step, float p_target
 } // namespace Math
 } // namespace godot
 
+#endif
 #endif // GODOT_MATH_HPP

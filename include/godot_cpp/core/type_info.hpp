@@ -31,6 +31,10 @@
 #ifndef GODOT_TYPE_INFO_HPP
 #define GODOT_TYPE_INFO_HPP
 
+#ifdef GODOT_MODULE
+#include "core/variant/type_info.h"
+#else
+
 #include <godot_cpp/core/object.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/variant/variant.hpp>
@@ -417,4 +421,5 @@ MAKE_TYPED_ARRAY_INFO(IPAddress, Variant::STRING)
 
 } // namespace godot
 
+#endif
 #endif // GODOT_TYPE_INFO_HPP

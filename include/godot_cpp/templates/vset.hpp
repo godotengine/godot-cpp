@@ -31,6 +31,10 @@
 #ifndef GODOT_VSET_HPP
 #define GODOT_VSET_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/vset.h"
+#else
+
 #include <godot_cpp/templates/vector.hpp>
 
 namespace godot {
@@ -142,4 +146,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_VSET_HPP

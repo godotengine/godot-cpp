@@ -31,6 +31,10 @@
 #ifndef GODOT_LIST_HPP
 #define GODOT_LIST_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/list.h"
+#else
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/templates/sort_array.hpp>
@@ -784,4 +788,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_LIST_HPP

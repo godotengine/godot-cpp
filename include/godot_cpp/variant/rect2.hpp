@@ -31,6 +31,10 @@
 #ifndef GODOT_RECT2_HPP
 #define GODOT_RECT2_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/rect2.h"
+#else
+
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/vector2.hpp>
 
@@ -370,4 +374,5 @@ struct _NO_DISCARD_ Rect2 {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_RECT2_HPP

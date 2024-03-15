@@ -31,6 +31,10 @@
 #ifndef GODOT_PLANE_HPP
 #define GODOT_PLANE_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/plane.h"
+#else
+
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 
@@ -138,4 +142,5 @@ bool Plane::operator!=(const Plane &p_plane) const {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_PLANE_HPP

@@ -31,6 +31,10 @@
 #ifndef GODOT_SAFE_REFCOUNT_HPP
 #define GODOT_SAFE_REFCOUNT_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/safe_refcount.h"
+#else
+
 #if !defined(NO_THREADS)
 
 #include <atomic>
@@ -332,4 +336,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_SAFE_REFCOUNT_HPP

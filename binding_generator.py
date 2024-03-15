@@ -5,6 +5,9 @@ import re
 import shutil
 from pathlib import Path
 
+from compat_generator import map_header_files
+from header_matcher import match_headers
+
 
 def generate_mod_version(argcount, const=False, returns=False):
     s = """
@@ -378,11 +381,14 @@ def scons_generate_bindings(target, source, env):
         "32" if "32" in env["arch"] else "64",
         env["precision"],
         env["godot_cpp_gen_dir"],
+        env["godot_repo"],
     )
     return None
 
 
-def generate_bindings(api_filepath, use_template_get_node, bits="64", precision="single", output_dir="."):
+def generate_bindings(
+    api_filepath, use_template_get_node, bits="64", precision="single", output_dir=".", godot_repo=""
+):
     api = None
 
     target_dir = Path(output_dir) / "gen"
@@ -402,6 +408,8 @@ def generate_bindings(api_filepath, use_template_get_node, bits="64", precision=
     generate_builtin_bindings(api, target_dir, real_t + "_" + bits)
     generate_engine_classes_bindings(api, target_dir, use_template_get_node)
     generate_utility_functions(api, target_dir)
+    if godot_repo != "":
+        generate_compat_includes(godot_repo, target_dir)
 
 
 CLASS_ALIASES = {
@@ -1543,6 +1551,50 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
         with header_filename.open("w+", encoding="utf-8") as header_file:
             header_file.write("\n".join(result))
+
+
+def generate_compat_includes(godot_repo: Path, target_dir: Path):
+    file_types_mapping_godot_cpp_gen = map_header_files(target_dir)
+    file_types_mapping_godot = map_header_files(godot_repo)
+    # Match the headers
+    file_types_mapping = match_headers(file_types_mapping_godot_cpp_gen, file_types_mapping_godot)
+    for file_godot_cpp_name, file_godot_names in file_types_mapping.items():
+        result = []
+        with (Path(target_dir) / Path(file_godot_cpp_name)).open("r", encoding="utf-8") as header_file:
+            content = header_file.readlines()
+        # Find the last line (#endif guard)
+        last_endif_idx = len(content) - 1
+        # Look for the marker for the header guard (usually #define)
+        marker_pos = next((i for i, line in enumerate(content) if line.startswith("#define")), -1)
+
+        if marker_pos != -1:
+            # Add content before the last #endif
+            before_marker = content[: marker_pos + 1]  # Include up to the marker line
+            after_marker = content[marker_pos + 1 : last_endif_idx]  # Content excluding the final #endif
+
+            result.extend(before_marker)  # Append original content up to marker
+            result.append("\n")  # Blank line for separation
+
+            # Insert the #ifdef block
+            result.append("#ifdef GODOT_MODULE\n")
+            if len(file_godot_names) == 0:
+                print("No header found for", file_godot_cpp_name)
+            for file_godot_name in file_godot_names:
+                result.append(f'#include "{Path(file_godot_name).as_posix()}"\n')
+            result.append("#else\n")
+
+            result.extend(after_marker)
+
+            # Add the namespace and endif
+            result.append("#endif\n")
+
+            # Finally, append the original final #endif line
+            result.append(content[last_endif_idx].strip())
+
+        else:
+            print(f"Marker not found in {file_godot_cpp_name}")
+        with (Path(target_dir) / Path(file_godot_cpp_name)).open("w+", encoding="utf-8") as header_file:
+            header_file.write("".join(result))
 
 
 def generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node):

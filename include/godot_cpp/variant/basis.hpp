@@ -31,6 +31,10 @@
 #ifndef GODOT_BASIS_HPP
 #define GODOT_BASIS_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/basis.h"
+#else
+
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/quaternion.hpp>
 #include <godot_cpp/variant/vector3.hpp>
@@ -316,4 +320,5 @@ real_t Basis::determinant() const {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_BASIS_HPP

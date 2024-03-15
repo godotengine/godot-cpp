@@ -31,6 +31,10 @@
 #ifndef GODOT_VECTOR2_HPP
 #define GODOT_VECTOR2_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/vector2.h"
+#else
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/math.hpp>
 
@@ -331,4 +335,5 @@ typedef Vector2 Point2;
 
 } // namespace godot
 
+#endif
 #endif // GODOT_VECTOR2_HPP

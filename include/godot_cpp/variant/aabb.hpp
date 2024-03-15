@@ -31,6 +31,10 @@
 #ifndef GODOT_AABB_HPP
 #define GODOT_AABB_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/aabb.h"
+#else
+
 #include <godot_cpp/variant/plane.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 
@@ -492,4 +496,5 @@ AABB AABB::quantized(real_t p_unit) const {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_AABB_HPP

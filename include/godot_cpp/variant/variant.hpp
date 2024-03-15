@@ -31,6 +31,10 @@
 #ifndef GODOT_VARIANT_HPP
 #define GODOT_VARIANT_HPP
 
+#ifdef GODOT_MODULE
+#include "core/variant/variant.h"
+#else
+
 #include <godot_cpp/core/defs.hpp>
 
 #include <godot_cpp/variant/builtin_types.hpp>
@@ -367,4 +371,5 @@ using PackedRealArray = PackedFloat32Array;
 
 } // namespace godot
 
+#endif
 #endif // GODOT_VARIANT_HPP

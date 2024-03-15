@@ -31,6 +31,10 @@
 #ifndef GODOT_MUTEX_LOCK_HPP
 #define GODOT_MUTEX_LOCK_HPP
 
+#ifdef GODOT_MODULE
+#include "core/os/mutex.h"
+#else
+
 #include <godot_cpp/classes/mutex.hpp>
 
 namespace godot {
@@ -56,4 +60,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_MUTEX_LOCK_HPP

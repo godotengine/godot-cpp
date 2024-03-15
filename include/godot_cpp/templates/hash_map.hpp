@@ -31,6 +31,10 @@
 #ifndef GODOT_HASH_MAP_HPP
 #define GODOT_HASH_MAP_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/hash_map.h"
+#else
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/templates/hashfuncs.hpp>
@@ -588,4 +592,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_HASH_MAP_HPP

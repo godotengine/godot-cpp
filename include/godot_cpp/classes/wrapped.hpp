@@ -31,6 +31,10 @@
 #ifndef GODOT_WRAPPED_HPP
 #define GODOT_WRAPPED_HPP
 
+#ifdef GODOT_MODULE
+#include "core/object/object.h"
+#else
+
 #include <godot_cpp/core/memory.hpp>
 
 #include <godot_cpp/core/property_info.hpp>
@@ -506,4 +510,5 @@ private:
 #define GDVIRTUAL_IS_OVERRIDDEN(m_name) _gdvirtual_##m_name##_overridden()
 #define GDVIRTUAL_IS_OVERRIDDEN_PTR(m_obj, m_name) m_obj->_gdvirtual_##m_name##_overridden()
 
+#endif
 #endif // GODOT_WRAPPED_HPP

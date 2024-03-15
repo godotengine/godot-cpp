@@ -31,6 +31,10 @@
 #ifndef GODOT_QUATERNION_HPP
 #define GODOT_QUATERNION_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/quaternion.h"
+#else
+
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 
@@ -235,4 +239,5 @@ _FORCE_INLINE_ Quaternion operator*(const real_t &p_real, const Quaternion &p_qu
 
 } // namespace godot
 
+#endif
 #endif // GODOT_QUATERNION_HPP

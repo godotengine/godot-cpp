@@ -31,6 +31,10 @@
 #ifndef GODOT_SPIN_LOCK_HPP
 #define GODOT_SPIN_LOCK_HPP
 
+#ifdef GODOT_MODULE
+#include "core/os/spin_lock.h"
+#else
+
 #include <atomic>
 
 namespace godot {
@@ -51,4 +55,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_SPIN_LOCK_HPP

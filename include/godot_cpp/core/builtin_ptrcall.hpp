@@ -31,6 +31,9 @@
 #ifndef GODOT_BUILTIN_PTRCALL_HPP
 #define GODOT_BUILTIN_PTRCALL_HPP
 
+#ifdef GODOT_MODULE
+#else
+
 #include <gdextension_interface.h>
 #include <godot_cpp/core/object.hpp>
 
@@ -89,4 +92,5 @@ T _call_builtin_ptr_getter(const GDExtensionPtrGetter getter, GDExtensionConstTy
 
 } // namespace godot
 
+#endif
 #endif // GODOT_BUILTIN_PTRCALL_HPP

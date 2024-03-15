@@ -31,6 +31,10 @@
 #ifndef GODOT_REF_HPP
 #define GODOT_REF_HPP
 
+#ifdef GODOT_MODULE
+#include "core/object/ref_counted.h"
+#else
+
 #include <godot_cpp/core/defs.hpp>
 
 #include <godot_cpp/classes/object.hpp>
@@ -281,4 +285,5 @@ struct GetTypeInfo<const Ref<T> &, typename EnableIf<TypeInherits<RefCounted, T>
 
 } // namespace godot
 
+#endif
 #endif // GODOT_REF_HPP

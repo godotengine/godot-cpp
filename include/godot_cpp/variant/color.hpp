@@ -31,6 +31,10 @@
 #ifndef GODOT_COLOR_HPP
 #define GODOT_COLOR_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/color.h"
+#else
+
 #include <godot_cpp/core/math.hpp>
 
 namespace godot {
@@ -286,4 +290,5 @@ _FORCE_INLINE_ Color operator*(float p_scalar, const Color &p_color) {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_COLOR_HPP

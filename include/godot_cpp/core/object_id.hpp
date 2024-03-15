@@ -31,6 +31,10 @@
 #ifndef GODOT_OBJECT_ID_HPP
 #define GODOT_OBJECT_ID_HPP
 
+#ifdef GODOT_MODULE
+#include "core/object/object_id.h"
+#else
+
 #include <godot_cpp/core/defs.hpp>
 
 namespace godot {
@@ -59,4 +63,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_OBJECT_ID_HPP

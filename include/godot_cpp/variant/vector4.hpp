@@ -31,6 +31,10 @@
 #ifndef GODOT_VECTOR4_HPP
 #define GODOT_VECTOR4_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/vector4.h"
+#else
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/math.hpp>
 
@@ -319,4 +323,5 @@ _FORCE_INLINE_ Vector4 operator*(const int64_t p_scalar, const Vector4 &p_vec) {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_VECTOR4_HPP
