@@ -108,6 +108,17 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Clone Godot
+        uses: actions/checkout@v4
+        with:
+          repository: godotengine/godot
+          path: godot
+          #ref: TODO take tag
+      
+      - name: Generate compat mappings for godot
+        run: |
+          python compat_generator.py godot
+
       - name: Android dependencies
         if: ${{ matrix.platform == 'android' }}
         uses: nttld/setup-ndk@v1
