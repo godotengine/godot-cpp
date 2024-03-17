@@ -16,6 +16,9 @@ env = SConscript("../SConstruct")
 env.Append(CPPPATH=["src/"])
 sources = Glob("src/*.cpp")
 
+doc_header = env.GodotCPPDocHeader("src/doc_data.gen.h", source=Glob("doc_classes/*.xml"))
+#sources.append(doc_header)
+
 if env["platform"] == "macos":
     library = env.SharedLibrary(
         "project/bin/libgdexample.{}.{}.framework/libgdexample.{}.{}".format(
@@ -40,4 +43,4 @@ else:
         source=sources,
     )
 
-Default(library)
+Default(doc_header, library)

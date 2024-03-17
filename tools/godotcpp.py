@@ -262,6 +262,38 @@ def options(opts, env):
             tool.options(opts)
 
 
+def make_doc_header(target, source, env):
+    dst = str(target[0])
+    g = open(dst, "w", encoding="utf-8")
+    buf = ""
+    docbegin = ""
+    docend = ""
+    for src in source:
+        src_path = str(src)
+        if not src_path.endswith(".xml"):
+            continue
+        with open(src_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        buf += content
+
+    buf = (docbegin + buf + docend).encode("utf-8")
+    decomp_size = len(buf)
+
+    g.write("/* THIS FILE IS GENERATED DO NOT EDIT */\n")
+    g.write("#ifndef _GODOT_CPP_DOC_DATA_RAW_H\n")
+    g.write("#define _GODOT_CPP_DOC_DATA_RAW_H\n")
+    g.write('static const char *_doc_data_hash = "' + str(hash(buf)) + '";\n')
+    g.write("static const int _doc_data_uncompressed_size = " + str(decomp_size) + ";\n")
+    g.write("static const unsigned char _doc_data_uncompressed[] = {\n")
+    for i in range(len(buf)):
+        g.write("\t" + str(buf[i]) + ",\n")
+    g.write("};\n")
+
+    g.write("#endif")
+
+    g.close()
+
+
 def generate(env):
     # Default num_jobs to local cpu count if not user specified.
     # SCons has a peculiarity where user-specified options won't be overridden
@@ -383,6 +415,7 @@ def generate(env):
 
     # Builders
     env.Append(BUILDERS={"GodotCPPBindings": Builder(action=scons_generate_bindings, emitter=scons_emit_files)})
+    env.Append(BUILDERS={"GodotCPPDocHeader": Builder(action=make_doc_header)})
     env.AddMethod(_godot_cpp, "GodotCPP")
 
 

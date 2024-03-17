@@ -14,9 +14,19 @@
 #include "example.h"
 #include "tests.h"
 
+#if defined(TOOLS_ENABLED) || defined(DEBUG_ENABLED)
+#include "doc_data.gen.h"
+#endif
+
 using namespace godot;
 
 void initialize_example_module(ModuleInitializationLevel p_level) {
+#if defined(TOOLS_ENABLED) || defined(DEBUG_ENABLED)
+	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
+		internal::gdextension_interface_editor_help_load_xml_from_utf8_chars_and_len(reinterpret_cast<const char *>(_doc_data_uncompressed), _doc_data_uncompressed_size);
+	}
+#endif
+
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
