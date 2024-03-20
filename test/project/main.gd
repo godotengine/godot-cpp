@@ -191,6 +191,10 @@ func _ready():
 	control.queue_free()
 	sprite.queue_free()
 
+	# Test that passing null for objects works as expected too.
+	var example_null : Example = null
+	assert_equal(example.test_object_cast_to_node(example_null), false)
+
 	# Test conversions to and from Variant.
 	assert_equal(example.test_variant_vector2i_conversion(Vector2i(1, 1)), Vector2i(1, 1))
 	assert_equal(example.test_variant_vector2i_conversion(Vector2(1.0, 1.0)), Vector2i(1, 1))
