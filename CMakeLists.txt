@@ -37,7 +37,7 @@
 # Todo
 # Test build for Windows, Mac and mingw.
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 project(godot-cpp LANGUAGES CXX)
 
 option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)

@@ -1,5 +1,5 @@
+cmake_minimum_required(VERSION 3.13)
 project(godot-cpp-test)
-cmake_minimum_required(VERSION 3.6)
 
 set(GODOT_GDEXTENSION_DIR ../gdextension/ CACHE STRING "Path to GDExtension interface header directory")
 set(CPP_BINDINGS_PATH ../ CACHE STRING "Path to C++ bindings")
