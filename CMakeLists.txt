@@ -30,6 +30,10 @@
 #		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 -DANDROID_PLATFORM=android-23 -DCMAKE_BUILD_TYPE=Debug .
 # cmake --build .
 #
+# Installation (after the library is built):
+# cmake --install <insert_build_directory_here> --component godot-cpp-dev
+#
+#
 # Protip
 # Generate the buildfiles in a sub directory to not clutter the root directory with build files:
 # mkdir build && cd build && cmake -G "Unix Makefiles" .. && cmake --build .
@@ -65,9 +69,8 @@ if(NOT DEFINED BITS)
 endif()
 
 # Input from user for GDExtension interface header and the API JSON file
-set(GODOT_GDEXTENSION_DIR "gdextension" CACHE STRING "")
+set(GODOT_GDEXTENSION_DIR "${CMAKE_CURRENT_SOURCE_DIR}/gdextension" CACHE STRING "")
 set(GODOT_CUSTOM_API_FILE "" CACHE STRING "")
-
 set(GODOT_GDEXTENSION_API_FILE "${GODOT_GDEXTENSION_DIR}/extension_api.json")
 if (NOT "${GODOT_CUSTOM_API_FILE}" STREQUAL "")  # User-defined override.
 	set(GODOT_GDEXTENSION_API_FILE "${GODOT_CUSTOM_API_FILE}")
@@ -183,9 +186,10 @@ if (GODOT_CPP_SYSTEM_HEADERS)
 endif ()
 
 target_include_directories(${PROJECT_NAME} ${GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE} PUBLIC
-	include
-	${CMAKE_CURRENT_BINARY_DIR}/gen/include
-	${GODOT_GDEXTENSION_DIR}
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen/include>
+	$<BUILD_INTERFACE:${GODOT_GDEXTENSION_DIR}>
+	$<INSTALL_INTERFACE:include>
 )
 
 # Add the compile flags
@@ -213,4 +217,8 @@ set_target_properties(${PROJECT_NAME}
 		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		OUTPUT_NAME "${OUTPUT_NAME}"
+		EXPORT_NAME "cpp"	# This ensures that the exported target is godot::cpp
 )
+
+
+include("cmake/install.cmake")
