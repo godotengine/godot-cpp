@@ -703,7 +703,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
                 method_signature += "static "
 
             if "return_type" in method:
-                method_signature += f'{correct_type(method["return_type"])} '
+                method_signature += f'{correct_type(method["return_type"])}'
+                if not method_signature.endswith("*"):
+                    method_signature += " "
             else:
                 method_signature += "void "
 
@@ -1644,9 +1646,11 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
             if "return_type" in method:
                 method_signature += f'{correct_type(method["return_type"])} '
             elif "return_value" in method:
-                method_signature += (
-                    correct_type(method["return_value"]["type"], method["return_value"].get("meta", None)) + " "
+                method_signature += correct_type(
+                    method["return_value"]["type"], method["return_value"].get("meta", None)
                 )
+                if not method_signature.endswith("*"):
+                    method_signature += " "
             else:
                 method_signature += "void "
 
@@ -2542,7 +2546,7 @@ def correct_type(type_name, meta=None):
     if type_name == "Object" or is_engine_class(type_name):
         return f"{type_name} *"
     if type_name.endswith("*"):
-        return f"{type_name[:-1]} *"
+        return f"{type_name[:-1]}*"
     return type_name
 
 
