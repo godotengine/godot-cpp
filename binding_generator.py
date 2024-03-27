@@ -619,14 +619,16 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
             vararg = method["is_vararg"]
             if vararg:
-                result.append("\ttemplate<typename... Args>")
+                result.append("\ttemplate <typename... Args>")
 
             method_signature = "\t"
             if "is_static" in method and method["is_static"]:
                 method_signature += "static "
 
             if "return_type" in method:
-                method_signature += f'{correct_type(method["return_type"])} '
+                method_signature += f'{correct_type(method["return_type"])}'
+                if not method_signature.endswith("*"):
+                    method_signature += " "
             else:
                 method_signature += "void "
 
@@ -1041,7 +1043,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                 continue
 
             method_signature = make_signature(class_name, method, for_builtin=True)
-            result.append(method_signature + "{")
+            result.append(method_signature + " {")
 
             method_call = "\t"
             is_ref = False
@@ -1449,8 +1451,6 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
             vararg = "is_vararg" in method and method["is_vararg"]
 
             method_signature = "\t"
-            if vararg:
-                method_signature += "private: "
             method_signature += make_signature(
                 class_name, method, for_header=True, use_template_get_node=use_template_get_node
             )
@@ -1520,16 +1520,16 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     if class_name == "Object":
         result.append("")
 
-        result.append("\ttemplate<typename T>")
+        result.append("\ttemplate <typename T>")
         result.append("\tstatic T *cast_to(Object *p_object);")
 
-        result.append("\ttemplate<typename T>")
+        result.append("\ttemplate <typename T>")
         result.append("\tstatic const T *cast_to(const Object *p_object);")
 
         result.append("\tvirtual ~Object() = default;")
 
     elif use_template_get_node and class_name == "Node":
-        result.append("\ttemplate<typename T>")
+        result.append("\ttemplate <typename T>")
         result.append(
             "\tT *get_node(const NodePath &p_path) const { return Object::cast_to<T>(get_node_internal(p_path)); }"
         )
@@ -1571,7 +1571,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
             vararg = "is_vararg" in method and method["is_vararg"]
             if vararg:
-                method_signature = "\ttemplate<typename... Args> static "
+                method_signature = "\ttemplate <typename... Args> static "
             else:
                 method_signature = "\tstatic "
 
@@ -1585,7 +1585,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                     False,
                 )
             if return_type is not None:
-                method_signature += return_type + " "
+                method_signature += return_type
+                if not method_signature.endswith("*"):
+                    method_signature += " "
             else:
                 method_signature += "void "
 
@@ -2182,7 +2184,7 @@ def make_signature(
 def make_varargs_template(function_data, static=False):
     result = []
 
-    function_signature = "\tpublic: template<typename... Args> "
+    function_signature = "\tpublic: template <typename... Args> "
 
     if static:
         function_signature += "static "
@@ -2476,7 +2478,7 @@ def correct_type(type_name, meta=None, use_alias=True):
         return f"Ref<{type_name}>"
     if type_name == "Object" or is_engine_class(type_name):
         return f"{type_name} *"
-    if type_name.endswith("*"):
+    if type_name.endswith("*") and not type_name.endswith("**") and not type_name.endswith(" *"):
         return f"{type_name[:-1]} *"
     return type_name
 
