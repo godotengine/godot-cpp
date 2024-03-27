@@ -77,7 +77,7 @@ R _call_utility_ret(GDExtensionPtrUtilityFunction func, const Args &...args) {
 }
 
 template <typename... Args>
-Object *_call_utility_ret_obj(const GDExtensionPtrUtilityFunction func, void *instance, const Args &...args) {
+Object *_call_utility_ret_obj(const GDExtensionPtrUtilityFunction func, const Args &...args) {
 	GodotObject *ret = nullptr;
 	std::array<GDExtensionConstTypePtr, sizeof...(Args)> mb_args = { { (GDExtensionConstTypePtr)args... } };
 	func(&ret, mb_args.data(), mb_args.size());
