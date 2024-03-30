@@ -112,9 +112,9 @@ private:
 	template <class T, bool is_abstract>
 	static void _register_class(bool p_virtual = false, bool p_exposed = true, bool p_runtime = false);
 
-	template <class T>
+	template <class T, bool is_abstract>
 	static GDExtensionObjectPtr _create_instance_func(void *data) {
-		if constexpr (!std::is_abstract_v<T>) {
+		if constexpr (!std::is_abstract_v<T> || !is_abstract) {
 			T *new_object = memnew(T);
 			return new_object->_owner;
 		} else {
@@ -122,9 +122,9 @@ private:
 		}
 	}
 
-	template <class T>
+	template <class T, bool is_abstract>
 	static GDExtensionClassInstancePtr _recreate_instance_func(void *data, GDExtensionObjectPtr obj) {
-		if constexpr (!std::is_abstract_v<T>) {
+		if constexpr (!std::is_abstract_v<T> || !is_abstract) {
 #ifdef HOT_RELOAD_ENABLED
 			T *new_instance = (T *)memalloc(sizeof(T));
 			Wrapped::RecreateInstance recreate_data = { new_instance, obj, Wrapped::recreate_instance };
@@ -235,9 +235,9 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 		T::to_string_bind, // GDExtensionClassToString to_string_func;
 		nullptr, // GDExtensionClassReference reference_func;
 		nullptr, // GDExtensionClassUnreference unreference_func;
-		&_create_instance_func<T>, // GDExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
+		&_create_instance_func<T, is_abstract>, // GDExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
 		T::free, // GDExtensionClassFreeInstance free_instance_func; /* this one is mandatory */
-		&_recreate_instance_func<T>, // GDExtensionClassRecreateInstance recreate_instance_func;
+		&_recreate_instance_func<T, is_abstract>, // GDExtensionClassRecreateInstance recreate_instance_func;
 		&ClassDB::get_virtual_func, // GDExtensionClassGetVirtual get_virtual_func;
 		nullptr, // GDExtensionClassGetVirtualCallData get_virtual_call_data_func;
 		nullptr, // GDExtensionClassCallVirtualWithData call_virtual_func;
