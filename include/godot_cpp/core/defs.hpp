@@ -108,7 +108,7 @@ typedef float real_t;
 // Generic swap template.
 #ifndef SWAP
 #define SWAP(m_x, m_y) __swap_tmpl((m_x), (m_y))
-template <class T>
+template <typename T>
 inline void __swap_tmpl(T &x, T &y) {
 	T aux = x;
 	x = y;

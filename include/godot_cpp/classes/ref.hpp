@@ -45,7 +45,7 @@ namespace godot {
 
 class RefCounted;
 
-template <class T>
+template <typename T>
 class Ref {
 	T *reference = nullptr;
 
@@ -108,7 +108,7 @@ public:
 		ref(p_from);
 	}
 
-	template <class T_Other>
+	template <typename T_Other>
 	void operator=(const Ref<T_Other> &p_from) {
 		RefCounted *refb = const_cast<RefCounted *>(static_cast<const RefCounted *>(p_from.ptr()));
 		if (!refb) {
@@ -144,7 +144,7 @@ public:
 		}
 	}
 
-	template <class T_Other>
+	template <typename T_Other>
 	void reference_ptr(T_Other *p_ptr) {
 		if (reference == p_ptr) {
 			return;
@@ -161,7 +161,7 @@ public:
 		ref(p_from);
 	}
 
-	template <class T_Other>
+	template <typename T_Other>
 	Ref(const Ref<T_Other> &p_from) {
 		RefCounted *refb = const_cast<RefCounted *>(static_cast<const RefCounted *>(p_from.ptr()));
 		if (!refb) {
@@ -226,7 +226,7 @@ public:
 	}
 };
 
-template <class T>
+template <typename T>
 struct PtrToArg<Ref<T>> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
 		GDExtensionRefPtr ref = (GDExtensionRefPtr)p_ptr;
@@ -248,7 +248,7 @@ struct PtrToArg<Ref<T>> {
 	}
 };
 
-template <class T>
+template <typename T>
 struct PtrToArg<const Ref<T> &> {
 	typedef Ref<T> EncodeT;
 
@@ -259,7 +259,7 @@ struct PtrToArg<const Ref<T> &> {
 	}
 };
 
-template <class T>
+template <typename T>
 struct GetTypeInfo<Ref<T>, typename EnableIf<TypeInherits<RefCounted, T>::value>::type> {
 	static const GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_OBJECT;
 	static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
@@ -269,7 +269,7 @@ struct GetTypeInfo<Ref<T>, typename EnableIf<TypeInherits<RefCounted, T>::value>
 	}
 };
 
-template <class T>
+template <typename T>
 struct GetTypeInfo<const Ref<T> &, typename EnableIf<TypeInherits<RefCounted, T>::value>::type> {
 	static const GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_OBJECT;
 	static const GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
