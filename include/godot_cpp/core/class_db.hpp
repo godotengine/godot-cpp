@@ -112,7 +112,6 @@ private:
 	template <typename T, bool is_abstract>
 	static void _register_class(bool p_virtual = false, bool p_exposed = true, bool p_runtime = false);
 
-
 	template <typename T, bool is_abstract>
 	static GDExtensionObjectPtr _create_instance_func(void *data) {
 		if constexpr (!std::is_abstract_v<T> || !is_abstract) {
@@ -122,7 +121,6 @@ private:
 			return nullptr;
 		}
 	}
-
 
 	template <typename T, bool is_abstract>
 	static GDExtensionClassInstancePtr _recreate_instance_func(void *data, GDExtensionObjectPtr obj) {
