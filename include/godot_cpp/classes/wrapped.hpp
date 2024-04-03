@@ -115,13 +115,13 @@ _FORCE_INLINE_ void snarray_add_str(Vector<StringName> &arr, const StringName &p
 	arr.push_back(p_str);
 }
 
-template <class... P>
+template <typename... P>
 _FORCE_INLINE_ void snarray_add_str(Vector<StringName> &arr, const StringName &p_str, P... p_args) {
 	arr.push_back(p_str);
 	snarray_add_str(arr, p_args...);
 }
 
-template <class... P>
+template <typename... P>
 _FORCE_INLINE_ Vector<StringName> snarray(P... p_args) {
 	Vector<StringName> arr;
 	snarray_add_str(arr, p_args...);
@@ -138,7 +138,7 @@ void add_engine_class_registration_callback(EngineClassRegistrationCallback p_ca
 void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks);
 void register_engine_classes();
 
-template <class T>
+template <typename T>
 struct EngineClassRegistration {
 	EngineClassRegistration() {
 		add_engine_class_registration_callback(&EngineClassRegistration<T>::callback);
@@ -207,7 +207,7 @@ protected:                                                                      
 		return (::godot::String(::godot::Wrapped::*)() const) & m_class::_to_string;                                                                                                   \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	template <class T, class B>                                                                                                                                                        \
+	template <typename T, typename B>                                                                                                                                                  \
 	static void register_virtuals() {                                                                                                                                                  \
 		m_inherits::register_virtuals<T, B>();                                                                                                                                         \
 	}                                                                                                                                                                                  \

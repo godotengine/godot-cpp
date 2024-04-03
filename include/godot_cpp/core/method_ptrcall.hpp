@@ -39,7 +39,7 @@
 
 namespace godot {
 
-template <class T>
+template <typename T>
 struct PtrToArg {};
 
 #define MAKE_PTRARG(m_type)                                            \
@@ -166,7 +166,7 @@ MAKE_PTRARG_BY_REFERENCE(Variant);
 
 // This is for Object.
 
-template <class T>
+template <typename T>
 struct PtrToArg<T *> {
 	static_assert(std::is_base_of<Object, T>::value, "Cannot encode non-Object value as an Object");
 	_FORCE_INLINE_ static T *convert(const void *p_ptr) {
@@ -178,7 +178,7 @@ struct PtrToArg<T *> {
 	}
 };
 
-template <class T>
+template <typename T>
 struct PtrToArg<const T *> {
 	static_assert(std::is_base_of<Object, T>::value, "Cannot encode non-Object value as an Object");
 	_FORCE_INLINE_ static const T *convert(const void *p_ptr) {
