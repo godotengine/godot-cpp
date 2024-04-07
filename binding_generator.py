@@ -222,9 +222,11 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
             continue
 
         header_filename = include_gen_folder / "variant" / (camel_to_snake(builtin_class["name"]) + ".hpp")
+        header_compat_filename = include_gen_compat_folder / "variant" / (camel_to_snake(builtin_class["name"]) + ".hpp")
         source_filename = source_gen_folder / "variant" / (camel_to_snake(builtin_class["name"]) + ".cpp")
         if headers:
             files.append(str(header_filename.as_posix()))
+            files.append(str(header_compat_filename.as_posix()))
         if sources:
             files.append(str(source_filename.as_posix()))
 
@@ -234,9 +236,11 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
             engine_class["name"] = "ClassDBSingleton"
             engine_class["alias_for"] = "ClassDB"
         header_filename = include_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".hpp")
+        header_compat_filename = include_gen_compat_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".hpp")
         source_filename = source_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".cpp")
         if headers:
             files.append(str(header_filename.as_posix()))
+            files.append(str(header_compat_filename.as_posix()))
         if sources:
             files.append(str(source_filename.as_posix()))
 
@@ -247,8 +251,10 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
         snake_struct_name = camel_to_snake(struct_name)
 
         header_filename = include_gen_folder / "classes" / (snake_struct_name + ".hpp")
+        header_compat_filename = include_gen_compat_folder / "classes" / (snake_struct_name + ".hpp")
         if headers:
             files.append(str(header_filename.as_posix()))
+            files.append(str(header_compat_filename.as_posix()))
 
     if headers:
         for path in [
