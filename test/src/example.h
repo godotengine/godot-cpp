@@ -127,6 +127,7 @@ public:
 	String test_str_utility() const;
 	bool test_string_is_fourty_two(const String &p_str) const;
 	int test_vector_ops() const;
+	int test_vector_init_list() const;
 
 	bool test_object_cast_to_node(Object *p_object) const;
 	bool test_object_cast_to_control(Object *p_object) const;
@@ -184,6 +185,31 @@ class ExampleAbstract : public Object {
 
 protected:
 	static void _bind_methods() {}
+};
+
+class ExampleBase : public Node {
+	GDCLASS(ExampleBase, Node);
+
+protected:
+	int value1 = 0;
+	int value2 = 0;
+
+	static void _bind_methods();
+
+	void _notification(int p_what);
+
+public:
+	int get_value1() { return value1; }
+	int get_value2() { return value2; }
+};
+
+class ExampleChild : public ExampleBase {
+	GDCLASS(ExampleChild, ExampleBase);
+
+protected:
+	static void _bind_methods() {}
+
+	void _notification(int p_what);
 };
 
 #endif // EXAMPLE_CLASS_H

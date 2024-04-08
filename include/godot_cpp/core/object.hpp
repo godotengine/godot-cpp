@@ -45,10 +45,10 @@
 
 #include <vector>
 
-#define ADD_SIGNAL(m_signal) godot::ClassDB::add_signal(get_class_static(), m_signal)
-#define ADD_GROUP(m_name, m_prefix) godot::ClassDB::add_property_group(get_class_static(), m_name, m_prefix)
-#define ADD_SUBGROUP(m_name, m_prefix) godot::ClassDB::add_property_subgroup(get_class_static(), m_name, m_prefix)
-#define ADD_PROPERTY(m_property, m_setter, m_getter) godot::ClassDB::add_property(get_class_static(), m_property, m_setter, m_getter)
+#define ADD_SIGNAL(m_signal) ::godot::ClassDB::add_signal(get_class_static(), m_signal)
+#define ADD_GROUP(m_name, m_prefix) ::godot::ClassDB::add_property_group(get_class_static(), m_name, m_prefix)
+#define ADD_SUBGROUP(m_name, m_prefix) ::godot::ClassDB::add_property_subgroup(get_class_static(), m_name, m_prefix)
+#define ADD_PROPERTY(m_property, m_setter, m_getter) ::godot::ClassDB::add_property(get_class_static(), m_property, m_setter, m_getter)
 
 namespace godot {
 
@@ -75,31 +75,31 @@ struct MethodInfo {
 
 	MethodInfo();
 	MethodInfo(StringName p_name);
-	template <class... Args>
+	template <typename... Args>
 	MethodInfo(StringName p_name, const Args &...args);
 	MethodInfo(Variant::Type ret);
 	MethodInfo(Variant::Type ret, StringName p_name);
-	template <class... Args>
+	template <typename... Args>
 	MethodInfo(Variant::Type ret, StringName p_name, const Args &...args);
 	MethodInfo(const PropertyInfo &p_ret, StringName p_name);
-	template <class... Args>
+	template <typename... Args>
 	MethodInfo(const PropertyInfo &p_ret, StringName p_name, const Args &...);
 };
 
-template <class... Args>
+template <typename... Args>
 MethodInfo::MethodInfo(StringName p_name, const Args &...args) :
 		name(p_name), flags(GDEXTENSION_METHOD_FLAG_NORMAL) {
 	arguments = { args... };
 }
 
-template <class... Args>
+template <typename... Args>
 MethodInfo::MethodInfo(Variant::Type ret, StringName p_name, const Args &...args) :
 		name(p_name), flags(GDEXTENSION_METHOD_FLAG_NORMAL) {
 	return_val.type = ret;
 	arguments = { args... };
 }
 
-template <class... Args>
+template <typename... Args>
 MethodInfo::MethodInfo(const PropertyInfo &p_ret, StringName p_name, const Args &...args) :
 		name(p_name), return_val(p_ret), flags(GDEXTENSION_METHOD_FLAG_NORMAL) {
 	arguments = { args... };
@@ -138,7 +138,7 @@ public:
 	}
 };
 
-template <class T>
+template <typename T>
 T *Object::cast_to(Object *p_object) {
 	if (p_object == nullptr) {
 		return nullptr;
@@ -151,7 +151,7 @@ T *Object::cast_to(Object *p_object) {
 	return dynamic_cast<T *>(internal::get_object_instance_binding(casted));
 }
 
-template <class T>
+template <typename T>
 const T *Object::cast_to(const Object *p_object) {
 	if (p_object == nullptr) {
 		return nullptr;

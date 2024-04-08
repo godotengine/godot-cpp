@@ -47,8 +47,6 @@ class ObjectID;
 class Variant {
 	uint8_t opaque[GODOT_CPP_VARIANT_SIZE]{ 0 };
 
-	_FORCE_INLINE_ GDExtensionVariantPtr _native_ptr() const { return const_cast<uint8_t(*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
-
 	friend class GDExtensionBinding;
 	friend class MethodBind;
 
@@ -145,6 +143,7 @@ private:
 	static GDExtensionTypeFromVariantConstructorFunc to_type_constructor[VARIANT_MAX];
 
 public:
+	_FORCE_INLINE_ GDExtensionVariantPtr _native_ptr() const { return const_cast<uint8_t(*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
 	Variant();
 	Variant(std::nullptr_t n) :
 			Variant() {}
@@ -270,7 +269,7 @@ public:
 
 	void callp(const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
 
-	template <class... Args>
+	template <typename... Args>
 	Variant call(const StringName &method, Args... args) {
 		std::array<Variant, sizeof...(args)> vargs = { args... };
 		std::array<const Variant *, sizeof...(args)> argptrs;
@@ -285,7 +284,7 @@ public:
 
 	static void callp_static(Variant::Type type, const StringName &method, const Variant **args, int argcount, Variant &r_ret, GDExtensionCallError &r_error);
 
-	template <class... Args>
+	template <typename... Args>
 	static Variant call_static(Variant::Type type, const StringName &method, Args... args) {
 		std::array<Variant, sizeof...(args)> vargs = { args... };
 		std::array<const Variant *, sizeof...(args)> argptrs;

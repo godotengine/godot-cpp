@@ -148,6 +148,7 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_str_utility"), &Example::test_str_utility);
 	ClassDB::bind_method(D_METHOD("test_string_is_fourty_two"), &Example::test_string_is_fourty_two);
 	ClassDB::bind_method(D_METHOD("test_vector_ops"), &Example::test_vector_ops);
+	ClassDB::bind_method(D_METHOD("test_vector_init_list"), &Example::test_vector_init_list);
 
 	ClassDB::bind_method(D_METHOD("test_object_cast_to_node", "object"), &Example::test_object_cast_to_node);
 	ClassDB::bind_method(D_METHOD("test_object_cast_to_control", "object"), &Example::test_object_cast_to_control);
@@ -339,6 +340,15 @@ int Example::test_vector_ops() const {
 	return ret;
 }
 
+int Example::test_vector_init_list() const {
+	PackedInt32Array arr = { 10, 20, 30, 45 };
+	int ret = 0;
+	for (const int32_t &E : arr) {
+		ret += E;
+	}
+	return ret;
+}
+
 int Example::test_tarray_arg(const TypedArray<int64_t> &p_array) {
 	int sum = 0;
 	for (int i = 0; i < p_array.size(); i++) {
@@ -453,5 +463,23 @@ void Example::_input(const Ref<InputEvent> &event) {
 	const InputEventKey *key_event = Object::cast_to<const InputEventKey>(*event);
 	if (key_event) {
 		emit_custom_signal(String("_input: ") + key_event->get_key_label(), key_event->get_unicode());
+	}
+}
+
+void ExampleBase::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_value1"), &ExampleBase::get_value1);
+	ClassDB::bind_method(D_METHOD("get_value2"), &ExampleBase::get_value2);
+}
+
+void ExampleBase::_notification(int p_what) {
+	if (p_what == NOTIFICATION_ENTER_TREE) {
+		value1 = 11;
+		value2 = 22;
+	}
+}
+
+void ExampleChild::_notification(int p_what) {
+	if (p_what == NOTIFICATION_ENTER_TREE) {
+		value2 = 33;
 	}
 }
