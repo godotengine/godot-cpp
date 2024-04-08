@@ -129,6 +129,7 @@ public:
 	bool test_string_is_fourty_two(const String &p_str) const;
 	String test_string_resize(String p_original) const;
 	int test_vector_ops() const;
+	int test_vector_init_list() const;
 
 	bool test_object_cast_to_node(Object *p_object) const;
 	bool test_object_cast_to_control(Object *p_object) const;
@@ -214,6 +215,31 @@ protected:
 	static void _bind_methods() {}
 
 	virtual int test_function() override { return 25; }
+};
+
+class ExampleBase : public Node {
+	GDCLASS(ExampleBase, Node);
+
+protected:
+	int value1 = 0;
+	int value2 = 0;
+
+	static void _bind_methods();
+
+	void _notification(int p_what);
+
+public:
+	int get_value1() { return value1; }
+	int get_value2() { return value2; }
+};
+
+class ExampleChild : public ExampleBase {
+	GDCLASS(ExampleChild, ExampleBase);
+
+protected:
+	static void _bind_methods() {}
+
+	void _notification(int p_what);
 };
 
 #endif // EXAMPLE_CLASS_H

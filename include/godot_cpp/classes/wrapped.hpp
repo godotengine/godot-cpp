@@ -117,7 +117,7 @@ void add_engine_class_registration_callback(EngineClassRegistrationCallback p_ca
 void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks);
 void register_engine_classes();
 
-template <class T>
+template <typename T>
 struct EngineClassRegistration {
 	EngineClassRegistration() {
 		add_engine_class_registration_callback(&EngineClassRegistration<T>::callback);
@@ -186,7 +186,7 @@ protected:                                                                      
 		return (::godot::String(::godot::Wrapped::*)() const) & m_class::_to_string;                                                                                                   \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	template <class T, class B>                                                                                                                                                        \
+	template <typename T, typename B>                                                                                                                                                  \
 	static void register_virtuals() {                                                                                                                                                  \
 		m_inherits::register_virtuals<T, B>();                                                                                                                                         \
 	}                                                                                                                                                                                  \
@@ -218,11 +218,16 @@ public:                                                                         
                                                                                                                                                                                        \
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, GDExtensionBool p_reversed) {                                                                \
 		if (p_instance && m_class::_get_notification()) {                                                                                                                              \
+			if (!p_reversed) {                                                                                                                                                         \
+				m_inherits::notification_bind(p_instance, p_what, p_reversed);                                                                                                         \
+			}                                                                                                                                                                          \
 			if (m_class::_get_notification() != m_inherits::_get_notification()) {                                                                                                     \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
-				return cls->_notification(p_what);                                                                                                                                     \
+				cls->_notification(p_what);                                                                                                                                            \
 			}                                                                                                                                                                          \
-			m_inherits::notification_bind(p_instance, p_what, p_reversed);                                                                                                             \
+			if (p_reversed) {                                                                                                                                                          \
+				m_inherits::notification_bind(p_instance, p_what, p_reversed);                                                                                                         \
+			}                                                                                                                                                                          \
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \

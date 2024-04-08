@@ -32,6 +32,7 @@
 #define GODOT_BUILTIN_PTRCALL_HPP
 
 #include <gdextension_interface.h>
+#include <godot_cpp/core/object.hpp>
 
 #include <array>
 
@@ -39,13 +40,24 @@ namespace godot {
 
 namespace internal {
 
-template <class... Args>
+template <typename O, typename... Args>
+O *_call_builtin_method_ptr_ret_obj(const GDExtensionPtrBuiltInMethod method, GDExtensionTypePtr base, const Args &...args) {
+	GodotObject *ret = nullptr;
+	std::array<GDExtensionConstTypePtr, sizeof...(Args)> call_args = { { (GDExtensionConstTypePtr)args... } };
+	method(base, call_args.data(), &ret, sizeof...(Args));
+	if (ret == nullptr) {
+		return nullptr;
+	}
+	return reinterpret_cast<O *>(internal::get_object_instance_binding(ret));
+}
+
+template <typename... Args>
 void _call_builtin_constructor(const GDExtensionPtrConstructor constructor, GDExtensionTypePtr base, Args... args) {
 	std::array<GDExtensionConstTypePtr, sizeof...(Args)> call_args = { { (GDExtensionConstTypePtr)args... } };
 	constructor(base, call_args.data());
 }
 
-template <class T, class... Args>
+template <typename T, typename... Args>
 T _call_builtin_method_ptr_ret(const GDExtensionPtrBuiltInMethod method, GDExtensionTypePtr base, Args... args) {
 	T ret;
 	std::array<GDExtensionConstTypePtr, sizeof...(Args)> call_args = { { (GDExtensionConstTypePtr)args... } };
@@ -53,20 +65,20 @@ T _call_builtin_method_ptr_ret(const GDExtensionPtrBuiltInMethod method, GDExten
 	return ret;
 }
 
-template <class... Args>
+template <typename... Args>
 void _call_builtin_method_ptr_no_ret(const GDExtensionPtrBuiltInMethod method, GDExtensionTypePtr base, Args... args) {
 	std::array<GDExtensionConstTypePtr, sizeof...(Args)> call_args = { { (GDExtensionConstTypePtr)args... } };
 	method(base, call_args.data(), nullptr, sizeof...(Args));
 }
 
-template <class T>
+template <typename T>
 T _call_builtin_operator_ptr(const GDExtensionPtrOperatorEvaluator op, GDExtensionConstTypePtr left, GDExtensionConstTypePtr right) {
 	T ret;
 	op(left, right, &ret);
 	return ret;
 }
 
-template <class T>
+template <typename T>
 T _call_builtin_ptr_getter(const GDExtensionPtrGetter getter, GDExtensionConstTypePtr base) {
 	T ret;
 	getter(base, &ret);

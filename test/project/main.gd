@@ -154,6 +154,7 @@ func _ready():
 
 	# PackedArray iterators
 	assert_equal(example.test_vector_ops(), 105)
+	assert_equal(example.test_vector_init_list(), 105)
 
 	# Properties.
 	assert_equal(example.group_subgroup_custom_position, Vector2(0, 0))
@@ -240,6 +241,14 @@ func _ready():
 	var new_example_ref = ExampleRef.new()
 	assert_equal(new_example_ref.was_post_initialized(), true)
 	assert_equal(example.test_post_initialize(), true)
+
+	# Test that notifications happen on both parent and child classes.
+	var example_child = $ExampleChild
+	assert_equal(example_child.get_value1(), 11)
+	assert_equal(example_child.get_value2(), 33)
+	example_child.notification(NOTIFICATION_ENTER_TREE, true)
+	assert_equal(example_child.get_value1(), 11)
+	assert_equal(example_child.get_value2(), 22)
 
 	exit_with_status()
 

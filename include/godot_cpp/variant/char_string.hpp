@@ -38,19 +38,19 @@
 
 namespace godot {
 
-template <class T>
+template <typename T>
 class CharStringT;
 
-template <class T>
+template <typename T>
 class CharProxy {
-	template <class TS>
+	template <typename TS>
 	friend class CharStringT;
 
-	const int _index;
+	const int64_t _index;
 	CowData<T> &_cowdata;
 	static inline const T _null = 0;
 
-	_FORCE_INLINE_ CharProxy(const int &p_index, CowData<T> &p_cowdata) :
+	_FORCE_INLINE_ CharProxy(const int64_t &p_index, CowData<T> &p_cowdata) :
 			_index(p_index),
 			_cowdata(p_cowdata) {}
 
@@ -80,7 +80,7 @@ public:
 	}
 };
 
-template <class T>
+template <typename T>
 class CharStringT {
 	friend class String;
 
@@ -90,19 +90,19 @@ class CharStringT {
 public:
 	_FORCE_INLINE_ T *ptrw() { return _cowdata.ptrw(); }
 	_FORCE_INLINE_ const T *ptr() const { return _cowdata.ptr(); }
-	_FORCE_INLINE_ int size() const { return _cowdata.size(); }
-	Error resize(int p_size) { return _cowdata.resize(p_size); }
+	_FORCE_INLINE_ int64_t size() const { return _cowdata.size(); }
+	Error resize(int64_t p_size) { return _cowdata.resize(p_size); }
 
-	_FORCE_INLINE_ T get(int p_index) const { return _cowdata.get(p_index); }
-	_FORCE_INLINE_ void set(int p_index, const T &p_elem) { _cowdata.set(p_index, p_elem); }
-	_FORCE_INLINE_ const T &operator[](int p_index) const {
+	_FORCE_INLINE_ T get(int64_t p_index) const { return _cowdata.get(p_index); }
+	_FORCE_INLINE_ void set(int64_t p_index, const T &p_elem) { _cowdata.set(p_index, p_elem); }
+	_FORCE_INLINE_ const T &operator[](int64_t p_index) const {
 		if (unlikely(p_index == _cowdata.size())) {
 			return _null;
 		}
 
 		return _cowdata.get(p_index);
 	}
-	_FORCE_INLINE_ CharProxy<T> operator[](int p_index) { return CharProxy<T>(p_index, _cowdata); }
+	_FORCE_INLINE_ CharProxy<T> operator[](int64_t p_index) { return CharProxy<T>(p_index, _cowdata); }
 
 	_FORCE_INLINE_ CharStringT() {}
 	_FORCE_INLINE_ CharStringT(const CharStringT<T> &p_str) { _cowdata._ref(p_str._cowdata); }
@@ -112,7 +112,7 @@ public:
 	void operator=(const T *p_cstr);
 	bool operator<(const CharStringT<T> &p_right) const;
 	CharStringT<T> &operator+=(T p_char);
-	int length() const { return size() ? size() - 1 : 0; }
+	int64_t length() const { return size() ? size() - 1 : 0; }
 	const T *get_data() const;
 	operator const T *() const { return get_data(); };
 
