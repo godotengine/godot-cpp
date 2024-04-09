@@ -2583,6 +2583,8 @@ def correct_type(type_name, meta=None, use_alias=True):
     if meta != None:
         if "int" in meta:
             return f"{meta}_t"
+        elif meta == "float":
+            return meta
         elif meta in type_conversion:
             return type_conversion[type_name]
         else:
