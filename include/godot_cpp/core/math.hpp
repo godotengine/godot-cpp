@@ -613,6 +613,14 @@ inline bool is_inf(double p_val) {
 	return std::isinf(p_val);
 }
 
+inline bool is_finite(float p_val) {
+	return std::isfinite(p_val);
+}
+
+inline bool is_finite(double p_val) {
+	return std::isfinite(p_val);
+}
+
 inline bool is_equal_approx(float a, float b) {
 	// Check for exact equality first, required to handle "infinity" values.
 	if (a == b) {
