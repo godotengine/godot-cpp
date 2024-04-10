@@ -11,8 +11,8 @@ def parse_header_file(file_path):
         content = file.read()
 
         # Regular expressions to match different types
-        class_pattern = r"class\s+([a-zA-Z_]\w*)\s*[:{]"
-        struct_pattern = r"struct\s+([a-zA-Z_]\w*)\s*[:{]"
+        struct_pattern = r"struct\s+[\w\s]*?([a-zA-Z_]\w*)\s*[:{]"
+        class_pattern = r"class\s+[\w\s]*?([a-zA-Z_]\w*)\s*[:{]"
         define_pattern = r"#define\s+([a-zA-Z_]\w*)"
 
         # Extract classes

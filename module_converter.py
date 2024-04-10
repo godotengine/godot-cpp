@@ -9,11 +9,14 @@ from compat_generator import map_header_files
 from header_matcher import match_headers
 
 if __name__ == "__main__":
-    if len(sys.argv) > 2:
-        current_directory = os.path.join(os.getcwd(), sys.argv[1])
-        godot_cpp_directory = os.path.join(os.getcwd(), sys.argv[2])
+    if len(sys.argv) > 3:
+        src_directory = os.path.join(os.getcwd(), sys.argv[1])
+        godot_directory = os.path.join(os.getcwd(), sys.argv[2])
+        godot_cpp_directory = os.path.join(os.getcwd(), sys.argv[3])
+    else:
+        raise Exception("Usage: python module_converter.py <source directory> <godot directory> <godot-cpp directory>")
     # Load the godot mappings
-    with open(f"{godot_cpp_directory}/output_header_mapping.json", "r") as file:
+    with open(f"{godot_directory}/output_header_mapping_godot.json", "r") as file:
         godot_mappings = json.load(file)
     
     # Generate mappings for godot-cpp
@@ -22,9 +25,9 @@ if __name__ == "__main__":
     # Save matches to a file
     with open("header_matches.json", "w") as outfile:
         json.dump(matches, outfile, indent=4)
-    current_directory = os.getcwd()
+    src_directory = os.getcwd()
     # Go through folder specified through all files with .cpp, .h or .hpp
-    for root, dirs, files in os.walk(current_directory):
+    for root, dirs, files in os.walk(src_directory):
         for file in files:
             if file.endswith(".cpp") or file.endswith(".h") or file.endswith(".hpp"):
                 with open(os.path.join(root, file), "r") as f:
