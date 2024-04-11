@@ -16,12 +16,6 @@ from build_profile import generate_trimmed_api
 from doc_source_generator import scons_generate_doc_source
 
 
-def add_sources(sources, dir, extension):
-    for f in os.listdir(dir):
-        if f.endswith("." + extension):
-            sources.append(dir + "/" + f)
-
-
 def get_cmdline_bool(option, default):
     """We use `ARGUMENTS.get()` to check if options were manually overridden on the command line,
     and SCons' _text2bool helper to convert them to booleans, otherwise they're handled as strings.
@@ -34,7 +28,12 @@ def get_cmdline_bool(option, default):
 
 
 def normalize_path(val, env):
-    return val if os.path.isabs(val) else os.path.join(env.Dir("#").abspath, val)
+    """Normalize a path that was provided by the user on the command line
+    and is thus either an absolute path, or relative to the top level directory (#)
+    where the command was run.
+    """
+    # If val is an absolute path, it will not be joined.
+    return os.path.join(env.Dir("#").abspath, val)
 
 
 def validate_file(key, val, env):
@@ -54,9 +53,10 @@ def validate_parent_dir(key, val, env):
 
 def get_platform_tools_paths(env):
     path = env.get("custom_tools", None)
+    tools_path = env.Dir("tools").srcnode().abspath
     if path is None:
-        return ["tools"]
-    return [normalize_path(path, env), "tools"]
+        return [tools_path]
+    return [normalize_path(path, env), tools_path]
 
 
 def get_custom_platforms(env):
@@ -258,7 +258,8 @@ def options(opts, env):
             help="Path to a custom directory containing GDExtension interface header and API JSON file",
             default=env.get("gdextension_dir", None),
             validator=validate_dir,
-        )
+        ),
+        converter=normalize_path,
     )
     opts.Add(
         PathVariable(
@@ -266,7 +267,8 @@ def options(opts, env):
             help="Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)",
             default=env.get("custom_api_file", None),
             validator=validate_file,
-        )
+        ),
+        converter=normalize_path,
     )
     opts.Add(
         BoolVariable(
@@ -535,8 +537,9 @@ def generate(env):
 
 
 def _godot_cpp(env):
-    extension_dir = normalize_path(env.get("gdextension_dir", env.Dir("gdextension").abspath), env)
-    api_file = normalize_path(env.get("custom_api_file", env.File(extension_dir + "/extension_api.json").abspath), env)
+    extension_dir = env.get("gdextension_dir", default=env.Dir("gdextension").srcnode().abspath)
+    api_file = env.get("custom_api_file", default=os.path.join(extension_dir, "extension_api.json"))
+
     bindings = env.GodotCPPBindings(
         env.Dir("."),
         [
@@ -551,15 +554,22 @@ def _godot_cpp(env):
         env.NoCache(bindings)
 
     # Sources to compile
-    sources = []
-    add_sources(sources, "src", "cpp")
-    add_sources(sources, "src/classes", "cpp")
-    add_sources(sources, "src/core", "cpp")
-    add_sources(sources, "src/variant", "cpp")
-    sources.extend([f for f in bindings if str(f).endswith(".cpp")])
+    sources = [
+        *env.Glob("src/*.cpp"),
+        *env.Glob("src/classes/*.cpp"),
+        *env.Glob("src/core/*.cpp"),
+        *env.Glob("src/variant/*.cpp"),
+        *tuple(f for f in bindings if str(f).endswith(".cpp")),
+    ]
 
     # Includes
-    env.AppendUnique(CPPPATH=[env.Dir(d) for d in [extension_dir, "include", "gen/include"]])
+    env.AppendUnique(
+        CPPPATH=[
+            env.Dir(extension_dir),
+            env.Dir("include").srcnode(),
+            env.Dir("gen/include"),
+        ]
+    )
 
     library = None
     library_name = "libgodot-cpp" + env["suffix"] + env["LIBSUFFIX"]
