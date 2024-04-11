@@ -36,6 +36,7 @@
 #include <godot_cpp/core/property_info.hpp>
 
 #include <godot_cpp/templates/list.hpp>
+#include <godot_cpp/templates/vector.hpp>
 
 #include <godot_cpp/godot.hpp>
 
@@ -48,6 +49,7 @@ typedef void GodotObject;
 // Base for all engine classes, to contain the pointer to the engine instance.
 class Wrapped {
 	friend class GDExtensionBinding;
+	friend class ClassDB;
 	friend void postinitialize_handler(Wrapped *);
 
 protected:
@@ -106,6 +108,26 @@ public:
 	GodotObject *_owner = nullptr;
 };
 
+_FORCE_INLINE_ void snarray_add_str(Vector<StringName> &arr) {
+}
+
+_FORCE_INLINE_ void snarray_add_str(Vector<StringName> &arr, const StringName &p_str) {
+	arr.push_back(p_str);
+}
+
+template <typename... P>
+_FORCE_INLINE_ void snarray_add_str(Vector<StringName> &arr, const StringName &p_str, P... p_args) {
+	arr.push_back(p_str);
+	snarray_add_str(arr, p_args...);
+}
+
+template <typename... P>
+_FORCE_INLINE_ Vector<StringName> snarray(P... p_args) {
+	Vector<StringName> arr;
+	snarray_add_str(arr, p_args...);
+	return arr;
+}
+
 namespace internal {
 
 GDExtensionPropertyInfo *create_c_property_list(const ::godot::List<::godot::PropertyInfo> &plist_cpp, uint32_t *r_size);
@@ -116,7 +138,7 @@ void add_engine_class_registration_callback(EngineClassRegistrationCallback p_ca
 void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks);
 void register_engine_classes();
 
-template <class T>
+template <typename T>
 struct EngineClassRegistration {
 	EngineClassRegistration() {
 		add_engine_class_registration_callback(&EngineClassRegistration<T>::callback);
@@ -130,17 +152,6 @@ struct EngineClassRegistration {
 } // namespace internal
 
 } // namespace godot
-
-#ifdef HOT_RELOAD_ENABLED
-#define _GDCLASS_RECREATE(m_class, m_inherits)                                                   \
-	m_class *new_instance = (m_class *)memalloc(sizeof(m_class));                                \
-	Wrapped::RecreateInstance recreate_data = { new_instance, obj, Wrapped::recreate_instance }; \
-	Wrapped::recreate_instance = &recreate_data;                                                 \
-	memnew_placement(new_instance, m_class);                                                     \
-	return new_instance;
-#else
-#define _GDCLASS_RECREATE(m_class, m_inherits) return nullptr;
-#endif
 
 // Use this on top of your own classes.
 // Note: the trail of `***` is to keep sane diffs in PRs, because clang-format otherwise moves every `\` which makes
@@ -196,7 +207,7 @@ protected:                                                                      
 		return (::godot::String(::godot::Wrapped::*)() const) & m_class::_to_string;                                                                                                   \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	template <class T, class B>                                                                                                                                                        \
+	template <typename T, typename B>                                                                                                                                                  \
 	static void register_virtuals() {                                                                                                                                                  \
 		m_inherits::register_virtuals<T, B>();                                                                                                                                         \
 	}                                                                                                                                                                                  \
@@ -226,22 +237,18 @@ public:                                                                         
 		return m_inherits::get_class_static();                                                                                                                                         \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDExtensionObjectPtr create(void *data) {                                                                                                                                   \
-		m_class *new_object = memnew(m_class);                                                                                                                                         \
-		return new_object->_owner;                                                                                                                                                     \
-	}                                                                                                                                                                                  \
-                                                                                                                                                                                       \
-	static GDExtensionClassInstancePtr recreate(void *data, GDExtensionObjectPtr obj) {                                                                                                \
-		_GDCLASS_RECREATE(m_class, m_inherits);                                                                                                                                        \
-	}                                                                                                                                                                                  \
-                                                                                                                                                                                       \
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, GDExtensionBool p_reversed) {                                                                \
 		if (p_instance && m_class::_get_notification()) {                                                                                                                              \
+			if (!p_reversed) {                                                                                                                                                         \
+				m_inherits::notification_bind(p_instance, p_what, p_reversed);                                                                                                         \
+			}                                                                                                                                                                          \
 			if (m_class::_get_notification() != m_inherits::_get_notification()) {                                                                                                     \
 				m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                \
-				return cls->_notification(p_what);                                                                                                                                     \
+				cls->_notification(p_what);                                                                                                                                            \
 			}                                                                                                                                                                          \
-			m_inherits::notification_bind(p_instance, p_what, p_reversed);                                                                                                             \
+			if (p_reversed) {                                                                                                                                                          \
+				m_inherits::notification_bind(p_instance, p_what, p_reversed);                                                                                                         \
+			}                                                                                                                                                                          \
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
@@ -437,14 +444,6 @@ public:                                                                         
 		return m_inherits::get_class_static();                                                                                                                                         \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static GDExtensionObjectPtr create(void *data) {                                                                                                                                   \
-		return nullptr;                                                                                                                                                                \
-	}                                                                                                                                                                                  \
-                                                                                                                                                                                       \
-	static GDExtensionClassInstancePtr recreate(void *data, GDExtensionObjectPtr obj) {                                                                                                \
-		return nullptr;                                                                                                                                                                \
-	}                                                                                                                                                                                  \
-                                                                                                                                                                                       \
 	static void free(void *data, GDExtensionClassInstancePtr ptr) {                                                                                                                    \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
@@ -471,5 +470,15 @@ private:
 
 // Don't use this for your classes, use GDCLASS() instead.
 #define GDEXTENSION_CLASS(m_class, m_inherits) GDEXTENSION_CLASS_ALIAS(m_class, m_class, m_inherits)
+
+#define GDVIRTUAL_CALL(m_name, ...) _gdvirtual_##m_name##_call<false>(__VA_ARGS__)
+#define GDVIRTUAL_CALL_PTR(m_obj, m_name, ...) m_obj->_gdvirtual_##m_name##_call<false>(__VA_ARGS__)
+
+#define GDVIRTUAL_REQUIRED_CALL(m_name, ...) _gdvirtual_##m_name##_call<true>(__VA_ARGS__)
+#define GDVIRTUAL_REQUIRED_CALL_PTR(m_obj, m_name, ...) m_obj->_gdvirtual_##m_name##_call<true>(__VA_ARGS__)
+
+#define GDVIRTUAL_BIND(m_name, ...) ::godot::ClassDB::add_virtual_method(get_class_static(), _gdvirtual_##m_name##_get_method_info(), ::godot::snarray(__VA_ARGS__));
+#define GDVIRTUAL_IS_OVERRIDDEN(m_name) _gdvirtual_##m_name##_overridden()
+#define GDVIRTUAL_IS_OVERRIDDEN_PTR(m_obj, m_name) m_obj->_gdvirtual_##m_name##_overridden()
 
 #endif // GODOT_WRAPPED_HPP

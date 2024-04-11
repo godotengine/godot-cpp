@@ -24,6 +24,7 @@
 #include <godot_cpp/variant/variant.hpp>
 
 #include <godot_cpp/core/binder_common.hpp>
+#include <godot_cpp/core/gdvirtual.gen.inc>
 
 using namespace godot;
 
@@ -129,6 +130,7 @@ public:
 	bool test_string_is_fourty_two(const String &p_str) const;
 	String test_string_resize(String p_original) const;
 	int test_vector_ops() const;
+	int test_vector_init_list() const;
 
 	bool test_object_cast_to_node(Object *p_object) const;
 	bool test_object_cast_to_control(Object *p_object) const;
@@ -181,6 +183,9 @@ public:
 	// Virtual function override (no need to bind manually).
 	virtual bool _has_point(const Vector2 &point) const override;
 	virtual void _input(const Ref<InputEvent> &event) override;
+
+	GDVIRTUAL2R(String, _do_something_virtual, String, int);
+	String test_virtual_implemented_in_script(const String &p_name, int p_value);
 };
 
 VARIANT_ENUM_CAST(Example::Constants);
@@ -198,11 +203,63 @@ protected:
 	static void _bind_methods() {}
 };
 
-class ExampleAbstract : public Object {
-	GDCLASS(ExampleAbstract, Object);
+class ExampleAbstractBase : public Object {
+	GDCLASS(ExampleAbstractBase, Object);
 
 protected:
 	static void _bind_methods() {}
+
+	virtual int test_function() = 0;
+};
+
+class ExampleConcrete : public ExampleAbstractBase {
+	GDCLASS(ExampleConcrete, ExampleAbstractBase);
+
+protected:
+	static void _bind_methods() {}
+
+	virtual int test_function() override { return 25; }
+};
+
+class ExampleBase : public Node {
+	GDCLASS(ExampleBase, Node);
+
+protected:
+	int value1 = 0;
+	int value2 = 0;
+
+	static void _bind_methods();
+
+	void _notification(int p_what);
+
+public:
+	int get_value1() { return value1; }
+	int get_value2() { return value2; }
+};
+
+class ExampleChild : public ExampleBase {
+	GDCLASS(ExampleChild, ExampleBase);
+
+protected:
+	static void _bind_methods() {}
+
+	void _notification(int p_what);
+};
+
+class ExampleRuntime : public Node {
+	GDCLASS(ExampleRuntime, Node);
+
+	int prop_value = 12;
+
+protected:
+	static void _bind_methods();
+
+public:
+	void set_prop_value(int p_prop_value);
+	int get_prop_value() const;
+
+	ExampleRuntime();
+	~ExampleRuntime();
 };
 
 #endif // EXAMPLE_CLASS_H

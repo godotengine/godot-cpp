@@ -35,6 +35,11 @@
 
 namespace godot {
 
+int CallableCustomBase::get_argument_count(bool &r_is_valid) const {
+	r_is_valid = false;
+	return 0;
+}
+
 static void callable_custom_call(void *p_userdata, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error) {
 	CallableCustom *callable_custom = (CallableCustom *)p_userdata;
 	callable_custom->call((const Variant **)p_args, p_argument_count, *(Variant *)r_return, *r_error);
@@ -84,13 +89,21 @@ static GDExtensionBool callable_custom_less_than_func(void *p_a, void *p_b) {
 	return func_a(a, b);
 }
 
+static GDExtensionInt custom_callable_get_argument_count_func(void *p_userdata, GDExtensionBool *r_is_valid) {
+	CallableCustom *callable_custom = (CallableCustom *)p_userdata;
+	bool valid = false;
+	int ret = callable_custom->get_argument_count(valid);
+	*r_is_valid = valid;
+	return ret;
+}
+
 bool CallableCustom::is_valid() const {
 	// The same default implementation as in Godot.
 	return ObjectDB::get_instance(get_object());
 }
 
 Callable::Callable(CallableCustom *p_callable_custom) {
-	GDExtensionCallableCustomInfo info = {};
+	GDExtensionCallableCustomInfo2 info = {};
 	info.callable_userdata = p_callable_custom;
 	info.token = internal::token;
 	info.object_id = p_callable_custom->get_object();
@@ -101,8 +114,9 @@ Callable::Callable(CallableCustom *p_callable_custom) {
 	info.equal_func = &callable_custom_equal_func;
 	info.less_than_func = &callable_custom_less_than_func;
 	info.to_string_func = &callable_custom_to_string;
+	info.get_argument_count_func = &custom_callable_get_argument_count_func;
 
-	::godot::internal::gdextension_interface_callable_custom_create(_native_ptr(), &info);
+	::godot::internal::gdextension_interface_callable_custom_create2(_native_ptr(), &info);
 }
 
 CallableCustom *Callable::get_custom() const {

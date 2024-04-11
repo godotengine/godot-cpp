@@ -36,7 +36,7 @@
 
 namespace godot {
 
-template <class T>
+template <typename T>
 class TypedArray : public Array {
 public:
 	_FORCE_INLINE_ void operator=(const Array &p_array) {
@@ -75,6 +75,8 @@ public:
 		}                                                                                                        \
 	};
 
+// All Variant::OBJECT types are intentionally omitted from this list because they are handled by
+// the unspecialized TypedArray definition.
 MAKE_TYPED_ARRAY(bool, Variant::BOOL)
 MAKE_TYPED_ARRAY(uint8_t, Variant::INT)
 MAKE_TYPED_ARRAY(int8_t, Variant::INT)
@@ -94,11 +96,14 @@ MAKE_TYPED_ARRAY(Rect2i, Variant::RECT2I)
 MAKE_TYPED_ARRAY(Vector3, Variant::VECTOR3)
 MAKE_TYPED_ARRAY(Vector3i, Variant::VECTOR3I)
 MAKE_TYPED_ARRAY(Transform2D, Variant::TRANSFORM2D)
+MAKE_TYPED_ARRAY(Vector4, Variant::VECTOR4)
+MAKE_TYPED_ARRAY(Vector4i, Variant::VECTOR4I)
 MAKE_TYPED_ARRAY(Plane, Variant::PLANE)
 MAKE_TYPED_ARRAY(Quaternion, Variant::QUATERNION)
 MAKE_TYPED_ARRAY(AABB, Variant::AABB)
 MAKE_TYPED_ARRAY(Basis, Variant::BASIS)
 MAKE_TYPED_ARRAY(Transform3D, Variant::TRANSFORM3D)
+MAKE_TYPED_ARRAY(Projection, Variant::PROJECTION)
 MAKE_TYPED_ARRAY(Color, Variant::COLOR)
 MAKE_TYPED_ARRAY(StringName, Variant::STRING_NAME)
 MAKE_TYPED_ARRAY(NodePath, Variant::NODE_PATH)
@@ -116,6 +121,10 @@ MAKE_TYPED_ARRAY(PackedStringArray, Variant::PACKED_STRING_ARRAY)
 MAKE_TYPED_ARRAY(PackedVector2Array, Variant::PACKED_VECTOR2_ARRAY)
 MAKE_TYPED_ARRAY(PackedVector3Array, Variant::PACKED_VECTOR3_ARRAY)
 MAKE_TYPED_ARRAY(PackedColorArray, Variant::PACKED_COLOR_ARRAY)
+// If the IPAddress struct is added to godot-cpp, the following could also be added:
+//MAKE_TYPED_ARRAY(IPAddress, Variant::STRING)
+
+#undef MAKE_TYPED_ARRAY
 
 } // namespace godot
 

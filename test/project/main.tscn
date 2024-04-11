@@ -1,11 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://dmx2xuigcpvt4"]
+[gd_scene load_steps=3 format=3 uid="uid://dmx2xuigcpvt4"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_qesh5"]
+[ext_resource type="Script" path="res://example.gd" id="2_jju25"]
 
 [node name="Node" type="Node"]
 script = ExtResource("1_qesh5")
 
 [node name="Example" type="Example" parent="."]
+script = ExtResource("2_jju25")
 
 [node name="ExampleMin" type="ExampleMin" parent="Example"]
 layout_mode = 0
@@ -21,5 +23,7 @@ offset_bottom = 21.0
 offset_right = 79.0
 offset_bottom = 29.0
 text = "Click me!"
+
+[node name="ExampleChild" type="ExampleChild" parent="."]
 
 [connection signal="custom_signal" from="Example" to="." method="_on_Example_custom_signal"]

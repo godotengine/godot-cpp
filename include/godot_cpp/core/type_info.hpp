@@ -90,7 +90,7 @@ static PropertyInfo make_property_info(Variant::Type p_type, const StringName &p
 // instead of a forward declaration. You can always forward declare 'T' in a header file, and then
 // include the actual declaration of 'T' in the source file where 'GetTypeInfo<T>' is instantiated.
 
-template <class T, typename = void>
+template <typename T, typename = void>
 struct GetTypeInfo;
 
 #define MAKE_TYPE_INFO(m_type, m_var_type)                                                                            \
@@ -248,14 +248,14 @@ inline StringName _gde_constant_get_enum_name(T param, StringName p_constant) {
 	return GetTypeInfo<T>::get_class_info().class_name;
 }
 
-template <class T>
+template <typename T>
 class BitField {
 	int64_t value = 0;
 
 public:
 	_FORCE_INLINE_ void set_flag(T p_flag) { value |= p_flag; }
 	_FORCE_INLINE_ bool has_flag(T p_flag) const { return value & p_flag; }
-	_FORCE_INLINE_ void clear_flag(T p_flag) { return value &= ~p_flag; }
+	_FORCE_INLINE_ void clear_flag(T p_flag) { value &= ~p_flag; }
 	_FORCE_INLINE_ BitField(int64_t p_value) { value = p_value; }
 	_FORCE_INLINE_ operator int64_t() const { return value; }
 	_FORCE_INLINE_ operator Variant() const { return value; }
@@ -295,7 +295,7 @@ inline StringName _gde_constant_get_bitfield_name(T param, StringName p_constant
 	return GetTypeInfo<BitField<T>>::get_class_info().class_name;
 }
 
-template <class T>
+template <typename T>
 struct PtrToArg<TypedArray<T>> {
 	_FORCE_INLINE_ static TypedArray<T> convert(const void *p_ptr) {
 		return TypedArray<T>(*reinterpret_cast<const Array *>(p_ptr));
@@ -306,7 +306,7 @@ struct PtrToArg<TypedArray<T>> {
 	}
 };
 
-template <class T>
+template <typename T>
 struct PtrToArg<const TypedArray<T> &> {
 	typedef Array EncodeT;
 	_FORCE_INLINE_ static TypedArray<T>
@@ -370,11 +370,14 @@ MAKE_TYPED_ARRAY_INFO(Rect2i, Variant::RECT2I)
 MAKE_TYPED_ARRAY_INFO(Vector3, Variant::VECTOR3)
 MAKE_TYPED_ARRAY_INFO(Vector3i, Variant::VECTOR3I)
 MAKE_TYPED_ARRAY_INFO(Transform2D, Variant::TRANSFORM2D)
+MAKE_TYPED_ARRAY_INFO(Vector4, Variant::VECTOR4)
+MAKE_TYPED_ARRAY_INFO(Vector4i, Variant::VECTOR4I)
 MAKE_TYPED_ARRAY_INFO(Plane, Variant::PLANE)
 MAKE_TYPED_ARRAY_INFO(Quaternion, Variant::QUATERNION)
 MAKE_TYPED_ARRAY_INFO(AABB, Variant::AABB)
 MAKE_TYPED_ARRAY_INFO(Basis, Variant::BASIS)
 MAKE_TYPED_ARRAY_INFO(Transform3D, Variant::TRANSFORM3D)
+MAKE_TYPED_ARRAY_INFO(Projection, Variant::PROJECTION)
 MAKE_TYPED_ARRAY_INFO(Color, Variant::COLOR)
 MAKE_TYPED_ARRAY_INFO(StringName, Variant::STRING_NAME)
 MAKE_TYPED_ARRAY_INFO(NodePath, Variant::NODE_PATH)
@@ -393,7 +396,10 @@ MAKE_TYPED_ARRAY_INFO(Vector<String>, Variant::PACKED_STRING_ARRAY)
 MAKE_TYPED_ARRAY_INFO(Vector<Vector2>, Variant::PACKED_VECTOR2_ARRAY)
 MAKE_TYPED_ARRAY_INFO(Vector<Vector3>, Variant::PACKED_VECTOR3_ARRAY)
 MAKE_TYPED_ARRAY_INFO(Vector<Color>, Variant::PACKED_COLOR_ARRAY)
+MAKE_TYPED_ARRAY_INFO(IPAddress, Variant::STRING)
 */
+
+#undef MAKE_TYPED_ARRAY_INFO
 
 #define CLASS_INFO(m_type) (GetTypeInfo<m_type *>::get_class_info())
 

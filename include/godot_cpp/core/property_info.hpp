@@ -80,6 +80,17 @@ struct PropertyInfo {
 		p_info->usage = usage;
 		*(reinterpret_cast<StringName *>(p_info->class_name)) = class_name;
 	}
+
+	GDExtensionPropertyInfo _to_gdextension() const {
+		return {
+			(GDExtensionVariantType)type,
+			name._native_ptr(),
+			class_name._native_ptr(),
+			hint,
+			hint_string._native_ptr(),
+			usage,
+		};
+	}
 };
 
 } // namespace godot

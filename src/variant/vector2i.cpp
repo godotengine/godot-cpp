@@ -49,6 +49,14 @@ double Vector2i::length() const {
 	return Math::sqrt((double)length_squared());
 }
 
+int64_t Vector2i::distance_squared_to(const Vector2i &p_to) const {
+	return (p_to - *this).length_squared();
+}
+
+double Vector2i::distance_to(const Vector2i &p_to) const {
+	return (p_to - *this).length();
+}
+
 Vector2i Vector2i::operator+(const Vector2i &p_v) const {
 	return Vector2i(x + p_v.x, y + p_v.y);
 }

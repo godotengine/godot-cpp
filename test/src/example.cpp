@@ -49,6 +49,11 @@ public:
 		return ObjectID();
 	}
 
+	virtual int get_argument_count(bool &r_is_valid) const {
+		r_is_valid = true;
+		return 2;
+	}
+
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, GDExtensionCallError &r_call_error) const {
 		r_return_value = "Hi";
 		r_call_error.error = GDEXTENSION_CALL_OK;
@@ -197,6 +202,7 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_string_is_fourty_two"), &Example::test_string_is_fourty_two);
 	ClassDB::bind_method(D_METHOD("test_string_resize"), &Example::test_string_resize);
 	ClassDB::bind_method(D_METHOD("test_vector_ops"), &Example::test_vector_ops);
+	ClassDB::bind_method(D_METHOD("test_vector_init_list"), &Example::test_vector_init_list);
 
 	ClassDB::bind_method(D_METHOD("test_object_cast_to_node", "object"), &Example::test_object_cast_to_node);
 	ClassDB::bind_method(D_METHOD("test_object_cast_to_control", "object"), &Example::test_object_cast_to_control);
@@ -229,6 +235,9 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
 	ClassDB::bind_method(D_METHOD("callable_bind"), &Example::callable_bind);
 	ClassDB::bind_method(D_METHOD("test_post_initialize"), &Example::test_post_initialize);
+
+	GDVIRTUAL_BIND(_do_something_virtual, "name", "value");
+	ClassDB::bind_method(D_METHOD("test_virtual_implemented_in_script"), &Example::test_virtual_implemented_in_script);
 
 	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
 	ClassDB::bind_static_method("Example", D_METHOD("test_static2"), &Example::test_static2);
@@ -401,6 +410,15 @@ int Example::test_vector_ops() const {
 	arr.push_back(20);
 	arr.push_back(30);
 	arr.push_back(45);
+	int ret = 0;
+	for (const int32_t &E : arr) {
+		ret += E;
+	}
+	return ret;
+}
+
+int Example::test_vector_init_list() const {
+	PackedInt32Array arr = { 10, 20, 30, 45 };
 	int ret = 0;
 	for (const int32_t &E : arr) {
 		ret += E;
@@ -625,4 +643,50 @@ void Example::_input(const Ref<InputEvent> &event) {
 	if (key_event) {
 		emit_custom_signal(String("_input: ") + key_event->get_key_label(), key_event->get_unicode());
 	}
+}
+
+void ExampleBase::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_value1"), &ExampleBase::get_value1);
+	ClassDB::bind_method(D_METHOD("get_value2"), &ExampleBase::get_value2);
+}
+
+void ExampleBase::_notification(int p_what) {
+	if (p_what == NOTIFICATION_ENTER_TREE) {
+		value1 = 11;
+		value2 = 22;
+	}
+}
+
+void ExampleChild::_notification(int p_what) {
+	if (p_what == NOTIFICATION_ENTER_TREE) {
+		value2 = 33;
+	}
+}
+
+String Example::test_virtual_implemented_in_script(const String &p_name, int p_value) {
+	String ret;
+	if (GDVIRTUAL_CALL(_do_something_virtual, p_name, p_value, ret)) {
+		return ret;
+	}
+	return "Unimplemented";
+}
+
+void ExampleRuntime::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("set_prop_value", "value"), &ExampleRuntime::set_prop_value);
+	ClassDB::bind_method(D_METHOD("get_prop_value"), &ExampleRuntime::get_prop_value);
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "prop_value"), "set_prop_value", "get_prop_value");
+}
+
+void ExampleRuntime::set_prop_value(int p_prop_value) {
+	prop_value = p_prop_value;
+}
+
+int ExampleRuntime::get_prop_value() const {
+	return prop_value;
+}
+
+ExampleRuntime::ExampleRuntime() {
+}
+
+ExampleRuntime::~ExampleRuntime() {
 }

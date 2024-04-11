@@ -48,7 +48,16 @@ namespace godot {
 //   value and, as an important benefit, you can be sure the value is properly synchronized
 //   even with threads that are already running.
 
-template <class T>
+// These are used in very specific areas of the engine where it's critical that these guarantees are held
+#define SAFE_NUMERIC_TYPE_PUN_GUARANTEES(m_type)                    \
+	static_assert(sizeof(SafeNumeric<m_type>) == sizeof(m_type));   \
+	static_assert(alignof(SafeNumeric<m_type>) == alignof(m_type)); \
+	static_assert(std::is_trivially_destructible<std::atomic<m_type>>::value);
+#define SAFE_FLAG_TYPE_PUN_GUARANTEES                \
+	static_assert(sizeof(SafeFlag) == sizeof(bool)); \
+	static_assert(alignof(SafeFlag) == alignof(bool));
+
+template <typename T>
 class SafeNumeric {
 	std::atomic<T> value;
 
@@ -186,7 +195,7 @@ public:
 
 #else
 
-template <class T>
+template <typename T>
 class SafeNumeric {
 protected:
 	T value;
