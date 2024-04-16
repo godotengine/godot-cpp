@@ -47,9 +47,9 @@ struct PropertyInfo {
 	Variant::Type type = Variant::NIL;
 	StringName name;
 	StringName class_name;
-	uint32_t hint = 0;
+	uint32_t hint = PROPERTY_HINT_NONE;
 	String hint_string;
-	uint32_t usage = 7;
+	uint32_t usage = PROPERTY_USAGE_DEFAULT;
 
 	PropertyInfo() = default;
 
