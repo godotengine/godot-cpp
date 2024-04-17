@@ -117,7 +117,7 @@ jobs:
 
       - name: Web dependencies
         if: ${{ matrix.platform == 'web' }}
-        uses: mymindstorm/setup-emsdk@v13
+        uses: mymindstorm/setup-emsdk@v14
         with:
           version: ${{env.EM_VERSION}}
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
@@ -134,22 +134,22 @@ jobs:
 
       - name: Generate godot-cpp sources only
         run: |
-          scons platform=${{ matrix.platform }} build_library=no ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} verbose=yes build_library=no ${{ matrix.flags }}
           scons -c
 
       - name: Build godot-cpp (debug)
         run: |
-          scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }}
 
       - name: Build test without rebuilding godot-cpp (debug)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} target=template_debug ${{ matrix.flags }} build_library=no
+          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }} build_library=no
 
       - name: Build test and godot-cpp (release)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} target=template_release ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} verbose=yes target=template_release ${{ matrix.flags }}
 
       - name: Download latest Godot artifacts
         uses: dsnopek/action-download-artifact@1322f74e2dac9feed2ee76a32d9ae1ca3b4cf4e9
