@@ -58,6 +58,16 @@ struct TypesAreSame<A, A> {
 	static bool const value = true;
 };
 
+template <auto A, auto B>
+struct FunctionsAreSame {
+	static bool const value = false;
+};
+
+template <auto A>
+struct FunctionsAreSame<A, A> {
+	static bool const value = true;
+};
+
 template <typename B, typename D>
 struct TypeInherits {
 	static D *get_d();
