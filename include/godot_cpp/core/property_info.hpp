@@ -72,6 +72,40 @@ struct PropertyInfo {
 	PropertyInfo(const GDExtensionPropertyInfo *p_info) :
 			PropertyInfo(p_info->type, *reinterpret_cast<StringName *>(p_info->name), (PropertyHint)p_info->hint, *reinterpret_cast<String *>(p_info->hint_string), p_info->usage, *reinterpret_cast<StringName *>(p_info->class_name)) {}
 
+	operator Dictionary() const {
+		Dictionary dict;
+		dict["name"] = name;
+		dict["class_name"] = class_name;
+		dict["type"] = type;
+		dict["hint"] = hint;
+		dict["hint_string"] = hint_string;
+		dict["usage"] = usage;
+		return dict;
+	}
+
+	static PropertyInfo from_dict(const Dictionary &p_dict) {
+		PropertyInfo pi;
+		if (p_dict.has("type")) {
+			pi.type = Variant::Type(int(p_dict["type"]));
+		}
+		if (p_dict.has("name")) {
+			pi.name = p_dict["name"];
+		}
+		if (p_dict.has("class_name")) {
+			pi.class_name = p_dict["class_name"];
+		}
+		if (p_dict.has("hint")) {
+			pi.hint = PropertyHint(int(p_dict["hint"]));
+		}
+		if (p_dict.has("hint_string")) {
+			pi.hint_string = p_dict["hint_string"];
+		}
+		if (p_dict.has("usage")) {
+			pi.usage = p_dict["usage"];
+		}
+		return pi;
+	}
+
 	void _update(GDExtensionPropertyInfo *p_info) {
 		p_info->type = (GDExtensionVariantType)type;
 		*(reinterpret_cast<StringName *>(p_info->name)) = name;
