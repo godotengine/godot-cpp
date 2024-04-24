@@ -76,6 +76,7 @@ protected:
 	uint32_t plist_size = 0;
 
 	void _postinitialize();
+	virtual void _notificationv(int32_t p_what) {}
 
 	Wrapped(const StringName p_godot_class);
 	Wrapped(GodotObject *p_godot_object);
@@ -327,6 +328,11 @@ public:                                                                         
 		_gde_binding_free_callback,                                                                                                                                                    \
 		_gde_binding_reference_callback,                                                                                                                                               \
 	};                                                                                                                                                                                 \
+                                                                                                                                                                                       \
+protected:                                                                                                                                                                             \
+	virtual void _notificationv(int32_t p_what) override {                                                                                                                             \
+		m_class::notification_bind(this, p_what);                                                                                                                                      \
+	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 private:
 

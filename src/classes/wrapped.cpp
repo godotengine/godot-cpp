@@ -51,10 +51,7 @@ void Wrapped::_postinitialize() {
 	}
 	godot::internal::gdextension_interface_object_set_instance_binding(_owner, godot::internal::token, this, _get_bindings_callbacks());
 	if (extension_class) {
-		Object *obj = dynamic_cast<Object *>(this);
-		if (obj) {
-			obj->notification(Object::NOTIFICATION_POSTINITIALIZE);
-		}
+		_notificationv(Object::NOTIFICATION_POSTINITIALIZE);
 	}
 }
 
