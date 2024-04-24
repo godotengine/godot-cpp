@@ -174,6 +174,7 @@ public:
 template <typename T, bool is_abstract>
 void ClassDB::_register_class(bool p_virtual) {
 	static_assert(TypesAreSame<typename T::self_type, T>::value, "Class not declared properly, please use GDCLASS.");
+	static_assert(!FunctionsAreSame<T::self_type::_bind_methods, T::parent_type::_bind_methods>::value, "Class must declare 'static void _bind_methods'.");
 	static_assert(!std::is_abstract_v<T> || is_abstract, "Class is abstract, please use GDREGISTER_ABSTRACT_CLASS.");
 	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
 

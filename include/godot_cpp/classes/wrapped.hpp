@@ -171,6 +171,7 @@ protected:                                                                      
                                                                                                                                                                                        \
 public:                                                                                                                                                                                \
 	typedef m_class self_type;                                                                                                                                                         \
+	typedef m_inherits parent_type;                                                                                                                                                    \
                                                                                                                                                                                        \
 	static void initialize_class() {                                                                                                                                                   \
 		static bool initialized = false;                                                                                                                                               \
@@ -334,6 +335,7 @@ private:
 private:                                                                                                                                                                               \
 	inline static ::godot::internal::EngineClassRegistration<m_class> _gde_engine_class_registration_helper;                                                                           \
 	void operator=(const m_class &p_rval) {}                                                                                                                                           \
+	friend class ::godot::ClassDB;                                                                                                                                                     \
                                                                                                                                                                                        \
 protected:                                                                                                                                                                             \
 	virtual const GDExtensionInstanceBindingCallbacks *_get_bindings_callbacks() const override {                                                                                      \
@@ -342,6 +344,8 @@ protected:                                                                      
                                                                                                                                                                                        \
 	m_class(const char *p_godot_class) : m_inherits(p_godot_class) {}                                                                                                                  \
 	m_class(GodotObject *p_godot_object) : m_inherits(p_godot_object) {}                                                                                                               \
+                                                                                                                                                                                       \
+	static void _bind_methods() {}                                                                                                                                                     \
                                                                                                                                                                                        \
 	static void (*_get_bind_methods())() {                                                                                                                                             \
 		return nullptr;                                                                                                                                                                \
@@ -385,6 +389,7 @@ protected:                                                                      
                                                                                                                                                                                        \
 public:                                                                                                                                                                                \
 	typedef m_class self_type;                                                                                                                                                         \
+	typedef m_inherits parent_type;                                                                                                                                                    \
                                                                                                                                                                                        \
 	static void initialize_class() {}                                                                                                                                                  \
                                                                                                                                                                                        \
