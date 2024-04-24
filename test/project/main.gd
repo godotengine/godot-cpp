@@ -9,6 +9,9 @@ class TestClass:
 func _ready():
 	var example: Example = $Example
 
+	# Timing of set instance binding.
+	assert_equal(example.is_object_binding_set_by_parent_constructor(), true)
+
 	# Signal.
 	example.emit_custom_signal("Button", 42)
 	assert_equal(custom_signal_emitted, ["Button", 42])
