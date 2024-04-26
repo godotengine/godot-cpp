@@ -162,6 +162,9 @@ public:
 	template <typename M>
 	static MethodBind *bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const std::vector<Variant> &p_default_args = std::vector<Variant>{}, bool p_return_nil_is_variant = true);
 
+	template <class M>
+	static MethodBind *bind_static_vararg_method(uint32_t p_flags, StringName p_class, StringName p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const std::vector<Variant> &p_default_args = std::vector<Variant>{}, bool p_return_nil_is_variant = true);
+
 	static void add_property_group(const StringName &p_class, const String &p_name, const String &p_prefix);
 	static void add_property_subgroup(const StringName &p_class, const String &p_name, const String &p_prefix);
 	static void add_property(const StringName &p_class, const PropertyInfo &p_pinfo, const StringName &p_setter, const StringName &p_getter, int p_index = -1);
@@ -319,6 +322,37 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p
 	if (type.method_map.find(p_name) != type.method_map.end()) {
 		memdelete(bind);
 		ERR_FAIL_V_MSG(nullptr, String("Binding duplicate method: {0}::{1}.").format(Array::make(instance_type, p_method)));
+	}
+
+	// register our method bind within our plugin
+	type.method_map[p_name] = bind;
+
+	// and register with godot
+	bind_method_godot(type.name, bind);
+
+	return bind;
+}
+
+template <class M>
+MethodBind *ClassDB::bind_static_vararg_method(uint32_t p_flags, StringName p_class, StringName p_name, M p_method, const MethodInfo &p_info, const std::vector<Variant> &p_default_args, bool p_return_nil_is_variant) {
+	MethodBind *bind = create_vararg_method_bind(p_method, p_info, p_return_nil_is_variant);
+	ERR_FAIL_COND_V(!bind, nullptr);
+
+	bind->set_name(p_name);
+	bind->set_default_arguments(p_default_args);
+	bind->set_instance_class(p_class);
+
+	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class);
+	if (type_it == classes.end()) {
+		memdelete(bind);
+		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
+	}
+
+	ClassInfo &type = type_it->second;
+
+	if (type.method_map.find(p_name) != type.method_map.end()) {
+		memdelete(bind);
+		ERR_FAIL_V_MSG(nullptr, String("Binding duplicate method: {0}::{1}.").format(Array::make(p_class, p_method)));
 	}
 
 	// register our method bind within our plugin
