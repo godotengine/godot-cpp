@@ -34,8 +34,9 @@ def generate(env):
     env["SHLIBSUFFIX"] = ".wasm"
 
     # Thread support (via SharedArrayBuffer).
-    env.Append(CCFLAGS=["-s", "USE_PTHREADS=1"])
-    env.Append(LINKFLAGS=["-s", "USE_PTHREADS=1"])
+    if env["threads"]:
+        env.Append(CCFLAGS=["-s", "USE_PTHREADS=1"])
+        env.Append(LINKFLAGS=["-s", "USE_PTHREADS=1"])
 
     # Build as side module (shared library).
     env.Append(CPPFLAGS=["-s", "SIDE_MODULE=1"])
