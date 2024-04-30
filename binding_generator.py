@@ -309,6 +309,10 @@ def generate_bindings(api_filepath, use_template_get_node, bits="64", precision=
     generate_utility_functions(api, target_dir)
 
 
+CLASS_ALIASES = {
+    "ClassDB": "ClassDBSingleton",
+}
+
 builtin_classes = []
 
 # Key is class name, value is boolean where True means the class is refcounted.
@@ -1256,9 +1260,9 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
     # First create map of classes and singletons.
     for class_api in api["classes"]:
         # Generate code for the ClassDB singleton under a different name.
-        if class_api["name"] == "ClassDB":
-            class_api["name"] = "ClassDBSingleton"
-            class_api["alias_for"] = "ClassDB"
+        if class_api["name"] in CLASS_ALIASES:
+            class_api["alias_for"] = class_api["name"]
+            class_api["name"] = CLASS_ALIASES[class_api["alias_for"]]
         engine_classes[class_api["name"]] = class_api["is_refcounted"]
     for native_struct in api["native_structures"]:
         if native_struct["name"] == "ObjectID":
@@ -1268,9 +1272,9 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
     for singleton in api["singletons"]:
         # Generate code for the ClassDB singleton under a different name.
-        if singleton["name"] == "ClassDB":
-            singleton["name"] = "ClassDBSingleton"
-            singleton["alias_for"] = "ClassDB"
+        if singleton["name"] in CLASS_ALIASES:
+            singleton["alias_for"] = singleton["name"]
+            singleton["name"] = CLASS_ALIASES[singleton["name"]]
         singletons.append(singleton["name"])
 
     for class_api in api["classes"]:
@@ -1475,6 +1479,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append("#include <type_traits>")
         result.append("")
 
+    if class_name == "ClassDBSingleton":
+        result.append("#include <godot_cpp/core/binder_common.hpp>")
+        result.append("")
+
     result.append("namespace godot {")
     result.append("")
 
@@ -1633,6 +1641,19 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     if class_name == "ClassDBSingleton":
         result.append("#define CLASSDB_SINGLETON_FORWARD_METHODS \\")
+
+        if "enums" in class_api:
+            for enum_api in class_api["enums"]:
+                if enum_api["is_bitfield"]:
+                    result.append(f'\tenum {enum_api["name"]} : uint64_t {{ \\')
+                else:
+                    result.append(f'\tenum {enum_api["name"]} {{ \\')
+
+                for value in enum_api["values"]:
+                    result.append(f'\t\t{value["name"]} = {value["value"]}, \\')
+                result.append("\t}; \\")
+                result.append("\t \\")
+
         for method in class_api["methods"]:
             # ClassDBSingleton shouldn't have any static or vararg methods, but if some appear later, lets skip them.
             if vararg:
@@ -1641,12 +1662,17 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 continue
 
             method_signature = "\tstatic "
+            return_type = None
             if "return_type" in method:
-                method_signature += f'{correct_type(method["return_type"])} '
+                return_type = correct_type(method["return_type"].replace("ClassDBSingleton", "ClassDB"), None, False)
             elif "return_value" in method:
-                method_signature += (
-                    correct_type(method["return_value"]["type"], method["return_value"].get("meta", None)) + " "
+                return_type = correct_type(
+                    method["return_value"]["type"].replace("ClassDBSingleton", "ClassDB"),
+                    method["return_value"].get("meta", None),
+                    False,
                 )
+            if return_type is not None:
+                method_signature += return_type + " "
             else:
                 method_signature += "void "
 
@@ -1665,14 +1691,28 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
             result.append(method_signature)
 
             method_body = "\t\t"
-            if "return_type" in method or "return_value" in method:
+            if return_type is not None:
                 method_body += "return "
+                if "alias_for" in class_api and return_type.startswith(class_api["alias_for"] + "::"):
+                    method_body += f"({return_type})"
             method_body += f'ClassDBSingleton::get_singleton()->{method["name"]}('
             method_body += ", ".join(map(lambda x: escape_identifier(x["name"]), method_arguments))
             method_body += "); \\"
 
             result.append(method_body)
             result.append("\t} \\")
+        result.append("\t;")
+        result.append("")
+
+        result.append("#define CLASSDB_SINGLETON_VARIANT_CAST \\")
+
+        if "enums" in class_api:
+            for enum_api in class_api["enums"]:
+                if enum_api["is_bitfield"]:
+                    result.append(f'\tVARIANT_BITFIELD_CAST({class_api["alias_for"]}::{enum_api["name"]}); \\')
+                else:
+                    result.append(f'\tVARIANT_ENUM_CAST({class_api["alias_for"]}::{enum_api["name"]}); \\')
+
         result.append("\t;")
         result.append("")
 
@@ -2513,7 +2553,7 @@ def correct_typed_array(type_name):
     return type_name
 
 
-def correct_type(type_name, meta=None):
+def correct_type(type_name, meta=None, use_alias=True):
     type_conversion = {"float": "double", "int": "int64_t", "Nil": "Variant"}
     if meta != None:
         if "int" in meta:
@@ -2529,11 +2569,15 @@ def correct_type(type_name, meta=None):
     if is_enum(type_name):
         if is_bitfield(type_name):
             base_class = get_enum_class(type_name)
+            if use_alias and base_class in CLASS_ALIASES:
+                base_class = CLASS_ALIASES[base_class]
             if base_class == "GlobalConstants":
                 return f"BitField<{get_enum_name(type_name)}>"
             return f"BitField<{base_class}::{get_enum_name(type_name)}>"
         else:
             base_class = get_enum_class(type_name)
+            if use_alias and base_class in CLASS_ALIASES:
+                base_class = CLASS_ALIASES[base_class]
             if base_class == "GlobalConstants":
                 return f"{get_enum_name(type_name)}"
             return f"{base_class}::{get_enum_name(type_name)}"
