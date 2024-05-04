@@ -44,17 +44,17 @@ jobs:
 
           - name: CMake
             generate_sources: |
-              cmake {0} -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER_LAUNCHER=ccache -D CMAKE_CXX_COMPILER_LAUNCHER=ccache -B build test
+              cmake {0} -DCMAKE_C_COMPILER_LAUNCHER=ccache -D CMAKE_CXX_COMPILER_LAUNCHER=ccache -B build test
 
             build_godot_cpp_debug: |
-              cmake --build build --config Debug --target godot-cpp
+              cmake --build build --config Debug --target godot-cpp -v
 
             build_debug: |
-              cmake --build build --config Debug
+              cmake --build build --config Debug -v
 
             build_release: |
-              cmake {0} -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DTARGET=TEMPLATE_RELEASE -B build_release test
-              cmake --build build_release --config Release
+              cmake {0} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DTARGET=TEMPLATE_RELEASE -B build_release test
+              cmake --build build_release --config Release -v
 
         platforms:
           - name: 🐧 Linux
@@ -64,10 +64,10 @@ jobs:
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
             artifact-path:
               SCons: bin/libgodot-cpp.linux.template_release.x86_64.a
-              CMake: build_release/godot-cpp/bin/libgodot-cpp.linux.template_release.x86_64.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.linux.template_release.x86_64.a
             flags:
               SCons: platform=linux
-              CMake: -G Ninja
+              CMake: -G "Ninja Multi-Config"
             run-tests: true
             cache-name: linux-x86_64
 
@@ -78,10 +78,10 @@ jobs:
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
             artifact-path:
               SCons: bin/libgodot-cpp.linux.template_release.double.x86_64.a
-              CMake: build_release/godot-cpp/bin/libgodot-cpp.linux.template_release.double.x86_64.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.linux.template_release.double.x86_64.a
             flags:
               SCons: platform=linux precision=double
-              CMake: -G Ninja -DFLOAT_PRECISION=DOUBLE
+              CMake: -G "Ninja Multi-Config" -DFLOAT_PRECISION=DOUBLE
             run-tests: false
             cache-name: linux-x86_64-f64
 
@@ -106,10 +106,10 @@ jobs:
             artifact-name: godot-cpp-linux-mingw-x86_64-release
             artifact-path:
               SCons: bin/libgodot-cpp.windows.template_release.x86_64.a
-              CMake: build_release/godot-cpp/bin/libgodot-cpp.windows.template_release.x86_64.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.windows.template_release.x86_64.a
             flags:
               SCons: platform=windows use_mingw=yes
-              CMake: -G Ninja
+              CMake: -G "Ninja Multi-Config"
             use-mingw: true
             run-tests: false
             cache-name: windows-x86_64-mingw
@@ -135,10 +135,10 @@ jobs:
             artifact-name: godot-cpp-android-arm64-release
             artifact-path:
               SCons: bin/libgodot-cpp.android.template_release.arm64.a
-              CMake: build_release/godot-cpp/bin/libgodot-cpp.android.template_release.arm64.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.android.template_release.arm64.a
             flags:
               SCons: platform=android arch=arm64
-              CMake: --toolchain ${ANDROID_HOME}/ndk/23.2.8568313/build/cmake/android.toolchain.cmake -G Ninja -DANDROID_PLATFORM=21
+              CMake: --toolchain ${ANDROID_HOME}/ndk/23.2.8568313/build/cmake/android.toolchain.cmake -G "Ninja Multi-Config" -DANDROID_PLATFORM=21
             run-tests: false
             cache-name: android-arm64
 
@@ -149,7 +149,7 @@ jobs:
             artifact-name: godot-cpp-ios-arm64-release
             artifact-path:
               SCons: bin/libgodot-cpp.ios.template_release.arm64.a
-              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.ios.template_release.a
+              CMake: build_release/godot-cpp/bin/Release/Release/libgodot-cpp.ios.template_release.a
             flags:
               SCons: platform=ios arch=arm64
               CMake: -G Xcode -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO
@@ -163,10 +163,10 @@ jobs:
             artifact-name: godot-cpp-web-wasm32-release
             artifact-path:
               SCons: bin/libgodot-cpp.web.template_release.wasm32.a
-              CMake: build_release/godot-cpp/bin/libgodot-cpp.web.template_release.wasm32.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.web.template_release.wasm32.a
             flags:
               SCons: platform=web
-              CMake: --toolchain ${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -G Ninja
+              CMake: --toolchain ${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -G "Ninja Multi-Config"
             run-tests: false
             cache-name: web-wasm32
 
