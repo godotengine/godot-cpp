@@ -545,6 +545,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("#include <godot_cpp/variant/vector2.hpp>")
     if class_name == "PackedVector3Array":
         result.append("#include <godot_cpp/variant/vector3.hpp>")
+    if class_name == "PackedVector4Array":
+        result.append("#include <godot_cpp/variant/vector4.hpp>")
 
     if is_packed_array(class_name):
         result.append("#include <godot_cpp/core/error_macros.hpp>")
@@ -2445,6 +2447,7 @@ def is_packed_array(type_name):
         "PackedStringArray",
         "PackedVector2Array",
         "PackedVector3Array",
+        "PackedVector4Array",
     ]
 
 
