@@ -523,6 +523,11 @@ public:
 		}
 	}
 
+	// Index operator, kept for compatibility.
+	_FORCE_INLINE_ T &operator[](int p_index) {
+		return get(p_index);
+	}
+
 	// Random access to elements, use with care,
 	// do not use for iteration.
 	T &get(int p_index) {
@@ -536,6 +541,11 @@ public:
 		}
 
 		return I->get();
+	}
+
+	// Index operator, kept for compatibility.
+	_FORCE_INLINE_ const T &operator[](int p_index) const {
+		return get(p_index);
 	}
 
 	// Random access to elements, use with care,
