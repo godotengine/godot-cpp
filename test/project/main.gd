@@ -256,6 +256,9 @@ func _ready():
 	assert_equal(example.test_virtual_implemented_in_script("Virtual", 939), "Implemented")
 	assert_equal(custom_signal_emitted, ["Virtual", 939])
 
+	# Test that we can access an engine singleton.
+	assert_equal(example.test_use_engine_singleton(), OS.get_name())
+
 	# Test that notifications happen on both parent and child classes.
 	var example_child = $ExampleChild
 	assert_equal(example_child.get_value1(), 11)

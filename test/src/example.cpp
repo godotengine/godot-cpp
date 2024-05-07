@@ -11,6 +11,7 @@
 #include <godot_cpp/classes/label.hpp>
 #include <godot_cpp/classes/multiplayer_api.hpp>
 #include <godot_cpp/classes/multiplayer_peer.hpp>
+#include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
@@ -238,6 +239,8 @@ void Example::_bind_methods() {
 
 	GDVIRTUAL_BIND(_do_something_virtual, "name", "value");
 	ClassDB::bind_method(D_METHOD("test_virtual_implemented_in_script"), &Example::test_virtual_implemented_in_script);
+
+	ClassDB::bind_method(D_METHOD("test_use_engine_singleton"), &Example::test_use_engine_singleton);
 
 	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
 	ClassDB::bind_static_method("Example", D_METHOD("test_static2"), &Example::test_static2);
@@ -669,6 +672,10 @@ String Example::test_virtual_implemented_in_script(const String &p_name, int p_v
 		return ret;
 	}
 	return "Unimplemented";
+}
+
+String Example::test_use_engine_singleton() const {
+	return OS::get_singleton()->get_name();
 }
 
 void ExampleRuntime::_bind_methods() {
