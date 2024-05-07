@@ -154,14 +154,12 @@ struct _NO_DISCARD_ Rect2 {
 			return Rect2();
 		}
 
-		new_rect.position.x = Math::max(p_rect.position.x, position.x);
-		new_rect.position.y = Math::max(p_rect.position.y, position.y);
+		new_rect.position = p_rect.position.max(position);
 
 		Point2 p_rect_end = p_rect.position + p_rect.size;
 		Point2 end = position + size;
 
-		new_rect.size.x = Math::min(p_rect_end.x, end.x) - new_rect.position.x;
-		new_rect.size.y = Math::min(p_rect_end.y, end.y) - new_rect.position.y;
+		new_rect.size = p_rect_end.min(end) - new_rect.position;
 
 		return new_rect;
 	}
@@ -174,11 +172,9 @@ struct _NO_DISCARD_ Rect2 {
 #endif
 		Rect2 new_rect;
 
-		new_rect.position.x = Math::min(p_rect.position.x, position.x);
-		new_rect.position.y = Math::min(p_rect.position.y, position.y);
+		new_rect.position = p_rect.position.min(position);
 
-		new_rect.size.x = Math::max(p_rect.position.x + p_rect.size.x, position.x + size.x);
-		new_rect.size.y = Math::max(p_rect.position.y + p_rect.size.y, position.y + size.y);
+		new_rect.size = (p_rect.position + p_rect.size).max(position + size);
 
 		new_rect.size = new_rect.size - new_rect.position; // Make relative again.
 
@@ -284,7 +280,7 @@ struct _NO_DISCARD_ Rect2 {
 	}
 
 	_FORCE_INLINE_ Rect2 abs() const {
-		return Rect2(Point2(position.x + Math::min(size.x, (real_t)0), position.y + Math::min(size.y, (real_t)0)), size.abs());
+		return Rect2(position + size.minf(0), size.abs());
 	}
 
 	Vector2 get_support(const Vector2 &p_normal) const {
