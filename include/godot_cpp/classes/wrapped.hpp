@@ -274,7 +274,6 @@ public:                                                                         
 		if (p_instance) {                                                                                                                                                              \
 			m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
 			cls->plist_owned.clear();                                                                                                                                                  \
-			/* TODO `GDExtensionClassFreePropertyList` is ill-defined, we need a non-const pointer to free this. */                                                                    \
 			::godot::internal::free_c_property_list(const_cast<GDExtensionPropertyInfo *>(p_list));                                                                                    \
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \
