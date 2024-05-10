@@ -173,7 +173,7 @@ jobs:
           ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono --headless --version
           cd test
           # Need to run the editor so .godot is generated... but it crashes! Ignore that :-)
-          (cd project && (timeout 10 ../../godot-artifacts/godot.linuxbsd.editor.x86_64.mono --editor --headless --quit >/dev/null 2>&1 || true))
+          (cd project && (timeout 30 ../../godot-artifacts/godot.linuxbsd.editor.x86_64.mono --import --headless >/dev/null 2>&1 || true))
           GODOT=../godot-artifacts/godot.linuxbsd.editor.x86_64.mono ./run-tests.sh
 
       - name: Upload artifact
