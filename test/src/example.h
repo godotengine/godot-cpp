@@ -186,6 +186,8 @@ public:
 
 	GDVIRTUAL2R(String, _do_something_virtual, String, int);
 	String test_virtual_implemented_in_script(const String &p_name, int p_value);
+
+	String test_use_engine_singleton() const;
 };
 
 VARIANT_ENUM_CAST(Example::Constants);
