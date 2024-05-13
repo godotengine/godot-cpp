@@ -22,7 +22,7 @@ This repository contains the  *C++ bindings* for the [**Godot Engine**](https://
 - [**Compatibility**](#compatibility)
 - [**Contributing**](#contributing)
 - [**Getting started**](#getting-started)
-- [**Included example**](#included-example)
+- [**Examples and templates**](#examples-and-templates)
 
 ## Versioning
 
