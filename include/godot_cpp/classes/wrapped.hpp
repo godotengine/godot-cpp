@@ -94,8 +94,8 @@ protected:
 	virtual ~Wrapped() {}
 
 public:
-	static StringName &get_class_static() {
-		static StringName string_name = StringName("Wrapped");
+	static const StringName &get_class_static() {
+		static const StringName string_name = StringName("Wrapped");
 		return string_name;
 	}
 
@@ -208,12 +208,12 @@ public:                                                                         
 		initialized = true;                                                                                                                                                            \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static ::godot::StringName &get_class_static() {                                                                                                                                   \
-		static ::godot::StringName string_name = ::godot::StringName(#m_class);                                                                                                        \
+	static const ::godot::StringName &get_class_static() {                                                                                                                             \
+		static const ::godot::StringName string_name = ::godot::StringName(#m_class);                                                                                                  \
 		return string_name;                                                                                                                                                            \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static ::godot::StringName &get_parent_class_static() {                                                                                                                            \
+	static const ::godot::StringName &get_parent_class_static() {                                                                                                                      \
 		return m_inherits::get_class_static();                                                                                                                                         \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
@@ -418,12 +418,12 @@ public:                                                                         
                                                                                                                                                                                        \
 	static void initialize_class() {}                                                                                                                                                  \
                                                                                                                                                                                        \
-	static ::godot::StringName &get_class_static() {                                                                                                                                   \
-		static ::godot::StringName string_name = ::godot::StringName(#m_alias_for);                                                                                                    \
+	static const ::godot::StringName &get_class_static() {                                                                                                                             \
+		static const ::godot::StringName string_name = ::godot::StringName(#m_alias_for);                                                                                              \
 		return string_name;                                                                                                                                                            \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static ::godot::StringName &get_parent_class_static() {                                                                                                                            \
+	static const ::godot::StringName &get_parent_class_static() {                                                                                                                      \
 		return m_inherits::get_class_static();                                                                                                                                         \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
