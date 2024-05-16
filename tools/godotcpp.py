@@ -266,6 +266,8 @@ def options(opts, env):
         )
     )
 
+    opts.Add(BoolVariable(key="threads", help="Enable threading support", default=env.get("threads", True)))
+
     # compiledb
     opts.Add(
         BoolVariable(
@@ -438,6 +440,9 @@ def generate(env):
 
     tool.generate(env)
 
+    if env["threads"]:
+        env.Append(CPPDEFINES=["THREADS_ENABLED"])
+
     if env.use_hot_reload:
         env.Append(CPPDEFINES=["HOT_RELOAD_ENABLED"])
 
@@ -481,6 +486,8 @@ def generate(env):
     suffix += "." + env["arch"]
     if env["ios_simulator"]:
         suffix += ".simulator"
+    if not env["threads"]:
+        suffix += ".nothreads"
 
     env["suffix"] = suffix  # Exposed when included from another project
     env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
