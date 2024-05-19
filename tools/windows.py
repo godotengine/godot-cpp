@@ -38,9 +38,15 @@ def generate(env):
             env["CXX"] = "clang-cl"
 
         if env["use_static_cpp"]:
-            env.Append(CCFLAGS=["/MT"])
+            if env["dev_build"]:
+                env.Append(CCFLAGS=["/MTd"])
+            else:
+                env.Append(CCFLAGS=["/MT"])
         else:
-            env.Append(CCFLAGS=["/MD"])
+            if env["dev_build"]:
+                env.Append(CCFLAGS=["/MDd"])
+            else:
+                env.Append(CCFLAGS=["/MD"])
 
     elif sys.platform == "win32" or sys.platform == "msys":
         env["use_mingw"] = True
