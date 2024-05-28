@@ -2384,6 +2384,9 @@ typedef void (*GDExtensionInterfaceObjectSetInstance)(GDExtensionObjectPtr p_o, 
  *
  * Gets the class name of an Object.
  *
+ * If the GDExtension wraps the Godot object in an abstraction specific to its class, this is the
+ * function that should be used to determine which wrapper to use.
+ *
  * @param p_object A pointer to the Object.
  * @param p_library A pointer the library received by the GDExtension's entry point function.
  * @param r_class_name A pointer to a String to receive the class name.
@@ -2658,7 +2661,7 @@ typedef void *(*GDExtensionInterfaceClassdbGetClassTag)(GDExtensionConstStringNa
 /**
  * @name classdb_register_extension_class
  * @since 4.1
- * @deprecated in Godot 4.2. Use `classdb_register_extension_class2` instead.
+ * @deprecated in Godot 4.2. Use `classdb_register_extension_class3` instead.
  *
  * Registers an extension class in the ClassDB.
  *
@@ -2674,6 +2677,7 @@ typedef void (*GDExtensionInterfaceClassdbRegisterExtensionClass)(GDExtensionCla
 /**
  * @name classdb_register_extension_class2
  * @since 4.2
+ * @deprecated in Godot 4.3. Use `classdb_register_extension_class3` instead.
  *
  * Registers an extension class in the ClassDB.
  *
