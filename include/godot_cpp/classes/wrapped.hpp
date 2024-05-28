@@ -76,14 +76,15 @@ protected:
 	uint32_t plist_size = 0;
 
 	void _postinitialize();
+	virtual void _notificationv(int32_t p_what) {}
 
 	Wrapped(const StringName p_godot_class);
 	Wrapped(GodotObject *p_godot_object);
 	virtual ~Wrapped() {}
 
 public:
-	static StringName &get_class_static() {
-		static StringName string_name = StringName("Wrapped");
+	static const StringName &get_class_static() {
+		static const StringName string_name = StringName("Wrapped");
 		return string_name;
 	}
 
@@ -171,6 +172,7 @@ protected:                                                                      
                                                                                                                                                                                        \
 public:                                                                                                                                                                                \
 	typedef m_class self_type;                                                                                                                                                         \
+	typedef m_inherits parent_type;                                                                                                                                                    \
                                                                                                                                                                                        \
 	static void initialize_class() {                                                                                                                                                   \
 		static bool initialized = false;                                                                                                                                               \
@@ -185,12 +187,12 @@ public:                                                                         
 		initialized = true;                                                                                                                                                            \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static ::godot::StringName &get_class_static() {                                                                                                                                   \
-		static ::godot::StringName string_name = ::godot::StringName(#m_class);                                                                                                        \
+	static const ::godot::StringName &get_class_static() {                                                                                                                             \
+		static const ::godot::StringName string_name = ::godot::StringName(#m_class);                                                                                                  \
 		return string_name;                                                                                                                                                            \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static ::godot::StringName &get_parent_class_static() {                                                                                                                            \
+	static const ::godot::StringName &get_parent_class_static() {                                                                                                                      \
 		return m_inherits::get_class_static();                                                                                                                                         \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
@@ -327,6 +329,11 @@ public:                                                                         
 		_gde_binding_reference_callback,                                                                                                                                               \
 	};                                                                                                                                                                                 \
                                                                                                                                                                                        \
+protected:                                                                                                                                                                             \
+	virtual void _notificationv(int32_t p_what) override {                                                                                                                             \
+		m_class::notification_bind(this, p_what);                                                                                                                                      \
+	}                                                                                                                                                                                  \
+                                                                                                                                                                                       \
 private:
 
 // Don't use this for your classes, use GDCLASS() instead.
@@ -334,6 +341,7 @@ private:
 private:                                                                                                                                                                               \
 	inline static ::godot::internal::EngineClassRegistration<m_class> _gde_engine_class_registration_helper;                                                                           \
 	void operator=(const m_class &p_rval) {}                                                                                                                                           \
+	friend class ::godot::ClassDB;                                                                                                                                                     \
                                                                                                                                                                                        \
 protected:                                                                                                                                                                             \
 	virtual const GDExtensionInstanceBindingCallbacks *_get_bindings_callbacks() const override {                                                                                      \
@@ -342,6 +350,8 @@ protected:                                                                      
                                                                                                                                                                                        \
 	m_class(const char *p_godot_class) : m_inherits(p_godot_class) {}                                                                                                                  \
 	m_class(GodotObject *p_godot_object) : m_inherits(p_godot_object) {}                                                                                                               \
+                                                                                                                                                                                       \
+	static void _bind_methods() {}                                                                                                                                                     \
                                                                                                                                                                                        \
 	static void (*_get_bind_methods())() {                                                                                                                                             \
 		return nullptr;                                                                                                                                                                \
@@ -385,15 +395,16 @@ protected:                                                                      
                                                                                                                                                                                        \
 public:                                                                                                                                                                                \
 	typedef m_class self_type;                                                                                                                                                         \
+	typedef m_inherits parent_type;                                                                                                                                                    \
                                                                                                                                                                                        \
 	static void initialize_class() {}                                                                                                                                                  \
                                                                                                                                                                                        \
-	static ::godot::StringName &get_class_static() {                                                                                                                                   \
-		static ::godot::StringName string_name = ::godot::StringName(#m_alias_for);                                                                                                    \
+	static const ::godot::StringName &get_class_static() {                                                                                                                             \
+		static const ::godot::StringName string_name = ::godot::StringName(#m_alias_for);                                                                                              \
 		return string_name;                                                                                                                                                            \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
-	static ::godot::StringName &get_parent_class_static() {                                                                                                                            \
+	static const ::godot::StringName &get_parent_class_static() {                                                                                                                      \
 		return m_inherits::get_class_static();                                                                                                                                         \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \

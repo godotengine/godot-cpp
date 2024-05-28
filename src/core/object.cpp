@@ -60,7 +60,65 @@ Object *get_object_instance_binding(GodotObject *p_engine_object) {
 	return reinterpret_cast<Object *>(gdextension_interface_object_get_instance_binding(p_engine_object, token, binding_callbacks));
 }
 
+TypedArray<Dictionary> convert_property_list(const std::vector<PropertyInfo> &p_list) {
+	TypedArray<Dictionary> va;
+	for (const PropertyInfo &pi : p_list) {
+		va.push_back(Dictionary(pi));
+	}
+	return va;
+}
+
 } // namespace internal
+
+MethodInfo::operator Dictionary() const {
+	Dictionary dict;
+	dict["name"] = name;
+	dict["args"] = internal::convert_property_list(arguments);
+	Array da;
+	for (int i = 0; i < default_arguments.size(); i++) {
+		da.push_back(default_arguments[i]);
+	}
+	dict["default_args"] = da;
+	dict["flags"] = flags;
+	dict["id"] = id;
+	Dictionary r = return_val;
+	dict["return"] = r;
+	return dict;
+}
+
+MethodInfo MethodInfo::from_dict(const Dictionary &p_dict) {
+	MethodInfo mi;
+
+	if (p_dict.has("name")) {
+		mi.name = p_dict["name"];
+	}
+	Array args;
+	if (p_dict.has("args")) {
+		args = p_dict["args"];
+	}
+
+	for (int i = 0; i < args.size(); i++) {
+		Dictionary d = args[i];
+		mi.arguments.push_back(PropertyInfo::from_dict(d));
+	}
+	Array defargs;
+	if (p_dict.has("default_args")) {
+		defargs = p_dict["default_args"];
+	}
+	for (int i = 0; i < defargs.size(); i++) {
+		mi.default_arguments.push_back(defargs[i]);
+	}
+
+	if (p_dict.has("return")) {
+		mi.return_val = PropertyInfo::from_dict(p_dict["return"]);
+	}
+
+	if (p_dict.has("flags")) {
+		mi.flags = p_dict["flags"];
+	}
+
+	return mi;
+}
 
 MethodInfo::MethodInfo() :
 		flags(GDEXTENSION_METHOD_FLAG_NORMAL) {}
