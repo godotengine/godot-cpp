@@ -182,6 +182,8 @@ public:
 	// Virtual function override (no need to bind manually).
 	virtual bool _has_point(const Vector2 &point) const override;
 	virtual void _input(const Ref<InputEvent> &event) override;
+
+	String test_use_engine_singleton() const;
 };
 
 VARIANT_ENUM_CAST(Example::Constants);

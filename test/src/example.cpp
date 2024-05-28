@@ -11,6 +11,7 @@
 #include <godot_cpp/classes/label.hpp>
 #include <godot_cpp/classes/multiplayer_api.hpp>
 #include <godot_cpp/classes/multiplayer_peer.hpp>
+#include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
@@ -230,6 +231,8 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("def_args", "a", "b"), &Example::def_args, DEFVAL(100), DEFVAL(200));
 	ClassDB::bind_method(D_METHOD("callable_bind"), &Example::callable_bind);
 	ClassDB::bind_method(D_METHOD("test_post_initialize"), &Example::test_post_initialize);
+
+	ClassDB::bind_method(D_METHOD("test_use_engine_singleton"), &Example::test_use_engine_singleton);
 
 	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
 	ClassDB::bind_static_method("Example", D_METHOD("test_static2"), &Example::test_static2);
@@ -653,4 +656,8 @@ void ExampleChild::_notification(int p_what) {
 	if (p_what == NOTIFICATION_ENTER_TREE) {
 		value2 = 33;
 	}
+}
+
+String Example::test_use_engine_singleton() const {
+	return OS::get_singleton()->get_name();
 }

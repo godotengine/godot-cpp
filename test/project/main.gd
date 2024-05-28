@@ -185,6 +185,10 @@ func _ready():
 	control.queue_free()
 	sprite.queue_free()
 
+	# Test that passing null for objects works as expected too.
+	var example_null : Example = null
+	assert_equal(example.test_object_cast_to_node(example_null), false)
+
 	# Test conversions to and from Variant.
 	assert_equal(example.test_variant_vector2i_conversion(Vector2i(1, 1)), Vector2i(1, 1))
 	assert_equal(example.test_variant_vector2i_conversion(Vector2(1.0, 1.0)), Vector2i(1, 1))
@@ -241,6 +245,9 @@ func _ready():
 	var new_example_ref = ExampleRef.new()
 	assert_equal(new_example_ref.was_post_initialized(), true)
 	assert_equal(example.test_post_initialize(), true)
+
+	# Test that we can access an engine singleton.
+	assert_equal(example.test_use_engine_singleton(), OS.get_name())
 
 	# Test that notifications happen on both parent and child classes.
 	var example_child = $ExampleChild

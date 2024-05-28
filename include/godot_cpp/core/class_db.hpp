@@ -45,6 +45,7 @@
 #include <godot_cpp/variant/callable_method_pointer.hpp>
 
 #include <list>
+#include <mutex>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -104,6 +105,8 @@ private:
 	static std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *> instance_binding_callbacks;
 	// Used to remember the custom class registration order.
 	static std::vector<StringName> class_register_order;
+	static std::unordered_map<StringName, Object *> engine_singletons;
+	static std::mutex engine_singletons_mutex;
 
 	static MethodBind *bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount);
 	static void initialize_class(const ClassInfo &cl);
@@ -149,6 +152,21 @@ public:
 
 	_FORCE_INLINE_ static void _register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks) {
 		instance_binding_callbacks[p_name] = p_callbacks;
+	}
+
+	static void _register_engine_singleton(const StringName &p_class_name, Object *p_singleton) {
+		std::lock_guard<std::mutex> lock(engine_singletons_mutex);
+		std::unordered_map<StringName, Object *>::const_iterator i = engine_singletons.find(p_class_name);
+		if (i != engine_singletons.end()) {
+			ERR_FAIL_COND((*i).second != p_singleton);
+			return;
+		}
+		engine_singletons[p_class_name] = p_singleton;
+	}
+
+	static void _unregister_engine_singleton(const StringName &p_class_name) {
+		std::lock_guard<std::mutex> lock(engine_singletons_mutex);
+		engine_singletons.erase(p_class_name);
 	}
 
 	template <typename N, typename M, typename... VarArgs>
@@ -198,6 +216,8 @@ public:
 template <typename T, bool is_abstract>
 void ClassDB::_register_class(bool p_virtual, bool p_exposed) {
 	static_assert(TypesAreSame<typename T::self_type, T>::value, "Class not declared properly, please use GDCLASS.");
+	static_assert(!FunctionsAreSame<T::self_type::_bind_methods, T::parent_type::_bind_methods>::value, "Class must declare 'static void _bind_methods'.");
+	static_assert(!std::is_abstract_v<T> || is_abstract, "Class is abstract, please use GDREGISTER_ABSTRACT_CLASS.");
 	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
 
 	// Register this class within our plugin
@@ -324,5 +344,7 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p
 #define GDREGISTER_INTERNAL_CLASS(m_class) ClassDB::register_internal_class<m_class>();
 
 } // namespace godot
+
+CLASSDB_SINGLETON_VARIANT_CAST;
 
 #endif // GODOT_CLASS_DB_HPP
