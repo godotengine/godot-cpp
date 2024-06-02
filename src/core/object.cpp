@@ -75,7 +75,7 @@ MethodInfo::operator Dictionary() const {
 	dict["name"] = name;
 	dict["args"] = internal::convert_property_list(arguments);
 	Array da;
-	for (int i = 0; i < default_arguments.size(); i++) {
+	for (size_t i = 0; i < default_arguments.size(); i++) {
 		da.push_back(default_arguments[i]);
 	}
 	dict["default_args"] = da;
