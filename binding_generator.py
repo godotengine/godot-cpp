@@ -733,9 +733,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     # Special cases.
     if class_name == "String":
         result.append("\tstatic String utf8(const char *from, int64_t len = -1);")
-        result.append("\tvoid parse_utf8(const char *from, int64_t len = -1);")
+        result.append("\tError parse_utf8(const char *from, int64_t len = -1);")
         result.append("\tstatic String utf16(const char16_t *from, int64_t len = -1);")
-        result.append("\tvoid parse_utf16(const char16_t *from, int64_t len = -1);")
+        result.append("\tError parse_utf16(const char16_t *from, int64_t len = -1, bool default_little_endian = true);")
         result.append("\tCharString utf8() const;")
         result.append("\tCharString ascii() const;")
         result.append("\tChar16String utf16() const;")
@@ -1600,6 +1600,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     # Special cases.
     if class_name == "XMLParser":
         result.append("\tError _open_buffer(const uint8_t *p_buffer, size_t p_size);")
+
+    if class_name == "Image":
+        result.append("\tuint8_t *ptrw();")
+        result.append("\tconst uint8_t *ptr();")
 
     if class_name == "FileAccess":
         result.append("\tuint64_t get_buffer(uint8_t *p_dst, uint64_t p_length) const;")
