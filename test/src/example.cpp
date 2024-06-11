@@ -239,6 +239,7 @@ void Example::_bind_methods() {
 
 	GDVIRTUAL_BIND(_do_something_virtual, "name", "value");
 	ClassDB::bind_method(D_METHOD("test_virtual_implemented_in_script"), &Example::test_virtual_implemented_in_script);
+	GDVIRTUAL_BIND(_do_something_virtual_with_control, "control");
 
 	ClassDB::bind_method(D_METHOD("test_use_engine_singleton"), &Example::test_use_engine_singleton);
 

@@ -186,6 +186,7 @@ public:
 
 	GDVIRTUAL2R(String, _do_something_virtual, String, int);
 	String test_virtual_implemented_in_script(const String &p_name, int p_value);
+	GDVIRTUAL1(_do_something_virtual_with_control, Control *);
 
 	String test_use_engine_singleton() const;
 };
