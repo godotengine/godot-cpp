@@ -1470,13 +1470,16 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 result.append("\t \\")
 
         for method in class_api["methods"]:
-            # ClassDBSingleton shouldn't have any static or vararg methods, but if some appear later, lets skip them.
-            if vararg:
-                continue
+            # ClassDBSingleton shouldn't have any static methods, but if some appear later, lets skip them.
             if "is_static" in method and method["is_static"]:
                 continue
 
-            method_signature = "\tstatic "
+            vararg = "is_vararg" in method and method["is_vararg"]
+            if vararg:
+                method_signature = "\ttemplate<typename... Args> static "
+            else:
+                method_signature = "\tstatic "
+
             return_type = None
             if "return_type" in method:
                 return_type = correct_type(method["return_type"].replace("ClassDBSingleton", "ClassDB"), None, False)
@@ -1498,7 +1501,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 method_arguments = method["arguments"]
 
             method_signature += make_function_parameters(
-                method_arguments, include_default=True, for_builtin=True, is_vararg=False
+                method_arguments, include_default=True, for_builtin=True, is_vararg=vararg
             )
 
             method_signature += ") { \\"
@@ -1512,6 +1515,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                     method_body += f"({return_type})"
             method_body += f'ClassDBSingleton::get_singleton()->{method["name"]}('
             method_body += ", ".join(map(lambda x: escape_identifier(x["name"]), method_arguments))
+            if vararg:
+                method_body += ", args..."
             method_body += "); \\"
 
             result.append(method_body)
@@ -2126,9 +2131,9 @@ def make_varargs_template(function_data, static=False):
     args_array = f"\t\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args {{ "
     for argument in method_arguments:
         if argument["type"] == "Variant":
-            args_array += argument["name"]
+            args_array += escape_identifier(argument["name"])
         else:
-            args_array += f'Variant({argument["name"]})'
+            args_array += f'Variant({escape_identifier(argument["name"])})'
         args_array += ", "
 
     args_array += "Variant(args)... };"
