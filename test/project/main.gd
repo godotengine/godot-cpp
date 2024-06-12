@@ -14,7 +14,7 @@ func _ready():
 	assert_equal(custom_signal_emitted, ["Button", 42])
 
 	# To string.
-	assert_equal(example.to_string(),'Example:[ GDExtension::Example <--> Instance ID:%s ]' % example.get_instance_id())
+	assert_equal(example.to_string(),'[ GDExtension::Example <--> Instance ID:%s ]' % example.get_instance_id())
 	# It appears there's a bug with instance ids :-(
 	#assert_equal($Example/ExampleMin.to_string(), 'ExampleMin:[Wrapped:%s]' % $Example/ExampleMin.get_instance_id())
 
