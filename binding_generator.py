@@ -2562,6 +2562,7 @@ def correct_default_value(value, type_name):
         "null": "nullptr",
         '""': "String()",
         '&""': "StringName()",
+        '^""': "NodePath()",
         "[]": "Array()",
         "{}": "Dictionary()",
         "Transform2D(1, 0, 0, 1, 0, 0)": "Transform2D()",  # Default transform.
@@ -2574,6 +2575,8 @@ def correct_default_value(value, type_name):
     if value.startswith("Array["):
         return f"{{}}"
     if value.startswith("&"):
+        return value[1::]
+    if value.startswith("^"):
         return value[1::]
     return value
 
