@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include <godot_cpp/classes/file_access.hpp>
+#include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/worker_thread_pool.hpp>
 #include <godot_cpp/classes/xml_parser.hpp>
 
@@ -53,6 +54,14 @@ WorkerThreadPool::TaskID WorkerThreadPool::add_native_task(void (*p_func)(void *
 
 WorkerThreadPool::GroupID WorkerThreadPool::add_native_group_task(void (*p_func)(void *, uint32_t), void *p_userdata, int p_elements, int p_tasks, bool p_high_priority, const String &p_description) {
 	return (GroupID)internal::gdextension_interface_worker_thread_pool_add_native_group_task(_owner, p_func, p_userdata, p_elements, p_tasks, p_high_priority, (GDExtensionConstStringPtr)&p_description);
+}
+
+uint8_t *Image::ptrw() {
+	return internal::gdextension_interface_image_ptrw(_owner);
+}
+
+const uint8_t *Image::ptr() {
+	return internal::gdextension_interface_image_ptr(_owner);
 }
 
 } // namespace godot

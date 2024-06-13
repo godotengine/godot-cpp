@@ -178,8 +178,8 @@ String String::utf8(const char *from, int64_t len) {
 	return ret;
 }
 
-void String::parse_utf8(const char *from, int64_t len) {
-	internal::gdextension_interface_string_new_with_utf8_chars_and_len(_native_ptr(), from, len);
+Error String::parse_utf8(const char *from, int64_t len) {
+	return (Error)internal::gdextension_interface_string_new_with_utf8_chars_and_len2(_native_ptr(), from, len);
 }
 
 String String::utf16(const char16_t *from, int64_t len) {
@@ -188,8 +188,8 @@ String String::utf16(const char16_t *from, int64_t len) {
 	return ret;
 }
 
-void String::parse_utf16(const char16_t *from, int64_t len) {
-	internal::gdextension_interface_string_new_with_utf16_chars_and_len(_native_ptr(), from, len);
+Error String::parse_utf16(const char16_t *from, int64_t len, bool default_little_endian) {
+	return (Error)internal::gdextension_interface_string_new_with_utf16_chars_and_len2(_native_ptr(), from, len, default_little_endian);
 }
 
 String String::num_real(double p_num, bool p_trailing) {
