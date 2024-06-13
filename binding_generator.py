@@ -2442,6 +2442,8 @@ def correct_default_value(value, type_name):
         return f"{type_name}()"
     if value.startswith("Array["):
         return f"{{}}"
+    if value.startswith("&"):
+        return value[1::]
     return value
 
 
