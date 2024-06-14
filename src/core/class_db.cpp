@@ -388,7 +388,7 @@ void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
 		{
 			std::lock_guard<std::mutex> lock(engine_singletons_mutex);
 			singleton_objects.reserve(engine_singletons.size());
-			for (const std::pair<StringName, Object *> &pair : engine_singletons) {
+			for (const std::pair<const StringName, Object *> &pair : engine_singletons) {
 				singleton_objects.push_back(pair.second);
 			}
 		}
