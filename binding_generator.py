@@ -625,17 +625,17 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
             result.append(method_signature)
 
     # Move constructor.
-    result.append(f"\t{class_name}({class_name} &&other);")
+    result.append(f"\t{class_name}({class_name} &&p_other);")
 
     # Special cases.
     if class_name == "String" or class_name == "StringName" or class_name == "NodePath":
         if class_name == "StringName":
-            result.append(f"\t{class_name}(const char *from, bool p_static = false);")
+            result.append(f"\t{class_name}(const char *p_from, bool p_static = false);")
         else:
-            result.append(f"\t{class_name}(const char *from);")
-        result.append(f"\t{class_name}(const wchar_t *from);")
-        result.append(f"\t{class_name}(const char16_t *from);")
-        result.append(f"\t{class_name}(const char32_t *from);")
+            result.append(f"\t{class_name}(const char *p_from);")
+        result.append(f"\t{class_name}(const wchar_t *p_from);")
+        result.append(f"\t{class_name}(const char16_t *p_from);")
+        result.append(f"\t{class_name}(const char32_t *p_from);")
     if class_name == "Callable":
         result.append("\tCallable(CallableCustom *p_custom);")
         result.append("\tCallableCustom *get_custom() const;")
@@ -696,10 +696,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     # Special cases.
     if class_name == "String":
-        result.append("\tstatic String utf8(const char *from, int64_t len = -1);")
-        result.append("\tvoid parse_utf8(const char *from, int64_t len = -1);")
-        result.append("\tstatic String utf16(const char16_t *from, int64_t len = -1);")
-        result.append("\tvoid parse_utf16(const char16_t *from, int64_t len = -1);")
+        result.append("\tstatic String utf8(const char *p_from, int64_t p_len = -1);")
+        result.append("\tvoid parse_utf8(const char *p_from, int64_t p_len = -1);")
+        result.append("\tstatic String utf16(const char16_t *p_from, int64_t p_len = -1);")
+        result.append("\tvoid parse_utf16(const char16_t *p_from, int64_t p_len = -1);")
         result.append("\tCharString utf8() const;")
         result.append("\tCharString ascii() const;")
         result.append("\tChar16String utf16() const;")
@@ -720,7 +720,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
             if operator["name"] not in ["in", "xor"]:
                 if "right_type" in operator:
                     result.append(
-                        f'\t{correct_type(operator["return_type"])} operator{operator["name"]}({type_for_parameter(operator["right_type"])}other) const;'
+                        f'\t{correct_type(operator["return_type"])} operator{operator["name"]}({type_for_parameter(operator["right_type"])}p_other) const;'
                     )
                 else:
                     result.append(
@@ -729,10 +729,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     # Copy assignment.
     if copy_constructor_index >= 0:
-        result.append(f"\t{class_name} &operator=(const {class_name} &other);")
+        result.append(f"\t{class_name} &operator=(const {class_name} &p_other);")
 
     # Move assignment.
-    result.append(f"\t{class_name} &operator=({class_name} &&other);")
+    result.append(f"\t{class_name} &operator=({class_name} &&p_other);")
 
     # Special cases.
     if class_name == "String":
@@ -766,8 +766,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     if class_name == "Array":
         result.append("\ttemplate <typename... Args>")
-        result.append("\tstatic Array make(Args... args) {")
-        result.append("\t\treturn helpers::append_all(Array(), args...);")
+        result.append("\tstatic Array make(Args... p_args) {")
+        result.append("\t\treturn helpers::append_all(Array(), p_args...);")
         result.append("\t}")
 
     if is_packed_array(class_name):
@@ -1062,13 +1062,13 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             result.append("")
 
     # Move constructor.
-    result.append(f"{class_name}::{class_name}({class_name} &&other) {{")
+    result.append(f"{class_name}::{class_name}({class_name} &&p_other) {{")
     if needs_copy_instead_of_move(class_name) and copy_constructor_index >= 0:
         result.append(
-            f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &other);"
+            f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &p_other);"
         )
     else:
-        result.append("\tstd::swap(opaque, other.opaque);")
+        result.append("\tstd::swap(opaque, p_other.opaque);")
     result.append("}")
     result.append("")
 
@@ -1159,7 +1159,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
             if operator["name"] not in ["in", "xor"]:
                 if "right_type" in operator:
                     result.append(
-                        f'{correct_type(operator["return_type"])} {class_name}::operator{operator["name"]}({type_for_parameter(operator["right_type"])}other) const {{'
+                        f'{correct_type(operator["return_type"])} {class_name}::operator{operator["name"]}({type_for_parameter(operator["right_type"])}p_other) const {{'
                     )
                     (encode, arg_name) = get_encoded_arg("other", operator["right_type"], None)
                     result += encode
@@ -1179,7 +1179,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 
     # Copy assignment.
     if copy_constructor_index >= 0:
-        result.append(f"{class_name} &{class_name}::operator=(const {class_name} &other) {{")
+        result.append(f"{class_name} &{class_name}::operator=(const {class_name} &p_other) {{")
         if builtin_api["has_destructor"]:
             result.append("\t_method_bindings.destructor(&opaque);")
         (encode, arg_name) = get_encoded_arg(
@@ -1196,13 +1196,13 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
         result.append("")
 
     # Move assignment.
-    result.append(f"{class_name} &{class_name}::operator=({class_name} &&other) {{")
+    result.append(f"{class_name} &{class_name}::operator=({class_name} &&p_other) {{")
     if needs_copy_instead_of_move(class_name) and copy_constructor_index >= 0:
         result.append(
-            f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &other);"
+            f"\tinternal::_call_builtin_constructor(_method_bindings.constructor_{copy_constructor_index}, &opaque, &p_other);"
         )
     else:
-        result.append("\tstd::swap(opaque, other.opaque);")
+        result.append("\tstd::swap(opaque, p_other.opaque);")
     result.append("\treturn *this;")
     result.append("}")
 
@@ -1674,9 +1674,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 if "alias_for" in class_api and return_type.startswith(class_api["alias_for"] + "::"):
                     method_body += f"({return_type})"
             method_body += f'ClassDBSingleton::get_singleton()->{method["name"]}('
-            method_body += ", ".join(map(lambda x: escape_identifier(x["name"]), method_arguments))
+            method_body += ", ".join(map(lambda x: escape_argument(x["name"]), method_arguments))
             if vararg:
-                method_body += ", args..."
+                method_body += ", p_args..."
             method_body += "); \\"
 
             result.append(method_body)
@@ -1838,7 +1838,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             else:  # vararg.
                 result.append("\tGDExtensionCallError error;")
                 result.append("\tVariant ret;")
-                method_call += "internal::gdextension_interface_object_method_bind_call(_gde_method_bind, _owner, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count, &ret, &error"
+                method_call += "internal::gdextension_interface_object_method_bind_call(_gde_method_bind, _owner, reinterpret_cast<GDExtensionConstVariantPtr *>(p_args), p_arg_count, &ret, &error"
 
             if is_ref:
                 method_call += ")"  # Close Ref<> constructor.
@@ -2107,7 +2107,7 @@ def generate_utility_functions(api, output_dir):
                 source.append(f'\t{get_gdextension_type(correct_type(function["return_type"]))} ret;')
             else:
                 source.append("\tVariant ret;")
-            function_call += "_gde_function(&ret, reinterpret_cast<GDExtensionConstVariantPtr *>(args), arg_count"
+            function_call += "_gde_function(&ret, reinterpret_cast<GDExtensionConstVariantPtr *>(p_args), p_arg_count"
 
         function_call += ");"
         source.append(function_call)
@@ -2138,9 +2138,9 @@ def make_function_parameters(parameters, include_default=False, for_builtin=Fals
 
     for index, par in enumerate(parameters):
         parameter = type_for_parameter(par["type"], par["meta"] if "meta" in par else None)
-        parameter_name = escape_identifier(par["name"])
+        parameter_name = escape_argument(par["name"])
         if len(parameter_name) == 0:
-            parameter_name = "arg_" + str(index + 1)
+            parameter_name = "p_arg_" + str(index + 1)
         parameter += parameter_name
 
         if include_default and "default_value" in par and (not for_builtin or par["type"] != "Variant"):
@@ -2154,7 +2154,7 @@ def make_function_parameters(parameters, include_default=False, for_builtin=Fals
         signature.append(parameter)
 
     if is_vararg:
-        signature.append("const Args&... args")
+        signature.append("const Args&... p_args")
 
     return ", ".join(signature)
 
@@ -2185,7 +2185,7 @@ def get_include_path(type_name):
 def get_encoded_arg(arg_name, type_name, type_meta):
     result = []
 
-    name = escape_identifier(arg_name)
+    name = escape_argument(arg_name)
     arg_type = correct_type(type_name)
     if is_pod_type(arg_type):
         result.append(f"\t{get_gdextension_type(arg_type)} {name}_encoded;")
@@ -2251,7 +2251,7 @@ def make_signature(
     if not is_vararg:
         function_signature += make_function_parameters(arguments, for_header, for_builtin, is_vararg)
     else:
-        function_signature += "const Variant **args, GDExtensionInt arg_count"
+        function_signature += "const Variant **p_args, GDExtensionInt p_arg_count"
 
     function_signature += ")"
 
@@ -2324,12 +2324,12 @@ def make_varargs_template(
     args_array = f"\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args {{ "
     for argument in method_arguments:
         if argument["type"] == "Variant":
-            args_array += escape_identifier(argument["name"])
+            args_array += escape_argument(argument["name"])
         else:
-            args_array += f'Variant({escape_identifier(argument["name"])})'
+            args_array += f'Variant({escape_argument(argument["name"])})'
         args_array += ", "
 
-    args_array += "Variant(args)... };"
+    args_array += "Variant(p_args)... };"
     result.append(args_array)
     result.append(f"\tstd::array<const Variant *, {len(method_arguments)} + sizeof...(Args)> call_args;")
     result.append("\tfor(size_t i = 0; i < variant_args.size(); i++) {")
@@ -2644,6 +2644,12 @@ def escape_identifier(id):
     if id in cpp_keywords_map:
         return cpp_keywords_map[id]
     return id
+
+
+def escape_argument(id):
+    if id.startswith("p_") or id.startswith("r_"):
+        return id
+    return "p_" + id
 
 
 def get_operator_id_name(op):
