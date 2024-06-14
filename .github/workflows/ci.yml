@@ -4,6 +4,8 @@ on: [push, pull_request]
 env:
   # Only used for the cache key. Increment version to force clean build.
   GODOT_BASE_BRANCH: master
+  # Used to select the version of Godot to run the tests with.
+  GODOT_TEST_VERSION: 4.1.4-stable
 
 concurrency:
   group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}
@@ -153,7 +155,7 @@ jobs:
 
       - name: Download latest Godot artifacts
         uses: dsnopek/action-download-artifact@1322f74e2dac9feed2ee76a32d9ae1ca3b4cf4e9
-        if: ${{ matrix.run-tests }}
+        if: ${{ matrix.run-tests && env.GODOT_TEST_VERSION == 'master' }}
         with:
           repo: godotengine/godot
           branch: master
@@ -166,15 +168,28 @@ jobs:
           ensure_latest: true
           path: godot-artifacts
 
+      - name: Prepare Godot artifacts for testing
+        if: ${{ matrix.run-tests && env.GODOT_TEST_VERSION == 'master' }}
+        run: |
+          chmod +x ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono
+          echo "GODOT=$(pwd)/godot-artifacts/godot.linuxbsd.editor.x86_64.mono" >> $GITHUB_ENV
+
+      - name: Download requested Godot version for testing
+        if: ${{ matrix.run-tests && env.GODOT_TEST_VERSION != 'master' }}
+        run: |
+          wget "https://github.com/godotengine/godot-builds/releases/download/${GODOT_TEST_VERSION}/Godot_v${GODOT_TEST_VERSION}_linux.x86_64.zip" -O Godot.zip
+          unzip -a Godot.zip
+          chmod +x "Godot_v${GODOT_TEST_VERSION}_linux.x86_64"
+          echo "GODOT=$(pwd)/Godot_v${GODOT_TEST_VERSION}_linux.x86_64" >> $GITHUB_ENV
+
       - name: Run tests
         if: ${{ matrix.run-tests }}
         run: |
-          chmod +x ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono
-          ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono --headless --version
+          $GODOT --headless --version
           cd test
           # Need to run the editor so .godot is generated... but it crashes! Ignore that :-)
-          (cd project && (timeout 10 ../../godot-artifacts/godot.linuxbsd.editor.x86_64.mono --editor --headless --quit >/dev/null 2>&1 || true))
-          GODOT=../godot-artifacts/godot.linuxbsd.editor.x86_64.mono ./run-tests.sh
+          (cd project && (timeout 30 $GODOT --editor --headless --quit >/dev/null 2>&1 || true))
+          ./run-tests.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3

@@ -286,9 +286,9 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p
 	return bind;
 }
 
-#define GDREGISTER_CLASS(m_class) ClassDB::register_class<m_class>();
-#define GDREGISTER_VIRTUAL_CLASS(m_class) ClassDB::register_class<m_class>(true);
-#define GDREGISTER_ABSTRACT_CLASS(m_class) ClassDB::register_abstract_class<m_class>();
+#define GDREGISTER_CLASS(m_class) ::godot::ClassDB::register_class<m_class>();
+#define GDREGISTER_VIRTUAL_CLASS(m_class) ::godot::ClassDB::register_class<m_class>(true);
+#define GDREGISTER_ABSTRACT_CLASS(m_class) ::godot::ClassDB::register_abstract_class<m_class>();
 
 } // namespace godot
 
