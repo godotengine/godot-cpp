@@ -39,18 +39,16 @@
 #include <godot_cpp/core/class_db.hpp>
 
 namespace godot {
+thread_local const StringName *Wrapped::_constructing_extension_class_name = nullptr;
+thread_local const GDExtensionInstanceBindingCallbacks *Wrapped::_constructing_class_binding_callbacks = nullptr;
 
-const StringName *Wrapped::_get_extension_class_name() const {
+const StringName *Wrapped::_get_extension_class_name() {
 	return nullptr;
 }
 
 void Wrapped::_postinitialize() {
-	const StringName *extension_class = _get_extension_class_name();
-	if (extension_class) {
-		godot::internal::gdextension_interface_object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(extension_class), this);
-	}
-	godot::internal::gdextension_interface_object_set_instance_binding(_owner, godot::internal::token, this, _get_bindings_callbacks());
-	if (extension_class) {
+	// Only send NOTIFICATION_POSTINITIALIZE for extension classes.
+	if (_is_extension_class()) {
 		_notificationv(Object::NOTIFICATION_POSTINITIALIZE);
 	}
 }
@@ -76,6 +74,19 @@ Wrapped::Wrapped(const StringName p_godot_class) {
 	}
 #endif
 	_owner = godot::internal::gdextension_interface_classdb_construct_object(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
+
+	if (_constructing_extension_class_name) {
+		godot::internal::gdextension_interface_object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(_constructing_extension_class_name), this);
+		_constructing_extension_class_name = nullptr;
+	}
+
+	if (likely(_constructing_class_binding_callbacks)) {
+		godot::internal::gdextension_interface_object_set_instance_binding(_owner, godot::internal::token, this, _constructing_class_binding_callbacks);
+		_constructing_class_binding_callbacks = nullptr;
+	} else {
+		ERR_PRINT("BUG: create a Godot Object without binding callbacks.");
+		CRASH_NOW_MSG("BUG: create a Godot Object without binding callbacks.");
+	}
 }
 
 Wrapped::Wrapped(GodotObject *p_godot_object) {

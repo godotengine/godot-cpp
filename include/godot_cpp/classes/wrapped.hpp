@@ -46,13 +46,31 @@ class ClassDB;
 
 typedef void GodotObject;
 
+template <typename T, std::enable_if_t<std::is_base_of<::godot::Wrapped, T>::value, bool> = true>
+_ALWAYS_INLINE_ void _pre_initialize();
+
 // Base for all engine classes, to contain the pointer to the engine instance.
 class Wrapped {
 	friend class GDExtensionBinding;
 	friend class ClassDB;
 	friend void postinitialize_handler(Wrapped *);
 
+	template <typename T, std::enable_if_t<std::is_base_of<::godot::Wrapped, T>::value, bool>>
+	friend _ALWAYS_INLINE_ void _pre_initialize();
+
+	thread_local static const StringName *_constructing_extension_class_name;
+	thread_local static const GDExtensionInstanceBindingCallbacks *_constructing_class_binding_callbacks;
+
+	template <typename T>
+	_ALWAYS_INLINE_ static void _set_construct_info() {
+		_constructing_extension_class_name = T::_get_extension_class_name();
+		_constructing_class_binding_callbacks = &T::_gde_binding_callbacks;
+	}
+
 protected:
+	virtual bool _is_extension_class() const { return false; }
+	static const StringName *_get_extension_class_name(); // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
+
 #ifdef HOT_RELOAD_ENABLED
 	struct RecreateInstance {
 		GDExtensionClassInstancePtr wrapper;
@@ -61,9 +79,6 @@ protected:
 	};
 	inline static RecreateInstance *recreate_instance = nullptr;
 #endif
-
-	virtual const StringName *_get_extension_class_name() const; // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
-	virtual const GDExtensionInstanceBindingCallbacks *_get_bindings_callbacks() const = 0;
 
 	void _notification(int p_what) {}
 	bool _set(const StringName &p_name, const Variant &p_property) { return false; }
@@ -108,6 +123,11 @@ public:
 	// Must be public but you should not touch this.
 	GodotObject *_owner = nullptr;
 };
+
+template <typename T, std::enable_if_t<std::is_base_of<::godot::Wrapped, T>::value, bool>>
+_ALWAYS_INLINE_ void _pre_initialize() {
+	Wrapped::_set_construct_info<T>();
+}
 
 _FORCE_INLINE_ void snarray_add_str(Vector<StringName> &arr) {
 }
@@ -161,15 +181,14 @@ struct EngineClassRegistration {
 private:                                                                                                                                                                               \
 	void operator=(const m_class &p_rval) {}                                                                                                                                           \
 	friend class ::godot::ClassDB;                                                                                                                                                     \
+	friend class ::godot::Wrapped;                                                                                                                                                     \
                                                                                                                                                                                        \
 protected:                                                                                                                                                                             \
-	virtual const ::godot::StringName *_get_extension_class_name() const override {                                                                                                    \
-		static ::godot::StringName string_name = get_class_static();                                                                                                                   \
-		return &string_name;                                                                                                                                                           \
-	}                                                                                                                                                                                  \
+	virtual bool _is_extension_class() const override { return true; }                                                                                                                 \
                                                                                                                                                                                        \
-	virtual const GDExtensionInstanceBindingCallbacks *_get_bindings_callbacks() const override {                                                                                      \
-		return &_gde_binding_callbacks;                                                                                                                                                \
+	static const ::godot::StringName *_get_extension_class_name() {                                                                                                                    \
+		const ::godot::StringName &string_name = get_class_static();                                                                                                                   \
+		return &string_name;                                                                                                                                                           \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	static void (*_get_bind_methods())() {                                                                                                                                             \
@@ -388,12 +407,9 @@ private:                                                                        
 	inline static ::godot::internal::EngineClassRegistration<m_class> _gde_engine_class_registration_helper;                                                                           \
 	void operator=(const m_class &p_rval) {}                                                                                                                                           \
 	friend class ::godot::ClassDB;                                                                                                                                                     \
+	friend class ::godot::Wrapped;                                                                                                                                                     \
                                                                                                                                                                                        \
 protected:                                                                                                                                                                             \
-	virtual const GDExtensionInstanceBindingCallbacks *_get_bindings_callbacks() const override {                                                                                      \
-		return &_gde_binding_callbacks;                                                                                                                                                \
-	}                                                                                                                                                                                  \
-                                                                                                                                                                                       \
 	m_class(const char *p_godot_class) : m_inherits(p_godot_class) {}                                                                                                                  \
 	m_class(GodotObject *p_godot_object) : m_inherits(p_godot_object) {}                                                                                                               \
                                                                                                                                                                                        \

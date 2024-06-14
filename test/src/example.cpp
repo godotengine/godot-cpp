@@ -193,6 +193,8 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("return_extended_ref"), &Example::return_extended_ref);
 	ClassDB::bind_method(D_METHOD("extended_ref_checks", "ref"), &Example::extended_ref_checks);
 
+	ClassDB::bind_method(D_METHOD("is_object_binding_set_by_parent_constructor"), &Example::is_object_binding_set_by_parent_constructor);
+
 	ClassDB::bind_method(D_METHOD("test_array"), &Example::test_array);
 	ClassDB::bind_method(D_METHOD("test_tarray_arg", "array"), &Example::test_tarray_arg);
 	ClassDB::bind_method(D_METHOD("test_tarray"), &Example::test_tarray);
@@ -291,7 +293,17 @@ void Example::_bind_methods() {
 	BIND_ENUM_CONSTANT(OUTSIDE_OF_CLASS);
 }
 
-Example::Example() {
+bool Example::has_object_instance_binding() const {
+	return internal::gdextension_interface_object_get_instance_binding(_owner, internal::token, nullptr);
+}
+
+Example::Example() :
+		object_instance_binding_set_by_parent_constructor(has_object_instance_binding()) {
+	// Test conversion, to ensure users can use all parent calss functions at this time.
+	// It would crash if instance binding still not be initialized.
+	Variant v = Variant(this);
+	Object *o = (Object *)v;
+
 	//UtilityFunctions::print("Constructor.");
 }
 
@@ -369,6 +381,10 @@ void Example::varargs_func_void(const Variant **args, GDExtensionInt arg_count, 
 
 void Example::emit_custom_signal(const String &name, int value) {
 	emit_signal("custom_signal", name, value);
+}
+
+bool Example::is_object_binding_set_by_parent_constructor() const {
+	return object_instance_binding_set_by_parent_constructor;
 }
 
 Array Example::test_array() const {
