@@ -286,6 +286,15 @@ def options(opts, env):
     )
 
     opts.Add(
+        PathVariable(
+            "build_profile",
+            "Path to a file containing a feature build profile",
+            default=env.get("build_profile", None),
+            validator=validate_file,
+        )
+    )
+
+    opts.Add(
         BoolVariable(
             key="use_hot_reload",
             help="Enable the extra accounting required to support hot reload.",
