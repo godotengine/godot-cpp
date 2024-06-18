@@ -48,7 +48,7 @@ jobs:
             cache-name: windows-x86_64-mingw
 
           - name: 🍎 macOS (universal)
-            os: macos-11
+            os: macos-latest
             platform: macos
             artifact-name: godot-cpp-macos-universal-release
             artifact-path: bin/libgodot-cpp.macos.template_release.universal.a
@@ -65,7 +65,7 @@ jobs:
             cache-name: android-arm64
 
           - name: 🍏 iOS (arm64)
-            os: macos-11
+            os: macos-latest
             platform: ios
             artifact-name: godot-cpp-ios-arm64-release
             artifact-path: bin/libgodot-cpp.ios.template_release.arm64.a
