@@ -248,6 +248,10 @@ Variant::Variant(const PackedColorArray &v) {
 	from_type_constructor[PACKED_COLOR_ARRAY](_native_ptr(), v._native_ptr());
 }
 
+Variant::Variant(const PackedVector4Array &v) {
+	from_type_constructor[PACKED_VECTOR4_ARRAY](_native_ptr(), v._native_ptr());
+}
+
 Variant::~Variant() {
 	internal::gdextension_interface_variant_destroy(_native_ptr());
 }
@@ -504,6 +508,10 @@ Variant::operator PackedVector3Array() const {
 
 Variant::operator PackedColorArray() const {
 	return PackedColorArray(this);
+}
+
+Variant::operator PackedVector4Array() const {
+	return PackedVector4Array(this);
 }
 
 Variant &Variant::operator=(const Variant &other) {
