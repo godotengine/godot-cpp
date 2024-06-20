@@ -214,3 +214,27 @@ set_target_properties(${PROJECT_NAME}
 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		OUTPUT_NAME "${OUTPUT_NAME}"
 )
+
+install(TARGETS ${PROJECT_NAME} EXPORT godot_cpp_targets)
+
+# Export the target to the build directory.
+# The target then can be imported by another cmake project like this:
+#   find_package(godot-cpp CONFIG REQUIRED)
+#
+#   add_library(libfoo SHARED)
+#   set_target_properties(libfoo PROPERTIES POSITION_INDEPENDENT_CODE ON)
+#   target_link_libraries(libfoo PUBLIC godot::godot-cpp)
+#
+# And user provides the build directory to cmake:
+#   -DCMAKE_PREFIX_PATH=<absolute-path-to-godot-cpp-build-dir>.
+
+export(EXPORT godot_cpp_targets
+	FILE "${PROJECT_BINARY_DIR}/cmake/godot-cpp.cmake"
+	NAMESPACE godot::
+)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/config.cmake.in
+	"${PROJECT_BINARY_DIR}/cmake/godot-cpp-config.cmake"
+	INSTALL_DESTINATION "lib/cmake/godot-cpp"
+)
