@@ -74,7 +74,7 @@ def generate(env):
             else:
                 env.Append(CCFLAGS=["-g2"])
         else:
-            if using_clang(env) and not is_vanilla_clang(env):
+            if using_clang(env) and not is_vanilla_clang(env) and not env["use_mingw"]:
                 # Apple Clang, its linker doesn't like -s.
                 env.Append(LINKFLAGS=["-Wl,-S", "-Wl,-x", "-Wl,-dead_strip"])
             else:
