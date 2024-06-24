@@ -1,18 +1,13 @@
 #!/usr/bin/env python
 
 import os
-import platform
-import sys
-import subprocess
-from binding_generator import scons_generate_bindings, scons_emit_files
-
 
 EnsureSConsVersion(4, 0)
 
 
 try:
     Import("env")
-except:
+except Exception:
     # Default tools with no platform defaults to gnu toolchain.
     # We apply platform specific toolchains via our custom tools.
     env = Environment(tools=["default"], PLATFORM="")
@@ -23,7 +18,7 @@ env.PrependENVPath("PATH", os.getenv("PATH"))
 customs = ["custom.py"]
 try:
     customs += Import("customs")
-except:
+except Exception:
     pass
 profile = ARGUMENTS.get("profile", "")
 if profile:
