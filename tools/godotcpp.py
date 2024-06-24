@@ -1,15 +1,16 @@
-import os, sys, platform
+import os
+import platform
+import sys
 
-from SCons.Variables import EnumVariable, PathVariable, BoolVariable
-from SCons.Variables.BoolVariable import _text2bool
-from SCons.Tool import Tool
 from SCons.Action import Action
 from SCons.Builder import Builder
 from SCons.Errors import UserError
 from SCons.Script import ARGUMENTS
+from SCons.Tool import Tool
+from SCons.Variables import BoolVariable, EnumVariable, PathVariable
+from SCons.Variables.BoolVariable import _text2bool
 
-
-from binding_generator import scons_generate_bindings, scons_emit_files
+from binding_generator import scons_emit_files, scons_generate_bindings
 
 
 def add_sources(sources, dir, extension):

@@ -3,7 +3,7 @@
 #
 # godot-cpp cmake arguments
 # GODOT_GDEXTENSION_DIR:		Path to the directory containing GDExtension interface header and API JSON file
-# GODOT_CPP_SYSTEM_HEADERS		Mark the header files as SYSTEM. This may be useful to supress warnings in projects including this one.
+# GODOT_CPP_SYSTEM_HEADERS		Mark the header files as SYSTEM. This may be useful to suppress warnings in projects including this one.
 # GODOT_CPP_WARNING_AS_ERROR	Treat any warnings as errors
 # GODOT_CUSTOM_API_FILE:		Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
 # FLOAT_PRECISION:				Floating-point precision level ("single", "double")

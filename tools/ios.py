@@ -1,8 +1,9 @@
 import os
-import sys
 import subprocess
+import sys
+
 import common_compiler_flags
-from SCons.Variables import *
+from SCons.Variables import BoolVariable
 
 if sys.version_info < (3,):
 

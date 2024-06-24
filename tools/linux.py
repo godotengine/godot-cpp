@@ -1,6 +1,6 @@
 import common_compiler_flags
-from SCons.Variables import *
 from SCons.Tool import clang, clangxx
+from SCons.Variables import BoolVariable
 
 
 def options(opts):

@@ -1,8 +1,8 @@
 import os
 import sys
-import my_spawn
+
 import common_compiler_flags
-from SCons.Script import ARGUMENTS
+import my_spawn
 
 
 def options(opts):
