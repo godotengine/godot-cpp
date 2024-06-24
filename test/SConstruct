@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import os
-import sys
 
 env = SConscript("../SConstruct")
 

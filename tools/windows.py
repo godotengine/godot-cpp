@@ -1,8 +1,9 @@
 import sys
-import my_spawn
+
 import common_compiler_flags
-from SCons.Tool import msvc, mingw
-from SCons.Variables import *
+import my_spawn
+from SCons.Tool import mingw, msvc
+from SCons.Variables import BoolVariable
 
 
 def options(opts):
@@ -16,7 +17,6 @@ def exists(env):
 
 
 def generate(env):
-    base = None
     if not env["use_mingw"] and msvc.exists(env):
         if env["arch"] == "x86_64":
             env["TARGET_ARCH"] = "amd64"

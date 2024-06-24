@@ -591,7 +591,7 @@ def generate_builtin_class_vararg_method_implements_header(builtin_classes):
     result.append(f"#define {header_guard}")
     result.append("")
     for builtin_api in builtin_classes:
-        if not "methods" in builtin_api:
+        if "methods" not in builtin_api:
             continue
         class_name = builtin_api["name"]
         for method in builtin_api["methods"]:
@@ -1513,7 +1513,7 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         for field in expanded_format.split(";"):
             field_type = field.strip().split(" ")[0].split("::")[0]
             if field_type != "" and not is_included_type(field_type) and not is_pod_type(field_type):
-                if not field_type in used_classes:
+                if field_type not in used_classes:
                     used_classes.append(field_type)
 
         result.append("")
@@ -2127,7 +2127,7 @@ def generate_global_constant_binds(api, output_dir):
             header.append(f'VARIANT_ENUM_CAST({enum_def["name"]});')
 
     # Variant::Type is not a global enum, but only one line, it is worth to place in this file instead of creating new file.
-    header.append(f"VARIANT_ENUM_CAST(godot::Variant::Type);")
+    header.append("VARIANT_ENUM_CAST(godot::Variant::Type);")
 
     header.append("")
 
@@ -2583,7 +2583,7 @@ def is_packed_array(type_name):
 
 def needs_copy_instead_of_move(type_name):
     """
-    Those are types which need initialised data or we'll get warning spam so need a copy instead of move.
+    Those are types which need initialized data or we'll get warning spam so need a copy instead of move.
     """
     return type_name in [
         "Dictionary",
@@ -2691,7 +2691,7 @@ def correct_default_value(value, type_name):
     if value == "":
         return f"{type_name}()"
     if value.startswith("Array["):
-        return f"{{}}"
+        return "{}"
     if value.startswith("&"):
         return value[1::]
     if value.startswith("^"):
@@ -2707,7 +2707,7 @@ def correct_typed_array(type_name):
 
 def correct_type(type_name, meta=None, use_alias=True):
     type_conversion = {"float": "double", "int": "int64_t", "Nil": "Variant"}
-    if meta != None:
+    if meta is not None:
         if "int" in meta:
             return f"{meta}_t"
         elif meta in type_conversion:
@@ -2818,7 +2818,6 @@ def get_operator_id_name(op):
         "or": "or",
         "xor": "xor",
         "not": "not",
-        "and": "and",
         "in": "in",
     }
     return op_id_map[op]
