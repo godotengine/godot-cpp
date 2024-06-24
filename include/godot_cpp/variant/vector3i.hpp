@@ -72,19 +72,19 @@ struct _NO_DISCARD_ Vector3i {
 	Vector3i::Axis max_axis_index() const;
 
 	Vector3i min(const Vector3i &p_vector3i) const {
-		return Vector3i(MIN(x, p_vector3i.x), MIN(y, p_vector3i.y), MIN(z, p_vector3i.z));
+		return Vector3i(Math::min(x, p_vector3i.x), Math::min(y, p_vector3i.y), Math::min(z, p_vector3i.z));
 	}
 
 	Vector3i mini(int32_t p_scalar) const {
-		return Vector3i(MIN(x, p_scalar), MIN(y, p_scalar), MIN(z, p_scalar));
+		return Vector3i(Math::min(x, p_scalar), Math::min(y, p_scalar), Math::min(z, p_scalar));
 	}
 
 	Vector3i max(const Vector3i &p_vector3i) const {
-		return Vector3i(MAX(x, p_vector3i.x), MAX(y, p_vector3i.y), MAX(z, p_vector3i.z));
+		return Vector3i(Math::max(x, p_vector3i.x), Math::max(y, p_vector3i.y), Math::max(z, p_vector3i.z));
 	}
 
 	Vector3i maxi(int32_t p_scalar) const {
-		return Vector3i(MAX(x, p_scalar), MAX(y, p_scalar), MAX(z, p_scalar));
+		return Vector3i(Math::max(x, p_scalar), Math::max(y, p_scalar), Math::max(z, p_scalar));
 	}
 
 	_FORCE_INLINE_ int64_t length_squared() const;
@@ -163,7 +163,7 @@ Vector3i Vector3i::abs() const {
 }
 
 Vector3i Vector3i::sign() const {
-	return Vector3i(SIGN(x), SIGN(y), SIGN(z));
+	return Vector3i(Math::sign(x), Math::sign(y), Math::sign(z));
 }
 
 /* Operators */
