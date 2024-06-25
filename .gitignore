@@ -8,7 +8,7 @@
 include/gen
 src/gen
 
-# Build configuarion.
+# Build configuration.
 /custom.py
 
 # Misc

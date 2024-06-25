@@ -1,6 +1,5 @@
 import os
 import subprocess
-import sys
 
 
 def using_clang(env):

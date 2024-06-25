@@ -1,0 +1,64 @@
+default_language_version:
+  python: python3
+
+exclude: |
+  (?x)^(
+    gdextension/extension_api\.json|
+    gdextension/gdextension_interface\.h
+  )$
+
+repos:
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v17.0.6
+    hooks:
+      - id: clang-format
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.971
+    hooks:
+      - id: mypy
+        files: \.py$
+        types_or: [text]
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        additional_dependencies: [tomli]
+
+  - repo: local
+    hooks:
+      - id: copyright-headers
+        name: copyright-headers
+        language: python
+        entry: python misc/scripts/copyright_headers.py
+        files: \.(c|h)pp$
+        exclude: ^test/
+
+      - id: header-guards
+        name: header-guards
+        language: python
+        entry: python misc/scripts/header_guards.py
+        files: \.hpp$
+        exclude: ^test/
+
+      - id: file-format
+        name: file-format
+        language: python
+        entry: python misc/scripts/file_format.py
+        types_or: [text]
+
+      - id: check-get-file-list
+        name: check-get-file-list
+        language: python
+        entry: python misc/scripts/check_get_file_list.py
+        pass_filenames: false
+        always_run: true
+        stages: [manual]

@@ -132,7 +132,7 @@ public:
 	Example *test_node_argument(Example *p_node) const;
 	String test_string_ops() const;
 	String test_str_utility() const;
-	bool test_string_is_fourty_two(const String &p_str) const;
+	bool test_string_is_forty_two(const String &p_str) const;
 	String test_string_resize(String p_original) const;
 	int test_vector_ops() const;
 	int test_vector_init_list() const;
