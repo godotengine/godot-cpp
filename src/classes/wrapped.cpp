@@ -84,8 +84,7 @@ Wrapped::Wrapped(const StringName p_godot_class) {
 		godot::internal::gdextension_interface_object_set_instance_binding(_owner, godot::internal::token, this, _constructing_class_binding_callbacks);
 		_constructing_class_binding_callbacks = nullptr;
 	} else {
-		ERR_PRINT("BUG: create a Godot Object without binding callbacks.");
-		CRASH_NOW_MSG("BUG: create a Godot Object without binding callbacks.");
+		CRASH_NOW_MSG("BUG: Godot Object created without binding callbacks. Did you forget to use memnew()?");
 	}
 }
 
