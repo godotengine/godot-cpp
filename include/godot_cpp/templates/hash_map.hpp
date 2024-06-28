@@ -160,7 +160,7 @@ private:
 		uint32_t old_capacity = hash_table_size_primes[capacity_index];
 
 		// Capacity can't be 0.
-		capacity_index = MAX((uint32_t)MIN_CAPACITY_INDEX, p_new_capacity_index);
+		capacity_index = Math::max((uint32_t)MIN_CAPACITY_INDEX, p_new_capacity_index);
 
 		uint32_t capacity = hash_table_size_primes[capacity_index];
 

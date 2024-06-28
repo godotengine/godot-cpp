@@ -135,13 +135,13 @@ struct _NO_DISCARD_ Color {
 
 		float sharedexp = 65408.000f; // Result of: ((pow2to9 - 1.0f) / pow2to9) * powf(2.0f, 31.0f - 15.0f)
 
-		float cRed = MAX(0.0f, MIN(sharedexp, r));
-		float cGreen = MAX(0.0f, MIN(sharedexp, g));
-		float cBlue = MAX(0.0f, MIN(sharedexp, b));
+		float cRed = Math::max(0.0f, Math::min(sharedexp, r));
+		float cGreen = Math::max(0.0f, Math::min(sharedexp, g));
+		float cBlue = Math::max(0.0f, Math::min(sharedexp, b));
 
-		float cMax = MAX(cRed, MAX(cGreen, cBlue));
+		float cMax = Math::max(cRed, Math::max(cGreen, cBlue));
 
-		float expp = MAX(-B - 1.0f, floor(Math::log(cMax) / (real_t)Math_LN2)) + 1.0f + B;
+		float expp = Math::max<float>(-B - 1.0f, floor(Math::log(cMax) / (real_t)Math_LN2)) + 1.0f + B;
 
 		float sMax = (float)floor((cMax / Math::pow(2.0f, expp - B - N)) + 0.5f);
 
@@ -204,14 +204,14 @@ struct _NO_DISCARD_ Color {
 	operator String() const;
 
 	// For the binder.
-	_FORCE_INLINE_ void set_r8(int32_t r8) { r = (CLAMP(r8, 0, 255) / 255.0f); }
-	_FORCE_INLINE_ int32_t get_r8() const { return int32_t(CLAMP(Math::round(r * 255.0f), 0.0f, 255.0f)); }
-	_FORCE_INLINE_ void set_g8(int32_t g8) { g = (CLAMP(g8, 0, 255) / 255.0f); }
-	_FORCE_INLINE_ int32_t get_g8() const { return int32_t(CLAMP(Math::round(g * 255.0f), 0.0f, 255.0f)); }
-	_FORCE_INLINE_ void set_b8(int32_t b8) { b = (CLAMP(b8, 0, 255) / 255.0f); }
-	_FORCE_INLINE_ int32_t get_b8() const { return int32_t(CLAMP(Math::round(b * 255.0f), 0.0f, 255.0f)); }
-	_FORCE_INLINE_ void set_a8(int32_t a8) { a = (CLAMP(a8, 0, 255) / 255.0f); }
-	_FORCE_INLINE_ int32_t get_a8() const { return int32_t(CLAMP(Math::round(a * 255.0f), 0.0f, 255.0f)); }
+	_FORCE_INLINE_ void set_r8(int32_t r8) { r = (Math::clamp(r8, 0, 255) / 255.0f); }
+	_FORCE_INLINE_ int32_t get_r8() const { return int32_t(Math::clamp(Math::round(r * 255.0f), 0.0f, 255.0f)); }
+	_FORCE_INLINE_ void set_g8(int32_t g8) { g = (Math::clamp(g8, 0, 255) / 255.0f); }
+	_FORCE_INLINE_ int32_t get_g8() const { return int32_t(Math::clamp(Math::round(g * 255.0f), 0.0f, 255.0f)); }
+	_FORCE_INLINE_ void set_b8(int32_t b8) { b = (Math::clamp(b8, 0, 255) / 255.0f); }
+	_FORCE_INLINE_ int32_t get_b8() const { return int32_t(Math::clamp(Math::round(b * 255.0f), 0.0f, 255.0f)); }
+	_FORCE_INLINE_ void set_a8(int32_t a8) { a = (Math::clamp(a8, 0, 255) / 255.0f); }
+	_FORCE_INLINE_ int32_t get_a8() const { return int32_t(Math::clamp(Math::round(a * 255.0f), 0.0f, 255.0f)); }
 
 	_FORCE_INLINE_ void set_h(float p_h) { set_hsv(p_h, get_s(), get_v(), a); }
 	_FORCE_INLINE_ void set_s(float p_s) { set_hsv(get_h(), p_s, get_v(), a); }

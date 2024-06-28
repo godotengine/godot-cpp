@@ -71,19 +71,19 @@ struct _NO_DISCARD_ Vector4 {
 	Vector4::Axis max_axis_index() const;
 
 	Vector4 min(const Vector4 &p_vector4) const {
-		return Vector4(MIN(x, p_vector4.x), MIN(y, p_vector4.y), MIN(z, p_vector4.z), MIN(w, p_vector4.w));
+		return Vector4(Math::min(x, p_vector4.x), Math::min(y, p_vector4.y), Math::min(z, p_vector4.z), Math::min(w, p_vector4.w));
 	}
 
 	Vector4 minf(real_t p_scalar) const {
-		return Vector4(MIN(x, p_scalar), MIN(y, p_scalar), MIN(z, p_scalar), MIN(w, p_scalar));
+		return Vector4(Math::min(x, p_scalar), Math::min(y, p_scalar), Math::min(z, p_scalar), Math::min(w, p_scalar));
 	}
 
 	Vector4 max(const Vector4 &p_vector4) const {
-		return Vector4(MAX(x, p_vector4.x), MAX(y, p_vector4.y), MAX(z, p_vector4.z), MAX(w, p_vector4.w));
+		return Vector4(Math::max(x, p_vector4.x), Math::max(y, p_vector4.y), Math::max(z, p_vector4.z), Math::max(w, p_vector4.w));
 	}
 
 	Vector4 maxf(real_t p_scalar) const {
-		return Vector4(MAX(x, p_scalar), MAX(y, p_scalar), MAX(z, p_scalar), MAX(w, p_scalar));
+		return Vector4(Math::max(x, p_scalar), Math::max(y, p_scalar), Math::max(z, p_scalar), Math::max(w, p_scalar));
 	}
 
 	_FORCE_INLINE_ real_t length_squared() const;

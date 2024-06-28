@@ -55,27 +55,31 @@ namespace godot {
 #undef MAX
 #undef CLAMP
 
-// Generic ABS function, for math uses please use Math::abs.
+// DEPRECATED. Use `Math::abs` instead.
 template <typename T>
 constexpr T ABS(T m_v) {
 	return m_v < 0 ? -m_v : m_v;
 }
 
+// DEPRECATED. Use `Math::sign` instead.
 template <typename T>
 constexpr const T SIGN(const T m_v) {
 	return m_v == 0 ? 0.0f : (m_v < 0 ? -1.0f : +1.0f);
 }
 
+// DEPRECATED. Use `Math::min` instead.
 template <typename T, typename T2>
 constexpr auto MIN(const T m_a, const T2 m_b) {
 	return m_a < m_b ? m_a : m_b;
 }
 
+// DEPRECATED. Use `Math::max` instead.
 template <typename T, typename T2>
 constexpr auto MAX(const T m_a, const T2 m_b) {
 	return m_a > m_b ? m_a : m_b;
 }
 
+// DEPRECATED. Use `Math::clamp` instead.
 template <typename T, typename T2, typename T3>
 constexpr auto CLAMP(const T m_a, const T2 m_min, const T3 m_max) {
 	return m_a < m_min ? m_min : (m_a > m_max ? m_max : m_a);
@@ -539,34 +543,28 @@ inline float bezier_interpolate(float p_start, float p_control_1, float p_contro
 }
 
 template <typename T>
-inline T clamp(T x, T minv, T maxv) {
-	if (x < minv) {
-		return minv;
-	}
-	if (x > maxv) {
-		return maxv;
-	}
-	return x;
+constexpr T clamp(T x, T minv, T maxv) {
+	return x < minv ? minv : (x > maxv ? maxv : x);
 }
 
 template <typename T>
-inline T min(T a, T b) {
+constexpr T min(T a, T b) {
 	return a < b ? a : b;
 }
 
 template <typename T>
-inline T max(T a, T b) {
+constexpr T max(T a, T b) {
 	return a > b ? a : b;
 }
 
 template <typename T>
-inline T sign(T x) {
-	return static_cast<T>(SIGN(x));
+constexpr T sign(T x) {
+	return x > T(0) ? T(1) : (x < T(0) ? T(-1) : T(0));
 }
 
 template <typename T>
-inline T abs(T x) {
-	return std::abs(x);
+constexpr T abs(T x) {
+	return x == T(0) ? T(0) : (x < T(0) ? -x : x);
 }
 
 inline double deg_to_rad(double p_y) {
