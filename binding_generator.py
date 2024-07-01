@@ -2166,6 +2166,12 @@ def generate_utility_functions(api, output_dir):
     header.append("public:")
 
     for function in api["utility_functions"]:
+        if function["name"] == "is_instance_valid":
+            # The `is_instance_valid()` function doesn't work as developers expect, and unless used very
+            # carefully will cause crashes. Instead, developers should use `ObjectDB::get_instance()`
+            # with object ids to ensure that an instance is still valid.
+            continue
+
         vararg = "is_vararg" in function and function["is_vararg"]
 
         function_signature = "\t"
@@ -2200,6 +2206,9 @@ def generate_utility_functions(api, output_dir):
     source.append("")
 
     for function in api["utility_functions"]:
+        if function["name"] == "is_instance_valid":
+            continue
+
         vararg = "is_vararg" in function and function["is_vararg"]
 
         function_signature = make_signature("UtilityFunctions", function)
