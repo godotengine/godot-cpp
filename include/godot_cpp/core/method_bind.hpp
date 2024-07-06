@@ -132,7 +132,7 @@ public:
 		std::vector<GDExtensionClassMethodArgumentMetadata> vec;
 		// First element is return value
 		vec.reserve(argument_count + 1);
-		for (int i = 0; i < argument_count; i++) {
+		for (int i = 0; i < argument_count + 1; i++) {
 			vec.push_back(get_argument_metadata(i - 1));
 		}
 		return vec;
