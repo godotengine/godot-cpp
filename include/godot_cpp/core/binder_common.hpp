@@ -68,17 +68,17 @@ namespace godot {
 	template <>                                                                  \
 	struct VariantCaster<BitField<m_enum>> {                                     \
 		static _FORCE_INLINE_ BitField<m_enum> cast(const Variant &p_variant) {  \
-			return BitField<m_enum>(p_variant.operator int64_t());               \
+			return BitField<m_enum>(p_variant.operator uint64_t());              \
 		}                                                                        \
 	};                                                                           \
 	template <>                                                                  \
 	struct PtrToArg<BitField<m_enum>> {                                          \
 		_FORCE_INLINE_ static BitField<m_enum> convert(const void *p_ptr) {      \
-			return BitField<m_enum>(*reinterpret_cast<const int64_t *>(p_ptr));  \
+			return BitField<m_enum>(*reinterpret_cast<const uint64_t *>(p_ptr)); \
 		}                                                                        \
-		typedef int64_t EncodeT;                                                 \
+		typedef uint64_t EncodeT;                                                \
 		_FORCE_INLINE_ static void encode(BitField<m_enum> p_val, void *p_ptr) { \
-			*reinterpret_cast<int64_t *>(p_ptr) = p_val;                         \
+			*reinterpret_cast<uint64_t *>(p_ptr) = p_val;                        \
 		}                                                                        \
 	};                                                                           \
 	}
