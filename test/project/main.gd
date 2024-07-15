@@ -270,6 +270,12 @@ func _ready():
 	assert_equal(example_child.get_value1(), 11)
 	assert_equal(example_child.get_value2(), 22)
 
+	# Test that the extension's library path is absolute and valid.
+	var library_path = Example.test_library_path()
+	assert_equal(library_path.begins_with("res://"), false)
+	assert_equal(library_path, ProjectSettings.globalize_path(library_path))
+	assert_equal(FileAccess.file_exists(library_path), true)
+
 	exit_with_status()
 
 func _on_Example_custom_signal(signal_name, value):
