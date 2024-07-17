@@ -1,4 +1,3 @@
-import os
 import common_compiler_flags
 from SCons.Util import WhereIs
 

@@ -9,8 +9,8 @@ if len(sys.argv) < 2:
 
 fname = sys.argv[1]
 
-fileread = open(fname.strip(), "r")
-file_contents = fileread.read()
+with open(fname.strip(), "r", encoding="utf-8") as fileread:
+    file_contents = fileread.read()
 
 # If find "ERROR: AddressSanitizer:", then happens invalid read or write
 # This is critical bug, so we need to fix this as fast as possible
@@ -25,6 +25,8 @@ if (
     file_contents.find("Program crashed with signal") != -1
     or file_contents.find("Dumping the backtrace") != -1
     or file_contents.find("Segmentation fault (core dumped)") != -1
+    or file_contents.find("Aborted (core dumped)") != -1
+    or file_contents.find("terminate called without an active exception") != -1
 ):
     print("FATAL ERROR: Godot has been crashed.")
     sys.exit(52)

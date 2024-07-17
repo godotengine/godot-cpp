@@ -1,0 +1,9 @@
+{
+	"enabled_classes": [
+		"Control",
+		"Label",
+		"OS",
+		"TileMap",
+		"InputEventKey"
+	]
+}
