@@ -1,7 +1,7 @@
 import common_compiler_flags
 from SCons.Variables import *
 from SCons.Tool import clang, clangxx
-
+from SCons.Variables import BoolVariable
 
 def options(opts):
     opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler - only effective when targeting Linux", False))

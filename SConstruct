@@ -5,6 +5,7 @@ import platform
 import sys
 import subprocess
 from binding_generator import scons_generate_bindings, scons_emit_files
+from SCons.Variables import BoolVariable
 
 
 EnsureSConsVersion(4, 0)

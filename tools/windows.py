@@ -3,7 +3,7 @@ import my_spawn
 import common_compiler_flags
 from SCons.Tool import msvc, mingw
 from SCons.Variables import *
-
+from SCons.Variables import BoolVariable
 
 def options(opts):
     opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
