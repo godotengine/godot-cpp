@@ -31,10 +31,10 @@
 #ifndef GODOT_LOCAL_VECTOR_HPP
 #define GODOT_LOCAL_VECTOR_HPP
 
-#include "godot_cpp/core/error_macros.hpp"
-#include "godot_cpp/core/memory.hpp"
-#include "godot_cpp/templates/sort_array.hpp"
-#include "godot_cpp/templates/vector.hpp"
+#include <godot_cpp/core/error_macros.hpp>
+#include <godot_cpp/core/memory.hpp>
+#include <godot_cpp/templates/sort_array.hpp>
+#include <godot_cpp/templates/vector.hpp>
 
 #include <initializer_list>
 #include <type_traits>
