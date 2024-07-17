@@ -1,4 +1,4 @@
-from SCons.Variables import *
+from SCons.Variables import BoolVariable
 from SCons.Tool import clang, clangxx
 
 
