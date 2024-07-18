@@ -1,20 +1,10 @@
+import codecs
 import os
 import subprocess
 import sys
 
 import common_compiler_flags
 from SCons.Variables import BoolVariable
-
-if sys.version_info < (3,):
-
-    def decode_utf8(x):
-        return x
-
-else:
-    import codecs
-
-    def decode_utf8(x):
-        return codecs.utf_8_decode(x)[0]
 
 
 def has_ios_osxcross():
@@ -53,9 +43,9 @@ def generate(env):
     if sys.platform == "darwin":
         if env["IOS_SDK_PATH"] == "":
             try:
-                env["IOS_SDK_PATH"] = decode_utf8(
+                env["IOS_SDK_PATH"] = codecs.utf_8_decode(
                     subprocess.check_output(["xcrun", "--sdk", sdk_name, "--show-sdk-path"]).strip()
-                )
+                )[0]
             except (subprocess.CalledProcessError, OSError):
                 raise ValueError(
                     "Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name)
