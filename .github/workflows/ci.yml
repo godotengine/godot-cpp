@@ -99,8 +99,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Godot build cache
-        uses: ./.github/actions/godot-cache
+      - name: Restore Godot build cache
+        uses: ./.github/actions/godot-cache-restore
         with:
           cache-name: ${{ matrix.cache-name }}
         continue-on-error: true
@@ -152,6 +152,12 @@ jobs:
         run: |
           cd test
           scons platform=${{ matrix.platform }} verbose=yes target=template_release ${{ matrix.flags }}
+
+      - name: Save Godot build cache
+        uses: ./.github/actions/godot-cache-save
+        with:
+          cache-name: ${{ matrix.cache-name }}
+        continue-on-error: true
 
       - name: Download latest Godot artifacts
         uses: dsnopek/action-download-artifact@1322f74e2dac9feed2ee76a32d9ae1ca3b4cf4e9
