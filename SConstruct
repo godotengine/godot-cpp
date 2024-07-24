@@ -1,20 +1,10 @@
 #!/usr/bin/env python
 
+import codecs
 import os
 import sys
 import subprocess
 from binding_generator import scons_generate_bindings, scons_emit_files
-
-if sys.version_info < (3,):
-
-    def decode_utf8(x):
-        return x
-
-else:
-    import codecs
-
-    def decode_utf8(x):
-        return codecs.utf_8_decode(x)[0]
 
 
 # Workaround for MinGW. See:
@@ -258,7 +248,7 @@ elif env["platform"] == "ios":
         env.Append(CCFLAGS=["-miphoneos-version-min=10.0"])
 
     try:
-        sdk_path = decode_utf8(subprocess.check_output(["xcrun", "--sdk", sdk_name, "--show-sdk-path"]).strip())
+        sdk_path = codecs.utf_8_decode(subprocess.check_output(["xcrun", "--sdk", sdk_name, "--show-sdk-path"]).strip())[0]
     except (subprocess.CalledProcessError, OSError):
         raise ValueError("Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name))
 
