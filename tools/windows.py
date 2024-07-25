@@ -88,6 +88,8 @@ def generate(env):
             env["TARGET_ARCH"] = "amd64"
         elif env["arch"] == "x86_32":
             env["TARGET_ARCH"] = "x86"
+        else:
+            env["TARGET_ARCH"] = env["arch"]
         env["is_msvc"] = True
 
         # MSVC, linker, and archiver.
