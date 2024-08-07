@@ -736,6 +736,23 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("")
     result.append("public:")
 
+    if class_name == "Callable":
+        result.append("\tstruct CallError {")
+        result.append("\t\tenum Error {")
+        result.append("\t\t\tCALL_OK,")
+        result.append("\t\t\tCALL_ERROR_INVALID_METHOD,")
+        result.append("\t\t\tCALL_ERROR_INVALID_ARGUMENT,")
+        result.append("\t\t\tCALL_ERROR_TOO_MANY_ARGUMENTS,")
+        result.append("\t\t\tCALL_ERROR_TOO_FEW_ARGUMENTS,")
+        result.append("\t\t\tCALL_ERROR_INSTANCE_IS_NULL,")
+        result.append("\t\t\tCALL_ERROR_METHOD_NOT_CONST,")
+        result.append("\t\t};")
+        result.append("\t\tError error = Error::CALL_OK;")
+        result.append("\t\tint argument = 0;")
+        result.append("\t\tint expected = 0;")
+        result.append("\t};")
+        result.append("")
+
     result.append(
         f"\t_FORCE_INLINE_ GDExtensionTypePtr _native_ptr() const {{ return const_cast<uint8_t (*)[{snake_class_name}_SIZE]>(&opaque); }}"
     )
