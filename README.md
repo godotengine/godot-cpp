@@ -1,6 +1,6 @@
 # godot-cpp
 
-> **Warning**
+> [!WARNING]
 >
 > This repository's `master` branch is only usable with
 > [GDExtension](https://godotengine.org/article/introducing-gd-extensions)
@@ -49,18 +49,20 @@ Godot version.**
 
 ## Compatibility
 
-**Warning:** The GDExtension API is brand new in Godot 4.0, and is still
+> [!WARNING]
+>
+> The GDExtension API is brand new in Godot 4.0, and is still
 considered in **beta** stage, despite Godot 4.0 itself being released.
-
-This applies to both the GDExtension interface header, the API JSON, and this
+>
+> This applies to both the GDExtension interface header, the API JSON, and this
 first-party `godot-cpp` extension.
-
-Some compatibility breakage is to be expected as GDExtension and `godot-cpp`
-get more used, documented, and critical issues get resolved. See the
-[Godot issue tracker](https://github.com/godotengine/godot/issues?q=is%3Aissue+is%3Aopen+label%3Atopic%3Agdextension)
-and the [godot-cpp issue tracker](https://github.com/godotengine/godot-cpp/issues)
-for a list of known issues, and be sure to provide feedback on issues and PRs
-which affect your use of this extension.
+>
+> Some compatibility breakage is to be expected as GDExtension and `godot-cpp`
+> get more used, documented, and critical issues get resolved. See the
+> [Godot issue tracker](https://github.com/godotengine/godot/issues?q=is%3Aissue+is%3Aopen+label%3Atopic%3Agdextension)
+> and the [godot-cpp issue tracker](https://github.com/godotengine/godot-cpp/issues)
+> for a list of known issues, and be sure to provide feedback on issues and PRs
+> which affect your use of this extension.
 
 ## Contributing
 
