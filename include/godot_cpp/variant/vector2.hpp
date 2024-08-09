@@ -88,19 +88,19 @@ struct _NO_DISCARD_ Vector2 {
 	Vector2 limit_length(const real_t p_len = 1.0) const;
 
 	Vector2 min(const Vector2 &p_vector2) const {
-		return Vector2(MIN(x, p_vector2.x), MIN(y, p_vector2.y));
+		return Vector2(Math::min(x, p_vector2.x), Math::min(y, p_vector2.y));
 	}
 
 	Vector2 minf(real_t p_scalar) const {
-		return Vector2(MIN(x, p_scalar), MIN(y, p_scalar));
+		return Vector2(Math::min(x, p_scalar), Math::min(y, p_scalar));
 	}
 
 	Vector2 max(const Vector2 &p_vector2) const {
-		return Vector2(MAX(x, p_vector2.x), MAX(y, p_vector2.y));
+		return Vector2(Math::max(x, p_vector2.x), Math::max(y, p_vector2.y));
 	}
 
 	Vector2 maxf(real_t p_scalar) const {
-		return Vector2(MAX(x, p_scalar), MAX(y, p_scalar));
+		return Vector2(Math::max(x, p_scalar), Math::max(y, p_scalar));
 	}
 
 	real_t distance_to(const Vector2 &p_vector2) const;

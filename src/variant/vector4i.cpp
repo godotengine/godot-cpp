@@ -77,18 +77,18 @@ Vector4i::Axis Vector4i::max_axis_index() const {
 
 Vector4i Vector4i::clamp(const Vector4i &p_min, const Vector4i &p_max) const {
 	return Vector4i(
-			CLAMP(x, p_min.x, p_max.x),
-			CLAMP(y, p_min.y, p_max.y),
-			CLAMP(z, p_min.z, p_max.z),
-			CLAMP(w, p_min.w, p_max.w));
+			Math::clamp(x, p_min.x, p_max.x),
+			Math::clamp(y, p_min.y, p_max.y),
+			Math::clamp(z, p_min.z, p_max.z),
+			Math::clamp(w, p_min.w, p_max.w));
 }
 
 Vector4i Vector4i::clampi(int32_t p_min, int32_t p_max) const {
 	return Vector4i(
-			CLAMP(x, p_min, p_max),
-			CLAMP(y, p_min, p_max),
-			CLAMP(z, p_min, p_max),
-			CLAMP(w, p_min, p_max));
+			Math::clamp(x, p_min, p_max),
+			Math::clamp(y, p_min, p_max),
+			Math::clamp(z, p_min, p_max),
+			Math::clamp(w, p_min, p_max));
 }
 
 Vector4i::operator String() const {

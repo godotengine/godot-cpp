@@ -49,16 +49,16 @@ Vector3 Vector3::rotated(const Vector3 &p_axis, const real_t p_angle) const {
 
 Vector3 Vector3::clamp(const Vector3 &p_min, const Vector3 &p_max) const {
 	return Vector3(
-			CLAMP(x, p_min.x, p_max.x),
-			CLAMP(y, p_min.y, p_max.y),
-			CLAMP(z, p_min.z, p_max.z));
+			Math::clamp(x, p_min.x, p_max.x),
+			Math::clamp(y, p_min.y, p_max.y),
+			Math::clamp(z, p_min.z, p_max.z));
 }
 
 Vector3 Vector3::clampf(real_t p_min, real_t p_max) const {
 	return Vector3(
-			CLAMP(x, p_min, p_max),
-			CLAMP(y, p_min, p_max),
-			CLAMP(z, p_min, p_max));
+			Math::clamp(x, p_min, p_max),
+			Math::clamp(y, p_min, p_max),
+			Math::clamp(z, p_min, p_max));
 }
 
 void Vector3::snap(const Vector3 p_step) {
@@ -122,7 +122,7 @@ Vector2 Vector3::octahedron_encode() const {
 Vector3 Vector3::octahedron_decode(const Vector2 &p_oct) {
 	Vector2 f(p_oct.x * 2.0f - 1.0f, p_oct.y * 2.0f - 1.0f);
 	Vector3 n(f.x, f.y, 1.0f - Math::abs(f.x) - Math::abs(f.y));
-	float t = CLAMP(-n.z, 0.0f, 1.0f);
+	float t = Math::clamp<real_t>(-n.z, 0, 1);
 	n.x += n.x >= 0 ? -t : t;
 	n.y += n.y >= 0 ? -t : t;
 	return n.normalized();
