@@ -161,6 +161,7 @@ MAKE_PTRARG(PackedFloat64Array);
 MAKE_PTRARG(PackedStringArray);
 MAKE_PTRARG(PackedVector2Array);
 MAKE_PTRARG(PackedVector3Array);
+MAKE_PTRARG(PackedVector4Array);
 MAKE_PTRARG(PackedColorArray);
 MAKE_PTRARG_BY_REFERENCE(Variant);
 
