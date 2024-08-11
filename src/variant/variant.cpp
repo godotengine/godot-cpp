@@ -66,6 +66,7 @@ void Variant::init_bindings() {
 	PackedStringArray::init_bindings();
 	PackedVector2Array::init_bindings();
 	PackedVector3Array::init_bindings();
+	PackedVector4Array::init_bindings();
 	PackedColorArray::init_bindings();
 }
 
