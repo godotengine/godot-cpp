@@ -124,10 +124,6 @@ else()
 	endif()
 endif()
 
-if (GODOT_ENABLE_HOT_RELOAD)
-    set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -D HOT_RELOAD_ENABLED")
-endif()
-
 # Generate source from the bindings file
 find_package(Python3 3.4 REQUIRED) # pathlib should be present
 if(GENERATE_TEMPLATE_GET_NODE)
@@ -169,6 +165,11 @@ target_compile_features(${PROJECT_NAME}
 	PRIVATE
 		cxx_std_17
 )
+
+if(GODOT_ENABLE_HOT_RELOAD)
+	target_compile_definitions(${PROJECT_NAME} PUBLIC HOT_RELOAD_ENABLED)
+	target_compile_options(${PROJECT_NAME} PUBLIC $<${compiler_is_gnu}:-fno-gnu-unique>)
+endif()
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC
 	$<$<CONFIG:Debug>:
