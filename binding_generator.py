@@ -1918,11 +1918,17 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             )
             method_call = "\t"
             has_return = "return_value" in method and method["return_value"]["type"] != "void"
+            has_meta = "return_value" in method and "meta" in method["return_value"]
 
             if has_return:
-                result.append(
-                    f'\tCHECK_METHOD_BIND_RET(_gde_method_bind, {get_default_value_for_type(method["return_value"]["type"])});'
-                )
+                if has_meta:
+                    result.append(
+                        f'\tCHECK_METHOD_BIND_RET(_gde_method_bind, {get_default_value_for_type(method["return_value"]["type"], method["return_value"]["meta"])});'
+                    )
+                else:
+                    result.append(
+                        f'\tCHECK_METHOD_BIND_RET(_gde_method_bind, {get_default_value_for_type(method["return_value"]["type"])});'
+                    )
             else:
                 result.append("\tCHECK_METHOD_BIND(_gde_method_bind);")
 
@@ -2708,15 +2714,9 @@ def correct_default_value(value, type_name):
     return value
 
 
-def correct_typed_array(type_name):
-    if type_name.startswith("typedarray::"):
-        return type_name.replace("typedarray::", "TypedArray<") + ">"
-    return type_name
-
-
 def correct_type(type_name, meta=None, use_alias=True):
     type_conversion = {"float": "double", "int": "int64_t", "Nil": "Variant"}
-    if meta is not None:
+    if meta is not None and not type_name.startswith("typedarray::"):
         if "int" in meta:
             return f"{meta}_t"
         elif meta in type_conversion:
@@ -2726,7 +2726,10 @@ def correct_type(type_name, meta=None, use_alias=True):
     if type_name in type_conversion:
         return type_conversion[type_name]
     if type_name.startswith("typedarray::"):
-        return type_name.replace("typedarray::", "TypedArray<") + ">"
+        elem_type = type_name[len("typedarray::") :]
+        if meta is not None:
+            elem_type = correct_type(elem_type, meta)
+        return "TypedArray<" + elem_type + ">"
     if is_enum(type_name):
         if is_bitfield(type_name):
             base_class = get_enum_class(type_name)
@@ -2832,7 +2835,7 @@ def get_operator_id_name(op):
     return op_id_map[op]
 
 
-def get_default_value_for_type(type_name):
+def get_default_value_for_type(type_name, meta=None):
     if type_name == "int":
         return "0"
     if type_name == "float":
@@ -2840,7 +2843,7 @@ def get_default_value_for_type(type_name):
     if type_name == "bool":
         return "false"
     if type_name.startswith("typedarray::"):
-        return f"{correct_type(type_name)}()"
+        return f"{correct_type(type_name, meta)}()"
     if is_enum(type_name):
         return f"{correct_type(type_name)}(0)"
     if is_variant(type_name):
