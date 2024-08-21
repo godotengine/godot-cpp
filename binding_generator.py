@@ -738,14 +738,14 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     if "operators" in builtin_api:
         for operator in builtin_api["operators"]:
-            if operator["name"] not in ["in", "xor"]:
+            if is_valid_cpp_operator(operator["name"]):
                 if "right_type" in operator:
                     result.append(
-                        f'\t{correct_type(operator["return_type"])} operator{operator["name"]}({type_for_parameter(operator["right_type"])}p_other) const;'
+                        f'\t{correct_type(operator["return_type"])} operator{get_operator_cpp_name(operator["name"])}({type_for_parameter(operator["right_type"])}p_other) const;'
                     )
                 else:
                     result.append(
-                        f'\t{correct_type(operator["return_type"])} operator{operator["name"].replace("unary", "")}() const;'
+                        f'\t{correct_type(operator["return_type"])} operator{get_operator_cpp_name(operator["name"])}() const;'
                     )
 
     # Copy assignment.
@@ -1182,10 +1182,10 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 
     if "operators" in builtin_api:
         for operator in builtin_api["operators"]:
-            if operator["name"] not in ["in", "xor"]:
+            if is_valid_cpp_operator(operator["name"]):
                 if "right_type" in operator:
                     result.append(
-                        f'{correct_type(operator["return_type"])} {class_name}::operator{operator["name"]}({type_for_parameter(operator["right_type"])}p_other) const {{'
+                        f'{correct_type(operator["return_type"])} {class_name}::operator{get_operator_cpp_name(operator["name"])}({type_for_parameter(operator["right_type"])}p_other) const {{'
                     )
                     (encode, arg_name) = get_encoded_arg("other", operator["right_type"], None)
                     result += encode
@@ -1195,7 +1195,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
                     result.append("}")
                 else:
                     result.append(
-                        f'{correct_type(operator["return_type"])} {class_name}::operator{operator["name"].replace("unary", "")}() const {{'
+                        f'{correct_type(operator["return_type"])} {class_name}::operator{get_operator_cpp_name(operator["name"])}() const {{'
                     )
                     result.append(
                         f'\treturn internal::_call_builtin_operator_ptr<{get_gdextension_type(correct_type(operator["return_type"]))}>(_method_bindings.operator_{get_operator_id_name(operator["name"])}, (GDExtensionConstTypePtr)&opaque, (GDExtensionConstTypePtr) nullptr);'
@@ -2731,6 +2731,38 @@ def get_operator_id_name(op):
         "in": "in",
     }
     return op_id_map[op]
+
+
+def get_operator_cpp_name(op):
+    op_cpp_map = {
+        "==": "==",
+        "!=": "!=",
+        "<": "<",
+        "<=": "<=",
+        ">": ">",
+        ">=": ">=",
+        "+": "+",
+        "-": "-",
+        "*": "*",
+        "/": "/",
+        "unary-": "-",
+        "unary+": "+",
+        "%": "%",
+        "<<": "<<",
+        ">>": ">>",
+        "&": "&",
+        "|": "|",
+        "^": "^",
+        "~": "~",
+        "and": "&&",
+        "or": "||",
+        "not": "!",
+    }
+    return op_cpp_map[op]
+
+
+def is_valid_cpp_operator(op):
+    return op not in ["**", "xor", "in"]
 
 
 def get_default_value_for_type(type_name):
