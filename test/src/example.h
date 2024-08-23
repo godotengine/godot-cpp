@@ -126,6 +126,7 @@ public:
 	String test_string_ops() const;
 	String test_str_utility() const;
 	bool test_string_is_forty_two(const String &p_str) const;
+	TypedArray<PackedInt32Array> test_typed_array_of_packed() const;
 	int test_vector_ops() const;
 	int test_vector_init_list() const;
 
