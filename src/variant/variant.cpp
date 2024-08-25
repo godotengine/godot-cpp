@@ -441,7 +441,10 @@ Variant::operator Object *() const {
 	if (obj == nullptr) {
 		return nullptr;
 	}
-	return internal::get_object_instance_binding(obj);
+	Object* ret = internal::get_object_instance_binding(obj);
+	if(!ret->_owner)
+		ret->_owner = obj;
+	return ret;
 }
 
 Variant::operator ObjectID() const {
