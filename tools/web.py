@@ -39,7 +39,7 @@ def generate(env):
         env.Append(LINKFLAGS=["-sUSE_PTHREADS=1"])
 
     # Build as side module (shared library).
-    env.Append(CPPFLAGS=["-sSIDE_MODULE=1"])
+    env.Append(CCFLAGS=["-sSIDE_MODULE=1"])
     env.Append(LINKFLAGS=["-sSIDE_MODULE=1"])
 
     # Force wasm longjmp mode.
