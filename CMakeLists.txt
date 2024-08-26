@@ -35,6 +35,10 @@
 # Generate the buildfiles in a sub directory to not clutter the root directory with build files:
 # mkdir build && cd build && cmake -G "Unix Makefiles" .. && cmake --build .
 #
+# Ensure that you avoid exposing godot-cpp symbols - this might lead to hard to debug errors if you ever load multiple
+# plugins using difference godot-cpp versions. Use visibility hidden whenever possible:
+# set_target_properties(<all-my-plugin-related-targets> PROPERTIES CXX_VISIBILITY_PRESET hidden)
+#
 # Todo
 # Test build for Windows, Mac and mingw.
 
@@ -222,6 +226,7 @@ set_target_properties(${PROJECT_NAME}
 	PROPERTIES
 		CXX_EXTENSIONS OFF
 		POSITION_INDEPENDENT_CODE ON
+		CXX_VISIBILITY_PRESET hidden
 		ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
