@@ -25,6 +25,17 @@ jobs:
             godot_zip: Godot_v3.5-stable_linux_server.64.zip
             executable: Godot_v3.5-stable_linux_server.64
             cache-name: linux-x86_64
+            build-system: scons
+
+          - name: 🐧 Linux (GCC, CMake)
+            os: ubuntu-20.04
+            platform: linux
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
+            artifact-path: bin/libgodot-cpp.linux.release.64.a
+            godot_zip: Godot_v3.5-stable_linux_server.64.zip
+            executable: Godot_v3.5-stable_linux_server.64
+            cache-name: linux-x86_64-cmake
+            build-system: cmake
 
           - name: 🏁 Windows (x86_64, MSVC)
             os: windows-2022
@@ -32,6 +43,7 @@ jobs:
             artifact-name: godot-cpp-windows-msvc2019-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.release.64.lib
             cache-name: windows-x86_64-msvc
+            build-system: scons
 
           - name: 🏁 Windows (x86_64, MinGW)
             os: windows-2022
@@ -40,6 +52,7 @@ jobs:
             artifact-path: bin/libgodot-cpp.windows.release.64.a
             flags: use_mingw=yes
             cache-name: windows-x86_64-mingw
+            build-system: scons
 
           - name: 🍎 macOS (universal)
             os: macos-13
@@ -50,6 +63,7 @@ jobs:
             godot_zip: Godot_v3.5-stable_osx.universal.zip
             executable: Godot.app/Contents/MacOS/Godot
             cache-name: macos-unversal
+            build-system: scons
 
           - name: 🤖 Android (arm64)
             os: ubuntu-20.04
@@ -58,6 +72,7 @@ jobs:
             artifact-path: bin/libgodot-cpp.android.release.arm64v8.a
             flags: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME android_arch=arm64v8
             cache-name: android-arm64
+            build-system: scons
 
           - name: 🍏 iOS (arm64)
             os: macos-13
@@ -65,6 +80,7 @@ jobs:
             artifact-name: godot-cpp-ios-arm64-release
             artifact-path: bin/libgodot-cpp.ios.release.arm64.a
             cache-name: ios-arm64
+            build-system: scons
 
     env:
       SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
@@ -81,7 +97,7 @@ jobs:
           cache-name: ${{ matrix.cache-name }}
         continue-on-error: true
 
-      - name: Set up Python (for SCons)
+      - name: Set up Python (for SCons and binding generator)
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
@@ -93,8 +109,14 @@ jobs:
           sudo apt-get install -qqq build-essential pkg-config
 
       - name: Install scons
+        if: ${{ matrix.build-system == 'scons' }}
         run: |
           python -m pip install scons
+
+      - name: Install cmake
+        if: ${{ matrix.platform == 'linux' && matrix.build-system == 'cmake' }}
+        run: |
+          sudo apt-get install -qqq cmake
 
       - name: Windows dependency (MinGW)
         if: ${{ matrix.platform == 'windows' }}
@@ -103,18 +125,42 @@ jobs:
           version: 12.2.0
 
       - name: Build godot-cpp (debug)
+        if: ${{ matrix.build-system == 'scons' }}
         run: |
           scons platform=${{ matrix.platform }} target=debug ${{ matrix.flags }}
 
+      - name: Build godot-cpp (debug)
+        if: ${{ matrix.build-system == 'cmake' }}
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Debug .
+          make -j $(nproc)
+
       - name: Build test without rebuilding godot-cpp (debug)
+        if: ${{ matrix.build-system == 'scons' }}
         run: |
           cd test
           scons platform=${{ matrix.platform }} target=debug ${{ matrix.flags }} build_library=no
 
+      - name: Build test without rebuilding godot-cpp (debug)
+        if: ${{ matrix.build-system == 'cmake' }}
+        run: |
+          cd test && cmake -DCMAKE_BUILD_TYPE=Debug .
+          make -j $(nproc)
+
       - name: Build test and godot-cpp (release)
+        if: ${{ matrix.build-system == 'scons' }}
         run: |
           cd test
           scons platform=${{ matrix.platform }} target=release ${{ matrix.flags }}
+
+      - name: Build test and godot-cpp (release)
+        if: ${{ matrix.build-system == 'cmake' }}
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release .
+          make -j $(nproc)         
+          cd test
+          cmake -DCMAKE_BUILD_TYPE=Release .
+          make -j $(nproc)    
 
       - name: Run test GDNative library
         if: ${{ matrix.platform == 'linux' || matrix.platform == 'osx' }}
