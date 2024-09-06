@@ -273,4 +273,14 @@ public:
 	~ExampleRuntime();
 };
 
+class ExamplePrzykład : public RefCounted {
+	GDCLASS(ExamplePrzykład, RefCounted);
+
+protected:
+	static void _bind_methods();
+
+public:
+	String get_the_word() const;
+};
+
 #endif // EXAMPLE_CLASS_H
