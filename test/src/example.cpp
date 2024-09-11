@@ -238,6 +238,8 @@ void Example::_bind_methods() {
 	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
 	ClassDB::bind_static_method("Example", D_METHOD("test_static2"), &Example::test_static2);
 
+	ClassDB::bind_static_method("Example", D_METHOD("test_library_path"), &Example::test_library_path);
+
 	{
 		MethodInfo mi;
 		mi.arguments.push_back(PropertyInfo(Variant::STRING, "some_argument"));
@@ -674,4 +676,10 @@ void ExampleChild::_notification(int p_what) {
 
 String Example::test_use_engine_singleton() const {
 	return OS::get_singleton()->get_name();
+}
+
+String Example::test_library_path() {
+	String library_path;
+	internal::gdextension_interface_get_library_path(internal::library, library_path._native_ptr());
+	return library_path;
 }

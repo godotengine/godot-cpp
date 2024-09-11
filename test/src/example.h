@@ -185,6 +185,8 @@ public:
 	virtual void _input(const Ref<InputEvent> &event) override;
 
 	String test_use_engine_singleton() const;
+
+	static String test_library_path();
 };
 
 VARIANT_ENUM_CAST(Example::Constants);
