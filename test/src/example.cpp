@@ -204,6 +204,7 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_str_utility"), &Example::test_str_utility);
 	ClassDB::bind_method(D_METHOD("test_string_is_forty_two"), &Example::test_string_is_forty_two);
 	ClassDB::bind_method(D_METHOD("test_string_resize"), &Example::test_string_resize);
+	ClassDB::bind_method(D_METHOD("test_typed_array_of_packed"), &Example::test_typed_array_of_packed);
 	ClassDB::bind_method(D_METHOD("test_vector_ops"), &Example::test_vector_ops);
 	ClassDB::bind_method(D_METHOD("test_vector_init_list"), &Example::test_vector_init_list);
 
@@ -247,6 +248,8 @@ void Example::_bind_methods() {
 
 	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
 	ClassDB::bind_static_method("Example", D_METHOD("test_static2"), &Example::test_static2);
+
+	ClassDB::bind_static_method("Example", D_METHOD("test_library_path"), &Example::test_library_path);
 
 	{
 		MethodInfo mi;
@@ -422,6 +425,19 @@ String Example::test_string_resize(String p_string) const {
 	data[orig_len + 1] = '?';
 	data[orig_len + 2] = '\0';
 	return p_string;
+}
+
+TypedArray<PackedInt32Array> Example::test_typed_array_of_packed() const {
+	TypedArray<PackedInt32Array> arr;
+	PackedInt32Array packed_arr1;
+	packed_arr1.push_back(1);
+	packed_arr1.push_back(2);
+	arr.push_back(packed_arr1);
+	PackedInt32Array packed_arr2;
+	packed_arr2.push_back(3);
+	packed_arr2.push_back(4);
+	arr.push_back(packed_arr2);
+	return arr;
 }
 
 int Example::test_vector_ops() const {
@@ -693,6 +709,12 @@ String Example::test_virtual_implemented_in_script(const String &p_name, int p_v
 
 String Example::test_use_engine_singleton() const {
 	return OS::get_singleton()->get_name();
+}
+
+String Example::test_library_path() {
+	String library_path;
+	internal::gdextension_interface_get_library_path(internal::library, library_path._native_ptr());
+	return library_path;
 }
 
 void ExampleRuntime::_bind_methods() {
