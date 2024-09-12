@@ -49,6 +49,18 @@ option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class
 option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." ON)
 option(GODOT_CPP_WARNING_AS_ERROR "Treat warnings as errors" OFF)
 
+set( GODOT_SYMBOL_VISIBILITY "hidden" CACHE STRING "Symbols visibility on GNU platforms. Use 'auto' to apply the default value. (auto|visible|hidden)")
+set_property( CACHE GODOT_SYMBOL_VISIBILITY PROPERTY STRINGS "auto;visible;hidden" )
+
+# CXX_VISIBILITY_PRESET supported values are: default, hidden, protected, and internal
+# which is inline with the gcc -fvisibility=
+# https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html
+# To match the scons options we need to change the text to match the -fvisibility flag
+# it is probably worth another PR which changes both to use the flag options
+if( ${GODOT_SYMBOL_VISIBILITY} STREQUAL "auto" OR ${GODOT_SYMBOL_VISIBILITY} STREQUAL "visible" )
+    set( GODOT_SYMBOL_VISIBILITY "default" )
+endif ()
+
 # Add path to modules
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
 
@@ -226,7 +238,7 @@ set_target_properties(${PROJECT_NAME}
 	PROPERTIES
 		CXX_EXTENSIONS OFF
 		POSITION_INDEPENDENT_CODE ON
-		CXX_VISIBILITY_PRESET hidden
+		CXX_VISIBILITY_PRESET ${GODOT_SYMBOL_VISIBILITY}
 		ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
