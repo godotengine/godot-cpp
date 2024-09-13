@@ -89,6 +89,6 @@ function( set_warning_as_error )
     endif()
 endfunction()
 
-if ( GODOT_CPP_WARNING_AS_ERROR )
+if ( GODOT_WARNING_AS_ERROR )
     set_warning_as_error()
 endif()
