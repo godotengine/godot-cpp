@@ -1,19 +1,19 @@
 # cmake arguments
-# CMAKE_BUILD_TYPE:			Compilation target (Debug or Release defaults to Debug)
+# CMAKE_BUILD_TYPE:         Compilation target (Debug or Release defaults to Debug)
 #
 # godot-cpp cmake arguments
-# GODOT_GDEXTENSION_DIR:		Path to the directory containing GDExtension interface header and API JSON file
-# GODOT_CPP_SYSTEM_HEADERS		Mark the header files as SYSTEM. This may be useful to suppress warnings in projects including this one.
-# GODOT_CPP_WARNING_AS_ERROR	Treat any warnings as errors
-# GODOT_ENABLE_HOT_RELOAD       Build with hot reload support. Defaults to YES for Debug-builds and NO for Release-builds.
-# GODOT_CUSTOM_API_FILE:		Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
-# FLOAT_PRECISION:				Floating-point precision level ("single", "double")
+# GODOT_GDEXTENSION_DIR:    Path to the directory containing GDExtension interface header and API JSON file
+# GODOT_SYSTEM_HEADERS:     Mark the header files as SYSTEM. This may be useful to suppress warnings in projects including this one.
+# GODOT_WARNING_AS_ERROR:   Treat any warnings as errors
+# GODOT_USE_HOT_RELOAD:     Build with hot reload support. Defaults to YES for Debug-builds and NO for Release-builds.
+# GODOT_CUSTOM_API_FILE:    Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)
+# GODOT_PRECISION:          Floating-point precision level ("single", "double")
 #
 # Android cmake arguments
-# CMAKE_TOOLCHAIN_FILE:		The path to the android cmake toolchain ($ANDROID_NDK/build/cmake/android.toolchain.cmake)
-# ANDROID_NDK:				The path to the android ndk root folder
-# ANDROID_TOOLCHAIN_NAME:	The android toolchain (arm-linux-androideabi-4.9 or aarch64-linux-android-4.9 or x86-4.9 or x86_64-4.9)
-# ANDROID_PLATFORM:			The android platform version (android-23)
+# CMAKE_TOOLCHAIN_FILE:     The path to the android cmake toolchain ($ANDROID_NDK/build/cmake/android.toolchain.cmake)
+# ANDROID_NDK:              The path to the android ndk root folder
+# ANDROID_TOOLCHAIN_NAME:   The android toolchain (arm-linux-androideabi-4.9 or aarch64-linux-android-4.9 or x86-4.9 or x86_64-4.9)
+# ANDROID_PLATFORM:         The android platform version (android-23)
 # More info here: https://godot.readthedocs.io/en/latest/development/compiling/compiling_for_android.html
 #
 # Examples
@@ -45,9 +45,9 @@
 cmake_minimum_required(VERSION 3.13)
 project(godot-cpp LANGUAGES CXX)
 
-option(GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node." ON)
-option(GODOT_CPP_SYSTEM_HEADERS "Expose headers as SYSTEM." ON)
-option(GODOT_CPP_WARNING_AS_ERROR "Treat warnings as errors" OFF)
+option(GODOT_GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node. (ON|OFF)" ON)
+option(GODOT_SYSTEM_HEADERS "Expose headers as SYSTEM." ON)
+option(GODOT_WARNING_AS_ERROR "Treat warnings as errors" OFF)
 
 set( GODOT_SYMBOL_VISIBILITY "hidden" CACHE STRING "Symbols visibility on GNU platforms. Use 'auto' to apply the default value. (auto|visible|hidden)")
 set_property( CACHE GODOT_SYMBOL_VISIBILITY PROPERTY STRINGS "auto;visible;hidden" )
@@ -76,9 +76,9 @@ endif()
 
 # Hot reload is enabled by default in Debug-builds
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    option(GODOT_ENABLE_HOT_RELOAD "Build with hot reload support" ON)
+    option(GODOT_USE_HOT_RELOAD "Enable the extra accounting required to support hot reload. (ON|OFF)" ON)
 else()
-    option(GODOT_ENABLE_HOT_RELOAD "Build with hot reload support" OFF)
+    option(GODOT_USE_HOT_RELOAD "Enable the extra accounting required to support hot reload. (ON|OFF)" OFF)
 endif()
 
 if(NOT DEFINED BITS)
@@ -89,20 +89,22 @@ if(NOT DEFINED BITS)
 endif()
 
 # Input from user for GDExtension interface header and the API JSON file
-set(GODOT_GDEXTENSION_DIR "gdextension" CACHE STRING "")
-set(GODOT_CUSTOM_API_FILE "" CACHE STRING "")
+set(GODOT_GDEXTENSION_DIR "gdextension" CACHE PATH
+        "Path to a custom directory containing GDExtension interface header and API JSON file ( /path/to/gdextension_dir )" )
+set(GODOT_CUSTOM_API_FILE "" CACHE FILEPATH
+        "Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`) ( /path/to/custom_api_file )")
 
 set(GODOT_GDEXTENSION_API_FILE "${GODOT_GDEXTENSION_DIR}/extension_api.json")
 if (NOT "${GODOT_CUSTOM_API_FILE}" STREQUAL "")  # User-defined override.
 	set(GODOT_GDEXTENSION_API_FILE "${GODOT_CUSTOM_API_FILE}")
 endif()
 
-set(FLOAT_PRECISION "single" CACHE STRING "")
-if ("${FLOAT_PRECISION}" STREQUAL "double")
+set(GODOT_PRECISION "single" CACHE STRING "Set the floating-point precision level (single|double)")
+if ("${GODOT_PRECISION}" STREQUAL "double")
 	add_definitions(-DREAL_T_IS_DOUBLE)
 endif()
 
-set(GODOT_COMPILE_FLAGS )
+set( GODOT_COMPILE_FLAGS )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	# using Visual Studio C++
@@ -127,7 +129,7 @@ endif()
 
 # Disable exception handling. Godot doesn't use exceptions anywhere, and this
 # saves around 20% of binary size and very significant build time (GH-80513).
-option(GODOT_DISABLE_EXCEPTIONS ON "Force disabling exception handling code")
+option(GODOT_DISABLE_EXCEPTIONS "Force disabling exception handling code (ON|OFF)" ON )
 if (GODOT_DISABLE_EXCEPTIONS)
 	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -D_HAS_EXCEPTIONS=0")
@@ -142,7 +144,7 @@ endif()
 
 # Generate source from the bindings file
 find_package(Python3 3.4 REQUIRED) # pathlib should be present
-if(GENERATE_TEMPLATE_GET_NODE)
+if(GODOT_GENERATE_TEMPLATE_GET_NODE)
 	set(GENERATE_BINDING_PARAMETERS "True")
 else()
 	set(GENERATE_BINDING_PARAMETERS "False")
@@ -155,7 +157,7 @@ execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; 
 )
 
 add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
-		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_GDEXTENSION_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${BITS}\", \"${FLOAT_PRECISION}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
+		COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_GDEXTENSION_API_FILE}\", \"${GENERATE_BINDING_PARAMETERS}\", \"${BITS}\", \"${GODOT_PRECISION}\", \"${CMAKE_CURRENT_BINARY_DIR}\")"
 		VERBATIM
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		MAIN_DEPENDENCY ${GODOT_GDEXTENSION_API_FILE}
@@ -182,7 +184,7 @@ target_compile_features(${PROJECT_NAME}
 		cxx_std_17
 )
 
-if(GODOT_ENABLE_HOT_RELOAD)
+if(GODOT_USE_HOT_RELOAD)
 	target_compile_definitions(${PROJECT_NAME} PUBLIC HOT_RELOAD_ENABLED)
 	target_compile_options(${PROJECT_NAME} PUBLIC $<${compiler_is_gnu}:-fno-gnu-unique>)
 endif()
@@ -206,12 +208,12 @@ target_link_options(${PROJECT_NAME} PRIVATE
 )
 
 # Optionally mark headers as SYSTEM
-set(GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE "")
-if (GODOT_CPP_SYSTEM_HEADERS)
-	set(GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE SYSTEM)
+set(GODOT_SYSTEM_HEADERS_ATTRIBUTE "")
+if (GODOT_SYSTEM_HEADERS)
+	set(GODOT_SYSTEM_HEADERS_ATTRIBUTE SYSTEM)
 endif ()
 
-target_include_directories(${PROJECT_NAME} ${GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE} PUBLIC
+target_include_directories(${PROJECT_NAME} ${GODOT_SYSTEM_HEADERS_ATTRIBUTE} PUBLIC
 	include
 	${CMAKE_CURRENT_BINARY_DIR}/gen/include
 	${GODOT_GDEXTENSION_DIR}
