@@ -46,7 +46,7 @@ jobs:
 
           - name: CMake
             generate_sources: |
-              cmake {0} -DCMAKE_C_COMPILER_LAUNCHER=ccache -D CMAKE_CXX_COMPILER_LAUNCHER=ccache -B build test
+              cmake {0} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -B build test
 
             build_godot_cpp_debug: |
               cmake --build build --config Debug --target godot-cpp -v
@@ -83,7 +83,7 @@ jobs:
               CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.linux.template_release.double.x86_64.a
             flags:
               SCons: platform=linux precision=double
-              CMake: -G "Ninja Multi-Config" -DGODOT_FLOAT_PRECISION=DOUBLE
+              CMake: -G "Ninja Multi-Config" -DGODOT_PRECISION=DOUBLE
             run-tests: false
             cache-name: linux-x86_64-f64
 
