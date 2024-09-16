@@ -49,20 +49,22 @@ Godot version.**
 
 ## Compatibility
 
-> [!WARNING]
->
-> The GDExtension API is brand new in Godot 4.0, and is still
-considered in **beta** stage, despite Godot 4.0 itself being released.
->
-> This applies to both the GDExtension interface header, the API JSON, and this
+Due to the intricacies of working with [ABIs](https://en.wikipedia.org/wiki/Application_binary_interface),
+compatibility with GDExtension is not as strictly guaranteed as with GDScript or C#.
+Current limitations in the GDExtension system may also require compatibility-breaking changes
+to be lifted. This applies to both the GDExtension interface header, the API JSON, and this
 first-party `godot-cpp` extension.
->
-> Some compatibility breakage is to be expected as GDExtension and `godot-cpp`
-> get more used, documented, and critical issues get resolved. See the
-> [Godot issue tracker](https://github.com/godotengine/godot/issues?q=is%3Aissue+is%3Aopen+label%3Atopic%3Agdextension)
-> and the [godot-cpp issue tracker](https://github.com/godotengine/godot-cpp/issues)
-> for a list of known issues, and be sure to provide feedback on issues and PRs
-> which affect your use of this extension.
+
+In practice, this means that **GDExtension compatibility can occasionally break across minor Godot releases**.
+Be sure to read the [Migrating](https://docs.godotengine.org/en/latest/tutorials/migrating/index.html)
+guide for your current Godot version when running into issues with installing GDExtensions.
+
+Some compatibility breakage is to be expected as GDExtension and `godot-cpp`
+get more used, documented, and critical issues get resolved. See the
+[Godot issue tracker](https://github.com/godotengine/godot/issues?q=is%3Aissue+is%3Aopen+label%3Atopic%3Agdextension)
+and the [godot-cpp issue tracker](https://github.com/godotengine/godot-cpp/issues)
+for a list of known issues, and be sure to provide feedback on issues and PRs
+which affect your use of this extension.
 
 ## Contributing
 
