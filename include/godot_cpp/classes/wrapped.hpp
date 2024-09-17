@@ -61,6 +61,10 @@ class Wrapped {
 	thread_local static const StringName *_constructing_extension_class_name;
 	thread_local static const GDExtensionInstanceBindingCallbacks *_constructing_class_binding_callbacks;
 
+#ifdef HOT_RELOAD_ENABLED
+	thread_local static GDExtensionObjectPtr _constructing_recreate_owner;
+#endif
+
 	template <typename T>
 	_ALWAYS_INLINE_ static void _set_construct_info() {
 		_constructing_extension_class_name = T::_get_extension_class_name();
@@ -70,15 +74,6 @@ class Wrapped {
 protected:
 	virtual bool _is_extension_class() const { return false; }
 	static const StringName *_get_extension_class_name(); // This is needed to retrieve the class name before the godot object has its _extension and _extension_instance members assigned.
-
-#ifdef HOT_RELOAD_ENABLED
-	struct RecreateInstance {
-		GDExtensionClassInstancePtr wrapper;
-		GDExtensionObjectPtr owner;
-		RecreateInstance *next;
-	};
-	inline static RecreateInstance *recreate_instance = nullptr;
-#endif
 
 	void _notification(int p_what) {}
 	bool _set(const StringName &p_name, const Variant &p_property) { return false; }
