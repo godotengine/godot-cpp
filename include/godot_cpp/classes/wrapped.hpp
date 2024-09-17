@@ -40,6 +40,14 @@
 
 #include <godot_cpp/godot.hpp>
 
+#if defined(MACOS_ENABLED) && defined(HOT_RELOAD_ENABLED)
+#include <mutex>
+#define _GODOT_CPP_AVOID_THREAD_LOCAL
+#define _GODOT_CPP_THREAD_LOCAL
+#else
+#define _GODOT_CPP_THREAD_LOCAL thread_local
+#endif
+
 namespace godot {
 
 class ClassDB;
@@ -58,11 +66,15 @@ class Wrapped {
 	template <typename T, std::enable_if_t<std::is_base_of<::godot::Wrapped, T>::value, bool>>
 	friend _ALWAYS_INLINE_ void _pre_initialize();
 
-	thread_local static const StringName *_constructing_extension_class_name;
-	thread_local static const GDExtensionInstanceBindingCallbacks *_constructing_class_binding_callbacks;
+#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
+	static std::recursive_mutex _constructing_mutex;
+#endif
+
+	_GODOT_CPP_THREAD_LOCAL static const StringName *_constructing_extension_class_name;
+	_GODOT_CPP_THREAD_LOCAL static const GDExtensionInstanceBindingCallbacks *_constructing_class_binding_callbacks;
 
 #ifdef HOT_RELOAD_ENABLED
-	thread_local static GDExtensionObjectPtr _constructing_recreate_owner;
+	_GODOT_CPP_THREAD_LOCAL static GDExtensionObjectPtr _constructing_recreate_owner;
 #endif
 
 	template <typename T>
@@ -121,6 +133,9 @@ public:
 
 template <typename T, std::enable_if_t<std::is_base_of<::godot::Wrapped, T>::value, bool>>
 _ALWAYS_INLINE_ void _pre_initialize() {
+#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
+	Wrapped::_constructing_mutex.lock();
+#endif
 	Wrapped::_set_construct_info<T>();
 }
 

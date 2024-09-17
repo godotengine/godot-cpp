@@ -129,6 +129,9 @@ private:
 	static GDExtensionClassInstancePtr _recreate_instance_func(void *data, GDExtensionObjectPtr obj) {
 		if constexpr (!std::is_abstract_v<T>) {
 #ifdef HOT_RELOAD_ENABLED
+#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
+			std::lock_guard<std::recursive_mutex> lk(Wrapped::_constructing_mutex);
+#endif
 			Wrapped::_constructing_recreate_owner = obj;
 			T *new_instance = (T *)memalloc(sizeof(T));
 			memnew_placement(new_instance, T);

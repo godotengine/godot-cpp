@@ -39,11 +39,16 @@
 #include <godot_cpp/core/class_db.hpp>
 
 namespace godot {
-thread_local const StringName *Wrapped::_constructing_extension_class_name = nullptr;
-thread_local const GDExtensionInstanceBindingCallbacks *Wrapped::_constructing_class_binding_callbacks = nullptr;
+
+#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
+std::recursive_mutex Wrapped::_constructing_mutex;
+#endif
+
+_GODOT_CPP_THREAD_LOCAL const StringName *Wrapped::_constructing_extension_class_name = nullptr;
+_GODOT_CPP_THREAD_LOCAL const GDExtensionInstanceBindingCallbacks *Wrapped::_constructing_class_binding_callbacks = nullptr;
 
 #ifdef HOT_RELOAD_ENABLED
-thread_local GDExtensionObjectPtr Wrapped::_constructing_recreate_owner = nullptr;
+_GODOT_CPP_THREAD_LOCAL GDExtensionObjectPtr Wrapped::_constructing_recreate_owner = nullptr;
 #endif
 
 const StringName *Wrapped::_get_extension_class_name() {
@@ -51,6 +56,10 @@ const StringName *Wrapped::_get_extension_class_name() {
 }
 
 void Wrapped::_postinitialize() {
+#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
+	Wrapped::_constructing_mutex.unlock();
+#endif
+
 	// Only send NOTIFICATION_POSTINITIALIZE for extension classes.
 	if (_is_extension_class()) {
 		_notificationv(Object::NOTIFICATION_POSTINITIALIZE);
