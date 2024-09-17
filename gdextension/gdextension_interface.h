@@ -1272,6 +1272,18 @@ typedef GDExtensionBool (*GDExtensionInterfaceVariantHasMember)(GDExtensionVaria
 typedef GDExtensionBool (*GDExtensionInterfaceVariantHasKey)(GDExtensionConstVariantPtr p_self, GDExtensionConstVariantPtr p_key, GDExtensionBool *r_valid);
 
 /**
+ * @name variant_get_object_instance_id
+ * @since 4.4
+ *
+ * Gets the object instance ID from a variant of type GDEXTENSION_VARIANT_TYPE_OBJECT.
+ *
+ * @param p_self A pointer to the Variant.
+ *
+ * @return The instance ID for the contained object.
+ */
+typedef GDObjectInstanceID (*GDExtensionInterfaceVariantGetObjectInstanceId)(GDExtensionConstVariantPtr p_self);
+
+/**
  * @name variant_get_type_name
  * @since 4.1
  *

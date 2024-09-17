@@ -215,6 +215,7 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_variant_vector2i_conversion", "variant"), &Example::test_variant_vector2i_conversion);
 	ClassDB::bind_method(D_METHOD("test_variant_int_conversion", "variant"), &Example::test_variant_int_conversion);
 	ClassDB::bind_method(D_METHOD("test_variant_float_conversion", "variant"), &Example::test_variant_float_conversion);
+	ClassDB::bind_method(D_METHOD("test_object_is_valid", "variant"), &Example::test_object_is_valid);
 
 	ClassDB::bind_method(D_METHOD("test_add_child", "node"), &Example::test_add_child);
 	ClassDB::bind_method(D_METHOD("test_set_tileset", "tilemap", "tileset"), &Example::test_set_tileset);
@@ -577,6 +578,10 @@ int Example::test_variant_int_conversion(const Variant &p_variant) const {
 
 float Example::test_variant_float_conversion(const Variant &p_variant) const {
 	return p_variant;
+}
+
+bool Example::test_object_is_valid(const Variant &p_variant) const {
+	return static_cast<bool>(p_variant.get_validated_object());
 }
 
 void Example::test_add_child(Node *p_node) {
