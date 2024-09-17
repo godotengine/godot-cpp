@@ -448,12 +448,7 @@ Variant::operator ObjectID() const {
 	if (get_type() == Type::INT) {
 		return ObjectID(operator uint64_t());
 	} else if (get_type() == Type::OBJECT) {
-		Object *obj = operator Object *();
-		if (obj != nullptr) {
-			return ObjectID(obj->get_instance_id());
-		} else {
-			return ObjectID();
-		}
+		return ObjectID(internal::gdextension_interface_variant_get_object_instance_id(_native_ptr()));
 	} else {
 		return ObjectID();
 	}
@@ -513,6 +508,10 @@ Variant::operator PackedColorArray() const {
 
 Variant::operator PackedVector4Array() const {
 	return PackedVector4Array(this);
+}
+
+Object *Variant::get_validated_object() const {
+	return ObjectDB::get_instance(operator ObjectID());
 }
 
 Variant &Variant::operator=(const Variant &other) {
