@@ -55,7 +55,7 @@ jobs:
               cmake --build build --config Debug -v
 
             build_release: |
-              cmake {0} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DGODOT_TARGET=TEMPLATE_RELEASE -B build_release test
+              cmake {0} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DGODOT_TARGET=template_release -B build_release test
               cmake --build build_release --config Release -v
 
         platform:
@@ -83,7 +83,7 @@ jobs:
               CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.linux.template_release.double.x86_64.a
             flags:
               SCons: platform=linux precision=double
-              CMake: -G "Ninja Multi-Config" -DGODOT_PRECISION=DOUBLE
+              CMake: -G "Ninja Multi-Config" -DGODOT_PRECISION=double
             run-tests: false
             cache-name: linux-x86_64-f64
 
@@ -298,4 +298,3 @@ jobs:
           name: ${{ matrix.platform.artifact-name }}-${{ matrix.builder.name }}
           path: ${{ matrix.platform.artifact-path[matrix.builder.name] }}
           if-no-files-found: error
-
