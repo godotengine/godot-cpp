@@ -672,6 +672,8 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         for include in fully_used_classes:
             if include == "TypedArray":
                 includes.append("godot_cpp/variant/typed_array.hpp")
+            elif include == "TypedDictionary":
+                includes.append("godot_cpp/variant/typed_dictionary.hpp")
             else:
                 includes.append(f"godot_cpp/{get_include_path(include)}")
 
@@ -1022,6 +1024,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if class_name == "Dictionary":
         result.append("\tconst Variant &operator[](const Variant &p_key) const;")
         result.append("\tVariant &operator[](const Variant &p_key);")
+        result.append(
+            "\tvoid set_typed(uint32_t p_key_type, const StringName &p_key_class_name, const Variant &p_key_script, uint32_t p_value_type, const StringName &p_value_class_name, const Variant &p_value_script);"
+        )
 
     result.append("};")
 
@@ -1438,6 +1443,32 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                                         fully_used_classes.add(array_type_name)
                                     else:
                                         used_classes.add(array_type_name)
+                            elif type_name.startswith("typeddictionary::"):
+                                fully_used_classes.add("TypedDictionary")
+                                dict_type_name = type_name.replace("typeddictionary::", "")
+                                if dict_type_name.startswith("const "):
+                                    dict_type_name = dict_type_name[6:]
+                                dict_type_names = dict_type_name.split(";")
+                                dict_type_name = dict_type_names[0]
+                                if dict_type_name.endswith("*"):
+                                    dict_type_name = dict_type_name[:-1]
+                                if is_included(dict_type_name, class_name):
+                                    if is_enum(dict_type_name):
+                                        fully_used_classes.add(get_enum_class(dict_type_name))
+                                    elif "default_value" in argument:
+                                        fully_used_classes.add(dict_type_name)
+                                    else:
+                                        used_classes.add(dict_type_name)
+                                dict_type_name = dict_type_names[2]
+                                if dict_type_name.endswith("*"):
+                                    dict_type_name = dict_type_name[:-1]
+                                if is_included(dict_type_name, class_name):
+                                    if is_enum(dict_type_name):
+                                        fully_used_classes.add(get_enum_class(dict_type_name))
+                                    elif "default_value" in argument:
+                                        fully_used_classes.add(dict_type_name)
+                                    else:
+                                        used_classes.add(dict_type_name)
                             elif is_enum(type_name):
                                 fully_used_classes.add(get_enum_class(type_name))
                             elif "default_value" in argument:
@@ -1467,6 +1498,32 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
                                     fully_used_classes.add(array_type_name)
                                 else:
                                     used_classes.add(array_type_name)
+                        elif type_name.startswith("typeddictionary::"):
+                            fully_used_classes.add("TypedDictionary")
+                            dict_type_name = type_name.replace("typeddictionary::", "")
+                            if dict_type_name.startswith("const "):
+                                dict_type_name = dict_type_name[6:]
+                            dict_type_names = dict_type_name.split(";")
+                            dict_type_name = dict_type_names[0]
+                            if dict_type_name.endswith("*"):
+                                dict_type_name = dict_type_name[:-1]
+                            if is_included(dict_type_name, class_name):
+                                if is_enum(dict_type_name):
+                                    fully_used_classes.add(get_enum_class(dict_type_name))
+                                elif is_variant(dict_type_name):
+                                    fully_used_classes.add(dict_type_name)
+                                else:
+                                    used_classes.add(dict_type_name)
+                            dict_type_name = dict_type_names[2]
+                            if dict_type_name.endswith("*"):
+                                dict_type_name = dict_type_name[:-1]
+                            if is_included(dict_type_name, class_name):
+                                if is_enum(dict_type_name):
+                                    fully_used_classes.add(get_enum_class(dict_type_name))
+                                elif is_variant(dict_type_name):
+                                    fully_used_classes.add(dict_type_name)
+                                else:
+                                    used_classes.add(dict_type_name)
                         elif is_enum(type_name):
                             fully_used_classes.add(get_enum_class(type_name))
                         elif is_variant(type_name):
@@ -1600,6 +1657,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         for included in fully_used_classes:
             if included == "TypedArray":
                 includes.append("godot_cpp/variant/typed_array.hpp")
+            elif included == "TypedDictionary":
+                includes.append("godot_cpp/variant/typed_dictionary.hpp")
             else:
                 includes.append(f"godot_cpp/{get_include_path(included)}")
 
@@ -2688,6 +2747,7 @@ def is_variant(type_name):
         or type_name in builtin_classes
         or type_name == "Nil"
         or type_name.startswith("typedarray::")
+        or type_name.startswith("typeddictionary::")
     )
 
 
@@ -2727,6 +2787,8 @@ def is_included(type_name, current_type):
     """
     if type_name.startswith("typedarray::"):
         return True
+    if type_name.startswith("typeddictionary::"):
+        return True
     to_include = get_enum_class(type_name) if is_enum(type_name) else type_name
     if to_include == current_type or is_pod_type(to_include):
         return False
@@ -2765,6 +2827,12 @@ def correct_typed_array(type_name):
     return type_name
 
 
+def correct_typed_dictionary(type_name):
+    if type_name.startswith("typeddictionary::"):
+        return type_name.replace("typeddictionary::", "TypedDictionary<").replace(";", ", ") + ">"
+    return type_name
+
+
 def correct_type(type_name, meta=None, use_alias=True):
     type_conversion = {"float": "double", "int": "int64_t", "Nil": "Variant"}
     if meta is not None:
@@ -2778,6 +2846,8 @@ def correct_type(type_name, meta=None, use_alias=True):
         return type_conversion[type_name]
     if type_name.startswith("typedarray::"):
         return type_name.replace("typedarray::", "TypedArray<") + ">"
+    if type_name.startswith("typeddictionary::"):
+        return type_name.replace("typeddictionary::", "TypedDictionary<").replace(";", ", ") + ">"
     if is_enum(type_name):
         if is_bitfield(type_name):
             base_class = get_enum_class(type_name)
@@ -2923,6 +2993,8 @@ def get_default_value_for_type(type_name):
     if type_name == "bool":
         return "false"
     if type_name.startswith("typedarray::"):
+        return f"{correct_type(type_name)}()"
+    if type_name.startswith("typeddictionary::"):
         return f"{correct_type(type_name)}()"
     if is_enum(type_name):
         return f"{correct_type(type_name)}(0)"

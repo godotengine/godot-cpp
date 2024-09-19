@@ -199,6 +199,8 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_tarray_arg", "array"), &Example::test_tarray_arg);
 	ClassDB::bind_method(D_METHOD("test_tarray"), &Example::test_tarray);
 	ClassDB::bind_method(D_METHOD("test_dictionary"), &Example::test_dictionary);
+	ClassDB::bind_method(D_METHOD("test_tdictionary_arg", "dictionary"), &Example::test_tdictionary_arg);
+	ClassDB::bind_method(D_METHOD("test_tdictionary"), &Example::test_tdictionary);
 	ClassDB::bind_method(D_METHOD("test_node_argument"), &Example::test_node_argument);
 	ClassDB::bind_method(D_METHOD("test_string_ops"), &Example::test_string_ops);
 	ClassDB::bind_method(D_METHOD("test_str_utility"), &Example::test_str_utility);
@@ -547,6 +549,23 @@ Dictionary Example::test_dictionary() const {
 
 	dict["hello"] = "world";
 	dict["foo"] = "bar";
+
+	return dict;
+}
+
+int Example::test_tdictionary_arg(const TypedDictionary<String, int64_t> &p_dictionary) {
+	int sum = 0;
+	TypedArray<int64_t> values = p_dictionary.values();
+	for (int i = 0; i < p_dictionary.size(); i++) {
+		sum += (int)values[i];
+	}
+	return sum;
+}
+
+TypedDictionary<Vector2, Vector2i> Example::test_tdictionary() const {
+	TypedDictionary<Vector2, Vector2i> dict;
+
+	dict[Vector2(1, 2)] = Vector2i(2, 3);
 
 	return dict;
 }
