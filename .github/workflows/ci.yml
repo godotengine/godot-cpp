@@ -13,78 +13,162 @@ concurrency:
 
 jobs:
   build:
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
+    name: "${{ matrix.platform.name }} (${{ matrix.builder.name }}, ${{matrix.platform.description}})"
+    runs-on: ${{ matrix.platform.os }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: 🐧 Linux (GCC)
+
+        # TODO: remove after CMake IOS config is ready
+        exclude:
+          - builder:
+              name: CMake
+
+            platform:
+              name: 🍏 iOS
+
+        builder:
+          - name: SCons
+            generate_sources: |
+              scons {0} build_library=no verbose=yes
+              scons -c
+
+            build_godot_cpp_debug: |
+              scons {0} target=template_debug verbose=yes
+
+            build_debug: |
+              cd test
+              scons {0} target=template_debug build_library=no debug_symbols=yes optimize=debug verbose=yes
+
+            build_release: |
+              cd test
+              scons {0} target=template_release verbose=yes
+
+          - name: CMake
+            generate_sources: |
+              cmake {0} -DCMAKE_C_COMPILER_LAUNCHER=ccache -D CMAKE_CXX_COMPILER_LAUNCHER=ccache -B build test
+
+            build_godot_cpp_debug: |
+              cmake --build build --config Debug --target godot-cpp -v
+
+            build_debug: |
+              cmake --build build --config Debug -v
+
+            build_release: |
+              cmake {0} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DGODOT_TARGET=TEMPLATE_RELEASE -B build_release test
+              cmake --build build_release --config Release -v
+
+        platform:
+          - name: 🐧 Linux
+            description: 'GCC'
             os: ubuntu-20.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
-            artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
+            artifact-path:
+              SCons: bin/libgodot-cpp.linux.template_release.x86_64.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.linux.template_release.x86_64.a
+            flags:
+              SCons: platform=linux
+              CMake: -G "Ninja Multi-Config"
             run-tests: true
             cache-name: linux-x86_64
 
-          - name: 🐧 Linux (GCC, Double Precision)
+          - name: 🐧 Linux
+            description: 'GCC, Double Precision'
             os: ubuntu-20.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
-            artifact-path: bin/libgodot-cpp.linux.template_release.double.x86_64.a
-            flags: precision=double
+            artifact-path:
+              SCons: bin/libgodot-cpp.linux.template_release.double.x86_64.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.linux.template_release.double.x86_64.a
+            flags:
+              SCons: platform=linux precision=double
+              CMake: -G "Ninja Multi-Config" -DGODOT_FLOAT_PRECISION=DOUBLE
             run-tests: false
             cache-name: linux-x86_64-f64
 
-          - name: 🏁 Windows (x86_64, MSVC)
+          - name: 🏁 Windows
+            description: 'x86_64, MSVC'
             os: windows-2019
             platform: windows
             artifact-name: godot-cpp-windows-msvc2019-x86_64-release
-            artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.lib
+            artifact-path:
+              SCons: bin/libgodot-cpp.windows.template_release.x86_64.lib
+              CMake: build_release/godot-cpp/bin/Release/godot-cpp.windows.template_release.x86_64.lib
+            flags:
+              Scons: platform=windows
+              CMake: '-G "Visual Studio 16 2019" -A x64'
             run-tests: false
             cache-name: windows-x86_64-msvc
 
-          - name: 🏁 Windows (x86_64, MinGW)
+          - name: 🏁 Windows
+            description: 'x86_64, MinGW'
             os: windows-2019
             platform: windows
             artifact-name: godot-cpp-linux-mingw-x86_64-release
-            artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.a
-            flags: use_mingw=yes
+            artifact-path:
+              SCons: bin/libgodot-cpp.windows.template_release.x86_64.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.windows.template_release.x86_64.a
+            flags:
+              SCons: platform=windows use_mingw=yes
+              CMake: -G "Ninja Multi-Config"
+            use-mingw: true
             run-tests: false
             cache-name: windows-x86_64-mingw
 
-          - name: 🍎 macOS (universal)
+          - name: 🍎 macOS
+            description: 'universal'
             os: macos-latest
             platform: macos
             artifact-name: godot-cpp-macos-universal-release
-            artifact-path: bin/libgodot-cpp.macos.template_release.universal.a
-            flags: arch=universal
+            artifact-path:
+              SCons: bin/libgodot-cpp.macos.template_release.universal.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.macos.template_release.a
+            flags:
+              SCons: platform=macos arch=universal
+              CMake: -G Xcode -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO
             run-tests: false
             cache-name: macos-universal
 
-          - name: 🤖 Android (arm64)
+          - name: 🤖 Android
+            description: 'arm64'
             os: ubuntu-20.04
             platform: android
             artifact-name: godot-cpp-android-arm64-release
-            artifact-path: bin/libgodot-cpp.android.template_release.arm64.a
-            flags: arch=arm64
+            artifact-path:
+              SCons: bin/libgodot-cpp.android.template_release.arm64.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.android.template_release.arm64.a
+            flags:
+              SCons: platform=android arch=arm64
+              CMake: --toolchain ${ANDROID_HOME}/ndk/23.2.8568313/build/cmake/android.toolchain.cmake -G "Ninja Multi-Config" -DANDROID_PLATFORM=21
             run-tests: false
             cache-name: android-arm64
 
-          - name: 🍏 iOS (arm64)
+          - name: 🍏 iOS
+            description: 'arm64'
             os: macos-latest
             platform: ios
             artifact-name: godot-cpp-ios-arm64-release
-            artifact-path: bin/libgodot-cpp.ios.template_release.arm64.a
-            flags: arch=arm64
+            artifact-path:
+              SCons: bin/libgodot-cpp.ios.template_release.arm64.a
+              CMake: build_release/godot-cpp/bin/Release/Release/libgodot-cpp.ios.template_release.a
+            flags:
+              SCons: platform=ios arch=arm64
+              CMake: -G Xcode -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO
             run-tests: false
             cache-name: ios-arm64
 
-          - name: 🌐 Web (wasm32)
+          - name: 🌐 Web
+            description: 'wasm32'
             os: ubuntu-20.04
             platform: web
             artifact-name: godot-cpp-web-wasm32-release
-            artifact-path: bin/libgodot-cpp.web.template_release.wasm32.a
+            artifact-path:
+              SCons: bin/libgodot-cpp.web.template_release.wasm32.a
+              CMake: build_release/godot-cpp/bin/Release/libgodot-cpp.web.template_release.wasm32.a
+            flags:
+              SCons: platform=web
+              CMake: --toolchain ${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -G "Ninja Multi-Config"
             run-tests: false
             cache-name: web-wasm32
 
@@ -100,68 +184,79 @@ jobs:
           submodules: recursive
 
       - name: Restore Godot build cache
+        if: ${{ matrix.builder.name == 'SCons' }}
         uses: ./.github/actions/godot-cache-restore
         with:
-          cache-name: ${{ matrix.cache-name }}
+          cache-name: ${{ matrix.platform.cache-name }}
         continue-on-error: true
 
       - name: Set up Python (for SCons)
+        if: ${{ matrix.builder.name == 'SCons' }}
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
       - name: Android dependencies
-        if: ${{ matrix.platform == 'android' }}
+        if: ${{ matrix.platform.platform == 'android' }}
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r23c
           link-to-sdk: true
 
       - name: Web dependencies
-        if: ${{ matrix.platform == 'web' }}
+        if: ${{ matrix.platform.platform == 'web' }}
         uses: mymindstorm/setup-emsdk@v14
         with:
           version: ${{env.EM_VERSION}}
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
 
       - name: Setup MinGW for Windows/MinGW build
-        if: ${{ matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes' }}
+        if: ${{ matrix.platform.use-mingw }}
         uses: egor-tensin/setup-mingw@v2
         with:
           version: 12.2.0
 
       - name: Install scons
+        if: ${{ matrix.builder.name == 'SCons' }}
         run: |
           python -m pip install scons==4.0.0
 
+      - name: Install CMake
+        if: ${{ matrix.builder.name == 'CMake' }}
+        uses: jwlawson/actions-setup-cmake@v2
+
+      - name: Install ccache
+        if: ${{ matrix.builder.name == 'CMake' }}
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ matrix.platform.cache-name }}
+
+      - name: Install Ninja
+        if: ${{ matrix.builder.name == 'CMake' }}
+        uses: ashutoshvarma/setup-ninja@master
+
       - name: Generate godot-cpp sources only
-        run: |
-          scons platform=${{ matrix.platform }} verbose=yes build_library=no ${{ matrix.flags }}
-          scons -c
+        run: ${{ format(matrix.builder.generate_sources, matrix.platform.flags[matrix.builder.name]) }}
 
       - name: Build godot-cpp (debug)
-        run: |
-          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }}
+        run: ${{ format(matrix.builder.build_godot_cpp_debug, matrix.platform.flags[matrix.builder.name]) }}
 
       - name: Build test without rebuilding godot-cpp (debug)
-        run: |
-          cd test
-          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }} build_library=no
+        run: ${{ format(matrix.builder.build_debug, matrix.platform.flags[matrix.builder.name]) }}
 
       - name: Build test and godot-cpp (release)
-        run: |
-          cd test
-          scons platform=${{ matrix.platform }} verbose=yes target=template_release ${{ matrix.flags }}
+        run: ${{ format(matrix.builder.build_release, matrix.platform.flags[matrix.builder.name]) }}
 
       - name: Save Godot build cache
+        if: ${{ matrix.builder.name == 'SCons' }}
         uses: ./.github/actions/godot-cache-save
         with:
-          cache-name: ${{ matrix.cache-name }}
+          cache-name: ${{ matrix.builder.cache-name }}
         continue-on-error: true
 
       - name: Download latest Godot artifacts
         uses: dsnopek/action-download-artifact@1322f74e2dac9feed2ee76a32d9ae1ca3b4cf4e9
-        if: ${{ matrix.run-tests && env.GODOT_TEST_VERSION == 'master' }}
+        if: ${{ matrix.platform.run-tests && env.GODOT_TEST_VERSION == 'master' }}
         with:
           repo: godotengine/godot
           branch: master
@@ -175,13 +270,13 @@ jobs:
           path: godot-artifacts
 
       - name: Prepare Godot artifacts for testing
-        if: ${{ matrix.run-tests && env.GODOT_TEST_VERSION == 'master' }}
+        if: ${{ matrix.platform.run-tests && env.GODOT_TEST_VERSION == 'master' }}
         run: |
           chmod +x ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono
           echo "GODOT=$(pwd)/godot-artifacts/godot.linuxbsd.editor.x86_64.mono" >> $GITHUB_ENV
 
       - name: Download requested Godot version for testing
-        if: ${{ matrix.run-tests && env.GODOT_TEST_VERSION != 'master' }}
+        if: ${{ matrix.platform.run-tests && env.GODOT_TEST_VERSION != 'master' }}
         run: |
           wget "https://github.com/godotengine/godot-builds/releases/download/${GODOT_TEST_VERSION}/Godot_v${GODOT_TEST_VERSION}_linux.x86_64.zip" -O Godot.zip
           unzip -a Godot.zip
@@ -189,7 +284,7 @@ jobs:
           echo "GODOT=$(pwd)/Godot_v${GODOT_TEST_VERSION}_linux.x86_64" >> $GITHUB_ENV
 
       - name: Run tests
-        if: ${{ matrix.run-tests }}
+        if: ${{ matrix.platform.run-tests }}
         run: |
           $GODOT --headless --version
           cd test
@@ -200,73 +295,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.artifact-name }}
-          path: ${{ matrix.artifact-path }}
+          name: ${{ matrix.platform.artifact-name }}-${{ matrix.builder.name }}
+          path: ${{ matrix.platform.artifact-path[matrix.builder.name] }}
           if-no-files-found: error
 
-  linux-cmake:
-    name: 🐧 Build (Linux, GCC, CMake)
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -qqq build-essential pkg-config cmake
-
-      - name: Build godot-cpp
-        run: |
-          cmake -DCMAKE_BUILD_TYPE=Release .
-          make -j $(nproc) VERBOSE=1
-
-      - name: Build test GDExtension library
-        run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." .
-          make -j $(nproc) VERBOSE=1
-
-  linux-cmake-ninja:
-    name: 🐧 Build (Linux, GCC, CMake Ninja)
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -qqq build-essential pkg-config cmake ninja-build
-
-      - name: Build godot-cpp
-        run: |
-          cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
-          cmake --build . -j $(nproc) --verbose
-
-      - name: Build test GDExtension library
-        run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -GNinja .
-          cmake --build . -j $(nproc) --verbose
-
-  windows-msvc-cmake:
-    name: 🏁 Build (Windows, MSVC, CMake)
-    runs-on: windows-2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Build godot-cpp
-        run: |
-          cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 16 2019" .
-          cmake --build . --verbose
-
-      - name: Build test GDExtension library
-        run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
-          cmake --build . --verbose

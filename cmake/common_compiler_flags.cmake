@@ -1,13 +1,18 @@
+# Set some helper variables for readability
+set(compiler_is_clang "$<OR:$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>>")
+set(compiler_is_gnu "$<CXX_COMPILER_ID:GNU>")
+set(compiler_is_msvc "$<CXX_COMPILER_ID:MSVC>")
+
 # Add warnings based on compiler & version
 # Set some helper variables for readability
-set( compiler_less_than_v8 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,8>" )
-set( compiler_greater_than_or_equal_v9 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,9>" )
-set( compiler_greater_than_or_equal_v11 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,11>" )
-set( compiler_less_than_v11 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,11>" )
-set( compiler_greater_than_or_equal_v12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>" )
+set(compiler_less_than_v8 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,8>")
+set(compiler_greater_than_or_equal_v9 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,9>")
+set(compiler_greater_than_or_equal_v11 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,11>")
+set(compiler_less_than_v11 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,11>")
+set(compiler_greater_than_or_equal_v12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>")
 
 # These compiler options reflect what is in godot/SConstruct.
-target_compile_options( ${PROJECT_NAME} PRIVATE
+list(APPEND GODOT_COMPILE_WARNING_FLAGS
     # MSVC only
     $<${compiler_is_msvc}:
         /W4
@@ -73,22 +78,18 @@ target_compile_options( ${PROJECT_NAME} PRIVATE
 )
 
 # Treat warnings as errors
-function( set_warning_as_error )
-    message( STATUS "[${PROJECT_NAME}] Treating warnings as errors")
-    if ( CMAKE_VERSION VERSION_GREATER_EQUAL "3.24" )
-        set_target_properties( ${PROJECT_NAME}
+function(set_warning_as_error TARGET_NAME)
+    message(STATUS "[${TARGET_NAME}] Treating warnings as errors")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
+        set_target_properties(${TARGET_NAME}
             PROPERTIES
                 COMPILE_WARNING_AS_ERROR ON
         )
     else()
-        target_compile_options( ${PROJECT_NAME}
+        target_compile_options(${TARGET_NAME}
             PRIVATE
                 $<${compiler_is_msvc}:/WX>
                 $<$<OR:${compiler_is_clang},${compiler_is_gnu}>:-Werror>
         )
     endif()
 endfunction()
-
-if ( GODOT_WARNING_AS_ERROR )
-    set_warning_as_error()
-endif()
