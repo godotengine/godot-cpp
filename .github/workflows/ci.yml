@@ -97,7 +97,7 @@ jobs:
               CMake: build_release/godot-cpp/bin/Release/godot-cpp.windows.template_release.x86_64.lib
             flags:
               Scons: platform=windows
-              CMake: '-G "Visual Studio 16 2019" -A x64'
+              CMake: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_VERBOSE_MAKEFILE=TRUE'
             run-tests: false
             cache-name: windows-x86_64-msvc
 
