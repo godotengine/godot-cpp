@@ -52,4 +52,8 @@ def generate(env):
 
     env.Append(CPPDEFINES=["WEB_ENABLED", "UNIX_ENABLED"])
 
+    # Refer to https://github.com/godotengine/godot/blob/master/platform/web/detect.py
+    if env["lto"] == "auto":
+        env["lto"] = "full"
+
     common_compiler_flags.generate(env)

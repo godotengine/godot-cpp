@@ -198,4 +198,12 @@ def generate(env):
 
     env.Append(CPPDEFINES=["WINDOWS_ENABLED"])
 
+    # Refer to https://github.com/godotengine/godot/blob/master/platform/windows/detect.py
+    if env["lto"] == "auto":
+        if env.get("is_msvc", False):
+            # No LTO by default for MSVC, doesn't help.
+            env["lto"] = "none"
+        else:  # Release
+            env["lto"] = "full"
+
     common_compiler_flags.generate(env)
