@@ -264,9 +264,9 @@ jobs:
       - name: Build godot-cpp
         run: |
           cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 16 2019" .
-          cmake --build . --verbose
+          cmake --build . --verbose --config Release
 
       - name: Build test GDExtension library
         run: |
           cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
-          cmake --build . --verbose
+          cmake --build . --verbose --config Release
