@@ -76,10 +76,9 @@ def options(opts):
     mingw = os.getenv("MINGW_PREFIX", "")
 
     opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
-    opts.Add(BoolVariable("use_clang_cl", "Use the clang driver instead of MSVC - only effective on Windows", False))
     opts.Add(BoolVariable("use_static_cpp", "Link MinGW/MSVC C++ runtime libraries statically", True))
     opts.Add(BoolVariable("silence_msvc", "Silence MSVC's cl/link stdout bloat, redirecting errors to stderr.", True))
-    opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler", False))
+    opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler (MVSC or MinGW depending on the use_mingw flag)", False))
     opts.Add("mingw_prefix", "MinGW prefix", mingw)
 
 
@@ -114,7 +113,7 @@ def generate(env):
         env.Append(CCFLAGS=["/utf-8"])
         env.Append(LINKFLAGS=["/WX"])
 
-        if env["use_clang_cl"]:
+        if env["use_llvm"]:
             env["CC"] = "clang-cl"
             env["CXX"] = "clang-cl"
 
