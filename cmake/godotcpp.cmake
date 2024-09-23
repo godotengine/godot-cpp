@@ -28,6 +28,8 @@ function( godotcpp_options )
     set(GODOT_USE_HOT_RELOAD "" CACHE BOOL
             "Enable the extra accounting required to support hot reload. (ON|OFF)")
 
+    # Disable exception handling. Godot doesn't use exceptions anywhere, and this
+    # saves around 20% of binary size and very significant build time (GH-80513).
     option(GODOT_DISABLE_EXCEPTIONS "Force disabling exception handling code (ON|OFF)" ON )
 
     set( GODOT_SYMBOL_VISIBILITY "hidden" CACHE STRING
@@ -54,11 +56,7 @@ endfunction()
 
 
 function( godotcpp_generate )
-    # Set some helper variables for readability
-    set( compiler_is_clang "$<OR:$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>>" )
-    set( compiler_is_gnu "$<CXX_COMPILER_ID:GNU>" )
-    set( compiler_is_msvc "$<CXX_COMPILER_ID:MSVC>" )
-
+    ### Configure variables
     # CXX_VISIBILITY_PRESET supported values are: default, hidden, protected, and internal
     # which is inline with the gcc -fvisibility=
     # https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html
@@ -68,16 +66,7 @@ function( godotcpp_generate )
         set( GODOT_SYMBOL_VISIBILITY "default" )
     endif ()
 
-    # Default build type is Debug in the SConstruct
-    if("${CMAKE_BUILD_TYPE}" STREQUAL "")
-        set(CMAKE_BUILD_TYPE Debug)
-    endif()
-
-    # Hot reload is enabled by default in Debug-builds
-    if( GODOT_USE_HOT_RELOAD STREQUAL "" AND NOT CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(GODOT_USE_HOT_RELOAD ON)
-    endif()
-
+    ### Generate Bindings
     if(NOT DEFINED BITS)
         set(BITS 32)
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -91,47 +80,7 @@ function( godotcpp_generate )
         set(GODOT_GDEXTENSION_API_FILE "${GODOT_CUSTOM_API_FILE}")
     endif()
 
-    if ("${GODOT_PRECISION}" STREQUAL "double")
-        add_definitions(-DREAL_T_IS_DOUBLE)
-    endif()
-
-    set( GODOT_COMPILE_FLAGS )
-
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-        # using Visual Studio C++
-        set(GODOT_COMPILE_FLAGS "/utf-8") # /GF /MP
-
-        if(CMAKE_BUILD_TYPE MATCHES Debug)
-            set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MDd") # /Od /RTC1 /Zi
-        else()
-            set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /MD /O2") # /Oy /GL /Gy
-        endif(CMAKE_BUILD_TYPE MATCHES Debug)
-
-        add_definitions(-DNOMINMAX)
-    else()  # GCC/Clang
-        if(CMAKE_BUILD_TYPE MATCHES Debug)
-            set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -fno-omit-frame-pointer -O0 -g")
-        else()
-            set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -O3")
-        endif(CMAKE_BUILD_TYPE MATCHES Debug)
-    endif()
-
-    # Disable exception handling. Godot doesn't use exceptions anywhere, and this
-    # saves around 20% of binary size and very significant build time (GH-80513).
-    if (GODOT_DISABLE_EXCEPTIONS)
-        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-            set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -D_HAS_EXCEPTIONS=0")
-        else()
-            set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} -fno-exceptions")
-        endif()
-    else()
-        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-            set(GODOT_COMPILE_FLAGS "${GODOT_COMPILE_FLAGS} /EHsc")
-        endif()
-    endif()
-
     # Generate source from the bindings file
-    find_package(Python3 3.4 REQUIRED) # pathlib should be present
     if(GODOT_GENERATE_TEMPLATE_GET_NODE)
         set(GENERATE_BINDING_PARAMETERS "True")
     else()
@@ -153,48 +102,23 @@ function( godotcpp_generate )
             COMMENT "Generating bindings"
     )
 
-    # Get Sources
-    # As this cmake file was added using 'include(godotcpp)' from the root CMakeLists.txt,
-    # the ${CMAKE_CURRENT_SOURCE_DIR} is still the root dir.
-    file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.c**)
-    file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS include/*.h**)
-
-    # Define our godot-cpp library
-    add_library(${PROJECT_NAME} STATIC
-            ${SOURCES}
-            ${HEADERS}
-            ${GENERATED_FILES_LIST}
-    )
+    ### Define our godot-cpp library
+    add_library(${PROJECT_NAME} STATIC )
     add_library(godot::cpp ALIAS ${PROJECT_NAME})
 
-    include(${PROJECT_SOURCE_DIR}/cmake/common_compiler_flags.cmake)
-
-    target_compile_features(${PROJECT_NAME}
+    # Get Sources
+    include( cmake/sources.cmake )
+    target_sources( ${PROJECT_NAME}
             PRIVATE
-            cxx_std_17
+            ${GODOTCPP_HEADERS}
+            ${GODOTCPP_SOURCES}
+            ${GENERATED_FILES_LIST}
     )
 
-    if(GODOT_USE_HOT_RELOAD)
-        target_compile_definitions(${PROJECT_NAME} PUBLIC HOT_RELOAD_ENABLED)
-        target_compile_options(${PROJECT_NAME} PUBLIC $<${compiler_is_gnu}:-fno-gnu-unique>)
-    endif()
-
-    target_compile_definitions(${PROJECT_NAME} PUBLIC
-            $<$<CONFIG:Debug>:
-            DEBUG_ENABLED
-            DEBUG_METHODS_ENABLED
-            >
-            $<${compiler_is_msvc}:
-            TYPED_METHOD_BIND
-            >
-    )
-
-    target_link_options(${PROJECT_NAME} PRIVATE
-            $<$<NOT:${compiler_is_msvc}>:
-            -static-libgcc
-            -static-libstdc++
-            -Wl,-R,'$$ORIGIN'
-            >
+    #This exposes the include directory to consumers
+    target_include_directories( ${PROJECT_NAME}
+            INTERFACE
+            ${PROJECT_SOURCE_DIR}/include/godot_cpp
     )
 
     # Optionally mark headers as SYSTEM
@@ -209,12 +133,11 @@ function( godotcpp_generate )
             ${GODOT_GDEXTENSION_DIR}
     )
 
-    # Add the compile flags
-    set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
+    include(${PROJECT_SOURCE_DIR}/cmake/common_compiler_flags.cmake)
 
-    # Create the correct name (godot.os.build_type.system_bits)
-    string(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME)
-    string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+    ### Create the correct name (godot.os.build_type.system_bits)
+    set( SYSTEM_NAME "$<LOWER_CASE:${CMAKE_SYSTEM_NAME}>" )
+    set( BUILD_TYPE "$<LOWER_CASE:$<CONFIG>>" )
 
     if(ANDROID)
         # Added the android abi after system name
@@ -225,6 +148,7 @@ function( godotcpp_generate )
     else()
         set(OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}.${BITS}")
     endif()
+
 
     set_target_properties(${PROJECT_NAME}
             PROPERTIES

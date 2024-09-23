@@ -221,12 +221,11 @@ jobs:
       - name: Build godot-cpp
         run: |
           cmake -DCMAKE_BUILD_TYPE=Release .
-          make -j $(nproc) VERBOSE=1
+          cmake --build . --verbose -j $(nproc) -t godot-cpp
 
       - name: Build test GDExtension library
         run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." .
-          make -j $(nproc) VERBOSE=1
+          cmake --build . --verbose -j $(nproc) -t godot-cpp-test
 
   linux-cmake-ninja:
     name: 🐧 Build (Linux, GCC, CMake Ninja)
@@ -245,12 +244,11 @@ jobs:
       - name: Build godot-cpp
         run: |
           cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
-          cmake --build . -j $(nproc) --verbose
+          cmake --build . --verbose -j $(nproc) -t godot-cpp
 
       - name: Build test GDExtension library
         run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -GNinja .
-          cmake --build . -j $(nproc) --verbose
+          cmake --build . --verbose -j $(nproc) -t godot-cpp-test
 
   windows-msvc-cmake:
     name: 🏁 Build (Windows, MSVC, CMake)
@@ -263,10 +261,9 @@ jobs:
 
       - name: Build godot-cpp
         run: |
-          cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 16 2019" .
-          cmake --build . --verbose
+          cmake -G"Visual Studio 16 2019" .
+          cmake --build . --verbose -t godot-cpp --config Release
 
       - name: Build test GDExtension library
         run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
-          cmake --build . --verbose
+          cmake --build . --verbose -t godot-cpp-test --config Release
