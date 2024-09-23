@@ -47,7 +47,6 @@ def generate(env):
     env.Append(LINKFLAGS=["-sSUPPORT_LONGJMP='wasm'"])
 
     # Use big int
-    env.Append(CCFLAGS=["-sWASM_BIGINT"])
     env.Append(LINKFLAGS=["-sWASM_BIGINT"])
 
     env.Append(CPPDEFINES=["WEB_ENABLED", "UNIX_ENABLED"])
