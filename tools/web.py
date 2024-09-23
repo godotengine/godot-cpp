@@ -42,6 +42,10 @@ def generate(env):
     env.Append(CCFLAGS=["-sSIDE_MODULE=1"])
     env.Append(LINKFLAGS=["-sSIDE_MODULE=1"])
 
+    # Enable WebAssembly BigInt <-> i64 conversion.
+    # This must match the flag used to build Godot (true in official builds since 4.3)
+    env.Append(LINKFLAGS=["-sWASM_BIGINT"])
+
     # Force wasm longjmp mode.
     env.Append(CCFLAGS=["-sSUPPORT_LONGJMP='wasm'"])
     env.Append(LINKFLAGS=["-sSUPPORT_LONGJMP='wasm'"])
