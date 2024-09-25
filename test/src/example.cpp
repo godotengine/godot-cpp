@@ -443,8 +443,8 @@ TypedArray<PackedInt32Array> Example::test_typed_array_of_packed() const {
 	return arr;
 }
 
-PackedByteArray test_append_to_packed(const PackedByteArray& packed) const {
-	PackedByteArray b = PackedByteArray(a);
+PackedByteArray test_append_to_packed(const PackedByteArray &packed) const {
+	PackedByteArray b = PackedByteArray(packed);
 	b.append(3);
 	return b;
 }
