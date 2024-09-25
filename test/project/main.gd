@@ -164,8 +164,8 @@ func _ready():
 	assert_equal(custom_callable.get_argument_count(), 2)
 	assert_equal(str(custom_callable), "<MyCallableCustom>");
 
-    # Typed packed array
-    assert_equal(example.test_typed_array_of_packed(), [
+	# Typed packed array
+	assert_equal(example.test_typed_array_of_packed(), [
 		PackedInt32Array([1, 2]),
 		PackedInt32Array([3, 4])
 	])
@@ -173,14 +173,14 @@ func _ready():
 	# Packed array handling
 	var packed_original := PackedByteArray([1, 2])
 	assert_equal(
-	    example.test_append_to_packed(packed_original),
-        PackedByteArray([1, 2, 3]),
-    )
-    assert_equal(packed_original, PackedByteArray([1, 2]))
+		example.test_append_to_packed(packed_original),
+		PackedByteArray([1, 2, 3]),
+	)
+	assert_equal(packed_original, PackedByteArray([1, 2]))
 	assert_equal(
-	    example.test_copy_packed_implicit(),
-        [PackedInt32Array([1]), PackedInt32Array([1, 2])],
-    )
+		example.test_copy_packed_implicit(),
+		[PackedInt32Array([1]), PackedInt32Array([1, 2])],
+	)
 
 	# PackedArray iterators
 	assert_equal(example.test_vector_ops(), 105)
