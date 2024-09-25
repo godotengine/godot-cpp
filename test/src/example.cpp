@@ -443,10 +443,26 @@ TypedArray<PackedInt32Array> Example::test_typed_array_of_packed() const {
 	return arr;
 }
 
-PackedInt32Array test_append_to_packed(const PackedInt32Array& packed) const {
+PackedByteArray test_append_to_packed(const PackedByteArray& packed) const {
 	PackedByteArray b = PackedByteArray(a);
 	b.append(3);
 	return b;
+}
+
+TypedArray<PackedInt32Array> test_copy_packed_implicit() const {
+	PackedInt32Array a;
+	a.append(1);
+
+	PackedInt32Array b = a;
+	b.append(2);
+
+	Array arr;
+
+	arr.resize(2);
+	arr[0] = a;
+	arr[1] = b;
+
+	return arr;
 }
 
 int Example::test_vector_ops() const {

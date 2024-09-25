@@ -170,10 +170,14 @@ func _ready():
 		PackedInt32Array([3, 4])
 	])
 
-	# Packed array append
+	# Packed array handling
 	assert_equal(
-	    example.test_append_to_packed(PackedInt32Array([1, 2])),
-        PackedInt32Array([1, 2, 3]),
+	    example.test_append_to_packed(PackedByteArray([1, 2])),
+        PackedByteArray([1, 2, 3]),
+    )
+	assert_equal(
+	    example.test_copy_packed_implicit(),
+        [PackedInt32Array([1]), PackedInt32Array([1, 2])],
     )
 
 	# PackedArray iterators
