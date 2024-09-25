@@ -137,6 +137,7 @@ public:
 	bool test_string_is_forty_two(const String &p_str) const;
 	String test_string_resize(String p_original) const;
 	TypedArray<PackedInt32Array> test_typed_array_of_packed() const;
+	PackedInt32Array test_append_to_packed(const PackedInt32Array& packed) const;
 	int test_vector_ops() const;
 	int test_vector_init_list() const;
 
