@@ -37,6 +37,19 @@
 #
 # Todo
 # Test build for Windows, Mac and mingw.
+#
+# Installs the library after build:
+# cmake --install path/to/build --prefix path/to/install
+#
+# Then the target then can be imported by another cmake project like this:
+# find_package(godot-cpp CONFIG REQUIRED)
+# 
+# add_library(libfoo SHARED)
+# set_target_properties(libfoo PROPERTIES POSITION_INDEPENDENT_CODE ON)
+# target_link_libraries(libfoo PUBLIC godot-cpp::godot-cpp)
+#
+# Users need to provide the directory of the installation:
+# cmake -S . -B path/to/build -DCMAKE_PREFIX_PATH=/absolute/path/to/install
 
 cmake_minimum_required(VERSION 3.13)
 project(godot-cpp LANGUAGES CXX)
@@ -194,10 +207,11 @@ if (GODOT_CPP_SYSTEM_HEADERS)
 	set(GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE SYSTEM)
 endif ()
 
-target_include_directories(${PROJECT_NAME} ${GODOT_CPP_SYSTEM_HEADERS_ATTRIBUTE} PUBLIC
-	include
-	${CMAKE_CURRENT_BINARY_DIR}/gen/include
-	${GODOT_GDEXTENSION_DIR}
+target_include_directories(${PROJECT_NAME} ${GODOT_SYSTEM_HEADERS_ATTRIBUTE} PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${GODOT_GDEXTENSION_DIR}>
+	$<INSTALL_INTERFACE:include>
 )
 
 # Add the compile flags
@@ -226,3 +240,28 @@ set_target_properties(${PROJECT_NAME}
 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 		OUTPUT_NAME "${OUTPUT_NAME}"
 )
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+set(GODOT_CPP_PACKAGE_NAME godot-cpp) # the find_package name
+set(GODOT_CPP_PACKAGE_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${GODOT_CPP_PACKAGE_NAME}")
+
+configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/config.cmake.in
+	"${PROJECT_BINARY_DIR}/cmake/${GODOT_CPP_PACKAGE_NAME}-config.cmake"
+	INSTALL_DESTINATION "${GODOT_CPP_PACKAGE_DESTINATION}"
+)
+
+install(FILES ${PROJECT_BINARY_DIR}/cmake/${GODOT_CPP_PACKAGE_NAME}-config.cmake
+	DESTINATION ${GODOT_CPP_PACKAGE_DESTINATION}
+)
+
+install(TARGETS godot-cpp EXPORT godot_cpp_targets)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${GODOT_GDEXTENSION_DIR}/gdextension_interface.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(EXPORT godot_cpp_targets
+	NAMESPACE godot-cpp::
+	FILE ${GODOT_CPP_PACKAGE_NAME}-targets.cmake
+	DESTINATION "${GODOT_CPP_PACKAGE_DESTINATION}")
