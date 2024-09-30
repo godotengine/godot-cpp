@@ -506,6 +506,7 @@ def _godot_cpp(env):
 
     if env["build_library"]:
         library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
+        env.NoCache(library)
         default_args = [library]
 
         # Add compiledb if the option is set
