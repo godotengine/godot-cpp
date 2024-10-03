@@ -755,3 +755,11 @@ ExampleRuntime::ExampleRuntime() {
 
 ExampleRuntime::~ExampleRuntime() {
 }
+
+void ExamplePrzykład::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_the_word"), &ExamplePrzykład::get_the_word);
+}
+
+String ExamplePrzykład::get_the_word() const {
+	return U"słowo to przykład";
+}

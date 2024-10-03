@@ -279,6 +279,10 @@ func _ready():
 	assert_equal(library_path, ProjectSettings.globalize_path(library_path))
 	assert_equal(FileAccess.file_exists(library_path), true)
 
+	# Test a class with a unicode name.
+	var przykład = ExamplePrzykład.new()
+	assert_equal(przykład.get_the_word(), "słowo to przykład")
+
 	exit_with_status()
 
 func _on_Example_custom_signal(signal_name, value):
