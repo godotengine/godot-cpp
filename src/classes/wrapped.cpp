@@ -42,6 +42,10 @@ namespace godot {
 thread_local const StringName *Wrapped::_constructing_extension_class_name = nullptr;
 thread_local const GDExtensionInstanceBindingCallbacks *Wrapped::_constructing_class_binding_callbacks = nullptr;
 
+#ifdef HOT_RELOAD_ENABLED
+thread_local GDExtensionObjectPtr Wrapped::_constructing_recreate_owner = nullptr;
+#endif
+
 const StringName *Wrapped::_get_extension_class_name() {
 	return nullptr;
 }
@@ -55,25 +59,14 @@ void Wrapped::_postinitialize() {
 
 Wrapped::Wrapped(const StringName p_godot_class) {
 #ifdef HOT_RELOAD_ENABLED
-	if (unlikely(Wrapped::recreate_instance)) {
-		RecreateInstance *recreate_data = Wrapped::recreate_instance;
-		RecreateInstance *previous = nullptr;
-		while (recreate_data) {
-			if (recreate_data->wrapper == this) {
-				_owner = recreate_data->owner;
-				if (previous) {
-					previous->next = recreate_data->next;
-				} else {
-					Wrapped::recreate_instance = recreate_data->next;
-				}
-				return;
-			}
-			previous = recreate_data;
-			recreate_data = recreate_data->next;
-		}
-	}
+	if (unlikely(Wrapped::_constructing_recreate_owner)) {
+		_owner = Wrapped::_constructing_recreate_owner;
+		Wrapped::_constructing_recreate_owner = nullptr;
+	} else
 #endif
-	_owner = godot::internal::gdextension_interface_classdb_construct_object(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
+	{
+		_owner = godot::internal::gdextension_interface_classdb_construct_object(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
+	}
 
 	if (_constructing_extension_class_name) {
 		godot::internal::gdextension_interface_object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(_constructing_extension_class_name), this);
