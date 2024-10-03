@@ -42,4 +42,5 @@ else:
         source=sources,
     )
 
+env.NoCache(library)
 Default(library)
