@@ -110,9 +110,9 @@ Callable::Callable(CallableCustom *p_callable_custom) {
 	info.call_func = &callable_custom_call;
 	info.is_valid_func = &callable_custom_is_valid;
 	info.free_func = &callable_custom_free;
-	info.hash_func = &callable_custom_hash;
-	info.equal_func = &callable_custom_equal_func;
-	info.less_than_func = &callable_custom_less_than_func;
+	info.hash_func = p_callable_custom->hash() != 0 ? &callable_custom_hash : nullptr;
+	info.equal_func = p_callable_custom->get_compare_equal_func() ? &callable_custom_equal_func : nullptr;
+	info.less_than_func = p_callable_custom->get_compare_less_func() ? &callable_custom_less_than_func : nullptr;
 	info.to_string_func = &callable_custom_to_string;
 	info.get_argument_count_func = &custom_callable_get_argument_count_func;
 
