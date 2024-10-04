@@ -355,7 +355,9 @@ void ClassDB::add_virtual_method(const StringName &p_class, const MethodInfo &p_
 		mi.arguments_metadata = (GDExtensionClassMethodArgumentMetadata *)memalloc(sizeof(GDExtensionClassMethodArgumentMetadata) * mi.argument_count);
 		for (uint32_t i = 0; i < mi.argument_count; i++) {
 			mi.arguments[i] = p_method.arguments[i]._to_gdextension();
-			mi.arguments_metadata[i] = p_method.arguments_metadata[i];
+			if (i < p_method.arguments_metadata.size()) {
+				mi.arguments_metadata[i] = p_method.arguments_metadata[i];
+			}
 		}
 	} else {
 		mi.arguments = nullptr;
