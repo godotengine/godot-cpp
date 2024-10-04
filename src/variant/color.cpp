@@ -109,7 +109,7 @@ uint64_t Color::to_rgba64() const {
 
 String _to_hex(float p_val) {
 	int v = Math::round(p_val * 255.0f);
-	v = CLAMP(v, 0, 255);
+	v = Math::clamp(v, 0, 255);
 	String ret;
 
 	for (int i = 0; i < 2; i++) {
@@ -246,10 +246,10 @@ bool Color::is_equal_approx(const Color &p_color) const {
 
 Color Color::clamp(const Color &p_min, const Color &p_max) const {
 	return Color(
-			CLAMP(r, p_min.r, p_max.r),
-			CLAMP(g, p_min.g, p_max.g),
-			CLAMP(b, p_min.b, p_max.b),
-			CLAMP(a, p_min.a, p_max.a));
+			Math::clamp(r, p_min.r, p_max.r),
+			Math::clamp(g, p_min.g, p_max.g),
+			Math::clamp(b, p_min.b, p_max.b),
+			Math::clamp(a, p_min.a, p_max.a));
 }
 
 void Color::invert() {

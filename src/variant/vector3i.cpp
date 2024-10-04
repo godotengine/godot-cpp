@@ -59,16 +59,16 @@ Vector3i::Axis Vector3i::max_axis_index() const {
 
 Vector3i Vector3i::clamp(const Vector3i &p_min, const Vector3i &p_max) const {
 	return Vector3i(
-			CLAMP(x, p_min.x, p_max.x),
-			CLAMP(y, p_min.y, p_max.y),
-			CLAMP(z, p_min.z, p_max.z));
+			Math::clamp(x, p_min.x, p_max.x),
+			Math::clamp(y, p_min.y, p_max.y),
+			Math::clamp(z, p_min.z, p_max.z));
 }
 
 Vector3i Vector3i::clampi(int32_t p_min, int32_t p_max) const {
 	return Vector3i(
-			CLAMP(x, p_min, p_max),
-			CLAMP(y, p_min, p_max),
-			CLAMP(z, p_min, p_max));
+			Math::clamp(x, p_min, p_max),
+			Math::clamp(y, p_min, p_max),
+			Math::clamp(z, p_min, p_max));
 }
 
 Vector3i::operator String() const {
