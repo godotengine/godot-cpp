@@ -264,6 +264,8 @@ public:
 	operator PackedColorArray() const;
 	operator PackedVector4Array() const;
 
+	Object *get_validated_object() const;
+
 	Variant &operator=(const Variant &other);
 	Variant &operator=(Variant &&other);
 	bool operator==(const Variant &other) const;

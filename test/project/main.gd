@@ -209,6 +209,12 @@ func _ready():
 	assert_equal(example.test_variant_float_conversion(10.0), 10.0)
 	assert_equal(example.test_variant_float_conversion(10), 10.0)
 
+	# Test checking if objects are valid.
+	var object_of_questionable_validity = Object.new()
+	assert_equal(example.test_object_is_valid(object_of_questionable_validity), true)
+	object_of_questionable_validity.free()
+	assert_equal(example.test_object_is_valid(object_of_questionable_validity), false)
+
 	# Test that ptrcalls from GDExtension to the engine are correctly encoding Object and RefCounted.
 	var new_node = Node.new()
 	example.test_add_child(new_node)
