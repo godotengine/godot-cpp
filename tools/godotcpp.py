@@ -404,9 +404,9 @@ def generate(env):
     # Process CPU architecture argument.
     if env["arch"] == "":
         # No architecture specified. Default to arm64 if building for Android,
-        # universal if building for macOS or iOS, wasm32 if building for web,
+        # universal if building for macOS or iOS (non-dev), wasm32 if building for web,
         # otherwise default to the host architecture.
-        if env["platform"] in ["macos", "ios"]:
+        if env["platform"] in ["macos", "ios"] and not env["dev_build"]:
             env["arch"] = "universal"
         elif env["platform"] == "android":
             env["arch"] = "arm64"
