@@ -22,6 +22,10 @@ def exists(env):
 
 
 def generate(env):
+    assert env["lto"] in ["thin", "full", "none"], "Unrecognized lto: {}".format(env["lto"])
+    if env["lto"] != "none":
+        print("Using LTO: " + env["lto"])
+
     # Require C++17
     if env.get("is_msvc", False):
         env.Append(CXXFLAGS=["/std:c++17"])
@@ -64,6 +68,22 @@ def generate(env):
             env.Append(LINKFLAGS=["/OPT:REF"])
         elif env["optimize"] == "debug" or env["optimize"] == "none":
             env.Append(CCFLAGS=["/Od"])
+
+        if env["lto"] == "thin":
+            if not env["use_llvm"]:
+                print("ThinLTO is only compatible with LLVM, use `use_llvm=yes` or `lto=full`.")
+                env.Exit(255)
+
+            env.Append(CCFLAGS=["-flto=thin"])
+            env.Append(LINKFLAGS=["-flto=thin"])
+        elif env["lto"] == "full":
+            if env["use_llvm"]:
+                env.Append(CCFLAGS=["-flto"])
+                env.Append(LINKFLAGS=["-flto"])
+            else:
+                env.AppendUnique(CCFLAGS=["/GL"])
+                env.AppendUnique(ARFLAGS=["/LTCG"])
+                env.AppendUnique(LINKFLAGS=["/LTCG"])
     else:
         if env["debug_symbols"]:
             # Adding dwarf-4 explicitly makes stacktraces work with clang builds,
@@ -91,3 +111,13 @@ def generate(env):
             env.Append(CCFLAGS=["-Og"])
         elif env["optimize"] == "none":
             env.Append(CCFLAGS=["-O0"])
+
+        if env["lto"] == "thin":
+            if (env["platform"] == "windows" or env["platform"] == "linux") and not env["use_llvm"]:
+                print("ThinLTO is only compatible with LLVM, use `use_llvm=yes` or `lto=full`.")
+                env.Exit(255)
+            env.Append(CCFLAGS=["-flto=thin"])
+            env.Append(LINKFLAGS=["-flto=thin"])
+        elif env["lto"] == "full":
+            env.Append(CCFLAGS=["-flto"])
+            env.Append(LINKFLAGS=["-flto"])

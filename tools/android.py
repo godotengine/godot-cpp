@@ -120,4 +120,9 @@ def generate(env):
 
     env.Append(CPPDEFINES=["ANDROID_ENABLED", "UNIX_ENABLED"])
 
+    # Refer to https://github.com/godotengine/godot/blob/master/platform/android/detect.py
+    # LTO benefits for Android (size, performance) haven't been clearly established yet.
+    if env["lto"] == "auto":
+        env["lto"] = "none"
+
     common_compiler_flags.generate(env)
