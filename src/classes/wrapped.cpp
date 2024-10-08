@@ -84,7 +84,24 @@ Wrapped::Wrapped(const StringName p_godot_class) {
 		godot::internal::gdextension_interface_object_set_instance_binding(_owner, godot::internal::token, this, _constructing_class_binding_callbacks);
 		_constructing_class_binding_callbacks = nullptr;
 	} else {
+#ifndef DISABLE_OBJECT_BINDING_GUARD
+		// Detect attempts to use godot::Object subclasses without initializing
+		// the bindings using `memnew`.  Failing to initialize the bindings can
+		// cause unexpected crashes.  This guard is in place so new users of
+		// godot-cpp are warned of this issue and directed to use `memnew`.
+		//
+		// The side-effect of this guard is that it prevents the use of
+		// godot::Object subclasses on the stack.  There are godot native
+		// classes such as godot::RegEx that can be used safely on the stack.
+		// Custom subclasses of godot::Object may also operate safely without
+		// the bindings being initialized.  To support these cases, use the
+		// above compiler flag to disable this guard.
+		//
+		// If you disable this guard, be aware that any godot::Object subclass
+		// passed into the godot engine will likely cause a crash unless you
+		// initialize the bindings using `memnew()`.
 		CRASH_NOW_MSG("BUG: Godot Object created without binding callbacks. Did you forget to use memnew()?");
+#endif
 	}
 }
 
