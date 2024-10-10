@@ -219,7 +219,7 @@ public:
 
 	// Used exclusively in the bindings to recreate the Ref Godot encapsulates in return values,
 	// without adding to the refcount.
-	inline static Ref<T> _gde_internal_constructor(Object *obj) {
+	static Ref<T> _gde_internal_constructor(Object *obj) {
 		Ref<T> r;
 		r.reference = (T *)obj;
 		return r;

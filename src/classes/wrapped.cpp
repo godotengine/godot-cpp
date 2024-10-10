@@ -42,6 +42,10 @@ namespace godot {
 thread_local const StringName *Wrapped::_constructing_extension_class_name = nullptr;
 thread_local const GDExtensionInstanceBindingCallbacks *Wrapped::_constructing_class_binding_callbacks = nullptr;
 
+#ifdef HOT_RELOAD_ENABLED
+Wrapped::RecreateInstance *Wrapped::recreate_instance = nullptr;
+#endif
+
 const StringName *Wrapped::_get_extension_class_name() {
 	return nullptr;
 }

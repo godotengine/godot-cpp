@@ -77,7 +77,7 @@ protected:
 		GDExtensionObjectPtr owner;
 		RecreateInstance *next;
 	};
-	inline static RecreateInstance *recreate_instance = nullptr;
+	static RecreateInstance *recreate_instance;
 #endif
 
 	void _notification(int p_what) {}
@@ -408,7 +408,7 @@ private:
 // Don't use this for your classes, use GDCLASS() instead.
 #define GDEXTENSION_CLASS_ALIAS(m_class, m_alias_for, m_inherits) /******************************************************************************************************************/ \
 private:                                                                                                                                                                               \
-	inline static ::godot::internal::EngineClassRegistration<m_class> _gde_engine_class_registration_helper;                                                                           \
+	static ::godot::internal::EngineClassRegistration<m_class> _gde_engine_class_registration_helper;                                                                                  \
 	void operator=(const m_class &p_rval) {}                                                                                                                                           \
 	friend class ::godot::ClassDB;                                                                                                                                                     \
 	friend class ::godot::Wrapped;                                                                                                                                                     \
