@@ -1,5 +1,6 @@
 name: Continuous integration
-on: [push, pull_request]
+on:
+  workflow_call:
 
 env:
   # Only used for the cache key. Increment version to force clean build.
@@ -8,7 +9,7 @@ env:
   GODOT_TEST_VERSION: master
 
 concurrency:
-  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}
+  group: ci-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -91,7 +92,7 @@ jobs:
     env:
       SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
       EM_VERSION: 3.1.39
-      EM_CACHE_FOLDER: "emsdk-cache"
+      EM_CACHE_FOLDER: emsdk-cache
 
     steps:
       - name: Checkout
@@ -108,24 +109,24 @@ jobs:
       - name: Set up Python (for SCons)
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: 3.x
 
       - name: Android dependencies
-        if: ${{ matrix.platform == 'android' }}
+        if: matrix.platform == 'android'
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r23c
           link-to-sdk: true
 
       - name: Web dependencies
-        if: ${{ matrix.platform == 'web' }}
+        if: matrix.platform == 'web'
         uses: mymindstorm/setup-emsdk@v14
         with:
-          version: ${{env.EM_VERSION}}
-          actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
+          version: ${{ env.EM_VERSION }}
+          actions-cache-folder: ${{ env.EM_CACHE_FOLDER }}
 
       - name: Setup MinGW for Windows/MinGW build
-        if: ${{ matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes' }}
+        if: matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes'
         uses: egor-tensin/setup-mingw@v2
         with:
           version: 12.2.0
@@ -161,7 +162,7 @@ jobs:
 
       - name: Download latest Godot artifacts
         uses: dsnopek/action-download-artifact@1322f74e2dac9feed2ee76a32d9ae1ca3b4cf4e9
-        if: ${{ matrix.run-tests && env.GODOT_TEST_VERSION == 'master' }}
+        if: matrix.run-tests && env.GODOT_TEST_VERSION == 'master'
         with:
           repo: godotengine/godot
           branch: master
@@ -175,13 +176,13 @@ jobs:
           path: godot-artifacts
 
       - name: Prepare Godot artifacts for testing
-        if: ${{ matrix.run-tests && env.GODOT_TEST_VERSION == 'master' }}
+        if: matrix.run-tests && env.GODOT_TEST_VERSION == 'master'
         run: |
           chmod +x ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono
           echo "GODOT=$(pwd)/godot-artifacts/godot.linuxbsd.editor.x86_64.mono" >> $GITHUB_ENV
 
       - name: Download requested Godot version for testing
-        if: ${{ matrix.run-tests && env.GODOT_TEST_VERSION != 'master' }}
+        if: matrix.run-tests && env.GODOT_TEST_VERSION != 'master'
         run: |
           wget "https://github.com/godotengine/godot-builds/releases/download/${GODOT_TEST_VERSION}/Godot_v${GODOT_TEST_VERSION}_linux.x86_64.zip" -O Godot.zip
           unzip -a Godot.zip
@@ -189,7 +190,7 @@ jobs:
           echo "GODOT=$(pwd)/Godot_v${GODOT_TEST_VERSION}_linux.x86_64" >> $GITHUB_ENV
 
       - name: Run tests
-        if: ${{ matrix.run-tests }}
+        if: matrix.run-tests
         run: |
           $GODOT --headless --version
           cd test
