@@ -269,6 +269,16 @@ void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) 
 	internal::gdextension_interface_classdb_register_extension_class_signal(internal::library, cl.name._native_ptr(), p_signal.name._native_ptr(), parameters.data(), parameters.size());
 }
 
+void ClassDB::set_icon(const StringName &p_class, const String &p_icon_path) {
+	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class);
+
+	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
+
+	ClassInfo &cl = type_it->second;
+
+	internal::gdextension_interface_classdb_set_extension_class_icon(internal::library, cl.name._native_ptr(), p_icon_path._native_ptr());
+}
+
 void ClassDB::bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDExtensionInt p_constant_value, bool p_is_bitfield) {
 	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class_name);
 

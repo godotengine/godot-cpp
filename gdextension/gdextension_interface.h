@@ -3007,6 +3007,18 @@ typedef void (*GDExtensionInterfaceClassdbRegisterExtensionClassPropertySubgroup
 typedef void (*GDExtensionInterfaceClassdbRegisterExtensionClassSignal)(GDExtensionClassLibraryPtr p_library, GDExtensionConstStringNamePtr p_class_name, GDExtensionConstStringNamePtr p_signal_name, const GDExtensionPropertyInfo *p_argument_info, GDExtensionInt p_argument_count);
 
 /**
+ * @name classdb_set_extension_class_icon
+ * @since 4.4
+ *
+ * Sets the icon of an extension class in the ClassDB.
+ *
+ * @param p_library A pointer the library received by the GDExtension's entry point function.
+ * @param p_class_name A pointer to a StringName with the class name.
+ * @param p_icon_path A pointer to a String with the path to the icon image.
+ */
+typedef void (*GDExtensionInterfaceClassdbSetExtensionClassIcon)(GDExtensionClassLibraryPtr p_library, GDExtensionConstStringNamePtr p_class_name, GDExtensionConstStringPtr p_icon_path);
+
+/**
  * @name classdb_unregister_extension_class
  * @since 4.1
  *
