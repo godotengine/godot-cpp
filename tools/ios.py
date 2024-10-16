@@ -97,4 +97,9 @@ def generate(env):
 
     env.Append(CPPDEFINES=["IOS_ENABLED", "UNIX_ENABLED"])
 
+    # Refer to https://github.com/godotengine/godot/blob/master/platform/ios/detect.py:
+    # Disable by default as it makes linking in Xcode very slow.
+    if env["lto"] == "auto":
+        env["lto"] = "none"
+
     common_compiler_flags.generate(env)

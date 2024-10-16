@@ -326,6 +326,14 @@ def options(opts, env):
             ("none", "custom", "debug", "speed", "speed_trace", "size"),
         )
     )
+    opts.Add(
+        EnumVariable(
+            "lto",
+            "Link-time optimization",
+            "none",
+            ("none", "auto", "thin", "full"),
+        )
+    )
     opts.Add(BoolVariable("debug_symbols", "Build with debugging symbols", True))
     opts.Add(BoolVariable("dev_build", "Developer build with dev-only debugging code (DEV_ENABLED)", False))
     opts.Add(BoolVariable("verbose", "Enable verbose output for the compilation", False))

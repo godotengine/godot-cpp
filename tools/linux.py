@@ -39,4 +39,8 @@ def generate(env):
 
     env.Append(CPPDEFINES=["LINUX_ENABLED", "UNIX_ENABLED"])
 
+    # Refer to https://github.com/godotengine/godot/blob/master/platform/linuxbsd/detect.py
+    if env["lto"] == "auto":
+        env["lto"] = "full"
+
     common_compiler_flags.generate(env)
