@@ -165,11 +165,11 @@ public:
 
 		const Size s = size();
 
-		Size begin = CLAMP(p_begin, -s, s);
+		Size begin = Math::clamp(p_begin, -s, s);
 		if (begin < 0) {
 			begin += s;
 		}
-		Size end = CLAMP(p_end, -s, s);
+		Size end = Math::clamp(p_end, -s, s);
 		if (end < 0) {
 			end += s;
 		}

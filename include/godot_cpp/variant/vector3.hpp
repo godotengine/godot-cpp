@@ -79,19 +79,19 @@ struct _NO_DISCARD_ Vector3 {
 	}
 
 	Vector3 min(const Vector3 &p_vector3) const {
-		return Vector3(MIN(x, p_vector3.x), MIN(y, p_vector3.y), MIN(z, p_vector3.z));
+		return Vector3(Math::min(x, p_vector3.x), Math::min(y, p_vector3.y), Math::min(z, p_vector3.z));
 	}
 
 	Vector3 minf(real_t p_scalar) const {
-		return Vector3(MIN(x, p_scalar), MIN(y, p_scalar), MIN(z, p_scalar));
+		return Vector3(Math::min(x, p_scalar), Math::min(y, p_scalar), Math::min(z, p_scalar));
 	}
 
 	Vector3 max(const Vector3 &p_vector3) const {
-		return Vector3(MAX(x, p_vector3.x), MAX(y, p_vector3.y), MAX(z, p_vector3.z));
+		return Vector3(Math::max(x, p_vector3.x), Math::max(y, p_vector3.y), Math::max(z, p_vector3.z));
 	}
 
 	Vector3 maxf(real_t p_scalar) const {
-		return Vector3(MAX(x, p_scalar), MAX(y, p_scalar), MAX(z, p_scalar));
+		return Vector3(Math::max(x, p_scalar), Math::max(y, p_scalar), Math::max(z, p_scalar));
 	}
 
 	_FORCE_INLINE_ real_t length() const;
@@ -213,7 +213,7 @@ Vector3 Vector3::abs() const {
 }
 
 Vector3 Vector3::sign() const {
-	return Vector3(SIGN(x), SIGN(y), SIGN(z));
+	return Vector3(Math::sign(x), Math::sign(y), Math::sign(z));
 }
 
 Vector3 Vector3::floor() const {

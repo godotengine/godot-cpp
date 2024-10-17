@@ -96,7 +96,7 @@ real_t Vector2::cross(const Vector2 &p_other) const {
 }
 
 Vector2 Vector2::sign() const {
-	return Vector2(SIGN(x), SIGN(y));
+	return Vector2(Math::sign(x), Math::sign(y));
 }
 
 Vector2 Vector2::floor() const {
@@ -133,14 +133,14 @@ Vector2 Vector2::project(const Vector2 &p_to) const {
 
 Vector2 Vector2::clamp(const Vector2 &p_min, const Vector2 &p_max) const {
 	return Vector2(
-			CLAMP(x, p_min.x, p_max.x),
-			CLAMP(y, p_min.y, p_max.y));
+			Math::clamp(x, p_min.x, p_max.x),
+			Math::clamp(y, p_min.y, p_max.y));
 }
 
 Vector2 Vector2::clampf(real_t p_min, real_t p_max) const {
 	return Vector2(
-			CLAMP(x, p_min, p_max),
-			CLAMP(y, p_min, p_max));
+			Math::clamp(x, p_min, p_max),
+			Math::clamp(y, p_min, p_max));
 }
 
 Vector2 Vector2::snapped(const Vector2 &p_step) const {

@@ -80,19 +80,19 @@ struct _NO_DISCARD_ Vector2i {
 	}
 
 	Vector2i min(const Vector2i &p_vector2i) const {
-		return Vector2i(MIN(x, p_vector2i.x), MIN(y, p_vector2i.y));
+		return Vector2i(Math::min(x, p_vector2i.x), Math::min(y, p_vector2i.y));
 	}
 
 	Vector2i mini(int32_t p_scalar) const {
-		return Vector2i(MIN(x, p_scalar), MIN(y, p_scalar));
+		return Vector2i(Math::min(x, p_scalar), Math::min(y, p_scalar));
 	}
 
 	Vector2i max(const Vector2i &p_vector2i) const {
-		return Vector2i(MAX(x, p_vector2i.x), MAX(y, p_vector2i.y));
+		return Vector2i(Math::max(x, p_vector2i.x), Math::max(y, p_vector2i.y));
 	}
 
 	Vector2i maxi(int32_t p_scalar) const {
-		return Vector2i(MAX(x, p_scalar), MAX(y, p_scalar));
+		return Vector2i(Math::max(x, p_scalar), Math::max(y, p_scalar));
 	}
 
 	Vector2i operator+(const Vector2i &p_v) const;
@@ -129,7 +129,7 @@ struct _NO_DISCARD_ Vector2i {
 	double distance_to(const Vector2i &p_to) const;
 
 	real_t aspect() const { return width / (real_t)height; }
-	Vector2i sign() const { return Vector2i(SIGN(x), SIGN(y)); }
+	Vector2i sign() const { return Vector2i(Math::sign(x), Math::sign(y)); }
 	Vector2i abs() const { return Vector2i(Math::abs(x), Math::abs(y)); }
 	Vector2i snapped(const Vector2i &p_step) const;
 	Vector2i snappedi(int32_t p_step) const;
