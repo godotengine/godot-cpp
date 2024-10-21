@@ -12,6 +12,7 @@
 #include <godot_cpp/classes/multiplayer_api.hpp>
 #include <godot_cpp/classes/multiplayer_peer.hpp>
 #include <godot_cpp/classes/os.hpp>
+#include <godot_cpp/variant/typed_dictionary.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
