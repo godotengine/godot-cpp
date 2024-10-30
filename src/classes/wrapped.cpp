@@ -60,9 +60,9 @@ void Wrapped::_postinitialize() {
 	Wrapped::_constructing_mutex.unlock();
 #endif
 
-	// Only send NOTIFICATION_POSTINITIALIZE for extension classes.
-	if (_is_extension_class()) {
-		_notificationv(Object::NOTIFICATION_POSTINITIALIZE);
+	Object *obj = dynamic_cast<Object *>(this);
+	if (obj) {
+		obj->notification(Object::NOTIFICATION_POSTINITIALIZE);
 	}
 }
 
@@ -74,7 +74,7 @@ Wrapped::Wrapped(const StringName p_godot_class) {
 	} else
 #endif
 	{
-		_owner = godot::internal::gdextension_interface_classdb_construct_object(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
+		_owner = godot::internal::gdextension_interface_classdb_construct_object2(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
 	}
 
 	if (_constructing_extension_class_name) {
