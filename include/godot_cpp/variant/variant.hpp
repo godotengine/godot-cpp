@@ -329,8 +329,6 @@ public:
 	bool booleanize() const;
 	String stringify() const;
 	Variant duplicate(bool deep = false) const;
-	static void blend(const Variant &a, const Variant &b, float c, Variant &r_dst);
-	static void interpolate(const Variant &a, const Variant &b, float c, Variant &r_dst);
 
 	static String get_type_name(Variant::Type type);
 	static bool can_convert(Variant::Type from, Variant::Type to);
