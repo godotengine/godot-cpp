@@ -31,6 +31,11 @@
 #ifndef GODOT_DEFS_HPP
 #define GODOT_DEFS_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/math_defs.h"
+#include "core/typedefs.h"
+#else
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -127,4 +132,5 @@ struct BuildIndexSequence : BuildIndexSequence<N - 1, N - 1, Is...> {};
 template <size_t... Is>
 struct BuildIndexSequence<0, Is...> : IndexSequence<Is...> {};
 
+#endif
 #endif // GODOT_DEFS_HPP

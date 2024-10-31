@@ -31,6 +31,10 @@
 #ifndef GODOT_EDITOR_PLUGIN_REGISTRATION_HPP
 #define GODOT_EDITOR_PLUGIN_REGISTRATION_HPP
 
+#ifdef GODOT_MODULE
+#include "editor/plugins/editor_plugin.h"
+#else
+
 #include <godot_cpp/templates/vector.hpp>
 
 namespace godot {
@@ -59,4 +63,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_EDITOR_PLUGIN_REGISTRATION_HPP

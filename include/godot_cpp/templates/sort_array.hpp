@@ -31,6 +31,10 @@
 #ifndef GODOT_SORT_ARRAY_HPP
 #define GODOT_SORT_ARRAY_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/sort_array.h"
+#else
+
 #include <godot_cpp/core/error_macros.hpp>
 
 namespace godot {
@@ -320,4 +324,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_SORT_ARRAY_HPP

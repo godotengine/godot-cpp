@@ -229,6 +229,14 @@ def options(opts, env):
         )
     )
     opts.Add(
+        PathVariable(
+            key="godot_repo",
+            help="Path to a custom directory containing Godot repository. Used to generate godot_compat bindings.",
+            default=env.get("godot_repo", ""),
+            validator=validate_dir,
+        )
+    )
+    opts.Add(
         BoolVariable(
             key="generate_bindings",
             help="Force GDExtension API bindings generation. Auto-detected by default.",

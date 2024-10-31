@@ -31,6 +31,10 @@
 #ifndef GODOT_METHOD_PTRCALL_HPP
 #define GODOT_METHOD_PTRCALL_HPP
 
+#ifdef GODOT_MODULE
+#include "core/variant/method_ptrcall.h"
+#else
+
 #include <godot_cpp/core/defs.hpp>
 
 #include <godot_cpp/core/object.hpp>
@@ -235,4 +239,5 @@ GDVIRTUAL_NATIVE_PTR(double);
 
 } // namespace godot
 
+#endif
 #endif // GODOT_METHOD_PTRCALL_HPP

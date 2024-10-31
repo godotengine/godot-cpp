@@ -31,6 +31,10 @@
 #ifndef GODOT_HASHFUNCS_HPP
 #define GODOT_HASHFUNCS_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/hashfuncs.h"
+#else
+
 // Needed for fastmod.
 #if defined(_MSC_VER)
 #include <intrin.h>
@@ -523,4 +527,5 @@ static _FORCE_INLINE_ uint32_t fastmod(const uint32_t n, const uint64_t c, const
 
 } // namespace godot
 
+#endif
 #endif // GODOT_HASHFUNCS_HPP

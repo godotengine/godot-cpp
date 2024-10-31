@@ -31,6 +31,10 @@
 #ifndef GODOT_TRANSFORM2D_HPP
 #define GODOT_TRANSFORM2D_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/transform_2d.h"
+#else
+
 #include <godot_cpp/variant/packed_vector2_array.hpp>
 #include <godot_cpp/variant/rect2.hpp>
 #include <godot_cpp/variant/vector2.hpp>
@@ -248,4 +252,5 @@ PackedVector2Array Transform2D::xform_inv(const PackedVector2Array &p_array) con
 
 } // namespace godot
 
+#endif
 #endif // GODOT_TRANSFORM2D_HPP

@@ -31,6 +31,10 @@
 #ifndef GODOT_TYPED_ARRAY_HPP
 #define GODOT_TYPED_ARRAY_HPP
 
+#ifdef GODOT_MODULE
+#include "core/variant/typed_array.h"
+#else
+
 #include <godot_cpp/variant/array.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
@@ -139,4 +143,5 @@ MAKE_TYPED_ARRAY(PackedColorArray, Variant::PACKED_COLOR_ARRAY)
 
 } // namespace godot
 
+#endif
 #endif // GODOT_TYPED_ARRAY_HPP

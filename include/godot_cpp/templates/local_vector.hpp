@@ -31,6 +31,10 @@
 #ifndef GODOT_LOCAL_VECTOR_HPP
 #define GODOT_LOCAL_VECTOR_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/local_vector.h"
+#else
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/templates/sort_array.hpp>
@@ -340,4 +344,5 @@ using TightLocalVector = LocalVector<T, U, force_trivial, true>;
 
 } // namespace godot
 
+#endif
 #endif // GODOT_LOCAL_VECTOR_HPP

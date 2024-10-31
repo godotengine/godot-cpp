@@ -31,6 +31,10 @@
 #ifndef GODOT_RB_SET_HPP
 #define GODOT_RB_SET_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/rb_set.h"
+#else
+
 #include <godot_cpp/core/memory.hpp>
 
 // based on the very nice implementation of rb-trees by:
@@ -711,4 +715,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_RB_SET_HPP

@@ -31,6 +31,10 @@
 #ifndef GODOT_RID_OWNER_HPP
 #define GODOT_RID_OWNER_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/rid_owner.h"
+#else
+
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/godot.hpp>
 #include <godot_cpp/templates/list.hpp>
@@ -462,4 +466,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_RID_OWNER_HPP

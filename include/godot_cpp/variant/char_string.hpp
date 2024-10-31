@@ -31,6 +31,10 @@
 #ifndef GODOT_CHAR_STRING_HPP
 #define GODOT_CHAR_STRING_HPP
 
+#ifdef GODOT_MODULE
+#include "core/string/ustring.h"
+#else
+
 #include <godot_cpp/templates/cowdata.hpp>
 
 #include <cstddef>
@@ -139,4 +143,5 @@ typedef CharStringT<wchar_t> CharWideString;
 
 } // namespace godot
 
+#endif
 #endif // GODOT_CHAR_STRING_HPP

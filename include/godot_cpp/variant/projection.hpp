@@ -31,6 +31,10 @@
 #ifndef GODOT_PROJECTION_HPP
 #define GODOT_PROJECTION_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/projection.h"
+#else
+
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 #include <godot_cpp/variant/vector4.hpp>
@@ -168,4 +172,5 @@ Vector3 Projection::xform(const Vector3 &p_vec3) const {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_PROJECTION_HPP

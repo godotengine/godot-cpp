@@ -31,6 +31,10 @@
 #ifndef GODOT_SEARCH_ARRAY_HPP
 #define GODOT_SEARCH_ARRAY_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/search_array.h"
+#else
+
 #include <godot_cpp/templates/sort_array.hpp>
 
 namespace godot {
@@ -68,4 +72,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_SEARCH_ARRAY_HPP

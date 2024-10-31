@@ -31,6 +31,10 @@
 #ifndef GODOT_VECTOR_HPP
 #define GODOT_VECTOR_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/vector.h"
+#else
+
 /**
  * @class Vector
  * Vector container. Regular Vector Container. Use with care and for smaller arrays when possible. Use Vector for large arrays.
@@ -333,4 +337,5 @@ void Vector<T>::fill(T p_elem) {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_VECTOR_HPP

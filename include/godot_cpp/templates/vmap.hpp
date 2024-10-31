@@ -31,6 +31,10 @@
 #ifndef GODOT_VMAP_HPP
 #define GODOT_VMAP_HPP
 
+#ifdef GODOT_MODULE
+#include "core/templates/vmap.h"
+#else
+
 #include <godot_cpp/templates/cowdata.hpp>
 
 namespace godot {
@@ -201,4 +205,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_VMAP_HPP

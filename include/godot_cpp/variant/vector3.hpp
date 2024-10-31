@@ -31,6 +31,10 @@
 #ifndef GODOT_VECTOR3_HPP
 #define GODOT_VECTOR3_HPP
 
+#ifdef GODOT_MODULE
+#include "core/math/vector3.h"
+#else
+
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/math.hpp>
 
@@ -538,4 +542,5 @@ Vector3 Vector3::reflect(const Vector3 &p_normal) const {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_VECTOR3_HPP

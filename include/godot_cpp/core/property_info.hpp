@@ -31,6 +31,10 @@
 #ifndef GODOT_PROPERTY_INFO_HPP
 #define GODOT_PROPERTY_INFO_HPP
 
+#ifdef GODOT_MODULE
+#include "core/object/object.h"
+#else
+
 #include <godot_cpp/core/defs.hpp>
 
 #include <godot_cpp/classes/global_constants.hpp>
@@ -129,4 +133,5 @@ struct PropertyInfo {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_PROPERTY_INFO_HPP

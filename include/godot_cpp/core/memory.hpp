@@ -31,6 +31,10 @@
 #ifndef GODOT_MEMORY_HPP
 #define GODOT_MEMORY_HPP
 
+#ifdef GODOT_MODULE
+#include "core/os/memory.h"
+#else
+
 #include <cstddef>
 #include <cstdint>
 
@@ -217,4 +221,5 @@ struct _GlobalNilClass {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_MEMORY_HPP

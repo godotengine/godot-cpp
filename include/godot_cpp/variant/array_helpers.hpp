@@ -31,6 +31,9 @@
 #ifndef GODOT_ARRAY_HELPERS_HPP
 #define GODOT_ARRAY_HELPERS_HPP
 
+#ifdef GODOT_MODULE
+#else
+
 namespace godot {
 namespace helpers {
 template <typename T, typename ValueT>
@@ -52,4 +55,5 @@ T append_all(T appendable) {
 } // namespace helpers
 } // namespace godot
 
+#endif
 #endif // GODOT_ARRAY_HELPERS_HPP

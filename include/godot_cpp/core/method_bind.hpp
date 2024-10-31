@@ -31,6 +31,10 @@
 #ifndef GODOT_METHOD_BIND_HPP
 #define GODOT_METHOD_BIND_HPP
 
+#ifdef GODOT_MODULE
+#include "core/object/method_bind.h"
+#else
+
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/type_info.hpp>
 
@@ -732,4 +736,5 @@ MethodBind *create_static_method_bind(R (*p_method)(P...)) {
 
 } // namespace godot
 
+#endif
 #endif // GODOT_METHOD_BIND_HPP

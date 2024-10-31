@@ -31,6 +31,10 @@
 #ifndef GODOT_GODOT_HPP
 #define GODOT_GODOT_HPP
 
+#ifdef GODOT_MODULE
+#include "modules/register_module_types.h"
+#else
+
 #include <gdextension_interface.h>
 
 namespace godot {
@@ -263,4 +267,5 @@ public:
 
 } // namespace godot
 
+#endif
 #endif // GODOT_GODOT_HPP
