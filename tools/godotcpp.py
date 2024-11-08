@@ -382,6 +382,30 @@ def make_doc_source(target, source, env):
     g.close()
 
 
+def make_suffix(env, compatibility_only=False) -> str:
+    suffix = ".{}".format(env["platform"])
+
+    if not compatibility_only:
+        suffix += "." + env["target"]
+
+    if env.dev_build and not compatibility_only:
+        suffix += ".dev"
+
+    if env["precision"] == "double":
+        suffix += ".double"
+
+    if not compatibility_only or env["arch"] != "universal":
+        suffix += "." + env["arch"]
+
+    if env["ios_simulator"] and not compatibility_only:
+        suffix += ".simulator"
+
+    if not env["threads"] and not compatibility_only:
+        suffix += ".nothreads"
+
+    return suffix
+
+
 def generate(env):
     # Default num_jobs to local cpu count if not user specified.
     # SCons has a peculiarity where user-specified options won't be overridden
@@ -488,19 +512,9 @@ def generate(env):
     env.Append(CPPDEFINES=["GDEXTENSION"])
 
     # Suffix
-    suffix = ".{}.{}".format(env["platform"], env["target"])
-    if env.dev_build:
-        suffix += ".dev"
-    if env["precision"] == "double":
-        suffix += ".double"
-    suffix += "." + env["arch"]
-    if env["ios_simulator"]:
-        suffix += ".simulator"
-    if not env["threads"]:
-        suffix += ".nothreads"
-
-    env["suffix"] = suffix  # Exposed when included from another project
-    env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
+    env["suffix"] = make_suffix(env)  # Exposed when included from another project
+    env["compatibility_suffix"] = make_suffix(env, compatibility_only=True)
+    env["OBJSUFFIX"] = env["suffix"] + env["OBJSUFFIX"]
 
     # compile_commands.json
     env.Tool("compilation_db")
