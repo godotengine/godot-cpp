@@ -95,7 +95,6 @@ jobs:
     env:
       SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
       EM_VERSION: 3.1.39
-      EM_CACHE_FOLDER: emsdk-cache
 
     steps:
       - name: Checkout
@@ -126,7 +125,7 @@ jobs:
         uses: mymindstorm/setup-emsdk@v14
         with:
           version: ${{ env.EM_VERSION }}
-          actions-cache-folder: ${{ env.EM_CACHE_FOLDER }}
+          no-cache: true
 
       - name: Setup MinGW for Windows/MinGW build
         if: matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes'
