@@ -48,4 +48,7 @@ if scons_cache_path is not None:
 cpp_tool.generate(env)
 library = env.GodotCPP()
 
+if library:
+    env.InstallableGodotCPP(library)
+
 Return("env")
