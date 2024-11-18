@@ -22,3 +22,5 @@ include( ${PROJECT_SOURCE_DIR}/cmake/godotcpp.cmake )
 godotcpp_options()
 
 godotcpp_generate()
+
+godotcpp_installable()
