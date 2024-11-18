@@ -287,5 +287,18 @@ function( godotcpp_installable )
             DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/godot"
             COMPONENT "godot-cpp"
         )
+
+        # Install the pkg-config file
+        get_target_property(GODOTCPP_OUTPUT_NAME "${PROJECT_NAME}" OUTPUT_NAME)
+        configure_file(
+            "${CMAKE_CURRENT_SOURCE_DIR}/cmake/godot-cpp.pc.in"
+            "${CMAKE_CURRENT_BINARY_DIR}/godot-cpp.pc"
+            @ONLY
+        )
+        install(
+            FILES "${CMAKE_CURRENT_BINARY_DIR}/godot-cpp.pc"
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+            COMPONENT "godot-cpp"
+        )
     endif()
 endfunction()
