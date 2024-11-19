@@ -338,6 +338,33 @@ def options(opts, env):
     opts.Add(BoolVariable("dev_build", "Developer build with dev-only debugging code (DEV_ENABLED)", False))
     opts.Add(BoolVariable("verbose", "Enable verbose output for the compilation", False))
 
+    # Scons lack a default install prefix, so use CMake's as a default for feature parity
+    # https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html
+    opts.Add(
+        PathVariable(
+            "install_prefix_dir",
+            "The directory to install to",
+            "C:/Program Files/godot-cpp" if default_platform == "windows" else "/usr/local",
+            PathVariable.PathAccept,
+        )
+    )
+    opts.Add(
+        PathVariable(
+            "install_lib_dir",
+            "The directory to install the library (relative from the prefix)",
+            "lib",
+            PathVariable.PathAccept,
+        )
+    )
+    opts.Add(
+        PathVariable(
+            "install_include_dir",
+            "The directory to install the headers (relative from the prefix)",
+            "include",
+            PathVariable.PathAccept,
+        )
+    )
+
     # Add platform options (custom tools can override platforms)
     for pl in sorted(set(platforms + custom_platforms)):
         tool = Tool(pl, toolpath=get_platform_tools_paths(env))
@@ -526,6 +553,7 @@ def generate(env):
         }
     )
     env.AddMethod(_godot_cpp, "GodotCPP")
+    env.AddMethod(_installable, "InstallableGodotCPP")
 
 
 def _godot_cpp(env):
@@ -571,3 +599,58 @@ def _godot_cpp(env):
 
     env.AppendUnique(LIBS=[env.File("bin/%s" % library_name)])
     return library
+
+
+def _installable(env, library):
+    import itertools
+    import json
+
+    install_prefix_dir = env["install_prefix_dir"]
+    full_install_lib_dir = os.path.join(install_prefix_dir, env["install_lib_dir"])
+    full_install_include_dir = os.path.join(install_prefix_dir, env["install_include_dir"])
+
+    # Obtain the gdextension version
+    extension_dir = normalize_path(env.get("gdextension_dir", env.Dir("gdextension").abspath), env)
+    api_filename = normalize_path(
+        env.get("custom_api_file", env.File(extension_dir + "/extension_api.json").abspath),
+        env,
+    )
+    with open(api_filename, "r") as api_json_file:
+        api_data = json.load(api_json_file)
+        version_major = api_data["header"]["version_major"]
+        version_minor = api_data["header"]["version_minor"]
+        version_patch = api_data["header"]["version_patch"]
+        gd_version = f"{version_major}.{version_minor}.{version_patch}"
+
+    # Configure and install the pkgconfig file
+    libname = str(library[0])
+    pkgconfig = env.Substfile(
+        target="gen/godot-cpp.pc",
+        source="cmake/godot-cpp.pc.in",
+        SUBST_DICT={
+            "@CMAKE_INSTALL_PREFIX@": install_prefix_dir,
+            "@CMAKE_INSTALL_FULL_INCLUDEDIR@": full_install_include_dir,
+            "@CMAKE_INSTALL_FULL_LIBDIR@": full_install_lib_dir,
+            "@GODOT_API_VERSION@": gd_version,
+            "@GODOTCPP_OUTPUT_NAME@": libname,
+        },
+    )
+    full_install_pkgconfig_dir = os.path.join(full_install_lib_dir, "pkgconfig")
+    env.Install(full_install_pkgconfig_dir, pkgconfig)
+
+    # Install the headers
+    headers_from = []
+    headers_to = []
+    for dir_from, _, file_lst in itertools.chain(os.walk("include/godot_cpp"), os.walk("gen/include/godot_cpp")):
+        dir_to = os.path.join(full_install_include_dir, dir_from[dir_from.find("/godot_cpp") + 1 :])
+        headers_from += [os.path.join(dir_from, filename) for filename in file_lst]
+        headers_to += [os.path.join(dir_to, filename) for filename in file_lst]
+    env.InstallAs(headers_to, headers_from)
+    # Install the gdextension files
+    interface_header = os.path.join(extension_dir, "gdextension_interface.h")
+    env.Install(full_install_include_dir, interface_header)
+
+    # Install the static library
+    env.Install(full_install_lib_dir, library)
+
+    env.Alias("install", env["install_prefix_dir"])

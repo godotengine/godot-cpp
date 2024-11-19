@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+
+Name: godot-cpp
+Description: C++ bindings for the Godot script API
+Version: @GODOT_API_VERSION@
+Libs: -L${libdir} -l@GODOTCPP_OUTPUT_NAME@
+Cflags: -I${includedir}
