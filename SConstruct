@@ -27,7 +27,16 @@ if profile:
     elif os.path.isfile(profile + ".py"):
         customs.append(profile + ".py")
 opts = Variables(customs, ARGUMENTS)
-cpp_tool = Tool("godotcpp", toolpath=["tools"])
+
+# Some environments do not have setdefault yet.
+if "toolpath" not in env:
+    env["toolpath"] = []
+
+# Needed because if we're called as SConscript, our site_tools are not automatically appended to toolpath.
+env["toolpath"].append("site_scons/site_tools")
+
+cpp_tool = Tool("godotcpp", toolpath=env["toolpath"])
+
 cpp_tool.options(opts, env)
 opts.Update(env)
 

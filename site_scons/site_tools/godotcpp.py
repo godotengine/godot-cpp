@@ -49,13 +49,6 @@ def validate_parent_dir(key, val, env):
         raise UserError("'%s' is not a directory: %s" % (key, os.path.dirname(val)))
 
 
-def get_platform_tools_paths(env):
-    path = env.get("custom_tools", None)
-    if path is None:
-        return ["tools"]
-    return [normalize_path(path, env), "tools"]
-
-
 def get_custom_platforms(env):
     path = env.get("custom_tools", None)
     if path is None:
@@ -188,6 +181,13 @@ def options(opts, env):
     )
 
     opts.Update(env)
+
+    # Some environments do not have setdefault yet.
+    if "toolpath" not in env:
+        env["toolpath"] = []
+
+    if env.get("custom_tools", None) is not None:
+        env["toolpath"].append(normalize_path(env["custom_tools"], env))
 
     custom_platforms = get_custom_platforms(env)
 
@@ -340,7 +340,7 @@ def options(opts, env):
 
     # Add platform options (custom tools can override platforms)
     for pl in sorted(set(platforms + custom_platforms)):
-        tool = Tool(pl, toolpath=get_platform_tools_paths(env))
+        tool = Tool(pl, toolpath=env["toolpath"])
         if hasattr(tool, "options"):
             tool.options(opts)
 
@@ -451,7 +451,7 @@ def generate(env):
     env["optimize"] = ARGUMENTS.get("optimize", opt_level)
     env["debug_symbols"] = get_cmdline_bool("debug_symbols", env.dev_build)
 
-    tool = Tool(env["platform"], toolpath=get_platform_tools_paths(env))
+    tool = Tool(env["platform"], toolpath=env["toolpath"])
 
     if tool is None or not tool.exists(env):
         raise ValueError("Required toolchain not found for platform " + env["platform"])
