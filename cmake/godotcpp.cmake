@@ -32,6 +32,7 @@ set( PLATFORM_LIST linux macos windows android ios web )
 # List of known architectures
 set( ARCH_LIST universal x86_32 x86_64 arm32 arm64 rv64 ppc32 ppc64 wasm32 )
 
+
 # Function to map processors to known architectures
 function( godot_arch_map ALIAS PROC )
     string( TOLOWER "${PROC}" PROC )
@@ -121,6 +122,29 @@ function( godotcpp_options )
     # FIXME These options are not present in SCons, and perhaps should be added there.
     option( GODOT_SYSTEM_HEADERS "Expose headers as SYSTEM." OFF )
     option( GODOT_WARNING_AS_ERROR "Treat warnings as errors" OFF )
+
+    # Define wich targets create for build. By default all targets are included
+    # Not presented in SCons
+    option(GODOT_ADD_TARGET_TEMPLATE_RELEASE "Add template_release target to build" ON)
+    option(GODOT_ADD_TARGET_TEMPLATE_DEBUG "Add template_debug target to build" ON)
+    option(GODOT_ADD_TARGET_EDITOR "Add editor target to build" ON)
+    if(GODOT_ADD_TARGET_TEMPLATE_DEBUG)
+        list(APPEND GODOT_TARGETS "template_debug")
+    endif()
+    if(GODOT_ADD_TARGET_TEMPLATE_RELEASE)
+        list(APPEND GODOT_TARGETS "template_release")
+    endif()
+    if(GODOT_ADD_TARGET_EDITOR)
+        list(APPEND GODOT_TARGETS "editor")
+    endif()
+    if(NOT GODOT_TARGETS)
+        message(FATAL_ERROR "No targets were chosen to be build.See GODOT_ADD_TARGET_* variables: at least one of the should be ON")
+    endif()
+    # since targets can be turned off, we need to know wich one is left
+    list(GET GODOT_TARGETS 0 GODOT_DEFAULT_TARGET)
+    # parent scoping GODOT_TARGETS and GODOT_DEFAULT_TARGET
+	set(GODOT_DEFAULT_TARGET ${GODOT_DEFAULT_TARGET} PARENT_SCOPE)
+	set(GODOT_TARGETS ${GODOT_TARGETS} PARENT_SCOPE)
 
     # Run options commands on the following to populate cache for all
     # platforms. This type of thing is typically done conditionally But as
@@ -231,7 +255,7 @@ function( godotcpp_generate )
     endif()
 
     ### Define our godot-cpp library targets
-    foreach ( TARGET_NAME template_debug template_release editor )
+    foreach ( TARGET_NAME ${GODOT_TARGETS} )
 
         # Useful genex snippits used in subsequent genex's
         set( IS_RELEASE "$<STREQUAL:${TARGET_NAME},template_release>")

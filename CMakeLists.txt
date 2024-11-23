@@ -95,4 +95,7 @@ project( godot-cpp
 godotcpp_generate()
 
 # Test Example
-add_subdirectory( test )
+option(GODOT_CPP_USE_TEST "Add test example project to build" ON)
+if(GODOT_CPP_USE_TEST)
+    add_subdirectory( test )
+endif()
