@@ -293,4 +293,8 @@ function( godotcpp_generate )
 
     endforeach ()
 
+    # Added for backwards compatibility with prior cmake solution so that builds dont immediately break
+    # from a missing target.
+    add_library( godot::cpp ALIAS template_debug )
+
 endfunction()
