@@ -49,6 +49,7 @@ class Variant {
 
 	friend class GDExtensionBinding;
 	friend class MethodBind;
+	friend class VariantInternal;
 
 	static void init_bindings();
 

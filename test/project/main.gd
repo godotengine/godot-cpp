@@ -271,6 +271,9 @@ func _ready():
 	# Test that we can access an engine singleton.
 	assert_equal(example.test_use_engine_singleton(), OS.get_name())
 
+	assert_equal(example.test_get_internal(1), 1)
+	assert_equal(example.test_get_internal(true), -1)
+
 	# Test that notifications happen on both parent and child classes.
 	var example_child = $ExampleChild
 	assert_equal(example_child.get_value1(), 11)
