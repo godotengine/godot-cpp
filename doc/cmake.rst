@@ -24,6 +24,20 @@ Configuration examples are listed at the bottom of the page.
 
 .. _godot-cpp-template: https://github.com/godotengine/godot-cpp-template
 
+SCons Deviations
+----------------
+
+Not everything from SCons can be perfectly representable in CMake, here are
+the notable differences.
+
+- debug_symbols
+    No longer has an explicit option, and is enabled via Debug-like CMake
+    build configurations; Debug, RelWithDebInfo.
+
+- dev_build
+    Does not define NDEBUG when disabled, NDEBUG is set via Release-like
+    CMake build configurations; Release, MinSizeRel.
+
 Basic walkthrough
 -----------------
 

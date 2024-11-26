@@ -26,6 +26,7 @@ get_target_property( GODOT_TARGET godot-cpp::${TEST_TARGET} GODOT_TARGET )
 get_target_property( GODOT_ARCH godot-cpp::${TEST_TARGET} GODOT_ARCH )
 
 set( OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/" )
+set( DEV_TAG "$<$<BOOL:${GODOT_DEV_BUILD}>:.dev>" )
 
 set_target_properties( godot-cpp-test
         PROPERTIES
@@ -45,7 +46,7 @@ set_target_properties( godot-cpp-test
         PDB_OUTPUT_DIRECTORY     "$<1:${OUTPUT_DIR}>" #MSVC Only, ignored on other platforms
 
         PREFIX "lib"
-        OUTPUT_NAME "gdexample.${GODOT_PLATFORM}.${GODOT_TARGET}.${GODOT_ARCH}"
+        OUTPUT_NAME "gdexample.${GODOT_PLATFORM}.${GODOT_TARGET}${DEV_TAG}.${GODOT_ARCH}"
 )
 
 if( CMAKE_SYSTEM_NAME STREQUAL Darwin )
@@ -58,7 +59,7 @@ if( CMAKE_SYSTEM_NAME STREQUAL Darwin )
             LIBRARY_OUTPUT_DIRECTORY "$<1:${OUTPUT_DIR}>"
             RUNTIME_OUTPUT_DIRECTORY "$<1:${OUTPUT_DIR}>"
 
-            OUTPUT_NAME "gdexample.macos.${TEST_TARGET}"
+            OUTPUT_NAME "gdexample.macos.${TEST_TARGET}${DEV_TAG}"
             SUFFIX ""
 
             #macos options
