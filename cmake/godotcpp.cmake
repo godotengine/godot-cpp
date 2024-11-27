@@ -123,7 +123,7 @@ function( godotcpp_options )
     option( GODOT_SYSTEM_HEADERS "Expose headers as SYSTEM." OFF )
     option( GODOT_WARNING_AS_ERROR "Treat warnings as errors" OFF )
 
-    # Define wich targets create for build. By default all targets are included
+    # Define which targets create for build. By default all targets are included
     # Not presented in SCons
     option(GODOT_ADD_TARGET_TEMPLATE_RELEASE "Add template_release target to build" ON)
     option(GODOT_ADD_TARGET_TEMPLATE_DEBUG "Add template_debug target to build" ON)
@@ -140,7 +140,7 @@ function( godotcpp_options )
     if(NOT GODOT_TARGETS)
         message(FATAL_ERROR "No targets were chosen to be build.See GODOT_ADD_TARGET_* variables: at least one of the should be ON")
     endif()
-    # since targets can be turned off, we need to know wich one is left
+    # since targets can be turned off, we need to know which one is left
     list(GET GODOT_TARGETS 0 GODOT_DEFAULT_TARGET)
     # parent scoping GODOT_TARGETS and GODOT_DEFAULT_TARGET
 	set(GODOT_DEFAULT_TARGET ${GODOT_DEFAULT_TARGET} PARENT_SCOPE)
