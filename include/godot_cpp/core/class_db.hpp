@@ -37,6 +37,7 @@
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/method_bind.hpp>
 #include <godot_cpp/core/object.hpp>
+#include <godot_cpp/core/print_string.hpp>
 
 #include <godot_cpp/classes/class_db_singleton.hpp>
 
