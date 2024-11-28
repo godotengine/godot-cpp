@@ -33,8 +33,6 @@ set_target_properties( godot-cpp-test
         CXX_EXTENSIONS OFF
         CXX_VISIBILITY_PRESET ${GODOT_SYMBOL_VISIBILITY}
 
-        POSITION_INDEPENDENT_CODE ON
-        BUILD_RPATH_USE_ORIGIN ON
         LINK_SEARCH_START_STATIC ON
         LINK_SEARCH_END_STATIC ON
 
@@ -49,8 +47,6 @@ set_target_properties( godot-cpp-test
 )
 
 if( CMAKE_SYSTEM_NAME STREQUAL Darwin )
-    get_target_property( OSX_ARCH godot-cpp::${TEST_TARGET} OSX_ARCHITECTURES )
-
     set( OUTPUT_DIR "${OUTPUT_DIR}/libgdexample.macos.${TEST_TARGET}.framework")
 
     set_target_properties( godot-cpp-test
@@ -60,8 +56,5 @@ if( CMAKE_SYSTEM_NAME STREQUAL Darwin )
 
             OUTPUT_NAME "gdexample.macos.${TEST_TARGET}"
             SUFFIX ""
-
-            #macos options
-            OSX_ARCHITECTURES "${OSX_ARCH}"
     )
 endif ()

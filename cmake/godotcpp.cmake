@@ -264,8 +264,12 @@ function( godotcpp_generate )
                 CXX_VISIBILITY_PRESET ${GODOT_SYMBOL_VISIBILITY}
 
                 COMPILE_WARNING_AS_ERROR ${GODOT_WARNING_AS_ERROR}
+
                 POSITION_INDEPENDENT_CODE ON
-                BUILD_RPATH_USE_ORIGIN ON
+                INTERFACE_POSITION_INDEPENDENT_CODE ON
+
+                # Tell the linker to add the $ORIGIN relative location at build time
+                INTERFACE_BUILD_RPATH_USE_ORIGIN ON
 
                 PREFIX lib
                 OUTPUT_NAME "${PROJECT_NAME}.${SYSTEM_NAME}.${TARGET_NAME}.${SYSTEM_ARCH}"

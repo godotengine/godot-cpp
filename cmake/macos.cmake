@@ -35,8 +35,13 @@ function( macos_generate TARGET_NAME )
 
     set_target_properties( ${TARGET_NAME}
             PROPERTIES
+            # enable RPATH on MACOS, with the BUILD_RPATH_USE_ORIGIN
+            # this should allow loading libraries from relative paths on macos.
+            INTERFACE_MACOSX_RPATH ON
 
+            # Specify multiple architectures for universal builds
             OSX_ARCHITECTURES "${OSX_ARCH}"
+            INTERFACE_OSX_ARCHITECTURES "${OSX_ARCH}"
     )
 
     target_compile_definitions(${TARGET_NAME}
