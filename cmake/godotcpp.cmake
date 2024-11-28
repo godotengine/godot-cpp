@@ -240,7 +240,7 @@ function( godotcpp_generate )
         set( HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},$<NOT:${IS_RELEASE}>,$<BOOL:${GODOT_USE_HOT_RELOAD}>>" )
 
         # the godot-cpp.* library targets
-        add_library( ${TARGET_NAME} STATIC ${EXCLUDE} )
+        add_library( ${TARGET_NAME} STATIC EXCLUDE_FROM_ALL )
         add_library( godot-cpp::${TARGET_NAME} ALIAS ${TARGET_NAME} )
 
         file( GLOB_RECURSE GODOTCPP_SOURCES LIST_DIRECTORIES NO CONFIGURE_DEPENDS src/*.cpp )
