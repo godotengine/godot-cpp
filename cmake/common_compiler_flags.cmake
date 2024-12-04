@@ -2,9 +2,10 @@
 Common Compiler Flags
 ---------------------
 
-This file contains a single function to configure platform agnostic compiler
-flags like optimization levels, warnings, and features. For platform specific
-flags look to each of the ``cmake/<platform>.cmake`` files.
+This file contains host platform toolchain and target platform agnostic
+configuration. It includes flags like optimization levels, warnings, and
+features. For target platform specific flags look to each of the
+``cmake/<platform>.cmake`` files.
 
 ]=======================================================================]
 
@@ -23,6 +24,25 @@ set( GNU_GE_V9 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,9>" )
 set( GNU_GT_V11 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,11>" )
 set( GNU_LT_V11 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,11>" )
 set( GNU_GE_V12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>" )
+
+#[[ Check for clang-cl with MSVC frontend
+The compiler is tested and set when the project command is called.
+The variable CXX_COMPILER_FRONTEND_VARIANT was introduced in 3.14
+The generator expression $<CXX_COMPILER_FRONTEND_VARIANT> wasn't introduced
+until CMake 3.30 so we can't use it yet.
+
+So to support clang downloaded from llvm.org which uses the MSVC frontend
+by default, we need to test for it. ]]
+function( compiler_detection )
+    if( ${CMAKE_CXX_COMPILER_ID} STREQUAL Clang )
+        if( ${CMAKE_CXX_COMPILER_FRONTEND_VARIANT} STREQUAL MSVC )
+            message( "Using clang-cl" )
+            set( IS_CLANG   "0" PARENT_SCOPE )
+            set( IS_MSVC    "1" PARENT_SCOPE )
+            set( NOT_MSVC   "0" PARENT_SCOPE )
+        endif ()
+    endif ()
+endfunction(  )
 
 function( common_compiler_flags TARGET_NAME )
 
@@ -60,7 +80,8 @@ function( common_compiler_flags TARGET_NAME )
 
         # MSVC only
         $<${IS_MSVC}:
-            "/MP ${PROC_N}"
+            # /MP isn't valid for clang-cl with msvc frontend
+            $<$<CXX_COMPILER_ID:MSVC>:/MP${PROC_N}>
             /W4
 
             # Disable warnings which we don't plan to fix.
