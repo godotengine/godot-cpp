@@ -92,6 +92,7 @@ project( godot-cpp
         HOMEPAGE_URL "https://github.com/godotengine/godot-cpp"
         LANGUAGES CXX)
 
+compiler_detection()
 godotcpp_generate()
 
 # Test Example
