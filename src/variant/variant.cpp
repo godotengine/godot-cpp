@@ -35,6 +35,7 @@
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/variant/variant_internal.hpp>
 
 #include <utility>
 
@@ -49,6 +50,7 @@ void Variant::init_bindings() {
 		from_type_constructor[i] = internal::gdextension_interface_get_variant_from_type_constructor((GDExtensionVariantType)i);
 		to_type_constructor[i] = internal::gdextension_interface_get_variant_to_type_constructor((GDExtensionVariantType)i);
 	}
+	VariantInternal::init_bindings();
 
 	StringName::init_bindings();
 	String::init_bindings();

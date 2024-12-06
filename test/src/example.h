@@ -22,6 +22,7 @@
 #include <godot_cpp/classes/tile_set.hpp>
 #include <godot_cpp/classes/viewport.hpp>
 #include <godot_cpp/variant/variant.hpp>
+#include <godot_cpp/variant/variant_internal.hpp>
 
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/gdvirtual.gen.inc>
@@ -184,6 +185,8 @@ public:
 	Vector4 get_v4() const;
 
 	bool test_post_initialize() const;
+
+	int64_t test_get_internal(const Variant &p_input) const;
 
 	// Static method.
 	static int test_static(int p_a, int p_b);
