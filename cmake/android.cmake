@@ -29,13 +29,12 @@ function( android_options )
     # Android Options
 endfunction()
 
-function( android_generate TARGET_NAME )
-
+function( android_generate )
     target_compile_definitions(${TARGET_NAME}
             PUBLIC
             ANDROID_ENABLED
             UNIX_ENABLED
     )
 
-    common_compiler_flags( ${TARGET_NAME} )
+    common_compiler_flags()
 endfunction()
