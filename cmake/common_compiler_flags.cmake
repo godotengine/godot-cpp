@@ -25,7 +25,7 @@ set( HOT_RELOAD-UNSET "$<STREQUAL:${GODOT_USE_HOT_RELOAD},>")
 set( DISABLE_EXCEPTIONS "$<BOOL:${GODOT_DISABLE_EXCEPTIONS}>")
 
 
-function( common_compiler_flags TARGET_NAME )
+function( common_compiler_flags )
     set( IS_RELEASE "$<STREQUAL:${TARGET_NAME},template_release>")
     set( DEBUG_FEATURES "$<OR:$<STREQUAL:${TARGET_NAME},template_debug>,$<STREQUAL:${TARGET_NAME},editor>>" )
     set( HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},$<NOT:${IS_RELEASE}>,$<BOOL:${GODOT_USE_HOT_RELOAD}>>" )

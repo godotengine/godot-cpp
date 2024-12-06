@@ -94,5 +94,12 @@ project( godot-cpp
 
 godotcpp_generate()
 
-# Test Example
-add_subdirectory( test )
+# optionally add the godot-cpp-test integration testing target
+if( GODOT_ENABLE_TESTING )
+    add_subdirectory( test )
+endif()
+
+# If this is the top level CMakeLists.txt, Generators which honor the
+# USE_FOLDERS flag will organize godot-cpp targets under the subfolder
+# 'godot-cpp'. This is enable by default from CMake version 3.26
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)

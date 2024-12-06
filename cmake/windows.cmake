@@ -58,7 +58,7 @@ function( windows_options )
 endfunction()
 
 #[===========================[ Target Generation ]===========================]
-function( windows_generate TARGET_NAME )
+function( windows_generate )
     set( IS_MSVC "$<CXX_COMPILER_ID:MSVC>" )
     set( IS_CLANG "$<OR:$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>>" )
     set( NOT_MSVC "$<NOT:${IS_MSVC}>" )
@@ -100,5 +100,5 @@ function( windows_generate TARGET_NAME )
             $<${IS_CLANG}:-lstdc++>
     )
 
-    common_compiler_flags( ${TARGET_NAME} )
+    common_compiler_flags()
 endfunction()
