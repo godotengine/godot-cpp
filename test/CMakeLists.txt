@@ -13,8 +13,14 @@ target_sources( godot-cpp-test
         src/tests.h
 )
 
-set( TEST_TARGET "template_debug" CACHE STRING "Which godot-cpp::target to link against" )
-set_property( CACHE TEST_TARGET PROPERTY STRINGS "template_debug;template_release;editor" )
+set( TEST_TARGET "${GODOT_DEFAULT_TARGET}" CACHE STRING "Which godot-cpp::target to link against" )
+set_property( CACHE TEST_TARGET PROPERTY STRINGS "${GODOT_TARGETS}" )
+# Since list of targets can dynamically change, we need to account for incorrect (outdated) choice
+if(NOT TEST_TARGET IN_LIST GODOT_TARGETS)
+   message("Test target '${TEST_TARGET}' is not in list of build targets (${GODOT_TARGETS}): Forcing test target ${GODOT_DEFAULT_TARGET}")
+   set( TEST_TARGET "${GODOT_DEFAULT_TARGET}" CACHE STRING "Which godot-cpp::target to link against" FORCE)
+endif()
+
 
 target_link_libraries( godot-cpp-test
         PRIVATE
