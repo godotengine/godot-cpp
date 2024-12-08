@@ -59,11 +59,7 @@ endfunction()
 
 #[===========================[ Target Generation ]===========================]
 function( windows_generate TARGET_NAME )
-    set( IS_MSVC "$<CXX_COMPILER_ID:MSVC>" )
-    set( IS_CLANG "$<OR:$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>>" )
-    set( NOT_MSVC "$<NOT:${IS_MSVC}>" )
     set( STATIC_CPP "$<BOOL:${GODOT_USE_STATIC_CPP}>")
-    set( DISABLE_EXCEPTIONS "$<BOOL:${GODOT_DISABLE_EXCEPTIONS}>")
     set( DEBUG_CRT "$<BOOL:${GODOT_DEBUG_CRT}>" )
 
     set_target_properties( ${TARGET_NAME}

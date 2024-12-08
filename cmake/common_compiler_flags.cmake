@@ -7,7 +7,11 @@ flags like optimization levels, warnings, and features. For platform specific
 flags look to each of the ``cmake/<platform>.cmake`` files.
 
 ]=======================================================================]
-#Generator Expression Helpers
+
+#[[ Compiler Configuration, not to be confused with build targets ]]
+set( DEBUG_SYMBOLS "$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>" )
+
+#[[ Compiler Identification ]]
 set( IS_CLANG "$<CXX_COMPILER_ID:Clang>" )
 set( IS_APPLECLANG "$<CXX_COMPILER_ID:AppleClang>" )
 set( IS_GNU "$<CXX_COMPILER_ID:GNU>" )
@@ -20,16 +24,7 @@ set( GNU_GT_V11 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,11>" )
 set( GNU_LT_V11 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,11>" )
 set( GNU_GE_V12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>" )
 
-set( HOT_RELOAD-UNSET "$<STREQUAL:${GODOT_USE_HOT_RELOAD},>")
-
-set( DISABLE_EXCEPTIONS "$<BOOL:${GODOT_DISABLE_EXCEPTIONS}>")
-
-
 function( common_compiler_flags TARGET_NAME )
-    set( IS_RELEASE "$<STREQUAL:${TARGET_NAME},template_release>")
-    set( DEBUG_FEATURES "$<OR:$<STREQUAL:${TARGET_NAME},template_debug>,$<STREQUAL:${TARGET_NAME},editor>>" )
-    set( HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},$<NOT:${IS_RELEASE}>,$<BOOL:${GODOT_USE_HOT_RELOAD}>>" )
-    set( DEBUG_SYMBOLS "$<BOOL:${GODOT_DEBUG_SYMBOLS}>" )
 
     target_compile_features(${TARGET_NAME}
             PUBLIC
@@ -44,24 +39,19 @@ function( common_compiler_flags TARGET_NAME )
             $<${DISABLE_EXCEPTIONS}:
                 $<${NOT_MSVC}:-fno-exceptions>
             >
-            $<$<NOT:${DISABLE_EXCEPTIONS}>:
-                $<${IS_MSVC}:/EHsc>
-            >
 
             # Enabling Debug Symbols
             $<${DEBUG_SYMBOLS}:
-                $<${IS_MSVC}: /Zi /FS>
-
                 # Adding dwarf-4 explicitly makes stacktraces work with clang builds,
                 # otherwise addr2line doesn't understand them.
                 $<${NOT_MSVC}:
                     -gdwarf-4
-                    $<IF:${IS_DEV},-g3,-g2>
+                    $<IF:${IS_DEV_BUILD},-g3,-g2>
                 >
             >
 
-            $<${IS_DEV}:
-                $<${NOT_MSVC}:-fno-omit-frame-pointer -O0 -g>
+            $<${IS_DEV_BUILD}:
+                $<${NOT_MSVC}:-fno-omit-frame-pointer -O0>
             >
 
             $<${HOT_RELOAD}:
@@ -136,6 +126,8 @@ function( common_compiler_flags TARGET_NAME )
 
             # features
             $<${DEBUG_FEATURES}:DEBUG_ENABLED DEBUG_METHODS_ENABLED>
+
+            $<${IS_DEV_BUILD}:DEV_ENABLED>
 
             $<${HOT_RELOAD}:HOT_RELOAD_ENABLED>
 
