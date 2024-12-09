@@ -20,6 +20,13 @@ target_link_libraries( godot-cpp-test
         PRIVATE
         godot-cpp::${TEST_TARGET} )
 
+# These compiler options reflect what is in godot/SConstruct.
+target_compile_options( godot-cpp-test
+        PRIVATE
+        # Interpret source code files using utf8
+        $<${IS_MSVC}:/utf-8>
+)
+
 ### Get useful properties of the library
 get_target_property( GODOT_PLATFORM godot-cpp::${TEST_TARGET} GODOT_PLATFORM )
 get_target_property( GODOT_TARGET godot-cpp::${TEST_TARGET} GODOT_TARGET )
@@ -56,13 +63,15 @@ if( CMAKE_SYSTEM_NAME STREQUAL Darwin )
 
     set_target_properties( godot-cpp-test
             PROPERTIES
-            LIBRARY_OUTPUT_DIRECTORY "$<1:${OUTPUT_DIR}>"
-            RUNTIME_OUTPUT_DIRECTORY "$<1:${OUTPUT_DIR}>"
 
             OUTPUT_NAME "gdexample.macos.${TEST_TARGET}${DEV_TAG}"
             SUFFIX ""
 
             #macos options
             OSX_ARCHITECTURES "${OSX_ARCH}"
+
+            # enable RPATH on MACOS, with the BUILD_RPATH_USE_ORIGIN
+            # this should allow loading libraries from relative paths on macos.
+            MACOSX_RPATH ON
     )
 endif ()
