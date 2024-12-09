@@ -108,34 +108,11 @@ jobs:
           cache-name: ${{ matrix.cache-name }}
         continue-on-error: true
 
-      - name: Set up Python (for SCons)
-        uses: actions/setup-python@v5
+      - name: Setup godot-cpp
+        uses: ./.github/actions/setup-godot-cpp
         with:
-          python-version: 3.x
-
-      - name: Android dependencies
-        if: matrix.platform == 'android'
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r23c
-          link-to-sdk: true
-
-      - name: Web dependencies
-        if: matrix.platform == 'web'
-        uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: ${{ env.EM_VERSION }}
-          no-cache: true
-
-      - name: Setup MinGW for Windows/MinGW build
-        if: matrix.platform == 'windows' && matrix.flags == 'use_mingw=yes'
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          version: 12.2.0
-
-      - name: Install scons
-        run: |
-          python -m pip install scons==4.0.0
+          platform: ${{ matrix.platform }}
+          windows-compiler: ${{ contains(matrix.flags, 'use_mingw=yes') && 'mingw' || 'msvc' }}
 
       - name: Generate godot-cpp sources only
         run: |
