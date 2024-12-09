@@ -61,15 +61,13 @@ void print_line_rich(const Variant &p_variant, Args... p_args) {
 	UtilityFunctions::print_rich(p_variant, p_args...);
 }
 
+template <typename... Args>
+void print_verbose(const Variant &p_variant, Args... p_args) {
+	UtilityFunctions::print_verbose(p_variant, p_args...);
+}
+
 bool is_print_verbose_enabled();
 
-// Checking the condition before evaluating the text to be printed avoids processing unless it actually has to be printed, saving some CPU usage.
-#define print_verbose(m_variant)          \
-	{                                     \
-		if (is_print_verbose_enabled()) { \
-			print_line(m_variant);        \
-		}                                 \
-	}
 } // namespace godot
 
 #endif // GODOT_PRINT_STRING_HPP
