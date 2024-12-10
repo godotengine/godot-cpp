@@ -23,7 +23,7 @@ function( macos_options )
 endfunction()
 
 
-function( macos_generate TARGET_NAME )
+function( macos_generate )
 
     # OSX_ARCHITECTURES does not support generator expressions.
     if( NOT GODOT_ARCH OR GODOT_ARCH STREQUAL universal )
@@ -55,5 +55,5 @@ function( macos_generate TARGET_NAME )
             ${COCOA_LIBRARY}
     )
 
-    common_compiler_flags( ${TARGET_NAME} )
+    common_compiler_flags()
 endfunction()
