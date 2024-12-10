@@ -191,6 +191,7 @@ public:
 	static void add_property_subgroup(const StringName &p_class, const String &p_name, const String &p_prefix);
 	static void add_property(const StringName &p_class, const PropertyInfo &p_pinfo, const StringName &p_setter, const StringName &p_getter, int p_index = -1);
 	static void add_signal(const StringName &p_class, const MethodInfo &p_signal);
+	static void set_icon(const StringName &p_class, const String &p_icon_path);
 	static void bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDExtensionInt p_constant_value, bool p_is_bitfield = false);
 	// Binds an implementation of a virtual method defined in Godot.
 	static void bind_virtual_method(const StringName &p_class, const StringName &p_method, GDExtensionClassCallVirtual p_call);
