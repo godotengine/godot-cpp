@@ -15,8 +15,7 @@ function( web_options )
 endfunction()
 
 
-function( web_generate TARGET_NAME )
-
+function( web_generate )
     target_compile_definitions(${TARGET_NAME}
             PUBLIC
             WEB_ENABLED
@@ -38,5 +37,5 @@ function( web_generate TARGET_NAME )
             -shared
     )
 
-    common_compiler_flags( ${TARGET_NAME} )
+    common_compiler_flags()
 endfunction()

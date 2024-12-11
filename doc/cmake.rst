@@ -38,6 +38,27 @@ the notable differences.
     Does not define NDEBUG when disabled, NDEBUG is set via Release-like
     CMake build configurations; Release, MinSizeRel.
 
+Testing Integration
+-------------------
+When consuming a third party CMake project into yours, an unfortunate side
+effect is that the targets of the consumed project appear in the list of
+available targets, and are by default included in the ALL meta target
+created by most build systems. For this reason, all the targets specified
+in godot-cpp are marked with the ``EXCLUDE_FROM_ALL`` tag to prevent
+unnecessary compilation. The testing targets ``godot-cpp.test.<target>``
+are also guarded by ``GODOT_ENABLE_TESTING`` which is off by default.
+
+To configure and build the godot-cpp project to enable the integration
+testing targets the command will look something like:
+
+.. code-block::
+
+    # Assuming our current directory is the godot-cpp source root
+    mkdir cmake-build
+    cd cmake-build
+    cmake .. -DGODOT_ENABLE_TESTING=YES
+    cmake --build . --target godot-cpp.test.template_debug
+
 Basic walkthrough
 -----------------
 
@@ -73,20 +94,20 @@ Basic walkthrough
 
     .. code-block::
 
-        cmake ../ -G "Ninja"
+        cmake .. -G "Ninja"
 
     To list the available options CMake use the ``-L[AH]`` option. ``A`` is for
     advanced, and ``H`` is for help strings.
 
     .. code-block::
 
-        cmake ../ -LH
+        cmake .. -LH
 
     Options are specified on the command line when configuring
 
     .. code-block::
 
-        cmake ../ -DGODOT_USE_HOT_RELOAD:BOOL=ON \
+        cmake .. -DGODOT_USE_HOT_RELOAD:BOOL=ON \
             -DGODOT_PRECISION:STRING=double \
             -DCMAKE_BUILD_TYPE:STRING=Debug
 
@@ -137,78 +158,85 @@ Basic walkthrough
 
     .. code-block::
 
-        cmake --build . -t template_debug --config Release
+        cmake --build . -t template_debug --config Debug
 
 Examples
 --------
 
-Windows and MSVC
-~~~~~~~~~~~~~~~~
+Windows and MSVC - Release
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 So long as CMake is installed from the `CMake Downloads`_ page and in the PATH,
 and Microsoft Visual Studio is installed with c++ support, CMake will detect
 the MSVC compiler.
 
+Remembering that Visual Studio is a Multi-Config Generator so the build type
+needs to be specified at build time.
+
 .. _CMake downloads: https://cmake.org/download/
 
-Assuming the current working directory is the godot-cpp project root:
-
 .. code-block::
 
+    # Assuming our current directory is the godot-cpp source root
     mkdir build-msvc
     cd build-msvc
-    cmake ../
-    cmake --build . -t godot-cpp-test --config Release
+    cmake .. -DGODOT_ENABLE_TESTING=YES
+    cmake --build . -t godot-cpp.test.template_debug --config Debug
 
 
-MSys2/clang64, "Ninja", godot-cpp-test target with debug symbols
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+MSys2/clang64, "Ninja" - Debug
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Assumes the ming-w64-clang-x86_64-toolchain is installed
+
+Remembering that Ninja is a Single-Config Generator so the build type
+needs to be specified at Configure time.
 
 Using the msys2/clang64 shell
 
 .. code-block::
 
+    # Assuming our current directory is the godot-cpp source root
     mkdir build-clang
     cd build-clang
-    cmake ../ -G"Ninja" -DCMAKE_BUILD_TYPE:STRING=Debug
-    cmake --build . -t godot-cpp-test
+    cmake .. -G"Ninja" -DGODOT_ENABLE_TESTING=YES -DCMAKE_BUILD_TYPE=Debug
+    cmake --build . -t godot-cpp.test.template_debug
 
-MSys2/clang64, "Ninja Multi-Config", godot-cpp-test target with GODOT_DEV_BUILD
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+MSys2/clang64, "Ninja Multi-Config" - dev_build, Debug Symbols
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Assumes the ming-w64-clang-x86_64-toolchain is installed
+
+This time we are choosing the 'Ninja Multi-Config' generator, so the build
+type is specified at build time.
 
 Using the msys2/clang64 shell
 
 .. code-block::
 
+    # Assuming our current directory is the godot-cpp source root
     mkdir build-clang
     cd build-clang
-    cmake ../ -G"Ninja Multi-Config" -DGODOT_DEV_BUILD:BOOL=ON
-    cmake --build . -t godot-cpp-test --config Debug
+    cmake .. -G"Ninja Multi-Config" -DGODOT_ENABLE_TESTING=YES -DGODOT_DEV_BUILD:BOOL=ON
+    cmake --build . -t godot-cpp.test.template_debug --config Debug
 
-Emscripten for web, template_release target
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Emscripten for web platform
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 I've only tested this on windows so far.
 
-I cloned, installed, and activating the latest Emscripten tools(for me it was
-3.1.69) to ``c:\emsdk``
+I cloned and installed the latest Emscripten tools to ``c:\emsdk``
+At the time of writing that was v3.1.69
 
-From a terminal running the ``c:\emsdk\emcmdprompt.bat`` puts me in a cmdprompt
-context which I dislike, so after that I run pwsh to get my powershell 7.4.5
-context back.
+I've been using ``C:\emsdk\emsdk.ps1 activate latest`` to enable the
+environment from powershell in the current shell.
 
-using the ``emcmake.bat`` command adds the emscripten toolchain to the CMake
-command
+The ``emcmake.bat`` utility adds the emscripten toolchain to the CMake command
 
 .. code-block::
 
-    C:\emsdk\emcmdprompt.bat
-    pwsh
-    cd <godot-cpp source folder>
+    # Assuming our current directory is the godot-cpp source root
+    C:\emsdk\emsdk.ps1 activate latest
     mkdir build-wasm32
     cd build-wasm32
     emcmake.bat cmake ../
-    cmake --build . --verbose -t template_release
+    cmake --build . --target template_release
 
 Android Cross Compile from Windows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -221,7 +249,7 @@ own toolchain file as listed in the cmake-toolchains_ documentation
 
 Or use the toolchain and scripts provided by the Android SDK and make changes
 using the ``ANDROID_*`` variables listed there. Where ``<version>`` is whatever
-ndk version you have installed ( tested with `23.2.8568313`) and ``<platform>``
+ndk version you have installed (tested with `23.2.8568313`) and ``<platform>``
 is for android sdk platform, (tested with ``android-29``)
 
 .. warning::
@@ -234,18 +262,20 @@ is for android sdk platform, (tested with ``android-29``)
 
     .. code-block::
 
+        # Assuming our current directory is the godot-cpp source root
         mkdir build-android
         cd build-android
-        cmake ../ --toolchain my_toolchain.cmake
+        cmake .. --toolchain my_toolchain.cmake
         cmake --build . -t template_release
 
     Doing the equivalent on just using the command line
 
     .. code-block::
 
+        # Assuming our current directory is the godot-cpp source root
         mkdir build-android
         cd build-android
-        cmake ../ \
+        cmake .. \
             -DCMAKE_SYSTEM_NAME=Android \
             -DCMAKE_SYSTEM_VERSION=<platform> \
             -DCMAKE_ANDROID_ARCH_ABI=<arch> \
@@ -258,20 +288,22 @@ is for android sdk platform, (tested with ``android-29``)
 
     .. code-block::
 
+        # Assuming our current directory is the godot-cpp source root
         mkdir build-android
         cd build-android
-        cmake ../ --toolchain $ANDROID_HOME/ndk/<version>/build/cmake/android.toolchain.cmake
+        cmake .. --toolchain $ANDROID_HOME/ndk/<version>/build/cmake/android.toolchain.cmake
         cmake --build . -t template_release
 
     Specify Android platform and ABI
 
     .. code-block::
 
+        # Assuming our current directory is the godot-cpp source root
         mkdir build-android
         cd build-android
-        cmake ../ --toolchain $ANDROID_HOME/ndk/<version>/build/cmake/android.toolchain.cmake \
-          -DANDROID_PLATFORM:STRING=android-29 \
-          -DANDROID_ABI:STRING=armeabi-v7a
+        cmake .. --toolchain $ANDROID_HOME/ndk/<version>/build/cmake/android.toolchain.cmake \
+            -DANDROID_PLATFORM:STRING=android-29 \
+            -DANDROID_ABI:STRING=armeabi-v7a
         cmake --build . -t template_release
 
 
