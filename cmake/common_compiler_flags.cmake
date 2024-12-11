@@ -44,7 +44,7 @@ function( compiler_detection )
     endif ()
 endfunction(  )
 
-function( common_compiler_flags TARGET_NAME )
+function( common_compiler_flags )
 
     target_compile_features(${TARGET_NAME}
             PUBLIC
