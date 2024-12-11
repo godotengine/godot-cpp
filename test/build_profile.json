@@ -4,6 +4,7 @@
 		"Label",
 		"OS",
 		"TileMap",
-		"InputEventKey"
+		"InputEventKey",
+		"VisualInstance3D"
 	]
 }

@@ -81,6 +81,53 @@ function( godot_arch_map ALIAS PROC )
     endif ()
 endfunction()
 
+
+#[[ Generate File List
+Use the binding_generator.py Python script to determine the list of files that
+will be passed to the code generator using extension_api.json and
+build_profile.json.
+
+This happens for every configure.]]
+function( generate_file_list OUT_VAR API_FILEPATH PROFILE_FILEPATH OUTPUT_DIR )
+    # This code snippet will be squashed into a single line
+    set( PRINT_FILE_LIST_PY [[
+import binding_generator;
+binding_generator.print_file_list(
+    api_filepath='${API_FILEPATH}',
+    profile_filepath='${PROFILE_FILEPATH}',
+    output_dir='${OUTPUT_DIR}',
+    headers=True,sources=True)
+]])
+
+    # Reformat code to a single line, to make build tools happy.
+    string( CONFIGURE "${PRINT_FILE_LIST_PY}" PYTHON_SCRIPT )
+    message( DEBUG "Python:\n${PYTHON_SCRIPT}" )
+    string( REGEX REPLACE "\n *" " " PYTHON_SCRIPT "${PYTHON_SCRIPT}" )
+
+    execute_process( COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            OUTPUT_VARIABLE GENERATED_FILES_LIST
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    # Debug output
+    message( DEBUG "FileList-Begin" )
+    foreach( PATH ${GENERATED_FILES_LIST} )
+        message( DEBUG ${PATH} )
+    endforeach(  )
+    message( DEBUG "FileList-End" )
+
+    # Error out if the file list generator returned no files.
+    list( LENGTH GENERATED_FILES_LIST LIST_LENGTH )
+    if( NOT LIST_LENGTH GREATER 0 )
+        message( FATAL_ERROR "File List Generation Failed")
+    endif()
+    message( STATUS "There are ${LIST_LENGTH} Files to generate" )
+
+    set( ${OUT_VAR} ${GENERATED_FILES_LIST} PARENT_SCOPE )
+endfunction(  )
+
+
 # Function to define all the options.
 function( godotcpp_options )
     #NOTE: platform is managed using toolchain files.
@@ -109,7 +156,9 @@ function( godotcpp_options )
     #TODO threads
     #TODO compiledb
     #TODO compiledb_file
-    #TODO build_profile
+
+    set( GODOT_BUILD_PROFILE "" CACHE PATH
+            "Path to a file containing a feature build profile" )
 
     set(GODOT_USE_HOT_RELOAD "" CACHE BOOL
             "Enable the extra accounting required to support hot reload. (ON|OFF)")
@@ -205,6 +254,10 @@ function( godotcpp_generate )
     if (NOT "${GODOT_CUSTOM_API_FILE}" STREQUAL "")  # User-defined override.
         set(GODOT_GDEXTENSION_API_FILE "${GODOT_CUSTOM_API_FILE}")
     endif()
+    message( STATUS "GODOT_GDEXTENSION_API_FILE = '${GODOT_GDEXTENSION_API_FILE}'")
+    if( GODOT_BUILD_PROFILE )
+        message( STATUS "GODOT_BUILD_PROFILE = '${GODOT_BUILD_PROFILE}'")
+    endif(  )
 
     # Code Generation option
     if(GODOT_GENERATE_TEMPLATE_GET_NODE)
@@ -213,14 +266,33 @@ function( godotcpp_generate )
         set(GENERATE_BINDING_PARAMETERS "False")
     endif()
 
-    execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list('${GODOT_GDEXTENSION_API_FILE}', '${CMAKE_CURRENT_BINARY_DIR}', headers=True, sources=True)"
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            OUTPUT_VARIABLE GENERATED_FILES_LIST
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+    # generate the file list to use
+    generate_file_list( GENERATED_FILES_LIST
+            "${GODOT_GDEXTENSION_API_FILE}"
+            "${GODOT_BUILD_PROFILE}"
+            "${CMAKE_CURRENT_BINARY_DIR}" )
+
+    #[[ Generate Bindings
+    Using the generated file list, use the binding_generator.py to generate the
+    godot-cpp bindings. This will run at build time only if there are files
+    missing.
+    ]]
+    set( GENERATE_BINDINGS_PY
+[[import binding_generator;
+binding_generator.generate_bindings(
+    api_filepath='${GODOT_GDEXTENSION_API_FILE}',
+    use_template_get_node='${GENERATE_BINDING_PARAMETERS}',
+    bits='${BITS}',
+    precision='${GODOT_PRECISION}',
+    output_dir='${CMAKE_CURRENT_BINARY_DIR}')
+]])
+
+    string(CONFIGURE "${GENERATE_BINDINGS_PY}" PYTHON_SCRIPT )
+    message( DEBUG "Python:\n${PYTHON_SCRIPT}" )
+    string( REGEX REPLACE "\n *" " " PYTHON_SCRIPT "${PYTHON_SCRIPT}" )
 
     add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
-            COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings('${GODOT_GDEXTENSION_API_FILE}', '${GENERATE_BINDING_PARAMETERS}', '${BITS}', '${GODOT_PRECISION}', '${CMAKE_CURRENT_BINARY_DIR}')"
+            COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
             VERBATIM
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             MAIN_DEPENDENCY ${GODOT_GDEXTENSION_API_FILE}

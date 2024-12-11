@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+import io
 import json
 import re
 import shutil
+from contextlib import redirect_stdout
 from pathlib import Path
 
 
@@ -268,7 +270,12 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False, profil
 
 
 def print_file_list(api_filepath, output_dir, headers=False, sources=False, profile_filepath=""):
-    print(*get_file_list(api_filepath, output_dir, headers, sources, profile_filepath), sep=";", end=None)
+    trap = io.StringIO()
+    # suppress stdout messages from get_file_list
+    with redirect_stdout(trap):
+        file_list = get_file_list(api_filepath, output_dir, headers, sources, profile_filepath)
+
+    print(*file_list, sep=";", end=None)
 
 
 def parse_build_profile(profile_filepath, api):
