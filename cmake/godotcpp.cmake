@@ -193,32 +193,21 @@ function( godotcpp_generate )
         set(GODOT_SYSTEM_HEADERS_ATTRIBUTE SYSTEM)
     endif ()
 
-    #[[ Generate Bindings ]]
-    if(NOT DEFINED BITS)
-        set(BITS 32)
-        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-            set(BITS 64)
-        endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    endif()
-
+    #[[ Configure Binding Variables ]]
     set(GODOT_GDEXTENSION_API_FILE "${GODOT_GDEXTENSION_DIR}/extension_api.json")
-    if (NOT "${GODOT_CUSTOM_API_FILE}" STREQUAL "")  # User-defined override.
+    if( GODOT_CUSTOM_API_FILE )  # User-defined override.
         set(GODOT_GDEXTENSION_API_FILE "${GODOT_CUSTOM_API_FILE}")
     endif()
 
-    # Code Generation option
-    if(GODOT_GENERATE_TEMPLATE_GET_NODE)
-        set(GENERATE_BINDING_PARAMETERS "True")
-    else()
-        set(GENERATE_BINDING_PARAMETERS "False")
-    endif()
+    set( GENERATE_BINDING_PARAMETERS "$<IF:$<BOOL:${GODOT_GENERATE_TEMPLATE_GET_NODE}>,True,False>" )
+    math( EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8" )
 
     execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.print_file_list('${GODOT_GDEXTENSION_API_FILE}', '${CMAKE_CURRENT_BINARY_DIR}', headers=True, sources=True)"
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             OUTPUT_VARIABLE GENERATED_FILES_LIST
             OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-
+    
     add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
             COMMAND "${Python3_EXECUTABLE}" "-c" "import binding_generator; binding_generator.generate_bindings('${GODOT_GDEXTENSION_API_FILE}', '${GENERATE_BINDING_PARAMETERS}', '${BITS}', '${GODOT_PRECISION}', '${CMAKE_CURRENT_BINARY_DIR}')"
             VERBATIM
@@ -298,8 +287,9 @@ function( godotcpp_generate )
                 CXX_VISIBILITY_PRESET ${GODOT_SYMBOL_VISIBILITY}
 
                 COMPILE_WARNING_AS_ERROR ${GODOT_WARNING_AS_ERROR}
+
                 POSITION_INDEPENDENT_CODE ON
-                BUILD_RPATH_USE_ORIGIN ON
+                INTERFACE_POSITION_INDEPENDENT_CODE ON
 
                 PREFIX lib
                 OUTPUT_NAME "${PROJECT_NAME}.${SYSTEM_NAME}.${TARGET_ALIAS}${DEV_TAG}.${SYSTEM_ARCH}"

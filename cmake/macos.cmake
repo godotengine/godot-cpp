@@ -36,7 +36,9 @@ function( macos_generate )
     set_target_properties( ${TARGET_NAME}
             PROPERTIES
 
+            # Specify multiple architectures for universal builds
             OSX_ARCHITECTURES "${OSX_ARCH}"
+            GODOT_ARCH ${SYSTEM_ARCH}
     )
 
     target_compile_definitions(${TARGET_NAME}
