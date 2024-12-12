@@ -40,11 +40,6 @@ if unknown:
     for item in unknown.items():
         print("    " + item[0] + "=" + item[1])
 
-scons_cache_path = os.environ.get("SCONS_CACHE")
-if scons_cache_path is not None:
-    CacheDir(scons_cache_path)
-    Decider("MD5")
-
 cpp_tool.generate(env)
 library = env.GodotCPP()
 

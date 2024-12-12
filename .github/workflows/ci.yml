@@ -93,7 +93,6 @@ jobs:
             cache-name: web-wasm32
 
     env:
-      SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
       EM_VERSION: 3.1.39
 
     steps:
@@ -116,22 +115,22 @@ jobs:
 
       - name: Generate godot-cpp sources only
         run: |
-          scons platform=${{ matrix.platform }} verbose=yes build_library=no ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} verbose=yes build_library=no ${{ matrix.flags }} "cache_path=${{ github.workspace }}/.scons_cache"
           scons -c
 
       - name: Build godot-cpp (debug)
         run: |
-          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }} "cache_path=${{ github.workspace }}/.scons_cache"
 
       - name: Build test without rebuilding godot-cpp (debug)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }} build_library=no
+          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }} "cache_path=${{ github.workspace }}/.scons_cache" build_library=no
 
       - name: Build test and godot-cpp (release)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} verbose=yes target=template_release ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} verbose=yes target=template_release ${{ matrix.flags }} "cache_path=${{ github.workspace }}/.scons_cache" cache_limit=1
 
       - name: Save Godot build cache
         uses: ./.github/actions/godot-cache-save

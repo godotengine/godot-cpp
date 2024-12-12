@@ -196,6 +196,9 @@ compile_commands.json
 .venv
 venv
 
+# Python modules
+.*_cache/
+
 # Clion Configuration
 .idea/
 cmake-build*/
