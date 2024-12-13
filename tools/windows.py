@@ -3,7 +3,7 @@ import sys
 
 import common_compiler_flags
 import my_spawn
-from SCons.Tool import mingw, msvc
+from SCons.Tool import clang, clangxx, mingw, msvc
 from SCons.Variables import BoolVariable
 
 
@@ -73,14 +73,17 @@ def silence_msvc(env):
 
 
 def options(opts):
-    mingw = os.getenv("MINGW_PREFIX", "")
+    msystem = os.getenv("MSYSTEM", "")
+    mingw_prefix = ""
+    if not msystem:
+        mingw_prefix = os.getenv("MINGW_PREFIX", "")
 
     opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
     opts.Add(BoolVariable("use_static_cpp", "Link MinGW/MSVC C++ runtime libraries statically", True))
     opts.Add(BoolVariable("silence_msvc", "Silence MSVC's cl/link stdout bloat, redirecting errors to stderr.", True))
     opts.Add(BoolVariable("debug_crt", "Compile with MSVC's debug CRT (/MDd)", False))
     opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler (MVSC or MinGW depending on the use_mingw flag)", False))
-    opts.Add("mingw_prefix", "MinGW prefix", mingw)
+    opts.Add("mingw_prefix", "MinGW prefix", mingw_prefix)
 
 
 def exists(env):
@@ -132,7 +135,12 @@ def generate(env):
 
     elif (sys.platform == "win32" or sys.platform == "msys") and not env["mingw_prefix"]:
         env["use_mingw"] = True
-        mingw.generate(env)
+        if env["use_llvm"]:
+            clang.generate(env)
+            clangxx.generate(env)
+        else:
+            mingw.generate(env)
+
         # Don't want lib prefixes
         env["IMPLIBPREFIX"] = ""
         env["SHLIBPREFIX"] = ""
