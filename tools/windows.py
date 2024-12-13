@@ -3,7 +3,7 @@ import sys
 
 import common_compiler_flags
 import my_spawn
-from SCons.Tool import mingw, msvc
+from SCons.Tool import clang, clangxx, gcc, mingw, msvc
 from SCons.Variables import BoolVariable
 
 
@@ -73,14 +73,12 @@ def silence_msvc(env):
 
 
 def options(opts):
-    mingw = os.getenv("MINGW_PREFIX", "")
-
     opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
     opts.Add(BoolVariable("use_static_cpp", "Link MinGW/MSVC C++ runtime libraries statically", True))
     opts.Add(BoolVariable("silence_msvc", "Silence MSVC's cl/link stdout bloat, redirecting errors to stderr.", True))
     opts.Add(BoolVariable("debug_crt", "Compile with MSVC's debug CRT (/MDd)", False))
     opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler (MVSC or MinGW depending on the use_mingw flag)", False))
-    opts.Add("mingw_prefix", "MinGW prefix", mingw)
+    opts.Add("mingw_prefix", "MinGW prefix", os.getenv("MINGW_PREFIX", ""))
 
 
 def exists(env):
@@ -88,7 +86,9 @@ def exists(env):
 
 
 def generate(env):
-    if not env["use_mingw"] and msvc.exists(env):
+    env["msystem"] = os.getenv("MSYSTEM", "")
+
+    if not (env["use_mingw"] or env["msystem"]) and msvc.exists(env):
         if env["arch"] == "x86_64":
             env["TARGET_ARCH"] = "amd64"
         elif env["arch"] == "arm64":
@@ -130,9 +130,16 @@ def generate(env):
         if env["silence_msvc"] and not env.GetOption("clean"):
             silence_msvc(env)
 
-    elif (sys.platform == "win32" or sys.platform == "msys") and not env["mingw_prefix"]:
-        env["use_mingw"] = True
-        mingw.generate(env)
+    elif env["msystem"]:
+        # default compiler is dictated by the msystem environment.
+        match env["msystem"]:
+            case "UCRT64" | "MINGW64" | "MINGW32":
+                gcc.generate(env)
+            case "CLANG64" | "CLANGARM64" | "CLANG32":
+                env["use_llvm"] = True
+                clang.generate(env)
+                clangxx.generate(env)
+
         # Don't want lib prefixes
         env["IMPLIBPREFIX"] = ""
         env["SHLIBPREFIX"] = ""
@@ -149,11 +156,14 @@ def generate(env):
                     "-static-libstdc++",
                 ]
             )
+        if env["use_llvm"]:
+            env.Append(LINKFLAGS=["-lstdc++"])
 
         # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
         my_spawn.configure(env)
 
     else:
+        mingw.generate(env)
         env["use_mingw"] = True
         # Cross-compilation using MinGW
         prefix = ""
@@ -198,8 +208,7 @@ def generate(env):
         if env["use_llvm"]:
             env.Append(LINKFLAGS=["-lstdc++"])
 
-        if sys.platform == "win32" or sys.platform == "msys":
-            my_spawn.configure(env)
+        my_spawn.configure(env)
 
     env.Append(CPPDEFINES=["WINDOWS_ENABLED"])
 

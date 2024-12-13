@@ -204,7 +204,7 @@ def options(opts, env):
         default_platform = "linux"
     elif sys.platform == "darwin":
         default_platform = "macos"
-    elif sys.platform == "win32" or sys.platform == "msys":
+    elif sys.platform == "win32":
         default_platform = "windows"
     elif ARGUMENTS.get("platform", ""):
         default_platform = ARGUMENTS.get("platform")
