@@ -337,6 +337,16 @@ def options(opts, env):
     opts.Add(BoolVariable("debug_symbols", "Build with debugging symbols", True))
     opts.Add(BoolVariable("dev_build", "Developer build with dev-only debugging code (DEV_ENABLED)", False))
     opts.Add(BoolVariable("verbose", "Enable verbose output for the compilation", False))
+    opts.Add(
+        "cache_path", "Path to a directory where SCons cache files will be stored. No value disables the cache.", ""
+    )
+    opts.Add(
+        (
+            ["cache_limit", "cache_limit_gb", "cache_limit_gib"],
+            "Max size (in GiB) for the SCons cache. 0 means no limit.",
+            "0",
+        )
+    )
 
     # Add platform options (custom tools can override platforms)
     for pl in sorted(set(platforms + custom_platforms)):
@@ -390,7 +400,141 @@ def make_doc_source(target, source, env):
     g.close()
 
 
+def convert_size(size_bytes: int) -> str:
+    import math
+
+    if size_bytes == 0:
+        return "0 bytes"
+    SIZE_NAMES = ["bytes", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
+    index = math.floor(math.log(size_bytes, 1024))
+    power = math.pow(1024, index)
+    size = round(size_bytes / power, 2)
+    return f"{size} {SIZE_NAMES[index]}"
+
+
+def get_size(start_path: str = ".") -> int:
+    total_size = 0
+    for dirpath, _, filenames in os.walk(start_path):
+        for file in filenames:
+            path = os.path.join(dirpath, file)
+            total_size += os.path.getsize(path)
+    return total_size
+
+
+def is_binary(path: str) -> bool:
+    try:
+        with open(path, encoding="utf-8") as out:
+            out.read(1024)
+        return False
+    except UnicodeDecodeError:
+        return True
+
+
+def clean_cache(cache_path: str, cache_limit: int, verbose: bool):
+    from glob import glob
+
+    files = glob(os.path.join(cache_path, "*", "*"))
+    if not files:
+        return
+
+    # Remove all text files, store binary files in list of (filename, size, atime).
+    purge = []
+    texts = []
+    stats = []
+    for file in files:
+        try:
+            # Save file stats to rewrite after modifying.
+            tmp_stat = os.stat(file)
+            if is_binary(file):
+                stats.append((file, *tmp_stat[6:8]))
+                # Restore file stats after reading.
+                os.utime(file, (tmp_stat[7], tmp_stat[8]))
+            else:
+                texts.append(file)
+        except OSError:
+            print(f'Failed to access cache file "{file}"; skipping.')
+
+    if texts:
+        count = len(texts)
+        for file in texts:
+            try:
+                os.remove(file)
+            except OSError:
+                print(f'Failed to remove cache file "{file}"; skipping.')
+                count -= 1
+        if verbose:
+            print("Purging %d text %s from cache..." % (count, "files" if count > 1 else "file"))
+
+    if cache_limit:
+        # Sort by most recent access (most sensible to keep) first. Search for the first entry where
+        # the cache limit is reached.
+        stats.sort(key=lambda x: x[2], reverse=True)
+        sum = 0
+        for index, stat in enumerate(stats):
+            sum += stat[1]
+            if sum > cache_limit:
+                purge.extend([x[0] for x in stats[index:]])
+                break
+
+    if purge:
+        count = len(purge)
+        for file in purge:
+            try:
+                os.remove(file)
+            except OSError:
+                print(f'Failed to remove cache file "{file}"; skipping.')
+                count -= 1
+        if verbose:
+            print("Purging %d %s from cache..." % (count, "files" if count > 1 else "file"))
+
+
+def prepare_cache(env) -> None:
+    import atexit
+
+    if env.GetOption("clean"):
+        return
+
+    cache_path = None
+    if env["cache_path"]:
+        cache_path = env["cache_path"]
+    elif os.environ.get("SCONS_CACHE"):
+        print("Environment variable `SCONS_CACHE` is deprecated; use `cache_path` argument instead.")
+        cache_path = os.environ.get("SCONS_CACHE")
+
+    if not cache_path:
+        return
+
+    env.CacheDir(cache_path)
+    cache_path = env.get_CacheDir().path
+    print(f'SCons cache enabled... (path: "{cache_path}")')
+
+    if env["cache_limit"]:
+        cache_limit = float(env["cache_limit"])
+    elif os.environ.get("SCONS_CACHE_LIMIT"):
+        print("Environment variable `SCONS_CACHE_LIMIT` is deprecated; use `cache_limit` argument instead.")
+        cache_limit = float(os.getenv("SCONS_CACHE_LIMIT", "0")) / 1024  # Old method used MiB, convert to GiB
+
+    # Convert GiB to bytes; treat negative numbers as 0 (unlimited).
+    cache_limit = max(0, int(cache_limit * 1024 * 1024 * 1024))
+    if env["verbose"]:
+        print(
+            "Current cache limit is {} (used: {})".format(
+                # FIXME: Infinity symbol `∞` breaks Windows GHA.
+                convert_size(cache_limit) if cache_limit else "<unlimited>",
+                convert_size(get_size(cache_path)),
+            )
+        )
+
+    atexit.register(clean_cache, cache_path, cache_limit, env["verbose"])
+
+
 def generate(env):
+    # Setup caching logic early to catch everything.
+    prepare_cache(env)
+
+    # Renamed to `content-timestamp` in SCons >= 4.2, keeping MD5 for compat.
+    env.Decider("MD5-timestamp")
+
     # Default num_jobs to local cpu count if not user specified.
     # SCons has a peculiarity where user-specified options won't be overridden
     # by SetOption, so we can rely on this to know if we should use our default.
