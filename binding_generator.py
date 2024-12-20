@@ -1788,7 +1788,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                     # condition returns false (in such cases it can't compile due to ambiguity).
                     f"\t\tif constexpr (!std::is_same_v<decltype(&B::{method_name}), decltype(&T::{method_name})>) {{"
                 )
-                result.append(f"\t\t\tBIND_VIRTUAL_METHOD(T, {method_name});")
+                result.append(f"\t\t\tBIND_VIRTUAL_METHOD(T, {method_name}, {method['hash']});")
                 result.append("\t\t}")
 
     result.append("\t}")
