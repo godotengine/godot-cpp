@@ -233,7 +233,7 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False, profil
             engine_class["alias_for"] = "ClassDB"
         header_filename = include_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".hpp")
         source_filename = source_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".cpp")
-        if headers:
+        if headers and is_class_included(engine_class["name"], build_profile):
             files.append(str(header_filename.as_posix()))
         if sources and is_class_included(engine_class["name"], build_profile):
             files.append(str(source_filename.as_posix()))
@@ -292,30 +292,6 @@ def parse_build_profile(profile_filepath, api):
         children[parent] = children.get(parent, [])
         children[parent].append(child)
 
-    # Parse methods dependencies
-    deps = {}
-    reverse_deps = {}
-    for name, engine_class in api_dict.items():
-        ref_cls = set()
-        for method in engine_class.get("methods", []):
-            rtype = method.get("return_value", {}).get("type", "")
-            args = [a["type"] for a in method.get("arguments", [])]
-            if rtype in api_dict:
-                ref_cls.add(rtype)
-            elif is_enum(rtype) and get_enum_class(rtype) in api_dict:
-                ref_cls.add(get_enum_class(rtype))
-            for arg in args:
-                if arg in api_dict:
-                    ref_cls.add(arg)
-                elif is_enum(arg) and get_enum_class(arg) in api_dict:
-                    ref_cls.add(get_enum_class(arg))
-        deps[engine_class["name"]] = set(filter(lambda x: x != name, ref_cls))
-        for acls in ref_cls:
-            if acls == name:
-                continue
-            reverse_deps[acls] = reverse_deps.get(acls, set())
-            reverse_deps[acls].add(name)
-
     included = []
     front = list(profile.get("enabled_classes", []))
     if front:
@@ -323,6 +299,12 @@ def parse_build_profile(profile_filepath, api):
         front.append("WorkerThreadPool")
         front.append("ClassDB")
         front.append("ClassDBSingleton")
+        # In src/classes/low_level.cpp
+        front.append("FileAccess")
+        front.append("Image")
+        front.append("XMLParser")
+        # In include/godot_cpp/templates/thread_work_pool.hpp
+        front.append("Semaphore")
     while front:
         cls = front.pop()
         if cls in included:
@@ -331,10 +313,6 @@ def parse_build_profile(profile_filepath, api):
         parent = parents.get(cls, "")
         if parent:
             front.append(parent)
-        for rcls in deps.get(cls, set()):
-            if rcls in included or rcls in front:
-                continue
-            front.append(rcls)
 
     excluded = []
     front = list(profile.get("disabled_classes", []))
@@ -344,10 +322,6 @@ def parse_build_profile(profile_filepath, api):
             continue
         excluded.append(cls)
         front += children.get(cls, [])
-        for rcls in reverse_deps.get(cls, set()):
-            if rcls in excluded or rcls in front:
-                continue
-            front.append(rcls)
 
     if included and excluded:
         print(
@@ -372,23 +346,32 @@ def scons_emit_files(target, source, env):
 
 
 def scons_generate_bindings(target, source, env):
+    profile_filepath = env.get("build_profile", "")
+    if profile_filepath and not Path(profile_filepath).is_absolute():
+        profile_filepath = str((Path(env.Dir("#").abspath) / profile_filepath).as_posix())
+
     generate_bindings(
         str(source[0]),
         env["generate_template_get_node"],
         "32" if "32" in env["arch"] else "64",
         env["precision"],
         env["godot_cpp_gen_dir"],
+        profile_filepath,
     )
     return None
 
 
-def generate_bindings(api_filepath, use_template_get_node, bits="64", precision="single", output_dir="."):
+def generate_bindings(
+    api_filepath, use_template_get_node, bits="64", precision="single", output_dir=".", profile_filepath=""
+):
     api = None
 
     target_dir = Path(output_dir) / "gen"
 
     with open(api_filepath, encoding="utf-8") as api_file:
         api = json.load(api_file)
+
+    build_profile = parse_build_profile(profile_filepath, api)
 
     shutil.rmtree(target_dir, ignore_errors=True)
     target_dir.mkdir(parents=True)
@@ -400,7 +383,7 @@ def generate_bindings(api_filepath, use_template_get_node, bits="64", precision=
     generate_version_header(api, target_dir)
     generate_global_constant_binds(api, target_dir)
     generate_builtin_bindings(api, target_dir, real_t + "_" + bits)
-    generate_engine_classes_bindings(api, target_dir, use_template_get_node)
+    generate_engine_classes_bindings(api, target_dir, use_template_get_node, build_profile)
     generate_utility_functions(api, target_dir)
 
 
@@ -1378,7 +1361,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     return "\n".join(result)
 
 
-def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
+def generate_engine_classes_bindings(api, output_dir, use_template_get_node, build_profile):
     global engine_classes
     global singletons
     global native_structures
@@ -1421,6 +1404,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
         if "methods" in class_api:
             for method in class_api["methods"]:
+                if not is_method_included(method, build_profile):
+                    continue
                 if "arguments" in method:
                     for argument in method["arguments"]:
                         type_name = argument["type"]
@@ -1566,14 +1551,21 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         fully_used_classes = list(fully_used_classes)
         fully_used_classes.sort()
 
+        if not is_class_included(class_api["name"], build_profile):
+            continue
+
         with header_filename.open("w+", encoding="utf-8") as header_file:
             header_file.write(
-                generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node)
+                generate_engine_class_header(
+                    class_api, used_classes, fully_used_classes, use_template_get_node, build_profile
+                )
             )
 
         with source_filename.open("w+", encoding="utf-8") as source_file:
             source_file.write(
-                generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node)
+                generate_engine_class_source(
+                    class_api, used_classes, fully_used_classes, use_template_get_node, build_profile
+                )
             )
 
     for native_struct in api["native_structures"]:
@@ -1635,7 +1627,7 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
             header_file.write("\n".join(result))
 
 
-def generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node):
+def generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node, build_profile):
     global singletons
     result = []
 
@@ -1735,6 +1727,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     if "methods" in class_api:
         for method in class_api["methods"]:
+            if not is_method_included(method, build_profile):
+                continue
             if method["is_virtual"]:
                 # Will be done later.
                 continue
@@ -1759,6 +1753,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
         # Virtuals now.
         for method in class_api["methods"]:
+            if not is_method_included(method, build_profile):
+                continue
             if not method["is_virtual"]:
                 continue
 
@@ -1779,6 +1775,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append(f"\t\t{inherits}::register_virtuals<T, B>();")
         if "methods" in class_api:
             for method in class_api["methods"]:
+                if not is_method_included(method, build_profile):
+                    continue
                 if not method["is_virtual"]:
                     continue
                 method_name = escape_identifier(method["name"])
@@ -1870,6 +1868,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 result.append("\t \\")
 
         for method in class_api["methods"]:
+            if not is_method_included(method, build_profile):
+                continue
             # ClassDBSingleton shouldn't have any static methods, but if some appear later, lets skip them.
             if "is_static" in method and method["is_static"]:
                 continue
@@ -1944,7 +1944,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     return "\n".join(result)
 
 
-def generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node):
+def generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node, build_profile):
     global singletons
     result = []
 
@@ -2012,6 +2012,8 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
 
     if "methods" in class_api:
         for method in class_api["methods"]:
+            if not is_method_included(method, build_profile):
+                continue
             if method["is_virtual"]:
                 # Will be done later
                 continue
@@ -2106,6 +2108,8 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
 
         # Virtuals now.
         for method in class_api["methods"]:
+            if not is_method_included(method, build_profile):
+                continue
             if not method["is_virtual"]:
                 continue
 
@@ -2778,6 +2782,44 @@ def is_class_included(class_name, build_profile):
     if excluded:
         return class_name not in excluded
     return True
+
+
+def is_method_included(method, build_profile):
+    """
+    Check if an engine class should be included.
+    This removes classes according to a build profile of enabled or disabled classes.
+    """
+    global engine_classes
+    included = build_profile.get("enabled_classes", [])
+    excluded = build_profile.get("disabled_classes", [])
+    ref_cls = set()
+    rtype = get_base_type(method.get("return_value", {}).get("type", ""))
+    args = [get_base_type(a["type"]) for a in method.get("arguments", [])]
+    if rtype in engine_classes:
+        ref_cls.add(rtype)
+    elif is_enum(rtype) and get_enum_class(rtype) in engine_classes:
+        ref_cls.add(get_enum_class(rtype))
+    for arg in args:
+        if arg in engine_classes:
+            ref_cls.add(arg)
+        elif is_enum(arg) and get_enum_class(arg) in engine_classes:
+            ref_cls.add(get_enum_class(arg))
+    for acls in ref_cls:
+        if len(included) > 0 and acls not in included:
+            return False
+        elif len(excluded) > 0 and acls in excluded:
+            return False
+    return True
+
+
+def get_base_type(type_name):
+    if type_name.startswith("const "):
+        type_name = type_name[6:]
+    if type_name.endswith("*"):
+        type_name = type_name[:-1]
+    if type_name.startswith("typedarray::"):
+        type_name = type_name.replace("typedarray::", "")
+    return type_name
 
 
 def is_included(type_name, current_type):
