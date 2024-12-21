@@ -251,6 +251,7 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 		is_abstract, // GDExtensionBool is_abstract;
 		p_exposed, // GDExtensionBool is_exposed;
 		p_runtime, // GDExtensionBool is_runtime;
+		nullptr, // GDExtensionConstStringPtr icon_path;
 		T::set_bind, // GDExtensionClassSet set_func;
 		T::get_bind, // GDExtensionClassGet get_func;
 		T::has_get_property_list() ? T::get_property_list_bind : nullptr, // GDExtensionClassGetPropertyList get_property_list_func;
