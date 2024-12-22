@@ -32,7 +32,6 @@
 #define GODOT_VARIANT_INTERNAL_HPP
 
 #include <gdextension_interface.h>
-#include <godot_cpp/classes/gpu_particles3d.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
 namespace godot {
