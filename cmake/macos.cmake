@@ -7,6 +7,7 @@ MacOS platform
 
 ]=======================================================================]
 
+#[===========================[ Find Dependencies ]===========================]
 # APPLE is set to True when the target system is an Apple platform
 # (macOS, iOS, tvOS, visionOS or watchOS).
 if( APPLE )
@@ -18,12 +19,14 @@ if( APPLE )
         NO_DEFAULT_PATH )
 endif( APPLE )
 
+#[=============================[ MacOS Options ]=============================]
 function( macos_options )
     # TODO "macos_deployment_target" "macOS deployment target" "default"
     # TODO "macos_sdk_path" "macOS SDK path" ""
     # TODO if has_osxcross(): "osxcross_sdk" "OSXCross SDK version" "darwin16"
 endfunction()
 
+#[===========================[ Target Generation ]===========================]
 function( macos_generate )
 
     # OSX_ARCHITECTURES does not support generator expressions.
