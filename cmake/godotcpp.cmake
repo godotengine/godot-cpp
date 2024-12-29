@@ -240,16 +240,15 @@ function( godotcpp_generate )
 
     ### Platform is derived from the toolchain target
     # See GeneratorExpressions PLATFORM_ID and CMAKE_SYSTEM_NAME
-    set( SYSTEM_NAME
-            $<$<PLATFORM_ID:Android>:android>
-            $<$<PLATFORM_ID:iOS>:ios>
-            $<$<PLATFORM_ID:Linux>:linux>
-            $<$<PLATFORM_ID:Darwin>:macos>
-            $<$<PLATFORM_ID:Emscripten>:web>
-            $<$<PLATFORM_ID:Windows>:windows>
-            $<$<PLATFORM_ID:Msys>:windows>
+    string( APPEND SYSTEM_NAME
+            "$<$<PLATFORM_ID:Android>:android.${ANDROID_ABI}>"
+            "$<$<PLATFORM_ID:iOS>:ios>"
+            "$<$<PLATFORM_ID:Linux>:linux>"
+            "$<$<PLATFORM_ID:Darwin>:macos>"
+            "$<$<PLATFORM_ID:Emscripten>:web>"
+            "$<$<PLATFORM_ID:Windows>:windows>"
+            "$<$<PLATFORM_ID:Msys>:windows>"
     )
-    string(REPLACE ";" "" SYSTEM_NAME "${SYSTEM_NAME}")
 
     ### Use the arch from the toolchain if it isn't set manually
     if( GODOT_ARCH )
