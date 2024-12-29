@@ -21,20 +21,10 @@ foreach( TARGET_ALIAS template_debug template_release editor )
     set( LINK_TARGET "godot-cpp::${TARGET_ALIAS}" )
 
     ### Get useful properties of the library
-    get_target_property( GODOT_PLATFORM ${LINK_TARGET} GODOT_PLATFORM   )
-    get_target_property( GODOT_TARGET   ${LINK_TARGET} GODOT_TARGET     )
-    get_target_property( GODOT_ARCH     ${LINK_TARGET} GODOT_ARCH       )
+    get_target_property( GODOT_SUFFIX   ${LINK_TARGET} GODOT_SUFFIX      )
     get_target_property( OSX_ARCH       ${LINK_TARGET} OSX_ARCHITECTURES )
 
-    set( DEV_TAG "$<$<BOOL:${GODOT_DEV_BUILD}>:.dev>" )
-
-    if( CMAKE_SYSTEM_NAME STREQUAL Darwin )
-        set( OUTPUT_DIR "${OUTPUT_DIR}/libgdexample.macos.${TEST_TARGET}.framework")
-        set( OUTPUT_NAME "gdexample.macos.${TEST_TARGET}${DEV_TAG}" )
-    else()
-        set( OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/" )
-        set( OUTPUT_NAME "gdexample.${GODOT_PLATFORM}.${GODOT_TARGET}${DEV_TAG}.${GODOT_ARCH}" )
-    endif()
+    set( OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/" )
 
     add_library( ${TARGET_NAME} SHARED EXCLUDE_FROM_ALL )
 
@@ -74,7 +64,7 @@ foreach( TARGET_ALIAS template_debug template_release editor )
             PDB_OUTPUT_DIRECTORY     "$<1:${OUTPUT_DIR}>" #MSVC Only, ignored on other platforms
 
             PREFIX "lib"
-            OUTPUT_NAME "gdexample.${GODOT_PLATFORM}.${GODOT_TARGET}${DEV_TAG}.${GODOT_ARCH}"
+            OUTPUT_NAME "gdexample${GODOT_SUFFIX}"
 
             #macos options, ignored on other platforms
             OSX_ARCHITECTURES "${OSX_ARCH}"
@@ -89,7 +79,11 @@ foreach( TARGET_ALIAS template_debug template_release editor )
 
     # Only blank the suffix on osx to match SCons
     if( CMAKE_SYSTEM_NAME STREQUAL Darwin )
-        set_target_properties( ${TARGET_NAME} PROPERTIES SUFFIX "" )
+        set_target_properties( ${TARGET_NAME}
+                PROPERTIES
+                SUFFIX ""
+                OUTPUT_DIR "${OUTPUT_DIR}/libgdexample.macos.${TARGET_ALIAS}.framework"
+        )
     endif ()
 
 endforeach()
