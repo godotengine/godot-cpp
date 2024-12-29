@@ -7,21 +7,22 @@ MacOS platform
 
 ]=======================================================================]
 
-# Find Requirements
-IF(APPLE)
+# APPLE is set to True when the target system is an Apple platform
+# (macOS, iOS, tvOS, visionOS or watchOS).
+if( APPLE )
     set( CMAKE_OSX_SYSROOT $ENV{SDKROOT} )
     find_library( COCOA_LIBRARY REQUIRED
         NAMES Cocoa
         PATHS ${CMAKE_OSX_SYSROOT}/System/Library
         PATH_SUFFIXES Frameworks
-        NO_DEFAULT_PATH)
-ENDIF (APPLE)
-
+        NO_DEFAULT_PATH )
+endif( APPLE )
 
 function( macos_options )
-    # macos options here
+    # TODO "macos_deployment_target" "macOS deployment target" "default"
+    # TODO "macos_sdk_path" "macOS SDK path" ""
+    # TODO if has_osxcross(): "osxcross_sdk" "OSXCross SDK version" "darwin16"
 endfunction()
-
 
 function( macos_generate )
 
@@ -36,7 +37,9 @@ function( macos_generate )
     set_target_properties( ${TARGET_NAME}
             PROPERTIES
 
+            # Specify multiple architectures for universal builds
             OSX_ARCHITECTURES "${OSX_ARCH}"
+            GODOT_ARCH ${SYSTEM_ARCH}
     )
 
     target_compile_definitions(${TARGET_NAME}
