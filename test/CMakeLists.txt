@@ -52,7 +52,7 @@ foreach( TARGET_ALIAS template_debug template_release editor )
             CXX_EXTENSIONS OFF
             CXX_VISIBILITY_PRESET ${GODOT_SYMBOL_VISIBILITY}
 
-            POSITION_INDEPENDENT_CODE ON
+            # This flag adds the runtime path at build time
             BUILD_RPATH_USE_ORIGIN ON
 
             # Try to ensure only static libraries are selected to be linked to.

@@ -307,8 +307,9 @@ function( godotcpp_generate )
                 CXX_VISIBILITY_PRESET ${GODOT_SYMBOL_VISIBILITY}
 
                 COMPILE_WARNING_AS_ERROR ${GODOT_WARNING_AS_ERROR}
+
                 POSITION_INDEPENDENT_CODE ON
-                BUILD_RPATH_USE_ORIGIN ON
+                INTERFACE_POSITION_INDEPENDENT_CODE ON
 
                 PREFIX lib
                 OUTPUT_NAME "${PROJECT_NAME}.${SYSTEM_NAME}.${TARGET_ALIAS}${DEV_TAG}.${SYSTEM_ARCH}"
