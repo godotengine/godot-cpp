@@ -27,7 +27,7 @@ if( EMSCRIPTEN )
     set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
     set(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-sSIDE_MODULE=1")
     set(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-sSIDE_MODULE=1")
-    set(CMAKE_SHARED_LIBRARY_SUFFIX) # remove the suffix from the shared lib
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".wasm") # SCons uses .wasm as a suffix
     set(CMAKE_STRIP FALSE)  # used by default in pybind11 on .so modules
 
     # The Emscripten toolchain sets the default value for EMSCRIPTEN_SYSTEM_PROCESSOR to x86
