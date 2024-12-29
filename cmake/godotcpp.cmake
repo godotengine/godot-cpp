@@ -11,18 +11,12 @@ This if statement simply silences that warning.
 if( CMAKE_C_COMPILER )
 endif ()
 
-#[=======================================================================[.rst:
-Include Platform Files
-----------------------
-
-Because these files are included into the top level CMakelists.txt before the
+#[[ Include Platform Files
+Because these files are included into the top level CMakeLists.txt before the
 project directive, it means that
 
-* ``CMAKE_CURRENT_SOURCE_DIR`` is the location of godot-cpp's CMakeLists.txt
-* ``CMAKE_SOURCE_DIR`` is the location where any prior ``project(...)``
-  directive was
-
-]=======================================================================]
+CMAKE_CURRENT_SOURCE_DIR is the location of godot-cpp's CMakeLists.txt
+CMAKE_SOURCE_DIR is the location where any prior project() directive was ]]
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/common_compiler_flags.cmake)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/android.cmake)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ios.cmake)
@@ -43,7 +37,8 @@ set( PLATFORM_LIST linux macos windows android ios web )
 # List of known architectures
 set( ARCH_LIST universal x86_32 x86_64 arm32 arm64 rv64 ppc32 ppc64 wasm32 )
 
-# Function to map processors to known architectures
+#[=============================[ godot_arch_map ]=============================]
+#[[ Function to map CMAKE_SYSTEM_PROCESSOR names to godot arch equivalents ]]
 function( godot_arch_map ALIAS PROC )
     string( TOLOWER "${PROC}" PROC )
 
@@ -157,7 +152,7 @@ function( godotcpp_options )
     windows_options()
 endfunction()
 
-# Function to configure and generate the targets
+#[===========================[ Target Generation ]===========================]
 function( godotcpp_generate )
     #[[ Multi-Threaded MSVC Compilation
     When using the MSVC compiler the build command -j <n> only specifies
