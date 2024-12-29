@@ -266,8 +266,6 @@ function( godotcpp_generate )
         message( WARNING "=> GODOT_DEV_BUILD implies a Debug-like build but CMAKE_BUILD_TYPE is '${CMAKE_BUILD_TYPE}'")
     endif ()
     set( IS_DEV_BUILD "$<BOOL:${GODOT_DEV_BUILD}>")
-    # The .dev portion of the name if GODOT_DEV_BUILD is true.
-    set( DEV_TAG "$<${IS_DEV_BUILD}:.dev>" )
 
     ### Define our godot-cpp library targets
     foreach ( TARGET_ALIAS template_debug template_release editor )
@@ -276,6 +274,17 @@ function( godotcpp_generate )
         # Generator Expressions that rely on the target
         set( DEBUG_FEATURES "$<NOT:$<STREQUAL:${TARGET_ALIAS},template_release>>" )
         set( HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},${DEBUG_FEATURES},$<BOOL:${GODOT_USE_HOT_RELOAD}>>" )
+
+        # Suffix
+        string( JOIN "" GODOT_SUFFIX
+                "$<1:.${SYSTEM_NAME}>"
+                "$<1:.${TARGET_ALIAS}>"
+                "$<${IS_DEV_BUILD}:.dev>"
+                "$<$<STREQUAL:${GODOT_PRECISION},double>:.double>"
+                "$<1:.${SYSTEM_ARCH}>"
+                # missing IOS_SIMULATOR
+                # missing THREADS
+        )
 
         # the godot-cpp.* library targets
         add_library( ${TARGET_NAME} STATIC EXCLUDE_FROM_ALL )
@@ -306,14 +315,17 @@ function( godotcpp_generate )
                 POSITION_INDEPENDENT_CODE ON
                 INTERFACE_POSITION_INDEPENDENT_CODE ON
 
-                PREFIX lib
-                OUTPUT_NAME "${PROJECT_NAME}.${SYSTEM_NAME}.${TARGET_ALIAS}${DEV_TAG}.${SYSTEM_ARCH}"
+                PREFIX      "lib"
+                OUTPUT_NAME "${PROJECT_NAME}${GODOT_SUFFIX}"
+
                 ARCHIVE_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>"
 
                 # Things that are handy to know for dependent targets
-                GODOT_PLATFORM "${SYSTEM_NAME}"
-                GODOT_TARGET "${TARGET_ALIAS}"
-                GODOT_ARCH "${SYSTEM_ARCH}"
+                GODOT_PLATFORM  "${SYSTEM_NAME}"
+                GODOT_TARGET    "${TARGET_ALIAS}"
+                GODOT_ARCH      "${SYSTEM_ARCH}"
+                GODOT_PRECISION "${GODOT_PRECISION}"
+                GODOT_SUFFIX    "${GODOT_SUFFIX}"
 
                 # Some IDE's respect this property to logically group targets
                 FOLDER "godot-cpp"
