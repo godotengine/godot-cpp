@@ -8,7 +8,7 @@ features. For target platform specific flags look to each of the
 ``cmake/<platform>.cmake`` files.
 
 The default compile and link options CMake adds can be found in the
-platform modules_. When a project is created it initialises its variables from
+platform modules_. When a project is created it initializes its variables from
 the ``CMAKE_*`` values. The cleanest way I have found to alter these defaults
 is the use of the ``CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`` as demonstrated by
 the emsdkHack.cmake to overcome the limitation on shared library creation.
@@ -35,6 +35,7 @@ set( GT_V11 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,11>" )
 set( LT_V11 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,11>" )
 set( GE_V12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>" )
 
+#[===========================[ compiler_detection ]===========================]
 #[[ Check for clang-cl with MSVC frontend
 The compiler is tested and set when the project command is called.
 The variable CXX_COMPILER_FRONTEND_VARIANT was introduced in 3.14
@@ -54,6 +55,9 @@ function( compiler_detection )
     endif ()
 endfunction(  )
 
+#[=========================[ common_compiler_flags ]=========================]
+#[[ This function assumes it is being called from within one of the platform
+generate functions, with all the variables from lower scopes defined. ]]
 function( common_compiler_flags )
 
     # These compiler options reflect what is in godot/SConstruct.
