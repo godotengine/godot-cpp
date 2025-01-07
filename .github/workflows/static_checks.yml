@@ -32,3 +32,7 @@ jobs:
         uses: pre-commit/action@v3.0.1
         with:
           extra_args: --verbose --hook-stage manual --files ${{ env.CHANGED_FILES }}
+
+      - name: Check generated files consistency
+        run:
+          python misc/scripts/check_get_file_list.py
