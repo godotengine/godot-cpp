@@ -58,7 +58,7 @@ function( windows_options )
 endfunction()
 
 #[===========================[ Target Generation ]===========================]
-function( windows_generate TARGET_NAME )
+function( windows_generate )
     set( STATIC_CPP "$<BOOL:${GODOT_USE_STATIC_CPP}>")
     set( DEBUG_CRT "$<BOOL:${GODOT_DEBUG_CRT}>" )
 
@@ -96,5 +96,5 @@ function( windows_generate TARGET_NAME )
             $<${IS_CLANG}:-lstdc++>
     )
 
-    common_compiler_flags( ${TARGET_NAME} )
+    common_compiler_flags()
 endfunction()
