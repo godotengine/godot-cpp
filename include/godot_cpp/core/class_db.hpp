@@ -88,12 +88,17 @@ class ClassDB {
 
 public:
 	struct ClassInfo {
+		struct VirtualMethod {
+			GDExtensionClassCallVirtual func;
+			uint32_t hash;
+		};
+
 		StringName name;
 		StringName parent_name;
 		GDExtensionInitializationLevel level = GDEXTENSION_INITIALIZATION_SCENE;
 		std::unordered_map<StringName, MethodBind *> method_map;
 		std::set<StringName> signal_names;
-		std::unordered_map<StringName, GDExtensionClassCallVirtual> virtual_methods;
+		std::unordered_map<StringName, VirtualMethod> virtual_methods;
 		std::set<StringName> property_names;
 		std::set<StringName> constant_names;
 		// Pointer to the parent custom class, if any. Will be null if the parent class is a Godot class.
@@ -193,13 +198,13 @@ public:
 	static void add_signal(const StringName &p_class, const MethodInfo &p_signal);
 	static void bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDExtensionInt p_constant_value, bool p_is_bitfield = false);
 	// Binds an implementation of a virtual method defined in Godot.
-	static void bind_virtual_method(const StringName &p_class, const StringName &p_method, GDExtensionClassCallVirtual p_call);
+	static void bind_virtual_method(const StringName &p_class, const StringName &p_method, GDExtensionClassCallVirtual p_call, uint32_t p_hash);
 	// Add a new virtual method that can be implemented by scripts.
 	static void add_virtual_method(const StringName &p_class, const MethodInfo &p_method, const Vector<StringName> &p_arg_names = Vector<StringName>());
 
 	static MethodBind *get_method(const StringName &p_class, const StringName &p_method);
 
-	static GDExtensionClassCallVirtual get_virtual_func(void *p_userdata, GDExtensionConstStringNamePtr p_name);
+	static GDExtensionClassCallVirtual get_virtual_func(void *p_userdata, GDExtensionConstStringNamePtr p_name, uint32_t p_hash);
 	static const GDExtensionInstanceBindingCallbacks *get_instance_binding_callbacks(const StringName &p_class);
 
 	static void initialize(GDExtensionInitializationLevel p_level);
@@ -217,12 +222,12 @@ public:
 #define BIND_BITFIELD_FLAG(m_constant) \
 	::godot::ClassDB::bind_integer_constant(get_class_static(), ::godot::_gde_constant_get_bitfield_name(m_constant, #m_constant), #m_constant, m_constant, true);
 
-#define BIND_VIRTUAL_METHOD(m_class, m_method)                                                                                                \
+#define BIND_VIRTUAL_METHOD(m_class, m_method, m_hash)                                                                                        \
 	{                                                                                                                                         \
 		auto _call##m_method = [](GDExtensionObjectPtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr p_ret) -> void { \
 			call_with_ptr_args(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret);                                   \
 		};                                                                                                                                    \
-		::godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, _call##m_method);                                       \
+		::godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, _call##m_method, m_hash);                               \
 	}
 
 template <typename T, bool is_abstract>
