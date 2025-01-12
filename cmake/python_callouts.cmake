@@ -18,8 +18,12 @@ Its usage is listed as:
 ]]
 function( build_profile_generate_trimmed_api BUILD_PROFILE INPUT_JSON OUTPUT_JSON )
     execute_process(
-            COMMAND "${Python3_EXECUTABLE}" "build_profile.py" "${BUILD_PROFILE}" "${INPUT_JSON}" "${OUTPUT_JSON}"
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMAND "${Python3_EXECUTABLE}"
+                "${godot-cpp_SOURCE_DIR}/build_profile.py"
+                "${BUILD_PROFILE}"
+                "${INPUT_JSON}"
+                "${OUTPUT_JSON}"
+            WORKING_DIRECTORY ${godot-cpp_SOURCE_DIR}
     )
 endfunction(  )
 
@@ -45,7 +49,7 @@ function( binding_generator_get_file_list OUT_VAR_NAME API_FILEPATH OUTPUT_DIR )
     string( REGEX REPLACE "\n *" " " PYTHON_SCRIPT "${PYTHON_SCRIPT}" )
 
     execute_process( COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            WORKING_DIRECTORY "${godot-cpp_SOURCE_DIR}"
             OUTPUT_VARIABLE GENERATED_FILES_LIST
             OUTPUT_STRIP_TRAILING_WHITESPACE
     )
@@ -91,9 +95,33 @@ function( binding_generator_generate_bindings API_FILE USE_TEMPLATE_GET_NODE, BI
     add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
             COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
             VERBATIM
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            WORKING_DIRECTORY ${godot-cpp_SOURCE_DIR}
             MAIN_DEPENDENCY ${GODOT_GDEXTENSION_API_FILE}
-            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/binding_generator.py
+            DEPENDS ${godot-cpp_SOURCE_DIR}/binding_generator.py
             COMMENT "Generating bindings"
     )
 endfunction(  )
+
+#[[ Generate doc_data.cpp
+The documentation displayed in the Godot editor is compiled into the extension.
+It takes a list of XML source files, and transforms them into a cpp file that
+is added to the sources list.]]
+function( generate_doc_source OUTPUT_PATH XML_SOURCES )
+    # Transform the CMake list into the content of a python list
+    # quote and join to form the interior of a python array
+    list( TRANSFORM XML_SOURCES REPLACE "(.*\.xml)" "'\\1'" )
+    list( JOIN XML_SOURCES "," XML_SOURCES )
+
+    # Python one-liner to run our command
+    # lists in CMake are just strings delimited by ';', so this works.
+    set( PYTHON_SCRIPT "from doc_source_generator import generate_doc_source"
+            "generate_doc_source( '${OUTPUT_PATH}', [${XML_SOURCES}] )" )
+
+    add_custom_command( OUTPUT "${OUTPUT_PATH}"
+            COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
+            VERBATIM
+            WORKING_DIRECTORY "${godot-cpp_SOURCE_DIR}"
+            DEPENDS "${godot-cpp_SOURCE_DIR}/doc_source_generator.py"
+            COMMENT "Generating Doc Data"
+    )
+endfunction()
