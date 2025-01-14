@@ -42,7 +42,6 @@ set( PLATFORM_LIST linux macos windows android ios web )
 
 # List of known architectures
 set( ARCH_LIST universal x86_32 x86_64 arm32 arm64 rv64 ppc32 ppc64 wasm32 )
-
 # Function to map processors to known architectures
 function( godot_arch_map ALIAS PROC )
     string( TOLOWER "${PROC}" PROC )
@@ -147,7 +146,26 @@ function( godotcpp_options )
 
     # Enable Testing
     option( GODOT_ENABLE_TESTING "Enable the godot-cpp.test.<target> integration testing targets" OFF )
-
+    # Define which targets create for build. By default all targets are included
+    # Not presented in SCons
+    option(GODOT_ADD_TARGET_TEMPLATE_RELEASE "Add template_release target to build" ON)
+    option(GODOT_ADD_TARGET_TEMPLATE_DEBUG "Add template_debug target to build" ON)
+    option(GODOT_ADD_TARGET_EDITOR "Add editor target to build" ON)
+    if(GODOT_ADD_TARGET_TEMPLATE_DEBUG)
+        list(APPEND GODOT_TARGETS "template_debug")
+    endif()
+    if(GODOT_ADD_TARGET_TEMPLATE_RELEASE)
+        list(APPEND GODOT_TARGETS "template_release")
+    endif()
+    if(GODOT_ADD_TARGET_EDITOR)
+        list(APPEND GODOT_TARGETS "editor")
+    endif()
+    if(NOT GODOT_TARGETS)
+        message(FATAL_ERROR "No targets were chosen to be build.See GODOT_ADD_TARGET_* variables: at least one of the should be ON")
+    endif()
+    # parent scoping GODOT_TARGETS
+    set(GODOT_TARGETS ${GODOT_TARGETS} PARENT_SCOPE)
+    
     #[[ Target Platform Options ]]
     android_options()
     ios_options()
@@ -276,7 +294,7 @@ function( godotcpp_generate )
     set( DEV_TAG "$<${IS_DEV_BUILD}:.dev>" )
 
     ### Define our godot-cpp library targets
-    foreach ( TARGET_ALIAS template_debug template_release editor )
+    foreach ( TARGET_ALIAS ${GODOT_TARGETS} )
         set( TARGET_NAME "godot-cpp.${TARGET_ALIAS}" )
 
         # Generator Expressions that rely on the target
@@ -342,6 +360,8 @@ function( godotcpp_generate )
 
     # Added for backwards compatibility with prior cmake solution so that builds dont immediately break
     # from a missing target.
-    add_library( godot::cpp ALIAS godot-cpp.template_debug )
+    # since targets can be turned off, we need to know which one is left (the order is 'template_debug' 'template_release' 'editor')
+    list(GET GODOT_TARGETS 0 GODOT_DEFAULT_TARGET)
+    add_library( godot::cpp ALIAS godot-cpp.${GODOT_DEFAULT_TARGET} )
 
 endfunction()
