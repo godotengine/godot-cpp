@@ -77,6 +77,14 @@ foreach( TARGET_ALIAS template_debug template_release editor )
             FOLDER "godot-cpp"
     )
 
+    target_compile_options(  ${TARGET_NAME}
+            PRIVATE
+            # The test project uses utf-8 characters in its source files:
+            # example.h:282.283, and example.cpp:774,8775,778
+            # which require interpretation of source files as utf-8 by MSVC
+            $<${IS_MSVC}:/utf-8>
+    )
+
     # Only blank the suffix on osx to match SCons
     if( CMAKE_SYSTEM_NAME STREQUAL Darwin )
         set_target_properties( ${TARGET_NAME}
