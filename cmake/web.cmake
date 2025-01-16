@@ -10,11 +10,12 @@ Web platform
 # Emscripten requires this hack for use of the SHARED option
 set( CMAKE_PROJECT_godot-cpp_INCLUDE cmake/emsdkHack.cmake )
 
+#[==============================[ Web Options ]==============================]
 function( web_options )
     # web options
 endfunction()
 
-
+#[===========================[ Target Generation ]===========================]
 function( web_generate )
     target_compile_definitions(${TARGET_NAME}
             PUBLIC
@@ -26,7 +27,6 @@ function( web_generate )
             PUBLIC
             -sSIDE_MODULE
             -sSUPPORT_LONGJMP=wasm
-            -fno-exceptions
     )
 
     target_link_options( ${TARGET_NAME}

@@ -11,18 +11,12 @@ This if statement simply silences that warning.
 if( CMAKE_C_COMPILER )
 endif ()
 
-#[=======================================================================[.rst:
-Include Platform Files
-----------------------
-
-Because these files are included into the top level CMakelists.txt before the
+#[[ Include Platform Files
+Because these files are included into the top level CMakeLists.txt before the
 project directive, it means that
 
-* ``CMAKE_CURRENT_SOURCE_DIR`` is the location of godot-cpp's CMakeLists.txt
-* ``CMAKE_SOURCE_DIR`` is the location where any prior ``project(...)``
-  directive was
-
-]=======================================================================]
+CMAKE_CURRENT_SOURCE_DIR is the location of godot-cpp's CMakeLists.txt
+CMAKE_SOURCE_DIR is the location where any prior project() directive was ]]
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/common_compiler_flags.cmake)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/android.cmake)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ios.cmake)
@@ -43,7 +37,8 @@ set( PLATFORM_LIST linux macos windows android ios web )
 # List of known architectures
 set( ARCH_LIST universal x86_32 x86_64 arm32 arm64 rv64 ppc32 ppc64 wasm32 )
 
-# Function to map processors to known architectures
+#[=============================[ godot_arch_map ]=============================]
+#[[ Function to map CMAKE_SYSTEM_PROCESSOR names to godot arch equivalents ]]
 function( godot_arch_map ALIAS PROC )
     string( TOLOWER "${PROC}" PROC )
 
@@ -157,7 +152,7 @@ function( godotcpp_options )
     windows_options()
 endfunction()
 
-# Function to configure and generate the targets
+#[===========================[ Target Generation ]===========================]
 function( godotcpp_generate )
     #[[ Multi-Threaded MSVC Compilation
     When using the MSVC compiler the build command -j <n> only specifies
@@ -240,16 +235,15 @@ function( godotcpp_generate )
 
     ### Platform is derived from the toolchain target
     # See GeneratorExpressions PLATFORM_ID and CMAKE_SYSTEM_NAME
-    set( SYSTEM_NAME
-            $<$<PLATFORM_ID:Android>:android>
-            $<$<PLATFORM_ID:iOS>:ios>
-            $<$<PLATFORM_ID:Linux>:linux>
-            $<$<PLATFORM_ID:Darwin>:macos>
-            $<$<PLATFORM_ID:Emscripten>:web>
-            $<$<PLATFORM_ID:Windows>:windows>
-            $<$<PLATFORM_ID:Msys>:windows>
+    string( APPEND SYSTEM_NAME
+            "$<$<PLATFORM_ID:Android>:android.${ANDROID_ABI}>"
+            "$<$<PLATFORM_ID:iOS>:ios>"
+            "$<$<PLATFORM_ID:Linux>:linux>"
+            "$<$<PLATFORM_ID:Darwin>:macos>"
+            "$<$<PLATFORM_ID:Emscripten>:web>"
+            "$<$<PLATFORM_ID:Windows>:windows>"
+            "$<$<PLATFORM_ID:Msys>:windows>"
     )
-    string(REPLACE ";" "" SYSTEM_NAME "${SYSTEM_NAME}")
 
     ### Use the arch from the toolchain if it isn't set manually
     if( GODOT_ARCH )
@@ -272,8 +266,6 @@ function( godotcpp_generate )
         message( WARNING "=> GODOT_DEV_BUILD implies a Debug-like build but CMAKE_BUILD_TYPE is '${CMAKE_BUILD_TYPE}'")
     endif ()
     set( IS_DEV_BUILD "$<BOOL:${GODOT_DEV_BUILD}>")
-    # The .dev portion of the name if GODOT_DEV_BUILD is true.
-    set( DEV_TAG "$<${IS_DEV_BUILD}:.dev>" )
 
     ### Define our godot-cpp library targets
     foreach ( TARGET_ALIAS template_debug template_release editor )
@@ -282,6 +274,17 @@ function( godotcpp_generate )
         # Generator Expressions that rely on the target
         set( DEBUG_FEATURES "$<NOT:$<STREQUAL:${TARGET_NAME},template_release>>" )
         set( HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},${DEBUG_FEATURES},$<BOOL:${GODOT_USE_HOT_RELOAD}>>" )
+
+        # Suffix
+        string( JOIN "" GODOT_SUFFIX
+                "$<1:.${SYSTEM_NAME}>"
+                "$<1:.${TARGET_ALIAS}>"
+                "$<${IS_DEV_BUILD}:.dev>"
+                "$<$<STREQUAL:${GODOT_PRECISION},double>:.double>"
+                "$<1:.${SYSTEM_ARCH}>"
+                # missing IOS_SIMULATOR
+                # missing THREADS
+        )
 
         # the godot-cpp.* library targets
         add_library( ${TARGET_NAME} STATIC EXCLUDE_FROM_ALL )
@@ -308,17 +311,21 @@ function( godotcpp_generate )
                 CXX_VISIBILITY_PRESET ${GODOT_SYMBOL_VISIBILITY}
 
                 COMPILE_WARNING_AS_ERROR ${GODOT_WARNING_AS_ERROR}
-                POSITION_INDEPENDENT_CODE ON
-                BUILD_RPATH_USE_ORIGIN ON
 
-                PREFIX lib
-                OUTPUT_NAME "${PROJECT_NAME}.${SYSTEM_NAME}.${TARGET_ALIAS}${DEV_TAG}.${SYSTEM_ARCH}"
+                POSITION_INDEPENDENT_CODE ON
+                INTERFACE_POSITION_INDEPENDENT_CODE ON
+
+                PREFIX      "lib"
+                OUTPUT_NAME "${PROJECT_NAME}${GODOT_SUFFIX}"
+
                 ARCHIVE_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>"
 
                 # Things that are handy to know for dependent targets
-                GODOT_PLATFORM "${SYSTEM_NAME}"
-                GODOT_TARGET "${TARGET_ALIAS}"
-                GODOT_ARCH "${SYSTEM_ARCH}"
+                GODOT_PLATFORM  "${SYSTEM_NAME}"
+                GODOT_TARGET    "${TARGET_ALIAS}"
+                GODOT_ARCH      "${SYSTEM_ARCH}"
+                GODOT_PRECISION "${GODOT_PRECISION}"
+                GODOT_SUFFIX    "${GODOT_SUFFIX}"
 
                 # Some IDE's respect this property to logically group targets
                 FOLDER "godot-cpp"

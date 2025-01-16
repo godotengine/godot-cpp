@@ -25,10 +25,21 @@ Android platforms.
 There is further information and examples in the doc/cmake.rst file.
 
 ]=======================================================================]
+
+#[============================[ Android Options ]============================]
 function( android_options )
-    # Android Options
+    #[[ The options present in the SCons build shown below are managed by
+    toolchain files, further information can be found in doc/cmake.rst
+
+    android_api_level : Target Android API level.
+        Default = 21
+
+    ANDROID_HOME : Path to your Android SDK installation.
+        Default = os.environ.get("ANDROID_HOME", os.environ.get("ANDROID_SDK_ROOT")
+    ]]
 endfunction()
 
+#[===========================[ Target Generation ]===========================]
 function( android_generate )
     target_compile_definitions(${TARGET_NAME}
             PUBLIC
