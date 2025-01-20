@@ -2350,6 +2350,10 @@ def get_encoded_arg(arg_name, type_name, type_meta):
         result.append(f"\t{get_gdextension_type(arg_type)} {name}_encoded;")
         result.append(f"\tPtrToArg<{correct_type(type_name)}>::encode({name}, &{name}_encoded);")
         name = f"&{name}_encoded"
+    elif is_enum(type_name) and not is_bitfield(type_name):
+        result.append(f"\tint64_t {name}_encoded;")
+        result.append(f"\tPtrToArg<int64_t>::encode({name}, &{name}_encoded);")
+        name = f"&{name}_encoded"
     elif is_engine_class(type_name):
         # `{name}` is a C++ wrapper, it contains a field which is the object's pointer Godot expects.
         # We have to check `nullptr` because when the caller sends `nullptr`, the wrapper itself will be null.
