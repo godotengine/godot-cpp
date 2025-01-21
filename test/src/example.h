@@ -21,6 +21,7 @@
 #include <godot_cpp/classes/tile_map.hpp>
 #include <godot_cpp/classes/tile_set.hpp>
 #include <godot_cpp/classes/viewport.hpp>
+#include <godot_cpp/variant/typed_dictionary.hpp>
 #include <godot_cpp/variant/variant.hpp>
 #include <godot_cpp/variant/variant_internal.hpp>
 
