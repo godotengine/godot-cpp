@@ -768,7 +768,7 @@ inline double pingpong(double value, double length) {
 inline int fast_ftoi(float a) {
 	static int b;
 
-#if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0603) || WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP // windows 8 phone?
+#if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0603) || (defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP) // windows 8 phone?
 	b = (int)((a > 0.0) ? (a + 0.5) : (a - 0.5));
 
 #elif defined(_MSC_VER) && _MSC_VER < 1800
