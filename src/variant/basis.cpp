@@ -470,7 +470,7 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 					if (rows[1][0] == 0 && rows[0][1] == 0 && rows[1][2] == 0 && rows[2][1] == 0 && rows[1][1] == 1) {
 						// return the simplest form (human friendlier in editor and scripts)
 						euler.x = 0;
-						euler.y = atan2(rows[0][2], rows[0][0]);
+						euler.y = Math::atan2(rows[0][2], rows[0][0]);
 						euler.z = 0;
 					} else {
 						euler.x = Math::atan2(-rows[1][2], rows[2][2]);
@@ -479,12 +479,12 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 					}
 				} else {
 					euler.x = Math::atan2(rows[2][1], rows[1][1]);
-					euler.y = -Math_PI / 2.0f;
+					euler.y = (real_t)(-Math_PI / 2.0);
 					euler.z = 0.0f;
 				}
 			} else {
 				euler.x = Math::atan2(rows[2][1], rows[1][1]);
-				euler.y = Math_PI / 2.0f;
+				euler.y = (real_t)(Math_PI / 2.0);
 				euler.z = 0.0f;
 			}
 			return euler;
@@ -508,13 +508,13 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 					// It's -1
 					euler.x = -Math::atan2(rows[1][2], rows[2][2]);
 					euler.y = 0.0f;
-					euler.z = Math_PI / 2.0f;
+					euler.z = (real_t)(Math_PI / 2.0);
 				}
 			} else {
 				// It's 1
 				euler.x = -Math::atan2(rows[1][2], rows[2][2]);
 				euler.y = 0.0f;
-				euler.z = -Math_PI / 2.0f;
+				euler.z = (real_t)(-Math_PI / 2.0);
 			}
 			return euler;
 		}
@@ -535,22 +535,22 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 					// is this a pure X rotation?
 					if (rows[1][0] == 0 && rows[0][1] == 0 && rows[0][2] == 0 && rows[2][0] == 0 && rows[0][0] == 1) {
 						// return the simplest form (human friendlier in editor and scripts)
-						euler.x = atan2(-m12, rows[1][1]);
+						euler.x = Math::atan2(-m12, rows[1][1]);
 						euler.y = 0;
 						euler.z = 0;
 					} else {
-						euler.x = asin(-m12);
-						euler.y = atan2(rows[0][2], rows[2][2]);
-						euler.z = atan2(rows[1][0], rows[1][1]);
+						euler.x = Math::asin(-m12);
+						euler.y = Math::atan2(rows[0][2], rows[2][2]);
+						euler.z = Math::atan2(rows[1][0], rows[1][1]);
 					}
 				} else { // m12 == -1
-					euler.x = Math_PI * 0.5f;
-					euler.y = atan2(rows[0][1], rows[0][0]);
+					euler.x = (real_t)(Math_PI * 0.5);
+					euler.y = Math::atan2(rows[0][1], rows[0][0]);
 					euler.z = 0;
 				}
 			} else { // m12 == 1
-				euler.x = -Math_PI * 0.5f;
-				euler.y = -atan2(rows[0][1], rows[0][0]);
+				euler.x = (real_t)(-Math_PI * 0.5);
+				euler.y = -Math::atan2(rows[0][1], rows[0][0]);
 				euler.z = 0;
 			}
 
@@ -575,13 +575,13 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 					// It's -1
 					euler.x = Math::atan2(rows[2][1], rows[2][2]);
 					euler.y = 0.0f;
-					euler.z = -Math_PI / 2.0f;
+					euler.z = (real_t)(-Math_PI / 2.0);
 				}
 			} else {
 				// It's 1
 				euler.x = Math::atan2(rows[2][1], rows[2][2]);
 				euler.y = 0.0f;
-				euler.z = Math_PI / 2.0f;
+				euler.z = (real_t)(Math_PI / 2.0);
 			}
 			return euler;
 		}
@@ -601,13 +601,13 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 					euler.z = Math::atan2(-rows[0][1], rows[1][1]);
 				} else {
 					// It's -1
-					euler.x = -Math_PI / 2.0f;
+					euler.x = (real_t)(-Math_PI / 2.0);
 					euler.y = Math::atan2(rows[0][2], rows[0][0]);
 					euler.z = 0;
 				}
 			} else {
 				// It's 1
-				euler.x = Math_PI / 2.0f;
+				euler.x = (real_t)(Math_PI / 2.0);
 				euler.y = Math::atan2(rows[0][2], rows[0][0]);
 				euler.z = 0;
 			}
@@ -630,13 +630,13 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 				} else {
 					// It's -1
 					euler.x = 0;
-					euler.y = Math_PI / 2.0f;
+					euler.y = (real_t)(Math_PI / 2.0);
 					euler.z = -Math::atan2(rows[0][1], rows[1][1]);
 				}
 			} else {
 				// It's 1
 				euler.x = 0;
-				euler.y = -Math_PI / 2.0f;
+				euler.y = (real_t)(-Math_PI / 2.0);
 				euler.z = -Math::atan2(rows[0][1], rows[1][1]);
 			}
 			return euler;
@@ -816,7 +816,7 @@ void Basis::get_axis_angle(Vector3 &r_axis, real_t &r_angle) const {
 		return;
 	}
 	// As we have reached here there are no singularities so we can handle normally.
-	double s = Math::sqrt((rows[2][1] - rows[1][2]) * (rows[2][1] - rows[1][2]) + (rows[0][2] - rows[2][0]) * (rows[0][2] - rows[2][0]) + (rows[1][0] - rows[0][1]) * (rows[1][0] - rows[0][1])); // Used to normalize.
+	real_t s = Math::sqrt((rows[2][1] - rows[1][2]) * (rows[2][1] - rows[1][2]) + (rows[0][2] - rows[2][0]) * (rows[0][2] - rows[2][0]) + (rows[1][0] - rows[0][1]) * (rows[1][0] - rows[0][1])); // Used to normalize.
 
 	if (Math::abs(s) < CMP_EPSILON) {
 		// Prevent divide by zero, should not happen if matrix is orthogonal and should be caught by singularity test above.
@@ -939,9 +939,9 @@ void Basis::rotate_sh(real_t *p_values) {
 	const static real_t s_c_scale = 1.0 / 0.91529123286551084;
 	const static real_t s_c_scale_inv = 0.91529123286551084;
 
-	const static real_t s_rc2 = 1.5853309190550713 * s_c_scale;
+	const static real_t s_rc2 = (real_t)1.5853309190550713 * s_c_scale;
 	const static real_t s_c4_div_c3 = s_c4 / s_c3;
-	const static real_t s_c4_div_c3_x2 = (s_c4 / s_c3) * 2.0;
+	const static real_t s_c4_div_c3_x2 = (s_c4 / s_c3) * (real_t)2.0;
 
 	const static real_t s_scale_dst2 = s_c3 * s_c_scale_inv;
 	const static real_t s_scale_dst4 = s_c5 * s_c_scale_inv;

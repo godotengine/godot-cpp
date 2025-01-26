@@ -154,7 +154,7 @@ static _FORCE_INLINE_ uint32_t hash_murmur3_one_double(double p_in, uint32_t p_s
 	} u;
 
 	// Normalize +/- 0.0 and NaN values so they hash the same.
-	if (p_in == 0.0f) {
+	if (p_in == 0.0) {
 		u.d = 0.0;
 	} else if (Math::is_nan(p_in)) {
 		u.d = NAN;
@@ -242,7 +242,7 @@ static _FORCE_INLINE_ uint32_t hash_djb2_one_float(double p_in, uint32_t p_prev 
 	} u;
 
 	// Normalize +/- 0.0 and NaN values so they hash the same.
-	if (p_in == 0.0f) {
+	if (p_in == 0.0) {
 		u.d = 0.0;
 	} else if (Math::is_nan(p_in)) {
 		u.d = NAN;
@@ -271,7 +271,7 @@ static _FORCE_INLINE_ uint64_t hash_djb2_one_float_64(double p_in, uint64_t p_pr
 	} u;
 
 	// Normalize +/- 0.0 and NaN values so they hash the same.
-	if (p_in == 0.0f) {
+	if (p_in == 0.0) {
 		u.d = 0.0;
 	} else if (Math::is_nan(p_in)) {
 		u.d = NAN;
