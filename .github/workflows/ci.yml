@@ -5,7 +5,7 @@ env:
   # Only used for the cache key. Increment version to force clean build.
   GODOT_BASE_BRANCH: master
   # Used to select the version of Godot to run the tests with.
-  GODOT_TEST_VERSION: master
+  GODOT_TEST_VERSION: 4.3-stable
 
 concurrency:
   group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}
