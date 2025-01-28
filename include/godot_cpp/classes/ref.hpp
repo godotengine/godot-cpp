@@ -230,7 +230,9 @@ template <typename T>
 struct PtrToArg<Ref<T>> {
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
 		GDExtensionRefPtr ref = (GDExtensionRefPtr)p_ptr;
-		ERR_FAIL_NULL_V(p_ptr, Ref<T>());
+		if (unlikely(!p_ptr)) {
+			return Ref<T>();
+		}
 		return Ref<T>(reinterpret_cast<T *>(godot::internal::get_object_instance_binding(godot::internal::gdextension_interface_ref_get_object(ref))));
 	}
 
@@ -254,7 +256,9 @@ struct PtrToArg<const Ref<T> &> {
 
 	_FORCE_INLINE_ static Ref<T> convert(const void *p_ptr) {
 		GDExtensionRefPtr ref = const_cast<GDExtensionRefPtr>(p_ptr);
-		ERR_FAIL_NULL_V(p_ptr, Ref<T>());
+		if (unlikely(!p_ptr)) {
+			return Ref<T>();
+		}
 		return Ref<T>(reinterpret_cast<T *>(godot::internal::get_object_instance_binding(godot::internal::gdextension_interface_ref_get_object(ref))));
 	}
 };
