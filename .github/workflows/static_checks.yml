@@ -1,8 +1,9 @@
 name: 📊 Static Checks
-on: [push, pull_request]
+on:
+  workflow_call:
 
 concurrency:
-  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-static
+  group: ci-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}-static
   cancel-in-progress: true
 
 jobs:
@@ -31,3 +32,7 @@ jobs:
         uses: pre-commit/action@v3.0.1
         with:
           extra_args: --verbose --hook-stage manual --files ${{ env.CHANGED_FILES }}
+
+      - name: Check generated files consistency
+        run:
+          python misc/scripts/check_get_file_list.py

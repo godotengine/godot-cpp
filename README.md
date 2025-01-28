@@ -71,8 +71,7 @@ wish to help out, ensure you have an account on GitHub and create a "fork" of
 this repository. See [Pull request workflow](https://docs.godotengine.org/en/stable/community/contributing/pr_workflow.html)
 for instructions.
 
-Please install clang-format and copy the files in `misc/hooks` into `.git/hooks`
-so formatting is done before your changes are submitted.
+Please install clang-format and the [pre-commit](https://pre-commit.com/) Python framework so formatting is done before your changes are submitted. See the [code style guidelines](https://docs.godotengine.org/en/latest/contributing/development/code_style_guidelines.html#pre-commit-hook) for instructions.
 
 ## Getting started
 
