@@ -280,7 +280,7 @@ function( godotcpp_generate )
         set( TARGET_NAME "godot-cpp.${TARGET_ALIAS}" )
 
         # Generator Expressions that rely on the target
-        set( DEBUG_FEATURES "$<NOT:$<STREQUAL:${TARGET_NAME},template_release>>" )
+        set( DEBUG_FEATURES "$<NOT:$<STREQUAL:${TARGET_ALIAS},template_release>>" )
         set( HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},${DEBUG_FEATURES},$<BOOL:${GODOT_USE_HOT_RELOAD}>>" )
 
         # the godot-cpp.* library targets
