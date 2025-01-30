@@ -37,6 +37,8 @@ that dependent targets rely on it, and point them to these comments as to why.
 .. https://discourse.cmake.org/t/mt-staticrelease-doesnt-match-value-md-dynamicrelease/5428/4
 
 ]=======================================================================]
+
+# FIXME INVALID LOGIC: consumers may also have not called project() yet.
 if( PROJECT_NAME ) # we are not the top level if this is true
     if( DEFINED CMAKE_MSVC_RUNTIME_LIBRARY )
         # Warning that we are clobbering the variable.
@@ -55,6 +57,20 @@ function( windows_options )
 
     option( GODOT_DEBUG_CRT "Compile with MSVC's debug CRT (/MDd)" OFF )
 
+    # NOT PLANNED:  silence_msvc : Silence MSVC's cl/link stdout bloat, redirecting errors to stderr. Default = True
+
+    #[[ The options present in the SCons build shown below are managed by
+    toolchain files, further information can be found in doc/cmake.rst
+
+    use_mingw : Use the MinGW compiler instead of MSVC
+        Default = False
+
+    mingw_prefix : MinGW prefix
+        Default = os.getenv("MINGW_PREFIX", "")
+
+    use_llvm : Use the LLVM compiler
+        Default = False
+    ]]
 endfunction()
 
 #[===========================[ Target Generation ]===========================]

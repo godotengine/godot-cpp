@@ -27,11 +27,11 @@ if( EMSCRIPTEN )
     set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
     set(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-sSIDE_MODULE=1")
     set(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-sSIDE_MODULE=1")
-    set(CMAKE_SHARED_LIBRARY_SUFFIX) # remove the suffix from the shared lib
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".wasm") # SCons uses .wasm as a suffix
     set(CMAKE_STRIP FALSE)  # used by default in pybind11 on .so modules
 
     # The Emscripten toolchain sets the default value for EMSCRIPTEN_SYSTEM_PROCESSOR to x86
-    # and CMAKE_SYSTEM_PROCESSOR to this value. I don't want that.
+    # and copies that to CMAKE_SYSTEM_PROCESSOR. We dont want that.
     set(CMAKE_SYSTEM_PROCESSOR "wasm32" )
     # the above prevents the need for logic like:
     #if( ${CMAKE_SYSTEM_NAME} STREQUAL Emscripten )

@@ -20,6 +20,12 @@ foreach( TARGET_ALIAS template_debug template_release editor )
     set( TARGET_NAME "godot-cpp.test.${TARGET_ALIAS}" )
     set( LINK_TARGET "godot-cpp::${TARGET_ALIAS}" )
 
+    ### Get useful properties of the library
+    get_target_property( GODOT_SUFFIX   ${LINK_TARGET} GODOT_SUFFIX      )
+    get_target_property( OSX_ARCH       ${LINK_TARGET} OSX_ARCHITECTURES )
+
+    set( OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/" )
+
     add_library( ${TARGET_NAME} SHARED EXCLUDE_FROM_ALL )
 
     target_sources( ${TARGET_NAME}
@@ -38,21 +44,13 @@ foreach( TARGET_ALIAS template_debug template_release editor )
 
     target_link_libraries( ${TARGET_NAME} PRIVATE ${LINK_TARGET} )
 
-    ### Get useful properties of the library
-    get_target_property( GODOT_PLATFORM ${LINK_TARGET} GODOT_PLATFORM   )
-    get_target_property( GODOT_TARGET   ${LINK_TARGET} GODOT_TARGET     )
-    get_target_property( GODOT_ARCH     ${LINK_TARGET} GODOT_ARCH       )
-
-    set( OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/" )
-    set( DEV_TAG "$<$<BOOL:${GODOT_DEV_BUILD}>:.dev>" )
-
     set_target_properties( ${TARGET_NAME}
             PROPERTIES
             CXX_STANDARD 17
             CXX_EXTENSIONS OFF
             CXX_VISIBILITY_PRESET ${GODOT_SYMBOL_VISIBILITY}
 
-            POSITION_INDEPENDENT_CODE ON
+            # This flag adds the runtime path at build time
             BUILD_RPATH_USE_ORIGIN ON
 
             # Try to ensure only static libraries are selected to be linked to.
@@ -66,28 +64,33 @@ foreach( TARGET_ALIAS template_debug template_release editor )
             PDB_OUTPUT_DIRECTORY     "$<1:${OUTPUT_DIR}>" #MSVC Only, ignored on other platforms
 
             PREFIX "lib"
-            OUTPUT_NAME "gdexample.${GODOT_PLATFORM}.${GODOT_TARGET}${DEV_TAG}.${GODOT_ARCH}"
+            OUTPUT_NAME "gdexample${GODOT_SUFFIX}"
+
+            #macos options, ignored on other platforms
+            OSX_ARCHITECTURES "${OSX_ARCH}"
+
+            # enable RPATH on MACOS, with the BUILD_RPATH_USE_ORIGIN
+            # this should allow loading libraries from relative paths on macos.
+            MACOSX_RPATH ON
 
             # Some IDE's respect this property to logically group targets
             FOLDER "godot-cpp"
     )
 
-    # CMAKE_SYSTEM_NAME refers to the target system
+    target_compile_options(  ${TARGET_NAME}
+            PRIVATE
+            # The test project uses utf-8 characters in its source files:
+            # example.h:282.283, and example.cpp:774,8775,778
+            # which require interpretation of source files as utf-8 by MSVC
+            $<${IS_MSVC}:/utf-8>
+    )
+
+    # Only blank the suffix on osx to match SCons
     if( CMAKE_SYSTEM_NAME STREQUAL Darwin )
-        get_target_property( OSX_ARCH ${LINK_TARGET} OSX_ARCHITECTURES )
-
-        set( OUTPUT_DIR "${OUTPUT_DIR}/libgdexample.macos.${TEST_TARGET}.framework")
-
         set_target_properties( ${TARGET_NAME}
                 PROPERTIES
-                LIBRARY_OUTPUT_DIRECTORY "$<1:${OUTPUT_DIR}>"
-                RUNTIME_OUTPUT_DIRECTORY "$<1:${OUTPUT_DIR}>"
-
-                OUTPUT_NAME "gdexample.macos.${TARGET_ALIAS}${DEV_TAG}"
                 SUFFIX ""
-
-                #macos options
-                OSX_ARCHITECTURES "${OSX_ARCH}"
+                OUTPUT_DIR "${OUTPUT_DIR}/libgdexample.macos.${TARGET_ALIAS}.framework"
         )
     endif ()
 
