@@ -107,7 +107,8 @@ function( godotcpp_options )
     set( GODOT_ARCH "" CACHE STRING "Target CPU Architecture")
     set_property( CACHE GODOT_ARCH PROPERTY STRINGS ${ARCH_LIST} )
 
-    #TODO threads
+    set( GODOT_THREADS ON CACHE BOOL "Enable threading support" )
+
     #TODO compiledb
     #TODO compiledb_file
 
@@ -240,16 +241,15 @@ function( godotcpp_generate )
 
     ### Platform is derived from the toolchain target
     # See GeneratorExpressions PLATFORM_ID and CMAKE_SYSTEM_NAME
-    set( SYSTEM_NAME
-            $<$<PLATFORM_ID:Android>:android>
-            $<$<PLATFORM_ID:iOS>:ios>
-            $<$<PLATFORM_ID:Linux>:linux>
-            $<$<PLATFORM_ID:Darwin>:macos>
-            $<$<PLATFORM_ID:Emscripten>:web>
-            $<$<PLATFORM_ID:Windows>:windows>
-            $<$<PLATFORM_ID:Msys>:windows>
+    string( CONCAT SYSTEM_NAME
+            "$<$<PLATFORM_ID:Android>:android.${ANDROID_ABI}>"
+            "$<$<PLATFORM_ID:iOS>:ios>"
+            "$<$<PLATFORM_ID:Linux>:linux>"
+            "$<$<PLATFORM_ID:Darwin>:macos>"
+            "$<$<PLATFORM_ID:Emscripten>:web>"
+            "$<$<PLATFORM_ID:Windows>:windows>"
+            "$<$<PLATFORM_ID:Msys>:windows>"
     )
-    string(REPLACE ";" "" SYSTEM_NAME "${SYSTEM_NAME}")
 
     ### Use the arch from the toolchain if it isn't set manually
     if( GODOT_ARCH )
@@ -263,6 +263,8 @@ function( godotcpp_generate )
 
     set( DISABLE_EXCEPTIONS "$<BOOL:${GODOT_DISABLE_EXCEPTIONS}>")
 
+    set( THREADS_ENABLED "$<BOOL:${GODOT_THREADS}>" )
+
     # GODOT_DEV_BUILD
     set( RELEASE_TYPES "Release;MinSizeRel")
     get_property( IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG )
@@ -272,8 +274,6 @@ function( godotcpp_generate )
         message( WARNING "=> GODOT_DEV_BUILD implies a Debug-like build but CMAKE_BUILD_TYPE is '${CMAKE_BUILD_TYPE}'")
     endif ()
     set( IS_DEV_BUILD "$<BOOL:${GODOT_DEV_BUILD}>")
-    # The .dev portion of the name if GODOT_DEV_BUILD is true.
-    set( DEV_TAG "$<${IS_DEV_BUILD}:.dev>" )
 
     ### Define our godot-cpp library targets
     foreach ( TARGET_ALIAS template_debug template_release editor )
@@ -282,6 +282,17 @@ function( godotcpp_generate )
         # Generator Expressions that rely on the target
         set( DEBUG_FEATURES "$<NOT:$<STREQUAL:${TARGET_ALIAS},template_release>>" )
         set( HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},${DEBUG_FEATURES},$<BOOL:${GODOT_USE_HOT_RELOAD}>>" )
+
+        # Suffix
+        string( CONCAT GODOT_SUFFIX
+                "$<1:.${SYSTEM_NAME}>"
+                "$<1:.${TARGET_ALIAS}>"
+                "$<${IS_DEV_BUILD}:.dev>"
+                "$<$<STREQUAL:${GODOT_PRECISION},double>:.double>"
+                "$<1:.${SYSTEM_ARCH}>"
+                # TODO IOS_SIMULATOR
+                "$<$<NOT:${THREADS_ENABLED}>:.nothreads>"
+        )
 
         # the godot-cpp.* library targets
         add_library( ${TARGET_NAME} STATIC EXCLUDE_FROM_ALL )
@@ -311,14 +322,17 @@ function( godotcpp_generate )
                 POSITION_INDEPENDENT_CODE ON
                 BUILD_RPATH_USE_ORIGIN ON
 
-                PREFIX lib
-                OUTPUT_NAME "${PROJECT_NAME}.${SYSTEM_NAME}.${TARGET_ALIAS}${DEV_TAG}.${SYSTEM_ARCH}"
+                PREFIX      "lib"
+                OUTPUT_NAME "${PROJECT_NAME}${GODOT_SUFFIX}"
+
                 ARCHIVE_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>"
 
                 # Things that are handy to know for dependent targets
-                GODOT_PLATFORM "${SYSTEM_NAME}"
-                GODOT_TARGET "${TARGET_ALIAS}"
-                GODOT_ARCH "${SYSTEM_ARCH}"
+                GODOT_PLATFORM  "${SYSTEM_NAME}"
+                GODOT_TARGET    "${TARGET_ALIAS}"
+                GODOT_ARCH      "${SYSTEM_ARCH}"
+                GODOT_PRECISION "${GODOT_PRECISION}"
+                GODOT_SUFFIX    "${GODOT_SUFFIX}"
 
                 # Some IDE's respect this property to logically group targets
                 FOLDER "godot-cpp"

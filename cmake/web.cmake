@@ -27,6 +27,7 @@ function( web_generate )
             -sSIDE_MODULE
             -sSUPPORT_LONGJMP=wasm
             -fno-exceptions
+            $<${THREADS_ENABLED}:-sUSE_PTHREADS=1>
     )
 
     target_link_options( ${TARGET_NAME}
