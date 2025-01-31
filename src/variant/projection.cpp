@@ -253,11 +253,11 @@ Projection Projection ::jitter_offseted(const Vector2 &p_offset) const {
 
 void Projection::set_perspective(real_t p_fovy_degrees, real_t p_aspect, real_t p_z_near, real_t p_z_far, bool p_flip_fov) {
 	if (p_flip_fov) {
-		p_fovy_degrees = get_fovy(p_fovy_degrees, 1.0 / p_aspect);
+		p_fovy_degrees = get_fovy(p_fovy_degrees, 1.0f / p_aspect);
 	}
 
 	real_t sine, cotangent, deltaZ;
-	real_t radians = Math::deg_to_rad(p_fovy_degrees / 2.0);
+	real_t radians = Math::deg_to_rad(p_fovy_degrees / 2.0f);
 
 	deltaZ = p_z_far - p_z_near;
 	sine = Math::sin(radians);
@@ -279,30 +279,30 @@ void Projection::set_perspective(real_t p_fovy_degrees, real_t p_aspect, real_t 
 
 void Projection::set_perspective(real_t p_fovy_degrees, real_t p_aspect, real_t p_z_near, real_t p_z_far, bool p_flip_fov, int p_eye, real_t p_intraocular_dist, real_t p_convergence_dist) {
 	if (p_flip_fov) {
-		p_fovy_degrees = get_fovy(p_fovy_degrees, 1.0 / p_aspect);
+		p_fovy_degrees = get_fovy(p_fovy_degrees, 1.0f / p_aspect);
 	}
 
 	real_t left, right, modeltranslation, ymax, xmax, frustumshift;
 
-	ymax = p_z_near * tan(Math::deg_to_rad(p_fovy_degrees / 2.0));
+	ymax = p_z_near * Math::tan(Math::deg_to_rad(p_fovy_degrees / 2.0f));
 	xmax = ymax * p_aspect;
-	frustumshift = (p_intraocular_dist / 2.0) * p_z_near / p_convergence_dist;
+	frustumshift = (p_intraocular_dist / 2.0f) * p_z_near / p_convergence_dist;
 
 	switch (p_eye) {
 		case 1: { // left eye
 			left = -xmax + frustumshift;
 			right = xmax + frustumshift;
-			modeltranslation = p_intraocular_dist / 2.0;
+			modeltranslation = p_intraocular_dist / 2.0f;
 		} break;
 		case 2: { // right eye
 			left = -xmax - frustumshift;
 			right = xmax - frustumshift;
-			modeltranslation = -p_intraocular_dist / 2.0;
+			modeltranslation = -p_intraocular_dist / 2.0f;
 		} break;
 		default: { // mono, should give the same result as set_perspective(p_fovy_degrees,p_aspect,p_z_near,p_z_far,p_flip_fov)
 			left = -xmax;
 			right = xmax;
-			modeltranslation = 0.0;
+			modeltranslation = 0.0f;
 		} break;
 	}
 
@@ -317,13 +317,13 @@ void Projection::set_perspective(real_t p_fovy_degrees, real_t p_aspect, real_t 
 
 void Projection::set_for_hmd(int p_eye, real_t p_aspect, real_t p_intraocular_dist, real_t p_display_width, real_t p_display_to_lens, real_t p_oversample, real_t p_z_near, real_t p_z_far) {
 	// we first calculate our base frustum on our values without taking our lens magnification into account.
-	real_t f1 = (p_intraocular_dist * 0.5) / p_display_to_lens;
-	real_t f2 = ((p_display_width - p_intraocular_dist) * 0.5) / p_display_to_lens;
-	real_t f3 = (p_display_width / 4.0) / p_display_to_lens;
+	real_t f1 = (p_intraocular_dist * 0.5f) / p_display_to_lens;
+	real_t f2 = ((p_display_width - p_intraocular_dist) * 0.5f) / p_display_to_lens;
+	real_t f3 = (p_display_width / 4.0f) / p_display_to_lens;
 
 	// now we apply our oversample factor to increase our FOV. how much we oversample is always a balance we strike between performance and how much
 	// we're willing to sacrifice in FOV.
-	real_t add = ((f1 + f2) * (p_oversample - 1.0)) / 2.0;
+	real_t add = ((f1 + f2) * (p_oversample - 1.0f)) / 2.0f;
 	f1 += add;
 	f2 += add;
 	f3 *= p_oversample;
@@ -346,13 +346,13 @@ void Projection::set_for_hmd(int p_eye, real_t p_aspect, real_t p_intraocular_di
 void Projection::set_orthogonal(real_t p_left, real_t p_right, real_t p_bottom, real_t p_top, real_t p_znear, real_t p_zfar) {
 	set_identity();
 
-	columns[0][0] = 2.0 / (p_right - p_left);
+	columns[0][0] = 2.0f / (p_right - p_left);
 	columns[3][0] = -((p_right + p_left) / (p_right - p_left));
-	columns[1][1] = 2.0 / (p_top - p_bottom);
+	columns[1][1] = 2.0f / (p_top - p_bottom);
 	columns[3][1] = -((p_top + p_bottom) / (p_top - p_bottom));
-	columns[2][2] = -2.0 / (p_zfar - p_znear);
+	columns[2][2] = -2.0f / (p_zfar - p_znear);
 	columns[3][2] = -((p_zfar + p_znear) / (p_zfar - p_znear));
-	columns[3][3] = 1.0;
+	columns[3][3] = 1.0f;
 }
 
 void Projection::set_orthogonal(real_t p_size, real_t p_aspect, real_t p_znear, real_t p_zfar, bool p_flip_fov) {
@@ -670,7 +670,7 @@ void Projection::invert() {
 		}
 
 		/** Replace pivot by reciprocal (at last we can touch it). **/
-		columns[k][k] = 1.0 / pvt_val;
+		columns[k][k] = 1.0f / pvt_val;
 	}
 
 	/* That was most of the work, one final pass of row/column interchange */
@@ -804,11 +804,11 @@ real_t Projection::get_aspect() const {
 int Projection::get_pixels_per_meter(int p_for_pixel_width) const {
 	Vector3 result = xform(Vector3(1, 0, -1));
 
-	return int((result.x * 0.5 + 0.5) * p_for_pixel_width);
+	return int((result.x * 0.5f + 0.5f) * p_for_pixel_width);
 }
 
 bool Projection::is_orthogonal() const {
-	return columns[3][3] == 1.0;
+	return columns[3][3] == 1.0f;
 }
 
 real_t Projection::get_fov() const {
@@ -821,7 +821,7 @@ real_t Projection::get_fov() const {
 	right_plane.normalize();
 
 	if ((matrix[8] == 0) && (matrix[9] == 0)) {
-		return Math::rad_to_deg(Math::acos(Math::abs(right_plane.normal.x))) * 2.0;
+		return Math::rad_to_deg(Math::acos(Math::abs(right_plane.normal.x))) * 2.0f;
 	} else {
 		// our frustum is asymmetrical need to calculate the left planes angle separately..
 		Plane left_plane = Plane(matrix[3] + matrix[0],
@@ -839,8 +839,8 @@ float Projection::get_lod_multiplier() const {
 		return get_viewport_half_extents().x;
 	} else {
 		float zn = get_z_near();
-		float width = get_viewport_half_extents().x * 2.0;
-		return 1.0 / (zn / width);
+		float width = get_viewport_half_extents().x * 2.0f;
+		return 1.0f / (zn / width);
 	}
 
 	// Usage is lod_size / (lod_distance * multiplier) < threshold
