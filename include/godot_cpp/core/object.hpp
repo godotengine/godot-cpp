@@ -119,6 +119,11 @@ public:
 		}
 		return internal::get_object_instance_binding(obj);
 	}
+
+	template <typename T>
+	static T *get_instance(uint64_t p_object_id) {
+		return Object::cast_to<T>(ObjectDB::get_instance(p_object_id));
+	}
 };
 
 template <typename T>
