@@ -155,6 +155,8 @@ function( common_compiler_flags )
             $<$<STREQUAL:${GODOT_PRECISION},double>:REAL_T_IS_DOUBLE>
 
             $<${IS_MSVC}:$<${DISABLE_EXCEPTIONS}:_HAS_EXCEPTIONS=0>>
+
+            $<${THREADS_ENABLED}:THREADS_ENABLED>
     )
 
     target_link_options( ${TARGET_NAME}

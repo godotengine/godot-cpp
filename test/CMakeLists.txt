@@ -18,7 +18,6 @@ generate_doc_source( "${DOC_DATA_SOURCE}" "${DOC_XML}" )
 
 foreach( TARGET_ALIAS template_debug template_release editor )
     set( TARGET_NAME "godot-cpp.test.${TARGET_ALIAS}" )
-    set( LINK_TARGET "godot-cpp::${TARGET_ALIAS}" )
 
     add_library( ${TARGET_NAME} SHARED EXCLUDE_FROM_ALL )
 
@@ -31,20 +30,20 @@ foreach( TARGET_ALIAS template_debug template_release editor )
             src/tests.h
     )
 
+    set( OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/" )
+
     # conditionally add doc data to compile output
     if( TARGET_ALIAS MATCHES "editor|template_debug" )
         target_sources( ${TARGET_NAME} PRIVATE "${DOC_DATA_SOURCE}" )
-    endif(   )
+    endif()
 
+    # Link to godot-cpp target
+    set( LINK_TARGET "godot-cpp::${TARGET_ALIAS}" )
     target_link_libraries( ${TARGET_NAME} PRIVATE ${LINK_TARGET} )
 
-    ### Get useful properties of the library
-    get_target_property( GODOT_PLATFORM ${LINK_TARGET} GODOT_PLATFORM   )
-    get_target_property( GODOT_TARGET   ${LINK_TARGET} GODOT_TARGET     )
-    get_target_property( GODOT_ARCH     ${LINK_TARGET} GODOT_ARCH       )
-
-    set( OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/" )
-    set( DEV_TAG "$<$<BOOL:${GODOT_DEV_BUILD}>:.dev>" )
+    ### Get useful properties from godot-cpp target
+    get_target_property( GODOT_SUFFIX   ${LINK_TARGET} GODOT_SUFFIX      )
+    get_target_property( OSX_ARCH       ${LINK_TARGET} OSX_ARCHITECTURES )
 
     set_target_properties( ${TARGET_NAME}
             PROPERTIES
@@ -66,7 +65,7 @@ foreach( TARGET_ALIAS template_debug template_release editor )
             PDB_OUTPUT_DIRECTORY     "$<1:${OUTPUT_DIR}>" #MSVC Only, ignored on other platforms
 
             PREFIX "lib"
-            OUTPUT_NAME "gdexample.${GODOT_PLATFORM}.${GODOT_TARGET}${DEV_TAG}.${GODOT_ARCH}"
+            OUTPUT_NAME "gdexample${GODOT_SUFFIX}"
 
             # Some IDE's respect this property to logically group targets
             FOLDER "godot-cpp"
@@ -74,21 +73,12 @@ foreach( TARGET_ALIAS template_debug template_release editor )
 
     # CMAKE_SYSTEM_NAME refers to the target system
     if( CMAKE_SYSTEM_NAME STREQUAL Darwin )
-        get_target_property( OSX_ARCH ${LINK_TARGET} OSX_ARCHITECTURES )
-
-        set( OUTPUT_DIR "${OUTPUT_DIR}/libgdexample.macos.${TEST_TARGET}.framework")
-
         set_target_properties( ${TARGET_NAME}
                 PROPERTIES
-                LIBRARY_OUTPUT_DIRECTORY "$<1:${OUTPUT_DIR}>"
-                RUNTIME_OUTPUT_DIRECTORY "$<1:${OUTPUT_DIR}>"
-
-                OUTPUT_NAME "gdexample.macos.${TARGET_ALIAS}${DEV_TAG}"
                 SUFFIX ""
-
-                #macos options
+                OUTPUT_DIR "${OUTPUT_DIR}/libgdexample.macos.${TARGET_ALIAS}.framework"
                 OSX_ARCHITECTURES "${OSX_ARCH}"
         )
-    endif ()
+    endif()
 
 endforeach()
