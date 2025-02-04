@@ -25,16 +25,12 @@ Android platforms.
 There is further information and examples in the doc/cmake.rst file.
 
 ]=======================================================================]
-function( android_options )
+function(android_options)
     # Android Options
 endfunction()
 
-function( android_generate )
-    target_compile_definitions(${TARGET_NAME}
-            PUBLIC
-            ANDROID_ENABLED
-            UNIX_ENABLED
-    )
+function(android_generate)
+    target_compile_definitions(${TARGET_NAME} PUBLIC ANDROID_ENABLED UNIX_ENABLED)
 
     common_compiler_flags()
 endfunction()
