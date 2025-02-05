@@ -165,7 +165,7 @@ function( godotcpp_options )
     endif()
     # parent scoping GODOT_TARGETS
     set(GODOT_TARGETS ${GODOT_TARGETS} PARENT_SCOPE)
-    
+
     #[[ Target Platform Options ]]
     android_options()
     ios_options()
