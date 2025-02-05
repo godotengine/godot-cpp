@@ -161,7 +161,7 @@ function( godotcpp_options )
         list(APPEND GODOT_TARGETS "editor")
     endif()
     if(NOT GODOT_TARGETS)
-        message(FATAL_ERROR "No targets were chosen to be build.See GODOT_ADD_TARGET_* variables: at least one of the should be ON")
+        message(FATAL_ERROR "No targets were chosen to be built. See GODOT_ADD_TARGET_* variables: at least one of the should be ON")
     endif()
     # parent scoping GODOT_TARGETS
     set(GODOT_TARGETS ${GODOT_TARGETS} PARENT_SCOPE)
