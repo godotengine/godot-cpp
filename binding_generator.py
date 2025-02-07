@@ -290,7 +290,7 @@ def _generate_bindings(api, api_filepath, use_template_get_node, bits="64", prec
     target_dir = Path(output_dir) / "gen"
 
     shutil.rmtree(target_dir, ignore_errors=True)
-    target_dir.mkdir(parents=True)
+    target_dir.mkdir(parents=True, exist_ok=True)
 
     real_t = "double" if precision == "double" else "float"
     print("Built-in type config: " + real_t + "_" + bits)
