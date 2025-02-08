@@ -137,7 +137,7 @@ Quaternion Quaternion::slerp(const Quaternion &p_to, real_t p_weight) const {
 		// standard case (slerp)
 		omega = Math::acos(cosom);
 		sinom = Math::sin(omega);
-		scale0 = Math::sin((1.0 - p_weight) * omega) / sinom;
+		scale0 = Math::sin((1.0f - p_weight) * omega) / sinom;
 		scale1 = Math::sin(p_weight * omega) / sinom;
 	} else {
 		// "from" and "to" quaternions are very close
