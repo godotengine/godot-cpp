@@ -16,7 +16,7 @@ file( GLOB_RECURSE DOC_XML
 set( DOC_DATA_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/src/gen/doc_data.gen.cpp" )
 generate_doc_source( "${DOC_DATA_SOURCE}" "${DOC_XML}" )
 
-foreach( TARGET_ALIAS template_debug template_release editor )
+foreach( TARGET_ALIAS ${GODOT_TARGETS} )
     set( TARGET_NAME "godot-cpp.test.${TARGET_ALIAS}" )
 
     add_library( ${TARGET_NAME} SHARED EXCLUDE_FROM_ALL )
