@@ -41,9 +41,6 @@ include( cmake/godotcpp.cmake )
 
 godotcpp_options()
 
-#[[ Python is required for code generation ]]
-find_package(Python3 3.4 REQUIRED) # pathlib should be present
-
 # Define our project.
 project( godot-cpp
         VERSION 4.4
