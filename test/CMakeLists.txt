@@ -13,9 +13,6 @@ file( GLOB_RECURSE DOC_XML
     CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/doc_classes/*.xml" )
 
-set( DOC_DATA_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/src/gen/doc_data.gen.cpp" )
-generate_doc_source( "${DOC_DATA_SOURCE}" "${DOC_XML}" )
-
 foreach( TARGET_ALIAS template_debug template_release editor )
     set( TARGET_NAME "godot-cpp.test.${TARGET_ALIAS}" )
 
@@ -30,12 +27,12 @@ foreach( TARGET_ALIAS template_debug template_release editor )
             src/tests.h
     )
 
-    set( OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/" )
-
     # conditionally add doc data to compile output
     if( TARGET_ALIAS MATCHES "editor|template_debug" )
-        target_sources( ${TARGET_NAME} PRIVATE "${DOC_DATA_SOURCE}" )
+        target_doc_sources( ${TARGET_NAME} ${DOC_XML} )
     endif()
+
+    set( OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/" )
 
     # Link to godot-cpp target
     set( LINK_TARGET "godot-cpp::${TARGET_ALIAS}" )

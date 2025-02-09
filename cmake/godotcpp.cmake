@@ -23,6 +23,7 @@ project directive, it means that
   directive was
 
 ]=======================================================================]
+include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/GodotCPPModule.cmake)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/common_compiler_flags.cmake)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/android.cmake)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ios.cmake)
@@ -30,7 +31,7 @@ include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/linux.cmake)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/macos.cmake)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/web.cmake)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/windows.cmake)
-include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/python_callouts.cmake)
+
 
 # Detect number of processors
 include(ProcessorCount)
