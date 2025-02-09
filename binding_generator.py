@@ -2477,7 +2477,7 @@ def make_varargs_template(
     function_signature += " {"
     result.append(function_signature)
 
-    args_array = f"\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args{{ "
+    args_array = f"\tstd::array<Variant, {len(method_arguments)} + sizeof...(Args)> variant_args{{{{ "
     for argument in method_arguments:
         if argument["type"] == "Variant":
             args_array += escape_argument(argument["name"])
@@ -2485,7 +2485,7 @@ def make_varargs_template(
             args_array += f'Variant({escape_argument(argument["name"])})'
         args_array += ", "
 
-    args_array += "Variant(p_args)... };"
+    args_array += "Variant(p_args)... }};"
     result.append(args_array)
     result.append(f"\tstd::array<const Variant *, {len(method_arguments)} + sizeof...(Args)> call_args;")
     result.append("\tfor (size_t i = 0; i < variant_args.size(); i++) {")
