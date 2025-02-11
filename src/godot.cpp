@@ -526,6 +526,17 @@ void GDExtensionBinding::initialize_level(void *p_userdata, GDExtensionInitializ
 			doc_data.load_data();
 		}
 	}
+
+#ifdef DEV_ENABLED
+	if ((ModuleInitializationLevel)p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
+		callable_mp_static(+[]() {
+			String library_path;
+			internal::gdextension_interface_get_library_path(internal::library, library_path._native_ptr());
+
+			WARN_PRINT("GDExtension loaded from a development build: " + library_path);
+		}).call_deferred();
+	}
+#endif
 }
 
 void GDExtensionBinding::deinitialize_level(void *p_userdata, GDExtensionInitializationLevel p_level) {
