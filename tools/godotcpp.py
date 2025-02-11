@@ -485,8 +485,6 @@ def generate(env):
 
     # Suffix
     suffix = ".{}.{}".format(env["platform"], env["target"])
-    if env.dev_build:
-        suffix += ".dev"
     if env["precision"] == "double":
         suffix += ".double"
     suffix += "." + env["arch"]
