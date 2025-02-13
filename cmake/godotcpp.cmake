@@ -41,50 +41,67 @@ message( "Auto-detected ${PROC_MAX} CPU cores available for build parallelism." 
 set( PLATFORM_LIST linux macos windows android ios web )
 
 # List of known architectures
-set( ARCH_LIST universal x86_32 x86_64 arm32 arm64 rv64 ppc32 ppc64 wasm32 )
+set( ARCH_LIST x86_32 x86_64 arm32 arm64 rv64 ppc32 ppc64 wasm32 )
 
 # Function to map processors to known architectures
-function( godot_arch_map ALIAS PROC )
-    string( TOLOWER "${PROC}" PROC )
+function( godot_arch_name OUTVAR )
 
-    if( "${PROC}" IN_LIST ARCH_LIST )
-        set( ${ALIAS} "${PROC}" PARENT_SCOPE)
+    # Special case for macos universal builds that target both x86_64 and arm64
+    if( DEFINED CMAKE_OSX_ARCHITECTURES)
+        if( "x86_64" IN_LIST CMAKE_OSX_ARCHITECTURES AND "arm64" IN_LIST CMAKE_OSX_ARCHITECTURES)
+            set(${OUTVAR} "universal" PARENT_SCOPE )
+            return()
+        endif()
+    endif()
+
+    # Direct match early out.
+    string( TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" ARCH )
+    if( ARCH IN_LIST ARCH_LIST )
+        set( ${OUTVAR} "${ARCH}" PARENT_SCOPE)
         return()
     endif()
 
-    set( x86_64 "w64;amd64" )
-    set( arm32  "armv7" )
-    set( arm64  "armv8;arm64v8;aarch64" )
+    # Known aliases
+    set( x86_64 "w64;amd64;x86-64" )
+    set( arm32  "armv7;armv7-a" )
+    set( arm64  "armv8;arm64v8;aarch64;armv8-a" )
     set( rv64   "rv;riscv;riscv64" )
     set( ppc32  "ppcle;ppc" )
     set( ppc64  "ppc64le" )
 
-    if( PROC IN_LIST x86_64  )
-        set(${ALIAS} "x86_64" PARENT_SCOPE )
+    if( ARCH IN_LIST x86_64  )
+        set(${OUTVAR} "x86_64" PARENT_SCOPE )
 
-    elseif( PROC IN_LIST arm32 )
-        set(${ALIAS} "arm32" PARENT_SCOPE )
+    elseif( ARCH IN_LIST arm32 )
+        set(${OUTVAR} "arm32" PARENT_SCOPE )
 
-    elseif( PROC IN_LIST arm64 )
-        set(${ALIAS} "arm64" PARENT_SCOPE )
+    elseif( ARCH IN_LIST arm64 )
+        set(${OUTVAR} "arm64" PARENT_SCOPE )
 
-    elseif( PROC IN_LIST rv64 )
-        set(${ALIAS} "rv64" PARENT_SCOPE )
+    elseif( ARCH IN_LIST rv64 )
+        set(${OUTVAR} "rv64" PARENT_SCOPE )
 
-    elseif( PROC IN_LIST ppc32 )
-        set(${ALIAS} "ppc32" PARENT_SCOPE )
+    elseif( ARCH IN_LIST ppc32 )
+        set(${OUTVAR} "ppc32" PARENT_SCOPE )
 
-    elseif( PROC IN_LIST ppc64 )
-        set(${ALIAS} "ppc64" PARENT_SCOPE )
+    elseif( ARCH IN_LIST ppc64 )
+        set(${OUTVAR} "ppc64" PARENT_SCOPE )
+
+    elseif( ARCH MATCHES "86")
+        # Catches x86, i386, i486, i586, i686, etc.
+        set(${OUTVAR} "x86_32" PARENT_SCOPE )
 
     else()
-        set(${ALIAS} "unknown" PARENT_SCOPE )
+        # Default value is whatever the processor is.
+        set(${OUTVAR} ${CMAKE_SYSTEM_PROCESSOR} PARENT_SCOPE )
     endif ()
 endfunction()
 
 # Function to define all the options.
 function( godotcpp_options )
     #NOTE: platform is managed using toolchain files.
+    #NOTE: arch is managed by using toolchain files.
+    # Except for macos universal, which can be set by GODOT_MACOS_UNIVERSAL=YES
 
     # Input from user for GDExtension interface header and the API JSON file
     set(GODOT_GDEXTENSION_DIR "gdextension" CACHE PATH
@@ -101,11 +118,6 @@ function( godotcpp_options )
 
     set(GODOT_PRECISION "single" CACHE STRING
             "Set the floating-point precision level (single|double)")
-
-    # The arch is typically set by the toolchain
-    # however for Apple multi-arch setting it here will override.
-    set( GODOT_ARCH "" CACHE STRING "Target CPU Architecture")
-    set_property( CACHE GODOT_ARCH PROPERTY STRINGS ${ARCH_LIST} )
 
     set( GODOT_THREADS ON CACHE BOOL "Enable threading support" )
 
@@ -251,12 +263,8 @@ function( godotcpp_generate )
             "$<$<PLATFORM_ID:Msys>:windows>"
     )
 
-    ### Use the arch from the toolchain if it isn't set manually
-    if( GODOT_ARCH )
-        set(SYSTEM_ARCH ${GODOT_ARCH})
-    else()
-        godot_arch_map( SYSTEM_ARCH ${CMAKE_SYSTEM_PROCESSOR} )
-    endif()
+    # Process CPU architecture argument.
+    godot_arch_name( ARCH_NAME )
 
     # Transform options into generator expressions
     set( HOT_RELOAD-UNSET "$<STREQUAL:${GODOT_USE_HOT_RELOAD},>")
@@ -289,7 +297,7 @@ function( godotcpp_generate )
                 "$<1:.${TARGET_ALIAS}>"
                 "$<${IS_DEV_BUILD}:.dev>"
                 "$<$<STREQUAL:${GODOT_PRECISION},double>:.double>"
-                "$<1:.${SYSTEM_ARCH}>"
+                "$<1:.${ARCH_NAME}>"
                 # TODO IOS_SIMULATOR
                 "$<$<NOT:${THREADS_ENABLED}>:.nothreads>"
         )
@@ -330,7 +338,7 @@ function( godotcpp_generate )
                 # Things that are handy to know for dependent targets
                 GODOT_PLATFORM  "${SYSTEM_NAME}"
                 GODOT_TARGET    "${TARGET_ALIAS}"
-                GODOT_ARCH      "${SYSTEM_ARCH}"
+                GODOT_ARCH      "${ARCH_NAME}"
                 GODOT_PRECISION "${GODOT_PRECISION}"
                 GODOT_SUFFIX    "${GODOT_SUFFIX}"
 
