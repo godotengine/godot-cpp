@@ -124,6 +124,9 @@ function( generate_doc_source OUTPUT_PATH SOURCES )
     list( TRANSFORM PYTHON_LIST REPLACE "(.*\.xml)" "'\\1'" )
     list( JOIN PYTHON_LIST "," PYTHON_LIST )
 
+    get_filename_component(OUTPUT_DIR "${OUTPUT_PATH}" DIRECTORY)
+    file(MAKE_DIRECTORY ${OUTPUT_DIR} )
+
     # Python one-liner to run our command
     # lists in CMake are just strings delimited by ';', so this works.
     set( PYTHON_SCRIPT "from doc_source_generator import generate_doc_source"
