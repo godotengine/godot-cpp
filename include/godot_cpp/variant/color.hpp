@@ -37,7 +37,7 @@ namespace godot {
 
 class String;
 
-struct _NO_DISCARD_ Color {
+struct [[nodiscard]] Color {
 	union {
 		struct {
 			float r;

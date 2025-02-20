@@ -44,7 +44,7 @@ struct Rect2;
 struct Transform3D;
 struct Vector2;
 
-struct _NO_DISCARD_ Projection {
+struct [[nodiscard]] Projection {
 	enum Planes {
 		PLANE_NEAR,
 		PLANE_FAR,
