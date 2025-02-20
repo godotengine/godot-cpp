@@ -37,7 +37,7 @@
 
 namespace godot {
 
-struct _NO_DISCARD_ Quaternion {
+struct [[nodiscard]] Quaternion {
 	union {
 		struct {
 			real_t x;
