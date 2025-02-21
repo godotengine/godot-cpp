@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include <godot_cpp/core/error_macros.hpp>
+#include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/variant/color.hpp>
 #include <godot_cpp/variant/color_names.inc.hpp>
 #include <godot_cpp/variant/string.hpp>
@@ -131,20 +132,20 @@ String _to_hex(float p_val) {
 
 String Color::to_html(bool p_alpha) const {
 	String txt;
-	txt = txt + _to_hex(r);
-	txt = txt + _to_hex(g);
-	txt = txt + _to_hex(b);
+	txt += _to_hex(r);
+	txt += _to_hex(g);
+	txt += _to_hex(b);
 	if (p_alpha) {
-		txt = txt + _to_hex(a);
+		txt += _to_hex(a);
 	}
 	return txt;
 }
 
 float Color::get_h() const {
-	float min = Math::min(r, g);
-	min = Math::min(min, b);
-	float max = Math::max(r, g);
-	max = Math::max(max, b);
+	float min = MIN(r, g);
+	min = MIN(min, b);
+	float max = MAX(r, g);
+	max = MAX(max, b);
 
 	float delta = max - min;
 
@@ -170,10 +171,10 @@ float Color::get_h() const {
 }
 
 float Color::get_s() const {
-	float min = Math::min(r, g);
-	min = Math::min(min, b);
-	float max = Math::max(r, g);
-	max = Math::max(max, b);
+	float min = MIN(r, g);
+	min = MIN(min, b);
+	float max = MAX(r, g);
+	max = MAX(max, b);
 
 	float delta = max - min;
 
@@ -181,8 +182,8 @@ float Color::get_s() const {
 }
 
 float Color::get_v() const {
-	float max = Math::max(r, g);
-	max = Math::max(max, b);
+	float max = MAX(r, g);
+	max = MAX(max, b);
 	return max;
 }
 
@@ -385,7 +386,6 @@ Color Color::named(const String &p_name) {
 	int idx = find_named_color(p_name);
 	if (idx == -1) {
 		ERR_FAIL_V_MSG(Color(), "Invalid color name: " + p_name + ".");
-		return Color();
 	}
 	return named_colors[idx].color;
 }
@@ -400,7 +400,7 @@ Color Color::named(const String &p_name, const Color &p_default) {
 
 int Color::find_named_color(const String &p_name) {
 	String name = p_name;
-	// Normalize name
+	// Normalize name.
 	name = name.replace(" ", "");
 	name = name.replace("-", "");
 	name = name.replace("_", "");
@@ -408,23 +408,24 @@ int Color::find_named_color(const String &p_name) {
 	name = name.replace(".", "");
 	name = name.to_upper();
 
-	int idx = 0;
-	while (named_colors[idx].name != nullptr) {
-		if (name == String(named_colors[idx].name).replace("_", "")) {
-			return idx;
+	static HashMap<String, int> named_colors_hashmap;
+	if (unlikely(named_colors_hashmap.is_empty())) {
+		const int named_color_count = get_named_color_count();
+		for (int i = 0; i < named_color_count; i++) {
+			named_colors_hashmap[String(named_colors[i].name).replace("_", "")] = i;
 		}
-		idx++;
+	}
+
+	const HashMap<String, int>::ConstIterator E = named_colors_hashmap.find(name);
+	if (E) {
+		return E->value;
 	}
 
 	return -1;
 }
 
 int Color::get_named_color_count() {
-	int idx = 0;
-	while (named_colors[idx].name != nullptr) {
-		idx++;
-	}
-	return idx;
+	return sizeof(named_colors) / sizeof(NamedColor);
 }
 
 String Color::get_named_color_name(int p_idx) {
@@ -465,6 +466,10 @@ Color Color::from_rgbe9995(uint32_t p_rgbe) {
 	float bd = b * m;
 
 	return Color(rd, gd, bd, 1.0f);
+}
+
+Color Color::from_rgba8(int64_t p_r8, int64_t p_g8, int64_t p_b8, int64_t p_a8) {
+	return Color(p_r8 / 255.0f, p_g8 / 255.0f, p_b8 / 255.0f, p_a8 / 255.0f);
 }
 
 Color::operator String() const {
