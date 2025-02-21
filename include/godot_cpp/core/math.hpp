@@ -537,6 +537,26 @@ inline float bezier_interpolate(float p_start, float p_control_1, float p_contro
 	return p_start * omt3 + p_control_1 * omt2 * p_t * 3.0f + p_control_2 * omt * t2 * 3.0f + p_end * t3;
 }
 
+inline double bezier_derivative(double p_start, double p_control_1, double p_control_2, double p_end, double p_t) {
+	/* Formula from Wikipedia article on Bezier curves. */
+	double omt = (1.0 - p_t);
+	double omt2 = omt * omt;
+	double t2 = p_t * p_t;
+
+	double d = (p_control_1 - p_start) * 3.0 * omt2 + (p_control_2 - p_control_1) * 6.0 * omt * p_t + (p_end - p_control_2) * 3.0 * t2;
+	return d;
+}
+
+inline float bezier_derivative(float p_start, float p_control_1, float p_control_2, float p_end, float p_t) {
+	/* Formula from Wikipedia article on Bezier curves. */
+	float omt = (1.0f - p_t);
+	float omt2 = omt * omt;
+	float t2 = p_t * p_t;
+
+	float d = (p_control_1 - p_start) * 3.0f * omt2 + (p_control_2 - p_control_1) * 6.0f * omt * p_t + (p_end - p_control_2) * 3.0f * t2;
+	return d;
+}
+
 template <typename T>
 inline T clamp(T x, T minv, T maxv) {
 	if (x < minv) {

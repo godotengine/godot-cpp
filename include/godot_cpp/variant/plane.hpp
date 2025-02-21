@@ -49,7 +49,7 @@ struct [[nodiscard]] Plane {
 
 	/* Plane-Point operations */
 
-	_FORCE_INLINE_ Vector3 center() const { return normal * d; }
+	_FORCE_INLINE_ Vector3 get_center() const { return normal * d; }
 	Vector3 get_any_perpendicular_normal() const;
 
 	_FORCE_INLINE_ bool is_point_over(const Vector3 &p_point) const; ///< Point is over plane
@@ -102,7 +102,7 @@ real_t Plane::distance_to(const Vector3 &p_point) const {
 
 bool Plane::has_point(const Vector3 &p_point, real_t p_tolerance) const {
 	real_t dist = normal.dot(p_point) - d;
-	dist = Math::abs(dist);
+	dist = ABS(dist);
 	return (dist <= p_tolerance);
 }
 
