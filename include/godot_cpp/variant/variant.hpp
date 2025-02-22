@@ -32,6 +32,7 @@
 
 #include <godot_cpp/core/defs.hpp>
 
+#include <godot_cpp/variant/array.hpp>
 #include <godot_cpp/variant/builtin_types.hpp>
 #include <godot_cpp/variant/variant_size.hpp>
 
@@ -355,6 +356,56 @@ String vformat(const String &p_text, const VarArgs... p_args) {
 	}
 
 	return p_text % args_array;
+}
+
+Variant &Array::Iterator::operator*() const {
+	return *elem_ptr;
+}
+
+Variant *Array::Iterator::operator->() const {
+	return elem_ptr;
+}
+
+Array::Iterator &Array::Iterator::operator++() {
+	elem_ptr++;
+	return *this;
+}
+
+Array::Iterator &Array::Iterator::operator--() {
+	elem_ptr--;
+	return *this;
+}
+
+const Variant &Array::ConstIterator::operator*() const {
+	return *elem_ptr;
+}
+
+const Variant *Array::ConstIterator::operator->() const {
+	return elem_ptr;
+}
+
+Array::ConstIterator &Array::ConstIterator::operator++() {
+	elem_ptr++;
+	return *this;
+}
+
+Array::ConstIterator &Array::ConstIterator::operator--() {
+	elem_ptr--;
+	return *this;
+}
+
+Array::Iterator Array::begin() {
+	return Array::Iterator(ptrw());
+}
+Array::Iterator Array::end() {
+	return Array::Iterator(ptrw() + size());
+}
+
+Array::ConstIterator Array::begin() const {
+	return Array::ConstIterator(ptr());
+}
+Array::ConstIterator Array::end() const {
+	return Array::ConstIterator(ptr() + size());
 }
 
 #include <godot_cpp/variant/builtin_vararg_methods.hpp>
