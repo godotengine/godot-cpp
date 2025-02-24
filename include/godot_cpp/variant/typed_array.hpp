@@ -36,9 +36,90 @@
 
 namespace godot {
 
+struct ConstIterator {
+	_FORCE_INLINE_ const Variant &operator*() const { return *element_ptr; }
+	_FORCE_INLINE_ const Variant *operator->() const { return element_ptr; }
+
+	_FORCE_INLINE_ ConstIterator &operator++() {
+		element_ptr++;
+		return *this;
+	}
+	_FORCE_INLINE_ ConstIterator &operator--() {
+		element_ptr--;
+		return *this;
+	}
+
+	_FORCE_INLINE_ bool operator==(const ConstIterator &p_other) const { return element_ptr == p_other.element_ptr; }
+	_FORCE_INLINE_ bool operator!=(const ConstIterator &p_other) const { return element_ptr != p_other.element_ptr; }
+
+	_FORCE_INLINE_ ConstIterator(const Variant *p_element_ptr) :
+			element_ptr(p_element_ptr) {}
+	_FORCE_INLINE_ ConstIterator() {}
+	_FORCE_INLINE_ ConstIterator(const ConstIterator &p_other) :
+			element_ptr(p_other.element_ptr) {}
+
+	_FORCE_INLINE_ ConstIterator &operator=(const ConstIterator &p_other) {
+		element_ptr = p_other.element_ptr;
+		return *this;
+	}
+
+private:
+	const Variant *element_ptr = nullptr;
+};
+
+struct Iterator {
+	_FORCE_INLINE_ Variant &operator*() const { return *element_ptr; }
+	_FORCE_INLINE_ Variant *operator->() const { return element_ptr; }
+
+	_FORCE_INLINE_ Iterator &operator++() {
+		element_ptr++;
+		return *this;
+	}
+	_FORCE_INLINE_ Iterator &operator--() {
+		element_ptr--;
+		return *this;
+	}
+
+	_FORCE_INLINE_ bool operator==(const Iterator &p_other) const { return element_ptr == p_other.element_ptr; }
+	_FORCE_INLINE_ bool operator!=(const Iterator &p_other) const { return element_ptr != p_other.element_ptr; }
+
+	_FORCE_INLINE_ Iterator(Variant *p_element_ptr) :
+			element_ptr(p_element_ptr) {}
+	_FORCE_INLINE_ Iterator() {}
+	_FORCE_INLINE_ Iterator(const Iterator &p_other) :
+			element_ptr(p_other.element_ptr) {}
+
+	_FORCE_INLINE_ Iterator &operator=(const Iterator &p_other) {
+		element_ptr = p_other.element_ptr;
+		return *this;
+	}
+
+	operator ConstIterator() const {
+		return ConstIterator(element_ptr);
+	}
+
+private:
+	Variant *element_ptr = nullptr;
+};
+
 template <typename T>
 class TypedArray : public Array {
 public:
+	Iterator begin() {
+		return Iterator(ptrw());
+	}
+
+	Iterator end() {
+		return Iterator(ptrw() + size());
+	}
+
+	ConstIterator begin() const {
+		return ConstIterator(ptr());
+	}
+	ConstIterator end() const {
+		return ConstIterator(ptr() + size());
+	}
+
 	_FORCE_INLINE_ void operator=(const Array &p_array) {
 		ERR_FAIL_COND_MSG(!is_same_typed(p_array), "Cannot assign an array with a different element type.");
 		_ref(p_array);
@@ -65,6 +146,18 @@ public:
 	template <>                                                                                                  \
 	class TypedArray<m_type> : public Array {                                                                    \
 	public:                                                                                                      \
+		Iterator begin() {                                                                                       \
+			return Iterator(ptrw());                                                                             \
+		}                                                                                                        \
+		Iterator end() {                                                                                         \
+			return Iterator(ptrw() + size());                                                                    \
+		}                                                                                                        \
+		ConstIterator begin() const {                                                                            \
+			return ConstIterator(ptr());                                                                         \
+		}                                                                                                        \
+		ConstIterator end() const {                                                                              \
+			return ConstIterator(ptr() + size());                                                                \
+		}                                                                                                        \
 		_FORCE_INLINE_ void operator=(const Array &p_array) {                                                    \
 			ERR_FAIL_COND_MSG(!is_same_typed(p_array), "Cannot assign an array with a different element type."); \
 			_ref(p_array);                                                                                       \
