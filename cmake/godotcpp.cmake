@@ -161,6 +161,25 @@ function( godotcpp_options )
 
     # Enable Testing
     option( GODOT_ENABLE_TESTING "Enable the godot-cpp.test.<target> integration testing targets" OFF )
+    # Define which targets create for build. By default all targets are included
+    # Not presented in SCons
+    option(GODOT_ADD_TARGET_TEMPLATE_RELEASE "Add template_release target to build" ON)
+    option(GODOT_ADD_TARGET_TEMPLATE_DEBUG "Add template_debug target to build" ON)
+    option(GODOT_ADD_TARGET_EDITOR "Add editor target to build" ON)
+    if(GODOT_ADD_TARGET_TEMPLATE_DEBUG)
+        list(APPEND GODOT_TARGETS "template_debug")
+    endif()
+    if(GODOT_ADD_TARGET_TEMPLATE_RELEASE)
+        list(APPEND GODOT_TARGETS "template_release")
+    endif()
+    if(GODOT_ADD_TARGET_EDITOR)
+        list(APPEND GODOT_TARGETS "editor")
+    endif()
+    if(NOT GODOT_TARGETS)
+        message(FATAL_ERROR "No targets were chosen to be build.See GODOT_ADD_TARGET_* variables: at least one of the should be ON")
+    endif()
+    # parent scoping GODOT_TARGETS
+    set(GODOT_TARGETS ${GODOT_TARGETS} PARENT_SCOPE)
 
     #[[ Target Platform Options ]]
     android_options()

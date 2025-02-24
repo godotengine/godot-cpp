@@ -13,7 +13,7 @@ file( GLOB_RECURSE DOC_XML
     CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/doc_classes/*.xml" )
 
-foreach( TARGET_ALIAS template_debug template_release editor )
+foreach( TARGET_ALIAS ${GODOT_TARGETS} )
     set( TARGET_NAME "godot-cpp.test.${TARGET_ALIAS}" )
 
     add_library( ${TARGET_NAME} SHARED EXCLUDE_FROM_ALL )
