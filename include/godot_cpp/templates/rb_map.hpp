@@ -35,6 +35,8 @@
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/templates/pair.hpp>
 
+#include <initializer_list>
+
 namespace godot {
 
 // based on the very nice implementation of rb-trees by:
@@ -98,6 +100,8 @@ public:
 	typedef KeyValue<K, V> ValueType;
 
 	struct Iterator {
+		friend class RBMap<K, V, C, A>;
+
 		_FORCE_INLINE_ KeyValue<K, V> &operator*() const {
 			return E->key_value();
 		}
@@ -111,10 +115,15 @@ public:
 			return *this;
 		}
 
-		_FORCE_INLINE_ bool operator==(const Iterator &b) const { return E == b.E; }
-		_FORCE_INLINE_ bool operator!=(const Iterator &b) const { return E != b.E; }
+		_FORCE_INLINE_ bool operator==(const Iterator &p_it) const { return E == p_it.E; }
+		_FORCE_INLINE_ bool operator!=(const Iterator &p_it) const { return E != p_it.E; }
 		explicit operator bool() const {
 			return E != nullptr;
+		}
+
+		Iterator &operator=(const Iterator &p_it) {
+			E = p_it.E;
+			return *this;
 		}
 		Iterator(Element *p_E) { E = p_E; }
 		Iterator() {}
@@ -138,10 +147,15 @@ public:
 			return *this;
 		}
 
-		_FORCE_INLINE_ bool operator==(const ConstIterator &b) const { return E == b.E; }
-		_FORCE_INLINE_ bool operator!=(const ConstIterator &b) const { return E != b.E; }
+		_FORCE_INLINE_ bool operator==(const ConstIterator &p_it) const { return E == p_it.E; }
+		_FORCE_INLINE_ bool operator!=(const ConstIterator &p_it) const { return E != p_it.E; }
 		explicit operator bool() const {
 			return E != nullptr;
+		}
+
+		ConstIterator &operator=(const ConstIterator &p_it) {
+			E = p_it.E;
+			return *this;
 		}
 		ConstIterator(const Element *p_E) { E = p_E; }
 		ConstIterator() {}
@@ -419,7 +433,7 @@ private:
 		new_node->right = _data._nil;
 		new_node->left = _data._nil;
 
-		// new_node->data=_data;
+		//new_node->data=_data;
 
 		if (new_parent == _data._root || less(p_key, new_parent->_data.key)) {
 			new_parent->left = new_node;
@@ -751,6 +765,12 @@ public:
 
 	RBMap(const RBMap &p_map) {
 		_copy_from(p_map);
+	}
+
+	RBMap(std::initializer_list<KeyValue<K, V>> p_init) {
+		for (const KeyValue<K, V> &E : p_init) {
+			insert(E.key, E.value);
+		}
 	}
 
 	_FORCE_INLINE_ RBMap() {}
