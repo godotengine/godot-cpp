@@ -59,16 +59,16 @@ class VSet {
 			middle = (low + high) / 2;
 
 			if (p_val < a[middle]) {
-				high = middle - 1; // search low end of array
+				high = middle - 1; //search low end of array
 			} else if (a[middle] < p_val) {
-				low = middle + 1; // search high end of array
+				low = middle + 1; //search high end of array
 			} else {
 				r_exact = true;
 				return middle;
 			}
 		}
 
-		// return the position where this would be inserted
+		//return the position where this would be inserted
 		if (a[middle] < p_val) {
 			middle++;
 		}
@@ -89,9 +89,9 @@ class VSet {
 			middle = (low + high) / 2;
 
 			if (p_val < a[middle]) {
-				high = middle - 1; // search low end of array
+				high = middle - 1; //search low end of array
 			} else if (a[middle] < p_val) {
-				low = middle + 1; // search high end of array
+				low = middle + 1; //search high end of array
 			} else {
 				return middle;
 			}
@@ -137,6 +137,10 @@ public:
 	inline const T &operator[](int p_index) const {
 		return _data[p_index];
 	}
+
+	_FORCE_INLINE_ VSet() {}
+	_FORCE_INLINE_ VSet(std::initializer_list<T> p_init) :
+			_data(p_init) {}
 };
 
 } // namespace godot
