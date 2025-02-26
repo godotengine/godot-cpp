@@ -152,7 +152,7 @@ function( common_compiler_flags )
 
             $<${HOT_RELOAD}:HOT_RELOAD_ENABLED>
 
-            $<$<STREQUAL:${GODOT_PRECISION},double>:REAL_T_IS_DOUBLE>
+            $<$<STREQUAL:${GODOTCPP_PRECISION},double>:REAL_T_IS_DOUBLE>
 
             $<${IS_MSVC}:$<${DISABLE_EXCEPTIONS}:_HAS_EXCEPTIONS=0>>
 

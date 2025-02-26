@@ -46,7 +46,7 @@ available targets, and are by default included in the ALL meta target
 created by most build systems. For this reason, all the targets specified
 in godot-cpp are marked with the ``EXCLUDE_FROM_ALL`` tag to prevent
 unnecessary compilation. The testing targets ``godot-cpp.test.<target>``
-are also guarded by ``GODOT_ENABLE_TESTING`` which is off by default.
+are also guarded by ``GODOTCPP_ENABLE_TESTING`` which is off by default.
 
 To configure and build the godot-cpp project to enable the integration
 testing targets the command will look something like:
@@ -56,7 +56,7 @@ testing targets the command will look something like:
     # Assuming our current directory is the godot-cpp source root
     mkdir cmake-build
     cd cmake-build
-    cmake .. -DGODOT_ENABLE_TESTING=YES
+    cmake .. -DGODOTCPP_ENABLE_TESTING=YES
     cmake --build . --target godot-cpp.test.template_debug
 
 Basic walkthrough
@@ -107,8 +107,8 @@ Basic walkthrough
 
     .. code-block::
 
-        cmake .. -DGODOT_USE_HOT_RELOAD:BOOL=ON \
-            -DGODOT_PRECISION:STRING=double \
+        cmake .. -DGODOTCPP_USE_HOT_RELOAD:BOOL=ON \
+            -DGODOTCPP_PRECISION:STRING=double \
             -DCMAKE_BUILD_TYPE:STRING=Debug
 
     Review setting-build-variables_ and build-configurations_ for more information.
@@ -120,32 +120,32 @@ Basic walkthrough
 
     .. code-block::
 
-        // Path to a custom GDExtension API JSON file (takes precedence over `GODOT_GDEXTENSION_DIR`) ( /path/to/custom_api_file )
-        `GODOT_CUSTOM_API_FILE:FILEPATH=`
+        // Path to a custom GDExtension API JSON file (takes precedence over `GODOTCPP_GDEXTENSION_DIR`) ( /path/to/custom_api_file )
+        `GODOTCPP_CUSTOM_API_FILE:FILEPATH=`
 
         // Force disabling exception handling code (ON|OFF)
-        GODOT_DISABLE_EXCEPTIONS:BOOL=ON
+        GODOTCPP_DISABLE_EXCEPTIONS:BOOL=ON
 
         // Path to a custom directory containing GDExtension interface header and API JSON file ( /path/to/gdextension_dir )
-        GODOT_GDEXTENSION_DIR:PATH=gdextension
+        GODOTCPP_GDEXTENSION_DIR:PATH=gdextension
 
         // Generate a template version of the Node class's get_node. (ON|OFF)
-        GODOT_GENERATE_TEMPLATE_GET_NODE:BOOL=ON
+        GODOTCPP_GENERATE_TEMPLATE_GET_NODE:BOOL=ON
 
         // Set the floating-point precision level (single|double)
-        GODOT_PRECISION:STRING=single
+        GODOTCPP_PRECISION:STRING=single
 
         // Symbols visibility on GNU platforms. Use 'auto' to apply the default value. (auto|visible|hidden)
-        GODOT_SYMBOL_VISIBILITY:STRING=hidden
+        GODOTCPP_SYMBOL_VISIBILITY:STRING=hidden
 
         // Expose headers as SYSTEM.
-        GODOT_SYSTEM_HEADERS:BOOL=ON
+        GODOTCPP_SYSTEM_HEADERS:BOOL=ON
 
         // Enable the extra accounting required to support hot reload. (ON|OFF)
-        GODOT_USE_HOT_RELOAD:BOOL=
+        GODOTCPP_USE_HOT_RELOAD:BOOL=
 
         // Treat warnings as errors
-        GODOT_WARNING_AS_ERROR:BOOL=OFF
+        GODOTCPP_WARNING_AS_ERROR:BOOL=OFF
 
 
 .. topic:: Compiling
@@ -179,7 +179,7 @@ needs to be specified at build time.
     # Assuming our current directory is the godot-cpp source root
     mkdir build-msvc
     cd build-msvc
-    cmake .. -DGODOT_ENABLE_TESTING=YES
+    cmake .. -DGODOTCPP_ENABLE_TESTING=YES
     cmake --build . -t godot-cpp.test.template_debug --config Debug
 
 
@@ -197,7 +197,7 @@ Using the msys2/clang64 shell
     # Assuming our current directory is the godot-cpp source root
     mkdir build-clang
     cd build-clang
-    cmake .. -G"Ninja" -DGODOT_ENABLE_TESTING=YES -DCMAKE_BUILD_TYPE=Debug
+    cmake .. -G"Ninja" -DGODOTCPP_ENABLE_TESTING=YES -DCMAKE_BUILD_TYPE=Debug
     cmake --build . -t godot-cpp.test.template_debug
 
 MSys2/clang64, "Ninja Multi-Config" - dev_build, Debug Symbols
@@ -214,7 +214,7 @@ Using the msys2/clang64 shell
     # Assuming our current directory is the godot-cpp source root
     mkdir build-clang
     cd build-clang
-    cmake .. -G"Ninja Multi-Config" -DGODOT_ENABLE_TESTING=YES -DGODOT_DEV_BUILD:BOOL=ON
+    cmake .. -G"Ninja Multi-Config" -DGODOTCPP_ENABLE_TESTING=YES -DGODOTCPP_DEV_BUILD:BOOL=ON
     cmake --build . -t godot-cpp.test.template_debug --config Debug
 
 Emscripten for web platform

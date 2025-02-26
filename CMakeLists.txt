@@ -52,7 +52,7 @@ compiler_detection()
 godotcpp_generate()
 
 # Conditionally enable the godot-cpp.test.<target> integration testing targets
-if( GODOT_ENABLE_TESTING )
+if( GODOTCPP_ENABLE_TESTING )
     add_subdirectory( test )
 endif()
 

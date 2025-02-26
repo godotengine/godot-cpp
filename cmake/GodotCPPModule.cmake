@@ -106,7 +106,7 @@ function( binding_generator_generate_bindings API_FILE USE_TEMPLATE_GET_NODE, BI
             COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
             VERBATIM
             WORKING_DIRECTORY ${godot-cpp_SOURCE_DIR}
-            MAIN_DEPENDENCY ${GODOT_GDEXTENSION_API_FILE}
+            MAIN_DEPENDENCY ${GODOTCPP_GDEXTENSION_API_FILE}
             DEPENDS ${godot-cpp_SOURCE_DIR}/binding_generator.py
             COMMENT "Generating bindings"
     )

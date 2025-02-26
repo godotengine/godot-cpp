@@ -39,14 +39,14 @@ foreach( TARGET_ALIAS template_debug template_release editor )
     target_link_libraries( ${TARGET_NAME} PRIVATE ${LINK_TARGET} )
 
     ### Get useful properties from godot-cpp target
-    get_target_property( GODOT_SUFFIX   ${LINK_TARGET} GODOT_SUFFIX      )
+    get_target_property( GODOTCPP_SUFFIX   ${LINK_TARGET} GODOTCPP_SUFFIX      )
     get_target_property( OSX_ARCH       ${LINK_TARGET} OSX_ARCHITECTURES )
 
     set_target_properties( ${TARGET_NAME}
             PROPERTIES
             CXX_STANDARD 17
             CXX_EXTENSIONS OFF
-            CXX_VISIBILITY_PRESET ${GODOT_SYMBOL_VISIBILITY}
+            CXX_VISIBILITY_PRESET ${GODOTCPP_SYMBOL_VISIBILITY}
 
             POSITION_INDEPENDENT_CODE ON
             BUILD_RPATH_USE_ORIGIN ON
@@ -62,7 +62,7 @@ foreach( TARGET_ALIAS template_debug template_release editor )
             PDB_OUTPUT_DIRECTORY     "$<1:${OUTPUT_DIR}>" #MSVC Only, ignored on other platforms
 
             PREFIX "lib"
-            OUTPUT_NAME "gdexample${GODOT_SUFFIX}"
+            OUTPUT_NAME "gdexample${GODOTCPP_SUFFIX}"
 
             # Some IDE's respect this property to logically group targets
             FOLDER "godot-cpp"
