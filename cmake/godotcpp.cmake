@@ -252,6 +252,9 @@ function( godotcpp_generate )
             "${GODOT_PRECISION}"
             "${CMAKE_CURRENT_BINARY_DIR}" )
 
+    add_custom_target( godot-cpp.generate_bindings DEPENDS ${GENERATED_FILES_LIST} )
+    set_target_properties( godot-cpp.generate_bindings PROPERTIES FOLDER "godot-cpp" )
+
     ### Platform is derived from the toolchain target
     # See GeneratorExpressions PLATFORM_ID and CMAKE_SYSTEM_NAME
     string( CONCAT SYSTEM_NAME
