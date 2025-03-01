@@ -299,7 +299,6 @@ function( godotcpp_generate )
         string( CONCAT GODOT_SUFFIX
                 "$<1:.${SYSTEM_NAME}>"
                 "$<1:.${TARGET_ALIAS}>"
-                "$<${IS_DEV_BUILD}:.dev>"
                 "$<$<STREQUAL:${GODOT_PRECISION},double>:.double>"
                 "$<1:.${ARCH_NAME}>"
                 # TODO IOS_SIMULATOR

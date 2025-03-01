@@ -485,8 +485,6 @@ def generate(env):
 
     # Suffix
     suffix = ".{}.{}".format(env["platform"], env["target"])
-    if env.dev_build:
-        suffix += ".dev"
     if env["precision"] == "double":
         suffix += ".double"
     suffix += "." + env["arch"]
@@ -496,7 +494,7 @@ def generate(env):
         suffix += ".nothreads"
 
     env["suffix"] = suffix  # Exposed when included from another project
-    env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
+    env["OBJSUFFIX"] = suffix + (".dev" if env.dev_build else "") + env["OBJSUFFIX"]
 
     # compile_commands.json
     env.Tool("compilation_db")
