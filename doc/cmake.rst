@@ -24,6 +24,22 @@ Configuration examples are listed at the bottom of the page.
 
 .. _godot-cpp-template: https://github.com/godotengine/godot-cpp-template
 
+Debug vs template_debug
+-----------------------
+
+Something I've seen come up many times is the conflation of a compilation of c++
+source code with debug symbols enabled, and compiling a Godot extension with
+debug features enabled. The two concepts are not mutually inclusive.
+
+- debug_features
+	Enables a pre-processor definition to selectively compile code to help
+	users of a Godot extension with their own project.
+
+- Debug
+	Sets compiler flags so that debug symbols are generated to help godot
+	extension developers debug their extension.
+
+
 SCons Deviations
 ----------------
 
@@ -312,21 +328,8 @@ Toolchains
 This section attempts to list the host and target combinations that have been
 at tested.
 
-Info on cross compiling triplets indicates that the naming is a little more
-freeform that expected, and tailored to its use case. Triplets tend to have the
-format ``<arch>[sub][-vendor][-OS][-env]``
-
-* `osdev.org <https://wiki.osdev.org/Target_Triplet>`_
-* `stack overflow <https://stackoverflow.com/questions/13819857/does-a-list-of-all-known-target-triplets-in-use-exist>`_
-* `LLVM <https://llvm.org/doxygen/classllvm_1_1Triple.html>`_
-* `clang target triple <https://clang.llvm.org/docs/CrossCompilation.html#target-triple>`_
-* `vcpkg <https://learn.microsoft.com/en-us/vcpkg/concepts/triplets>`_
-* `wasm32-unknown-emscripten <https://blog.therocode.net/2020/10/a-guide-to-rust-sdl2-emscripten>`_
-
 Linux Host
 ~~~~~~~~~~
-
-:Target: x86_64-linux
 
 Macos Host
 ~~~~~~~~~~
@@ -335,43 +338,36 @@ Macos Host
 :OS Name: Sequoia 15.0.1
 :Processor: Apple M2
 
+* AppleClang
+
 Windows Host
 ~~~~~~~~~~~~
 
-:OS Name: Microsoft Windows 11 Home, 10.0.22631 N/A Build 22631
+:OS Name: Windows 11
 :Processor: AMD Ryzen 7 6800HS Creator Edition
 
-`Microsoft Visual Studio 17 2022 <https://visualstudio.microsoft.com/vs/>`_
-    :Target: x86_64-w64
 
-`LLVM <https://llvm.org/>`_
-    :Target: x86_64-pc-windows-msvc
+* `Microsoft Visual Studio 17 2022 <https://visualstudio.microsoft.com/vs/>`_
+* `LLVM <https://llvm.org/>`_
+* `LLVM-MinGW <https://github.com/mstorsjo/llvm-mingw/releases>`_
 
-`AndroidSDK <https://developer.android.com/studio/#command-tools>`_
-    armv7-none-linux-androideabi16
+	* aarch64-w64-mingw32
+	* armv7-w64-mingw32
+	* i686-w64-mingw32
+	* x86_64-w64-mingw32
 
-`Emscripten <https://emscripten.org/>`_
-    :Compiler: Emscripten
-    :Target: wasm32-unknown-emscripten
+* `AndroidSDK <https://developer.android.com/studio/#command-tools>`_
+* `Emscripten <https://emscripten.org/>`_
+* `MinGW-W64-builds <https://github.com/niXman/mingw-builds-binaries/releases>`_
+* `Jetbrains-CLion <https://www.jetbrains.com/clion/>`_
 
-`MinGW-w64 <https://www.mingw-w64.org/>`_ based toolchains
+	Jetbrains builtin compiler is just the MingW64 above.
 
-    `MSYS2 <https://www.msys2.org/>`_
-        Necessary reading about MSYS2 `environments <https://www.msys2.org/docs/environments/>`_
+* `MSYS2 <https://www.msys2.org/>`_
+	Necessary reading about MSYS2 `environments <https://www.msys2.org/docs/environments/>`_
 
-        ucrt64
-            :Compiler: gcc version 14.2.0 (Rev1, Built by MSYS2 project)
-            :Target:   x86_64-w64-mingw32
-
-        clang64
-            :Compiler: clang version 18.1.8
-            :Target:   x86_64-w64-windows-gnu
-
-    `LLVM-MinGW <https://github.com/mstorsjo/llvm-mingw/releases>`_
-
-    `MinGW-W64-builds <https://github.com/niXman/mingw-builds-binaries/releases>`_
-        :Compiler: gcc
-        :Target: x86_64-w64-mingw32-ucrt
-
-    `Jetbrains-CLion <https://www.jetbrains.com/clion/>`_
-        :Target: x86_64-w64-mingw32-msvcrt
+	* ucrt64
+	* clang64
+	* mingw32
+	* mingw64
+	* clangarm64

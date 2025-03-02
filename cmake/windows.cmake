@@ -53,7 +53,21 @@ documentation.
 .. _issues: https://github.com/godotengine/godot-cpp/issues/1699
 
 ]=======================================================================]
+
+#[============================[ Windows Options ]============================]
 function(windows_options)
+    #[[ Options from SCons
+
+    TODO silence_msvc: Silence MSVC's cl/link stdout bloat, redirecting errors to stderr
+        Default: True
+
+    These three options will not implemented as compiler selection is managed
+    by CMake toolchain files. Look to doc/cmake.rst for examples.
+    use_mingw: Use the MinGW compiler instead of MSVC - only effective on Windows
+    use_llvm: Use the LLVM compiler (MVSC or MinGW depending on the use_mingw flag
+    mingw_prefix: MinGW prefix
+    ]]
+
     option(GODOTCPP_USE_STATIC_CPP "Link MinGW/MSVC C++ runtime libraries statically" ON)
     option(GODOTCPP_DEBUG_CRT "Compile with MSVC's debug CRT (/MDd)" OFF)
 
