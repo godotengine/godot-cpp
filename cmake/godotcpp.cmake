@@ -173,6 +173,28 @@ function(godotcpp_options)
 
     # Enable Testing
     option(GODOTCPP_ENABLE_TESTING "Enable the godot-cpp.test.<target> integration testing targets" OFF)
+    # Define which targets create for build. By default all targets are included
+    # Not presented in SCons
+    option(GODOTCPP_ADD_TARGET_TEMPLATE_RELEASE "Add template_release target to build" ON)
+    option(GODOTCPP_ADD_TARGET_TEMPLATE_DEBUG "Add template_debug target to build" ON)
+    option(GODOTCPP_ADD_TARGET_EDITOR "Add editor target to build" ON)
+    if(GODOTCPP_ADD_TARGET_TEMPLATE_DEBUG)
+        list(APPEND GODOTCPP_TARGETS "template_debug")
+    endif()
+    if(GODOTCPP_ADD_TARGET_TEMPLATE_RELEASE)
+        list(APPEND GODOTCPP_TARGETS "template_release")
+    endif()
+    if(GODOTCPP_ADD_TARGET_EDITOR)
+        list(APPEND GODOTCPP_TARGETS "editor")
+    endif()
+    if(NOT GODOTCPP_TARGETS)
+        message(
+            FATAL_ERROR
+            "No targets were chosen to be build.See GODOTCPP_ADD_TARGET_* variables: at least one of the should be ON"
+        )
+    endif()
+    # parent scoping GODOTCPP_TARGETS
+    set(GODOTCPP_TARGETS ${GODOTCPP_TARGETS} PARENT_SCOPE)
 
     #[[ Target Platform Options ]]
     android_options()
@@ -310,7 +332,7 @@ function(godotcpp_generate)
     set(IS_DEV_BUILD "$<BOOL:${GODOTCPP_DEV_BUILD}>")
 
     ### Define our godot-cpp library targets
-    foreach(TARGET_ALIAS template_debug template_release editor)
+    foreach(TARGET_ALIAS ${GODOTCPP_TARGETS})
         set(TARGET_NAME "godot-cpp.${TARGET_ALIAS}")
 
         # Generator Expressions that rely on the target
