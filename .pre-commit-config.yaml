@@ -33,6 +33,12 @@ repos:
       - id: codespell
         additional_dependencies: [tomli]
 
+  - repo: https://github.com/BlankSpruce/gersemi
+    rev: 0.18.2
+    hooks:
+      - id: gersemi
+        args: ["-i", "--no-warn-about-unknown-commands", "-l", "120"]
+
   - repo: local
     hooks:
       - id: copyright-headers
