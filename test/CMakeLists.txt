@@ -13,7 +13,11 @@ file( GLOB_RECURSE DOC_XML
     CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/doc_classes/*.xml" )
 
-foreach( TARGET_ALIAS template_debug template_release editor )
+set(DOC_SOURCE_FILE "${CMAKE_CURRENT_BINARY_DIR}/gen/doc_source.cpp")
+
+generate_doc_source( doc_gen "${DOC_SOURCE_FILE}" ${DOC_XML} )
+
+foreach( TARGET_ALIAS ${GODOTCPP_TARGETS} )
     set( TARGET_NAME "godot-cpp.test.${TARGET_ALIAS}" )
 
     add_library( ${TARGET_NAME} SHARED EXCLUDE_FROM_ALL )
@@ -29,7 +33,7 @@ foreach( TARGET_ALIAS template_debug template_release editor )
 
     # conditionally add doc data to compile output
     if( TARGET_ALIAS MATCHES "editor|template_debug" )
-        target_doc_sources( ${TARGET_NAME} ${DOC_XML} )
+        target_sources( ${TARGET_NAME} PRIVATE "${DOC_SOURCE_FILE}" )
     endif()
 
     set( OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/" )

@@ -17,21 +17,13 @@ jobs:
           fetch-depth: 2
 
       - name: Get changed files
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            files=$(git diff-tree --no-commit-id --name-only -r HEAD^1..HEAD 2> /dev/null || true)
-          elif [ "${{ github.event_name }}" == "push" -a "${{ github.event.forced }}" == "false" -a "${{ github.event.created }}" == "false" ]; then
-            files=$(git diff-tree --no-commit-id --name-only -r ${{ github.event.before }}..${{ github.event.after }} 2> /dev/null || true)
-          fi
-          files=$(echo "$files" | grep -v 'thirdparty' | xargs -I {} sh -c 'echo "\"./{}\""' | tr '\n' ' ')
-          echo "CHANGED_FILES=$files" >> $GITHUB_ENV
+        id: changed-files
+        uses: tj-actions/changed-files@v45
 
       - name: Style checks via pre-commit
         uses: pre-commit/action@v3.0.1
         with:
-          extra_args: --verbose --hook-stage manual --files ${{ env.CHANGED_FILES }}
+          extra_args: --verbose --hook-stage manual --files ${{ steps.changed-files.outputs.all_changed_files }}
 
       - name: Check generated files consistency
         run:
