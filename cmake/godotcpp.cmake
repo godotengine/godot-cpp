@@ -258,7 +258,7 @@ function( godotcpp_generate )
     ### Platform is derived from the toolchain target
     # See GeneratorExpressions PLATFORM_ID and CMAKE_SYSTEM_NAME
     string( CONCAT SYSTEM_NAME
-            "$<$<PLATFORM_ID:Android>:android.${ANDROID_ABI}>"
+            "$<$<PLATFORM_ID:Android>:android>"
             "$<$<PLATFORM_ID:iOS>:ios>"
             "$<$<PLATFORM_ID:Linux>:linux>"
             "$<$<PLATFORM_ID:Darwin>:macos>"

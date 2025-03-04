@@ -9,13 +9,62 @@ jobs:
   # First stage: Only static checks, fast and prevent expensive builds from running.
 
   static-checks:
-    if: '!vars.DISABLE_GODOT_CI'
     name: 📊 Static Checks
+    if: '!vars.DISABLE_GODOT_CI'
     uses: ./.github/workflows/static_checks.yml
 
-  # Second stage: Run all the builds and some of the tests.
+  # Second stage: Review code changes
 
-  ci:
-    name: 🛠️ Continuous Integration
+  files-changed:
+    name: Review Changes
     needs: static-checks
-    uses: ./.github/workflows/ci.yml
+    runs-on: ubuntu-22.04
+    outputs:
+      scons: ${{ steps.scons-changed.outputs.any_modified }}
+      cmake: ${{ steps.cmake-changed.outputs.any_modified }}
+      sources: ${{ steps.sourced-changed.outputs.any_modified }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - id: sources-changed
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            .github/workflows/*.yml
+            **/*.py
+            **/*.cpp
+            **/*.h
+            test/build_profile.json
+            gdextension/extension_api.json
+
+      - id: scons-changed
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/SConstruct
+            **/SCsub
+            **/*.py
+
+      - id: cmake-changed
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/CMakeLists.txt
+            **/*.cmake
+
+  # Third stage: Run all the builds and some of the tests.
+
+  ci-scons:
+    name: 🛠️ SCons CI
+    needs: files-changed
+    if: ${{ needs.files-changed.outputs.scons || needs.files-changed.outputs.sources }}
+    uses: ./.github/workflows/ci-scons.yml
+
+  ci-cmake:
+    name: 🛠️ CMake CI
+    needs: files-changed
+    if: ${{ needs.files-changed.outputs.cmake || needs.files-changed.outputs.sources }}
+    uses: ./.github/workflows/ci-cmake.yml
