@@ -104,6 +104,8 @@ function( godotcpp_options )
     #NOTE: arch is managed by using toolchain files.
     # Except for macos universal, which can be set by GODOTCPP_MACOS_UNIVERSAL=YES
 
+    set(GODOTCPP_TARGETS "template_debug;template_release;editor" CACHE STRING "")
+
     # Input from user for GDExtension interface header and the API JSON file
     set( GODOTCPP_GDEXTENSION_DIR "gdextension" CACHE PATH
             "Path to a custom directory containing GDExtension interface header and API JSON file ( /path/to/gdextension_dir )" )
@@ -252,9 +254,6 @@ function( godotcpp_generate )
             "${GODOTCPP_PRECISION}"
             "${CMAKE_CURRENT_BINARY_DIR}" )
 
-    add_custom_target( godot-cpp.generate_bindings DEPENDS ${GENERATED_FILES_LIST} )
-    set_target_properties( godot-cpp.generate_bindings PROPERTIES FOLDER "godot-cpp" )
-
     ### Platform is derived from the toolchain target
     # See GeneratorExpressions PLATFORM_ID and CMAKE_SYSTEM_NAME
     string( CONCAT SYSTEM_NAME
@@ -288,7 +287,7 @@ function( godotcpp_generate )
     set( IS_DEV_BUILD "$<BOOL:${GODOTCPP_DEV_BUILD}>")
 
     ### Define our godot-cpp library targets
-    foreach ( TARGET_ALIAS template_debug template_release editor )
+    foreach ( TARGET_ALIAS ${GODOTCPP_TARGETS} )
         set( TARGET_NAME "godot-cpp.${TARGET_ALIAS}" )
 
         # Generator Expressions that rely on the target

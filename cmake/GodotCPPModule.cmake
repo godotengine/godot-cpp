@@ -102,21 +102,25 @@ function( binding_generator_generate_bindings API_FILE USE_TEMPLATE_GET_NODE, BI
     # Strip newlines and whitespace to make it a one-liner.
     string( REGEX REPLACE "\n *" " " PYTHON_SCRIPT "${PYTHON_SCRIPT}" )
 
-    add_custom_command(OUTPUT ${GENERATED_FILES_LIST}
-            COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
-            VERBATIM
-            WORKING_DIRECTORY ${godot-cpp_SOURCE_DIR}
-            MAIN_DEPENDENCY ${GODOTCPP_GDEXTENSION_API_FILE}
-            DEPENDS ${godot-cpp_SOURCE_DIR}/binding_generator.py
-            COMMENT "Generating bindings"
+    add_custom_target(
+        godot-cpp.generate_bindings
+        COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
+        BYPRODUCTS ${GENERATED_FILES_LIST}
+        WORKING_DIRECTORY ${godot-cpp_SOURCE_DIR}
+        COMMENT "Generating bindings"
+        VERBATIM
+        SOURCES
+            ${godot-cpp_SOURCE_DIR}/binding_generator.py
+            ${GODOTCPP_GDEXTENSION_API_FILE}
     )
-endfunction(  )
+    set_target_properties( godot-cpp.generate_bindings PROPERTIES FOLDER "godot-cpp" )
+endfunction()
 
 #[[ Generate doc_data.cpp
 The documentation displayed in the Godot editor is compiled into the extension.
 It takes a list of XML source files, and transforms them into a cpp file that
 is added to the sources list.]]
-function( generate_doc_source OUTPUT_PATH SOURCES )
+function(generate_doc_source TARGET OUTPUT_PATH SOURCES)
     # Transform SOURCES CMake LIST
     # quote each path with ''
     # join with , to transform into a python list minus the surrounding []
@@ -132,14 +136,16 @@ function( generate_doc_source OUTPUT_PATH SOURCES )
     set( PYTHON_SCRIPT "from doc_source_generator import generate_doc_source"
             "generate_doc_source( '${OUTPUT_PATH}', [${PYTHON_LIST}] )" )
 
-    add_custom_command( OUTPUT "${OUTPUT_PATH}"
-            COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
-            VERBATIM
-            WORKING_DIRECTORY "${godot-cpp_SOURCE_DIR}"
-            DEPENDS
+    add_custom_target(
+        ${TARGET}
+        COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
+        BYPRODUCTS "${OUTPUT_PATH}"
+        WORKING_DIRECTORY "${godot-cpp_SOURCE_DIR}"
+        COMMENT "Generating: ${OUTPUT_PATH}"
+        VERBATIM
+        SOURCES
             "${godot-cpp_SOURCE_DIR}/doc_source_generator.py"
-            "${SOURCES}"
-            COMMENT "Generating: ${OUTPUT_PATH}"
+            ${SOURCES}
     )
 endfunction()
 
@@ -154,16 +160,8 @@ function( target_doc_sources TARGET SOURCES )
 
     # Create the file generation target, this won't be triggered unless a target
     # that depends on DOC_SOURCE_FILE is built
-    generate_doc_source( "${DOC_SOURCE_FILE}" ${SOURCES} )
+    generate_doc_source( ${TARGET}_doc_gen "${DOC_SOURCE_FILE}" ${SOURCES} )
 
     # Add DOC_SOURCE_FILE as a dependency to TARGET
     target_sources( ${TARGET} PRIVATE "${DOC_SOURCE_FILE}" )
-
-    # Create a dummy target that depends on the source so that users can
-    # test the file generation task.
-    if( TARGET doc_gen )
-    else()
-        add_custom_target( doc_gen )
-    endif()
-    target_sources( doc_gen PRIVATE "${DOC_SOURCE_FILE}"  )
 endfunction()
