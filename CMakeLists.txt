@@ -40,10 +40,16 @@ For example; the tools/godotcpp.py is matched by the cmake/godotcpp.cmake file
 
 The CMake equivalent is below.
 ]=======================================================================]
-
 include(cmake/godotcpp.cmake)
 
 godotcpp_options()
+
+#[[ People are compiling godot by itself and expecting template_debug
+Replace this with PROJECT_IS_TOP_LEVEL, <PROJECT-NAME>_IS_TOP_LEVEL when minimum reaches 3.21
+]]
+if(NOT PROJECT_NAME)
+    set(GODOTCPP_IS_TOP_LEVEL ON)
+endif()
 
 # Define our project.
 project(
