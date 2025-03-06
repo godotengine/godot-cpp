@@ -57,6 +57,12 @@ public:
 	_FORCE_INLINE_ TypedArray() {
 		set_typed(Variant::OBJECT, T::get_class_static(), Variant());
 	}
+	_FORCE_INLINE_ TypedArray(const std::initializer_list<T> &p_init) {
+		set_typed(Variant::OBJECT, T::get_class_static(), Variant());
+		for (auto &element : p_init) {
+			append(element);
+		}
+	}
 };
 
 // specialization for the rest of variant types
@@ -82,6 +88,12 @@ public:
 		}                                                                                                        \
 		_FORCE_INLINE_ TypedArray() {                                                                            \
 			set_typed(m_variant_type, StringName(), Variant());                                                  \
+		}                                                                                                        \
+		_FORCE_INLINE_ TypedArray(const std::initializer_list<m_type> &p_init) {                                 \
+			set_typed(m_variant_type, StringName(), Variant());                                                  \
+			for (auto &element : p_init) {                                                                       \
+				append(element);                                                                                 \
+			}                                                                                                    \
 		}                                                                                                        \
 	};
 
