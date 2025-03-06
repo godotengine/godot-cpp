@@ -330,8 +330,17 @@ function(godotcpp_generate)
             "$<$<NOT:${THREADS_ENABLED}>:.nothreads>"
         )
 
+        # People are compiling godot by itself.
+        set(EXCLUDE EXCLUDE_FROM_ALL)
+        if(GODOTCPP_IS_TOP_LEVEL)
+            if(TARGET_ALIAS STREQUAL template_debug)
+                set(EXCLUDE "")
+            endif()
+        endif()
+
         # the godot-cpp.* library targets
-        add_library(${TARGET_NAME} STATIC EXCLUDE_FROM_ALL)
+        add_library(${TARGET_NAME} STATIC ${EXCLUDE})
+
         add_library(godot-cpp::${TARGET_ALIAS} ALIAS ${TARGET_NAME})
 
         file(GLOB_RECURSE GODOTCPP_SOURCES LIST_DIRECTORIES NO CONFIGURE_DEPENDS src/*.cpp)
