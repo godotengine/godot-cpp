@@ -11,18 +11,12 @@ This if statement simply silences that warning.
 if(CMAKE_C_COMPILER)
 endif()
 
-#[=======================================================================[.rst:
-Include Platform Files
-----------------------
-
-Because these files are included into the top level CMakelists.txt before the
+#[[ Include Platform Files
+Because these files are included into the top level CMakeLists.txt before the
 project directive, it means that
 
-* ``CMAKE_CURRENT_SOURCE_DIR`` is the location of godot-cpp's CMakeLists.txt
-* ``CMAKE_SOURCE_DIR`` is the location where any prior ``project(...)``
-  directive was
-
-]=======================================================================]
+CMAKE_CURRENT_SOURCE_DIR is the location of godot-cpp's CMakeLists.txt
+CMAKE_SOURCE_DIR is the location where any prior project() directive was ]]
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/GodotCPPModule.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/common_compiler_flags.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/android.cmake)
@@ -59,7 +53,8 @@ set(ARCH_LIST
     wasm32
 )
 
-# Function to map processors to known architectures
+#[=============================[ godot_arch_name ]=============================]
+#[[ Function to map CMAKE_SYSTEM_PROCESSOR names to godot arch equivalents ]]
 function(godot_arch_name OUTVAR)
     # Special case for macos universal builds that target both x86_64 and arm64
     if(DEFINED CMAKE_OSX_ARCHITECTURES)
@@ -109,7 +104,7 @@ endfunction()
 function(godotcpp_options)
     #NOTE: platform is managed using toolchain files.
     #NOTE: arch is managed by using toolchain files.
-    # Except for macos universal, which can be set by GODOTCPP_MACOS_UNIVERSAL=YES
+    # To create a universal build for macos, set CMAKE_OSX_ARCHITECTURES
 
     # Input from user for GDExtension interface header and the API JSON file
     set(GODOTCPP_GDEXTENSION_DIR
@@ -183,7 +178,7 @@ function(godotcpp_options)
     windows_options()
 endfunction()
 
-# Function to configure and generate the targets
+#[===========================[ Target Generation ]===========================]
 function(godotcpp_generate)
     #[[ Multi-Threaded MSVC Compilation
     When using the MSVC compiler the build command -j <n> only specifies
