@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_TYPED_DICTIONARY_HPP
-#define GODOT_TYPED_DICTIONARY_HPP
+#pragma once
 
 #include <godot_cpp/core/type_info.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
@@ -435,5 +434,3 @@ MAKE_TYPED_DICTIONARY_INFO(IPAddress, Variant::STRING)
 #undef MAKE_TYPED_DICTIONARY_INFO_WITH_OBJECT
 
 } // namespace godot
-
-#endif // GODOT_TYPED_DICTIONARY_HPP

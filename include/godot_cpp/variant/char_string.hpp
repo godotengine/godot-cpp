@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_CHAR_STRING_HPP
-#define GODOT_CHAR_STRING_HPP
+#pragma once
 
 #include <godot_cpp/templates/cowdata.hpp>
 
@@ -138,5 +137,3 @@ typedef CharStringT<char32_t> Char32String;
 typedef CharStringT<wchar_t> CharWideString;
 
 } // namespace godot
-
-#endif // GODOT_CHAR_STRING_HPP
