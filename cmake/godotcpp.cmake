@@ -106,6 +106,18 @@ function(godotcpp_options)
     #NOTE: arch is managed by using toolchain files.
     # To create a universal build for macos, set CMAKE_OSX_ARCHITECTURES
 
+    set(GODOTCPP_VALID_TARGETS "template_debug;template_release;editor")
+    set(GODOTCPP_TARGETS
+        ${GODOTCPP_VALID_TARGETS}
+        CACHE STRING
+        "Which targets to generate, must be a semicolon separated list. valid values are: template_debug, template_release, and editor"
+    )
+    foreach(TARGET ${GODOTCPP_TARGETS})
+        if(NOT ${TARGET} IN_LIST GODOTCPP_VALID_TARGETS)
+            message(FATAL_ERROR "invalid GODOTCPP_TARGETS valid values are ${GODOTCPP_VALID_TARGETS} ")
+        endif()
+    endforeach()
+
     # Input from user for GDExtension interface header and the API JSON file
     set(GODOTCPP_GDEXTENSION_DIR
         "gdextension"
@@ -264,15 +276,12 @@ function(godotcpp_generate)
             "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
-    add_custom_target(godot-cpp.generate_bindings DEPENDS ${GENERATED_FILES_LIST})
-    set_target_properties(godot-cpp.generate_bindings PROPERTIES FOLDER "godot-cpp")
-
     ### Platform is derived from the toolchain target
     # See GeneratorExpressions PLATFORM_ID and CMAKE_SYSTEM_NAME
     string(
         CONCAT
         SYSTEM_NAME
-        "$<$<PLATFORM_ID:Android>:android.${ANDROID_ABI}>"
+        "$<$<PLATFORM_ID:Android>:android>"
         "$<$<PLATFORM_ID:iOS>:ios>"
         "$<$<PLATFORM_ID:Linux>:linux>"
         "$<$<PLATFORM_ID:Darwin>:macos>"
@@ -305,7 +314,7 @@ function(godotcpp_generate)
     set(IS_DEV_BUILD "$<BOOL:${GODOTCPP_DEV_BUILD}>")
 
     ### Define our godot-cpp library targets
-    foreach(TARGET_ALIAS template_debug template_release editor)
+    foreach(TARGET_ALIAS ${GODOTCPP_TARGETS})
         set(TARGET_NAME "godot-cpp.${TARGET_ALIAS}")
 
         # Generator Expressions that rely on the target
