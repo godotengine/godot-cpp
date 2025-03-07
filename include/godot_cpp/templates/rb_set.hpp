@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_RB_SET_HPP
-#define GODOT_RB_SET_HPP
+#pragma once
 
 #include <godot_cpp/core/memory.hpp>
 
@@ -710,5 +709,3 @@ public:
 };
 
 } // namespace godot
-
-#endif // GODOT_RB_SET_HPP

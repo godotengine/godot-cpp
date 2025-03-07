@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_CALLABLE_METHOD_POINTER_HPP
-#define GODOT_CALLABLE_METHOD_POINTER_HPP
+#pragma once
 
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/variant/variant.hpp>
@@ -269,5 +268,3 @@ Callable create_custom_callable_static_function_pointer(R (*p_method)(P...)) {
 #define callable_mp_static(M) ::godot::create_custom_callable_static_function_pointer(M)
 
 } // namespace godot
-
-#endif // GODOT_CALLABLE_METHOD_POINTER_HPP

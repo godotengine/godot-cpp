@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_TYPE_INFO_HPP
-#define GODOT_TYPE_INFO_HPP
+#pragma once
 
 #include <godot_cpp/core/object.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
@@ -416,5 +415,3 @@ MAKE_TYPED_ARRAY_INFO(IPAddress, Variant::STRING)
 #define CLASS_INFO(m_type) (GetTypeInfo<m_type *>::get_class_info())
 
 } // namespace godot
-
-#endif // GODOT_TYPE_INFO_HPP
