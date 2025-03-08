@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_HASH_SET_HPP
-#define GODOT_HASH_SET_HPP
+#pragma once
 
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/memory.hpp>
@@ -473,5 +472,3 @@ public:
 };
 
 } // namespace godot
-
-#endif // GODOT_HASH_SET_HPP

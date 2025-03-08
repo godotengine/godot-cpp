@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_VECTOR_HPP
-#define GODOT_VECTOR_HPP
+#pragma once
 
 /**
  * @class Vector
@@ -332,5 +331,3 @@ void Vector<T>::fill(T p_elem) {
 }
 
 } // namespace godot
-
-#endif // GODOT_VECTOR_HPP

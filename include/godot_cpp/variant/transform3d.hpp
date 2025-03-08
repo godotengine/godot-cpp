@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_TRANSFORM3D_HPP
-#define GODOT_TRANSFORM3D_HPP
+#pragma once
 
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/aabb.hpp>
@@ -272,5 +271,3 @@ _FORCE_INLINE_ Plane Transform3D::xform_inv_fast(const Plane &p_plane, const Tra
 }
 
 } // namespace godot
-
-#endif // GODOT_TRANSFORM3D_HPP

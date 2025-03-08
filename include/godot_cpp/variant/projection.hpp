@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_PROJECTION_HPP
-#define GODOT_PROJECTION_HPP
+#pragma once
 
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/vector3.hpp>
@@ -167,5 +166,3 @@ Vector3 Projection::xform(const Vector3 &p_vec3) const {
 }
 
 } // namespace godot
-
-#endif // GODOT_PROJECTION_HPP

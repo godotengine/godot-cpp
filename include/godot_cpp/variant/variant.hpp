@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_VARIANT_HPP
-#define GODOT_VARIANT_HPP
+#pragma once
 
 #include <godot_cpp/core/defs.hpp>
 
@@ -367,5 +366,3 @@ using PackedRealArray = PackedFloat32Array;
 #endif // REAL_T_IS_DOUBLE
 
 } // namespace godot
-
-#endif // GODOT_VARIANT_HPP

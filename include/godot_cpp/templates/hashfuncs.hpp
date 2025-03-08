@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_HASHFUNCS_HPP
-#define GODOT_HASHFUNCS_HPP
+#pragma once
 
 // Needed for fastmod.
 #if defined(_MSC_VER)
@@ -522,5 +521,3 @@ static _FORCE_INLINE_ uint32_t fastmod(const uint32_t n, const uint64_t c, const
 }
 
 } // namespace godot
-
-#endif // GODOT_HASHFUNCS_HPP

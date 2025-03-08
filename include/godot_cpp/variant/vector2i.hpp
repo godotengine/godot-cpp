@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_VECTOR2I_HPP
-#define GODOT_VECTOR2I_HPP
+#pragma once
 
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/math.hpp>
@@ -168,5 +167,3 @@ typedef Vector2i Size2i;
 typedef Vector2i Point2i;
 
 } // namespace godot
-
-#endif // GODOT_VECTOR2I_HPP

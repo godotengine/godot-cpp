@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_SELF_LIST_HPP
-#define GODOT_SELF_LIST_HPP
+#pragma once
 
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/core/error_macros.hpp>
@@ -139,5 +138,3 @@ public:
 };
 
 } // namespace godot
-
-#endif // GODOT_SELF_LIST_HPP

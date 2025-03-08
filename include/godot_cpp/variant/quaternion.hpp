@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_QUATERNION_HPP
-#define GODOT_QUATERNION_HPP
+#pragma once
 
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/core/math.hpp>
@@ -232,5 +231,3 @@ _FORCE_INLINE_ Quaternion operator*(real_t p_real, const Quaternion &p_quaternio
 }
 
 } // namespace godot
-
-#endif // GODOT_QUATERNION_HPP

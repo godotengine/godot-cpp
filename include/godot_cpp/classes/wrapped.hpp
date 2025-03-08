@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_WRAPPED_HPP
-#define GODOT_WRAPPED_HPP
+#pragma once
 
 #include <godot_cpp/core/memory.hpp>
 
@@ -511,5 +510,3 @@ private:
 #define GDVIRTUAL_BIND(m_name, ...) ::godot::ClassDB::add_virtual_method(get_class_static(), _gdvirtual_##m_name##_get_method_info(), ::godot::snarray(__VA_ARGS__));
 #define GDVIRTUAL_IS_OVERRIDDEN(m_name) _gdvirtual_##m_name##_overridden()
 #define GDVIRTUAL_IS_OVERRIDDEN_PTR(m_obj, m_name) m_obj->_gdvirtual_##m_name##_overridden()
-
-#endif // GODOT_WRAPPED_HPP

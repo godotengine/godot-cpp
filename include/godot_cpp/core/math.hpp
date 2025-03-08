@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_MATH_HPP
-#define GODOT_MATH_HPP
+#pragma once
 
 #include <godot_cpp/core/defs.hpp>
 
@@ -815,5 +814,3 @@ inline float snap_scalar_separation(float p_offset, float p_step, float p_target
 
 } // namespace Math
 } // namespace godot
-
-#endif // GODOT_MATH_HPP
