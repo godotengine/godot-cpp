@@ -18,7 +18,7 @@ endfunction()
 
 #[===========================[ Target Generation ]===========================]
 function(linux_generate)
-    target_compile_definitions(${TARGET_NAME} PUBLIC LINUX_ENABLED UNIX_ENABLED)
+    target_compile_definitions(godot-cpp PUBLIC LINUX_ENABLED UNIX_ENABLED)
 
     common_compiler_flags()
 endfunction()
