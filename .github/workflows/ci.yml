@@ -202,8 +202,8 @@ jobs:
         run: |
           mkdir cmake-build
           cd cmake-build
-          cmake ../ -DGODOTCPP_ENABLE_TESTING=YES
-          cmake --build . --verbose -j $(nproc) -t godot-cpp.test.template_release --config Release
+          cmake ../ -DGODOTCPP_ENABLE_TESTING=YES -DGODOTCPP_TARGET=template_release
+          cmake --build . --verbose -j $(nproc) --target godot-cpp-test --config Release
 
   windows-msvc-cmake:
     name: 🏁 Build (Windows, MSVC, CMake)
@@ -218,5 +218,5 @@ jobs:
         run: |
           mkdir cmake-build
           cd cmake-build
-          cmake ../ -DGODOTCPP_ENABLE_TESTING=YES
-          cmake --build . --verbose -t godot-cpp.test.template_release --config Release
+          cmake ../ -DGODOTCPP_ENABLE_TESTING=YES -DGODOTCPP_TARGET=template_release
+          cmake --build . --verbose --target godot-cpp-test --config Release
