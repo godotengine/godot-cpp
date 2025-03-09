@@ -88,16 +88,16 @@ endfunction()
 function(windows_generate)
     set(STATIC_CPP "$<BOOL:${GODOTCPP_USE_STATIC_CPP}>")
 
-    set_target_properties(${TARGET_NAME} PROPERTIES PDB_OUTPUT_DIRECTORY "$<1:${CMAKE_SOURCE_DIR}/bin>")
+    set_target_properties(godot-cpp PROPERTIES PDB_OUTPUT_DIRECTORY "$<1:${CMAKE_SOURCE_DIR}/bin>")
 
     target_compile_definitions(
-        ${TARGET_NAME}
+        godot-cpp
         PUBLIC WINDOWS_ENABLED $<${IS_MSVC}: TYPED_METHOD_BIND NOMINMAX >
     )
 
     # gersemi: off
     target_link_options(
-        ${TARGET_NAME}
+        godot-cpp
         PUBLIC
             $<${NOT_MSVC}:
                 -Wl,--no-undefined
