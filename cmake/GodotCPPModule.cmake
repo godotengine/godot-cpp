@@ -108,7 +108,7 @@ function(
     string(REGEX REPLACE "\n *" " " PYTHON_SCRIPT "${PYTHON_SCRIPT}")
 
     add_custom_target(
-        godot-cpp.generate_bindings
+        generate_bindings
         COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
         BYPRODUCTS ${GENERATED_FILES_LIST}
         WORKING_DIRECTORY ${godot-cpp_SOURCE_DIR}
@@ -116,7 +116,7 @@ function(
         VERBATIM
         SOURCES ${godot-cpp_SOURCE_DIR}/binding_generator.py ${GODOTCPP_GDEXTENSION_API_FILE}
     )
-    set_target_properties(godot-cpp.generate_bindings PROPERTIES FOLDER "godot-cpp")
+    set_target_properties(generate_bindings PROPERTIES FOLDER "godot-cpp")
 endfunction()
 
 #[[ Generate doc_data.cpp

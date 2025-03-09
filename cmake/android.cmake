@@ -43,7 +43,7 @@ endfunction()
 
 #[===========================[ Target Generation ]===========================]
 function(android_generate)
-    target_compile_definitions(${TARGET_NAME} PUBLIC ANDROID_ENABLED UNIX_ENABLED)
+    target_compile_definitions(godot-cpp PUBLIC ANDROID_ENABLED UNIX_ENABLED)
 
     common_compiler_flags()
 endfunction()
