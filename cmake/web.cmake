@@ -23,7 +23,6 @@ function(web_generate)
         PUBLIC #
             -sSIDE_MODULE
             -sSUPPORT_LONGJMP=wasm
-            -fno-exceptions
             $<${THREADS_ENABLED}:-sUSE_PTHREADS=1>
     )
 
