@@ -339,6 +339,14 @@ def options(opts, env):
 
     opts.Add(
         BoolVariable(
+            key="debug_features",
+            help="Enable the DEBUG_ENABLED and DEBUG_METHODS_ENABLED pre-processor defines.",
+            default=env.get("debug_features", None),
+        )
+    )
+
+    opts.Add(
+        BoolVariable(
             "disable_exceptions", "Force disabling exception handling code", default=env.get("disable_exceptions", True)
         )
     )
@@ -426,9 +434,9 @@ def generate(env):
 
     # These defaults may be needed by platform tools
     env.use_hot_reload = env.get("use_hot_reload", env["target"] != "template_release")
+    env.debug_features = env.get("debug_features", env["target"] != "template_release")
     env.editor_build = env["target"] == "editor"
     env.dev_build = env["dev_build"]
-    env.debug_features = env["target"] in ["editor", "template_debug"]
 
     if env.dev_build:
         opt_level = "none"
