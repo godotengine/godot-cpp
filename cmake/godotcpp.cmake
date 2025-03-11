@@ -271,9 +271,6 @@ function(godotcpp_generate)
             "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
-    add_custom_target(godot-cpp.generate_bindings DEPENDS ${GENERATED_FILES_LIST})
-    set_target_properties(godot-cpp.generate_bindings PROPERTIES FOLDER "godot-cpp")
-
     ### Platform is derived from the toolchain target
     # See GeneratorExpressions PLATFORM_ID and CMAKE_SYSTEM_NAME
     string(
@@ -331,6 +328,9 @@ function(godotcpp_generate)
 
     # the godot-cpp.* library targets
     add_library(godot-cpp STATIC)
+
+    # Without adding this dependency to the binding generator, XCode will complain.
+    add_dependencies(godot-cpp generate_bindings)
 
     # Added for backwards compatibility with prior cmake solution so that builds dont immediately break
     # from a missing target.
