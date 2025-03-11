@@ -116,6 +116,8 @@ function(
         DEPENDS ${godot-cpp_SOURCE_DIR}/binding_generator.py
         COMMENT "Generating bindings"
     )
+    add_custom_target(generate_bindings DEPENDS ${GENERATED_FILES_LIST})
+    set_target_properties(generate_bindings PROPERTIES FOLDER "godot-cpp")
 endfunction()
 
 #[[ Generate doc_data.cpp
@@ -145,19 +147,19 @@ function(generate_doc_source OUTPUT_PATH SOURCES)
         COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
         VERBATIM
         WORKING_DIRECTORY "${godot-cpp_SOURCE_DIR}"
-        DEPENDS
         DEPENDS #
             "${godot-cpp_SOURCE_DIR}/doc_source_generator.py"
             "${SOURCES}"
         COMMENT "Generating: ${OUTPUT_PATH}"
     )
+    add_custom_target(generate_doc_source DEPENDS "${OUTPUT_PATH}")
+    set_target_properties(generate_doc_source PROPERTIES FOLDER "godot-cpp")
 endfunction()
 
 #[[ target_doc_sources
 A simpler interface to add xml files as doc source to a output target.
 TARGET: The gdexension library target
-SOURCES: a list of xml files to use for source generation and inclusion.
-This function also adds a doc_gen target to test source generation.]]
+SOURCES: a list of xml files to use for source generation and inclusion.]]
 function(target_doc_sources TARGET SOURCES)
     # set the generated file name
     set(DOC_SOURCE_FILE "${CMAKE_CURRENT_BINARY_DIR}/gen/doc_source.cpp")
@@ -169,11 +171,6 @@ function(target_doc_sources TARGET SOURCES)
     # Add DOC_SOURCE_FILE as a dependency to TARGET
     target_sources(${TARGET} PRIVATE "${DOC_SOURCE_FILE}")
 
-    # Create a dummy target that depends on the source so that users can
-    # test the file generation task.
-    if(TARGET doc_gen)
-    else()
-        add_custom_target(doc_gen)
-    endif()
-    target_sources(doc_gen PRIVATE "${DOC_SOURCE_FILE}")
+    # Without adding this dependency to the doc_source_generator, XCode will complain.
+    add_dependencies(${TARGET} generate_doc_source)
 endfunction()
