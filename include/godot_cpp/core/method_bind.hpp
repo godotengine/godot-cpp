@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_METHOD_BIND_HPP
-#define GODOT_METHOD_BIND_HPP
+#pragma once
 
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/type_info.hpp>
@@ -731,5 +730,3 @@ MethodBind *create_static_method_bind(R (*p_method)(P...)) {
 }
 
 } // namespace godot
-
-#endif // GODOT_METHOD_BIND_HPP

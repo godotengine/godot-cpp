@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_COLOR_HPP
-#define GODOT_COLOR_HPP
+#pragma once
 
 #include <godot_cpp/core/math.hpp>
 
@@ -285,5 +284,3 @@ _FORCE_INLINE_ Color operator*(float p_scalar, const Color &p_color) {
 }
 
 } // namespace godot
-
-#endif // GODOT_COLOR_HPP

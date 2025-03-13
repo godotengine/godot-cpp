@@ -51,11 +51,7 @@ virtual $RETVAL _##m_name($FUNCARGS) $CONST override; \\
 def generate_wrappers(target):
     max_versions = 12
 
-    txt = """
-#ifndef GDEXTENSION_WRAPPERS_GEN_H
-#define GDEXTENSION_WRAPPERS_GEN_H
-
-"""
+    txt = "#pragma once"
 
     for i in range(max_versions + 1):
         txt += "\n/* Module Wrapper " + str(i) + " Arguments */\n"
@@ -63,8 +59,6 @@ def generate_wrappers(target):
         txt += generate_mod_version(i, False, True)
         txt += generate_mod_version(i, True, False)
         txt += generate_mod_version(i, True, True)
-
-    txt += "\n#endif\n"
 
     with open(target, "w", encoding="utf-8") as f:
         f.write(txt)
@@ -187,8 +181,7 @@ def generate_virtuals(target):
     max_versions = 12
 
     txt = """/* THIS FILE IS GENERATED DO NOT EDIT */
-#ifndef GDEXTENSION_GDVIRTUAL_GEN_H
-#define GDEXTENSION_GDVIRTUAL_GEN_H
+#pragma once
 
 """
 
@@ -202,8 +195,6 @@ def generate_virtuals(target):
         txt += generate_virtual_version(i, False, True, True)
         txt += generate_virtual_version(i, True, False, True)
         txt += generate_virtual_version(i, True, True, True)
-
-    txt += "#endif // GDEXTENSION_GDVIRTUAL_GEN_H\n"
 
     with open(target, "w", encoding="utf-8") as f:
         f.write(txt)
@@ -364,11 +355,8 @@ def generate_builtin_bindings(api, output_dir, build_config):
         variant_size_source = []
         add_header("variant_size.hpp", variant_size_source)
 
-        header_guard = "GODOT_CPP_VARIANT_SIZE_HPP"
-        variant_size_source.append(f"#ifndef {header_guard}")
-        variant_size_source.append(f"#define {header_guard}")
+        variant_size_source.append("#pragma once")
         variant_size_source.append(f'#define GODOT_CPP_VARIANT_SIZE {builtin_sizes["Variant"]}')
-        variant_size_source.append(f"#endif // ! {header_guard}")
 
         variant_size_file.write("\n".join(variant_size_source))
 
@@ -448,8 +436,7 @@ def generate_builtin_bindings(api, output_dir, build_config):
         builtin_header = []
         add_header("builtin_types.hpp", builtin_header)
 
-        builtin_header.append("#ifndef GODOT_CPP_BUILTIN_TYPES_HPP")
-        builtin_header.append("#define GODOT_CPP_BUILTIN_TYPES_HPP")
+        builtin_header.append("#pragma once")
 
         builtin_header.append("")
 
@@ -464,8 +451,6 @@ def generate_builtin_bindings(api, output_dir, build_config):
 
         builtin_header.append("")
 
-        builtin_header.append("#endif // ! GODOT_CPP_BUILTIN_TYPES_HPP")
-
         builtin_header_file.write("\n".join(builtin_header))
 
     # Create a header with bindings for builtin types.
@@ -474,8 +459,7 @@ def generate_builtin_bindings(api, output_dir, build_config):
         builtin_binds = []
         add_header("builtin_binds.hpp", builtin_binds)
 
-        builtin_binds.append("#ifndef GODOT_CPP_BUILTIN_BINDS_HPP")
-        builtin_binds.append("#define GODOT_CPP_BUILTIN_BINDS_HPP")
+        builtin_binds.append("#pragma once")
         builtin_binds.append("")
         builtin_binds.append("#include <godot_cpp/variant/builtin_types.hpp>")
         builtin_binds.append("")
@@ -487,7 +471,6 @@ def generate_builtin_bindings(api, output_dir, build_config):
                         builtin_binds.append(f"VARIANT_ENUM_CAST({builtin_api['name']}::{enum_api['name']});")
 
         builtin_binds.append("")
-        builtin_binds.append("#endif // ! GODOT_CPP_BUILTIN_BINDS_HPP")
 
         builtin_binds_file.write("\n".join(builtin_binds))
 
@@ -503,9 +486,7 @@ def generate_builtin_class_vararg_method_implements_header(builtin_classes):
 
     add_header("builtin_vararg_methods.hpp", result)
 
-    header_guard = "GODOT_CPP_BUILTIN_VARARG_METHODS_HPP"
-    result.append(f"#ifndef {header_guard}")
-    result.append(f"#define {header_guard}")
+    result.append("#pragma once")
     result.append("")
     for builtin_api in builtin_classes:
         if "methods" not in builtin_api:
@@ -520,8 +501,6 @@ def generate_builtin_class_vararg_method_implements_header(builtin_classes):
             )
             result.append("")
 
-    result.append(f"#endif // ! {header_guard}")
-
     return "\n".join(result)
 
 
@@ -531,12 +510,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     class_name = builtin_api["name"]
     snake_class_name = camel_to_snake(class_name).upper()
 
-    header_guard = f"GODOT_CPP_{snake_class_name}_HPP"
-
     add_header(f"{snake_class_name.lower()}.hpp", result)
 
-    result.append(f"#ifndef {header_guard}")
-    result.append(f"#define {header_guard}")
+    result.append("#pragma once")
 
     result.append("")
     result.append("#include <godot_cpp/core/defs.hpp>")
@@ -965,8 +941,6 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("")
     result.append("} // namespace godot")
 
-    result.append("")
-    result.append(f"#endif // ! {header_guard}")
     result.append("")
 
     return "\n".join(result)
@@ -1498,9 +1472,7 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         result = []
         add_header(f"{snake_struct_name}.hpp", result)
 
-        header_guard = f"GODOT_CPP_{snake_struct_name.upper()}_HPP"
-        result.append(f"#ifndef {header_guard}")
-        result.append(f"#define {header_guard}")
+        result.append("#pragma once")
 
         used_classes = []
         expanded_format = native_struct["format"].replace("(", " ").replace(")", ";").replace(",", ";")
@@ -1540,7 +1512,6 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         result.append("")
         result.append("} // namespace godot")
         result.append("")
-        result.append(f"#endif // ! {header_guard}")
 
         with header_filename.open("w+", encoding="utf-8") as header_file:
             header_file.write("\n".join(result))
@@ -1556,11 +1527,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     add_header(f"{snake_class_name.lower()}.hpp", result)
 
-    header_guard = f"GODOT_CPP_{snake_class_name}_HPP"
-
-    result.append(f"#ifndef {header_guard}")
-    result.append(f"#define {header_guard}")
-
+    result.append("#pragma once")
     result.append("")
 
     if len(fully_used_classes) > 0:
@@ -1849,7 +1816,6 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append("\t")
         result.append("")
 
-    result.append(f"#endif // ! {header_guard}")
     result.append("")
 
     return "\n".join(result)
@@ -2051,9 +2017,7 @@ def generate_global_constants(api, output_dir):
 
     header_filename = include_gen_folder / "global_constants.hpp"
 
-    header_guard = "GODOT_CPP_GLOBAL_CONSTANTS_HPP"
-    header.append(f"#ifndef {header_guard}")
-    header.append(f"#define {header_guard}")
+    header.append("#pragma once")
     header.append("")
     header.append("#include <cstdint>")
     header.append("")
@@ -2083,7 +2047,6 @@ def generate_global_constants(api, output_dir):
     header.append("} // namespace godot")
 
     header.append("")
-    header.append(f"#endif // ! {header_guard}")
 
     with header_filename.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))
@@ -2099,9 +2062,7 @@ def generate_version_header(api, output_dir):
 
     header_file_path = include_gen_folder / header_filename
 
-    header_guard = "GODOT_CPP_VERSION_HPP"
-    header.append(f"#ifndef {header_guard}")
-    header.append(f"#define {header_guard}")
+    header.append("#pragma once")
     header.append("")
 
     header.append(f"#define GODOT_VERSION_MAJOR {api['header']['version_major']}")
@@ -2110,8 +2071,6 @@ def generate_version_header(api, output_dir):
     header.append(f"#define GODOT_VERSION_STATUS \"{api['header']['version_status']}\"")
     header.append(f"#define GODOT_VERSION_BUILD \"{api['header']['version_build']}\"")
 
-    header.append("")
-    header.append(f"#endif // {header_guard}")
     header.append("")
 
     with header_file_path.open("w+", encoding="utf-8") as header_file:
@@ -2132,9 +2091,7 @@ def generate_global_constant_binds(api, output_dir):
 
     header_filename = include_gen_folder / "global_constants_binds.hpp"
 
-    header_guard = "GODOT_CPP_GLOBAL_CONSTANTS_BINDS_HPP"
-    header.append(f"#ifndef {header_guard}")
-    header.append(f"#define {header_guard}")
+    header.append("#pragma once")
     header.append("")
     header.append("#include <godot_cpp/classes/global_constants.hpp>")
     header.append("")
@@ -2152,8 +2109,6 @@ def generate_global_constant_binds(api, output_dir):
     header.append("VARIANT_ENUM_CAST(godot::Variant::Type);")
 
     header.append("")
-
-    header.append(f"#endif // ! {header_guard}")
 
     with header_filename.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))
@@ -2173,9 +2128,7 @@ def generate_utility_functions(api, output_dir):
 
     header_filename = include_gen_folder / "utility_functions.hpp"
 
-    header_guard = "GODOT_CPP_UTILITY_FUNCTIONS_HPP"
-    header.append(f"#ifndef {header_guard}")
-    header.append(f"#define {header_guard}")
+    header.append("#pragma once")
     header.append("")
     header.append("#include <godot_cpp/variant/builtin_types.hpp>")
     header.append("#include <godot_cpp/variant/variant.hpp>")
@@ -2214,7 +2167,6 @@ def generate_utility_functions(api, output_dir):
     header.append("")
     header.append("} // namespace godot")
     header.append("")
-    header.append(f"#endif // ! {header_guard}")
 
     with header_filename.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))

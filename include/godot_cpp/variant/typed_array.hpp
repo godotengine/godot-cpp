@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_TYPED_ARRAY_HPP
-#define GODOT_TYPED_ARRAY_HPP
+#pragma once
 
 #include <godot_cpp/variant/array.hpp>
 #include <godot_cpp/variant/variant.hpp>
@@ -138,5 +137,3 @@ MAKE_TYPED_ARRAY(PackedColorArray, Variant::PACKED_COLOR_ARRAY)
 #undef MAKE_TYPED_ARRAY
 
 } // namespace godot
-
-#endif // GODOT_TYPED_ARRAY_HPP

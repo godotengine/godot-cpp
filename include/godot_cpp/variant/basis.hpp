@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_BASIS_HPP
-#define GODOT_BASIS_HPP
+#pragma once
 
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/quaternion.hpp>
@@ -315,5 +314,3 @@ real_t Basis::determinant() const {
 }
 
 } // namespace godot
-
-#endif // GODOT_BASIS_HPP
