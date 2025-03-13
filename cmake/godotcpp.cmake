@@ -106,6 +106,13 @@ function(godotcpp_options)
     #NOTE: arch is managed by using toolchain files.
     # To create a universal build for macos, set CMAKE_OSX_ARCHITECTURES
 
+    set(GODOTCPP_TARGET
+        "template_debug"
+        CACHE STRING
+        "Which target to generate. valid values are: template_debug, template_release, and editor"
+    )
+    set_property(CACHE GODOTCPP_TARGET PROPERTY STRINGS "template_debug;template_release;editor")
+
     # Input from user for GDExtension interface header and the API JSON file
     set(GODOTCPP_GDEXTENSION_DIR
         "gdextension"
@@ -305,94 +312,79 @@ function(godotcpp_generate)
     set(IS_DEV_BUILD "$<BOOL:${GODOTCPP_DEV_BUILD}>")
 
     ### Define our godot-cpp library targets
-    foreach(TARGET_ALIAS template_debug template_release editor)
-        set(TARGET_NAME "godot-cpp.${TARGET_ALIAS}")
+    # Generator Expressions that rely on the target
+    set(DEBUG_FEATURES "$<NOT:$<STREQUAL:${GODOTCPP_TARGET},template_release>>")
+    set(HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},${DEBUG_FEATURES},$<BOOL:${GODOTCPP_USE_HOT_RELOAD}>>")
 
-        # Generator Expressions that rely on the target
-        set(DEBUG_FEATURES "$<NOT:$<STREQUAL:${TARGET_ALIAS},template_release>>")
-        set(HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},${DEBUG_FEATURES},$<BOOL:${GODOTCPP_USE_HOT_RELOAD}>>")
+    # Suffix
+    string(
+        CONCAT
+        GODOTCPP_SUFFIX
+        "$<1:.${SYSTEM_NAME}>"
+        "$<1:.${GODOTCPP_TARGET}>"
+        "$<${IS_DEV_BUILD}:.dev>"
+        "$<$<STREQUAL:${GODOTCPP_PRECISION},double>:.double>"
+        "$<1:.${ARCH_NAME}>"
+        # TODO IOS_SIMULATOR
+        "$<$<NOT:${THREADS_ENABLED}>:.nothreads>"
+    )
 
-        # Suffix
-        string(
-            CONCAT
-            GODOTCPP_SUFFIX
-            "$<1:.${SYSTEM_NAME}>"
-            "$<1:.${TARGET_ALIAS}>"
-            "$<${IS_DEV_BUILD}:.dev>"
-            "$<$<STREQUAL:${GODOTCPP_PRECISION},double>:.double>"
-            "$<1:.${ARCH_NAME}>"
-            # TODO IOS_SIMULATOR
-            "$<$<NOT:${THREADS_ENABLED}>:.nothreads>"
-        )
-
-        # People are compiling godot by itself.
-        set(EXCLUDE EXCLUDE_FROM_ALL)
-        if(GODOTCPP_IS_TOP_LEVEL)
-            if(TARGET_ALIAS STREQUAL template_debug)
-                set(EXCLUDE "")
-            endif()
-        endif()
-
-        # the godot-cpp.* library targets
-        add_library(${TARGET_NAME} STATIC ${EXCLUDE})
-
-        add_library(godot-cpp::${TARGET_ALIAS} ALIAS ${TARGET_NAME})
-
-        file(GLOB_RECURSE GODOTCPP_SOURCES LIST_DIRECTORIES NO CONFIGURE_DEPENDS src/*.cpp)
-
-        target_sources(${TARGET_NAME} PRIVATE ${GODOTCPP_SOURCES} ${GENERATED_FILES_LIST})
-
-        target_include_directories(
-            ${TARGET_NAME}
-            ${GODOTCPP_SYSTEM_HEADERS_ATTRIBUTE}
-            PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/gen/include ${GODOTCPP_GDEXTENSION_DIR}
-        )
-
-        # gersemi: off
-        set_target_properties(
-            ${TARGET_NAME}
-            PROPERTIES
-                CXX_STANDARD 17
-                CXX_EXTENSIONS OFF
-                CXX_VISIBILITY_PRESET ${GODOTCPP_SYMBOL_VISIBILITY}
-
-                COMPILE_WARNING_AS_ERROR ${GODOTCPP_WARNING_AS_ERROR}
-                POSITION_INDEPENDENT_CODE ON
-                BUILD_RPATH_USE_ORIGIN ON
-
-                PREFIX      "lib"
-                OUTPUT_NAME "${PROJECT_NAME}${GODOTCPP_SUFFIX}"
-
-                ARCHIVE_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>"
-
-                # Things that are handy to know for dependent targets
-                GODOTCPP_PLATFORM  "${SYSTEM_NAME}"
-                GODOTCPP_TARGET    "${TARGET_ALIAS}"
-                GODOTCPP_ARCH      "${ARCH_NAME}"
-                GODOTCPP_PRECISION "${GODOTCPP_PRECISION}"
-                GODOTCPP_SUFFIX    "${GODOTCPP_SUFFIX}"
-
-                # Some IDE's respect this property to logically group targets
-                FOLDER "godot-cpp"
-        )
-        # gersemi: on
-
-        if(CMAKE_SYSTEM_NAME STREQUAL Android)
-            android_generate()
-        elseif(CMAKE_SYSTEM_NAME STREQUAL iOS)
-            ios_generate()
-        elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
-            linux_generate()
-        elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
-            macos_generate()
-        elseif(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-            web_generate()
-        elseif(CMAKE_SYSTEM_NAME STREQUAL Windows)
-            windows_generate()
-        endif()
-    endforeach()
+    # the godot-cpp.* library targets
+    add_library(godot-cpp STATIC)
 
     # Added for backwards compatibility with prior cmake solution so that builds dont immediately break
     # from a missing target.
-    add_library(godot::cpp ALIAS godot-cpp.template_debug)
+    add_library(godot::cpp ALIAS godot-cpp)
+
+    file(GLOB_RECURSE GODOTCPP_SOURCES LIST_DIRECTORIES NO CONFIGURE_DEPENDS src/*.cpp)
+
+    target_sources(godot-cpp PRIVATE ${GODOTCPP_SOURCES} ${GENERATED_FILES_LIST})
+
+    target_include_directories(
+        godot-cpp
+        ${GODOTCPP_SYSTEM_HEADERS_ATTRIBUTE}
+        PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/gen/include ${GODOTCPP_GDEXTENSION_DIR}
+    )
+
+    # gersemi: off
+    set_target_properties(
+        godot-cpp
+        PROPERTIES
+            CXX_STANDARD 17
+            CXX_EXTENSIONS OFF
+            CXX_VISIBILITY_PRESET ${GODOTCPP_SYMBOL_VISIBILITY}
+
+            COMPILE_WARNING_AS_ERROR ${GODOTCPP_WARNING_AS_ERROR}
+            POSITION_INDEPENDENT_CODE ON
+            BUILD_RPATH_USE_ORIGIN ON
+
+            PREFIX      "lib"
+            OUTPUT_NAME "${PROJECT_NAME}${GODOTCPP_SUFFIX}"
+
+            ARCHIVE_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>"
+
+            # Things that are handy to know for dependent targets
+            GODOTCPP_PLATFORM  "${SYSTEM_NAME}"
+            GODOTCPP_TARGET    "${GODOTCPP_TARGET}"
+            GODOTCPP_ARCH      "${ARCH_NAME}"
+            GODOTCPP_PRECISION "${GODOTCPP_PRECISION}"
+            GODOTCPP_SUFFIX    "${GODOTCPP_SUFFIX}"
+
+            # Some IDE's respect this property to logically group targets
+            FOLDER "godot-cpp"
+    )
+    # gersemi: on
+    if(CMAKE_SYSTEM_NAME STREQUAL Android)
+        android_generate()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL iOS)
+        ios_generate()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
+        linux_generate()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+        macos_generate()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+        web_generate()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL Windows)
+        windows_generate()
+    endif()
 endfunction()
