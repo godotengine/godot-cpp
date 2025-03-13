@@ -319,14 +319,14 @@ inline float sinh(float p_x) {
 }
 
 inline float sinc(float p_x) {
-	return p_x == 0 ? 1 : ::sin(p_x) / p_x;
+	return p_x == 0 ? 1 : ::sinf(p_x) / p_x;
 }
 inline double sinc(double p_x) {
 	return p_x == 0 ? 1 : ::sin(p_x) / p_x;
 }
 
 inline float sincn(float p_x) {
-	return (float)sinc(Math_PI * p_x);
+	return sinc((float)Math_PI * p_x);
 }
 inline double sincn(double p_x) {
 	return sinc(Math_PI * p_x);
@@ -652,8 +652,8 @@ inline bool is_equal_approx(double a, double b) {
 		return true;
 	}
 	// Then check for approximate equality.
-	double tolerance = CMP_EPSILON * abs(a);
-	if (tolerance < CMP_EPSILON) {
+	double tolerance = (double)CMP_EPSILON * abs(a);
+	if (tolerance < (double)CMP_EPSILON) {
 		tolerance = CMP_EPSILON;
 	}
 	return abs(a - b) < tolerance;
@@ -669,7 +669,7 @@ inline bool is_equal_approx(double a, double b, double tolerance) {
 }
 
 inline bool is_zero_approx(double s) {
-	return abs(s) < CMP_EPSILON;
+	return abs(s) < (double)CMP_EPSILON;
 }
 
 inline float absf(float g) {
@@ -765,10 +765,10 @@ inline double pingpong(double value, double length) {
 
 // This function should be as fast as possible and rounding mode should not matter.
 inline int fast_ftoi(float a) {
-	static int b;
+	int b;
 
-#if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0603) || WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP // windows 8 phone?
-	b = (int)((a > 0.0) ? (a + 0.5) : (a - 0.5));
+#if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0603) || (defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP) // windows 8 phone?
+	b = (int)((a > 0.0f) ? (a + 0.5f) : (a - 0.5f));
 
 #elif defined(_MSC_VER) && _MSC_VER < 1800
 	__asm fld a __asm fistp b
@@ -787,9 +787,10 @@ inline int fast_ftoi(float a) {
 	return b;
 }
 
-inline double snapped(double p_value, double p_step) {
+template <typename T>
+inline T snapped(T p_value, T p_step) {
 	if (p_step != 0) {
-		p_value = Math::floor(p_value / p_step + 0.5) * p_step;
+		p_value = Math::floor(p_value / p_step + 0.5f) * p_step;
 	}
 	return p_value;
 }

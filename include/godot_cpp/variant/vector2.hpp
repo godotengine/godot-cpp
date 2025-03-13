@@ -291,13 +291,13 @@ Vector2 Vector2::bezier_interpolate(const Vector2 &p_control_1, const Vector2 &p
 	Vector2 res = *this;
 
 	/* Formula from Wikipedia article on Bezier curves. */
-	real_t omt = (1.0 - p_t);
+	real_t omt = (1.0f - p_t);
 	real_t omt2 = omt * omt;
 	real_t omt3 = omt2 * omt;
 	real_t t2 = p_t * p_t;
 	real_t t3 = t2 * p_t;
 
-	return res * omt3 + p_control_1 * omt2 * p_t * 3.0 + p_control_2 * omt * t2 * 3.0 + p_end * t3;
+	return res * omt3 + p_control_1 * omt2 * p_t * 3.0f + p_control_2 * omt * t2 * 3.0f + p_end * t3;
 }
 
 Vector2 Vector2::direction_to(const Vector2 &p_to) const {

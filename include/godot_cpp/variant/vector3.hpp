@@ -276,13 +276,13 @@ Vector3 Vector3::bezier_interpolate(const Vector3 &p_control_1, const Vector3 &p
 	Vector3 res = *this;
 
 	/* Formula from Wikipedia article on Bezier curves. */
-	real_t omt = (1.0 - p_t);
+	real_t omt = (1.0f - p_t);
 	real_t omt2 = omt * omt;
 	real_t omt3 = omt2 * omt;
 	real_t t2 = p_t * p_t;
 	real_t t3 = t2 * p_t;
 
-	return res * omt3 + p_control_1 * omt2 * p_t * 3.0 + p_control_2 * omt * t2 * 3.0 + p_end * t3;
+	return res * omt3 + p_control_1 * omt2 * p_t * 3.0f + p_control_2 * omt * t2 * 3.0f + p_end * t3;
 }
 
 real_t Vector3::distance_to(const Vector3 &p_to) const {

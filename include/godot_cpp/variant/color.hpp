@@ -140,9 +140,9 @@ struct [[nodiscard]] Color {
 
 		float cMax = MAX(cRed, MAX(cGreen, cBlue));
 
-		float expp = MAX(-B - 1.0f, floor(Math::log(cMax) / (real_t)Math_LN2)) + 1.0f + B;
+		float expp = MAX(-B - 1.0f, Math::floor(Math::log(cMax) / (real_t)Math_LN2)) + 1.0f + B;
 
-		float sMax = (float)floor((cMax / Math::pow(2.0f, expp - B - N)) + 0.5f);
+		float sMax = Math::floor((cMax / Math::pow(2.0f, expp - B - N)) + 0.5f);
 
 		float exps = expp + 1.0f;
 
@@ -150,9 +150,9 @@ struct [[nodiscard]] Color {
 			exps = expp;
 		}
 
-		float sRed = Math::floor((cRed / pow(2.0f, exps - B - N)) + 0.5f);
-		float sGreen = Math::floor((cGreen / pow(2.0f, exps - B - N)) + 0.5f);
-		float sBlue = Math::floor((cBlue / pow(2.0f, exps - B - N)) + 0.5f);
+		float sRed = Math::floor((cRed / Math::pow(2.0f, exps - B - N)) + 0.5f);
+		float sGreen = Math::floor((cGreen / Math::pow(2.0f, exps - B - N)) + 0.5f);
+		float sBlue = Math::floor((cBlue / Math::pow(2.0f, exps - B - N)) + 0.5f);
 
 		return (uint32_t(Math::fast_ftoi(sRed)) & 0x1FF) | ((uint32_t(Math::fast_ftoi(sGreen)) & 0x1FF) << 9) | ((uint32_t(Math::fast_ftoi(sBlue)) & 0x1FF) << 18) | ((uint32_t(Math::fast_ftoi(exps)) & 0x1F) << 27);
 	}
