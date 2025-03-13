@@ -236,6 +236,14 @@ void Array::_ref(const Array &p_from) const {
 	internal::gdextension_interface_array_ref((GDExtensionTypePtr *)this, (GDExtensionConstTypePtr *)&p_from);
 }
 
+const Variant *Array::ptr() const {
+	return (const Variant *)internal::gdextension_interface_array_operator_index_const((GDExtensionTypePtr *)this, 0);
+}
+
+Variant *Array::ptrw() {
+	return (Variant *)internal::gdextension_interface_array_operator_index((GDExtensionTypePtr *)this, 0);
+}
+
 const Variant &Dictionary::operator[](const Variant &p_key) const {
 	const Variant *var = (const Variant *)internal::gdextension_interface_dictionary_operator_index_const((GDExtensionTypePtr *)this, (GDExtensionVariantPtr)&p_key);
 	return *var;
