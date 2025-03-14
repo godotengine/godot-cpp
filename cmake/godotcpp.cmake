@@ -276,7 +276,7 @@ function(godotcpp_generate)
     string(
         CONCAT
         SYSTEM_NAME
-        "$<$<PLATFORM_ID:Android>:android.${ANDROID_ABI}>"
+        "$<$<PLATFORM_ID:Android>:android>"
         "$<$<PLATFORM_ID:iOS>:ios>"
         "$<$<PLATFORM_ID:Linux>:linux>"
         "$<$<PLATFORM_ID:Darwin>:macos>"
