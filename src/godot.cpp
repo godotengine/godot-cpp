@@ -204,6 +204,7 @@ GDExtensionInterfaceClassdbUnregisterExtensionClass gdextension_interface_classd
 GDExtensionInterfaceGetLibraryPath gdextension_interface_get_library_path = nullptr;
 GDExtensionInterfaceEditorAddPlugin gdextension_interface_editor_add_plugin = nullptr;
 GDExtensionInterfaceEditorRemovePlugin gdextension_interface_editor_remove_plugin = nullptr;
+GDExtensionInterfaceEditorRegisterGetClassesUsedCallback gdextension_interface_editor_register_get_classes_used_callback = nullptr;
 GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8Chars gdextension_interface_editor_help_load_xml_from_utf8_chars = nullptr;
 GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8CharsAndLen gdextension_interface_editor_help_load_xml_from_utf8_chars_and_len = nullptr;
 GDExtensionInterfaceImagePtrw gdextension_interface_image_ptrw = nullptr;
@@ -486,6 +487,7 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	LOAD_PROC_ADDRESS(get_library_path, GDExtensionInterfaceGetLibraryPath);
 	LOAD_PROC_ADDRESS(editor_add_plugin, GDExtensionInterfaceEditorAddPlugin);
 	LOAD_PROC_ADDRESS(editor_remove_plugin, GDExtensionInterfaceEditorRemovePlugin);
+	LOAD_PROC_ADDRESS(editor_register_get_classes_used_callback, GDExtensionInterfaceEditorRegisterGetClassesUsedCallback);
 	LOAD_PROC_ADDRESS(editor_help_load_xml_from_utf8_chars, GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8Chars);
 	LOAD_PROC_ADDRESS(editor_help_load_xml_from_utf8_chars_and_len, GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8CharsAndLen);
 	LOAD_PROC_ADDRESS(image_ptrw, GDExtensionInterfaceImagePtrw);
@@ -521,6 +523,8 @@ void GDExtensionBinding::initialize_level(void *p_userdata, GDExtensionInitializ
 	level_initialized[p_level]++;
 
 	if ((ModuleInitializationLevel)p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
+		internal::gdextension_interface_editor_register_get_classes_used_callback(internal::library, &ClassDB::_editor_get_classes_used_callback);
+
 		const internal::DocData &doc_data = internal::get_doc_data();
 		if (doc_data.is_valid()) {
 			doc_data.load_data();
