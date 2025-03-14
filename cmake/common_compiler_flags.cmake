@@ -29,11 +29,11 @@ set(IS_GNU "$<CXX_COMPILER_ID:GNU>")
 set(IS_MSVC "$<CXX_COMPILER_ID:MSVC>")
 set(NOT_MSVC "$<NOT:$<CXX_COMPILER_ID:MSVC>>")
 
-set(GNU_LT_V8 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,8>")
-set(GNU_GE_V9 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,9>")
-set(GNU_GT_V11 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,11>")
-set(GNU_LT_V11 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,11>")
-set(GNU_GE_V12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>")
+set(LT_V8 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,8>")
+set(GE_V9 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,9>")
+set(GT_V11 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,11>")
+set(LT_V11 "$<VERSION_LESS:$<CXX_COMPILER_VERSION>,11>")
+set(GE_V12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>")
 
 #[===========================[ compiler_detection ]===========================]
 #[[ Check for clang-cl with MSVC frontend
@@ -63,6 +63,8 @@ function(common_compiler_flags)
     # These compiler options reflect what is in godot/SConstruct.
     target_compile_options(
         godot-cpp
+        # The public flag tells CMake that the following options are transient,
+        # and will propagate to consumers.
         PUBLIC
             # Disable exception handling. Godot doesn't use exceptions anywhere, and this
             # saves around 20% of binary size and very significant build time.
@@ -86,7 +88,15 @@ function(common_compiler_flags)
             $<${IS_MSVC}:
                 # /MP isn't valid for clang-cl with msvc frontend
                 $<$<CXX_COMPILER_ID:MSVC>:/MP${PROC_N}>
-                /W4
+
+                # Interpret source files as utf-8
+                /utf-8
+            >
+
+        # Warnings below, these do not need to propagate to consumers.
+        PRIVATE
+            $<${IS_MSVC}:
+                /W4      # Warning level 4 (informational) warnings that aren't off by default.
 
                 # Disable warnings which we don't plan to fix.
                 /wd4100  # C4100 (unreferenced formal parameter): Doesn't play nice with polymorphism.
@@ -99,8 +109,6 @@ function(common_compiler_flags)
                 /wd4514  # C4514 (unreferenced inline function has been removed)
                 /wd4714  # C4714 (function marked as __forceinline not inlined)
                 /wd4820  # C4820 (padding added after construct)
-
-                /utf-8
             >
 
             # Clang and GNU common options
@@ -130,18 +138,18 @@ function(common_compiler_flags)
                 -Wstringop-overflow=4
 
                 # Bogus warning fixed in 8+.
-                $<${GNU_LT_V8}:-Wno-strict-overflow>
+                $<${LT_V8}:-Wno-strict-overflow>
 
-                $<${GNU_GE_V9}:-Wattribute-alias=2>
+                $<${GE_V9}:-Wattribute-alias=2>
 
                 # Broke on MethodBind templates before GCC 11.
-                $<${GNU_GT_V11}:-Wlogical-op>
+                $<${GT_V11}:-Wlogical-op>
 
                 # Regression in GCC 9/10, spams so much in our variadic templates that we need to outright disable it.
-                $<${GNU_LT_V11}:-Wno-type-limits>
+                $<${LT_V11}:-Wno-type-limits>
 
                 # False positives in our error macros, see GH-58747.
-                $<${GNU_GE_V12}:-Wno-return-type>
+                $<${GE_V12}:-Wno-return-type>
             >
     )
 
@@ -167,17 +175,17 @@ function(common_compiler_flags)
     target_link_options(
         godot-cpp
         PUBLIC
-            $<${IS_MSVC}:
-                /WX             # treat link warnings as errors.
-                /MANIFEST:NO    # We dont need a manifest
-            >
-
             $<${DEBUG_SYMBOLS}:$<${IS_MSVC}:/DEBUG:FULL>>
 
             $<$<NOT:${DEBUG_SYMBOLS}>:
                 $<${IS_GNU}:-s>
                 $<${IS_CLANG}:-s>
                 $<${IS_APPLECLANG}:-Wl,-S -Wl,-x -Wl,-dead_strip>
+            >
+        PRIVATE
+            $<${IS_MSVC}:
+                /WX             # treat link warnings as errors.
+                /MANIFEST:NO    # We dont need a manifest
             >
     )
     # gersemi: on
