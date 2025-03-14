@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GDEXTENSION_INTERFACE_H
-#define GDEXTENSION_INTERFACE_H
+#pragma once
 
 /* This is a C class header, you can copy it and use it directly in your own binders.
  * Together with the JSON file, you should be able to generate any binder.
@@ -400,6 +399,9 @@ typedef struct {
 } GDExtensionClassCreationInfo4;
 
 typedef void *GDExtensionClassLibraryPtr;
+
+/* Passed a pointer to a PackedStringArray that should be filled with the classes used by the GDExtension. */
+typedef void (*GDExtensionEditorGetClassesUsedCallback)(GDExtensionTypePtr p_packed_string_array);
 
 /* Method */
 
@@ -3078,8 +3080,20 @@ typedef void (*GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8Chars)(const char *
  */
 typedef void (*GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8CharsAndLen)(const char *p_data, GDExtensionInt p_size);
 
+/**
+ * @name editor_register_get_classes_used_callback
+ * @since 4.5
+ *
+ * Registers a callback that Godot can call to get the list of classes used by the calling GDExtension.
+ *
+ * This is used for generating build profiles, in order to recompile Godot with only the classes used.
+ * If a GDExtension doesn't register a callback, Godot will assume that it could use be using any classes.
+ *
+ * @param p_library A pointer the library received by the GDExtension's entry point function.
+ * @param p_callback The callback to retrieve the list of used classes.
+ */
+typedef void (*GDExtensionInterfaceEditorRegisterGetClassesUsedCallback)(GDExtensionClassLibraryPtr p_library, GDExtensionEditorGetClassesUsedCallback p_callback);
+
 #ifdef __cplusplus
 }
 #endif
-
-#endif // GDEXTENSION_INTERFACE_H
