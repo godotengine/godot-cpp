@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_BASIS_HPP
-#define GODOT_BASIS_HPP
+#pragma once
 
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/quaternion.hpp>
@@ -44,11 +43,11 @@ struct [[nodiscard]] Basis {
 		Vector3(0, 0, 1)
 	};
 
-	_FORCE_INLINE_ const Vector3 &operator[](int axis) const {
-		return rows[axis];
+	_FORCE_INLINE_ const Vector3 &operator[](int p_row) const {
+		return rows[p_row];
 	}
-	_FORCE_INLINE_ Vector3 &operator[](int axis) {
-		return rows[axis];
+	_FORCE_INLINE_ Vector3 &operator[](int p_row) {
+		return rows[p_row];
 	}
 
 	void invert();
@@ -59,21 +58,19 @@ struct [[nodiscard]] Basis {
 
 	_FORCE_INLINE_ real_t determinant() const;
 
-	void from_z(const Vector3 &p_z);
-
 	void rotate(const Vector3 &p_axis, real_t p_angle);
 	Basis rotated(const Vector3 &p_axis, real_t p_angle) const;
 
 	void rotate_local(const Vector3 &p_axis, real_t p_angle);
 	Basis rotated_local(const Vector3 &p_axis, real_t p_angle) const;
 
-	void rotate(const Vector3 &p_euler, EulerOrder p_order = EULER_ORDER_YXZ);
-	Basis rotated(const Vector3 &p_euler, EulerOrder p_order = EULER_ORDER_YXZ) const;
+	void rotate(const Vector3 &p_euler, EulerOrder p_order = EulerOrder::EULER_ORDER_YXZ);
+	Basis rotated(const Vector3 &p_euler, EulerOrder p_order = EulerOrder::EULER_ORDER_YXZ) const;
 
 	void rotate(const Quaternion &p_quaternion);
 	Basis rotated(const Quaternion &p_quaternion) const;
 
-	Vector3 get_euler_normalized(EulerOrder p_order = EULER_ORDER_YXZ) const;
+	Vector3 get_euler_normalized(EulerOrder p_order = EulerOrder::EULER_ORDER_YXZ) const;
 	void get_rotation_axis_angle(Vector3 &p_axis, real_t &p_angle) const;
 	void get_rotation_axis_angle_local(Vector3 &p_axis, real_t &p_angle) const;
 	Quaternion get_rotation_quaternion() const;
@@ -82,9 +79,9 @@ struct [[nodiscard]] Basis {
 
 	Vector3 rotref_posscale_decomposition(Basis &rotref) const;
 
-	Vector3 get_euler(EulerOrder p_order = EULER_ORDER_YXZ) const;
-	void set_euler(const Vector3 &p_euler, EulerOrder p_order = EULER_ORDER_YXZ);
-	static Basis from_euler(const Vector3 &p_euler, EulerOrder p_order = EULER_ORDER_YXZ) {
+	Vector3 get_euler(EulerOrder p_order = EulerOrder::EULER_ORDER_YXZ) const;
+	void set_euler(const Vector3 &p_euler, EulerOrder p_order = EulerOrder::EULER_ORDER_YXZ);
+	static Basis from_euler(const Vector3 &p_euler, EulerOrder p_order = EulerOrder::EULER_ORDER_YXZ) {
 		Basis b;
 		b.set_euler(p_euler, p_order);
 		return b;
@@ -104,27 +101,25 @@ struct [[nodiscard]] Basis {
 
 	void scale_orthogonal(const Vector3 &p_scale);
 	Basis scaled_orthogonal(const Vector3 &p_scale) const;
-
-	void make_scale_uniform();
-	float get_uniform_scale() const;
+	real_t get_uniform_scale() const;
 
 	Vector3 get_scale() const;
 	Vector3 get_scale_abs() const;
-	Vector3 get_scale_local() const;
+	Vector3 get_scale_global() const;
 
 	void set_axis_angle_scale(const Vector3 &p_axis, real_t p_angle, const Vector3 &p_scale);
-	void set_euler_scale(const Vector3 &p_euler, const Vector3 &p_scale, EulerOrder p_order = EULER_ORDER_YXZ);
+	void set_euler_scale(const Vector3 &p_euler, const Vector3 &p_scale, EulerOrder p_order = EulerOrder::EULER_ORDER_YXZ);
 	void set_quaternion_scale(const Quaternion &p_quaternion, const Vector3 &p_scale);
 
 	// transposed dot products
-	_FORCE_INLINE_ real_t tdotx(const Vector3 &v) const {
-		return rows[0][0] * v[0] + rows[1][0] * v[1] + rows[2][0] * v[2];
+	_FORCE_INLINE_ real_t tdotx(const Vector3 &p_v) const {
+		return rows[0][0] * p_v[0] + rows[1][0] * p_v[1] + rows[2][0] * p_v[2];
 	}
-	_FORCE_INLINE_ real_t tdoty(const Vector3 &v) const {
-		return rows[0][1] * v[0] + rows[1][1] * v[1] + rows[2][1] * v[2];
+	_FORCE_INLINE_ real_t tdoty(const Vector3 &p_v) const {
+		return rows[0][1] * p_v[0] + rows[1][1] * p_v[1] + rows[2][1] * p_v[2];
 	}
-	_FORCE_INLINE_ real_t tdotz(const Vector3 &v) const {
-		return rows[0][2] * v[0] + rows[1][2] * v[1] + rows[2][2] * v[2];
+	_FORCE_INLINE_ real_t tdotz(const Vector3 &p_v) const {
+		return rows[0][2] * p_v[0] + rows[1][2] * p_v[1] + rows[2][2] * p_v[2];
 	}
 
 	bool is_equal_approx(const Basis &p_basis) const;
@@ -141,31 +136,35 @@ struct [[nodiscard]] Basis {
 	_FORCE_INLINE_ Basis operator+(const Basis &p_matrix) const;
 	_FORCE_INLINE_ void operator-=(const Basis &p_matrix);
 	_FORCE_INLINE_ Basis operator-(const Basis &p_matrix) const;
-	_FORCE_INLINE_ void operator*=(const real_t p_val);
-	_FORCE_INLINE_ Basis operator*(const real_t p_val) const;
+	_FORCE_INLINE_ void operator*=(real_t p_val);
+	_FORCE_INLINE_ Basis operator*(real_t p_val) const;
+	_FORCE_INLINE_ void operator/=(real_t p_val);
+	_FORCE_INLINE_ Basis operator/(real_t p_val) const;
 
 	bool is_orthogonal() const;
+	bool is_orthonormal() const;
+	bool is_conformal() const;
 	bool is_diagonal() const;
 	bool is_rotation() const;
 
-	Basis lerp(const Basis &p_to, const real_t &p_weight) const;
-	Basis slerp(const Basis &p_to, const real_t &p_weight) const;
+	Basis lerp(const Basis &p_to, real_t p_weight) const;
+	Basis slerp(const Basis &p_to, real_t p_weight) const;
 	void rotate_sh(real_t *p_values);
 
 	operator String() const;
 
 	/* create / set */
 
-	_FORCE_INLINE_ void set(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz) {
-		rows[0][0] = xx;
-		rows[0][1] = xy;
-		rows[0][2] = xz;
-		rows[1][0] = yx;
-		rows[1][1] = yy;
-		rows[1][2] = yz;
-		rows[2][0] = zx;
-		rows[2][1] = zy;
-		rows[2][2] = zz;
+	_FORCE_INLINE_ void set(real_t p_xx, real_t p_xy, real_t p_xz, real_t p_yx, real_t p_yy, real_t p_yz, real_t p_zx, real_t p_zy, real_t p_zz) {
+		rows[0][0] = p_xx;
+		rows[0][1] = p_xy;
+		rows[0][2] = p_xz;
+		rows[1][0] = p_yx;
+		rows[1][1] = p_yy;
+		rows[1][2] = p_yz;
+		rows[2][0] = p_zx;
+		rows[2][1] = p_zy;
+		rows[2][2] = p_zz;
 	}
 	_FORCE_INLINE_ void set_columns(const Vector3 &p_x, const Vector3 &p_y, const Vector3 &p_z) {
 		set_column(0, p_x);
@@ -195,20 +194,20 @@ struct [[nodiscard]] Basis {
 		rows[2].zero();
 	}
 
-	_FORCE_INLINE_ Basis transpose_xform(const Basis &m) const {
+	_FORCE_INLINE_ Basis transpose_xform(const Basis &p_m) const {
 		return Basis(
-				rows[0].x * m[0].x + rows[1].x * m[1].x + rows[2].x * m[2].x,
-				rows[0].x * m[0].y + rows[1].x * m[1].y + rows[2].x * m[2].y,
-				rows[0].x * m[0].z + rows[1].x * m[1].z + rows[2].x * m[2].z,
-				rows[0].y * m[0].x + rows[1].y * m[1].x + rows[2].y * m[2].x,
-				rows[0].y * m[0].y + rows[1].y * m[1].y + rows[2].y * m[2].y,
-				rows[0].y * m[0].z + rows[1].y * m[1].z + rows[2].y * m[2].z,
-				rows[0].z * m[0].x + rows[1].z * m[1].x + rows[2].z * m[2].x,
-				rows[0].z * m[0].y + rows[1].z * m[1].y + rows[2].z * m[2].y,
-				rows[0].z * m[0].z + rows[1].z * m[1].z + rows[2].z * m[2].z);
+				rows[0].x * p_m[0].x + rows[1].x * p_m[1].x + rows[2].x * p_m[2].x,
+				rows[0].x * p_m[0].y + rows[1].x * p_m[1].y + rows[2].x * p_m[2].y,
+				rows[0].x * p_m[0].z + rows[1].x * p_m[1].z + rows[2].x * p_m[2].z,
+				rows[0].y * p_m[0].x + rows[1].y * p_m[1].x + rows[2].y * p_m[2].x,
+				rows[0].y * p_m[0].y + rows[1].y * p_m[1].y + rows[2].y * p_m[2].y,
+				rows[0].y * p_m[0].z + rows[1].y * p_m[1].z + rows[2].y * p_m[2].z,
+				rows[0].z * p_m[0].x + rows[1].z * p_m[1].x + rows[2].z * p_m[2].x,
+				rows[0].z * p_m[0].y + rows[1].z * p_m[1].y + rows[2].z * p_m[2].y,
+				rows[0].z * p_m[0].z + rows[1].z * p_m[1].z + rows[2].z * p_m[2].z);
 	}
-	Basis(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz) {
-		set(xx, xy, xz, yx, yy, yz, zx, zy, zz);
+	Basis(real_t p_xx, real_t p_xy, real_t p_xz, real_t p_yx, real_t p_yy, real_t p_yz, real_t p_zx, real_t p_zy, real_t p_zz) {
+		set(p_xx, p_xy, p_xz, p_yx, p_yy, p_yz, p_zx, p_zy, p_zz);
 	}
 
 	void orthonormalize();
@@ -282,15 +281,27 @@ _FORCE_INLINE_ Basis Basis::operator-(const Basis &p_matrix) const {
 	return ret;
 }
 
-_FORCE_INLINE_ void Basis::operator*=(const real_t p_val) {
+_FORCE_INLINE_ void Basis::operator*=(real_t p_val) {
 	rows[0] *= p_val;
 	rows[1] *= p_val;
 	rows[2] *= p_val;
 }
 
-_FORCE_INLINE_ Basis Basis::operator*(const real_t p_val) const {
+_FORCE_INLINE_ Basis Basis::operator*(real_t p_val) const {
 	Basis ret(*this);
 	ret *= p_val;
+	return ret;
+}
+
+_FORCE_INLINE_ void Basis::operator/=(real_t p_val) {
+	rows[0] /= p_val;
+	rows[1] /= p_val;
+	rows[2] /= p_val;
+}
+
+_FORCE_INLINE_ Basis Basis::operator/(real_t p_val) const {
+	Basis ret(*this);
+	ret /= p_val;
 	return ret;
 }
 
@@ -315,5 +326,3 @@ real_t Basis::determinant() const {
 }
 
 } // namespace godot
-
-#endif // GODOT_BASIS_HPP

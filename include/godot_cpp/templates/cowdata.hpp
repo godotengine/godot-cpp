@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_COWDATA_HPP
-#define GODOT_COWDATA_HPP
+#pragma once
 
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/core/error_macros.hpp>
@@ -38,8 +37,10 @@
 #include <godot_cpp/templates/safe_refcount.hpp>
 
 #include <cstring>
+#include <initializer_list>
 #include <new>
 #include <type_traits>
+#include <utility>
 
 namespace godot {
 
@@ -167,13 +168,25 @@ private:
 		return *out;
 	}
 
-	void _unref(void *p_data);
+	// Decrements the reference count. Deallocates the backing buffer if needed.
+	// After this function, _ptr is guaranteed to be NULL.
+	void _unref();
 	void _ref(const CowData *p_from);
 	void _ref(const CowData &p_from);
 	USize _copy_on_write();
+	Error _realloc(Size p_alloc_size);
 
 public:
 	void operator=(const CowData<T> &p_from) { _ref(p_from); }
+	void operator=(CowData<T> &&p_from) {
+		if (_ptr == p_from._ptr) {
+			return;
+		}
+
+		_unref();
+		_ptr = p_from._ptr;
+		p_from._ptr = nullptr;
+	}
 
 	_FORCE_INLINE_ T *ptrw() {
 		_copy_on_write();
@@ -222,19 +235,22 @@ public:
 		T *p = ptrw();
 		Size len = size();
 		for (Size i = p_index; i < len - 1; i++) {
-			p[i] = p[i + 1];
+			p[i] = std::move(p[i + 1]);
 		}
 
 		resize(len - 1);
 	}
 
 	Error insert(Size p_pos, const T &p_val) {
-		ERR_FAIL_INDEX_V(p_pos, size() + 1, ERR_INVALID_PARAMETER);
-		resize(size() + 1);
-		for (Size i = (size() - 1); i > p_pos; i--) {
-			set(i, get(i - 1));
+		Size new_size = size() + 1;
+		ERR_FAIL_INDEX_V(p_pos, new_size, ERR_INVALID_PARAMETER);
+		Error err = resize(new_size);
+		ERR_FAIL_COND_V(err, err);
+		T *p = ptrw();
+		for (Size i = new_size - 1; i > p_pos; i--) {
+			p[i] = std::move(p[i - 1]);
 		}
-		set(p_pos, p_val);
+		p[p_pos] = p_val;
 
 		return OK;
 	}
@@ -244,35 +260,47 @@ public:
 	Size count(const T &p_val) const;
 
 	_FORCE_INLINE_ CowData() {}
-	_FORCE_INLINE_ ~CowData();
-	_FORCE_INLINE_ CowData(CowData<T> &p_from) { _ref(p_from); };
+	_FORCE_INLINE_ ~CowData() { _unref(); }
+	_FORCE_INLINE_ CowData(std::initializer_list<T> p_init);
+	_FORCE_INLINE_ CowData(const CowData<T> &p_from) { _ref(p_from); }
+	_FORCE_INLINE_ CowData(CowData<T> &&p_from) {
+		_ptr = p_from._ptr;
+		p_from._ptr = nullptr;
+	}
 };
 
 template <typename T>
-void CowData<T>::_unref(void *p_data) {
-	if (!p_data) {
+void CowData<T>::_unref() {
+	if (!_ptr) {
 		return;
 	}
 
 	SafeNumeric<USize> *refc = _get_refcount();
-
 	if (refc->decrement() > 0) {
-		return; // still in use
+		// Data is still in use elsewhere.
+		_ptr = nullptr;
+		return;
 	}
-	// clean up
+	// Clean up.
+	// First, invalidate our own reference.
+	// NOTE: It is required to do so immediately because it must not be observable outside of this
+	//       function after refcount has already been reduced to 0.
+	// WARNING: It must be done before calling the destructors, because one of them may otherwise
+	//          observe it through a reference to us. In this case, it may try to access the buffer,
+	//          which is illegal after some of the elements in it have already been destructed, and
+	//          may lead to a segmentation fault.
+	USize current_size = *_get_size();
+	T *prev_ptr = _ptr;
+	_ptr = nullptr;
 
 	if constexpr (!std::is_trivially_destructible_v<T>) {
-		USize *count = _get_size();
-		T *data = (T *)(count + 1);
-
-		for (USize i = 0; i < *count; ++i) {
-			// call destructors
-			data[i].~T();
+		for (USize i = 0; i < current_size; ++i) {
+			prev_ptr[i].~T();
 		}
 	}
 
 	// free mem
-	Memory::free_static(((uint8_t *)p_data) - DATA_OFFSET, false);
+	Memory::free_static((uint8_t *)prev_ptr - DATA_OFFSET, false);
 }
 
 template <typename T>
@@ -307,7 +335,7 @@ typename CowData<T>::USize CowData<T>::_copy_on_write() {
 			}
 		}
 
-		_unref(_ptr);
+		_unref();
 		_ptr = _data_ptr;
 
 		rc = 1;
@@ -327,14 +355,13 @@ Error CowData<T>::resize(Size p_size) {
 	}
 
 	if (p_size == 0) {
-		// wants to clean up
-		_unref(_ptr);
-		_ptr = nullptr;
+		// Wants to clean up.
+		_unref(); // Resets _ptr to nullptr.
 		return OK;
 	}
 
 	// possibly changing size, copy on write
-	USize rc = _copy_on_write();
+	_copy_on_write();
 
 	USize current_alloc_size = _get_alloc_size(current_size);
 	USize alloc_size;
@@ -355,16 +382,12 @@ Error CowData<T>::resize(Size p_size) {
 				*(_size_ptr) = 0; //size, currently none
 
 				_ptr = _data_ptr;
+
 			} else {
-				uint8_t *mem_new = (uint8_t *)Memory::realloc_static(((uint8_t *)_ptr) - DATA_OFFSET, alloc_size + DATA_OFFSET, false);
-				ERR_FAIL_NULL_V(mem_new, ERR_OUT_OF_MEMORY);
-
-				SafeNumeric<USize> *_refc_ptr = _get_refcount_ptr(mem_new);
-				T *_data_ptr = _get_data_ptr(mem_new);
-
-				new (_refc_ptr) SafeNumeric<USize>(rc); //refcount
-
-				_ptr = _data_ptr;
+				const Error error = _realloc(alloc_size);
+				if (error) {
+					return error;
+				}
 			}
 		}
 
@@ -390,19 +413,29 @@ Error CowData<T>::resize(Size p_size) {
 		}
 
 		if (alloc_size != current_alloc_size) {
-			uint8_t *mem_new = (uint8_t *)Memory::realloc_static(((uint8_t *)_ptr) - DATA_OFFSET, alloc_size + DATA_OFFSET, false);
-			ERR_FAIL_NULL_V(mem_new, ERR_OUT_OF_MEMORY);
-
-			SafeNumeric<USize> *_refc_ptr = _get_refcount_ptr(mem_new);
-			T *_data_ptr = _get_data_ptr(mem_new);
-
-			new (_refc_ptr) SafeNumeric<USize>(rc); //refcount
-
-			_ptr = _data_ptr;
+			const Error error = _realloc(alloc_size);
+			if (error) {
+				return error;
+			}
 		}
 
 		*_get_size() = p_size;
 	}
+
+	return OK;
+}
+
+template <typename T>
+Error CowData<T>::_realloc(Size p_alloc_size) {
+	uint8_t *mem_new = (uint8_t *)Memory::realloc_static(((uint8_t *)_ptr) - DATA_OFFSET, p_alloc_size + DATA_OFFSET, false);
+	ERR_FAIL_NULL_V(mem_new, ERR_OUT_OF_MEMORY);
+
+	SafeNumeric<USize> *_refc_ptr = _get_refcount_ptr(mem_new);
+	T *_data_ptr = _get_data_ptr(mem_new);
+
+	// If we realloc, we're guaranteed to be the only reference.
+	new (_refc_ptr) SafeNumeric<USize>(1);
+	_ptr = _data_ptr;
 
 	return OK;
 }
@@ -466,11 +499,10 @@ void CowData<T>::_ref(const CowData &p_from) {
 		return; // self assign, do nothing.
 	}
 
-	_unref(_ptr);
-	_ptr = nullptr;
+	_unref(); // Resets _ptr to nullptr.
 
 	if (!p_from._ptr) {
-		return; // nothing to do
+		return; //nothing to do
 	}
 
 	if (p_from._get_refcount()->conditional_increment() > 0) { // could reference
@@ -479,8 +511,16 @@ void CowData<T>::_ref(const CowData &p_from) {
 }
 
 template <typename T>
-CowData<T>::~CowData() {
-	_unref(_ptr);
+CowData<T>::CowData(std::initializer_list<T> p_init) {
+	Error err = resize(p_init.size());
+	if (err != OK) {
+		return;
+	}
+
+	Size i = 0;
+	for (const T &element : p_init) {
+		set(i++, element);
+	}
 }
 
 #if defined(__GNUC__) && !defined(__clang__)
@@ -488,5 +528,3 @@ CowData<T>::~CowData() {
 #endif
 
 } // namespace godot
-
-#endif // GODOT_COWDATA_HPP

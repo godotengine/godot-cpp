@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_VMAP_HPP
-#define GODOT_VMAP_HPP
+#pragma once
 
 #include <godot_cpp/templates/cowdata.hpp>
 
@@ -73,16 +72,16 @@ private:
 			middle = (low + high) / 2;
 
 			if (p_val < a[middle].key) {
-				high = middle - 1; // search low end of array
+				high = middle - 1; //search low end of array
 			} else if (a[middle].key < p_val) {
-				low = middle + 1; // search high end of array
+				low = middle + 1; //search high end of array
 			} else {
 				r_exact = true;
 				return middle;
 			}
 		}
 
-		// return the position where this would be inserted
+		//return the position where this would be inserted
 		if (a[middle].key < p_val) {
 			middle++;
 		}
@@ -103,9 +102,9 @@ private:
 			middle = (low + high) / 2;
 
 			if (p_val < a[middle].key) {
-				high = middle - 1; // search low end of array
+				high = middle - 1; //search low end of array
 			} else if (a[middle].key < p_val) {
-				low = middle + 1; // search high end of array
+				low = middle + 1; //search high end of array
 			} else {
 				return middle;
 			}
@@ -143,6 +142,9 @@ public:
 	}
 
 	int find_nearest(const T &p_val) const {
+		if (_cowdata.is_empty()) {
+			return -1;
+		}
 		bool exact;
 		return _find(p_val, exact);
 	}
@@ -192,6 +194,8 @@ public:
 	}
 
 	_FORCE_INLINE_ VMap() {}
+	_FORCE_INLINE_ VMap(std::initializer_list<T> p_init) :
+			_cowdata(p_init) {}
 	_FORCE_INLINE_ VMap(const VMap &p_from) { _cowdata._ref(p_from._cowdata); }
 
 	inline void operator=(const VMap &p_from) {
@@ -200,5 +204,3 @@ public:
 };
 
 } // namespace godot
-
-#endif // GODOT_VMAP_HPP
