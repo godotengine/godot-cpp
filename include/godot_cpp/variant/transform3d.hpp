@@ -39,7 +39,7 @@
 
 namespace godot {
 
-struct _NO_DISCARD_ Transform3D {
+struct [[nodiscard]] Transform3D {
 	Basis basis;
 	Vector3 origin;
 

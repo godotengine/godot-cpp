@@ -19,6 +19,7 @@ def test(profile_filepath=""):
     api = generate_trimmed_api(api_filepath, profile_filepath)
     _generate_bindings(
         api,
+        api_filepath,
         use_template_get_node=False,
         bits=bits,
         precision=precision,
