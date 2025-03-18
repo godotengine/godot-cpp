@@ -909,6 +909,47 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("\tvoid _ref(const Array &p_from) const;")
         result.append("\tconst Variant *ptr() const;")
         result.append("\tVariant *ptrw();")
+        result.append("""
+	struct Iterator {
+		_FORCE_INLINE_ Variant &operator*() const;
+		_FORCE_INLINE_ Variant *operator->() const;
+		_FORCE_INLINE_ Iterator &operator++();
+		_FORCE_INLINE_ Iterator &operator--();
+
+		_FORCE_INLINE_ bool operator==(const Iterator &b) const { return elem_ptr == b.elem_ptr; }
+		_FORCE_INLINE_ bool operator!=(const Iterator &b) const { return elem_ptr != b.elem_ptr; }
+
+		Iterator(Variant *p_ptr) { elem_ptr = p_ptr; }
+		Iterator() {}
+		Iterator(const Iterator &p_it) { elem_ptr = p_it.elem_ptr; }
+
+	private:
+		Variant *elem_ptr = nullptr;
+	};
+
+	struct ConstIterator {
+		_FORCE_INLINE_ const Variant &operator*() const;
+		_FORCE_INLINE_ const Variant *operator->() const;
+		_FORCE_INLINE_ ConstIterator &operator++();
+		_FORCE_INLINE_ ConstIterator &operator--();
+
+		_FORCE_INLINE_ bool operator==(const ConstIterator &b) const { return elem_ptr == b.elem_ptr; }
+		_FORCE_INLINE_ bool operator!=(const ConstIterator &b) const { return elem_ptr != b.elem_ptr; }
+
+		ConstIterator(const Variant *p_ptr) { elem_ptr = p_ptr; }
+		ConstIterator() {}
+		ConstIterator(const ConstIterator &p_it) { elem_ptr = p_it.elem_ptr; }
+
+	private:
+		const Variant *elem_ptr = nullptr;
+	};
+
+	_FORCE_INLINE_ Iterator begin();
+	_FORCE_INLINE_ Iterator end();
+
+	_FORCE_INLINE_ ConstIterator begin() const;
+	_FORCE_INLINE_ ConstIterator end() const;
+	""")
 
     if class_name == "Dictionary":
         result.append("\tconst Variant &operator[](const Variant &p_key) const;")
