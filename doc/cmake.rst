@@ -24,6 +24,38 @@ Configuration examples are listed at the bottom of the page.
 
 .. _godot-cpp-template: https://github.com/godotengine/godot-cpp-template
 
+Debug vs template_debug
+-----------------------
+
+Something I've seen come up many times is the conflation of a compilation of c++
+source code with debug symbols enabled, and compiling a Godot extension with
+debug features enabled. The two concepts are not mutually inclusive.
+
+- debug_features
+    Enables a pre-processor definition to selectively compile code to help
+    users of a Godot extension with their own project.
+
+    debug features are enabled in editor and template_debug builds, which can be specified during the configure phase like so
+
+	``cmake -S . -B cmake-build -DGODOTCPP_TARGET=<target choice>``
+
+- Debug
+    Sets compiler flags so that debug symbols are generated to help godot
+    extension developers debug their extension.
+
+    ``Debug`` is the default build type for CMake projects, to select another it depends on the generator used
+
+    For single configuration generators, add to the configure command:
+
+	``-DCMAKE_BUILD_TYPE=<type>``
+
+    For multi-config generators add to the build command:
+
+	``--config <type>``
+
+    where ``<type>`` is one of ``Debug``, ``Release``, ``RelWithDebInfo``, ``MinSizeRel``
+
+
 SCons Deviations
 ----------------
 
@@ -32,21 +64,23 @@ the notable differences.
 
 - debug_symbols
     No longer has an explicit option, and is enabled via Debug-like CMake
-    build configurations; Debug, RelWithDebInfo.
+    build configurations; ``Debug``, ``RelWithDebInfo``.
 
 - dev_build
-    Does not define NDEBUG when disabled, NDEBUG is set via Release-like
-    CMake build configurations; Release, MinSizeRel.
+    Does not define ``NDEBUG`` when disabled, ``NDEBUG`` is set via Release-like
+    CMake build configurations; ``Release``, ``MinSizeRel``.
+
+- arch
+    CMake sets the architecture via the toolchain files, macos universal is controlled vua the ``CMAKE_OSX_ARCHITECTURES``
+    property which is copied to targets when they are defined.
+
+- debug_crt
+    CMake controls linking to windows runtime libraries by copying the value of ``CMAKE_MSVC_RUNTIME_LIBRARIES`` to targets as they are defined.
+    godot-cpp will set this variable if it isn't already set. so include it before other dependencies to have the value propagate across the projects.
 
 Testing Integration
 -------------------
-When consuming a third party CMake project into yours, an unfortunate side
-effect is that the targets of the consumed project appear in the list of
-available targets, and are by default included in the ALL meta target
-created by most build systems. For this reason, all the targets specified
-in godot-cpp are marked with the ``EXCLUDE_FROM_ALL`` tag to prevent
-unnecessary compilation. The testing targets ``godot-cpp.test.<target>``
-are also guarded by ``GODOTCPP_ENABLE_TESTING`` which is off by default.
+The testing target ``godot-cpp-test`` is guarded by ``GODOTCPP_ENABLE_TESTING`` which is off by default.
 
 To configure and build the godot-cpp project to enable the integration
 testing targets the command will look something like:
@@ -54,10 +88,8 @@ testing targets the command will look something like:
 .. code-block::
 
     # Assuming our current directory is the godot-cpp source root
-    mkdir cmake-build
-    cd cmake-build
-    cmake .. -DGODOTCPP_ENABLE_TESTING=YES
-    cmake --build . --target godot-cpp.test.template_debug
+    cmake -S . -B cmake-build -DGODOTCPP_ENABLE_TESTING=YES
+    cmake --build cmake-build --target godot-cpp-test
 
 Basic walkthrough
 -----------------
@@ -71,30 +103,7 @@ Basic walkthrough
         ...
         cd godot-cpp
 
-
-.. topic:: Out-of-tree build directory
-
-    Create a build directory for CMake to put caches and build artifacts in and
-    change directory to it. This is typically as a sub-directory of the project
-    root but can be outside the source tree. This is so that generated files do
-    not clutter up the source tree.
-
-    .. code-block::
-
-        mkdir cmake-build
-        cd cmake-build
-
-.. topic:: Configure the build
-
-    CMake doesn't build the code, it generates the files that another tool uses
-    to build the code. To see the list of generators run ``cmake --help``. The
-    first phase of which is running through the configuration scripts.
-
-    Configure and generate Ninja build files.
-
-    .. code-block::
-
-        cmake .. -G "Ninja"
+.. topic:: Options
 
     To list the available options CMake use the ``-L[AH]`` option. ``A`` is for
     advanced, and ``H`` is for help strings.
@@ -103,7 +112,7 @@ Basic walkthrough
 
         cmake .. -LH
 
-    Options are specified on the command line when configuring
+    Options are specified on the command line when configuring eg.
 
     .. code-block::
 
@@ -129,36 +138,38 @@ Basic walkthrough
         // Path to a custom directory containing GDExtension interface header and API JSON file ( /path/to/gdextension_dir )
         GODOTCPP_GDEXTENSION_DIR:PATH=gdextension
 
-        // Generate a template version of the Node class's get_node. (ON|OFF)
-        GODOTCPP_GENERATE_TEMPLATE_GET_NODE:BOOL=ON
-
         // Set the floating-point precision level (single|double)
         GODOTCPP_PRECISION:STRING=single
-
-        // Symbols visibility on GNU platforms. Use 'auto' to apply the default value. (auto|visible|hidden)
-        GODOTCPP_SYMBOL_VISIBILITY:STRING=hidden
-
-        // Expose headers as SYSTEM.
-        GODOTCPP_SYSTEM_HEADERS:BOOL=ON
 
         // Enable the extra accounting required to support hot reload. (ON|OFF)
         GODOTCPP_USE_HOT_RELOAD:BOOL=
 
-        // Treat warnings as errors
-        GODOTCPP_WARNING_AS_ERROR:BOOL=OFF
-
-
-.. topic:: Compiling
-
-   A target and a configuration is required, as the default ``all`` target does
-   not include anything and when using multi-config generators like ``Ninja
-   Multi-Config``, ``Visual Studio *`` or ``Xcode`` the build configuration
-   needs to be specified at build time. Build in Release mode unless you need
-   debug symbols.
+.. topic:: Configure the build
 
     .. code-block::
 
-        cmake --build . -t template_debug --config Debug
+        cmake -S . -B cmake-build -G Ninja
+
+    ``-S .`` Specifies the source directory
+
+    ``-B cmake-build`` Specifies the build directory
+
+    ``-G Ninja`` Specifies the Generator
+
+    The source directory in this example is the source code for godot-cpp.
+    The build directory is so that generated files do not clutter up the source tree.
+    CMake doesn't build the code, it generates the files that another tool uses
+    to build the code, in this case Ninja.
+    To see the list of generators run ``cmake --help``.
+
+.. topic:: Compiling
+
+    Tell cmake to invoke the build system it generated in the specified directory.
+    The default target is template_debug and the default build configuration is Debug.
+
+    .. code-block::
+
+        cmake --build cmake-build
 
 Examples
 --------
@@ -169,25 +180,23 @@ So long as CMake is installed from the `CMake Downloads`_ page and in the PATH,
 and Microsoft Visual Studio is installed with c++ support, CMake will detect
 the MSVC compiler.
 
-Remembering that Visual Studio is a Multi-Config Generator so the build type
-needs to be specified at build time.
+Note that Visual Studio is a Multi-Config Generator so the build configuration
+needs to be specified at build time ie ``--config Release``
 
 .. _CMake downloads: https://cmake.org/download/
 
 .. code-block::
 
     # Assuming our current directory is the godot-cpp source root
-    mkdir build-msvc
-    cd build-msvc
-    cmake .. -DGODOTCPP_ENABLE_TESTING=YES
-    cmake --build . -t godot-cpp.test.template_debug --config Debug
+    cmake -S . -B cmake-build -DGODOTCPP_ENABLE_TESTING=YES
+    cmake --build cmake-build -t godot-cpp-test --config Release
 
 
 MSys2/clang64, "Ninja" - Debug
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Assumes the ming-w64-clang-x86_64-toolchain is installed
 
-Remembering that Ninja is a Single-Config Generator so the build type
+Note that Ninja is a Single-Config Generator so the build type
 needs to be specified at Configure time.
 
 Using the msys2/clang64 shell
@@ -195,10 +204,8 @@ Using the msys2/clang64 shell
 .. code-block::
 
     # Assuming our current directory is the godot-cpp source root
-    mkdir build-clang
-    cd build-clang
-    cmake .. -G"Ninja" -DGODOTCPP_ENABLE_TESTING=YES -DCMAKE_BUILD_TYPE=Debug
-    cmake --build . -t godot-cpp.test.template_debug
+    cmake -S . -B cmake-build -G"Ninja" -DGODOTCPP_ENABLE_TESTING=YES -DCMAKE_BUILD_TYPE=Release
+    cmake --build cmake-build -t godot-cpp-test
 
 MSys2/clang64, "Ninja Multi-Config" - dev_build, Debug Symbols
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -212,10 +219,8 @@ Using the msys2/clang64 shell
 .. code-block::
 
     # Assuming our current directory is the godot-cpp source root
-    mkdir build-clang
-    cd build-clang
-    cmake .. -G"Ninja Multi-Config" -DGODOTCPP_ENABLE_TESTING=YES -DGODOTCPP_DEV_BUILD:BOOL=ON
-    cmake --build . -t godot-cpp.test.template_debug --config Debug
+    cmake -S . -B cmake-build -G"Ninja Multi-Config" -DGODOTCPP_ENABLE_TESTING=YES -DGODOTCPP_DEV_BUILD:BOOL=ON
+    cmake --build cmake-build -t godot-cpp-test --config Debug
 
 Emscripten for web platform
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -228,15 +233,14 @@ I've been using ``C:\emsdk\emsdk.ps1 activate latest`` to enable the
 environment from powershell in the current shell.
 
 The ``emcmake.bat`` utility adds the emscripten toolchain to the CMake command
+It can also be added manually, the location is listed inside the emcmake.bat file
 
 .. code-block::
 
     # Assuming our current directory is the godot-cpp source root
     C:\emsdk\emsdk.ps1 activate latest
-    mkdir build-wasm32
-    cd build-wasm32
-    emcmake.bat cmake ../
-    cmake --build . --target template_release
+    emcmake.bat cmake -S . -B cmake-build-web -DCMAKE_BUILD_TYPE=Release
+    cmake --build cmake-build-web
 
 Android Cross Compile from Windows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -263,24 +267,20 @@ is for android sdk platform, (tested with ``android-29``)
     .. code-block::
 
         # Assuming our current directory is the godot-cpp source root
-        mkdir build-android
-        cd build-android
-        cmake .. --toolchain my_toolchain.cmake
-        cmake --build . -t template_release
+        cmake -S . -B cmake-build --toolchain my_toolchain.cmake
+        cmake --build cmake-build -t template_release
 
     Doing the equivalent on just using the command line
 
     .. code-block::
 
         # Assuming our current directory is the godot-cpp source root
-        mkdir build-android
-        cd build-android
-        cmake .. \
+        cmake -S . -B cmake-build \
             -DCMAKE_SYSTEM_NAME=Android \
             -DCMAKE_SYSTEM_VERSION=<platform> \
             -DCMAKE_ANDROID_ARCH_ABI=<arch> \
             -DCMAKE_ANDROID_NDK=/path/to/android-ndk
-        cmake --build . -t template_release
+        cmake --build cmake-build
 
 .. topic:: Using the toolchain file from the Android SDK
 
@@ -289,22 +289,18 @@ is for android sdk platform, (tested with ``android-29``)
     .. code-block::
 
         # Assuming our current directory is the godot-cpp source root
-        mkdir build-android
-        cd build-android
-        cmake .. --toolchain $ANDROID_HOME/ndk/<version>/build/cmake/android.toolchain.cmake
-        cmake --build . -t template_release
+        cmake -S . -B cmake-build --toolchain $ANDROID_HOME/ndk/<version>/build/cmake/android.toolchain.cmake
+        cmake --build cmake-build
 
     Specify Android platform and ABI
 
     .. code-block::
 
         # Assuming our current directory is the godot-cpp source root
-        mkdir build-android
-        cd build-android
-        cmake .. --toolchain $ANDROID_HOME/ndk/<version>/build/cmake/android.toolchain.cmake \
+        cmake -S . -B cmake-build --toolchain $ANDROID_HOME/ndk/<version>/build/cmake/android.toolchain.cmake \
             -DANDROID_PLATFORM:STRING=android-29 \
             -DANDROID_ABI:STRING=armeabi-v7a
-        cmake --build . -t template_release
+        cmake --build cmake-build
 
 
 Toolchains
@@ -312,21 +308,8 @@ Toolchains
 This section attempts to list the host and target combinations that have been
 at tested.
 
-Info on cross compiling triplets indicates that the naming is a little more
-freeform that expected, and tailored to its use case. Triplets tend to have the
-format ``<arch>[sub][-vendor][-OS][-env]``
-
-* `osdev.org <https://wiki.osdev.org/Target_Triplet>`_
-* `stack overflow <https://stackoverflow.com/questions/13819857/does-a-list-of-all-known-target-triplets-in-use-exist>`_
-* `LLVM <https://llvm.org/doxygen/classllvm_1_1Triple.html>`_
-* `clang target triple <https://clang.llvm.org/docs/CrossCompilation.html#target-triple>`_
-* `vcpkg <https://learn.microsoft.com/en-us/vcpkg/concepts/triplets>`_
-* `wasm32-unknown-emscripten <https://blog.therocode.net/2020/10/a-guide-to-rust-sdl2-emscripten>`_
-
 Linux Host
 ~~~~~~~~~~
-
-:Target: x86_64-linux
 
 Macos Host
 ~~~~~~~~~~
@@ -335,43 +318,36 @@ Macos Host
 :OS Name: Sequoia 15.0.1
 :Processor: Apple M2
 
+* AppleClang
+
 Windows Host
 ~~~~~~~~~~~~
 
-:OS Name: Microsoft Windows 11 Home, 10.0.22631 N/A Build 22631
+:OS Name: Windows 11
 :Processor: AMD Ryzen 7 6800HS Creator Edition
 
-`Microsoft Visual Studio 17 2022 <https://visualstudio.microsoft.com/vs/>`_
-    :Target: x86_64-w64
 
-`LLVM <https://llvm.org/>`_
-    :Target: x86_64-pc-windows-msvc
+* `Microsoft Visual Studio 17 2022 <https://visualstudio.microsoft.com/vs/>`_
+* `LLVM <https://llvm.org/>`_
+* `LLVM-MinGW <https://github.com/mstorsjo/llvm-mingw/releases>`_
 
-`AndroidSDK <https://developer.android.com/studio/#command-tools>`_
-    armv7-none-linux-androideabi16
+    * aarch64-w64-mingw32
+    * armv7-w64-mingw32
+    * i686-w64-mingw32
+    * x86_64-w64-mingw32
 
-`Emscripten <https://emscripten.org/>`_
-    :Compiler: Emscripten
-    :Target: wasm32-unknown-emscripten
+* `AndroidSDK <https://developer.android.com/studio/#command-tools>`_
+* `Emscripten <https://emscripten.org/>`_
+* `MinGW-W64-builds <https://github.com/niXman/mingw-builds-binaries/releases>`_
+* `Jetbrains-CLion <https://www.jetbrains.com/clion/>`_
 
-`MinGW-w64 <https://www.mingw-w64.org/>`_ based toolchains
+    Jetbrains builtin compiler is just the MingW64 above.
 
-    `MSYS2 <https://www.msys2.org/>`_
-        Necessary reading about MSYS2 `environments <https://www.msys2.org/docs/environments/>`_
+* `MSYS2 <https://www.msys2.org/>`_
+    Necessary reading about MSYS2 `environments <https://www.msys2.org/docs/environments/>`_
 
-        ucrt64
-            :Compiler: gcc version 14.2.0 (Rev1, Built by MSYS2 project)
-            :Target:   x86_64-w64-mingw32
-
-        clang64
-            :Compiler: clang version 18.1.8
-            :Target:   x86_64-w64-windows-gnu
-
-    `LLVM-MinGW <https://github.com/mstorsjo/llvm-mingw/releases>`_
-
-    `MinGW-W64-builds <https://github.com/niXman/mingw-builds-binaries/releases>`_
-        :Compiler: gcc
-        :Target: x86_64-w64-mingw32-ucrt
-
-    `Jetbrains-CLion <https://www.jetbrains.com/clion/>`_
-        :Target: x86_64-w64-mingw32-msvcrt
+    * ucrt64
+    * clang64
+    * mingw32
+    * mingw64
+    * clangarm64
