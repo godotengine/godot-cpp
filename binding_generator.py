@@ -642,6 +642,11 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("")
     result.append(f"\t{class_name}(const Variant *p_variant);")
 
+    if class_name == "Array":
+        result.append("")
+        result.append("\tconst Variant *ptr() const;")
+        result.append("\tVariant *ptrw();")
+
     result.append("")
     result.append("public:")
 
@@ -907,8 +912,6 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("\tVariant &operator[](int64_t p_index);")
         result.append("\tvoid set_typed(uint32_t p_type, const StringName &p_class_name, const Variant &p_script);")
         result.append("\tvoid _ref(const Array &p_from) const;")
-        result.append("\tconst Variant *ptr() const;")
-        result.append("\tVariant *ptrw();")
         result.append("""
 	struct Iterator {
 		_FORCE_INLINE_ Variant &operator*() const;
