@@ -30,6 +30,8 @@
 
 #pragma once
 
+#include <godot_cpp/templates/hashfuncs.hpp>
+
 namespace godot {
 
 template <typename F, typename S>
