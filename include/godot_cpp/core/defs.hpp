@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_DEFS_HPP
-#define GODOT_DEFS_HPP
+#pragma once
 
 #include <cstddef>
 #include <cstdint>
@@ -130,5 +129,3 @@ struct BuildIndexSequence<0, Is...> : IndexSequence<Is...> {};
 // To maintain compatibility an alias is defined outside the namespace.
 // Consider it deprecated.
 using real_t = godot::real_t;
-
-#endif // GODOT_DEFS_HPP

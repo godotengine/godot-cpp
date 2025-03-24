@@ -154,6 +154,7 @@ def scons_generate_bindings(target, source, env):
 
     _generate_bindings(
         api,
+        str(source[0]),
         env["generate_template_get_node"],
         "32" if "32" in env["arch"] else "64",
         env["precision"],

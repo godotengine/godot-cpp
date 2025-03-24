@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_RECT2I_HPP
-#define GODOT_RECT2I_HPP
+#pragma once
 
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
@@ -89,7 +88,7 @@ struct [[nodiscard]] Rect2i {
 		return size.x > 0 && size.y > 0;
 	}
 
-	// Returns the intersection between two Rect2is or an empty Rect2i if there is no intersection
+	// Returns the intersection between two Rect2is or an empty Rect2i if there is no intersection.
 	inline Rect2i intersection(const Rect2i &p_rect) const {
 		Rect2i new_rect = p_rect;
 
@@ -241,5 +240,3 @@ struct [[nodiscard]] Rect2i {
 };
 
 } // namespace godot
-
-#endif // GODOT_RECT2I_HPP
