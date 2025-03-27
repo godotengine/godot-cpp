@@ -122,7 +122,7 @@ public:
 		}                                                                                                                  \
 		_FORCE_INLINE_ TypedDictionary(std::initializer_list<KeyValue<m_type, T>> p_init) :                                \
 				Dictionary() {                                                                                             \
-			set_typed(m_variant_type, StringName(), Variant(), Variant::OBJECT, T::get_class_static(), Variant());         \
+			set_typed(m_variant_type, StringName(), Variant(), Variant::OBJECT, StringName(), Variant());                  \
 			for (const KeyValue<m_type, T> &E : p_init) {                                                                  \
 				operator[](E.key) = E.value;                                                                               \
 			}                                                                                                              \
