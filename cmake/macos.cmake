@@ -17,14 +17,6 @@ https://cmake.org/cmake/help/latest/variable/CMAKE_OSX_ARCHITECTURES.html
 # Find Requirements
 if(APPLE)
     set(CMAKE_OSX_SYSROOT $ENV{SDKROOT})
-    find_library(
-        COCOA_LIBRARY
-        REQUIRED
-        NAMES Cocoa
-        PATHS ${CMAKE_OSX_SYSROOT}/System/Library
-        PATH_SUFFIXES Frameworks
-        NO_DEFAULT_PATH
-    )
 endif(APPLE)
 
 #[=============================[ MacOS Options ]=============================]
@@ -44,10 +36,6 @@ endfunction()
 #[===========================[ Target Generation ]===========================]
 function(macos_generate)
     target_compile_definitions(godot-cpp PUBLIC MACOS_ENABLED UNIX_ENABLED)
-
-    target_link_options(godot-cpp PUBLIC -Wl,-undefined,dynamic_lookup)
-
-    target_link_libraries(godot-cpp INTERFACE ${COCOA_LIBRARY})
 
     common_compiler_flags()
 endfunction()
