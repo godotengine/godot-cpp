@@ -121,6 +121,9 @@ MAKE_PTRARGCONV(uint16_t, int64_t);
 MAKE_PTRARGCONV(int16_t, int64_t);
 MAKE_PTRARGCONV(uint32_t, int64_t);
 MAKE_PTRARGCONV(int32_t, int64_t);
+MAKE_PTRARGCONV(char16_t, int64_t);
+MAKE_PTRARGCONV(char32_t, int64_t);
+MAKE_PTRARGCONV(wchar_t, int64_t);
 MAKE_PTRARG(int64_t);
 MAKE_PTRARG(uint64_t);
 // Float types
