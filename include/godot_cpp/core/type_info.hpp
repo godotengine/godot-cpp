@@ -33,6 +33,7 @@
 #include <godot_cpp/core/object.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/variant/variant.hpp>
+#include <godot_cpp/core/method_ptrcall.hpp>
 
 #include <gdextension_interface.h>
 
