@@ -12,11 +12,11 @@ env:
   LC_ALL: en_US.UTF-8
 
 concurrency:
-  group: ci-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}
+  group: ci-scons-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-scons:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -113,6 +113,7 @@ jobs:
         with:
           platform: ${{ matrix.platform }}
           windows-compiler: ${{ contains(matrix.flags, 'use_mingw=yes') && 'mingw' || 'msvc' }}
+          buildtool: scons
 
       - name: Generate godot-cpp sources only
         run: |
@@ -183,40 +184,3 @@ jobs:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
           if-no-files-found: error
-
-  linux-cmake-ninja:
-    name: 🐧 Build (Linux, GCC, CMake Ninja)
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -qqq build-essential pkg-config cmake ninja-build
-
-      - name: Build test GDExtension library
-        run: |
-          mkdir cmake-build
-          cd cmake-build
-          cmake ../ -DGODOTCPP_ENABLE_TESTING=YES -DGODOTCPP_TARGET=template_release
-          cmake --build . --verbose -j $(nproc) --target godot-cpp-test --config Release
-
-  windows-msvc-cmake:
-    name: 🏁 Build (Windows, MSVC, CMake)
-    runs-on: windows-2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Build test GDExtension library
-        run: |
-          mkdir cmake-build
-          cd cmake-build
-          cmake ../ -DGODOTCPP_ENABLE_TESTING=YES -DGODOTCPP_TARGET=template_release
-          cmake --build . --verbose --target godot-cpp-test --config Release
