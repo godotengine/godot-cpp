@@ -3,7 +3,7 @@
 import os
 
 EnsureSConsVersion(4, 0)
-
+EnsurePythonVersion(3, 8)
 
 try:
     Import("env")
