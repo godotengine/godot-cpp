@@ -130,6 +130,11 @@ def generate(env):
         if env["silence_msvc"] and not env.GetOption("clean"):
             silence_msvc(env)
 
+        if not env["use_llvm"]:
+            env.AppendUnique(CCFLAGS=["/experimental:external", "/external:anglebrackets"])
+        env.AppendUnique(CCFLAGS=["/external:W0"])
+        env["EXTINCPREFIX"] = "/external:I"
+
     elif (sys.platform == "win32" or sys.platform == "msys") and not env["mingw_prefix"]:
         env["use_mingw"] = True
         mingw.generate(env)

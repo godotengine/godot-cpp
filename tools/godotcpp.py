@@ -2,6 +2,7 @@ import os
 import platform
 import sys
 
+from SCons import __version__ as scons_raw_version
 from SCons.Action import Action
 from SCons.Builder import Builder
 from SCons.Errors import UserError
@@ -380,6 +381,8 @@ def options(opts, env):
 
 
 def generate(env):
+    env.scons_version = env._get_major_minor_revision(scons_raw_version)
+
     # Default num_jobs to local cpu count if not user specified.
     # SCons has a peculiarity where user-specified options won't be overridden
     # by SetOption, so we can rely on this to know if we should use our default.
@@ -436,6 +439,17 @@ def generate(env):
         opt_level = "speed_trace"
     else:  # Release
         opt_level = "speed"
+
+    # Allow marking includes as external/system to avoid raising warnings.
+    if env.scons_version < (4, 2):
+        env["_CPPEXTINCFLAGS"] = "${_concat(EXTINCPREFIX, CPPEXTPATH, EXTINCSUFFIX, __env__, RDirs, TARGET, SOURCE)}"
+    else:
+        env["_CPPEXTINCFLAGS"] = (
+            "${_concat(EXTINCPREFIX, CPPEXTPATH, EXTINCSUFFIX, __env__, RDirs, TARGET, SOURCE, affect_signature=False)}"
+        )
+    env["CPPEXTPATH"] = []
+    env["EXTINCPREFIX"] = "-isystem "
+    env["EXTINCSUFFIX"] = ""
 
     env["optimize"] = ARGUMENTS.get("optimize", opt_level)
     env["debug_symbols"] = get_cmdline_bool("debug_symbols", env.dev_build)
