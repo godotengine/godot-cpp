@@ -467,8 +467,6 @@ def generate(env):
         # DEBUG_ENABLED enables debugging *features* and debug-only code, which is intended
         # to give *users* extra debugging information for their game development.
         env.Append(CPPDEFINES=["DEBUG_ENABLED"])
-        # In upstream Godot this is added in typedefs.h when DEBUG_ENABLED is set.
-        env.Append(CPPDEFINES=["DEBUG_METHODS_ENABLED"])
 
     if env.dev_build:
         # DEV_ENABLED enables *engine developer* code which should only be compiled for those

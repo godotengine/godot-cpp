@@ -32,10 +32,10 @@
 
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/math.hpp>
+#include <godot_cpp/variant/string.hpp>
 
 namespace godot {
 
-class String;
 struct Basis;
 struct Vector2;
 struct Vector3i;
