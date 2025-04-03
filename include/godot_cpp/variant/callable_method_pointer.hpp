@@ -69,7 +69,10 @@ class CallableCustomMethodPointer : public CallableCustomMethodPointerBase {
 
 public:
 	virtual ObjectID get_object() const override {
-		return ObjectID(data.instance->get_instance_id());
+		if constexpr (std::is_base_of_v<Object, T>) {
+			return ObjectID(data.instance->get_instance_id());
+		}
+		return {};
 	}
 
 	virtual int get_argument_count(bool &r_is_valid) const override {
@@ -111,7 +114,10 @@ class CallableCustomMethodPointerRet : public CallableCustomMethodPointerBase {
 
 public:
 	virtual ObjectID get_object() const override {
-		return ObjectID(data.instance->get_instance_id());
+		if constexpr (std::is_base_of_v<Object, T>) {
+			return ObjectID(data.instance->get_instance_id());
+		}
+		return {};
 	}
 
 	virtual int get_argument_count(bool &r_is_valid) const override {
@@ -153,7 +159,10 @@ class CallableCustomMethodPointerRetC : public CallableCustomMethodPointerBase {
 
 public:
 	virtual ObjectID get_object() const override {
-		return ObjectID(data.instance->get_instance_id());
+		if constexpr (std::is_base_of_v<Object, T>) {
+			return ObjectID(data.instance->get_instance_id());
+		}
+		return {};
 	}
 
 	virtual int get_argument_count(bool &r_is_valid) const override {
