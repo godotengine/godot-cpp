@@ -70,6 +70,10 @@ class Ref {
 	}
 
 public:
+	static _FORCE_INLINE_ String get_class_static() {
+		return T::get_class_static();
+	}
+
 	_FORCE_INLINE_ bool operator==(const T *p_ptr) const {
 		return reference == p_ptr;
 	}
