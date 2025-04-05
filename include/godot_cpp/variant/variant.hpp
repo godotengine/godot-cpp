@@ -145,7 +145,7 @@ private:
 	static GDExtensionTypeFromVariantConstructorFunc to_type_constructor[VARIANT_MAX];
 
 public:
-	_FORCE_INLINE_ GDExtensionVariantPtr _native_ptr() const { return const_cast<uint8_t(*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
+	_FORCE_INLINE_ GDExtensionVariantPtr _native_ptr() const { return const_cast<uint8_t (*)[GODOT_CPP_VARIANT_SIZE]>(&opaque); }
 	Variant();
 	Variant(std::nullptr_t n) :
 			Variant() {}
