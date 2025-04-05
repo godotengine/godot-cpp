@@ -408,6 +408,15 @@ Array::ConstIterator Array::end() const {
 	return Array::ConstIterator(ptr() + size());
 }
 
+Array::Array(std::initializer_list<Variant> p_init) {
+	ERR_FAIL_COND(resize(p_init.size()) != 0);
+
+	size_t i = 0;
+	for (const Variant &element : p_init) {
+		set(i++, element);
+	}
+}
+
 #include <godot_cpp/variant/builtin_vararg_methods.hpp>
 
 #ifdef REAL_T_IS_DOUBLE

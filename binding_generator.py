@@ -541,7 +541,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("#include <godot_cpp/variant/vector4.hpp>")
         result.append("")
 
-    if is_packed_array(class_name):
+    if is_packed_array(class_name) or class_name == "Array":
         result.append("#include <godot_cpp/core/error_macros.hpp>")
         result.append("#include <initializer_list>")
         result.append("")
@@ -953,6 +953,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 	_FORCE_INLINE_ ConstIterator begin() const;
 	_FORCE_INLINE_ ConstIterator end() const;
 	""")
+        result.append("\t_FORCE_INLINE_ Array(std::initializer_list<Variant> p_init);")
 
     if class_name == "Dictionary":
         result.append("\tconst Variant &operator[](const Variant &p_key) const;")
