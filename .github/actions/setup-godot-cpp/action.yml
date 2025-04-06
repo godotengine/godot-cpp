@@ -23,6 +23,7 @@ inputs:
     default: r23c
     description: Android NDK version.
   buildtool:
+    default: scons
     description: scons or cmake
   scons-version:
     default: 4.4.0
