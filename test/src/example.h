@@ -58,7 +58,7 @@ class ExampleMin : public Control {
 	GDCLASS(ExampleMin, Control);
 
 protected:
-	static void _bind_methods(){};
+	static void _bind_methods() {}
 };
 
 class Example : public Control {
