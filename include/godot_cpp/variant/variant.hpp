@@ -408,7 +408,8 @@ Array::ConstIterator Array::end() const {
 	return Array::ConstIterator(ptr() + size());
 }
 
-Array::Array(std::initializer_list<Variant> p_init) {
+Array::Array(std::initializer_list<Variant> p_init) :
+		Array() {
 	ERR_FAIL_COND(resize(p_init.size()) != 0);
 
 	size_t i = 0;
