@@ -119,7 +119,7 @@ jobs:
           submodules: recursive
 
       - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.7
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Setup godot-cpp
         uses: ./.github/actions/setup-godot-cpp
