@@ -159,7 +159,7 @@ function(common_compiler_flags)
             GDEXTENSION
 
             # features
-            $<${DEBUG_FEATURES}:DEBUG_ENABLED DEBUG_METHODS_ENABLED>
+            $<${DEBUG_FEATURES}:DEBUG_ENABLED>
 
             $<${IS_DEV_BUILD}:DEV_ENABLED>
 
