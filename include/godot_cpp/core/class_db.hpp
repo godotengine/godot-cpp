@@ -167,6 +167,8 @@ public:
 		instance_binding_callbacks[p_name] = p_callbacks;
 	}
 
+	static void _editor_get_classes_used_callback(GDExtensionTypePtr p_packed_string_array);
+
 	static void _register_engine_singleton(const StringName &p_class_name, Object *p_singleton) {
 		std::lock_guard<std::mutex> lock(engine_singletons_mutex);
 		std::unordered_map<StringName, Object *>::const_iterator i = engine_singletons.find(p_class_name);
