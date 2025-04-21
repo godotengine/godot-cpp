@@ -392,7 +392,7 @@ void ClassDB::_editor_get_classes_used_callback(GDExtensionTypePtr p_packed_stri
 	PackedStringArray *arr = reinterpret_cast<PackedStringArray *>(p_packed_string_array);
 	arr->resize(instance_binding_callbacks.size());
 	int index = 0;
-	for (const std::pair<StringName, const GDExtensionInstanceBindingCallbacks *> &pair : instance_binding_callbacks) {
+	for (const std::pair<const StringName, const GDExtensionInstanceBindingCallbacks *> &pair : instance_binding_callbacks) {
 		(*arr)[index++] = pair.first;
 	}
 }
@@ -401,7 +401,7 @@ void ClassDB::initialize_class(const ClassInfo &p_cl) {
 }
 
 void ClassDB::initialize(GDExtensionInitializationLevel p_level) {
-	for (const std::pair<StringName, ClassInfo> pair : classes) {
+	for (const std::pair<const StringName, ClassInfo> &pair : classes) {
 		const ClassInfo &cl = pair.second;
 		if (cl.level != p_level) {
 			continue;
