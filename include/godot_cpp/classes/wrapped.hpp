@@ -93,7 +93,7 @@ protected:
 	bool _property_can_revert(const StringName &p_name) const { return false; }
 	bool _property_get_revert(const StringName &p_name, Variant &r_property) const { return false; }
 	void _validate_property(PropertyInfo &p_property) const {}
-	String _to_string() const { return "[" + String(get_class_static()) + ":" + itos(get_instance_id()) + "]"; }
+	String _to_string() const { return "<Wrapped#0>"; }
 
 	static void notification_bind(GDExtensionClassInstancePtr p_instance, int32_t p_what, GDExtensionBool p_reversed) {}
 	static GDExtensionBool set_bind(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionConstVariantPtr p_value) { return false; }
@@ -119,10 +119,6 @@ public:
 	static const StringName &get_class_static() {
 		static const StringName string_name = StringName("Wrapped");
 		return string_name;
-	}
-
-	uint64_t get_instance_id() const {
-		return 0;
 	}
 
 	// Must be public but you should not touch this.
