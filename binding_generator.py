@@ -1723,6 +1723,16 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append(f"\t~{class_name}();")
         result.append("")
 
+    if class_name == "Object":
+        result.append('\tString _to_string() const { return "<" + get_class() + "#" + itos(get_instance_id()) + ">"; }')
+        result.append("")
+
+    if class_name == "Node":
+        result.append(
+            '\tString _to_string() const { return (!get_name().is_empty() ? String(get_name()) + ":" : "") + Object::_to_string(); }'
+        )
+        result.append("")
+
     result.append("public:")
 
     # Special cases.
