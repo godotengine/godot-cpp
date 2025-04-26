@@ -10,6 +10,8 @@ env:
   # Use UTF-8 on Linux.
   LANG: en_US.UTF-8
   LC_ALL: en_US.UTF-8
+  # Use UTF-8 on Windows.
+  PYTHONIOENCODING: utf8
 
 concurrency:
   group: ci-scons-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}
