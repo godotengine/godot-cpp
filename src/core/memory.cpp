@@ -93,6 +93,60 @@ void Memory::free_static(void *p_ptr, bool p_pad_align) {
 	internal::gdextension_interface_mem_free(mem);
 }
 
+void *Memory::alloc_aligned_static(size_t p_bytes, size_t p_alignment) {
+	DEV_ASSERT(is_power_of_2(p_alignment));
+
+	void *p1, *p2;
+	if ((p1 = (void *)alloc_static(p_bytes + p_alignment - 1 + sizeof(uint32_t))) == nullptr) {
+		return nullptr;
+	}
+
+	p2 = (void *)(((uintptr_t)p1 + sizeof(uint32_t) + p_alignment - 1) & ~((p_alignment)-1));
+	*((uint32_t *)p2 - 1) = (uint32_t)((uintptr_t)p2 - (uintptr_t)p1);
+	return p2;
+
+	// TODO: Alternate implementation if engine accepts this interface
+	// void *mem = internal::gdextension_interface_mem_aligned_alloc(p_bytes, p_alignment);
+	// ERR_FAIL_NULL_V(mem, nullptr);
+	// return mem;
+}
+
+void *Memory::realloc_aligned_static(void *p_memory, size_t p_bytes, size_t p_prev_bytes, size_t p_alignment) {
+	DEV_ASSERT(is_power_of_2(p_alignment));
+
+	if (p_memory == nullptr) {
+		return alloc_aligned_static(p_bytes, p_alignment);
+	}
+
+	void *ret = alloc_aligned_static(p_bytes, p_alignment);
+	if (ret) {
+		memcpy(ret, p_memory, p_prev_bytes);
+	}
+	free_aligned_static(p_memory);
+	return ret;
+
+	// TODO: Alternate implementation if engine accepts this interface
+	// if (p_memory == nullptr) {
+	// 	return alloc_aligned_static(p_bytes, p_alignment);
+	// } else if (p_bytes == 0) {
+	// 	free_aligned_static(p_memory);
+	// 	return nullptr;
+	// }
+
+	// void *mem = internal::gdextension_interface_mem_aligned_realloc(p_memory, p_bytes, p_prev_bytes, p_alignment);
+	// ERR_FAIL_NULL_V(mem, nullptr);
+	// return mem;
+}
+
+void Memory::free_aligned_static(void *p_ptr) {
+	uint32_t offset = *((uint32_t *)p_ptr - 1);
+	void *p = (void *)((uint8_t *)p_ptr - offset);
+	free_static(p);
+
+	// TODO: Alternate implementation if engine accepts this interface
+	// internal::gdextension_interface_mem_aligned_free(p_ptr);
+}
+
 _GlobalNil::_GlobalNil() {
 	left = this;
 	right = this;
