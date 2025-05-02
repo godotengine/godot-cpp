@@ -104,8 +104,7 @@ template <typename T, typename R, typename... P>
 class CallableCustomMethodPointerRet : public CallableCustomMethodPointerBase {
 	struct Data {
 		T *instance;
-		R(T::*method)
-		(P...);
+		R (T::*method)(P...);
 	} data;
 	static_assert(sizeof(Data) % 4 == 0);
 
@@ -146,8 +145,7 @@ template <typename T, typename R, typename... P>
 class CallableCustomMethodPointerRetC : public CallableCustomMethodPointerBase {
 	struct Data {
 		T *instance;
-		R(T::*method)
-		(P...) const;
+		R (T::*method)(P...) const;
 	} data;
 	static_assert(sizeof(Data) % 4 == 0);
 
@@ -227,8 +225,7 @@ Callable create_custom_callable_static_function_pointer(void (*p_method)(P...)) 
 template <typename R, typename... P>
 class CallableCustomStaticMethodPointerRet : public CallableCustomMethodPointerBase {
 	struct Data {
-		R(*method)
-		(P...);
+		R (*method)(P...);
 	} data;
 	static_assert(sizeof(Data) % 4 == 0);
 

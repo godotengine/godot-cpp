@@ -149,8 +149,7 @@ public:
 template <typename Derived, typename T, typename R, bool should_returns>
 class MethodBindVarArgBase : public MethodBind {
 protected:
-	R(T::*method)
-	(const Variant **, GDExtensionInt, GDExtensionCallError &);
+	R (T::*method)(const Variant **, GDExtensionInt, GDExtensionCallError &);
 	std::vector<PropertyInfo> arguments;
 
 public:
@@ -434,8 +433,7 @@ template <typename T, typename R, typename... P>
 template <typename R, typename... P>
 #endif // TYPED_METHOD_BIND
 class MethodBindTR : public MethodBind {
-	R(MB_T::*method)
-	(P...);
+	R (MB_T::*method)(P...);
 
 protected:
 // GCC raises warnings in the case P = {} as the comparison is always false...
@@ -517,8 +515,7 @@ template <typename T, typename R, typename... P>
 template <typename R, typename... P>
 #endif // TYPED_METHOD_BIND
 class MethodBindTRC : public MethodBind {
-	R(MB_T::*method)
-	(P...) const;
+	R (MB_T::*method)(P...) const;
 
 protected:
 // GCC raises warnings in the case P = {} as the comparison is always false...
@@ -663,8 +660,7 @@ MethodBind *create_static_method_bind(void (*p_method)(P...)) {
 
 template <typename R, typename... P>
 class MethodBindTRS : public MethodBind {
-	R(*function)
-	(P...);
+	R (*function)(P...);
 
 protected:
 // GCC raises warnings in the case P = {} as the comparison is always false...
