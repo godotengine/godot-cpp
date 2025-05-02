@@ -33,6 +33,9 @@ def parse_build_profile(profile_filepath, api):
         front.append("FileAccess")
         front.append("Image")
         front.append("XMLParser")
+        # In src/classes/script_instance.cpp
+        front.append("ScriptExtension")
+        front.append("ScriptLanguageExtension")
         # In include/godot_cpp/templates/thread_work_pool.hpp
         front.append("Semaphore")
     while front:

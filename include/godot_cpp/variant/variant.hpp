@@ -304,6 +304,12 @@ public:
 	}
 
 	static void evaluate(const Operator &op, const Variant &a, const Variant &b, Variant &r_ret, bool &r_valid);
+	static _FORCE_INLINE_ Variant evaluate(const Operator &p_op, const Variant &p_a, const Variant &p_b) {
+		bool valid = true;
+		Variant res;
+		evaluate(p_op, p_a, p_b, res, valid);
+		return res;
+	}
 
 	void set(const Variant &key, const Variant &value, bool *r_valid = nullptr);
 	void set_named(const StringName &name, const Variant &value, bool &r_valid);
