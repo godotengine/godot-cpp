@@ -12,6 +12,11 @@ def options(opts):
         "21",
     )
     opts.Add(
+        "ndk_version",
+        "Fully qualified version of ndk to use for compilation.",
+        "23.2.8568313",
+    )
+    opts.Add(
         "ANDROID_HOME",
         "Path to your Android SDK installation. By default, uses ANDROID_HOME from your defined environment variables.",
         os.environ.get("ANDROID_HOME", os.environ.get("ANDROID_SDK_ROOT")),
@@ -22,14 +27,9 @@ def exists(env):
     return get_android_ndk_root(env) is not None
 
 
-# This must be kept in sync with the value in https://github.com/godotengine/godot/blob/master/platform/android/detect.py#L58.
-def get_ndk_version():
-    return "23.2.8568313"
-
-
 def get_android_ndk_root(env):
     if env["ANDROID_HOME"]:
-        return env["ANDROID_HOME"] + "/ndk/" + get_ndk_version()
+        return env["ANDROID_HOME"] + "/ndk/" + env["ndk_version"]
     else:
         return os.environ.get("ANDROID_NDK_ROOT")
 
@@ -68,7 +68,7 @@ def generate(env):
 
     if not os.path.exists(toolchain):
         print("ERROR: Could not find NDK toolchain at " + toolchain + ".")
-        print("Make sure NDK version " + get_ndk_version() + " is installed.")
+        print("Make sure NDK version " + env["ndk_version"] + " is installed.")
         env.Exit(1)
 
     env.PrependENVPath("PATH", toolchain + "/bin")  # This does nothing half of the time, but we'll put it here anyways
