@@ -200,10 +200,15 @@ function(godotcpp_generate)
         message(STATUS "Using ${PROC_N} cores for multi-threaded compilation.")
         # TODO You can override it at configure time with ...." )
     else()
+        if(CMAKE_BUILD_PARALLEL_LEVEL)
+            set(_cores "${CMAKE_BUILD_PARALLEL_LEVEL}")
+        else()
+            set(_cores "all")
+        endif()
         message(
             STATUS
-            "Using ${CMAKE_BUILD_PARALLEL_LEVEL} cores, You can override"
-            " it at configure time by using -j <n> or --parallel <n> on the build"
+            "Using ${_cores} cores. You can override"
+            " this at configure time by using -j <n> or --parallel <n> in the build"
             " command."
         )
         message(STATUS "  eg. cmake --build . -j 7  ...")
