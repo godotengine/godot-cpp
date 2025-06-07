@@ -113,7 +113,7 @@ public:
 	CharStringT<T> &operator+=(T p_char);
 	int64_t length() const { return size() ? size() - 1 : 0; }
 	const T *get_data() const;
-	operator const T *() const { return get_data(); };
+	operator const T *() const { return get_data(); }
 
 protected:
 	void copy_from(const T *p_cstr);
