@@ -2,6 +2,7 @@ import os
 import platform
 import sys
 
+import header_builders
 from SCons import __version__ as scons_raw_version
 from SCons.Action import Action
 from SCons.Builder import Builder
@@ -529,6 +530,10 @@ def generate(env):
         BUILDERS={
             "GodotCPPBindings": Builder(action=Action(scons_generate_bindings, "$GENCOMSTR"), emitter=scons_emit_files),
             "GodotCPPDocData": Builder(action=scons_generate_doc_source),
+            "GLSL_HEADER": Builder(
+                action=header_builders.build_raw_headers_action,
+                suffix="glsl.gen.h",
+            ),
         }
     )
     env.AddMethod(_godot_cpp, "GodotCPP")
