@@ -140,4 +140,4 @@ See the [godot-cpp-template](https://github.com/godotengine/godot-cpp-template) 
 generic reusable template.
 
 Or checkout the code for the [Summator example](https://github.com/paddy-exe/GDExtensionSummator)
-as shown in the [official documentation](https://docs.godotengine.org/en/latest/tutorials/scripting/gdextension/gdextension_cpp_example.html).
+as shown in the [official documentation](https://docs.godotengine.org/en/latest/tutorials/scripting/cpp/gdextension_cpp_example.html).
