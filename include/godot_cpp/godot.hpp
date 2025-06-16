@@ -40,10 +40,10 @@ extern "C" GDExtensionInterfaceGetProcAddress gdextension_interface_get_proc_add
 extern "C" GDExtensionClassLibraryPtr library;
 extern "C" void *token;
 
-extern "C" GDExtensionGodotVersion godot_version;
+extern "C" GDExtensionGodotVersion2 godot_version;
 
 // All of the GDExtension interface functions.
-extern "C" GDExtensionInterfaceGetGodotVersion gdextension_interface_get_godot_version;
+extern "C" GDExtensionInterfaceGetGodotVersion2 gdextension_interface_get_godot_version2;
 extern "C" GDExtensionInterfaceMemAlloc gdextension_interface_mem_alloc;
 extern "C" GDExtensionInterfaceMemRealloc gdextension_interface_mem_realloc;
 extern "C" GDExtensionInterfaceMemFree gdextension_interface_mem_free;
@@ -155,7 +155,6 @@ extern "C" GDExtensionInterfacePackedVector4ArrayOperatorIndex gdextension_inter
 extern "C" GDExtensionInterfacePackedVector4ArrayOperatorIndexConst gdextension_interface_packed_vector4_array_operator_index_const;
 extern "C" GDExtensionInterfaceArrayOperatorIndex gdextension_interface_array_operator_index;
 extern "C" GDExtensionInterfaceArrayOperatorIndexConst gdextension_interface_array_operator_index_const;
-extern "C" GDExtensionInterfaceArrayRef gdextension_interface_array_ref;
 extern "C" GDExtensionInterfaceArraySetTyped gdextension_interface_array_set_typed;
 extern "C" GDExtensionInterfaceDictionaryOperatorIndex gdextension_interface_dictionary_operator_index;
 extern "C" GDExtensionInterfaceDictionaryOperatorIndexConst gdextension_interface_dictionary_operator_index_const;
@@ -204,6 +203,7 @@ extern "C" GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8Chars gdextension_inter
 extern "C" GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8CharsAndLen gdextension_interface_editor_help_load_xml_from_utf8_chars_and_len;
 extern "C" GDExtensionInterfaceImagePtrw gdextension_interface_image_ptrw;
 extern "C" GDExtensionInterfaceImagePtr gdextension_interface_image_ptr;
+extern "C" GDExtensionInterfaceRegisterMainLoopCallbacks gdextension_interface_register_main_loop_callbacks;
 
 class DocDataRegistration {
 public:
@@ -228,6 +228,11 @@ public:
 		GDExtensionInitializationLevel minimum_initialization_level = GDEXTENSION_INITIALIZATION_CORE;
 		Callback init_callback = nullptr;
 		Callback terminate_callback = nullptr;
+		GDExtensionMainLoopCallbacks main_loop_callbacks = {};
+
+		inline bool has_main_loop_callbacks() const {
+			return main_loop_callbacks.frame_func || main_loop_callbacks.startup_func || main_loop_callbacks.shutdown_func;
+		}
 	};
 
 	class InitDataList {
@@ -261,6 +266,13 @@ public:
 		void register_initializer(Callback p_init) const;
 		void register_terminator(Callback p_init) const;
 		void set_minimum_library_initialization_level(ModuleInitializationLevel p_level) const;
+
+		// Register a callback that is called after all initialization levels when Godot is fully initialized.
+		void register_startup_callback(GDExtensionMainLoopStartupCallback p_callback) const;
+		// Register a callback that is called for every process frame. This will run after all `_process()` methods on Node, and before `ScriptServer::frame()`.
+		void register_frame_callback(GDExtensionMainLoopFrameCallback p_callback) const;
+		// Register a callback that is called before Godot is shutdown when it is still fully initialized.
+		void register_shutdown_callback(GDExtensionMainLoopShutdownCallback p_callback) const;
 
 		GDExtensionBool init() const;
 	};
