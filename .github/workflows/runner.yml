@@ -34,13 +34,14 @@ jobs:
               - '.github/workflows/*.yml'
               - '**/*.py'
               - '**/*.cpp'
+              - '**/*.hpp'
               - '**/*.h'
+              - '**/*.inc'
               - 'test/build_profile.json'
               - 'gdextension/extension_api.json'
             scons:
               - '**/SConstruct'
               - '**/SCsub'
-              - '**/*.py'
             cmake:
               - '**/CMakeLists.txt'
               - '**/*.cmake'
