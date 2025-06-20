@@ -141,7 +141,12 @@ def scons_emit_files(target, source, env):
     env.Clean(target, [env.File(f) for f in get_file_list(str(source[0]), target[0].abspath, True, True)])
 
     api = generate_trimmed_api(str(source[0]), profile_filepath)
-    files = [env.File(f) for f in _get_file_list(api, target[0].abspath, True, True)]
+    files = []
+    for f in _get_file_list(api, target[0].abspath, True, True):
+        file = env.File(f)
+        if profile_filepath:
+            env.Depends(file, profile_filepath)
+        files.append(file)
     env["godot_cpp_gen_dir"] = target[0].abspath
     return files, source
 
