@@ -2755,9 +2755,22 @@ def correct_type(type_name, meta=None, use_alias=True):
     if type_name in type_conversion:
         return type_conversion[type_name]
     if type_name.startswith("typedarray::"):
-        return type_name.replace("typedarray::", "TypedArray<") + ">"
+        arr_type_name = type_name.replace("typedarray::", "")
+        if is_refcounted(arr_type_name):
+            arr_type_name = "Ref<" + arr_type_name + ">"
+        return "TypedArray<" + arr_type_name + ">"
     if type_name.startswith("typeddictionary::"):
-        return type_name.replace("typeddictionary::", "TypedDictionary<").replace(";", ", ") + ">"
+        dict_type_name = type_name.replace("typeddictionary::", "")
+        dict_type_names = dict_type_name.split(";")
+        if is_refcounted(dict_type_names[0]):
+            key_name = "Ref<" + dict_type_names[0] + ">"
+        else:
+            key_name = dict_type_names[0]
+        if is_refcounted(dict_type_names[1]):
+            val_name = "Ref<" + dict_type_names[1] + ">"
+        else:
+            val_name = dict_type_names[1]
+        return "TypedDictionary<" + key_name + ", " + val_name + ">"
     if is_enum(type_name):
         if is_bitfield(type_name):
             base_class = get_enum_class(type_name)
