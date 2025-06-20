@@ -232,10 +232,6 @@ void Array::set_typed(uint32_t p_type, const StringName &p_class_name, const Var
 	internal::gdextension_interface_array_set_typed((GDExtensionTypePtr *)this, (GDExtensionVariantType)p_type, (GDExtensionConstStringNamePtr)&p_class_name, (GDExtensionConstVariantPtr)&p_script);
 }
 
-void Array::_ref(const Array &p_from) const {
-	internal::gdextension_interface_array_ref((GDExtensionTypePtr *)this, (GDExtensionConstTypePtr *)&p_from);
-}
-
 const Variant *Array::ptr() const {
 	return (const Variant *)internal::gdextension_interface_array_operator_index_const((GDExtensionTypePtr *)this, 0);
 }
