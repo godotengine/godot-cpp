@@ -204,6 +204,7 @@ extern "C" GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8Chars gdextension_inter
 extern "C" GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8CharsAndLen gdextension_interface_editor_help_load_xml_from_utf8_chars_and_len;
 extern "C" GDExtensionInterfaceImagePtrw gdextension_interface_image_ptrw;
 extern "C" GDExtensionInterfaceImagePtr gdextension_interface_image_ptr;
+extern "C" GDExtensionInterfaceObjectGetScriptInstance gdextension_interface_object_get_script_instance;
 
 class DocDataRegistration {
 public:

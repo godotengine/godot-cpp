@@ -211,6 +211,7 @@ GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8Chars gdextension_interface_editor
 GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8CharsAndLen gdextension_interface_editor_help_load_xml_from_utf8_chars_and_len = nullptr;
 GDExtensionInterfaceImagePtrw gdextension_interface_image_ptrw = nullptr;
 GDExtensionInterfaceImagePtr gdextension_interface_image_ptr = nullptr;
+GDExtensionInterfaceObjectGetScriptInstance gdextension_interface_object_get_script_instance = nullptr;
 
 struct DocData {
 	const char *hash = nullptr;
@@ -496,6 +497,7 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	LOAD_PROC_ADDRESS(editor_help_load_xml_from_utf8_chars_and_len, GDExtensionsInterfaceEditorHelpLoadXmlFromUtf8CharsAndLen);
 	LOAD_PROC_ADDRESS(image_ptrw, GDExtensionInterfaceImagePtrw);
 	LOAD_PROC_ADDRESS(image_ptr, GDExtensionInterfaceImagePtr);
+	LOAD_PROC_ADDRESS(object_get_script_instance, GDExtensionInterfaceObjectGetScriptInstance);
 
 	r_initialization->initialize = initialize_level;
 	r_initialization->deinitialize = deinitialize_level;
