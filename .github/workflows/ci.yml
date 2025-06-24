@@ -21,7 +21,7 @@ jobs:
       matrix:
         include:
           - name: 🐧 Linux (GCC)
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
@@ -29,7 +29,7 @@ jobs:
             cache-name: linux-x86_64
 
           - name: 🐧 Linux (GCC, Double Precision)
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
             artifact-path: bin/libgodot-cpp.linux.template_release.double.x86_64.a
@@ -64,7 +64,7 @@ jobs:
             cache-name: macos-universal
 
           - name: 🤖 Android (arm64)
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             platform: android
             artifact-name: godot-cpp-android-arm64-release
             artifact-path: bin/libgodot-cpp.android.template_release.arm64.a
@@ -82,7 +82,7 @@ jobs:
             cache-name: ios-arm64
 
           - name: 🌐 Web (wasm32)
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             platform: web
             artifact-name: godot-cpp-web-wasm32-release
             artifact-path: bin/libgodot-cpp.web.template_release.wasm32.a
@@ -183,7 +183,7 @@ jobs:
 
   linux-cmake:
     name: 🐧 Build (Linux, GCC, CMake)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -207,7 +207,7 @@ jobs:
 
   linux-cmake-ninja:
     name: 🐧 Build (Linux, GCC, CMake Ninja)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
