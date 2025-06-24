@@ -34,7 +34,7 @@ jobs:
             cache-name: linux-x86_64
 
           - name: 🏁 Windows (x86_64, MSVC)
-            os: windows-2019
+            os: windows-2022
             platform: windows
             artifact-name: godot-cpp-windows-msvc2019-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.lib
@@ -42,7 +42,7 @@ jobs:
             cache-name: windows-x86_64-msvc
 
           - name: 🏁 Windows (x86_64, MinGW)
-            os: windows-2019
+            os: windows-2022
             platform: windows
             artifact-name: godot-cpp-linux-mingw-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.a
