@@ -28,10 +28,10 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_PROJECTION_HPP
-#define GODOT_PROJECTION_HPP
+#pragma once
 
 #include <godot_cpp/core/math.hpp>
+#include <godot_cpp/templates/vector.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 #include <godot_cpp/variant/vector4.hpp>
 
@@ -56,21 +56,21 @@ struct [[nodiscard]] Projection {
 
 	Vector4 columns[4];
 
-	_FORCE_INLINE_ const Vector4 &operator[](const int p_axis) const {
+	_FORCE_INLINE_ const Vector4 &operator[](int p_axis) const {
 		DEV_ASSERT((unsigned int)p_axis < 4);
 		return columns[p_axis];
 	}
 
-	_FORCE_INLINE_ Vector4 &operator[](const int p_axis) {
+	_FORCE_INLINE_ Vector4 &operator[](int p_axis) {
 		DEV_ASSERT((unsigned int)p_axis < 4);
 		return columns[p_axis];
 	}
 
-	float determinant() const;
+	real_t determinant() const;
 	void set_identity();
 	void set_zero();
 	void set_light_bias();
-	void set_depth_correction(bool p_flip_y = true);
+	void set_depth_correction(bool p_flip_y = true, bool p_reverse_z = true, bool p_remap_z = true);
 
 	void set_light_atlas_rect(const Rect2 &p_rect);
 	void set_perspective(real_t p_fovy_degrees, real_t p_aspect, real_t p_z_near, real_t p_z_far, bool p_flip_fov = false);
@@ -107,7 +107,7 @@ struct [[nodiscard]] Projection {
 	real_t get_fov() const;
 	bool is_orthogonal() const;
 
-	Array get_projection_planes(const Transform3D &p_transform) const;
+	Vector<Plane> get_projection_planes(const Transform3D &p_transform) const;
 
 	bool get_endpoints(const Transform3D &p_transform, Vector3 *p_8points) const;
 	Vector2 get_viewport_half_extents() const;
@@ -149,10 +149,11 @@ struct [[nodiscard]] Projection {
 		return !(*this == p_cam);
 	}
 
-	float get_lod_multiplier() const;
+	real_t get_lod_multiplier() const;
 
 	Projection();
 	Projection(const Vector4 &p_x, const Vector4 &p_y, const Vector4 &p_z, const Vector4 &p_w);
+	Projection(real_t p_xx, real_t p_xy, real_t p_xz, real_t p_xw, real_t p_yx, real_t p_yy, real_t p_yz, real_t p_yw, real_t p_zx, real_t p_zy, real_t p_zz, real_t p_zw, real_t p_wx, real_t p_wy, real_t p_wz, real_t p_ww);
 	Projection(const Transform3D &p_transform);
 	~Projection();
 };
@@ -167,5 +168,3 @@ Vector3 Projection::xform(const Vector3 &p_vec3) const {
 }
 
 } // namespace godot
-
-#endif // GODOT_PROJECTION_HPP

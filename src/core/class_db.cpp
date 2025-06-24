@@ -392,7 +392,7 @@ void ClassDB::initialize_class(const ClassInfo &p_cl) {
 }
 
 void ClassDB::initialize(GDExtensionInitializationLevel p_level) {
-	for (const std::pair<StringName, ClassInfo> pair : classes) {
+	for (const std::pair<const StringName, ClassInfo> &pair : classes) {
 		const ClassInfo &cl = pair.second;
 		if (cl.level != p_level) {
 			continue;

@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_COLOR_NAMES_INC_HPP
-#define GODOT_COLOR_NAMES_INC_HPP
+#pragma once
 
 namespace godot {
 
@@ -188,9 +187,6 @@ static NamedColor named_colors[] = {
 	{ "WHITE_SMOKE", Color::hex(0xF5F5F5FF) },
 	{ "YELLOW", Color::hex(0xFFFF00FF) },
 	{ "YELLOW_GREEN", Color::hex(0x9ACD32FF) },
-	{ nullptr, Color() },
 };
 
 } // namespace godot
-
-#endif // GODOT_COLOR_NAMES_INC_HPP

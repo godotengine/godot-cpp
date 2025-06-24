@@ -28,10 +28,10 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_TYPED_DICTIONARY_HPP
-#define GODOT_TYPED_DICTIONARY_HPP
+#pragma once
 
 #include <godot_cpp/core/type_info.hpp>
+#include <godot_cpp/templates/pair.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
@@ -58,54 +58,75 @@ public:
 	_FORCE_INLINE_ TypedDictionary() {
 		set_typed(Variant::OBJECT, K::get_class_static(), Variant(), Variant::OBJECT, V::get_class_static(), Variant());
 	}
+	_FORCE_INLINE_ TypedDictionary(std::initializer_list<KeyValue<K, V>> p_init) :
+			Dictionary() {
+		set_typed(Variant::OBJECT, K::get_class_static(), Variant(), Variant::OBJECT, V::get_class_static(), Variant());
+		for (const KeyValue<K, V> &E : p_init) {
+			operator[](E.key) = E.value;
+		}
+	}
 };
 
 //specialization for the rest of variant types
 
-#define MAKE_TYPED_DICTIONARY_WITH_OBJECT(m_type, m_variant_type)                                                          \
-	template <typename T>                                                                                                  \
-	class TypedDictionary<T, m_type> : public Dictionary {                                                                 \
-	public:                                                                                                                \
-		_FORCE_INLINE_ void operator=(const Dictionary &p_dictionary) {                                                    \
-			ERR_FAIL_COND_MSG(!is_same_typed(p_dictionary), "Cannot assign an dictionary with a different element type."); \
-			Dictionary::operator=(p_dictionary);                                                                           \
-		}                                                                                                                  \
-		_FORCE_INLINE_ TypedDictionary(const Variant &p_variant) :                                                         \
-				TypedDictionary(Dictionary(p_variant)) {                                                                   \
-		}                                                                                                                  \
-		_FORCE_INLINE_ TypedDictionary(const Dictionary &p_dictionary) {                                                   \
-			set_typed(Variant::OBJECT, T::get_class_static(), Variant(), m_variant_type, StringName(), Variant());         \
-			if (is_same_typed(p_dictionary)) {                                                                             \
-				Dictionary::operator=(p_dictionary);                                                                       \
-			} else {                                                                                                       \
-				assign(p_dictionary);                                                                                      \
-			}                                                                                                              \
-		}                                                                                                                  \
-		_FORCE_INLINE_ TypedDictionary() {                                                                                 \
-			set_typed(Variant::OBJECT, T::get_class_static(), Variant(), m_variant_type, StringName(), Variant());         \
-		}                                                                                                                  \
-	};                                                                                                                     \
-	template <typename T>                                                                                                  \
-	class TypedDictionary<m_type, T> : public Dictionary {                                                                 \
-	public:                                                                                                                \
-		_FORCE_INLINE_ void operator=(const Dictionary &p_dictionary) {                                                    \
-			ERR_FAIL_COND_MSG(!is_same_typed(p_dictionary), "Cannot assign an dictionary with a different element type."); \
-			Dictionary::operator=(p_dictionary);                                                                           \
-		}                                                                                                                  \
-		_FORCE_INLINE_ TypedDictionary(const Variant &p_variant) :                                                         \
-				TypedDictionary(Dictionary(p_variant)) {                                                                   \
-		}                                                                                                                  \
-		_FORCE_INLINE_ TypedDictionary(const Dictionary &p_dictionary) {                                                   \
-			set_typed(m_variant_type, StringName(), Variant(), Variant::OBJECT, T::get_class_static(), Variant());         \
-			if (is_same_typed(p_dictionary)) {                                                                             \
-				Dictionary::operator=(p_dictionary);                                                                       \
-			} else {                                                                                                       \
-				assign(p_dictionary);                                                                                      \
-			}                                                                                                              \
-		}                                                                                                                  \
-		_FORCE_INLINE_ TypedDictionary() {                                                                                 \
-			set_typed(m_variant_type, StringName(), Variant(), Variant::OBJECT, T::get_class_static(), Variant());         \
-		}                                                                                                                  \
+#define MAKE_TYPED_DICTIONARY_WITH_OBJECT(m_type, m_variant_type)                                                                             \
+	template <typename T>                                                                                                                     \
+	class TypedDictionary<T, m_type> : public Dictionary {                                                                                    \
+	public:                                                                                                                                   \
+		_FORCE_INLINE_ void operator=(const Dictionary &p_dictionary) {                                                                       \
+			ERR_FAIL_COND_MSG(!is_same_typed(p_dictionary), "Cannot assign an dictionary with a different element type.");                    \
+			Dictionary::operator=(p_dictionary);                                                                                              \
+		}                                                                                                                                     \
+		_FORCE_INLINE_ TypedDictionary(const Variant &p_variant) :                                                                            \
+				TypedDictionary(Dictionary(p_variant)) {                                                                                      \
+		}                                                                                                                                     \
+		_FORCE_INLINE_ TypedDictionary(const Dictionary &p_dictionary) {                                                                      \
+			set_typed(Variant::OBJECT, T::get_class_static(), Variant(), m_variant_type, StringName(), Variant());                            \
+			if (is_same_typed(p_dictionary)) {                                                                                                \
+				Dictionary::operator=(p_dictionary);                                                                                          \
+			} else {                                                                                                                          \
+				assign(p_dictionary);                                                                                                         \
+			}                                                                                                                                 \
+		}                                                                                                                                     \
+		_FORCE_INLINE_ TypedDictionary() {                                                                                                    \
+			set_typed(Variant::OBJECT, T::get_class_static(), Variant(), m_variant_type, StringName(), Variant());                            \
+		}                                                                                                                                     \
+		_FORCE_INLINE_ TypedDictionary(std::initializer_list<KeyValue<T, m_type>> p_init) :                                                   \
+				Dictionary() {                                                                                                                \
+			set_typed(Variant::OBJECT, T::get_class_static(), Variant(), m_variant_type, StringName(), Variant());                            \
+			for (const KeyValue<T, m_type> &E : p_init) {                                                                                     \
+				operator[](E.key) = E.value;                                                                                                  \
+			}                                                                                                                                 \
+		}                                                                                                                                     \
+	};                                                                                                                                        \
+	template <typename T>                                                                                                                     \
+	class TypedDictionary<m_type, T> : public Dictionary {                                                                                    \
+	public:                                                                                                                                   \
+		_FORCE_INLINE_ void operator=(const Dictionary &p_dictionary) {                                                                       \
+			ERR_FAIL_COND_MSG(!is_same_typed(p_dictionary), "Cannot assign an dictionary with a different element type.");                    \
+			Dictionary::operator=(p_dictionary);                                                                                              \
+		}                                                                                                                                     \
+		_FORCE_INLINE_ TypedDictionary(const Variant &p_variant) :                                                                            \
+				TypedDictionary(Dictionary(p_variant)) {                                                                                      \
+		}                                                                                                                                     \
+		_FORCE_INLINE_ TypedDictionary(const Dictionary &p_dictionary) {                                                                      \
+			set_typed(m_variant_type, StringName(), Variant(), Variant::OBJECT, T::get_class_static(), Variant());                            \
+			if (is_same_typed(p_dictionary)) {                                                                                                \
+				Dictionary::operator=(p_dictionary);                                                                                          \
+			} else {                                                                                                                          \
+				assign(p_dictionary);                                                                                                         \
+			}                                                                                                                                 \
+		}                                                                                                                                     \
+		_FORCE_INLINE_ TypedDictionary() {                                                                                                    \
+			set_typed(m_variant_type, StringName(), Variant(), Variant::OBJECT, T::get_class_static(), Variant());                            \
+		}                                                                                                                                     \
+		_FORCE_INLINE_ TypedDictionary(std::initializer_list<KeyValue<m_type, T>> p_init) :                                                   \
+				Dictionary() {                                                                                                                \
+			set_typed(m_variant_type, StringName(), Variant(), Variant::OBJECT, std::remove_pointer<T>::type::get_class_static(), Variant()); \
+			for (const KeyValue<m_type, T> &E : p_init) {                                                                                     \
+				operator[](E.key) = E.value;                                                                                                  \
+			}                                                                                                                                 \
+		}                                                                                                                                     \
 	};
 
 #define MAKE_TYPED_DICTIONARY_EXPANDED(m_type_key, m_variant_type_key, m_type_value, m_variant_type_value)                 \
@@ -129,6 +150,13 @@ public:
 		}                                                                                                                  \
 		_FORCE_INLINE_ TypedDictionary() {                                                                                 \
 			set_typed(m_variant_type_key, StringName(), Variant(), m_variant_type_value, StringName(), Variant());         \
+		}                                                                                                                  \
+		_FORCE_INLINE_ TypedDictionary(std::initializer_list<KeyValue<m_type_key, m_type_value>> p_init) :                 \
+				Dictionary() {                                                                                             \
+			set_typed(m_variant_type_key, StringName(), Variant(), m_variant_type_value, StringName(), Variant());         \
+			for (const KeyValue<m_type_key, m_type_value> &E : p_init) {                                                   \
+				operator[](E.key) = E.value;                                                                               \
+			}                                                                                                              \
 		}                                                                                                                  \
 	};
 
@@ -435,5 +463,3 @@ MAKE_TYPED_DICTIONARY_INFO(IPAddress, Variant::STRING)
 #undef MAKE_TYPED_DICTIONARY_INFO_WITH_OBJECT
 
 } // namespace godot
-
-#endif // GODOT_TYPED_DICTIONARY_HPP

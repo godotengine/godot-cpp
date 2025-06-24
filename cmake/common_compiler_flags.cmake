@@ -47,7 +47,7 @@ by default, we need to test for it. ]]
 function(compiler_detection)
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
         if(${CMAKE_CXX_COMPILER_FRONTEND_VARIANT} STREQUAL MSVC)
-            message("Using clang-cl")
+            message(STATUS "Using clang-cl")
             set(IS_CLANG "0" PARENT_SCOPE)
             set(IS_MSVC "1" PARENT_SCOPE)
             set(NOT_MSVC "0" PARENT_SCOPE)
@@ -159,7 +159,7 @@ function(common_compiler_flags)
             GDEXTENSION
 
             # features
-            $<${DEBUG_FEATURES}:DEBUG_ENABLED DEBUG_METHODS_ENABLED>
+            $<${DEBUG_FEATURES}:DEBUG_ENABLED>
 
             $<${IS_DEV_BUILD}:DEV_ENABLED>
 

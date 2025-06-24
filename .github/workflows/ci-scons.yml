@@ -10,13 +10,15 @@ env:
   # Use UTF-8 on Linux.
   LANG: en_US.UTF-8
   LC_ALL: en_US.UTF-8
+  # Use UTF-8 on Windows.
+  PYTHONIOENCODING: utf8
 
 concurrency:
-  group: ci-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}
+  group: ci-scons-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-scons:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -31,17 +33,8 @@ jobs:
             run-tests: true
             cache-name: linux-x86_64
 
-          - name: 🐧 Linux (GCC, Double Precision)
-            os: ubuntu-22.04
-            platform: linux
-            artifact-name: godot-cpp-linux-glibc2.27-x86_64-double-release
-            artifact-path: bin/libgodot-cpp.linux.template_release.double.x86_64.a
-            flags: precision=double
-            run-tests: false
-            cache-name: linux-x86_64-f64
-
           - name: 🏁 Windows (x86_64, MSVC)
-            os: windows-2019
+            os: windows-2022
             platform: windows
             artifact-name: godot-cpp-windows-msvc2019-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.lib
@@ -49,7 +42,7 @@ jobs:
             cache-name: windows-x86_64-msvc
 
           - name: 🏁 Windows (x86_64, MinGW)
-            os: windows-2019
+            os: windows-2022
             platform: windows
             artifact-name: godot-cpp-linux-mingw-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.a
@@ -113,6 +106,7 @@ jobs:
         with:
           platform: ${{ matrix.platform }}
           windows-compiler: ${{ contains(matrix.flags, 'use_mingw=yes') && 'mingw' || 'msvc' }}
+          buildtool: scons
 
       - name: Generate godot-cpp sources only
         run: |
@@ -183,40 +177,3 @@ jobs:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
           if-no-files-found: error
-
-  linux-cmake-ninja:
-    name: 🐧 Build (Linux, GCC, CMake Ninja)
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -qqq build-essential pkg-config cmake ninja-build
-
-      - name: Build test GDExtension library
-        run: |
-          mkdir cmake-build
-          cd cmake-build
-          cmake ../ -DGODOTCPP_ENABLE_TESTING=YES -DGODOTCPP_TARGET=template_release
-          cmake --build . --verbose -j $(nproc) --target godot-cpp-test --config Release
-
-  windows-msvc-cmake:
-    name: 🏁 Build (Windows, MSVC, CMake)
-    runs-on: windows-2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Build test GDExtension library
-        run: |
-          mkdir cmake-build
-          cd cmake-build
-          cmake ../ -DGODOTCPP_ENABLE_TESTING=YES -DGODOTCPP_TARGET=template_release
-          cmake --build . --verbose --target godot-cpp-test --config Release

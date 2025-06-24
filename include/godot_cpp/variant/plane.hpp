@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_PLANE_HPP
-#define GODOT_PLANE_HPP
+#pragma once
 
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/vector3.hpp>
@@ -50,7 +49,7 @@ struct [[nodiscard]] Plane {
 
 	/* Plane-Point operations */
 
-	_FORCE_INLINE_ Vector3 center() const { return normal * d; }
+	_FORCE_INLINE_ Vector3 get_center() const { return normal * d; }
 	Vector3 get_any_perpendicular_normal() const;
 
 	_FORCE_INLINE_ bool is_point_over(const Vector3 &p_point) const; ///< Point is over plane
@@ -137,5 +136,3 @@ bool Plane::operator!=(const Plane &p_plane) const {
 }
 
 } // namespace godot
-
-#endif // GODOT_PLANE_HPP
