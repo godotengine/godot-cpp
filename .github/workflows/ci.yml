@@ -38,7 +38,7 @@ jobs:
             cache-name: linux-x86_64-f64
 
           - name: 🏁 Windows (x86_64, MSVC)
-            os: windows-2019
+            os: windows-2022
             platform: windows
             artifact-name: godot-cpp-windows-msvc2019-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.lib
@@ -46,7 +46,7 @@ jobs:
             cache-name: windows-x86_64-msvc
 
           - name: 🏁 Windows (x86_64, MinGW)
-            os: windows-2019
+            os: windows-2022
             platform: windows
             artifact-name: godot-cpp-linux-mingw-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.template_release.x86_64.a
@@ -231,7 +231,7 @@ jobs:
 
   windows-msvc-cmake:
     name: 🏁 Build (Windows, MSVC, CMake)
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -240,10 +240,10 @@ jobs:
 
       - name: Build godot-cpp
         run: |
-          cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 16 2019" .
+          cmake -DCMAKE_BUILD_TYPE=Release -G"Visual Studio 17 2022" .
           cmake --build . --verbose --config Release
 
       - name: Build test GDExtension library
         run: |
-          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 16 2019" .
+          cd test && cmake -DCMAKE_BUILD_TYPE=Release -DGODOT_HEADERS_PATH="../godot-headers" -DCPP_BINDINGS_PATH=".." -G"Visual Studio 17 2022" .
           cmake --build . --verbose --config Release
