@@ -41,7 +41,7 @@ jobs:
             run-tests: true
 
           - name: 🏁 Windows (x86_64, MSVC)
-            os: windows-2019
+            os: windows-2022
             platform: windows
             compiler: msvc
             build-flags: --config Release
@@ -50,7 +50,7 @@ jobs:
             run-tests: false
 
           - name: 🏁 Windows (x86_64, MinGW, Ninja)
-            os: windows-2019
+            os: windows-2022
             platform: windows
             compiler: mingw
             config-flags:
