@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
 import os
+import sys
+
+# Add godot-cpp folder to sys.path, so that we can import local modules.
+sys.path.append(Dir(".").srcnode().abspath)
+
 
 EnsureSConsVersion(4, 0)
 EnsurePythonVersion(3, 8)
@@ -27,7 +32,7 @@ if profile:
     elif os.path.isfile(profile + ".py"):
         customs.append(profile + ".py")
 opts = Variables(customs, ARGUMENTS)
-cpp_tool = Tool("godotcpp", toolpath=["tools"])
+cpp_tool = Tool("godotcpp", toolpath=[Dir("tools").srcnode().abspath])
 cpp_tool.options(opts, env)
 opts.Update(env)
 
