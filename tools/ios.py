@@ -36,9 +36,11 @@ def generate(env):
     if env["ios_simulator"]:
         sdk_name = "iphonesimulator"
         env.Append(CCFLAGS=["-mios-simulator-version-min=" + env["ios_min_version"]])
+        env.Append(LINKFLAGS=["-mios-simulator-version-min=" + env["ios_min_version"]])
     else:
         sdk_name = "iphoneos"
         env.Append(CCFLAGS=["-miphoneos-version-min=" + env["ios_min_version"]])
+        env.Append(LINKFLAGS=["-miphoneos-version-min=" + env["ios_min_version"]])
 
     if sys.platform == "darwin":
         if env["IOS_SDK_PATH"] == "":
