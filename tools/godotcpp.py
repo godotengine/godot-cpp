@@ -564,16 +564,25 @@ def _godot_cpp(env):
     library = None
     library_name = "libgodot-cpp" + env["suffix"] + env["LIBSUFFIX"]
 
+    default_args = []
+
     if env["build_library"]:
         library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
         env.NoCache(library)
         default_args = [library]
 
-        # Add compiledb if the option is set
-        if env.get("compiledb", False):
-            default_args += ["compiledb"]
+        env.AppendUnique(LIBS=[env.File("bin/%s" % library_name)])
+    else:
+        # When not building the library, allow it to be found in other library
+        # paths on the system. It may have been built previously, so still add
+        # bin/ to the search path.
+        env.AppendUnique(LIBPATH=[env.Dir("bin/")])
+        env.AppendUnique(LIBS=[library_name])
 
-        env.Default(*default_args)
+    # Add compiledb if the option is set
+    if env.get("compiledb", False):
+        default_args += ["compiledb"]
 
-    env.AppendUnique(LIBS=[env.File("bin/%s" % library_name)])
+    env.Default(*default_args)
+
     return library
