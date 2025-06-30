@@ -199,3 +199,11 @@ venv
 # Clion Configuration
 .idea/
 cmake-build-*
+
+# code coverage stuff
+*.gcno
+**/*.gcno
+*.gcda
+**/*.gcda
+coverage.info
+coverage_report

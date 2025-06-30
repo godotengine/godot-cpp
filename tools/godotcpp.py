@@ -338,7 +338,7 @@ def options(opts, env):
 
     opts.Add(
         BoolVariable(
-            "disable_exceptions", "Force disabling exception handling code", default=env.get("disable_exceptions", True)
+            "disable_exceptions", "Force disabling exception handling code", default=env.get("disable_exceptions", False)
         )
     )
 
