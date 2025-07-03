@@ -32,32 +32,28 @@
 
 namespace godot {
 
+void MethodBind::_set_const(bool p_const) {
+	_const = p_const;
+}
+
+void MethodBind::_set_static(bool p_static) {
+	_static = p_static;
+}
+
+void MethodBind::_set_returns(bool p_returns) {
+	_returns = p_returns;
+}
+
+void MethodBind::_set_vararg(bool p_vararg) {
+	_vararg = p_vararg;
+}
+
 StringName MethodBind::get_name() const {
 	return name;
 }
 
 void MethodBind::set_name(const StringName &p_name) {
 	name = p_name;
-}
-
-void MethodBind::set_argument_count(int p_count) {
-	argument_count = p_count;
-}
-
-void MethodBind::set_const(bool p_const) {
-	_is_const = p_const;
-}
-
-void MethodBind::set_return(bool p_return) {
-	_has_return = p_return;
-}
-
-void MethodBind::set_static(bool p_static) {
-	_static = p_static;
-}
-
-void MethodBind::set_vararg(bool p_vararg) {
-	_vararg = p_vararg;
 }
 
 void MethodBind::set_argument_names(const std::vector<StringName> &p_names) {
@@ -68,7 +64,7 @@ std::vector<StringName> MethodBind::get_argument_names() const {
 	return argument_names;
 }
 
-void MethodBind::generate_argument_types(int p_count) {
+void MethodBind::_generate_argument_types(int p_count) {
 	set_argument_count(p_count);
 
 	if (argument_types != nullptr) {
