@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_REF_HPP
-#define GODOT_REF_HPP
+#pragma once
 
 #include <godot_cpp/core/defs.hpp>
 
@@ -71,6 +70,10 @@ class Ref {
 	}
 
 public:
+	static _FORCE_INLINE_ String get_class_static() {
+		return T::get_class_static();
+	}
+
 	_FORCE_INLINE_ bool operator==(const T *p_ptr) const {
 		return reference == p_ptr;
 	}
@@ -284,5 +287,3 @@ struct GetTypeInfo<const Ref<T> &, typename EnableIf<TypeInherits<RefCounted, T>
 };
 
 } // namespace godot
-
-#endif // GODOT_REF_HPP

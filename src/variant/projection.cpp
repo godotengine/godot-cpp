@@ -39,7 +39,7 @@
 
 namespace godot {
 
-float Projection::determinant() const {
+real_t Projection::determinant() const {
 	return columns[0][3] * columns[1][2] * columns[2][1] * columns[3][0] - columns[0][2] * columns[1][3] * columns[2][1] * columns[3][0] -
 			columns[0][3] * columns[1][1] * columns[2][2] * columns[3][0] + columns[0][1] * columns[1][3] * columns[2][2] * columns[3][0] +
 			columns[0][2] * columns[1][1] * columns[2][3] * columns[3][0] - columns[0][1] * columns[1][2] * columns[2][3] * columns[3][0] -
@@ -171,7 +171,7 @@ Projection Projection::perspective_znear_adjusted(real_t p_new_znear) const {
 }
 
 Plane Projection::get_projection_plane(Planes p_plane) const {
-	const real_t *matrix = (const real_t *)this->columns;
+	const real_t *matrix = (const real_t *)columns;
 
 	switch (p_plane) {
 		case PLANE_NEAR: {
@@ -404,20 +404,19 @@ void Projection::set_frustum(real_t p_size, real_t p_aspect, Vector2 p_offset, r
 }
 
 real_t Projection::get_z_far() const {
-	const real_t *matrix = (const real_t *)this->columns;
+	const real_t *matrix = (const real_t *)columns;
 	Plane new_plane = Plane(matrix[3] - matrix[2],
 			matrix[7] - matrix[6],
 			matrix[11] - matrix[10],
 			matrix[15] - matrix[14]);
 
-	new_plane.normal = -new_plane.normal;
 	new_plane.normalize();
 
 	return new_plane.d;
 }
 
 real_t Projection::get_z_near() const {
-	const real_t *matrix = (const real_t *)this->columns;
+	const real_t *matrix = (const real_t *)columns;
 	Plane new_plane = Plane(matrix[3] + matrix[2],
 			matrix[7] + matrix[6],
 			matrix[11] + matrix[10],
@@ -428,7 +427,7 @@ real_t Projection::get_z_near() const {
 }
 
 Vector2 Projection::get_viewport_half_extents() const {
-	const real_t *matrix = (const real_t *)this->columns;
+	const real_t *matrix = (const real_t *)columns;
 	///////--- Near Plane ---///////
 	Plane near_plane = Plane(matrix[3] + matrix[2],
 			matrix[7] + matrix[6],
@@ -456,7 +455,7 @@ Vector2 Projection::get_viewport_half_extents() const {
 }
 
 Vector2 Projection::get_far_plane_half_extents() const {
-	const real_t *matrix = (const real_t *)this->columns;
+	const real_t *matrix = (const real_t *)columns;
 	///////--- Far Plane ---///////
 	Plane far_plane = Plane(matrix[3] - matrix[2],
 			matrix[7] - matrix[6],
@@ -484,7 +483,7 @@ Vector2 Projection::get_far_plane_half_extents() const {
 }
 
 bool Projection::get_endpoints(const Transform3D &p_transform, Vector3 *p_8points) const {
-	Array planes = get_projection_planes(Transform3D());
+	Vector<Plane> planes = get_projection_planes(Transform3D());
 	const Planes intersections[8][3] = {
 		{ PLANE_FAR, PLANE_LEFT, PLANE_TOP },
 		{ PLANE_FAR, PLANE_LEFT, PLANE_BOTTOM },
@@ -509,17 +508,17 @@ bool Projection::get_endpoints(const Transform3D &p_transform, Vector3 *p_8point
 	return true;
 }
 
-Array Projection::get_projection_planes(const Transform3D &p_transform) const {
+Vector<Plane> Projection::get_projection_planes(const Transform3D &p_transform) const {
 	/** Fast Plane Extraction from combined modelview/projection matrices.
 	 * References:
 	 * https://web.archive.org/web/20011221205252/https://www.markmorley.com/opengl/frustumculling.html
 	 * https://web.archive.org/web/20061020020112/https://www2.ravensoft.com/users/ggribb/plane%20extraction.pdf
 	 */
 
-	Array planes;
+	Vector<Plane> planes;
 	planes.resize(6);
 
-	const real_t *matrix = (const real_t *)this->columns;
+	const real_t *matrix = (const real_t *)columns;
 
 	Plane new_plane;
 
@@ -532,7 +531,7 @@ Array Projection::get_projection_planes(const Transform3D &p_transform) const {
 	new_plane.normal = -new_plane.normal;
 	new_plane.normalize();
 
-	planes[0] = p_transform.xform(new_plane);
+	planes.write[0] = p_transform.xform(new_plane);
 
 	///////--- Far Plane ---///////
 	new_plane = Plane(matrix[3] - matrix[2],
@@ -543,7 +542,7 @@ Array Projection::get_projection_planes(const Transform3D &p_transform) const {
 	new_plane.normal = -new_plane.normal;
 	new_plane.normalize();
 
-	planes[1] = p_transform.xform(new_plane);
+	planes.write[1] = p_transform.xform(new_plane);
 
 	///////--- Left Plane ---///////
 	new_plane = Plane(matrix[3] + matrix[0],
@@ -554,7 +553,7 @@ Array Projection::get_projection_planes(const Transform3D &p_transform) const {
 	new_plane.normal = -new_plane.normal;
 	new_plane.normalize();
 
-	planes[2] = p_transform.xform(new_plane);
+	planes.write[2] = p_transform.xform(new_plane);
 
 	///////--- Top Plane ---///////
 	new_plane = Plane(matrix[3] - matrix[1],
@@ -565,7 +564,7 @@ Array Projection::get_projection_planes(const Transform3D &p_transform) const {
 	new_plane.normal = -new_plane.normal;
 	new_plane.normalize();
 
-	planes[3] = p_transform.xform(new_plane);
+	planes.write[3] = p_transform.xform(new_plane);
 
 	///////--- Right Plane ---///////
 	new_plane = Plane(matrix[3] - matrix[0],
@@ -576,7 +575,7 @@ Array Projection::get_projection_planes(const Transform3D &p_transform) const {
 	new_plane.normal = -new_plane.normal;
 	new_plane.normalize();
 
-	planes[4] = p_transform.xform(new_plane);
+	planes.write[4] = p_transform.xform(new_plane);
 
 	///////--- Bottom Plane ---///////
 	new_plane = Plane(matrix[3] + matrix[1],
@@ -587,7 +586,7 @@ Array Projection::get_projection_planes(const Transform3D &p_transform) const {
 	new_plane.normal = -new_plane.normal;
 	new_plane.normalize();
 
-	planes[5] = p_transform.xform(new_plane);
+	planes.write[5] = p_transform.xform(new_plane);
 
 	return planes;
 }
@@ -599,101 +598,229 @@ Projection Projection::inverse() const {
 }
 
 void Projection::invert() {
-	int i, j, k;
-	int pvt_i[4], pvt_j[4]; /* Locations of pivot matrix */
-	real_t pvt_val; /* Value of current pivot element */
-	real_t hold; /* Temporary storage */
-	real_t determinant = 1.0f;
-	for (k = 0; k < 4; k++) {
-		/** Locate k'th pivot element **/
-		pvt_val = columns[k][k]; /** Initialize for search **/
-		pvt_i[k] = k;
-		pvt_j[k] = k;
-		for (i = k; i < 4; i++) {
-			for (j = k; j < 4; j++) {
-				if (Math::abs(columns[i][j]) > Math::abs(pvt_val)) {
-					pvt_i[k] = i;
-					pvt_j[k] = j;
-					pvt_val = columns[i][j];
-				}
-			}
-		}
+	// Adapted from Mesa's `src/util/u_math.c` `util_invert_mat4x4`.
+	// MIT licensed. Copyright 2008 VMware, Inc. Authored by Jacques Leroy.
+	Projection temp;
+	real_t *out = (real_t *)temp.columns;
+	real_t *m = (real_t *)columns;
 
-		/** Product of pivots, gives determinant when finished **/
-		determinant *= pvt_val;
-		if (Math::is_zero_approx(determinant)) {
-			return; /** Matrix is singular (zero determinant). **/
-		}
+	real_t wtmp[4][8];
+	real_t m0, m1, m2, m3, s;
+	real_t *r0, *r1, *r2, *r3;
 
-		/** "Interchange" rows (with sign change stuff) **/
-		i = pvt_i[k];
-		if (i != k) { /** If rows are different **/
-			for (j = 0; j < 4; j++) {
-				hold = -columns[k][j];
-				columns[k][j] = columns[i][j];
-				columns[i][j] = hold;
-			}
-		}
+#define MAT(m, r, c) (m)[(c) * 4 + (r)]
 
-		/** "Interchange" columns **/
-		j = pvt_j[k];
-		if (j != k) { /** If columns are different **/
-			for (i = 0; i < 4; i++) {
-				hold = -columns[i][k];
-				columns[i][k] = columns[i][j];
-				columns[i][j] = hold;
-			}
-		}
+	r0 = wtmp[0];
+	r1 = wtmp[1];
+	r2 = wtmp[2];
+	r3 = wtmp[3];
 
-		/** Divide column by minus pivot value **/
-		for (i = 0; i < 4; i++) {
-			if (i != k) {
-				columns[i][k] /= (-pvt_val);
-			}
-		}
+	r0[0] = MAT(m, 0, 0);
+	r0[1] = MAT(m, 0, 1);
+	r0[2] = MAT(m, 0, 2);
+	r0[3] = MAT(m, 0, 3);
+	r0[4] = 1.0;
+	r0[5] = 0.0;
+	r0[6] = 0.0;
+	r0[7] = 0.0;
 
-		/** Reduce the matrix **/
-		for (i = 0; i < 4; i++) {
-			hold = columns[i][k];
-			for (j = 0; j < 4; j++) {
-				if (i != k && j != k) {
-					columns[i][j] += hold * columns[k][j];
-				}
-			}
-		}
+	r1[0] = MAT(m, 1, 0);
+	r1[1] = MAT(m, 1, 1);
+	r1[2] = MAT(m, 1, 2);
+	r1[3] = MAT(m, 1, 3);
+	r1[5] = 1.0;
+	r1[4] = 0.0;
+	r1[6] = 0.0;
+	r1[7] = 0.0;
 
-		/** Divide row by pivot **/
-		for (j = 0; j < 4; j++) {
-			if (j != k) {
-				columns[k][j] /= pvt_val;
-			}
-		}
+	r2[0] = MAT(m, 2, 0);
+	r2[1] = MAT(m, 2, 1);
+	r2[2] = MAT(m, 2, 2);
+	r2[3] = MAT(m, 2, 3);
+	r2[6] = 1.0;
+	r2[4] = 0.0;
+	r2[5] = 0.0;
+	r2[7] = 0.0;
 
-		/** Replace pivot by reciprocal (at last we can touch it). **/
-		columns[k][k] = 1.0 / pvt_val;
+	r3[0] = MAT(m, 3, 0);
+	r3[1] = MAT(m, 3, 1);
+	r3[2] = MAT(m, 3, 2);
+	r3[3] = MAT(m, 3, 3);
+
+	r3[7] = 1.0;
+	r3[4] = 0.0;
+	r3[5] = 0.0;
+	r3[6] = 0.0;
+
+	/* choose pivot - or die */
+	if (Math::abs(r3[0]) > Math::abs(r2[0])) {
+		SWAP(r3, r2);
+	}
+	if (Math::abs(r2[0]) > Math::abs(r1[0])) {
+		SWAP(r2, r1);
+	}
+	if (Math::abs(r1[0]) > Math::abs(r0[0])) {
+		SWAP(r1, r0);
+	}
+	ERR_FAIL_COND(0.0 == r0[0]);
+
+	/* eliminate first variable     */
+	m1 = r1[0] / r0[0];
+	m2 = r2[0] / r0[0];
+	m3 = r3[0] / r0[0];
+	s = r0[1];
+	r1[1] -= m1 * s;
+	r2[1] -= m2 * s;
+	r3[1] -= m3 * s;
+	s = r0[2];
+	r1[2] -= m1 * s;
+	r2[2] -= m2 * s;
+	r3[2] -= m3 * s;
+	s = r0[3];
+	r1[3] -= m1 * s;
+	r2[3] -= m2 * s;
+	r3[3] -= m3 * s;
+	s = r0[4];
+	if (s != 0.0) {
+		r1[4] -= m1 * s;
+		r2[4] -= m2 * s;
+		r3[4] -= m3 * s;
+	}
+	s = r0[5];
+	if (s != 0.0) {
+		r1[5] -= m1 * s;
+		r2[5] -= m2 * s;
+		r3[5] -= m3 * s;
+	}
+	s = r0[6];
+	if (s != 0.0) {
+		r1[6] -= m1 * s;
+		r2[6] -= m2 * s;
+		r3[6] -= m3 * s;
+	}
+	s = r0[7];
+	if (s != 0.0) {
+		r1[7] -= m1 * s;
+		r2[7] -= m2 * s;
+		r3[7] -= m3 * s;
 	}
 
-	/* That was most of the work, one final pass of row/column interchange */
-	/* to finish */
-	for (k = 4 - 2; k >= 0; k--) { /* Don't need to work with 1 by 1 corner*/
-		i = pvt_j[k]; /* Rows to swap correspond to pivot COLUMN */
-		if (i != k) { /* If rows are different */
-			for (j = 0; j < 4; j++) {
-				hold = columns[k][j];
-				columns[k][j] = -columns[i][j];
-				columns[i][j] = hold;
-			}
-		}
-
-		j = pvt_i[k]; /* Columns to swap correspond to pivot ROW */
-		if (j != k) { /* If columns are different */
-			for (i = 0; i < 4; i++) {
-				hold = columns[i][k];
-				columns[i][k] = -columns[i][j];
-				columns[i][j] = hold;
-			}
-		}
+	/* choose pivot - or die */
+	if (Math::abs(r3[1]) > Math::abs(r2[1])) {
+		SWAP(r3, r2);
 	}
+	if (Math::abs(r2[1]) > Math::abs(r1[1])) {
+		SWAP(r2, r1);
+	}
+	ERR_FAIL_COND(0.0 == r1[1]);
+
+	/* eliminate second variable */
+	m2 = r2[1] / r1[1];
+	m3 = r3[1] / r1[1];
+	r2[2] -= m2 * r1[2];
+	r3[2] -= m3 * r1[2];
+	r2[3] -= m2 * r1[3];
+	r3[3] -= m3 * r1[3];
+	s = r1[4];
+	if (0.0 != s) {
+		r2[4] -= m2 * s;
+		r3[4] -= m3 * s;
+	}
+	s = r1[5];
+	if (0.0 != s) {
+		r2[5] -= m2 * s;
+		r3[5] -= m3 * s;
+	}
+	s = r1[6];
+	if (0.0 != s) {
+		r2[6] -= m2 * s;
+		r3[6] -= m3 * s;
+	}
+	s = r1[7];
+	if (0.0 != s) {
+		r2[7] -= m2 * s;
+		r3[7] -= m3 * s;
+	}
+
+	/* choose pivot - or die */
+	if (Math::abs(r3[2]) > Math::abs(r2[2])) {
+		SWAP(r3, r2);
+	}
+	ERR_FAIL_COND(0.0 == r2[2]);
+
+	/* eliminate third variable */
+	m3 = r3[2] / r2[2];
+	r3[3] -= m3 * r2[3];
+	r3[4] -= m3 * r2[4];
+	r3[5] -= m3 * r2[5];
+	r3[6] -= m3 * r2[6];
+	r3[7] -= m3 * r2[7];
+
+	/* last check */
+	ERR_FAIL_COND(0.0 == r3[3]);
+
+	s = 1.0 / r3[3]; /* now back substitute row 3 */
+	r3[4] *= s;
+	r3[5] *= s;
+	r3[6] *= s;
+	r3[7] *= s;
+
+	m2 = r2[3]; /* now back substitute row 2 */
+	s = 1.0 / r2[2];
+	r2[4] = s * (r2[4] - r3[4] * m2);
+	r2[5] = s * (r2[5] - r3[5] * m2);
+	r2[6] = s * (r2[6] - r3[6] * m2);
+	r2[7] = s * (r2[7] - r3[7] * m2);
+	m1 = r1[3];
+	r1[4] -= r3[4] * m1;
+	r1[5] -= r3[5] * m1;
+	r1[6] -= r3[6] * m1;
+	r1[7] -= r3[7] * m1;
+	m0 = r0[3];
+	r0[4] -= r3[4] * m0;
+	r0[5] -= r3[5] * m0;
+	r0[6] -= r3[6] * m0;
+	r0[7] -= r3[7] * m0;
+
+	m1 = r1[2]; /* now back substitute row 1 */
+	s = 1.0 / r1[1];
+	r1[4] = s * (r1[4] - r2[4] * m1);
+	r1[5] = s * (r1[5] - r2[5] * m1),
+	r1[6] = s * (r1[6] - r2[6] * m1);
+	r1[7] = s * (r1[7] - r2[7] * m1);
+	m0 = r0[2];
+	r0[4] -= r2[4] * m0;
+	r0[5] -= r2[5] * m0;
+	r0[6] -= r2[6] * m0;
+	r0[7] -= r2[7] * m0;
+
+	m0 = r0[1]; /* now back substitute row 0 */
+	s = 1.0 / r0[0];
+	r0[4] = s * (r0[4] - r1[4] * m0);
+	r0[5] = s * (r0[5] - r1[5] * m0),
+	r0[6] = s * (r0[6] - r1[6] * m0);
+	r0[7] = s * (r0[7] - r1[7] * m0);
+
+	MAT(out, 0, 0) = r0[4];
+	MAT(out, 0, 1) = r0[5];
+	MAT(out, 0, 2) = r0[6];
+	MAT(out, 0, 3) = r0[7];
+	MAT(out, 1, 0) = r1[4];
+	MAT(out, 1, 1) = r1[5];
+	MAT(out, 1, 2) = r1[6];
+	MAT(out, 1, 3) = r1[7];
+	MAT(out, 2, 0) = r2[4];
+	MAT(out, 2, 1) = r2[5];
+	MAT(out, 2, 2) = r2[6];
+	MAT(out, 2, 3) = r2[7];
+	MAT(out, 3, 0) = r3[4];
+	MAT(out, 3, 1) = r3[5];
+	MAT(out, 3, 2) = r3[6];
+	MAT(out, 3, 3) = r3[7];
+
+#undef MAT
+
+	*this = temp;
 }
 
 void Projection::flip_y() {
@@ -722,7 +849,8 @@ Projection Projection::operator*(const Projection &p_matrix) const {
 	return new_matrix;
 }
 
-void Projection::set_depth_correction(bool p_flip_y) {
+void Projection::set_depth_correction(bool p_flip_y, bool p_reverse_z, bool p_remap_z) {
+	// p_remap_z is used to convert from OpenGL-style clip space (-1 - 1) to Vulkan style (0 - 1).
 	real_t *m = &columns[0][0];
 
 	m[0] = 1;
@@ -735,11 +863,11 @@ void Projection::set_depth_correction(bool p_flip_y) {
 	m[7] = 0.0;
 	m[8] = 0.0;
 	m[9] = 0.0;
-	m[10] = 0.5;
+	m[10] = p_remap_z ? (p_reverse_z ? -0.5 : 0.5) : (p_reverse_z ? -1.0 : 1.0);
 	m[11] = 0.0;
 	m[12] = 0.0;
 	m[13] = 0.0;
-	m[14] = 0.5;
+	m[14] = p_remap_z ? 0.5 : 0.0;
 	m[15] = 1.0;
 }
 
@@ -786,14 +914,10 @@ void Projection::set_light_atlas_rect(const Rect2 &p_rect) {
 }
 
 Projection::operator String() const {
-	String str;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			str = str + String((j > 0) ? ", " : "\n") + rtos(columns[i][j]);
-		}
-	}
-
-	return str;
+	return "[X: " + columns[0].operator String() +
+			", Y: " + columns[1].operator String() +
+			", Z: " + columns[2].operator String() +
+			", W: " + columns[3].operator String() + "]";
 }
 
 real_t Projection::get_aspect() const {
@@ -812,7 +936,7 @@ bool Projection::is_orthogonal() const {
 }
 
 real_t Projection::get_fov() const {
-	const real_t *matrix = (const real_t *)this->columns;
+	const real_t *matrix = (const real_t *)columns;
 
 	Plane right_plane = Plane(matrix[3] - matrix[0],
 			matrix[7] - matrix[4],
@@ -834,13 +958,13 @@ real_t Projection::get_fov() const {
 	}
 }
 
-float Projection::get_lod_multiplier() const {
+real_t Projection::get_lod_multiplier() const {
 	if (is_orthogonal()) {
 		return get_viewport_half_extents().x;
 	} else {
-		float zn = get_z_near();
-		float width = get_viewport_half_extents().x * 2.0;
-		return 1.0 / (zn / width);
+		const real_t zn = get_z_near();
+		const real_t width = get_viewport_half_extents().x * 2.0f;
+		return 1.0f / (zn / width);
 	}
 
 	// Usage is lod_size / (lod_distance * multiplier) < threshold
@@ -911,6 +1035,13 @@ Projection::Projection(const Vector4 &p_x, const Vector4 &p_y, const Vector4 &p_
 	columns[1] = p_y;
 	columns[2] = p_z;
 	columns[3] = p_w;
+}
+
+Projection::Projection(real_t p_xx, real_t p_xy, real_t p_xz, real_t p_xw, real_t p_yx, real_t p_yy, real_t p_yz, real_t p_yw, real_t p_zx, real_t p_zy, real_t p_zz, real_t p_zw, real_t p_wx, real_t p_wy, real_t p_wz, real_t p_ww) {
+	columns[0] = Vector4(p_xx, p_xy, p_xz, p_xw);
+	columns[1] = Vector4(p_yx, p_yy, p_yz, p_yw);
+	columns[2] = Vector4(p_zx, p_zy, p_zz, p_zw);
+	columns[3] = Vector4(p_wx, p_wy, p_wz, p_ww);
 }
 
 Projection::Projection(const Transform3D &p_transform) {

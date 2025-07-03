@@ -35,22 +35,6 @@
 
 namespace godot {
 
-Vector4i Vector4i::snapped(const Vector4i &p_step) const {
-	return Vector4i(
-			Math::snapped(x, p_step.x),
-			Math::snapped(y, p_step.y),
-			Math::snapped(z, p_step.z),
-			Math::snapped(w, p_step.w));
-}
-
-Vector4i Vector4i::snappedi(int32_t p_step) const {
-	return Vector4i(
-			Math::snapped(x, p_step),
-			Math::snapped(y, p_step),
-			Math::snapped(z, p_step),
-			Math::snapped(w, p_step));
-}
-
 Vector4i::Axis Vector4i::min_axis_index() const {
 	uint32_t min_index = 0;
 	int32_t min_value = x;
@@ -89,6 +73,22 @@ Vector4i Vector4i::clampi(int32_t p_min, int32_t p_max) const {
 			CLAMP(y, p_min, p_max),
 			CLAMP(z, p_min, p_max),
 			CLAMP(w, p_min, p_max));
+}
+
+Vector4i Vector4i::snapped(const Vector4i &p_step) const {
+	return Vector4i(
+			Math::snapped(x, p_step.x),
+			Math::snapped(y, p_step.y),
+			Math::snapped(z, p_step.z),
+			Math::snapped(w, p_step.w));
+}
+
+Vector4i Vector4i::snappedi(int32_t p_step) const {
+	return Vector4i(
+			Math::snapped(x, p_step),
+			Math::snapped(y, p_step),
+			Math::snapped(z, p_step),
+			Math::snapped(w, p_step));
 }
 
 Vector4i::operator String() const {

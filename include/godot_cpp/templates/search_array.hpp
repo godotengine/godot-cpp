@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_SEARCH_ARRAY_HPP
-#define GODOT_SEARCH_ARRAY_HPP
+#pragma once
 
 #include <godot_cpp/templates/sort_array.hpp>
 
@@ -40,12 +39,12 @@ class SearchArray {
 public:
 	Comparator compare;
 
-	inline int bisect(const T *p_array, int p_len, const T &p_value, bool p_before) const {
-		int lo = 0;
-		int hi = p_len;
+	inline int64_t bisect(const T *p_array, int64_t p_len, const T &p_value, bool p_before) const {
+		int64_t lo = 0;
+		int64_t hi = p_len;
 		if (p_before) {
 			while (lo < hi) {
-				const int mid = (lo + hi) / 2;
+				const int64_t mid = (lo + hi) / 2;
 				if (compare(p_array[mid], p_value)) {
 					lo = mid + 1;
 				} else {
@@ -54,7 +53,7 @@ public:
 			}
 		} else {
 			while (lo < hi) {
-				const int mid = (lo + hi) / 2;
+				const int64_t mid = (lo + hi) / 2;
 				if (compare(p_value, p_array[mid])) {
 					hi = mid;
 				} else {
@@ -67,5 +66,3 @@ public:
 };
 
 } // namespace godot
-
-#endif // GODOT_SEARCH_ARRAY_HPP

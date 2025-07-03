@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_TRANSFORM3D_HPP
-#define GODOT_TRANSFORM3D_HPP
+#pragma once
 
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/variant/aabb.hpp>
@@ -55,8 +54,8 @@ struct [[nodiscard]] Transform3D {
 	void rotate(const Vector3 &p_axis, real_t p_angle);
 	void rotate_basis(const Vector3 &p_axis, real_t p_angle);
 
-	void set_look_at(const Vector3 &p_eye, const Vector3 &p_target, const Vector3 &p_up = Vector3(0, 1, 0));
-	Transform3D looking_at(const Vector3 &p_target, const Vector3 &p_up = Vector3(0, 1, 0)) const;
+	void set_look_at(const Vector3 &p_eye, const Vector3 &p_target, const Vector3 &p_up = Vector3(0, 1, 0), bool p_use_model_front = false);
+	Transform3D looking_at(const Vector3 &p_target, const Vector3 &p_up = Vector3(0, 1, 0), bool p_use_model_front = false) const;
 
 	void scale(const Vector3 &p_scale);
 	Transform3D scaled(const Vector3 &p_scale) const;
@@ -105,8 +104,10 @@ struct [[nodiscard]] Transform3D {
 
 	void operator*=(const Transform3D &p_transform);
 	Transform3D operator*(const Transform3D &p_transform) const;
-	void operator*=(const real_t p_val);
-	Transform3D operator*(const real_t p_val) const;
+	void operator*=(real_t p_val);
+	Transform3D operator*(real_t p_val) const;
+	void operator/=(real_t p_val);
+	Transform3D operator/(real_t p_val) const;
 
 	Transform3D interpolate_with(const Transform3D &p_transform, real_t p_c) const;
 
@@ -116,11 +117,11 @@ struct [[nodiscard]] Transform3D {
 				basis.xform(v));
 	}
 
-	void set(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz, real_t tx, real_t ty, real_t tz) {
-		basis.set(xx, xy, xz, yx, yy, yz, zx, zy, zz);
-		origin.x = tx;
-		origin.y = ty;
-		origin.z = tz;
+	void set(real_t p_xx, real_t p_xy, real_t p_xz, real_t p_yx, real_t p_yy, real_t p_yz, real_t p_zx, real_t p_zy, real_t p_zz, real_t p_tx, real_t p_ty, real_t p_tz) {
+		basis.set(p_xx, p_xy, p_xz, p_yx, p_yy, p_yz, p_zx, p_zy, p_zz);
+		origin.x = p_tx;
+		origin.y = p_ty;
+		origin.z = p_tz;
 	}
 
 	operator String() const;
@@ -128,7 +129,7 @@ struct [[nodiscard]] Transform3D {
 	Transform3D() {}
 	Transform3D(const Basis &p_basis, const Vector3 &p_origin = Vector3());
 	Transform3D(const Vector3 &p_x, const Vector3 &p_y, const Vector3 &p_z, const Vector3 &p_origin);
-	Transform3D(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz, real_t ox, real_t oy, real_t oz);
+	Transform3D(real_t p_xx, real_t p_xy, real_t p_xz, real_t p_yx, real_t p_yy, real_t p_yz, real_t p_zx, real_t p_zy, real_t p_zz, real_t p_ox, real_t p_oy, real_t p_oz);
 };
 
 _FORCE_INLINE_ Vector3 Transform3D::xform(const Vector3 &p_vector) const {
@@ -272,5 +273,3 @@ _FORCE_INLINE_ Plane Transform3D::xform_inv_fast(const Plane &p_plane, const Tra
 }
 
 } // namespace godot
-
-#endif // GODOT_TRANSFORM3D_HPP

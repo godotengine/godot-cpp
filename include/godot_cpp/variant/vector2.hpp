@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_VECTOR2_HPP
-#define GODOT_VECTOR2_HPP
+#pragma once
 
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/math.hpp>
@@ -62,13 +61,13 @@ struct [[nodiscard]] Vector2 {
 		real_t coord[2] = { 0 };
 	};
 
-	_FORCE_INLINE_ real_t &operator[](int p_idx) {
-		DEV_ASSERT((unsigned int)p_idx < 2);
-		return coord[p_idx];
+	_FORCE_INLINE_ real_t &operator[](int p_axis) {
+		DEV_ASSERT((unsigned int)p_axis < 2);
+		return coord[p_axis];
 	}
-	_FORCE_INLINE_ const real_t &operator[](int p_idx) const {
-		DEV_ASSERT((unsigned int)p_idx < 2);
-		return coord[p_idx];
+	_FORCE_INLINE_ const real_t &operator[](int p_axis) const {
+		DEV_ASSERT((unsigned int)p_axis < 2);
+		return coord[p_axis];
 	}
 
 	_FORCE_INLINE_ Vector2::Axis min_axis_index() const {
@@ -85,7 +84,7 @@ struct [[nodiscard]] Vector2 {
 
 	real_t length() const;
 	real_t length_squared() const;
-	Vector2 limit_length(const real_t p_len = 1.0) const;
+	Vector2 limit_length(real_t p_len = 1.0) const;
 
 	Vector2 min(const Vector2 &p_vector2) const {
 		return Vector2(MIN(x, p_vector2.x), MIN(y, p_vector2.y));
@@ -111,19 +110,20 @@ struct [[nodiscard]] Vector2 {
 
 	real_t dot(const Vector2 &p_other) const;
 	real_t cross(const Vector2 &p_other) const;
-	Vector2 posmod(const real_t p_mod) const;
+	Vector2 posmod(real_t p_mod) const;
 	Vector2 posmodv(const Vector2 &p_modv) const;
 	Vector2 project(const Vector2 &p_to) const;
 
-	Vector2 plane_project(const real_t p_d, const Vector2 &p_vec) const;
+	Vector2 plane_project(real_t p_d, const Vector2 &p_vec) const;
 
-	_FORCE_INLINE_ Vector2 lerp(const Vector2 &p_to, const real_t p_weight) const;
-	_FORCE_INLINE_ Vector2 slerp(const Vector2 &p_to, const real_t p_weight) const;
-	_FORCE_INLINE_ Vector2 cubic_interpolate(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, const real_t p_weight) const;
-	_FORCE_INLINE_ Vector2 cubic_interpolate_in_time(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, const real_t p_weight, const real_t &p_b_t, const real_t &p_pre_a_t, const real_t &p_post_b_t) const;
-	_FORCE_INLINE_ Vector2 bezier_interpolate(const Vector2 &p_control_1, const Vector2 &p_control_2, const Vector2 &p_end, const real_t p_t) const;
+	_FORCE_INLINE_ Vector2 lerp(const Vector2 &p_to, real_t p_weight) const;
+	_FORCE_INLINE_ Vector2 slerp(const Vector2 &p_to, real_t p_weight) const;
+	_FORCE_INLINE_ Vector2 cubic_interpolate(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, real_t p_weight) const;
+	_FORCE_INLINE_ Vector2 cubic_interpolate_in_time(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, real_t p_weight, real_t p_b_t, real_t p_pre_a_t, real_t p_post_b_t) const;
+	_FORCE_INLINE_ Vector2 bezier_interpolate(const Vector2 &p_control_1, const Vector2 &p_control_2, const Vector2 &p_end, real_t p_t) const;
+	_FORCE_INLINE_ Vector2 bezier_derivative(const Vector2 &p_control_1, const Vector2 &p_control_2, const Vector2 &p_end, real_t p_t) const;
 
-	Vector2 move_toward(const Vector2 &p_to, const real_t p_delta) const;
+	Vector2 move_toward(const Vector2 &p_to, real_t p_delta) const;
 
 	Vector2 slide(const Vector2 &p_normal) const;
 	Vector2 bounce(const Vector2 &p_normal) const;
@@ -139,16 +139,16 @@ struct [[nodiscard]] Vector2 {
 	void operator-=(const Vector2 &p_v);
 	Vector2 operator*(const Vector2 &p_v1) const;
 
-	Vector2 operator*(const real_t &rvalue) const;
-	void operator*=(const real_t &rvalue);
-	void operator*=(const Vector2 &rvalue) { *this = *this * rvalue; }
+	Vector2 operator*(real_t p_rvalue) const;
+	void operator*=(real_t p_rvalue);
+	void operator*=(const Vector2 &p_rvalue) { *this = *this * p_rvalue; }
 
 	Vector2 operator/(const Vector2 &p_v1) const;
 
-	Vector2 operator/(const real_t &rvalue) const;
+	Vector2 operator/(real_t p_rvalue) const;
 
-	void operator/=(const real_t &rvalue);
-	void operator/=(const Vector2 &rvalue) { *this = *this / rvalue; }
+	void operator/=(real_t p_rvalue);
+	void operator/=(const Vector2 &p_rvalue) { *this = *this / p_rvalue; }
 
 	Vector2 operator-() const;
 
@@ -161,13 +161,13 @@ struct [[nodiscard]] Vector2 {
 	bool operator>=(const Vector2 &p_vec2) const { return x == p_vec2.x ? (y >= p_vec2.y) : (x > p_vec2.x); }
 
 	real_t angle() const;
-	static Vector2 from_angle(const real_t p_angle);
+	static Vector2 from_angle(real_t p_angle);
 
 	_FORCE_INLINE_ Vector2 abs() const {
 		return Vector2(Math::abs(x), Math::abs(y));
 	}
 
-	Vector2 rotated(const real_t p_by) const;
+	Vector2 rotated(real_t p_by) const;
 	Vector2 orthogonal() const {
 		return Vector2(y, -x);
 	}
@@ -186,13 +186,13 @@ struct [[nodiscard]] Vector2 {
 	operator Vector2i() const;
 
 	_FORCE_INLINE_ Vector2() {}
-	_FORCE_INLINE_ Vector2(const real_t p_x, const real_t p_y) {
+	_FORCE_INLINE_ Vector2(real_t p_x, real_t p_y) {
 		x = p_x;
 		y = p_y;
 	}
 };
 
-_FORCE_INLINE_ Vector2 Vector2::plane_project(const real_t p_d, const Vector2 &p_vec) const {
+_FORCE_INLINE_ Vector2 Vector2::plane_project(real_t p_d, const Vector2 &p_vec) const {
 	return p_vec - *this * (dot(p_vec) - p_d);
 }
 
@@ -218,26 +218,26 @@ _FORCE_INLINE_ Vector2 Vector2::operator*(const Vector2 &p_v1) const {
 	return Vector2(x * p_v1.x, y * p_v1.y);
 }
 
-_FORCE_INLINE_ Vector2 Vector2::operator*(const real_t &rvalue) const {
-	return Vector2(x * rvalue, y * rvalue);
+_FORCE_INLINE_ Vector2 Vector2::operator*(real_t p_rvalue) const {
+	return Vector2(x * p_rvalue, y * p_rvalue);
 }
 
-_FORCE_INLINE_ void Vector2::operator*=(const real_t &rvalue) {
-	x *= rvalue;
-	y *= rvalue;
+_FORCE_INLINE_ void Vector2::operator*=(real_t p_rvalue) {
+	x *= p_rvalue;
+	y *= p_rvalue;
 }
 
 _FORCE_INLINE_ Vector2 Vector2::operator/(const Vector2 &p_v1) const {
 	return Vector2(x / p_v1.x, y / p_v1.y);
 }
 
-_FORCE_INLINE_ Vector2 Vector2::operator/(const real_t &rvalue) const {
-	return Vector2(x / rvalue, y / rvalue);
+_FORCE_INLINE_ Vector2 Vector2::operator/(real_t p_rvalue) const {
+	return Vector2(x / p_rvalue, y / p_rvalue);
 }
 
-_FORCE_INLINE_ void Vector2::operator/=(const real_t &rvalue) {
-	x /= rvalue;
-	y /= rvalue;
+_FORCE_INLINE_ void Vector2::operator/=(real_t p_rvalue) {
+	x /= p_rvalue;
+	y /= p_rvalue;
 }
 
 _FORCE_INLINE_ Vector2 Vector2::operator-() const {
@@ -252,16 +252,14 @@ _FORCE_INLINE_ bool Vector2::operator!=(const Vector2 &p_vec2) const {
 	return x != p_vec2.x || y != p_vec2.y;
 }
 
-Vector2 Vector2::lerp(const Vector2 &p_to, const real_t p_weight) const {
+Vector2 Vector2::lerp(const Vector2 &p_to, real_t p_weight) const {
 	Vector2 res = *this;
-
-	res.x += (p_weight * (p_to.x - x));
-	res.y += (p_weight * (p_to.y - y));
-
+	res.x = Math::lerp(res.x, p_to.x, p_weight);
+	res.y = Math::lerp(res.y, p_to.y, p_weight);
 	return res;
 }
 
-Vector2 Vector2::slerp(const Vector2 &p_to, const real_t p_weight) const {
+Vector2 Vector2::slerp(const Vector2 &p_to, real_t p_weight) const {
 	real_t start_length_sq = length_squared();
 	real_t end_length_sq = p_to.length_squared();
 	if (unlikely(start_length_sq == 0.0f || end_length_sq == 0.0f)) {
@@ -274,31 +272,32 @@ Vector2 Vector2::slerp(const Vector2 &p_to, const real_t p_weight) const {
 	return rotated(angle * p_weight) * (result_length / start_length);
 }
 
-Vector2 Vector2::cubic_interpolate(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, const real_t p_weight) const {
+Vector2 Vector2::cubic_interpolate(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, real_t p_weight) const {
 	Vector2 res = *this;
 	res.x = Math::cubic_interpolate(res.x, p_b.x, p_pre_a.x, p_post_b.x, p_weight);
 	res.y = Math::cubic_interpolate(res.y, p_b.y, p_pre_a.y, p_post_b.y, p_weight);
 	return res;
 }
 
-Vector2 Vector2::cubic_interpolate_in_time(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, const real_t p_weight, const real_t &p_b_t, const real_t &p_pre_a_t, const real_t &p_post_b_t) const {
+Vector2 Vector2::cubic_interpolate_in_time(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, real_t p_weight, real_t p_b_t, real_t p_pre_a_t, real_t p_post_b_t) const {
 	Vector2 res = *this;
 	res.x = Math::cubic_interpolate_in_time(res.x, p_b.x, p_pre_a.x, p_post_b.x, p_weight, p_b_t, p_pre_a_t, p_post_b_t);
 	res.y = Math::cubic_interpolate_in_time(res.y, p_b.y, p_pre_a.y, p_post_b.y, p_weight, p_b_t, p_pre_a_t, p_post_b_t);
 	return res;
 }
 
-Vector2 Vector2::bezier_interpolate(const Vector2 &p_control_1, const Vector2 &p_control_2, const Vector2 &p_end, const real_t p_t) const {
+Vector2 Vector2::bezier_interpolate(const Vector2 &p_control_1, const Vector2 &p_control_2, const Vector2 &p_end, real_t p_t) const {
 	Vector2 res = *this;
+	res.x = Math::bezier_interpolate(res.x, p_control_1.x, p_control_2.x, p_end.x, p_t);
+	res.y = Math::bezier_interpolate(res.y, p_control_1.y, p_control_2.y, p_end.y, p_t);
+	return res;
+}
 
-	/* Formula from Wikipedia article on Bezier curves. */
-	real_t omt = (1.0 - p_t);
-	real_t omt2 = omt * omt;
-	real_t omt3 = omt2 * omt;
-	real_t t2 = p_t * p_t;
-	real_t t3 = t2 * p_t;
-
-	return res * omt3 + p_control_1 * omt2 * p_t * 3.0 + p_control_2 * omt * t2 * 3.0 + p_end * t3;
+Vector2 Vector2::bezier_derivative(const Vector2 &p_control_1, const Vector2 &p_control_2, const Vector2 &p_end, real_t p_t) const {
+	Vector2 res = *this;
+	res.x = Math::bezier_derivative(res.x, p_control_1.x, p_control_2.x, p_end.x, p_t);
+	res.y = Math::bezier_derivative(res.y, p_control_1.y, p_control_2.y, p_end.y, p_t);
+	return res;
 }
 
 Vector2 Vector2::direction_to(const Vector2 &p_to) const {
@@ -310,19 +309,19 @@ Vector2 Vector2::direction_to(const Vector2 &p_to) const {
 // Multiplication operators required to workaround issues with LLVM using implicit conversion
 // to Vector2i instead for integers where it should not.
 
-_FORCE_INLINE_ Vector2 operator*(const float p_scalar, const Vector2 &p_vec) {
+_FORCE_INLINE_ Vector2 operator*(float p_scalar, const Vector2 &p_vec) {
 	return p_vec * p_scalar;
 }
 
-_FORCE_INLINE_ Vector2 operator*(const double p_scalar, const Vector2 &p_vec) {
+_FORCE_INLINE_ Vector2 operator*(double p_scalar, const Vector2 &p_vec) {
 	return p_vec * p_scalar;
 }
 
-_FORCE_INLINE_ Vector2 operator*(const int32_t p_scalar, const Vector2 &p_vec) {
+_FORCE_INLINE_ Vector2 operator*(int32_t p_scalar, const Vector2 &p_vec) {
 	return p_vec * p_scalar;
 }
 
-_FORCE_INLINE_ Vector2 operator*(const int64_t p_scalar, const Vector2 &p_vec) {
+_FORCE_INLINE_ Vector2 operator*(int64_t p_scalar, const Vector2 &p_vec) {
 	return p_vec * p_scalar;
 }
 
@@ -330,5 +329,3 @@ typedef Vector2 Size2;
 typedef Vector2 Point2;
 
 } // namespace godot
-
-#endif // GODOT_VECTOR2_HPP

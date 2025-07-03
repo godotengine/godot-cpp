@@ -3,8 +3,7 @@
  * This is free and unencumbered software released into the public domain.
  */
 
-#ifndef TESTS_H
-#define TESTS_H
+#pragma once
 
 #include <godot_cpp/templates/cowdata.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
@@ -25,5 +24,3 @@
 #include <godot_cpp/templates/vector.hpp>
 #include <godot_cpp/templates/vmap.hpp>
 #include <godot_cpp/templates/vset.hpp>
-
-#endif // TESTS_H

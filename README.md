@@ -7,6 +7,8 @@
 > from Godot's `master` branch.
 >
 > For users of stable branches, switch to the branch matching your target Godot version:
+> - [`4.4`](https://github.com/godotengine/godot-cpp/tree/4.4)
+> - [`4.3`](https://github.com/godotengine/godot-cpp/tree/4.3)
 > - [`4.2`](https://github.com/godotengine/godot-cpp/tree/4.2)
 > - [`4.1`](https://github.com/godotengine/godot-cpp/tree/4.1)
 > - [`4.0`](https://github.com/godotengine/godot-cpp/tree/4.0)
@@ -49,20 +51,13 @@ Godot version.**
 
 ## Compatibility
 
-> [!WARNING]
->
-> The GDExtension API is brand new in Godot 4.0, and is still
-considered in **beta** stage, despite Godot 4.0 itself being released.
->
-> This applies to both the GDExtension interface header, the API JSON, and this
-first-party `godot-cpp` extension.
->
-> Some compatibility breakage is to be expected as GDExtension and `godot-cpp`
-> get more used, documented, and critical issues get resolved. See the
-> [Godot issue tracker](https://github.com/godotengine/godot/issues?q=is%3Aissue+is%3Aopen+label%3Atopic%3Agdextension)
-> and the [godot-cpp issue tracker](https://github.com/godotengine/godot-cpp/issues)
-> for a list of known issues, and be sure to provide feedback on issues and PRs
-> which affect your use of this extension.
+GDExtensions targeting an earlier version of Godot should work in later minor versions,
+but not vice-versa. For example, a GDExtension targeting Godot 4.2 should work just fine
+in Godot 4.3, but one targeting Godot 4.3 won't work in Godot 4.2.
+
+There is one exception to this: extensions targeting Godot 4.0 will _not_ work with
+Godot 4.1 and later.
+See [Updating your GDExtension for 4.1](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.1.html#updating-your-gdextension-for-godot-4-1).
 
 ## Contributing
 
@@ -145,4 +140,4 @@ See the [godot-cpp-template](https://github.com/godotengine/godot-cpp-template) 
 generic reusable template.
 
 Or checkout the code for the [Summator example](https://github.com/paddy-exe/GDExtensionSummator)
-as shown in the [official documentation](https://docs.godotengine.org/en/latest/tutorials/scripting/gdextension/gdextension_cpp_example.html).
+as shown in the [official documentation](https://docs.godotengine.org/en/latest/tutorials/scripting/cpp/gdextension_cpp_example.html).

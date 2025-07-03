@@ -161,7 +161,7 @@ bool Example::_property_can_revert(const StringName &p_name) const {
 	} else {
 		return false;
 	}
-};
+}
 
 bool Example::_property_get_revert(const StringName &p_name, Variant &r_property) const {
 	if (p_name == StringName("property_from_list")) {
@@ -170,7 +170,7 @@ bool Example::_property_get_revert(const StringName &p_name, Variant &r_property
 	} else {
 		return false;
 	}
-};
+}
 
 void Example::_validate_property(PropertyInfo &p_property) const {
 	String name = p_property.name;

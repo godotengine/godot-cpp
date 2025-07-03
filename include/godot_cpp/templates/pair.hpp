@@ -28,8 +28,9 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_PAIR_HPP
-#define GODOT_PAIR_HPP
+#pragma once
+
+#include <godot_cpp/templates/hashfuncs.hpp>
 
 namespace godot {
 
@@ -69,6 +70,15 @@ struct PairSort {
 	}
 };
 
+template <typename F, typename S>
+struct PairHash {
+	static uint32_t hash(const Pair<F, S> &P) {
+		uint64_t h1 = HashMapHasherDefault::hash(P.first);
+		uint64_t h2 = HashMapHasherDefault::hash(P.second);
+		return hash_one_uint64((h1 << 32) | h2);
+	}
+};
+
 template <typename K, typename V>
 struct KeyValue {
 	const K key;
@@ -103,5 +113,3 @@ struct KeyValueSort {
 };
 
 } // namespace godot
-
-#endif // GODOT_PAIR_HPP

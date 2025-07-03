@@ -28,10 +28,10 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_MATH_HPP
-#define GODOT_MATH_HPP
+#pragma once
 
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/core/math_defs.hpp>
 
 #include <gdextension_interface.h>
 
@@ -39,184 +39,7 @@
 
 namespace godot {
 
-#define Math_SQRT12 0.7071067811865475244008443621048490
-#define Math_SQRT2 1.4142135623730950488016887242
-#define Math_LN2 0.6931471805599453094172321215
-#define Math_PI 3.1415926535897932384626433833
-#define Math_TAU 6.2831853071795864769252867666
-#define Math_E 2.7182818284590452353602874714
-#define Math_INF INFINITY
-#define Math_NAN NAN
-
-// Make room for our constexpr's below by overriding potential system-specific macros.
-#undef ABS
-#undef SIGN
-#undef MIN
-#undef MAX
-#undef CLAMP
-
-// Generic ABS function, for math uses please use Math::abs.
-template <typename T>
-constexpr T ABS(T m_v) {
-	return m_v < 0 ? -m_v : m_v;
-}
-
-template <typename T>
-constexpr const T SIGN(const T m_v) {
-	return m_v == 0 ? 0.0f : (m_v < 0 ? -1.0f : +1.0f);
-}
-
-template <typename T, typename T2>
-constexpr auto MIN(const T m_a, const T2 m_b) {
-	return m_a < m_b ? m_a : m_b;
-}
-
-template <typename T, typename T2>
-constexpr auto MAX(const T m_a, const T2 m_b) {
-	return m_a > m_b ? m_a : m_b;
-}
-
-template <typename T, typename T2, typename T3>
-constexpr auto CLAMP(const T m_a, const T2 m_min, const T3 m_max) {
-	return m_a < m_min ? m_min : (m_a > m_max ? m_max : m_a);
-}
-
-// Generic swap template.
-#ifndef SWAP
-#define SWAP(m_x, m_y) __swap_tmpl((m_x), (m_y))
-template <typename T>
-inline void __swap_tmpl(T &x, T &y) {
-	T aux = x;
-	x = y;
-	y = aux;
-}
-#endif // SWAP
-
-/* Functions to handle powers of 2 and shifting. */
-
-// Function to find the next power of 2 to an integer.
-static _FORCE_INLINE_ unsigned int next_power_of_2(unsigned int x) {
-	if (x == 0) {
-		return 0;
-	}
-
-	--x;
-	x |= x >> 1;
-	x |= x >> 2;
-	x |= x >> 4;
-	x |= x >> 8;
-	x |= x >> 16;
-
-	return ++x;
-}
-
-// Function to find the previous power of 2 to an integer.
-static _FORCE_INLINE_ unsigned int previous_power_of_2(unsigned int x) {
-	x |= x >> 1;
-	x |= x >> 2;
-	x |= x >> 4;
-	x |= x >> 8;
-	x |= x >> 16;
-	return x - (x >> 1);
-}
-
-// Function to find the closest power of 2 to an integer.
-static _FORCE_INLINE_ unsigned int closest_power_of_2(unsigned int x) {
-	unsigned int nx = next_power_of_2(x);
-	unsigned int px = previous_power_of_2(x);
-	return (nx - x) > (x - px) ? px : nx;
-}
-
-// Get a shift value from a power of 2.
-static inline int get_shift_from_power_of_2(unsigned int p_bits) {
-	for (unsigned int i = 0; i < 32; i++) {
-		if (p_bits == (unsigned int)(1 << i)) {
-			return i;
-		}
-	}
-
-	return -1;
-}
-
-template <typename T>
-static _FORCE_INLINE_ T nearest_power_of_2_templated(T x) {
-	--x;
-
-	// The number of operations on x is the base two logarithm
-	// of the number of bits in the type. Add three to account
-	// for sizeof(T) being in bytes.
-	size_t num = get_shift_from_power_of_2(sizeof(T)) + 3;
-
-	// If the compiler is smart, it unrolls this loop.
-	// If it's dumb, this is a bit slow.
-	for (size_t i = 0; i < num; i++) {
-		x |= x >> (1 << i);
-	}
-
-	return ++x;
-}
-
-// Function to find the nearest (bigger) power of 2 to an integer.
-static inline unsigned int nearest_shift(unsigned int p_number) {
-	for (int i = 30; i >= 0; i--) {
-		if (p_number & (1 << i)) {
-			return i + 1;
-		}
-	}
-
-	return 0;
-}
-
-// constexpr function to find the floored log2 of a number
-template <typename T>
-constexpr T floor_log2(T x) {
-	return x < 2 ? x : 1 + floor_log2(x >> 1);
-}
-
-// Get the number of bits needed to represent the number.
-// IE, if you pass in 8, you will get 4.
-// If you want to know how many bits are needed to store 8 values however, pass in (8 - 1).
-template <typename T>
-constexpr T get_num_bits(T x) {
-	return floor_log2(x);
-}
-
-// Swap 16, 32 and 64 bits value for endianness.
-#if defined(__GNUC__)
-#define BSWAP16(x) __builtin_bswap16(x)
-#define BSWAP32(x) __builtin_bswap32(x)
-#define BSWAP64(x) __builtin_bswap64(x)
-#else
-static inline uint16_t BSWAP16(uint16_t x) {
-	return (x >> 8) | (x << 8);
-}
-
-static inline uint32_t BSWAP32(uint32_t x) {
-	return ((x << 24) | ((x << 8) & 0x00FF0000) | ((x >> 8) & 0x0000FF00) | (x >> 24));
-}
-
-static inline uint64_t BSWAP64(uint64_t x) {
-	x = (x & 0x00000000FFFFFFFF) << 32 | (x & 0xFFFFFFFF00000000) >> 32;
-	x = (x & 0x0000FFFF0000FFFF) << 16 | (x & 0xFFFF0000FFFF0000) >> 16;
-	x = (x & 0x00FF00FF00FF00FF) << 8 | (x & 0xFF00FF00FF00FF00) >> 8;
-	return x;
-}
-#endif
-
 namespace Math {
-
-// This epsilon should match the one used by Godot for consistency.
-// Using `f` when `real_t` is float.
-#define CMP_EPSILON 0.00001f
-#define CMP_EPSILON2 (CMP_EPSILON * CMP_EPSILON)
-
-// This epsilon is for values related to a unit size (scalar or vector len).
-#ifdef PRECISE_MATH_CHECKS
-#define UNIT_EPSILON 0.00001
-#else
-// Tolerate some more floating point error normally.
-#define UNIT_EPSILON 0.001
-#endif
 
 // Functions reproduced as in Godot's source code `math_funcs.h`.
 // Some are overloads to automatically support changing real_t into either double or float in the way Godot does.
@@ -538,6 +361,26 @@ inline float bezier_interpolate(float p_start, float p_control_1, float p_contro
 	return p_start * omt3 + p_control_1 * omt2 * p_t * 3.0f + p_control_2 * omt * t2 * 3.0f + p_end * t3;
 }
 
+inline double bezier_derivative(double p_start, double p_control_1, double p_control_2, double p_end, double p_t) {
+	/* Formula from Wikipedia article on Bezier curves. */
+	double omt = (1.0 - p_t);
+	double omt2 = omt * omt;
+	double t2 = p_t * p_t;
+
+	double d = (p_control_1 - p_start) * 3.0 * omt2 + (p_control_2 - p_control_1) * 6.0 * omt * p_t + (p_end - p_control_2) * 3.0 * t2;
+	return d;
+}
+
+inline float bezier_derivative(float p_start, float p_control_1, float p_control_2, float p_end, float p_t) {
+	/* Formula from Wikipedia article on Bezier curves. */
+	float omt = (1.0f - p_t);
+	float omt2 = omt * omt;
+	float t2 = p_t * p_t;
+
+	float d = (p_control_1 - p_start) * 3.0f * omt2 + (p_control_2 - p_control_1) * 6.0f * omt * p_t + (p_end - p_control_2) * 3.0f * t2;
+	return d;
+}
+
 template <typename T>
 inline T clamp(T x, T minv, T maxv) {
 	if (x < minv) {
@@ -816,4 +659,4 @@ inline float snap_scalar_separation(float p_offset, float p_step, float p_target
 } // namespace Math
 } // namespace godot
 
-#endif // GODOT_MATH_HPP
+#include "math.compat.inc"

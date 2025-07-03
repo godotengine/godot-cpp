@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_METHOD_BIND_HPP
-#define GODOT_METHOD_BIND_HPP
+#pragma once
 
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/type_info.hpp>
@@ -48,14 +47,14 @@
 namespace godot {
 
 class MethodBind {
+	uint32_t hint_flags = METHOD_FLAGS_DEFAULT;
 	StringName name;
 	StringName instance_class;
 	int argument_count = 0;
-	uint32_t hint_flags = METHOD_FLAGS_DEFAULT;
 
 	bool _static = false;
-	bool _is_const = false;
-	bool _has_return = false;
+	bool _const = false;
+	bool _returns = false;
 	bool _vararg = false;
 
 	std::vector<StringName> argument_names;
@@ -63,20 +62,20 @@ class MethodBind {
 	std::vector<Variant> default_arguments;
 
 protected:
+	void _set_const(bool p_const);
+	void _set_static(bool p_static);
+	void _set_returns(bool p_returns);
+	void _set_vararg(bool p_vararg);
 	virtual GDExtensionVariantType gen_argument_type(int p_arg) const = 0;
 	virtual PropertyInfo gen_argument_type_info(int p_arg) const = 0;
-	void generate_argument_types(int p_count);
-	void set_const(bool p_const);
-	void set_return(bool p_return);
-	void set_static(bool p_static);
-	void set_vararg(bool p_vararg);
-	void set_argument_count(int p_count);
+	void _generate_argument_types(int p_count);
+
+	void set_argument_count(int p_count) { argument_count = p_count; }
 
 public:
-	StringName get_name() const;
-	void set_name(const StringName &p_name);
-	_FORCE_INLINE_ int get_default_argument_count() const { return (int)default_arguments.size(); }
 	_FORCE_INLINE_ const std::vector<Variant> &get_default_arguments() const { return default_arguments; }
+	_FORCE_INLINE_ int get_default_argument_count() const { return (int)default_arguments.size(); }
+
 	_FORCE_INLINE_ Variant has_default_argument(int p_arg) const {
 		const int num_default_args = (int)(default_arguments.size());
 		const int idx = p_arg - (argument_count - num_default_args);
@@ -97,19 +96,6 @@ public:
 			return default_arguments[idx];
 		}
 	}
-	_FORCE_INLINE_ StringName get_instance_class() const { return instance_class; }
-	_FORCE_INLINE_ void set_instance_class(StringName p_class) { instance_class = p_class; }
-
-	_FORCE_INLINE_ int get_argument_count() const { return argument_count; }
-	_FORCE_INLINE_ bool is_const() const { return _is_const; }
-	_FORCE_INLINE_ bool is_static() const { return _static; }
-	_FORCE_INLINE_ bool is_vararg() const { return _vararg; }
-	_FORCE_INLINE_ bool has_return() const { return _has_return; }
-	_FORCE_INLINE_ uint32_t get_hint_flags() const { return hint_flags | (is_const() ? GDEXTENSION_METHOD_FLAG_CONST : 0) | (is_vararg() ? GDEXTENSION_METHOD_FLAG_VARARG : 0) | (is_static() ? GDEXTENSION_METHOD_FLAG_STATIC : 0); }
-	_FORCE_INLINE_ void set_hint_flags(uint32_t p_hint_flags) { hint_flags = p_hint_flags; }
-	void set_argument_names(const std::vector<StringName> &p_names);
-	std::vector<StringName> get_argument_names() const;
-	void set_default_arguments(const std::vector<Variant> &p_default_arguments) { default_arguments = p_default_arguments; }
 
 	_FORCE_INLINE_ GDExtensionVariantType get_argument_type(int p_argument) const {
 		ERR_FAIL_COND_V(p_argument < -1 || p_argument > argument_count, GDEXTENSION_VARIANT_TYPE_NIL);
@@ -117,7 +103,6 @@ public:
 	}
 
 	PropertyInfo get_argument_info(int p_argument) const;
-	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const = 0;
 
 	std::vector<PropertyInfo> get_arguments_info_list() const {
 		std::vector<PropertyInfo> vec;
@@ -128,6 +113,31 @@ public:
 		}
 		return vec;
 	}
+
+	void set_argument_names(const std::vector<StringName> &p_names);
+	std::vector<StringName> get_argument_names() const;
+
+	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const = 0;
+
+	_FORCE_INLINE_ void set_hint_flags(uint32_t p_hint_flags) { hint_flags = p_hint_flags; }
+	_FORCE_INLINE_ uint32_t get_hint_flags() const { return hint_flags | (is_const() ? GDEXTENSION_METHOD_FLAG_CONST : 0) | (is_vararg() ? GDEXTENSION_METHOD_FLAG_VARARG : 0) | (is_static() ? GDEXTENSION_METHOD_FLAG_STATIC : 0); }
+	_FORCE_INLINE_ StringName get_instance_class() const { return instance_class; }
+	_FORCE_INLINE_ void set_instance_class(StringName p_class) { instance_class = p_class; }
+
+	_FORCE_INLINE_ int get_argument_count() const { return argument_count; }
+
+	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const = 0;
+	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) const = 0;
+
+	StringName get_name() const;
+	void set_name(const StringName &p_name);
+	_FORCE_INLINE_ bool is_const() const { return _const; }
+	_FORCE_INLINE_ bool is_static() const { return _static; }
+	_FORCE_INLINE_ bool is_vararg() const { return _vararg; }
+	_FORCE_INLINE_ bool has_return() const { return _returns; }
+
+	void set_default_arguments(const std::vector<Variant> &p_default_arguments) { default_arguments = p_default_arguments; }
+
 	std::vector<GDExtensionClassMethodArgumentMetadata> get_arguments_metadata_list() const {
 		std::vector<GDExtensionClassMethodArgumentMetadata> vec;
 		// First element is return value
@@ -138,9 +148,6 @@ public:
 		return vec;
 	}
 
-	virtual Variant call(GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionCallError &r_error) const = 0;
-	virtual void ptrcall(GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return) const = 0;
-
 	static void bind_call(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error);
 	static void bind_ptrcall(void *p_method_userdata, GDExtensionClassInstancePtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr r_return);
 
@@ -150,8 +157,7 @@ public:
 template <typename Derived, typename T, typename R, bool should_returns>
 class MethodBindVarArgBase : public MethodBind {
 protected:
-	R(T::*method)
-	(const Variant **, GDExtensionInt, GDExtensionCallError &);
+	R (T::*method)(const Variant **, GDExtensionInt, GDExtensionCallError &);
 	std::vector<PropertyInfo> arguments;
 
 public:
@@ -182,8 +188,8 @@ public:
 			const MethodInfo &p_method_info,
 			bool p_return_nil_is_variant) :
 			method(p_method) {
-		set_vararg(true);
-		set_const(true);
+		_set_vararg(true);
+		_set_const(true);
 		set_argument_count(p_method_info.arguments.size());
 		if (p_method_info.arguments.size()) {
 			arguments = p_method_info.arguments;
@@ -196,8 +202,8 @@ public:
 			set_argument_names(names);
 		}
 
-		generate_argument_types((int)p_method_info.arguments.size());
-		set_return(should_returns);
+		_generate_argument_types((int)p_method_info.arguments.size());
+		_set_returns(should_returns);
 	}
 
 	~MethodBindVarArgBase() {}
@@ -334,7 +340,7 @@ public:
 
 	MethodBindT(void (MB_T::*p_method)(P...)) {
 		method = p_method;
-		generate_argument_types(sizeof...(P));
+		_generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
 	}
 };
@@ -410,9 +416,9 @@ public:
 
 	MethodBindTC(void (MB_T::*p_method)(P...) const) {
 		method = p_method;
-		generate_argument_types(sizeof...(P));
+		_generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
-		set_const(true);
+		_set_const(true);
 	}
 };
 
@@ -435,8 +441,7 @@ template <typename T, typename R, typename... P>
 template <typename R, typename... P>
 #endif // TYPED_METHOD_BIND
 class MethodBindTR : public MethodBind {
-	R(MB_T::*method)
-	(P...);
+	R (MB_T::*method)(P...);
 
 protected:
 // GCC raises warnings in the case P = {} as the comparison is always false...
@@ -493,9 +498,9 @@ public:
 
 	MethodBindTR(R (MB_T::*p_method)(P...)) {
 		method = p_method;
-		generate_argument_types(sizeof...(P));
+		_generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
-		set_return(true);
+		_set_returns(true);
 	}
 };
 
@@ -518,8 +523,7 @@ template <typename T, typename R, typename... P>
 template <typename R, typename... P>
 #endif // TYPED_METHOD_BIND
 class MethodBindTRC : public MethodBind {
-	R(MB_T::*method)
-	(P...) const;
+	R (MB_T::*method)(P...) const;
 
 protected:
 // GCC raises warnings in the case P = {} as the comparison is always false...
@@ -576,10 +580,10 @@ public:
 
 	MethodBindTRC(R (MB_T::*p_method)(P...) const) {
 		method = p_method;
-		generate_argument_types(sizeof...(P));
+		_generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
-		set_return(true);
-		set_const(true);
+		_set_returns(true);
+		_set_const(true);
 	}
 };
 
@@ -648,9 +652,9 @@ public:
 
 	MethodBindTS(void (*p_function)(P...)) {
 		function = p_function;
-		generate_argument_types(sizeof...(P));
+		_generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
-		set_static(true);
+		_set_static(true);
 	}
 };
 
@@ -664,8 +668,7 @@ MethodBind *create_static_method_bind(void (*p_method)(P...)) {
 
 template <typename R, typename... P>
 class MethodBindTRS : public MethodBind {
-	R(*function)
-	(P...);
+	R (*function)(P...);
 
 protected:
 // GCC raises warnings in the case P = {} as the comparison is always false...
@@ -717,10 +720,10 @@ public:
 
 	MethodBindTRS(R (*p_function)(P...)) {
 		function = p_function;
-		generate_argument_types(sizeof...(P));
+		_generate_argument_types(sizeof...(P));
 		set_argument_count(sizeof...(P));
-		set_static(true);
-		set_return(true);
+		_set_static(true);
+		_set_returns(true);
 	}
 };
 
@@ -731,5 +734,3 @@ MethodBind *create_static_method_bind(R (*p_method)(P...)) {
 }
 
 } // namespace godot
-
-#endif // GODOT_METHOD_BIND_HPP

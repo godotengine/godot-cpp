@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_HASH_MAP_HPP
-#define GODOT_HASH_MAP_HPP
+#pragma once
 
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/memory.hpp>
@@ -62,15 +61,17 @@ struct HashMapElement {
 			data(p_key, p_value) {}
 };
 
+bool _hashmap_variant_less_than(const Variant &p_left, const Variant &p_right);
+
 template <typename TKey, typename TValue,
 		typename Hasher = HashMapHasherDefault,
 		typename Comparator = HashMapComparatorDefault<TKey>,
 		typename Allocator = DefaultTypedAllocator<HashMapElement<TKey, TValue>>>
 class HashMap {
 public:
-	const uint32_t MIN_CAPACITY_INDEX = 2; // Use a prime.
-	const float MAX_OCCUPANCY = 0.75;
-	const uint32_t EMPTY_HASH = 0;
+	static constexpr uint32_t MIN_CAPACITY_INDEX = 2; // Use a prime.
+	static constexpr float MAX_OCCUPANCY = 0.75;
+	static constexpr uint32_t EMPTY_HASH = 0;
 
 private:
 	Allocator element_alloc;
@@ -92,19 +93,20 @@ private:
 		return hash;
 	}
 
-	_FORCE_INLINE_ uint32_t _get_probe_length(uint32_t p_pos, uint32_t p_hash, uint32_t p_capacity) const {
-		uint32_t original_pos = p_hash % p_capacity;
-		return (p_pos - original_pos + p_capacity) % p_capacity;
+	static _FORCE_INLINE_ uint32_t _get_probe_length(const uint32_t p_pos, const uint32_t p_hash, const uint32_t p_capacity, const uint64_t p_capacity_inv) {
+		const uint32_t original_pos = fastmod(p_hash, p_capacity_inv, p_capacity);
+		return fastmod(p_pos - original_pos + p_capacity, p_capacity_inv, p_capacity);
 	}
 
 	bool _lookup_pos(const TKey &p_key, uint32_t &r_pos) const {
-		if (elements == nullptr) {
+		if (elements == nullptr || num_elements == 0) {
 			return false; // Failed lookups, no elements
 		}
 
-		uint32_t capacity = hash_table_size_primes[capacity_index];
+		const uint32_t capacity = hash_table_size_primes[capacity_index];
+		const uint64_t capacity_inv = hash_table_size_primes_inv[capacity_index];
 		uint32_t hash = _hash(p_key);
-		uint32_t pos = hash % capacity;
+		uint32_t pos = fastmod(hash, capacity_inv, capacity);
 		uint32_t distance = 0;
 
 		while (true) {
@@ -112,7 +114,7 @@ private:
 				return false;
 			}
 
-			if (distance > _get_probe_length(pos, hashes[pos], capacity)) {
+			if (distance > _get_probe_length(pos, hashes[pos], capacity, capacity_inv)) {
 				return false;
 			}
 
@@ -121,17 +123,18 @@ private:
 				return true;
 			}
 
-			pos = (pos + 1) % capacity;
+			pos = fastmod((pos + 1), capacity_inv, capacity);
 			distance++;
 		}
 	}
 
 	void _insert_with_hash(uint32_t p_hash, HashMapElement<TKey, TValue> *p_value) {
-		uint32_t capacity = hash_table_size_primes[capacity_index];
+		const uint32_t capacity = hash_table_size_primes[capacity_index];
+		const uint64_t capacity_inv = hash_table_size_primes_inv[capacity_index];
 		uint32_t hash = p_hash;
 		HashMapElement<TKey, TValue> *value = p_value;
 		uint32_t distance = 0;
-		uint32_t pos = hash % capacity;
+		uint32_t pos = fastmod(hash, capacity_inv, capacity);
 
 		while (true) {
 			if (hashes[pos] == EMPTY_HASH) {
@@ -144,14 +147,14 @@ private:
 			}
 
 			// Not an empty slot, let's check the probing length of the existing one.
-			uint32_t existing_probe_len = _get_probe_length(pos, hashes[pos], capacity);
+			uint32_t existing_probe_len = _get_probe_length(pos, hashes[pos], capacity, capacity_inv);
 			if (existing_probe_len < distance) {
 				SWAP(hash, hashes[pos]);
 				SWAP(value, elements[pos]);
 				distance = existing_probe_len;
 			}
 
-			pos = (pos + 1) % capacity;
+			pos = fastmod((pos + 1), capacity_inv, capacity);
 			distance++;
 		}
 	}
@@ -251,7 +254,7 @@ public:
 	}
 
 	void clear() {
-		if (elements == nullptr) {
+		if (elements == nullptr || num_elements == 0) {
 			return;
 		}
 		uint32_t capacity = hash_table_size_primes[capacity_index];
@@ -268,6 +271,47 @@ public:
 		tail_element = nullptr;
 		head_element = nullptr;
 		num_elements = 0;
+	}
+
+	void sort() {
+		if (elements == nullptr || num_elements < 2) {
+			return; // An empty or single element HashMap is already sorted.
+		}
+		// Use insertion sort because we want this operation to be fast for the
+		// common case where the input is already sorted or nearly sorted.
+		HashMapElement<TKey, TValue> *inserting = head_element->next;
+		while (inserting != nullptr) {
+			HashMapElement<TKey, TValue> *after = nullptr;
+			for (HashMapElement<TKey, TValue> *current = inserting->prev; current != nullptr; current = current->prev) {
+				if (_hashmap_variant_less_than(inserting->data.key, current->data.key)) {
+					after = current;
+				} else {
+					break;
+				}
+			}
+			HashMapElement<TKey, TValue> *next = inserting->next;
+			if (after != nullptr) {
+				// Modify the elements around `inserting` to remove it from its current position.
+				inserting->prev->next = next;
+				if (next == nullptr) {
+					tail_element = inserting->prev;
+				} else {
+					next->prev = inserting->prev;
+				}
+				// Modify `before` and `after` to insert `inserting` between them.
+				HashMapElement<TKey, TValue> *before = after->prev;
+				if (before == nullptr) {
+					head_element = inserting;
+				} else {
+					before->next = inserting;
+				}
+				after->prev = inserting;
+				// Point `inserting` to its new surroundings.
+				inserting->prev = before;
+				inserting->next = after;
+			}
+			inserting = next;
+		}
 	}
 
 	TValue &get(const TKey &p_key) {
@@ -317,13 +361,14 @@ public:
 			return false;
 		}
 
-		uint32_t capacity = hash_table_size_primes[capacity_index];
-		uint32_t next_pos = (pos + 1) % capacity;
-		while (hashes[next_pos] != EMPTY_HASH && _get_probe_length(next_pos, hashes[next_pos], capacity) != 0) {
+		const uint32_t capacity = hash_table_size_primes[capacity_index];
+		const uint64_t capacity_inv = hash_table_size_primes_inv[capacity_index];
+		uint32_t next_pos = fastmod((pos + 1), capacity_inv, capacity);
+		while (hashes[next_pos] != EMPTY_HASH && _get_probe_length(next_pos, hashes[next_pos], capacity, capacity_inv) != 0) {
 			SWAP(hashes[next_pos], hashes[pos]);
 			SWAP(elements[next_pos], elements[pos]);
 			pos = next_pos;
-			next_pos = (pos + 1) % capacity;
+			next_pos = fastmod((pos + 1), capacity_inv, capacity);
 		}
 
 		hashes[pos] = EMPTY_HASH;
@@ -348,6 +393,40 @@ public:
 		elements[pos] = nullptr;
 
 		num_elements--;
+		return true;
+	}
+
+	// Replace the key of an entry in-place, without invalidating iterators or changing the entries position during iteration.
+	// p_old_key must exist in the map and p_new_key must not, unless it is equal to p_old_key.
+	bool replace_key(const TKey &p_old_key, const TKey &p_new_key) {
+		if (p_old_key == p_new_key) {
+			return true;
+		}
+		uint32_t pos = 0;
+		ERR_FAIL_COND_V(_lookup_pos(p_new_key, pos), false);
+		ERR_FAIL_COND_V(!_lookup_pos(p_old_key, pos), false);
+		HashMapElement<TKey, TValue> *element = elements[pos];
+
+		// Delete the old entries in hashes and elements.
+		const uint32_t capacity = hash_table_size_primes[capacity_index];
+		const uint64_t capacity_inv = hash_table_size_primes_inv[capacity_index];
+		uint32_t next_pos = fastmod((pos + 1), capacity_inv, capacity);
+		while (hashes[next_pos] != EMPTY_HASH && _get_probe_length(next_pos, hashes[next_pos], capacity, capacity_inv) != 0) {
+			SWAP(hashes[next_pos], hashes[pos]);
+			SWAP(elements[next_pos], elements[pos]);
+			pos = next_pos;
+			next_pos = fastmod((pos + 1), capacity_inv, capacity);
+		}
+		hashes[pos] = EMPTY_HASH;
+		elements[pos] = nullptr;
+		// _insert_with_hash will increment this again.
+		num_elements--;
+
+		// Update the HashMapElement with the new key and reinsert it.
+		const_cast<TKey &>(element->data.key) = p_new_key;
+		uint32_t hash = _hash(p_new_key);
+		_insert_with_hash(hash, element);
+
 		return true;
 	}
 
@@ -561,6 +640,13 @@ public:
 		capacity_index = MIN_CAPACITY_INDEX;
 	}
 
+	HashMap(std::initializer_list<KeyValue<TKey, TValue>> p_init) {
+		reserve(p_init.size());
+		for (const KeyValue<TKey, TValue> &E : p_init) {
+			insert(E.key, E.value);
+		}
+	}
+
 	uint32_t debug_get_hash(uint32_t p_index) {
 		if (num_elements == 0) {
 			return 0;
@@ -587,5 +673,3 @@ public:
 };
 
 } // namespace godot
-
-#endif // GODOT_HASH_MAP_HPP

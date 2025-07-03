@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_CHAR_STRING_HPP
-#define GODOT_CHAR_STRING_HPP
+#pragma once
 
 #include <godot_cpp/templates/cowdata.hpp>
 
@@ -114,7 +113,7 @@ public:
 	CharStringT<T> &operator+=(T p_char);
 	int64_t length() const { return size() ? size() - 1 : 0; }
 	const T *get_data() const;
-	operator const T *() const { return get_data(); };
+	operator const T *() const { return get_data(); }
 
 protected:
 	void copy_from(const T *p_cstr);
@@ -138,5 +137,3 @@ typedef CharStringT<char32_t> Char32String;
 typedef CharStringT<wchar_t> CharWideString;
 
 } // namespace godot
-
-#endif // GODOT_CHAR_STRING_HPP

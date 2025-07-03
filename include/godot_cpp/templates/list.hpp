@@ -28,12 +28,13 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GODOT_LIST_HPP
-#define GODOT_LIST_HPP
+#pragma once
 
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/templates/sort_array.hpp>
+
+#include <initializer_list>
 
 /**
  * Generic Templatized Linked List Implementation.
@@ -134,6 +135,8 @@ public:
 			data->erase(this);
 		}
 
+		void transfer_to_back(List<T, A> *p_dst_list);
+
 		_FORCE_INLINE_ Element() {}
 	};
 
@@ -224,7 +227,7 @@ private:
 		Element *last = nullptr;
 		int size_cache = 0;
 
-		bool erase(const Element *p_I) {
+		bool erase(Element *p_I) {
 			ERR_FAIL_NULL_V(p_I, false);
 			ERR_FAIL_COND_V(p_I->data != this, false);
 
@@ -244,7 +247,7 @@ private:
 				p_I->next_ptr->prev_ptr = p_I->prev_ptr;
 			}
 
-			memdelete_allocator<Element, A>(const_cast<Element *>(p_I));
+			memdelete_allocator<Element, A>(p_I);
 			size_cache--;
 
 			return true;
@@ -430,7 +433,7 @@ public:
 	/**
 	 * erase an element in the list, by iterator pointing to it. Return true if it was found/erased.
 	 */
-	bool erase(const Element *p_I) {
+	bool erase(Element *p_I) {
 		if (_data && p_I) {
 			bool ret = _data->erase(p_I);
 
@@ -522,10 +525,14 @@ public:
 			it = it->next();
 		}
 	}
+	void operator=(List &&p_list) {
+		if (unlikely(this == &p_list)) {
+			return;
+		}
 
-	// Index operator, kept for compatibility.
-	_FORCE_INLINE_ T &operator[](int p_index) {
-		return get(p_index);
+		clear();
+		_data = p_list._data;
+		p_list._data = nullptr;
 	}
 
 	// Random access to elements, use with care,
@@ -541,11 +548,6 @@ public:
 		}
 
 		return I->get();
-	}
-
-	// Index operator, kept for compatibility.
-	_FORCE_INLINE_ const T &operator[](int p_index) const {
-		return get(p_index);
 	}
 
 	// Random access to elements, use with care,
@@ -721,8 +723,8 @@ public:
 
 	template <typename C>
 	void sort_custom() {
-		// this version uses auxiliary memory for speed.
-		// if you don't want to use auxiliary memory, use the in_place version
+		//this version uses auxiliary memory for speed.
+		//if you don't want to use auxiliary memory, use the in_place version
 
 		int s = size();
 		if (s < 2) {
@@ -770,8 +772,18 @@ public:
 			it = it->next();
 		}
 	}
+	List(List &&p_list) {
+		_data = p_list._data;
+		p_list._data = nullptr;
+	}
 
 	List() {}
+
+	List(std::initializer_list<T> p_init) {
+		for (const T &E : p_init) {
+			push_back(E);
+		}
+	}
 
 	~List() {
 		clear();
@@ -782,6 +794,41 @@ public:
 	}
 };
 
-} // namespace godot
+template <typename T, typename A>
+void List<T, A>::Element::transfer_to_back(List<T, A> *p_dst_list) {
+	// Detach from current.
 
-#endif // GODOT_LIST_HPP
+	if (data->first == this) {
+		data->first = data->first->next_ptr;
+	}
+	if (data->last == this) {
+		data->last = data->last->prev_ptr;
+	}
+	if (prev_ptr) {
+		prev_ptr->next_ptr = next_ptr;
+	}
+	if (next_ptr) {
+		next_ptr->prev_ptr = prev_ptr;
+	}
+	data->size_cache--;
+
+	// Attach to the back of the new one.
+
+	if (!p_dst_list->_data) {
+		p_dst_list->_data = memnew_allocator(_Data, A);
+		p_dst_list->_data->first = this;
+		p_dst_list->_data->last = nullptr;
+		p_dst_list->_data->size_cache = 0;
+		prev_ptr = nullptr;
+	} else {
+		p_dst_list->_data->last->next_ptr = this;
+		prev_ptr = p_dst_list->_data->last;
+	}
+	p_dst_list->_data->last = this;
+	next_ptr = nullptr;
+
+	data = p_dst_list->_data;
+	p_dst_list->_data->size_cache++;
+}
+
+} // namespace godot

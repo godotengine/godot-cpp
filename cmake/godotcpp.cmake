@@ -29,7 +29,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/windows.cmake)
 # Detect number of processors
 include(ProcessorCount)
 ProcessorCount(PROC_MAX)
-message("Auto-detected ${PROC_MAX} CPU cores available for build parallelism.")
+message(STATUS "Auto-detected ${PROC_MAX} CPU cores available for build parallelism.")
 
 # List of known platforms
 set(PLATFORM_LIST
@@ -197,15 +197,21 @@ function(godotcpp_generate)
     another compiler simulating the Visual C++ cl command-line syntax. ]]
     if(MSVC)
         math(EXPR PROC_N "(${PROC_MAX}-1) | (${X}-2)>>31 & 1")
-        message("Using ${PROC_N} cores for multi-threaded compilation.")
+        message(STATUS "Using ${PROC_N} cores for multi-threaded compilation.")
         # TODO You can override it at configure time with ...." )
     else()
+        if(CMAKE_BUILD_PARALLEL_LEVEL)
+            set(_cores "${CMAKE_BUILD_PARALLEL_LEVEL}")
+        else()
+            set(_cores "all")
+        endif()
         message(
-            "Using ${CMAKE_BUILD_PARALLEL_LEVEL} cores, You can override"
-            " it at configure time by using -j <n> or --parallel <n> on the build"
+            STATUS
+            "Using ${_cores} cores. You can override"
+            " this at configure time by using -j <n> or --parallel <n> in the build"
             " command."
         )
-        message("  eg. cmake --build . -j 7  ...")
+        message(STATUS "  eg. cmake --build . -j 7  ...")
     endif()
 
     #[[ GODOTCPP_SYMBOL_VISIBLITY
@@ -245,8 +251,8 @@ function(godotcpp_generate)
     # Build Profile
     if(GODOTCPP_BUILD_PROFILE)
         message(STATUS "Using build profile to trim api file")
-        message("\tBUILD_PROFILE = '${GODOTCPP_BUILD_PROFILE}'")
-        message("\tAPI_SOURCE = '${GODOTCPP_GDEXTENSION_API_FILE}'")
+        message(STATUS "\tBUILD_PROFILE = '${GODOTCPP_BUILD_PROFILE}'")
+        message(STATUS "\tAPI_SOURCE = '${GODOTCPP_GDEXTENSION_API_FILE}'")
         build_profile_generate_trimmed_api(
                 "${GODOTCPP_BUILD_PROFILE}"
                 "${GODOTCPP_GDEXTENSION_API_FILE}"
@@ -276,7 +282,7 @@ function(godotcpp_generate)
     string(
         CONCAT
         SYSTEM_NAME
-        "$<$<PLATFORM_ID:Android>:android.${ANDROID_ABI}>"
+        "$<$<PLATFORM_ID:Android>:android>"
         "$<$<PLATFORM_ID:iOS>:ios>"
         "$<$<PLATFORM_ID:Linux>:linux>"
         "$<$<PLATFORM_ID:Darwin>:macos>"
