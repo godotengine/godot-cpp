@@ -47,6 +47,10 @@ extern "C" GDExtensionInterfaceGetGodotVersion2 gdextension_interface_get_godot_
 extern "C" GDExtensionInterfaceMemAlloc gdextension_interface_mem_alloc;
 extern "C" GDExtensionInterfaceMemRealloc gdextension_interface_mem_realloc;
 extern "C" GDExtensionInterfaceMemFree gdextension_interface_mem_free;
+// TODO: Uncomment if the engine is updated to use this extended interface
+// extern "C" GDExtensionInterfaceMemAlignedAlloc gdextension_interface_mem_aligned_alloc;
+// extern "C" GDExtensionInterfaceMemAlignedRealloc gdextension_interface_mem_aligned_realloc;
+// extern "C" GDExtensionInterfaceMemAlignedFree gdextension_interface_mem_aligned_free;
 extern "C" GDExtensionInterfacePrintError gdextension_interface_print_error;
 extern "C" GDExtensionInterfacePrintErrorWithMessage gdextension_interface_print_error_with_message;
 extern "C" GDExtensionInterfacePrintWarning gdextension_interface_print_warning;
