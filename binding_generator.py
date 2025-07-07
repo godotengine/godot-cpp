@@ -1524,7 +1524,15 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         expanded_format = native_struct["format"].replace("(", " ").replace(")", ";").replace(",", ";")
         for field in expanded_format.split(";"):
             field_type = field.strip().split(" ")[0].split("::")[0]
-            if field_type != "" and not is_included_type(field_type) and not is_pod_type(field_type):
+            if (
+                field_type != ""
+                and field_type != "{"
+                and field_type != "}"
+                and field_type != "union"
+                and field_type != "struct"
+                and not is_included_type(field_type)
+                and not is_pod_type(field_type)
+            ):
                 if field_type not in used_classes:
                     used_classes.append(field_type)
 
@@ -1548,9 +1556,18 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         result.append("")
 
         result.append(f"struct {struct_name} {{")
+        indent = 1
         for field in native_struct["format"].split(";"):
             if field != "":
-                result.append(f"\t{field};")
+                if "}" in field:
+                    indent -= 1
+                if "{" in field:
+                    parts = field.split("{")
+                    result.append("\t" * indent + parts[0] + "{")
+                    indent += 1
+                    result.append("\t" * indent + parts[1] + ";")
+                else:
+                    result.append("\t" * indent + field + ";")
         result.append("};")
 
         result.append("")
