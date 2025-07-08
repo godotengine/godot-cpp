@@ -319,11 +319,11 @@ function(godotcpp_generate)
     set(DEBUG_FEATURES "$<NOT:$<STREQUAL:${GODOTCPP_TARGET},template_release>>")
     set(HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},${DEBUG_FEATURES},$<BOOL:${GODOTCPP_USE_HOT_RELOAD}>>")
 
-    # Suffix
+    # Suffix Generator Expression
     string(
         CONCAT
-        GODOTCPP_SUFFIX
-        "$<1:.${SYSTEM_NAME}>"
+        GODOTCPP_SUFFIX_GENEX
+        "$<1:${SYSTEM_NAME}>"
         "$<1:.${GODOTCPP_TARGET}>"
         "$<${IS_DEV_BUILD}:.dev>"
         "$<$<STREQUAL:${GODOTCPP_PRECISION},double>:.double>"
@@ -331,6 +331,8 @@ function(godotcpp_generate)
         # TODO IOS_SIMULATOR
         "$<$<NOT:${THREADS_ENABLED}>:.nothreads>"
     )
+    # The same as above, but with a leading '.' to maintain backwards compatibility.
+    set(GODOTCPP_SUFFIX ".${GODOTCPP_SUFFIX_GENEX}")
 
     # the godot-cpp.* library targets
     add_library(godot-cpp STATIC)
@@ -370,11 +372,12 @@ function(godotcpp_generate)
             ARCHIVE_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>"
 
             # Things that are handy to know for dependent targets
-            GODOTCPP_PLATFORM  "${SYSTEM_NAME}"
-            GODOTCPP_TARGET    "${GODOTCPP_TARGET}"
-            GODOTCPP_ARCH      "${ARCH_NAME}"
-            GODOTCPP_PRECISION "${GODOTCPP_PRECISION}"
-            GODOTCPP_SUFFIX    "${GODOTCPP_SUFFIX}"
+            GODOTCPP_PLATFORM       "${SYSTEM_NAME}"
+            GODOTCPP_TARGET         "${GODOTCPP_TARGET}"
+            GODOTCPP_ARCH           "${ARCH_NAME}"
+            GODOTCPP_PRECISION      "${GODOTCPP_PRECISION}"
+            GODOTCPP_SUFFIX         "${GODOTCPP_SUFFIX}"
+            GODOTCPP_SUFFIX_GENEX   "${GODOTCPP_SUFFIX_GENEX}"
 
             # Some IDE's respect this property to logically group targets
             FOLDER "godot-cpp"
