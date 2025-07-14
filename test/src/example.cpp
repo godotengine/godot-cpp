@@ -252,6 +252,8 @@ void Example::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("test_use_engine_singleton"), &Example::test_use_engine_singleton);
 
+	ClassDB::bind_method(D_METHOD("test_get_internal_class"), &Example::test_get_internal_class);
+
 	ClassDB::bind_static_method("Example", D_METHOD("test_static", "a", "b"), &Example::test_static);
 	ClassDB::bind_static_method("Example", D_METHOD("test_static2"), &Example::test_static2);
 
@@ -744,6 +746,12 @@ String Example::test_library_path() {
 	return library_path;
 }
 
+Ref<RefCounted> Example::test_get_internal_class() const {
+	Ref<ExampleInternal> it;
+	it.instantiate();
+	return it;
+}
+
 int64_t Example::test_get_internal(const Variant &p_input) const {
 	if (p_input.get_type() != Variant::INT) {
 		return -1;
@@ -778,4 +786,12 @@ void ExamplePrzykład::_bind_methods() {
 
 String ExamplePrzykład::get_the_word() const {
 	return U"słowo to przykład";
+}
+
+void ExampleInternal::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_the_answer"), &ExampleInternal::get_the_answer);
+}
+
+int ExampleInternal::get_the_answer() const {
+	return 42;
 }

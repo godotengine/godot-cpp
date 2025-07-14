@@ -29,6 +29,8 @@
 
 using namespace godot;
 
+class ExampleInternal;
+
 class ExampleRef : public RefCounted {
 	GDCLASS(ExampleRef, RefCounted);
 
@@ -203,6 +205,8 @@ public:
 	String test_use_engine_singleton() const;
 
 	static String test_library_path();
+
+	Ref<RefCounted> test_get_internal_class() const;
 };
 
 VARIANT_ENUM_CAST(Example::Constants);
@@ -287,4 +291,14 @@ protected:
 
 public:
 	String get_the_word() const;
+};
+
+class ExampleInternal : public RefCounted {
+	GDCLASS(ExampleInternal, RefCounted);
+
+protected:
+	static void _bind_methods();
+
+public:
+	int get_the_answer() const;
 };
