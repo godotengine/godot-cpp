@@ -258,8 +258,7 @@ def options(opts, env):
             help="Path to a custom directory containing GDExtension interface header and API JSON file",
             default=env.get("gdextension_dir", None),
             validator=validate_dir,
-        ),
-        converter=normalize_path,
+        )
     )
     opts.Add(
         PathVariable(
@@ -267,8 +266,7 @@ def options(opts, env):
             help="Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)",
             default=env.get("custom_api_file", None),
             validator=validate_file,
-        ),
-        converter=normalize_path,
+        )
     )
     opts.Add(
         BoolVariable(
@@ -537,8 +535,10 @@ def generate(env):
 
 
 def _godot_cpp(env):
-    extension_dir = env.get("gdextension_dir", default=env.Dir("gdextension").srcnode().abspath)
-    api_file = env.get("custom_api_file", default=os.path.join(extension_dir, "extension_api.json"))
+    extension_dir = normalize_path(env.get("gdextension_dir", default=env.Dir("gdextension").srcnode().abspath), env)
+    api_file = normalize_path(
+        env.get("custom_api_file", default=os.path.join(extension_dir, "extension_api.json")), env
+    )
 
     bindings = env.GodotCPPBindings(
         env.Dir("."),
