@@ -35,9 +35,17 @@
 namespace godot {
 
 void Transform2D::invert() {
-	// FIXME: this function assumes the basis is a rotation matrix, with no scaling.
-	// Transform2D::affine_inverse can handle matrices with scaling, so GDScript should eventually use that.
-	SWAP(columns[0][1], columns[1][0]);
+	// Use proper affine inversion that handles scaling
+	real_t det = determinant();
+#ifdef MATH_CHECKS
+	ERR_FAIL_COND(det == 0);
+#endif
+	real_t idet = 1.0f / det;
+
+	SWAP(columns[0][0], columns[1][1]);
+	columns[0] *= Vector2(idet, -idet);
+	columns[1] *= Vector2(-idet, idet);
+
 	columns[2] = basis_xform(-columns[2]);
 }
 

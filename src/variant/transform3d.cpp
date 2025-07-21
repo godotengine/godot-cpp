@@ -46,13 +46,11 @@ Transform3D Transform3D::affine_inverse() const {
 }
 
 void Transform3D::invert() {
-	basis.transpose();
+	basis.invert();
 	origin = basis.xform(-origin);
 }
 
 Transform3D Transform3D::inverse() const {
-	// FIXME: this function assumes the basis is a rotation matrix, with no scaling.
-	// Transform3D::affine_inverse can handle matrices with scaling, so GDScript should eventually use that.
 	Transform3D ret = *this;
 	ret.invert();
 	return ret;
