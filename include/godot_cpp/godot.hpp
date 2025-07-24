@@ -44,9 +44,9 @@ extern "C" GDExtensionGodotVersion2 godot_version;
 
 // All of the GDExtension interface functions.
 extern "C" GDExtensionInterfaceGetGodotVersion2 gdextension_interface_get_godot_version2;
-extern "C" GDExtensionInterfaceMemAlloc gdextension_interface_mem_alloc;
-extern "C" GDExtensionInterfaceMemRealloc gdextension_interface_mem_realloc;
-extern "C" GDExtensionInterfaceMemFree gdextension_interface_mem_free;
+extern "C" GDExtensionInterfaceMemAlloc2 gdextension_interface_mem_alloc2;
+extern "C" GDExtensionInterfaceMemRealloc2 gdextension_interface_mem_realloc2;
+extern "C" GDExtensionInterfaceMemFree2 gdextension_interface_mem_free2;
 extern "C" GDExtensionInterfacePrintError gdextension_interface_print_error;
 extern "C" GDExtensionInterfacePrintErrorWithMessage gdextension_interface_print_error_with_message;
 extern "C" GDExtensionInterfacePrintWarning gdextension_interface_print_warning;
