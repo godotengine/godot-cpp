@@ -34,7 +34,7 @@ function(android_options)
     more information
 
     android_api_level : Target Android API level.
-        Default = 21
+        Default = 24
 
     ANDROID_HOME : Path to your Android SDK installation.
         Default = os.environ.get("ANDROID_HOME", os.environ.get("ANDROID_SDK_ROOT")

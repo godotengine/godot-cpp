@@ -73,8 +73,8 @@ jobs:
             platform: android
             config-flags:
               -G Ninja -DCMAKE_BUILD_TYPE=Release
-              --toolchain ${ANDROID_HOME}/ndk/23.2.8568313/build/cmake/android.toolchain.cmake
-              -DANDROID_PLATFORM=21 -DANDROID_ABI=arm64-v8a
+              --toolchain ${ANDROID_HOME}/ndk/28.1.13356709/build/cmake/android.toolchain.cmake
+              -DANDROID_PLATFORM=24 -DANDROID_ABI=arm64-v8a
             artifact-name: godot-cpp-android-arm64-release.cmake
             artifact-path: cmake-build/bin/libgodot-cpp.android.template_release.arm64.a
             flags: arch=arm64
