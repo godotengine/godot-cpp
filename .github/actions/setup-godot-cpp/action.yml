@@ -20,7 +20,7 @@ inputs:
     default: 12.2.0
     description: MinGW version.
   ndk-version:
-    default: r23c
+    default: r28b
     description: Android NDK version.
   buildtool:
     default: scons
