@@ -111,7 +111,7 @@ protected:
 
 	void _postinitialize();
 
-	Wrapped(const StringName p_godot_class);
+	Wrapped(const StringName &p_godot_class);
 	Wrapped(GodotObject *p_godot_object);
 	virtual ~Wrapped() {}
 

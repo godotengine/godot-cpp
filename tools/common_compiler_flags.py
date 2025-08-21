@@ -2,6 +2,10 @@ import os
 import subprocess
 
 
+def using_emcc(env):
+    return "emcc" in os.path.basename(env["CC"])
+
+
 def using_clang(env):
     return "clang" in os.path.basename(env["CC"])
 
@@ -89,7 +93,13 @@ def generate(env):
             # Adding dwarf-4 explicitly makes stacktraces work with clang builds,
             # otherwise addr2line doesn't understand them.
             env.Append(CCFLAGS=["-gdwarf-4"])
-            if env.dev_build:
+            if using_emcc(env):
+                # Emscripten only produces dwarf symbols when using "-g3".
+                env.AppendUnique(CCFLAGS=["-g3"])
+                # Emscripten linker needs debug symbols options too.
+                env.AppendUnique(LINKFLAGS=["-gdwarf-4"])
+                env.AppendUnique(LINKFLAGS=["-g3"])
+            elif env.dev_build:
                 env.Append(CCFLAGS=["-g3"])
             else:
                 env.Append(CCFLAGS=["-g2"])
