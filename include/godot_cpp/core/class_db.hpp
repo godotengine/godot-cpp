@@ -44,11 +44,12 @@
 // Needs to come after method_bind and object have been included.
 #include <godot_cpp/variant/callable_method_pointer.hpp>
 
+#include <godot_cpp/templates/local_vector.hpp>
+
 #include <list>
 #include <mutex>
 #include <set>
 #include <unordered_map>
-#include <vector>
 
 // Needed to use StringName as key in `std::unordered_map`
 template <>
@@ -108,7 +109,7 @@ private:
 	static std::unordered_map<StringName, ClassInfo> classes;
 	static std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *> instance_binding_callbacks;
 	// Used to remember the custom class registration order.
-	static std::vector<StringName> class_register_order;
+	static LocalVector<StringName> class_register_order;
 	static std::unordered_map<StringName, Object *> engine_singletons;
 	static std::mutex engine_singletons_mutex;
 
@@ -188,7 +189,7 @@ public:
 	static MethodBind *bind_static_method(StringName p_class, N p_method_name, M p_method, VarArgs... p_args);
 
 	template <typename M>
-	static MethodBind *bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const std::vector<Variant> &p_default_args = std::vector<Variant>{}, bool p_return_nil_is_variant = true);
+	static MethodBind *bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const LocalVector<Variant> &p_default_args = LocalVector<Variant>{}, bool p_return_nil_is_variant = true);
 
 	static void add_property_group(const StringName &p_class, const String &p_name, const String &p_prefix);
 	static void add_property_subgroup(const StringName &p_class, const String &p_name, const String &p_prefix);
@@ -328,7 +329,7 @@ MethodBind *ClassDB::bind_static_method(StringName p_class, N p_method_name, M p
 }
 
 template <typename M>
-MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info, const std::vector<Variant> &p_default_args, bool p_return_nil_is_variant) {
+MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info, const LocalVector<Variant> &p_default_args, bool p_return_nil_is_variant) {
 	MethodBind *bind = create_vararg_method_bind(p_method, p_info, p_return_nil_is_variant);
 	ERR_FAIL_NULL_V(bind, nullptr);
 
