@@ -39,10 +39,7 @@
 
 #include <godot_cpp/classes/global_constants.hpp>
 
-#include <string>
 #include <vector>
-
-#include <iostream>
 
 namespace godot {
 
