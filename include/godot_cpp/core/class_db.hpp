@@ -44,7 +44,7 @@
 // Needs to come after method_bind and object have been included.
 #include <godot_cpp/variant/callable_method_pointer.hpp>
 
-#include <list>
+#include <godot_cpp/templates/list.hpp>
 #include <mutex>
 #include <set>
 #include <string>
@@ -65,7 +65,7 @@ namespace godot {
 
 struct MethodDefinition {
 	StringName name;
-	std::list<StringName> args;
+	List<StringName> args;
 	MethodDefinition() {}
 	MethodDefinition(StringName p_name) :
 			name(p_name) {}
