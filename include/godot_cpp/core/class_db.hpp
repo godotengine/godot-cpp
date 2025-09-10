@@ -45,7 +45,7 @@
 #include <godot_cpp/variant/callable_method_pointer.hpp>
 
 #include <godot_cpp/templates/a_hash_map.hpp>
-#include <list>
+#include <godot_cpp/templates/list.hpp>
 #include <mutex>
 #include <set>
 
@@ -55,7 +55,7 @@ namespace godot {
 
 struct MethodDefinition {
 	StringName name;
-	std::list<StringName> args;
+	List<StringName> args;
 	MethodDefinition() {}
 	MethodDefinition(StringName p_name) :
 			name(p_name) {}
