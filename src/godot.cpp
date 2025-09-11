@@ -286,7 +286,7 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 
 	// Make sure we weren't passed the legacy struct.
 	uint32_t *raw_interface = (uint32_t *)(void *)p_get_proc_address;
-	if (raw_interface[0] == 4 && raw_interface[1] == 0) {
+	if (uintptr_t(p_get_proc_address) % alignof(LegacyGDExtensionInterface) == 0 && raw_interface[0] == 4 && raw_interface[1] == 0) {
 		// Use the legacy interface only to give a nice error.
 		LegacyGDExtensionInterface *legacy_interface = (LegacyGDExtensionInterface *)p_get_proc_address;
 		internal::gdextension_interface_print_error = (GDExtensionInterfacePrintError)legacy_interface->print_error;

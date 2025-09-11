@@ -66,7 +66,7 @@ void Wrapped::_postinitialize() {
 	}
 }
 
-Wrapped::Wrapped(const StringName p_godot_class) {
+Wrapped::Wrapped(const StringName &p_godot_class) {
 #ifdef HOT_RELOAD_ENABLED
 	if (unlikely(Wrapped::_constructing_recreate_owner)) {
 		_owner = Wrapped::_constructing_recreate_owner;
