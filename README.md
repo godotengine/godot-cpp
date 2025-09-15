@@ -62,11 +62,7 @@ See [Updating your GDExtension for 4.1](https://docs.godotengine.org/en/latest/t
 ## Contributing
 
 We greatly appreciate help in maintaining and extending this project. If you
-wish to help out, ensure you have an account on GitHub and create a "fork" of
-this repository. See [Pull request workflow](https://docs.godotengine.org/en/stable/community/contributing/pr_workflow.html)
-for instructions.
-
-Please install clang-format and the [pre-commit](https://pre-commit.com/) Python framework so formatting is done before your changes are submitted. See the [code style guidelines](https://docs.godotengine.org/en/latest/contributing/development/code_style_guidelines.html#pre-commit-hook) for instructions.
+wish to help out, please visit the [godot-cpp section of the Contributing docs](https://contributing.godotengine.org/en/latest/other/godot-cpp.html).
 
 ## Getting started
 
