@@ -39,6 +39,8 @@
 
 #include <godot_cpp/core/error_macros.hpp>
 
+#include <stdio.h>
+
 namespace godot {
 
 namespace internal {
