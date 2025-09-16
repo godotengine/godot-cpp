@@ -37,7 +37,6 @@
 #include <godot_cpp/core/type_info.hpp>
 
 #include <array>
-#include <vector>
 
 namespace godot {
 
@@ -331,7 +330,7 @@ void call_with_variant_args_retc(T *p_instance, R (T::*p_method)(P...) const, co
 }
 
 template <typename T, typename... P>
-void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -366,7 +365,7 @@ void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const G
 }
 
 template <typename T, typename... P>
-void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -401,7 +400,7 @@ void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, 
 }
 
 template <typename T, typename R, typename... P>
-void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -436,7 +435,7 @@ void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), const 
 }
 
 template <typename T, typename R, typename... P>
-void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -548,7 +547,7 @@ void call_with_variant_args_static(void (*p_method)(P...), const Variant **p_arg
 }
 
 template <typename... P>
-void call_with_variant_args_static_dv(void (*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_static_dv(void (*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;
@@ -640,7 +639,7 @@ void call_with_variant_args_static_ret(R (*p_method)(P...), const Variant **p_ar
 }
 
 template <typename R, typename... P>
-void call_with_variant_args_static_ret_dv(R (*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const std::vector<Variant> &default_values) {
+void call_with_variant_args_static_ret_dv(R (*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
 	if ((size_t)p_argcount > sizeof...(P)) {
 		r_error.error = GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS;

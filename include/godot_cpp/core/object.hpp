@@ -38,13 +38,13 @@
 
 #include <godot_cpp/variant/variant.hpp>
 
+#include <godot_cpp/templates/local_vector.hpp>
+
 #include <godot_cpp/classes/object.hpp>
 
 #include <godot_cpp/godot.hpp>
 
 #include <gdextension_interface.h>
-
-#include <vector>
 
 #define ADD_SIGNAL(m_signal) ::godot::ClassDB::add_signal(get_class_static(), m_signal)
 #define ADD_GROUP(m_name, m_prefix) ::godot::ClassDB::add_property_group(get_class_static(), m_name, m_prefix)
@@ -65,10 +65,10 @@ struct MethodInfo {
 	PropertyInfo return_val;
 	uint32_t flags;
 	int id = 0;
-	std::vector<PropertyInfo> arguments;
-	std::vector<Variant> default_arguments;
+	LocalVector<PropertyInfo> arguments;
+	LocalVector<Variant> default_arguments;
 	GDExtensionClassMethodArgumentMetadata return_val_metadata;
-	std::vector<GDExtensionClassMethodArgumentMetadata> arguments_metadata;
+	LocalVector<GDExtensionClassMethodArgumentMetadata> arguments_metadata;
 
 	inline bool operator==(const MethodInfo &p_method) const { return id == p_method.id; }
 	inline bool operator<(const MethodInfo &p_method) const { return id == p_method.id ? (name < p_method.name) : (id < p_method.id); }
@@ -92,21 +92,17 @@ struct MethodInfo {
 
 template <typename... Args>
 MethodInfo::MethodInfo(StringName p_name, const Args &...args) :
-		name(p_name), flags(GDEXTENSION_METHOD_FLAG_NORMAL) {
-	arguments = { args... };
-}
+		name(p_name), flags(GDEXTENSION_METHOD_FLAG_NORMAL), arguments({ args... }) {}
 
 template <typename... Args>
 MethodInfo::MethodInfo(Variant::Type ret, StringName p_name, const Args &...args) :
-		name(p_name), flags(GDEXTENSION_METHOD_FLAG_NORMAL) {
+		name(p_name), flags(GDEXTENSION_METHOD_FLAG_NORMAL), arguments({ args... }) {
 	return_val.type = ret;
-	arguments = { args... };
 }
 
 template <typename... Args>
 MethodInfo::MethodInfo(const PropertyInfo &p_ret, StringName p_name, const Args &...args) :
-		name(p_name), return_val(p_ret), flags(GDEXTENSION_METHOD_FLAG_NORMAL) {
-	arguments = { args... };
+		name(p_name), return_val(p_ret), flags(GDEXTENSION_METHOD_FLAG_NORMAL), arguments({ args... }) {
 }
 
 class ObjectDB {
