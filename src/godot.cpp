@@ -56,6 +56,10 @@ GDExtensionInterfaceGetGodotVersion2 gdextension_interface_get_godot_version2 = 
 GDExtensionInterfaceMemAlloc gdextension_interface_mem_alloc = nullptr;
 GDExtensionInterfaceMemRealloc gdextension_interface_mem_realloc = nullptr;
 GDExtensionInterfaceMemFree gdextension_interface_mem_free = nullptr;
+// TODO: Uncomment if the engine is updated to use this extended interface
+// GDExtensionInterfaceMemAlignedAlloc gdextension_interface_mem_aligned_alloc = nullptr;
+// GDExtensionInterfaceMemAlignedRealloc gdextension_interface_mem_aligned_realloc = nullptr;
+// GDExtensionInterfaceMemAlignedFree gdextension_interface_mem_aligned_free = nullptr;
 GDExtensionInterfacePrintError gdextension_interface_print_error = nullptr;
 GDExtensionInterfacePrintErrorWithMessage gdextension_interface_print_error_with_message = nullptr;
 GDExtensionInterfacePrintWarning gdextension_interface_print_warning = nullptr;

@@ -79,6 +79,10 @@ public:
 	static void *alloc_static(size_t p_bytes, bool p_pad_align = false);
 	static void *realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align = false);
 	static void free_static(void *p_ptr, bool p_pad_align = false);
+
+	static void *alloc_aligned_static(size_t p_bytes, size_t p_alignment);
+	static void *realloc_aligned_static(void *p_memory, size_t p_bytes, size_t p_prev_bytes, size_t p_alignment);
+	static void free_aligned_static(void *p_ptr);
 };
 
 template <typename T, std::enable_if_t<!std::is_base_of<::godot::Wrapped, T>::value, bool> = true>
@@ -95,6 +99,10 @@ _ALWAYS_INLINE_ T *_post_initialize(T *p_obj) {
 #define memalloc(m_size) ::godot::Memory::alloc_static(m_size)
 #define memrealloc(m_mem, m_size) ::godot::Memory::realloc_static(m_mem, m_size)
 #define memfree(m_mem) ::godot::Memory::free_static(m_mem)
+
+#define memalloc_aligned(m_size, m_alignment) ::godot::Memory::alloc_aligned_static(m_size, m_alignment)
+#define memrealloc_aligned(m_mem, m_size, m_prev_size, m_alignment) ::godot::Memory::realloc_aligned_static(m_mem, m_size, m_prev_size, m_alignment)
+#define memfree_aligned(m_mem) ::godot::Memory::free_aligned_static(m_mem)
 
 #define memnew(m_class) (::godot::_pre_initialize<std::remove_pointer_t<decltype(new ("", "") m_class)>>(), ::godot::_post_initialize(new ("", "") m_class))
 
