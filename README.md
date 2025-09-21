@@ -7,6 +7,7 @@
 > from Godot's `master` branch.
 >
 > For users of stable branches, switch to the branch matching your target Godot version:
+> - [`4.5`](https://github.com/godotengine/godot-cpp/tree/4.5)
 > - [`4.4`](https://github.com/godotengine/godot-cpp/tree/4.4)
 > - [`4.3`](https://github.com/godotengine/godot-cpp/tree/4.3)
 > - [`4.2`](https://github.com/godotengine/godot-cpp/tree/4.2)
@@ -66,7 +67,7 @@ wish to help out, please visit the [godot-cpp section of the Contributing docs](
 
 ## Getting started
 
-You need the same C++ pre-requisites installed that are required for the `godot` repository. Follow the [official build instructions for your target platform](https://docs.godotengine.org/en/latest/contributing/development/compiling/index.html#building-for-target-platforms).
+You need the same C++ pre-requisites installed that are required for the `godot` repository. Follow the [official build instructions for your target platform](https://docs.godotengine.org/en/latest/engine_details/development/compiling/index.html).
 
 Getting started with GDExtensions is a bit similar to what it was for 3.x but also a bit different.
 
