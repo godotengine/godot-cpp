@@ -262,6 +262,7 @@ void call_with_variant_args_ret_helper(T *p_instance, R (T::*p_method)(P...), co
 #else
 	r_ret = (p_instance->*p_method)(VariantCaster<P>::cast(*p_args[Is])...);
 #endif
+	(void)p_args; // Avoid warning.
 }
 
 template <typename T, typename R, typename... P, size_t... Is>
@@ -273,7 +274,7 @@ void call_with_variant_args_retc_helper(T *p_instance, R (T::*p_method)(P...) co
 #else
 	r_ret = (p_instance->*p_method)(VariantCaster<P>::cast(*p_args[Is])...);
 #endif
-	(void)p_args;
+	(void)p_args; // Avoid warning.
 }
 
 template <typename T, typename... P>
