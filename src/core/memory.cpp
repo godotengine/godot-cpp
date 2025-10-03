@@ -35,21 +35,7 @@
 namespace godot {
 
 void *Memory::alloc_static(size_t p_bytes, bool p_pad_align) {
-#ifdef DEBUG_ENABLED
-	bool prepad = false; // Already pre paded in the engine.
-#else
-	bool prepad = p_pad_align;
-#endif
-
-	void *mem = internal::gdextension_interface_mem_alloc(p_bytes + (prepad ? DATA_OFFSET : 0));
-	ERR_FAIL_NULL_V(mem, nullptr);
-
-	if (prepad) {
-		uint8_t *s8 = (uint8_t *)mem;
-		return s8 + DATA_OFFSET;
-	} else {
-		return mem;
-	}
+	return internal::gdextension_interface_mem_alloc2(p_bytes, p_pad_align);
 }
 
 void *Memory::realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align) {
@@ -60,37 +46,11 @@ void *Memory::realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align) {
 		return nullptr;
 	}
 
-	uint8_t *mem = (uint8_t *)p_memory;
-
-#ifdef DEBUG_ENABLED
-	bool prepad = false; // Already pre paded in the engine.
-#else
-	bool prepad = p_pad_align;
-#endif
-
-	if (prepad) {
-		mem -= DATA_OFFSET;
-		mem = (uint8_t *)internal::gdextension_interface_mem_realloc(mem, p_bytes + DATA_OFFSET);
-		ERR_FAIL_NULL_V(mem, nullptr);
-		return mem + DATA_OFFSET;
-	} else {
-		return (uint8_t *)internal::gdextension_interface_mem_realloc(mem, p_bytes);
-	}
+	return internal::gdextension_interface_mem_realloc2(p_memory, p_bytes, p_pad_align);
 }
 
 void Memory::free_static(void *p_ptr, bool p_pad_align) {
-	uint8_t *mem = (uint8_t *)p_ptr;
-
-#ifdef DEBUG_ENABLED
-	bool prepad = false; // Already pre paded in the engine.
-#else
-	bool prepad = p_pad_align;
-#endif
-
-	if (prepad) {
-		mem -= DATA_OFFSET;
-	}
-	internal::gdextension_interface_mem_free(mem);
+	internal::gdextension_interface_mem_free2(p_ptr, p_pad_align);
 }
 
 _GlobalNil::_GlobalNil() {
