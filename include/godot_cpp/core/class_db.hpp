@@ -46,9 +46,9 @@
 
 #include <godot_cpp/templates/local_vector.hpp>
 
+#include <godot_cpp/templates/hash_set.hpp>
 #include <list>
 #include <mutex>
-#include <set>
 #include <unordered_map>
 
 // Needed to use StringName as key in `std::unordered_map`
@@ -96,10 +96,10 @@ public:
 		StringName parent_name;
 		GDExtensionInitializationLevel level = GDEXTENSION_INITIALIZATION_SCENE;
 		std::unordered_map<StringName, MethodBind *> method_map;
-		std::set<StringName> signal_names;
+		HashSet<StringName> signal_names;
 		std::unordered_map<StringName, VirtualMethod> virtual_methods;
-		std::set<StringName> property_names;
-		std::set<StringName> constant_names;
+		HashSet<StringName> property_names;
+		HashSet<StringName> constant_names;
 		// Pointer to the parent custom class, if any. Will be null if the parent class is a Godot class.
 		ClassInfo *parent_ptr = nullptr;
 	};

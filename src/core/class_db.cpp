@@ -410,7 +410,7 @@ void ClassDB::initialize(GDExtensionInitializationLevel p_level) {
 }
 
 void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
-	std::set<StringName> to_erase;
+	HashSet<StringName> to_erase;
 	for (int i = class_register_order.size() - 1; i >= 0; --i) {
 		const StringName &name = class_register_order[i];
 		const ClassInfo &cl = classes[name];
