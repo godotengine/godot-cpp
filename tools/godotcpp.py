@@ -445,17 +445,6 @@ def generate(env):
     else:  # Release
         opt_level = "speed"
 
-    # Allow marking includes as external/system to avoid raising warnings.
-    if env.scons_version < (4, 2):
-        env["_CPPEXTINCFLAGS"] = "${_concat(EXTINCPREFIX, CPPEXTPATH, EXTINCSUFFIX, __env__, RDirs, TARGET, SOURCE)}"
-    else:
-        env["_CPPEXTINCFLAGS"] = (
-            "${_concat(EXTINCPREFIX, CPPEXTPATH, EXTINCSUFFIX, __env__, RDirs, TARGET, SOURCE, affect_signature=False)}"
-        )
-    env["CPPEXTPATH"] = []
-    env["EXTINCPREFIX"] = "-isystem "
-    env["EXTINCSUFFIX"] = ""
-
     env["optimize"] = ARGUMENTS.get("optimize", opt_level)
     env["debug_symbols"] = get_cmdline_bool("debug_symbols", env.dev_build)
 
