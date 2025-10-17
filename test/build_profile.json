@@ -8,6 +8,11 @@
 		"OS",
 		"TileMap",
 		"TileSet",
-		"Viewport"
+		"Viewport",
+		"Engine",
+		"DirAccess",
+		"EditorInterface",
+		"GDExtensionManager",
+		"Thread"
 	]
 }

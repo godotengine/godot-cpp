@@ -114,6 +114,9 @@ void Example::_notification(int p_what) {
 		rpc_config("test_rpc", opts);
 	}
 	//UtilityFunctions::print("Notification: ", String::num(p_what));
+	if (p_what == NOTIFICATION_EXTENSION_RELOADED) {
+		emit_custom_signal("NOTIFICATION_EXTENSION_RELOADED ", 0);
+	}
 }
 
 bool Example::_set(const StringName &p_name, const Variant &p_value) {

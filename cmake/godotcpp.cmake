@@ -139,6 +139,9 @@ function(godotcpp_options)
     #TODO compiledb_file
 
     set(GODOTCPP_BUILD_PROFILE "" CACHE PATH "Path to a file containing a feature build profile")
+    if(GODOTCPP_BUILD_PROFILE AND EXISTS "${GODOTCPP_BUILD_PROFILE}")
+        set_property(SOURCE APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${GODOTCPP_BUILD_PROFILE}")
+    endif()
 
     set(GODOTCPP_USE_HOT_RELOAD "" CACHE BOOL "Enable the extra accounting required to support hot reload. (ON|OFF)")
 
