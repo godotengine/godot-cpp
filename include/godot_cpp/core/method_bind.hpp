@@ -38,11 +38,7 @@
 #include <gdextension_interface.h>
 
 #include <godot_cpp/classes/global_constants.hpp>
-
-#include <string>
-#include <vector>
-
-#include <iostream>
+#include <godot_cpp/templates/local_vector.hpp>
 
 namespace godot {
 
@@ -57,9 +53,9 @@ class MethodBind {
 	bool _returns = false;
 	bool _vararg = false;
 
-	std::vector<StringName> argument_names;
+	LocalVector<StringName> argument_names;
 	GDExtensionVariantType *argument_types = nullptr;
-	std::vector<Variant> default_arguments;
+	LocalVector<Variant> default_arguments;
 
 protected:
 	void _set_const(bool p_const);
@@ -73,7 +69,7 @@ protected:
 	void set_argument_count(int p_count) { argument_count = p_count; }
 
 public:
-	_FORCE_INLINE_ const std::vector<Variant> &get_default_arguments() const { return default_arguments; }
+	_FORCE_INLINE_ const LocalVector<Variant> &get_default_arguments() const { return default_arguments; }
 	_FORCE_INLINE_ int get_default_argument_count() const { return (int)default_arguments.size(); }
 
 	_FORCE_INLINE_ Variant has_default_argument(int p_arg) const {
@@ -104,8 +100,8 @@ public:
 
 	PropertyInfo get_argument_info(int p_argument) const;
 
-	std::vector<PropertyInfo> get_arguments_info_list() const {
-		std::vector<PropertyInfo> vec;
+	LocalVector<PropertyInfo> get_arguments_info_list() const {
+		LocalVector<PropertyInfo> vec;
 		// First element is return value
 		vec.reserve(argument_count + 1);
 		for (int i = 0; i < argument_count + 1; i++) {
@@ -114,8 +110,8 @@ public:
 		return vec;
 	}
 
-	void set_argument_names(const std::vector<StringName> &p_names);
-	std::vector<StringName> get_argument_names() const;
+	void set_argument_names(const LocalVector<StringName> &p_names);
+	LocalVector<StringName> get_argument_names() const;
 
 	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const = 0;
 
@@ -136,10 +132,10 @@ public:
 	_FORCE_INLINE_ bool is_vararg() const { return _vararg; }
 	_FORCE_INLINE_ bool has_return() const { return _returns; }
 
-	void set_default_arguments(const std::vector<Variant> &p_default_arguments) { default_arguments = p_default_arguments; }
+	void set_default_arguments(const LocalVector<Variant> &p_default_arguments) { default_arguments = p_default_arguments; }
 
-	std::vector<GDExtensionClassMethodArgumentMetadata> get_arguments_metadata_list() const {
-		std::vector<GDExtensionClassMethodArgumentMetadata> vec;
+	LocalVector<GDExtensionClassMethodArgumentMetadata> get_arguments_metadata_list() const {
+		LocalVector<GDExtensionClassMethodArgumentMetadata> vec;
 		// First element is return value
 		vec.reserve(argument_count + 1);
 		for (int i = 0; i < argument_count + 1; i++) {
@@ -158,7 +154,7 @@ template <typename Derived, typename T, typename R, bool should_returns>
 class MethodBindVarArgBase : public MethodBind {
 protected:
 	R (T::*method)(const Variant **, GDExtensionInt, GDExtensionCallError &);
-	std::vector<PropertyInfo> arguments;
+	LocalVector<PropertyInfo> arguments;
 
 public:
 	virtual PropertyInfo gen_argument_type_info(int p_arg) const {
@@ -194,7 +190,7 @@ public:
 		if (p_method_info.arguments.size()) {
 			arguments = p_method_info.arguments;
 
-			std::vector<StringName> names;
+			LocalVector<StringName> names;
 			names.reserve(p_method_info.arguments.size());
 			for (size_t i = 0; i < p_method_info.arguments.size(); i++) {
 				names.push_back(p_method_info.arguments[i].name);

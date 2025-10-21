@@ -21,7 +21,8 @@ compromises need to be made to resolve those differences.
 As we are attempting to maintain feature parity, and ease of maintenance, these
 CMake scripts are built to resemble the SCons build system wherever possible.
 Where they are not, we will attempt to document common difference in
-doc/cmake.rst and platform specific differences in their respective
+the docs (https://docs.godotengine.org/en/latest/tutorials/scripting/cpp/build_system/cmake.html)
+and platform specific differences in their respective
 cmake/<platform>.cmake file.
 
 The file structure and file content are made to match, if not in content then

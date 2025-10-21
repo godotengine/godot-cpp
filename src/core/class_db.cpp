@@ -36,14 +36,12 @@
 
 #include <godot_cpp/core/memory.hpp>
 
-#include <algorithm>
-
 namespace godot {
 
-std::unordered_map<StringName, ClassDB::ClassInfo> ClassDB::classes;
-std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *> ClassDB::instance_binding_callbacks;
-std::vector<StringName> ClassDB::class_register_order;
-std::unordered_map<StringName, Object *> ClassDB::engine_singletons;
+AHashMap<StringName, ClassDB::ClassInfo> ClassDB::classes;
+AHashMap<StringName, const GDExtensionInstanceBindingCallbacks *> ClassDB::instance_binding_callbacks;
+LocalVector<StringName> ClassDB::class_register_order;
+AHashMap<StringName, Object *> ClassDB::engine_singletons;
 std::mutex ClassDB::engine_singletons_mutex;
 GDExtensionInitializationLevel ClassDB::current_level = GDEXTENSION_INITIALIZATION_CORE;
 
@@ -116,9 +114,9 @@ MethodBind *ClassDB::get_method(const StringName &p_class, const StringName &p_m
 
 	ClassInfo *type = &classes[p_class];
 	while (type) {
-		std::unordered_map<StringName, MethodBind *>::iterator method = type->method_map.find(p_method);
+		AHashMap<StringName, MethodBind *>::Iterator method = type->method_map.find(p_method);
 		if (method != type->method_map.end()) {
-			return method->second;
+			return method->value;
 		}
 		type = type->parent_ptr;
 		continue;
@@ -130,13 +128,13 @@ MethodBind *ClassDB::get_method(const StringName &p_class, const StringName &p_m
 MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount) {
 	StringName instance_type = p_bind->get_instance_class();
 
-	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(instance_type);
+	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(instance_type);
 	if (type_it == classes.end()) {
 		memdelete(p_bind);
 		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(Array::make(instance_type)));
 	}
 
-	ClassInfo &type = type_it->second;
+	ClassInfo &type = type_it->value;
 
 	if (type.method_map.find(method_name.name) != type.method_map.end()) {
 		memdelete(p_bind);
@@ -157,7 +155,7 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 
 	p_bind->set_hint_flags(p_flags);
 
-	std::vector<StringName> args;
+	LocalVector<StringName> args;
 	args.resize(method_name.args.size());
 	size_t arg_index = 0;
 	for (StringName arg : method_name.args) {
@@ -166,7 +164,7 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 
 	p_bind->set_argument_names(args);
 
-	std::vector<Variant> defvals;
+	LocalVector<Variant> defvals;
 
 	defvals.resize(p_defcount);
 	for (int i = 0; i < p_defcount; i++) {
@@ -186,34 +184,34 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const M
 }
 
 void ClassDB::bind_method_godot(const StringName &p_class_name, MethodBind *p_method) {
-	std::vector<GDExtensionVariantPtr> def_args;
-	const std::vector<Variant> &def_args_val = p_method->get_default_arguments();
+	LocalVector<GDExtensionVariantPtr> def_args;
+	const LocalVector<Variant> &def_args_val = p_method->get_default_arguments();
 	def_args.resize(def_args_val.size());
 	for (size_t i = 0; i < def_args_val.size(); i++) {
 		def_args[i] = (GDExtensionVariantPtr)&def_args_val[i];
 	}
 
-	std::vector<PropertyInfo> return_value_and_arguments_info = p_method->get_arguments_info_list();
-	std::vector<GDExtensionClassMethodArgumentMetadata> return_value_and_arguments_metadata = p_method->get_arguments_metadata_list();
+	LocalVector<PropertyInfo> return_value_and_arguments_info = p_method->get_arguments_info_list();
+	LocalVector<GDExtensionClassMethodArgumentMetadata> return_value_and_arguments_metadata = p_method->get_arguments_metadata_list();
 
-	std::vector<GDExtensionPropertyInfo> return_value_and_arguments_gdextension_info;
+	LocalVector<GDExtensionPropertyInfo> return_value_and_arguments_gdextension_info;
 	return_value_and_arguments_gdextension_info.reserve(return_value_and_arguments_info.size());
-	for (std::vector<PropertyInfo>::iterator it = return_value_and_arguments_info.begin(); it != return_value_and_arguments_info.end(); it++) {
+	for (const PropertyInfo &info : return_value_and_arguments_info) {
 		return_value_and_arguments_gdextension_info.push_back(
 				GDExtensionPropertyInfo{
-						static_cast<GDExtensionVariantType>(it->type), // GDExtensionVariantType type;
-						it->name._native_ptr(), // GDExtensionStringNamePtr name;
-						it->class_name._native_ptr(), // GDExtensionStringNamePtr class_name;
-						it->hint, // uint32_t hint;
-						it->hint_string._native_ptr(), // GDExtensionStringPtr hint_string;
-						it->usage, // uint32_t usage;
+						static_cast<GDExtensionVariantType>(info.type), // GDExtensionVariantType type;
+						info.name._native_ptr(), // GDExtensionStringNamePtr name;
+						info.class_name._native_ptr(), // GDExtensionStringNamePtr class_name;
+						info.hint, // uint32_t hint;
+						info.hint_string._native_ptr(), // GDExtensionStringPtr hint_string;
+						info.usage, // uint32_t usage;
 				});
 	}
 
-	GDExtensionPropertyInfo *return_value_info = return_value_and_arguments_gdextension_info.data();
-	GDExtensionClassMethodArgumentMetadata *return_value_metadata = return_value_and_arguments_metadata.data();
-	GDExtensionPropertyInfo *arguments_info = return_value_and_arguments_gdextension_info.data() + 1;
-	GDExtensionClassMethodArgumentMetadata *arguments_metadata = return_value_and_arguments_metadata.data() + 1;
+	GDExtensionPropertyInfo *return_value_info = return_value_and_arguments_gdextension_info.ptr();
+	GDExtensionClassMethodArgumentMetadata *return_value_metadata = return_value_and_arguments_metadata.ptr();
+	GDExtensionPropertyInfo *arguments_info = return_value_and_arguments_gdextension_info.ptr() + 1;
+	GDExtensionClassMethodArgumentMetadata *arguments_metadata = return_value_and_arguments_metadata.ptr() + 1;
 
 	StringName name = p_method->get_name();
 	GDExtensionClassMethodInfo method_info = {
@@ -229,17 +227,17 @@ void ClassDB::bind_method_godot(const StringName &p_class_name, MethodBind *p_me
 		arguments_info, // GDExtensionPropertyInfo *
 		arguments_metadata, // GDExtensionClassMethodArgumentMetadata *
 		(uint32_t)p_method->get_default_argument_count(), // uint32_t default_argument_count;
-		def_args.data(), // GDExtensionVariantPtr *default_arguments;
+		def_args.ptr(), // GDExtensionVariantPtr *default_arguments;
 	};
 	internal::gdextension_interface_classdb_register_extension_class_method(internal::library, p_class_name._native_ptr(), &method_info);
 }
 
 void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) {
-	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class);
+	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class);
 
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
 
-	ClassInfo &cl = type_it->second;
+	ClassInfo &cl = type_it->value;
 
 	// Check if this signal is already register
 	ClassInfo *check = &cl;
@@ -252,7 +250,7 @@ void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) 
 	cl.signal_names.insert(p_signal.name);
 
 	// register our signal in godot
-	std::vector<GDExtensionPropertyInfo> parameters;
+	LocalVector<GDExtensionPropertyInfo> parameters;
 	parameters.reserve(p_signal.arguments.size());
 
 	for (const PropertyInfo &par : p_signal.arguments) {
@@ -266,15 +264,15 @@ void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) 
 		});
 	}
 
-	internal::gdextension_interface_classdb_register_extension_class_signal(internal::library, cl.name._native_ptr(), p_signal.name._native_ptr(), parameters.data(), parameters.size());
+	internal::gdextension_interface_classdb_register_extension_class_signal(internal::library, cl.name._native_ptr(), p_signal.name._native_ptr(), parameters.ptr(), parameters.size());
 }
 
 void ClassDB::bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDExtensionInt p_constant_value, bool p_is_bitfield) {
-	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class_name);
+	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class_name);
 
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class_name)));
 
-	ClassInfo &type = type_it->second;
+	ClassInfo &type = type_it->value;
 
 	// check if it already exists
 	ERR_FAIL_COND_MSG(type.constant_names.find(p_constant_name) != type.constant_names.end(), String("Constant '{0}::{1}' already registered.").format(Array::make(p_class_name, p_constant_name)));
@@ -292,17 +290,17 @@ GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtens
 	const StringName *class_name = reinterpret_cast<const StringName *>(p_userdata);
 	const StringName *name = reinterpret_cast<const StringName *>(p_name);
 
-	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(*class_name);
+	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(*class_name);
 	ERR_FAIL_COND_V_MSG(type_it == classes.end(), nullptr, String("Class '{0}' doesn't exist.").format(Array::make(*class_name)));
 
-	const ClassInfo *type = &type_it->second;
+	const ClassInfo *type = &type_it->value;
 
 	// Find method in current class, or any of its parent classes (Godot classes not included)
 	while (type != nullptr) {
-		std::unordered_map<StringName, ClassInfo::VirtualMethod>::const_iterator method_it = type->virtual_methods.find(*name);
+		AHashMap<StringName, ClassInfo::VirtualMethod>::ConstIterator method_it = type->virtual_methods.find(*name);
 
-		if (method_it != type->virtual_methods.end() && method_it->second.hash == p_hash) {
-			return method_it->second.func;
+		if (method_it != type->virtual_methods.end() && method_it->value.hash == p_hash) {
+			return method_it->value.func;
 		}
 
 		type = type->parent_ptr;
@@ -312,9 +310,9 @@ GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtens
 }
 
 const GDExtensionInstanceBindingCallbacks *ClassDB::get_instance_binding_callbacks(const StringName &p_class) {
-	std::unordered_map<StringName, const GDExtensionInstanceBindingCallbacks *>::iterator callbacks_it = instance_binding_callbacks.find(p_class);
+	AHashMap<StringName, const GDExtensionInstanceBindingCallbacks *>::Iterator callbacks_it = instance_binding_callbacks.find(p_class);
 	if (likely(callbacks_it != instance_binding_callbacks.end())) {
-		return callbacks_it->second;
+		return callbacks_it->value;
 	}
 
 	// If we don't have an instance binding callback for the given class, find the closest parent where we do.
@@ -325,14 +323,14 @@ const GDExtensionInstanceBindingCallbacks *ClassDB::get_instance_binding_callbac
 		callbacks_it = instance_binding_callbacks.find(class_name);
 	} while (callbacks_it == instance_binding_callbacks.end());
 
-	return callbacks_it->second;
+	return callbacks_it->value;
 }
 
 void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p_method, GDExtensionClassCallVirtual p_call, uint32_t p_hash) {
-	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class);
+	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class);
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
 
-	ClassInfo &type = type_it->second;
+	ClassInfo &type = type_it->value;
 
 	ERR_FAIL_COND_MSG(type.method_map.find(p_method) != type.method_map.end(), String("Method '{0}::{1}()' already registered as non-virtual.").format(Array::make(p_class, p_method)));
 	ERR_FAIL_COND_MSG(type.virtual_methods.find(p_method) != type.virtual_methods.end(), String("Virtual '{0}::{1}()' method already registered.").format(Array::make(p_class, p_method)));
@@ -344,7 +342,7 @@ void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p
 }
 
 void ClassDB::add_virtual_method(const StringName &p_class, const MethodInfo &p_method, const Vector<StringName> &p_arg_names) {
-	std::unordered_map<StringName, ClassInfo>::iterator type_it = classes.find(p_class);
+	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class);
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
 
 	GDExtensionClassVirtualMethodInfo mi;
@@ -392,8 +390,8 @@ void ClassDB::initialize_class(const ClassInfo &p_cl) {
 }
 
 void ClassDB::initialize(GDExtensionInitializationLevel p_level) {
-	for (const std::pair<const StringName, ClassInfo> &pair : classes) {
-		const ClassInfo &cl = pair.second;
+	for (const KeyValue<StringName, ClassInfo> &pair : classes) {
+		const ClassInfo &cl = pair.value;
 		if (cl.level != p_level) {
 			continue;
 		}
@@ -404,8 +402,8 @@ void ClassDB::initialize(GDExtensionInitializationLevel p_level) {
 
 void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
 	std::set<StringName> to_erase;
-	for (std::vector<StringName>::reverse_iterator i = class_register_order.rbegin(); i != class_register_order.rend(); ++i) {
-		const StringName &name = *i;
+	for (int i = class_register_order.size() - 1; i >= 0; --i) {
+		const StringName &name = class_register_order[i];
 		const ClassInfo &cl = classes[name];
 
 		if (cl.level != p_level) {
@@ -414,8 +412,8 @@ void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
 
 		internal::gdextension_interface_classdb_unregister_extension_class(internal::library, name._native_ptr());
 
-		for (const std::pair<const StringName, MethodBind *> &method : cl.method_map) {
-			memdelete(method.second);
+		for (const KeyValue<StringName, MethodBind *> &method : cl.method_map) {
+			memdelete(method.value);
 		}
 
 		classes.erase(name);
@@ -423,26 +421,24 @@ void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
 	}
 
 	{
-		// The following is equivalent to c++20 `std::erase_if(class_register_order, [&](const StringName& name){ return to_erase.contains(name); });`
-		std::vector<StringName>::iterator it = std::remove_if(class_register_order.begin(), class_register_order.end(), [&](const StringName &p_name) {
-			return to_erase.count(p_name) > 0;
-		});
-		class_register_order.erase(it, class_register_order.end());
+		for (const StringName &x : to_erase) {
+			class_register_order.erase(x);
+		}
 	}
 
 	if (p_level == GDEXTENSION_INITIALIZATION_CORE) {
 		// Make a new list of the singleton objects, since freeing the instance bindings will lead to
 		// elements getting removed from engine_singletons.
-		std::vector<Object *> singleton_objects;
+		LocalVector<Object *> singleton_objects;
 		{
 			std::lock_guard<std::mutex> lock(engine_singletons_mutex);
 			singleton_objects.reserve(engine_singletons.size());
-			for (const std::pair<const StringName, Object *> &pair : engine_singletons) {
-				singleton_objects.push_back(pair.second);
+			for (const KeyValue<StringName, Object *> &pair : engine_singletons) {
+				singleton_objects.push_back(pair.value);
 			}
 		}
-		for (std::vector<Object *>::iterator i = singleton_objects.begin(); i != singleton_objects.end(); i++) {
-			internal::gdextension_interface_object_free_instance_binding((*i)->_owner, internal::token);
+		for (const Object *i : singleton_objects) {
+			internal::gdextension_interface_object_free_instance_binding((*i)._owner, internal::token);
 		}
 	}
 }

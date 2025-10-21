@@ -60,7 +60,7 @@ Object *get_object_instance_binding(GodotObject *p_engine_object) {
 	return reinterpret_cast<Object *>(gdextension_interface_object_get_instance_binding(p_engine_object, token, binding_callbacks));
 }
 
-TypedArray<Dictionary> convert_property_list(const std::vector<PropertyInfo> &p_list) {
+TypedArray<Dictionary> convert_property_list(const LocalVector<PropertyInfo> &p_list) {
 	TypedArray<Dictionary> va;
 	for (const PropertyInfo &pi : p_list) {
 		va.push_back(Dictionary(pi));

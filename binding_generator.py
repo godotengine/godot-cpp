@@ -2746,12 +2746,12 @@ def correct_typed_dictionary(type_name):
 def correct_type(type_name, meta=None, use_alias=True):
     type_conversion = {"float": "double", "int": "int64_t", "Nil": "Variant"}
     if meta is not None:
-        if "int" in meta:
+        if meta in ["int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64"]:
             return f"{meta}_t"
-        elif "char" in meta:
-            return f"{meta}_t"
-        else:
+        elif meta in ["float", "double"]:
             return meta
+        elif meta in ["char16", "char32"]:
+            return f"{meta}_t"
     if type_name in type_conversion:
         return type_conversion[type_name]
     if type_name.startswith("typedarray::"):

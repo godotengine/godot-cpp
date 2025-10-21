@@ -56,11 +56,11 @@ void MethodBind::set_name(const StringName &p_name) {
 	name = p_name;
 }
 
-void MethodBind::set_argument_names(const std::vector<StringName> &p_names) {
+void MethodBind::set_argument_names(const LocalVector<StringName> &p_names) {
 	argument_names = p_names;
 }
 
-std::vector<StringName> MethodBind::get_argument_names() const {
+LocalVector<StringName> MethodBind::get_argument_names() const {
 	return argument_names;
 }
 
