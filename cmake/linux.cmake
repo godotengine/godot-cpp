@@ -12,7 +12,8 @@ function(linux_options)
     #[[ Options from SCons
     use_llvm : Use the LLVM compiler
         Not implemented as compiler selection is managed by CMake. Look to
-        doc/cmake.rst for examples.
+        the docs (https://docs.godotengine.org/en/latest/tutorials/scripting/cpp/build_system/cmake.html)
+        for examples.
     ]]
     option(GODOTCPP_USE_STATIC_CPP "Link libgcc and libstdc++ statically for better portability" ON)
 endfunction()

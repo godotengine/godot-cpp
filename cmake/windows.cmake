@@ -62,7 +62,9 @@ function(windows_options)
         Default: True
 
     These three options will not implemented as compiler selection is managed
-    by CMake toolchain files. Look to doc/cmake.rst for examples.
+    by CMake toolchain files. Look to the docs
+    (https://docs.godotengine.org/en/latest/tutorials/scripting/cpp/build_system/cmake.html)
+    for examples.
     use_mingw: Use the MinGW compiler instead of MSVC - only effective on Windows
     use_llvm: Use the LLVM compiler (MVSC or MinGW depending on the use_mingw flag
     mingw_prefix: MinGW prefix

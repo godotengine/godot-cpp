@@ -2,6 +2,7 @@ import os
 import platform
 import sys
 
+import header_builders
 from SCons import __version__ as scons_raw_version
 from SCons.Action import Action
 from SCons.Builder import Builder
@@ -445,17 +446,6 @@ def generate(env):
     else:  # Release
         opt_level = "speed"
 
-    # Allow marking includes as external/system to avoid raising warnings.
-    if env.scons_version < (4, 2):
-        env["_CPPEXTINCFLAGS"] = "${_concat(EXTINCPREFIX, CPPEXTPATH, EXTINCSUFFIX, __env__, RDirs, TARGET, SOURCE)}"
-    else:
-        env["_CPPEXTINCFLAGS"] = (
-            "${_concat(EXTINCPREFIX, CPPEXTPATH, EXTINCSUFFIX, __env__, RDirs, TARGET, SOURCE, affect_signature=False)}"
-        )
-    env["CPPEXTPATH"] = []
-    env["EXTINCPREFIX"] = "-isystem "
-    env["EXTINCSUFFIX"] = ""
-
     env["optimize"] = ARGUMENTS.get("optimize", opt_level)
     env["debug_symbols"] = get_cmdline_bool("debug_symbols", env.dev_build)
 
@@ -529,6 +519,10 @@ def generate(env):
         BUILDERS={
             "GodotCPPBindings": Builder(action=Action(scons_generate_bindings, "$GENCOMSTR"), emitter=scons_emit_files),
             "GodotCPPDocData": Builder(action=scons_generate_doc_source),
+            "GLSL_HEADER": Builder(
+                action=header_builders.build_raw_headers_action,
+                suffix="glsl.gen.h",
+            ),
         }
     )
     env.AddMethod(_godot_cpp, "GodotCPP")
