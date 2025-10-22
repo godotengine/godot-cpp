@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b4wrd36npp8ov"]
+
+[ext_resource type="Script" uid="uid://c8v75k3p4pnjj" path="res://reload.gd" id="1_icw2l"]
+
+[node name="Reload" type="Example"]
+script = ExtResource("1_icw2l")
