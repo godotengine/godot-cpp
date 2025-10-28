@@ -222,6 +222,7 @@ void Example::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("test_add_child", "node"), &Example::test_add_child);
 	ClassDB::bind_method(D_METHOD("test_set_tileset", "tilemap", "tileset"), &Example::test_set_tileset);
+	ClassDB::bind_method(D_METHOD("test_tween_smoke_test"), &Example::test_tween_smoke_test);
 
 	ClassDB::bind_method(D_METHOD("test_variant_call", "variant"), &Example::test_variant_call);
 
@@ -614,6 +615,11 @@ void Example::test_add_child(Node *p_node) {
 
 void Example::test_set_tileset(TileMap *p_tilemap, const Ref<TileSet> &p_tileset) const {
 	p_tilemap->set_tileset(p_tileset);
+}
+
+bool Example::test_tween_smoke_test() {
+	Ref<Tween> tween = create_tween();
+	return tween.is_valid() && tween->is_class("Tween") && tween->get_reference_count() > 1;
 }
 
 Variant Example::test_variant_call(Variant p_variant) {

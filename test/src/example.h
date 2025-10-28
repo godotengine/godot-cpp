@@ -19,6 +19,7 @@
 #include <godot_cpp/classes/input_event_key.hpp>
 #include <godot_cpp/classes/tile_map.hpp>
 #include <godot_cpp/classes/tile_set.hpp>
+#include <godot_cpp/classes/tween.hpp>
 #include <godot_cpp/classes/viewport.hpp>
 #include <godot_cpp/variant/typed_dictionary.hpp>
 #include <godot_cpp/variant/variant.hpp>
@@ -154,6 +155,7 @@ public:
 
 	void test_add_child(Node *p_node);
 	void test_set_tileset(TileMap *p_tilemap, const Ref<TileSet> &p_tileset) const;
+	bool test_tween_smoke_test();
 
 	Variant test_variant_call(Variant p_variant);
 
