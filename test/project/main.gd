@@ -225,6 +225,9 @@ func _ready():
 	assert_equal(new_tilemap.tile_set, new_tileset)
 	new_tilemap.queue_free()
 
+	# Creates a Tween and checks that it's valid. Improper refcount handling will crash now or at shutdown.
+	assert_equal(example.test_tween_smoke_test(), true)
+
 	# Test variant call.
 	var test_obj = TestClass.new()
 	assert_equal(example.test_variant_call(test_obj), "hello world")
