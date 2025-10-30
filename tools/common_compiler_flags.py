@@ -30,6 +30,32 @@ def generate(env):
     if env["lto"] != "none":
         print("Using LTO: " + env["lto"])
 
+    # Environment flags
+    env.Append(CPPDEFINES=env.get("cppdefines", "").split())
+    env.Append(CCFLAGS=env.get("ccflags", "").split())
+    env.Append(CXXFLAGS=env.get("cxxflags", "").split())
+    env.Append(CFLAGS=env.get("cflags", "").split())
+    env.Append(LINKFLAGS=env.get("linkflags", "").split())
+    env.Append(ASFLAGS=env.get("asflags", "").split())
+    env.Append(ARFLAGS=env.get("arflags", "").split())
+    env.Append(RCFLAGS=env.get("rcflags", "").split())
+
+    # Prepend compiler launchers
+    if "c_compiler_launcher" in env:
+        env["CC"] = " ".join([env["c_compiler_launcher"], env["CC"]])
+
+    if "cpp_compiler_launcher" in env:
+        env["CXX"] = " ".join([env["cpp_compiler_launcher"], env["CXX"]])
+
+    # SCons speed optimization controlled by the `fast_unsafe` option, which provide
+    # more than 10 s speed up for incremental rebuilds.
+    # Unsafe as they reduce the certainty of rebuilding all changed files, so it's
+    # enabled by default for `debug` builds, and can be overridden from command line.
+    # Ref: https://github.com/SCons/scons/wiki/GoFastButton
+    if env.get("fast_unsafe", False):
+        env.SetOption("implicit_cache", 1)
+        env.SetOption("max_drift", 60)
+
     # Require C++17
     if env.get("is_msvc", False):
         env.Append(CXXFLAGS=["/std:c++17"])

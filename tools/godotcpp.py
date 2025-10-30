@@ -242,6 +242,20 @@ def options(opts, env):
         )
     )
 
+    opts.Add("cppdefines", "Custom defines for the pre-processor")
+    opts.Add("ccflags", "Custom flags for both the C and C++ compilers")
+    opts.Add("cxxflags", "Custom flags for the C++ compiler")
+    opts.Add("cflags", "Custom flags for the C compiler")
+    opts.Add("linkflags", "Custom flags for the linker")
+    opts.Add("asflags", "Custom flags for the assembler")
+    opts.Add("arflags", "Custom flags for the archive tool")
+    opts.Add("rcflags", "Custom flags for Windows resource compiler")
+
+    opts.Add("c_compiler_launcher", "C compiler launcher (e.g. `ccache`)")
+    opts.Add("cpp_compiler_launcher", "C++ compiler launcher (e.g. `ccache`)")
+
+    opts.Add(BoolVariable("fast_unsafe", "Enable unsafe options for faster rebuilds", False))
+
     # Editor and template_debug are compatible (i.e. you can use the same binary for Godot editor builds and Godot debug templates).
     # Godot release templates are only compatible with "template_release" builds.
     # For this reason, we default to template_debug builds, unlike Godot which defaults to editor builds.
