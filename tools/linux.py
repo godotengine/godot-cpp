@@ -5,7 +5,7 @@ from SCons.Variables import BoolVariable
 
 def options(opts):
     opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler - only effective when targeting Linux", False))
-    opts.Add(BoolVariable("use_static_cpp", "Link libgcc and libstdc++ statically for better portability", True))
+    opts.Add(BoolVariable("use_static_cpp", "Link libgcc and libstdc++ statically for better portability", False))
 
 
 def exists(env):
