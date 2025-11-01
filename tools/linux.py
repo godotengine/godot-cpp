@@ -19,6 +19,8 @@ def generate(env):
     elif env.use_hot_reload:
         # Required for extensions to truly unload.
         env.Append(CXXFLAGS=["-fno-gnu-unique"])
+        # Reload won't work with "use_static_cpp", so disable it.
+        env["use_static_cpp"] = False
 
     env.Append(CCFLAGS=["-fPIC", "-Wwrite-strings"])
     env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
