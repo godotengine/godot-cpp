@@ -15,7 +15,7 @@ function(linux_options)
         the docs (https://docs.godotengine.org/en/latest/tutorials/scripting/cpp/build_system/cmake.html)
         for examples.
     ]]
-    option(GODOTCPP_USE_STATIC_CPP "Link libgcc and libstdc++ statically for better portability" ON)
+    option(GODOTCPP_USE_STATIC_CPP "Link libgcc and libstdc++ statically for better portability" OFF)
 endfunction()
 
 #[===========================[ Target Generation ]===========================]
