@@ -21,7 +21,7 @@ function(web_generate)
     target_compile_options(
         godot-cpp
         PUBLIC #
-            -sSIDE_MODULE
+            -sSIDE_MODULE=1
             -sSUPPORT_LONGJMP=wasm
             $<${THREADS_ENABLED}:-sUSE_PTHREADS=1>
     )
@@ -33,6 +33,7 @@ function(web_generate)
             -sSUPPORT_LONGJMP=wasm
             -fvisibility=hidden
             -shared
+            $<${THREADS_ENABLED}:-sUSE_PTHREADS=1>
     )
 
     common_compiler_flags()
