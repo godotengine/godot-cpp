@@ -97,7 +97,7 @@ private:
 		return ++x;
 	}
 
-	// Alignment:  ↓ max_align_t           ↓ USize          ↓ max_align_t
+	// Alignment:  ↓ max_align_t           ↓ USize          ↓ MAX_ALIGN
 	//             ┌────────────────────┬──┬─────────────┬──┬───────────...
 	//             │ SafeNumeric<USize> │░░│ USize       │░░│ T[]
 	//             │ ref. count         │░░│ data size   │░░│ data
@@ -106,7 +106,7 @@ private:
 
 	static constexpr size_t REF_COUNT_OFFSET = 0;
 	static constexpr size_t SIZE_OFFSET = ((REF_COUNT_OFFSET + sizeof(SafeNumeric<USize>)) % alignof(USize) == 0) ? (REF_COUNT_OFFSET + sizeof(SafeNumeric<USize>)) : ((REF_COUNT_OFFSET + sizeof(SafeNumeric<USize>)) + alignof(USize) - ((REF_COUNT_OFFSET + sizeof(SafeNumeric<USize>)) % alignof(USize)));
-	static constexpr size_t DATA_OFFSET = ((SIZE_OFFSET + sizeof(USize)) % alignof(max_align_t) == 0) ? (SIZE_OFFSET + sizeof(USize)) : ((SIZE_OFFSET + sizeof(USize)) + alignof(max_align_t) - ((SIZE_OFFSET + sizeof(USize)) % alignof(max_align_t)));
+	static constexpr size_t DATA_OFFSET = ((SIZE_OFFSET + sizeof(USize)) % Memory::MAX_ALIGN == 0) ? (SIZE_OFFSET + sizeof(USize)) : ((SIZE_OFFSET + sizeof(USize)) + Memory::MAX_ALIGN - ((SIZE_OFFSET + sizeof(USize)) % Memory::MAX_ALIGN));
 
 	mutable T *_ptr = nullptr;
 
