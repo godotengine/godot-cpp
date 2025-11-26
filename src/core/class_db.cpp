@@ -118,8 +118,13 @@ MethodBind *ClassDB::get_method(const StringName &p_class, const StringName &p_m
 		if (method != type->method_map.end()) {
 			return method->value;
 		}
-		type = type->parent_ptr;
-		continue;
+
+		AHashMap<StringName, ClassInfo>::Iterator parent_it = classes.find(type->parent_name);
+		if (parent_it == classes.end()) {
+			break;
+		}
+
+		type = &parent_it->value;
 	}
 
 	return nullptr;
@@ -243,7 +248,13 @@ void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) 
 	ClassInfo *check = &cl;
 	while (check) {
 		ERR_FAIL_COND_MSG(check->signal_names.find(p_signal.name) != check->signal_names.end(), String("Class '{0}' already has signal '{1}'.").format(Array::make(p_class, p_signal.name)));
-		check = check->parent_ptr;
+
+		AHashMap<StringName, ClassInfo>::Iterator parent_it = classes.find(check->parent_name);
+		if (parent_it == classes.end()) {
+			break;
+		}
+
+		check = &parent_it->value;
 	}
 
 	// register our signal in our plugin
@@ -303,7 +314,12 @@ GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtens
 			return method_it->value.func;
 		}
 
-		type = type->parent_ptr;
+		AHashMap<StringName, ClassInfo>::Iterator parent_it = classes.find(type->parent_name);
+		if (parent_it == classes.end()) {
+			break;
+		}
+
+		type = &parent_it->value;
 	}
 
 	return nullptr;

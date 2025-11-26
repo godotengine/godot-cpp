@@ -90,8 +90,6 @@ public:
 		AHashMap<StringName, VirtualMethod> virtual_methods;
 		std::set<StringName> property_names;
 		std::set<StringName> constant_names;
-		// Pointer to the parent custom class, if any. Will be null if the parent class is a Godot class.
-		ClassInfo *parent_ptr = nullptr;
 	};
 
 private:
@@ -233,11 +231,6 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 	cl.name = T::get_class_static();
 	cl.parent_name = T::get_parent_class_static();
 	cl.level = current_level;
-	AHashMap<StringName, ClassInfo>::Iterator parent_it = classes.find(cl.parent_name);
-	if (parent_it != classes.end()) {
-		// Assign parent if it is also a custom class
-		cl.parent_ptr = &parent_it->value;
-	}
 	classes[cl.name] = cl;
 	class_register_order.push_back(cl.name);
 
