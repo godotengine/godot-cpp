@@ -131,3 +131,6 @@ def generate(env):
         elif env["lto"] == "full":
             env.Append(CCFLAGS=["-flto"])
             env.Append(LINKFLAGS=["-flto"])
+
+        if env["platform"] == "linux" or env.get("use_mingw", False):
+            env['ARFLAGS'] = "rcs"
