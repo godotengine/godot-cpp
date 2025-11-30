@@ -66,9 +66,6 @@ function(common_compiler_flags)
         # The public flag tells CMake that the following options are transient,
         # and will propagate to consumers.
         PUBLIC
-            # Disable exception handling. Godot doesn't use exceptions anywhere, and this
-            # saves around 20% of binary size and very significant build time.
-            $<${DISABLE_EXCEPTIONS}:$<${NOT_MSVC}:-fno-exceptions>>
 
             # Enabling Debug Symbols
             $<${DEBUG_SYMBOLS}:
@@ -95,6 +92,9 @@ function(common_compiler_flags)
 
         # Warnings below, these do not need to propagate to consumers.
         PRIVATE
+            # Disable exception handling. Godot doesn't use exceptions anywhere, and this
+            # saves around 20% of binary size and very significant build time.
+            $<${DISABLE_EXCEPTIONS}:$<${NOT_MSVC}:-fno-exceptions>>
             $<${IS_MSVC}:
                 /W4      # Warning level 4 (informational) warnings that aren't off by default.
 
