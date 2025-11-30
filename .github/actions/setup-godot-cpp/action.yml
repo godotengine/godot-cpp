@@ -6,7 +6,7 @@ inputs:
     required: true
     description: Target platform.
   em-version:
-    default: 3.1.62
+    default: 4.0.11
     description: Emscripten version.
   windows-compiler:
     required: true

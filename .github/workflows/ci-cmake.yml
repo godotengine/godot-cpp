@@ -20,7 +20,7 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     env:
-      EM_VERSION: 3.1.39
+      EM_VERSION: 4.0.11
       config-flags:
         -DCMAKE_C_COMPILER_LAUNCHER=sccache
         -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
