@@ -96,7 +96,7 @@ public:
 
 private:
 	// This may only contain custom classes, not Godot classes
-	static AHashMap<StringName, ClassInfo> classes;
+	static HashMap<StringName, ClassInfo> classes;
 	static AHashMap<StringName, const GDExtensionInstanceBindingCallbacks *> instance_binding_callbacks;
 	// Used to remember the custom class registration order.
 	static LocalVector<StringName> class_register_order;
@@ -233,7 +233,7 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 	cl.name = T::get_class_static();
 	cl.parent_name = T::get_parent_class_static();
 	cl.level = current_level;
-	AHashMap<StringName, ClassInfo>::Iterator parent_it = classes.find(cl.parent_name);
+	HashMap<StringName, ClassInfo>::Iterator parent_it = classes.find(cl.parent_name);
 	if (parent_it != classes.end()) {
 		// Assign parent if it is also a custom class
 		cl.parent_ptr = &parent_it->value;
@@ -330,7 +330,7 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p
 
 	StringName instance_type = bind->get_instance_class();
 
-	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(instance_type);
+	HashMap<StringName, ClassInfo>::Iterator type_it = classes.find(instance_type);
 	if (type_it == classes.end()) {
 		memdelete(bind);
 		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(Array::make(instance_type)));

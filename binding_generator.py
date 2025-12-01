@@ -97,7 +97,7 @@ def generate_virtual_version(argcount, const=False, returns=False, required=Fals
 
     sproto = str(argcount)
     method_info = ""
-    method_flags = "METHOD_FLAG_VIRTUAL"
+    method_flags = "::godot::MethodFlags::METHOD_FLAG_VIRTUAL"
     if returns:
         sproto += "R"
         s = s.replace("$RET", "m_ret,")
@@ -110,14 +110,14 @@ def generate_virtual_version(argcount, const=False, returns=False, required=Fals
 
     if const:
         sproto += "C"
-        method_flags += " | METHOD_FLAG_CONST"
+        method_flags += " | ::godot::MethodFlags::METHOD_FLAG_CONST"
         s = s.replace("$CONST", "const")
     else:
         s = s.replace("$CONST ", "")
 
     if required:
         sproto += "_REQUIRED"
-        method_flags += " | METHOD_FLAG_VIRTUAL_REQUIRED"
+        method_flags += " | ::godot::MethodFlags::METHOD_FLAG_VIRTUAL_REQUIRED"
         s = s.replace(
             "$REQCHECK",
             'ERR_PRINT_ONCE("Required virtual method " + get_class() + "::" + #m_name + " must be overridden before calling.");',
