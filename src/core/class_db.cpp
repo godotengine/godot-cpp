@@ -38,7 +38,7 @@
 
 namespace godot {
 
-AHashMap<StringName, ClassDB::ClassInfo> ClassDB::classes;
+HashMap<StringName, ClassDB::ClassInfo> ClassDB::classes;
 AHashMap<StringName, const GDExtensionInstanceBindingCallbacks *> ClassDB::instance_binding_callbacks;
 LocalVector<StringName> ClassDB::class_register_order;
 AHashMap<StringName, Object *> ClassDB::engine_singletons;
@@ -128,7 +128,7 @@ MethodBind *ClassDB::get_method(const StringName &p_class, const StringName &p_m
 MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount) {
 	StringName instance_type = p_bind->get_instance_class();
 
-	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(instance_type);
+	HashMap<StringName, ClassInfo>::Iterator type_it = classes.find(instance_type);
 	if (type_it == classes.end()) {
 		memdelete(p_bind);
 		ERR_FAIL_V_MSG(nullptr, String("Class '{0}' doesn't exist.").format(Array::make(instance_type)));
@@ -233,7 +233,7 @@ void ClassDB::bind_method_godot(const StringName &p_class_name, MethodBind *p_me
 }
 
 void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) {
-	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class);
+	HashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class);
 
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
 
@@ -268,7 +268,7 @@ void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) 
 }
 
 void ClassDB::bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDExtensionInt p_constant_value, bool p_is_bitfield) {
-	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class_name);
+	HashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class_name);
 
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class_name)));
 
@@ -290,7 +290,7 @@ GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtens
 	const StringName *class_name = reinterpret_cast<const StringName *>(p_userdata);
 	const StringName *name = reinterpret_cast<const StringName *>(p_name);
 
-	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(*class_name);
+	HashMap<StringName, ClassInfo>::Iterator type_it = classes.find(*class_name);
 	ERR_FAIL_COND_V_MSG(type_it == classes.end(), nullptr, String("Class '{0}' doesn't exist.").format(Array::make(*class_name)));
 
 	const ClassInfo *type = &type_it->value;
@@ -327,7 +327,7 @@ const GDExtensionInstanceBindingCallbacks *ClassDB::get_instance_binding_callbac
 }
 
 void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p_method, GDExtensionClassCallVirtual p_call, uint32_t p_hash) {
-	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class);
+	HashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class);
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
 
 	ClassInfo &type = type_it->value;
@@ -342,7 +342,7 @@ void ClassDB::bind_virtual_method(const StringName &p_class, const StringName &p
 }
 
 void ClassDB::add_virtual_method(const StringName &p_class, const MethodInfo &p_method, const Vector<StringName> &p_arg_names) {
-	AHashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class);
+	HashMap<StringName, ClassInfo>::Iterator type_it = classes.find(p_class);
 	ERR_FAIL_COND_MSG(type_it == classes.end(), String("Class '{0}' doesn't exist.").format(Array::make(p_class)));
 
 	GDExtensionClassVirtualMethodInfo mi;
