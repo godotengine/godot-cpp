@@ -35,7 +35,19 @@
 namespace godot {
 
 void *Memory::alloc_static(size_t p_bytes, bool p_pad_align) {
-	return internal::gdextension_interface_mem_alloc2(p_bytes, p_pad_align);
+#if GODOT_VERSION_MINOR >= 6
+	return ::godot::gdextension_interface::mem_alloc2(p_bytes, p_pad_align);
+#else
+	void *mem = ::godot::gdextension_interface::mem_alloc(p_bytes + (p_pad_align ? DATA_OFFSET : 0));
+	ERR_FAIL_NULL_V(mem, nullptr);
+
+	if (p_pad_align) {
+		uint8_t *s8 = (uint8_t *)mem;
+		return s8 + DATA_OFFSET;
+	} else {
+		return mem;
+	}
+#endif
 }
 
 void *Memory::realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align) {
@@ -46,11 +58,31 @@ void *Memory::realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align) {
 		return nullptr;
 	}
 
-	return internal::gdextension_interface_mem_realloc2(p_memory, p_bytes, p_pad_align);
+#if GODOT_VERSION_MINOR >= 6
+	return ::godot::gdextension_interface::mem_realloc2(p_memory, p_bytes, p_pad_align);
+#else
+	uint8_t *mem = (uint8_t *)p_memory;
+	if (p_pad_align) {
+		mem -= DATA_OFFSET;
+		mem = (uint8_t *)::godot::gdextension_interface::mem_realloc(mem, p_bytes + DATA_OFFSET);
+		ERR_FAIL_NULL_V(mem, nullptr);
+		return mem + DATA_OFFSET;
+	} else {
+		return (uint8_t *)::godot::gdextension_interface::mem_realloc(mem, p_bytes);
+	}
+#endif
 }
 
 void Memory::free_static(void *p_ptr, bool p_pad_align) {
-	internal::gdextension_interface_mem_free2(p_ptr, p_pad_align);
+#if GODOT_VERSION_MINOR >= 6
+	::godot::gdextension_interface::mem_free2(p_ptr, p_pad_align);
+#else
+	uint8_t *mem = (uint8_t *)p_ptr;
+	if (p_pad_align) {
+		mem -= DATA_OFFSET;
+	}
+	::godot::gdextension_interface::mem_free(mem);
+#endif
 }
 
 _GlobalNil::_GlobalNil() {
