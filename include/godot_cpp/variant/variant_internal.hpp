@@ -205,12 +205,12 @@ class VariantInternal {
 public:
 	template <typename T>
 	_FORCE_INLINE_ static T *get_internal_value(Variant *v) {
-		return static_cast<T *>(get_internal_func[internal::VariantInternalType<T>::type](v));
+		return static_cast<T *>(get_internal_func[::godot::internal::VariantInternalType<T>::type](v));
 	}
 
 	template <typename T>
 	_FORCE_INLINE_ static const T *get_internal_value(const Variant *v) {
-		return static_cast<const T *>(get_internal_func[internal::VariantInternalType<T>::type](const_cast<Variant *>(v)));
+		return static_cast<const T *>(get_internal_func[::godot::internal::VariantInternalType<T>::type](const_cast<Variant *>(v)));
 	}
 
 	// Atomic types.
@@ -473,8 +473,8 @@ public:
 
 template <typename T>
 struct VariantGetInternalPtr {
-	static internal::VariantInternalType<T> *get_ptr(Variant *v) { return VariantInternal::get_internal_value<T>(v); }
-	static const internal::VariantInternalType<T> *get_ptr(const Variant *v) { return VariantInternal::get_internal_value<T>(v); }
+	static ::godot::internal::VariantInternalType<T> *get_ptr(Variant *v) { return VariantInternal::get_internal_value<T>(v); }
+	static const ::godot::internal::VariantInternalType<T> *get_ptr(const Variant *v) { return VariantInternal::get_internal_value<T>(v); }
 };
 
 template <typename T>
@@ -493,7 +493,7 @@ struct VariantInternalAccessor {
 
 	// Enable set() only for those types where we can set (all but Object *).
 	template <typename U = T, typename = std::enable_if_t<can_set_variant_internal_value<U>::value>>
-	static _FORCE_INLINE_ void set(Variant *v, const internal::VariantInternalType<U> &p_value) {
+	static _FORCE_INLINE_ void set(Variant *v, const ::godot::internal::VariantInternalType<U> &p_value) {
 		*VariantInternal::get_internal_value<U>(v) = p_value;
 	}
 };

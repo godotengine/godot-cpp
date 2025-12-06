@@ -103,7 +103,7 @@ namespace internal {
 Callable create_callable_from_ccmp(CallableCustomMethodPointerBase *p_callable_method_pointer) {
 	GDExtensionCallableCustomInfo2 info = {};
 	info.callable_userdata = p_callable_method_pointer;
-	info.token = internal::token;
+	info.token = ::godot::gdextension_interface::token;
 	info.object_id = p_callable_method_pointer->get_object();
 	info.call_func = &custom_callable_mp_call;
 	info.is_valid_func = &custom_callable_mp_is_valid;
@@ -114,7 +114,7 @@ Callable create_callable_from_ccmp(CallableCustomMethodPointerBase *p_callable_m
 	info.get_argument_count_func = &custom_callable_mp_get_argument_count_func;
 
 	Callable callable;
-	::godot::internal::gdextension_interface_callable_custom_create2(callable._native_ptr(), &info);
+	::godot::gdextension_interface::callable_custom_create2(callable._native_ptr(), &info);
 	return callable;
 }
 

@@ -236,7 +236,7 @@ struct PtrToArg<Ref<T>> {
 		if (unlikely(!p_ptr)) {
 			return Ref<T>();
 		}
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::get_object_instance_binding(godot::internal::gdextension_interface_ref_get_object(ref))));
+		return Ref<T>(reinterpret_cast<T *>(::godot::internal::get_object_instance_binding(::godot::gdextension_interface::ref_get_object(ref))));
 	}
 
 	typedef Ref<T> EncodeT;
@@ -248,7 +248,7 @@ struct PtrToArg<Ref<T>> {
 		// This code assumes that p_ptr points to an unset Ref<T> variable on the Godot side
 		// so we only set it if we have an object to set.
 		if (p_val.is_valid()) {
-			godot::internal::gdextension_interface_ref_set_object(ref, p_val->_owner);
+			::godot::gdextension_interface::ref_set_object(ref, p_val->_owner);
 		}
 	}
 };
@@ -262,7 +262,7 @@ struct PtrToArg<const Ref<T> &> {
 		if (unlikely(!p_ptr)) {
 			return Ref<T>();
 		}
-		return Ref<T>(reinterpret_cast<T *>(godot::internal::get_object_instance_binding(godot::internal::gdextension_interface_ref_get_object(ref))));
+		return Ref<T>(reinterpret_cast<T *>(::godot::internal::get_object_instance_binding(::godot::gdextension_interface::ref_get_object(ref))));
 	}
 };
 
