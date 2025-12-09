@@ -10,6 +10,7 @@ from binding_generator import _generate_bindings, _get_file_list
 from build_profile import generate_trimmed_api
 
 api_filepath = "gdextension/extension_api.json"
+interface_filepath = "gdextension/gdextension_interface.json"
 bits = "64"
 precision = "single"
 output_dir = "self_test"
@@ -20,6 +21,7 @@ def test(profile_filepath=""):
     _generate_bindings(
         api,
         api_filepath,
+        interface_filepath,
         use_template_get_node=False,
         bits=bits,
         precision=precision,

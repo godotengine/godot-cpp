@@ -36,7 +36,7 @@ GDExtensionVariantGetInternalPtrFunc VariantInternal::get_internal_func[Variant:
 
 void VariantInternal::init_bindings() {
 	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
-		get_internal_func[i] = internal::gdextension_interface_variant_get_ptr_internal_getter((GDExtensionVariantType)i);
+		get_internal_func[i] = ::godot::gdextension_interface::variant_get_ptr_internal_getter((GDExtensionVariantType)i);
 	}
 }
 

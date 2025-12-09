@@ -306,7 +306,7 @@ void Example::_bind_methods() {
 }
 
 bool Example::has_object_instance_binding() const {
-	return internal::gdextension_interface_object_get_instance_binding(_owner, internal::token, nullptr);
+	return ::godot::gdextension_interface::object_get_instance_binding(_owner, ::godot::gdextension_interface::token, nullptr);
 }
 
 Example::Example() :
@@ -748,7 +748,7 @@ String Example::test_use_engine_singleton() const {
 
 String Example::test_library_path() {
 	String library_path;
-	internal::gdextension_interface_get_library_path(internal::library, library_path._native_ptr());
+	::godot::gdextension_interface::get_library_path(::godot::gdextension_interface::library, library_path._native_ptr());
 	return library_path;
 }
 

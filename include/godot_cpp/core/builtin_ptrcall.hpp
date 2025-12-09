@@ -47,7 +47,7 @@ O *_call_builtin_method_ptr_ret_obj(const GDExtensionPtrBuiltInMethod method, GD
 	if (ret == nullptr) {
 		return nullptr;
 	}
-	return reinterpret_cast<O *>(internal::get_object_instance_binding(ret));
+	return reinterpret_cast<O *>(::godot::internal::get_object_instance_binding(ret));
 }
 
 template <typename... Args>

@@ -40,7 +40,7 @@ def generate_doc_source(dst, source):
     g.write("\n")
 
     g.write(
-        "static godot::internal::DocDataRegistration _doc_data_registration(_doc_data_hash, _doc_data_uncompressed_size, _doc_data_compressed_size, _doc_data_compressed);\n"
+        "static ::godot::internal::DocDataRegistration _doc_data_registration(_doc_data_hash, _doc_data_uncompressed_size, _doc_data_compressed_size, _doc_data_compressed);\n"
     )
     g.write("\n")
 

@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  editor_plugin_registration.cpp                                        */
+/*  load_proc_address.inc                                                 */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,34 +28,14 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include <godot_cpp/classes/editor_plugin_registration.hpp>
+#pragma once
 
-#include <godot_cpp/variant/variant.hpp>
+#define ERR_PRINT_EARLY(m_msg) \
+	::godot::gdextension_interface::print_error(m_msg, FUNCTION_STR, __FILE__, __LINE__, false)
 
-namespace godot {
-
-Vector<StringName> EditorPlugins::plugin_classes;
-
-void EditorPlugins::add_plugin_class(const StringName &p_class_name) {
-	ERR_FAIL_COND_MSG(plugin_classes.find(p_class_name) != -1, vformat("Editor plugin already registered: %s", p_class_name));
-	plugin_classes.push_back(p_class_name);
-	::godot::gdextension_interface::editor_add_plugin(p_class_name._native_ptr());
-}
-
-void EditorPlugins::remove_plugin_class(const StringName &p_class_name) {
-	int index = plugin_classes.find(p_class_name);
-	ERR_FAIL_COND_MSG(index == -1, vformat("Editor plugin is not registered: %s", p_class_name));
-	plugin_classes.remove_at(index);
-	::godot::gdextension_interface::editor_remove_plugin(p_class_name._native_ptr());
-}
-
-void EditorPlugins::deinitialize(GDExtensionInitializationLevel p_level) {
-	if (p_level == GDEXTENSION_INITIALIZATION_EDITOR) {
-		for (const StringName &class_name : plugin_classes) {
-			::godot::gdextension_interface::editor_remove_plugin(class_name._native_ptr());
-		}
-		plugin_classes.clear();
+#define LOAD_PROC_ADDRESS(m_name, m_type)                                               \
+	::godot::gdextension_interface::m_name = (m_type)p_get_proc_address(#m_name);                   \
+	if (!::godot::gdextension_interface::m_name) {                                                  \
+		ERR_PRINT_EARLY("Unable to load GDExtension interface function " #m_name "()"); \
+		return false;                                                                   \
 	}
-}
-
-} // namespace godot

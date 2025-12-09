@@ -170,6 +170,8 @@ function(common_compiler_flags)
             $<${IS_MSVC}:$<${DISABLE_EXCEPTIONS}:_HAS_EXCEPTIONS=0>>
 
             $<${THREADS_ENABLED}:THREADS_ENABLED>
+
+            $<$<NOT:$<BOOL:${GODOTCPP_DEPRECATED}>>:DISABLE_DEPRECATED>
     )
 
     target_link_options(
