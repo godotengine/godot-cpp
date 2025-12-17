@@ -176,6 +176,8 @@ def scons_generate_bindings(target, source, env):
     return None
 
 
+supported_api_versions = ["4.5", "4.6"]
+
 platforms = ["linux", "macos", "windows", "android", "ios", "web"]
 
 # CPU architecture options.
@@ -260,6 +262,14 @@ def options(opts, env):
         )
     )
     opts.Add(
+        EnumVariable(
+            key="api_version",
+            help='The Godot API version to target (ex "4.5") using one of the included API JSON files',
+            default=env.get("api_version", None),
+            allowed_values=supported_api_versions,
+        )
+    )
+    opts.Add(
         PathVariable(
             key="gdextension_dir",
             help="Path to a custom directory containing GDExtension interface header and API JSON file",
@@ -270,7 +280,7 @@ def options(opts, env):
     opts.Add(
         PathVariable(
             key="custom_api_file",
-            help="Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir`)",
+            help="Path to a custom GDExtension API JSON file (takes precedence over `gdextension_dir` and `api_version`)",
             default=env.get("custom_api_file", None),
             validator=validate_file,
         )
@@ -538,11 +548,22 @@ def generate(env):
     env.AddMethod(_godot_cpp, "GodotCPP")
 
 
+def _get_api_file(extension_dir, api_version):
+    if api_version is None or api_version == supported_api_versions[-1]:
+        return os.path.join(extension_dir, "extension_api.json")
+
+    filename = "extension_api-%s.json" % api_version.replace(".", "-")
+    path = os.path.join(extension_dir, filename)
+    if not os.path.exists(path):
+        raise UserError("Cannot find `%s` file for api_version %s" % (filename, api_version))
+
+    return path
+
+
 def _godot_cpp(env):
     extension_dir = normalize_path(env.get("gdextension_dir", default=env.Dir("gdextension").srcnode().abspath), env)
-    api_file = normalize_path(
-        env.get("custom_api_file", default=os.path.join(extension_dir, "extension_api.json")), env
-    )
+    default_api_file = _get_api_file(extension_dir, env.get("api_version", None))
+    api_file = normalize_path(env.get("custom_api_file", default=default_api_file), env)
 
     bindings = env.GodotCPPBindings(
         env.Dir("."),
