@@ -92,6 +92,14 @@ ExampleRef::ExampleRef() {
 ExampleRef::~ExampleRef() {
 }
 
+Dictionary Example::get_godot_target_version() const {
+	Dictionary ret;
+	ret["major"] = GODOT_VERSION_MAJOR;
+	ret["minor"] = GODOT_VERSION_MINOR;
+	ret["patch"] = GODOT_VERSION_PATCH;
+	return ret;
+}
+
 int Example::test_static(int p_a, int p_b) {
 	return p_a + p_b;
 }
@@ -182,6 +190,7 @@ void Example::_validate_property(PropertyInfo &p_property) const {
 
 void Example::_bind_methods() {
 	// Methods.
+	ClassDB::bind_method(D_METHOD("get_godot_target_version"), &Example::get_godot_target_version);
 	ClassDB::bind_method(D_METHOD("simple_func"), &Example::simple_func);
 	ClassDB::bind_method(D_METHOD("simple_const_func"), &Example::simple_const_func);
 	ClassDB::bind_method(D_METHOD("custom_ref_func", "ref"), &Example::custom_ref_func);

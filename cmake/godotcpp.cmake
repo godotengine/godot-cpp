@@ -119,7 +119,7 @@ function(godotcpp_options)
         CACHE STRING
         "The Godot API version to target (ex \"4.5\") using one of the included API JSON files"
     )
-    set_property(CACHE GODOTCPP_API_VERSION PROPERTY STRINGS ";4.5;4.6")
+    set_property(CACHE GODOTCPP_API_VERSION PROPERTY STRINGS ";4.4;4.5;4.6")
     set(GODOTCPP_GDEXTENSION_DIR
         "gdextension"
         CACHE PATH

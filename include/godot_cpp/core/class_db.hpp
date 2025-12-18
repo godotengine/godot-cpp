@@ -242,7 +242,11 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 	class_register_order.push_back(cl.name);
 
 	// Register this class with Godot
+#if GODOT_VERSION_MINOR >= 5
 	GDExtensionClassCreationInfo5 class_info = {
+#else
+	GDExtensionClassCreationInfo4 class_info = {
+#endif
 		p_virtual, // GDExtensionBool is_virtual;
 		is_abstract, // GDExtensionBool is_abstract;
 		p_exposed, // GDExtensionBool is_exposed;
@@ -268,7 +272,11 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 		(void *)&T::get_class_static(), // void *class_userdata;
 	};
 
+#if GODOT_VERSION_MINOR >= 5
 	::godot::gdextension_interface::classdb_register_extension_class5(::godot::gdextension_interface::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
+#else
+	::godot::gdextension_interface::classdb_register_extension_class4(::godot::gdextension_interface::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
+#endif
 
 	// call bind_methods etc. to register all members of the class
 	T::initialize_class();
