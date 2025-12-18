@@ -21,9 +21,12 @@
 #include <godot_cpp/classes/tile_set.hpp>
 #include <godot_cpp/classes/tween.hpp>
 #include <godot_cpp/classes/viewport.hpp>
-#include <godot_cpp/variant/typed_dictionary.hpp>
 #include <godot_cpp/variant/variant.hpp>
 #include <godot_cpp/variant/variant_internal.hpp>
+
+#if GODOT_VERSION_MINOR >= 4
+#include <godot_cpp/variant/typed_dictionary.hpp>
+#endif // GODOT_VERSION_MINOR >= 4
 
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/gdvirtual.gen.inc>
@@ -135,8 +138,12 @@ public:
 	int test_tarray_arg(const TypedArray<int64_t> &p_array);
 	TypedArray<Vector2> test_tarray() const;
 	Dictionary test_dictionary() const;
+
+#if GODOT_VERSION_MINOR >= 4
 	int test_tdictionary_arg(const TypedDictionary<String, int64_t> &p_dictionary);
 	TypedDictionary<Vector2, Vector2i> test_tdictionary() const;
+#endif // GODOT_VERSION_MINOR >= 4
+
 	Example *test_node_argument(Example *p_node) const;
 	String test_string_ops() const;
 	String test_str_utility() const;

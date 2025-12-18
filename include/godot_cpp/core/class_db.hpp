@@ -111,13 +111,21 @@ private:
 	static void _register_class(bool p_virtual = false, bool p_exposed = true, bool p_runtime = false);
 
 	template <typename T>
+#if GODOT_VERSION_MINOR >= 4
 	static GDExtensionObjectPtr _create_instance_func(void *data, GDExtensionBool p_notify_postinitialize) {
+#else
+	static GDExtensionObjectPtr _create_instance_func(void *data) {
+#endif // GODOT_VERSION_MINOR >= 4
 		if constexpr (!std::is_abstract_v<T>) {
 			Wrapped::_set_construct_info<T>();
+#if GODOT_VERSION_MINOR >= 4
 			T *new_object = new ("", "") T;
 			if (p_notify_postinitialize) {
 				new_object->_postinitialize();
 			}
+#else
+			T *new_object = memnew(T);
+#endif // GODOT_VERSION_MINOR >= 4
 			return new_object->_owner;
 		} else {
 			return nullptr;
@@ -195,7 +203,12 @@ public:
 
 	static MethodBind *get_method(const StringName &p_class, const StringName &p_method);
 
+#if GODOT_VERSION_MINOR >= 4
 	static GDExtensionClassCallVirtual get_virtual_func(void *p_userdata, GDExtensionConstStringNamePtr p_name, uint32_t p_hash);
+#else
+	static GDExtensionClassCallVirtual get_virtual_func(void *p_userdata, GDExtensionConstStringNamePtr p_name);
+#endif // GODOT_VERSION_MINOR >= 4
+
 	static const GDExtensionInstanceBindingCallbacks *get_instance_binding_callbacks(const StringName &p_class);
 
 	static void initialize(GDExtensionInitializationLevel p_level);
@@ -244,14 +257,18 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 	// Register this class with Godot
 #if GODOT_VERSION_MINOR >= 5
 	GDExtensionClassCreationInfo5 class_info = {
-#else
+#elif GODOT_VERSION_MINOR >= 4
 	GDExtensionClassCreationInfo4 class_info = {
+#else
+	GDExtensionClassCreationInfo3 class_info = {
 #endif
 		p_virtual, // GDExtensionBool is_virtual;
 		is_abstract, // GDExtensionBool is_abstract;
 		p_exposed, // GDExtensionBool is_exposed;
 		p_runtime, // GDExtensionBool is_runtime;
+#if GODOT_VERSION_MINOR >= 4
 		nullptr, // GDExtensionConstStringPtr icon_path;
+#endif // GODOT_VERSION_MINOR >= 4
 		T::set_bind, // GDExtensionClassSet set_func;
 		T::get_bind, // GDExtensionClassGet get_func;
 		T::has_get_property_list() ? T::get_property_list_bind : nullptr, // GDExtensionClassGetPropertyList get_property_list_func;
@@ -269,13 +286,18 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 		&ClassDB::get_virtual_func, // GDExtensionClassGetVirtual get_virtual_func;
 		nullptr, // GDExtensionClassGetVirtualCallData get_virtual_call_data_func;
 		nullptr, // GDExtensionClassCallVirtualWithData call_virtual_func;
+#if GODOT_VERSION_MINOR <= 3
+		nullptr, // GDExtensionClassGetRID get_rid;
+#endif // GODOT_VERSION_MINOR <= 3
 		(void *)&T::get_class_static(), // void *class_userdata;
 	};
 
 #if GODOT_VERSION_MINOR >= 5
 	::godot::gdextension_interface::classdb_register_extension_class5(::godot::gdextension_interface::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
-#else
+#elif GODOT_VERSION_MINOR >= 4
 	::godot::gdextension_interface::classdb_register_extension_class4(::godot::gdextension_interface::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
+#else
+	::godot::gdextension_interface::classdb_register_extension_class3(::godot::gdextension_interface::library, cl.name._native_ptr(), cl.parent_name._native_ptr(), &class_info);
 #endif
 
 	// call bind_methods etc. to register all members of the class

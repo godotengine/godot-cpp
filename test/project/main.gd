@@ -9,6 +9,7 @@ class TestClass:
 func _ready():
 	var example: Example = $Example
 	var godot_target_version := example.get_godot_target_version()
+	var godot_runtime_version := Engine.get_version_info()
 
 	# Timing of set instance binding.
 	assert_equal(example.is_object_binding_set_by_parent_constructor(), true)
@@ -85,9 +86,10 @@ func _ready():
 	var array: Array[int] = [1, 2, 3]
 	assert_equal(example.test_tarray_arg(array), 6)
 	assert_equal(example.test_dictionary(), { "hello": "world", "foo": "bar" })
-	assert_equal(example.test_tdictionary(), { Vector2(1, 2): Vector2i(2, 3) })
-	var dictionary: Dictionary[String, int] = { "1": 1, "2": 2, "3": 3 }
-	assert_equal(example.test_tdictionary_arg(dictionary), 6)
+
+	if godot_target_version["minor"] >= 4:
+		var test = load("res://test_typed_dictionary.gd").new()
+		test.test_typed_dictionary(self, example)
 
 	example.callable_bind()
 	assert_equal(custom_signal_emitted, ["bound", 11])
@@ -209,11 +211,12 @@ func _ready():
 	assert_equal(example.test_variant_float_conversion(10.0), 10.0)
 	assert_equal(example.test_variant_float_conversion(10), 10.0)
 
-	# Test checking if objects are valid.
-	var object_of_questionable_validity = Object.new()
-	assert_equal(example.test_object_is_valid(object_of_questionable_validity), true)
-	object_of_questionable_validity.free()
-	assert_equal(example.test_object_is_valid(object_of_questionable_validity), false)
+	if godot_target_version["minor"] >= 4:
+		# Test checking if objects are valid.
+		var object_of_questionable_validity = Object.new()
+		assert_equal(example.test_object_is_valid(object_of_questionable_validity), true)
+		object_of_questionable_validity.free()
+		assert_equal(example.test_object_is_valid(object_of_questionable_validity), false)
 
 	# Test that ptrcalls from GDExtension to the engine are correctly encoding Object and RefCounted.
 	var new_node = Node.new()
@@ -274,8 +277,9 @@ func _ready():
 	# Test that we can access an engine singleton.
 	assert_equal(example.test_use_engine_singleton(), OS.get_name())
 
-	assert_equal(example.test_get_internal(1), 1)
-	assert_equal(example.test_get_internal(true), -1)
+	if godot_target_version["minor"] >= 4:
+		assert_equal(example.test_get_internal(1), 1)
+		assert_equal(example.test_get_internal(true), -1)
 
 	# Test that notifications happen on both parent and child classes.
 	var example_child = $ExampleChild
@@ -299,9 +303,10 @@ func _ready():
 		assert_equal(internal_class.get_the_answer(), 42)
 		assert_equal(internal_class.get_class(), "ExampleInternal")
 
-	# Test a class with a unicode name.
-	var przykład = ExamplePrzykład.new()
-	assert_equal(przykład.get_the_word(), "słowo to przykład")
+	if godot_runtime_version["minor"] >= 4:
+		# Test a class with a unicode name.
+		var przykład = ClassDB.instantiate("ExamplePrzykład")
+		assert_equal(przykład.get_the_word(), "słowo to przykład")
 
 	exit_with_status()
 

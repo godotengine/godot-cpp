@@ -411,10 +411,11 @@ Array::ConstIterator Array::end() const {
 Array::Array(std::initializer_list<Variant> p_init) :
 		Array() {
 	ERR_FAIL_COND(resize(p_init.size()) != 0);
+	Variant *variant_ptr = ptrw();
 
 	size_t i = 0;
 	for (const Variant &element : p_init) {
-		set(i++, element);
+		variant_ptr[i++] = element;
 	}
 }
 

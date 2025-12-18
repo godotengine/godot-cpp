@@ -283,7 +283,12 @@ void ClassDB::bind_integer_constant(const StringName &p_class_name, const String
 	// Register it with Godot
 	::godot::gdextension_interface::classdb_register_extension_class_integer_constant(::godot::gdextension_interface::library, p_class_name._native_ptr(), p_enum_name._native_ptr(), p_constant_name._native_ptr(), p_constant_value, p_is_bitfield);
 }
+
+#if GODOT_VERSION_MINOR >= 4
 GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtensionConstStringNamePtr p_name, uint32_t p_hash) {
+#else
+GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtensionConstStringNamePtr p_name) {
+#endif // GODOT_VERSION_MINOR >= 4
 	// This is called by Godot the first time it calls a virtual function, and it caches the result, per object instance.
 	// Because of this, it can happen from different threads at once.
 	// It should be ok not using any mutex as long as we only READ data.
@@ -299,7 +304,11 @@ GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtens
 	while (type != nullptr) {
 		AHashMap<StringName, ClassInfo::VirtualMethod>::ConstIterator method_it = type->virtual_methods.find(*name);
 
+#if GODOT_VERSION_MINOR >= 4
 		if (method_it != type->virtual_methods.end() && method_it->value.hash == p_hash) {
+#else
+		if (method_it != type->virtual_methods.end()) {
+#endif // GODOT_VERSION_MINOR >= 4
 			return method_it->value.func;
 		}
 

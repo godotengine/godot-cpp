@@ -1135,9 +1135,11 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if class_name == "Dictionary":
         result.append("\tconst Variant &operator[](const Variant &p_key) const;")
         result.append("\tVariant &operator[](const Variant &p_key);")
+        result.append("#if GODOT_VERSION_MINOR >= 4")
         result.append(
             "\tvoid set_typed(uint32_t p_key_type, const StringName &p_key_class_name, const Variant &p_key_script, uint32_t p_value_type, const StringName &p_value_class_name, const Variant &p_value_script);"
         )
+        result.append("#endif")
 
     result.append("};")
 
@@ -1888,7 +1890,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                     # condition returns false (in such cases it can't compile due to ambiguity).
                     f"\t\tif constexpr (!std::is_same_v<decltype(&B::{method_name}), decltype(&T::{method_name})>) {{"
                 )
-                result.append(f"\t\t\tBIND_VIRTUAL_METHOD(T, {method_name}, {method['hash']});")
+                # If using an `extension_api.json` from Godot 4.3 or earlier, there will be no hash for virtual functions.
+                method_hash = method.get("hash", 0)
+                result.append(f"\t\t\tBIND_VIRTUAL_METHOD(T, {method_name}, {method_hash});")
                 result.append("\t\t}")
 
     result.append("\t}")

@@ -30,6 +30,8 @@
 
 #include <godot_cpp/variant/variant_internal.hpp>
 
+#if GODOT_VERSION_MINOR >= 4
+
 namespace godot {
 
 GDExtensionVariantGetInternalPtrFunc VariantInternal::get_internal_func[Variant::VARIANT_MAX]{};
@@ -41,3 +43,5 @@ void VariantInternal::init_bindings() {
 }
 
 } // namespace godot
+
+#endif // GODOT_VERSION_MINOR >= 4
