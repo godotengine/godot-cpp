@@ -4,7 +4,7 @@ default_language_version:
 exclude: |
   (?x)^(
     gdextension/extension_api\.json|
-    gdextension/gdextension_interface\.h
+    gdextension/gdextension_interface\.json
   )$
 
 repos:

@@ -58,13 +58,13 @@ MethodDefinition D_METHOD(StringName p_name, StringName p_arg1) {
 void ClassDB::add_property_group(const StringName &p_class, const String &p_name, const String &p_prefix) {
 	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), String("Trying to add property '{0}{1}' to non-existing class '{2}'.").format(Array::make(p_prefix, p_name, p_class)));
 
-	internal::gdextension_interface_classdb_register_extension_class_property_group(internal::library, p_class._native_ptr(), p_name._native_ptr(), p_prefix._native_ptr());
+	::godot::gdextension_interface::classdb_register_extension_class_property_group(::godot::gdextension_interface::library, p_class._native_ptr(), p_name._native_ptr(), p_prefix._native_ptr());
 }
 
 void ClassDB::add_property_subgroup(const StringName &p_class, const String &p_name, const String &p_prefix) {
 	ERR_FAIL_COND_MSG(classes.find(p_class) == classes.end(), String("Trying to add property '{0}{1}' to non-existing class '{2}'.").format(Array::make(p_prefix, p_name, p_class)));
 
-	internal::gdextension_interface_classdb_register_extension_class_property_subgroup(internal::library, p_class._native_ptr(), p_name._native_ptr(), p_prefix._native_ptr());
+	::godot::gdextension_interface::classdb_register_extension_class_property_subgroup(::godot::gdextension_interface::library, p_class._native_ptr(), p_name._native_ptr(), p_prefix._native_ptr());
 }
 
 void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinfo, const StringName &p_setter, const StringName &p_getter, int p_index) {
@@ -106,7 +106,7 @@ void ClassDB::add_property(const StringName &p_class, const PropertyInfo &p_pinf
 		p_pinfo.usage, // DEFAULT //uint32_t usage;
 	};
 
-	internal::gdextension_interface_classdb_register_extension_class_property_indexed(internal::library, info.name._native_ptr(), &prop_info, p_setter._native_ptr(), p_getter._native_ptr(), p_index);
+	::godot::gdextension_interface::classdb_register_extension_class_property_indexed(::godot::gdextension_interface::library, info.name._native_ptr(), &prop_info, p_setter._native_ptr(), p_getter._native_ptr(), p_index);
 }
 
 MethodBind *ClassDB::get_method(const StringName &p_class, const StringName &p_method) {
@@ -229,7 +229,7 @@ void ClassDB::bind_method_godot(const StringName &p_class_name, MethodBind *p_me
 		(uint32_t)p_method->get_default_argument_count(), // uint32_t default_argument_count;
 		def_args.ptr(), // GDExtensionVariantPtr *default_arguments;
 	};
-	internal::gdextension_interface_classdb_register_extension_class_method(internal::library, p_class_name._native_ptr(), &method_info);
+	::godot::gdextension_interface::classdb_register_extension_class_method(::godot::gdextension_interface::library, p_class_name._native_ptr(), &method_info);
 }
 
 void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) {
@@ -264,7 +264,7 @@ void ClassDB::add_signal(const StringName &p_class, const MethodInfo &p_signal) 
 		});
 	}
 
-	internal::gdextension_interface_classdb_register_extension_class_signal(internal::library, cl.name._native_ptr(), p_signal.name._native_ptr(), parameters.ptr(), parameters.size());
+	::godot::gdextension_interface::classdb_register_extension_class_signal(::godot::gdextension_interface::library, cl.name._native_ptr(), p_signal.name._native_ptr(), parameters.ptr(), parameters.size());
 }
 
 void ClassDB::bind_integer_constant(const StringName &p_class_name, const StringName &p_enum_name, const StringName &p_constant_name, GDExtensionInt p_constant_value, bool p_is_bitfield) {
@@ -281,7 +281,7 @@ void ClassDB::bind_integer_constant(const StringName &p_class_name, const String
 	type.constant_names.insert(p_constant_name);
 
 	// Register it with Godot
-	internal::gdextension_interface_classdb_register_extension_class_integer_constant(internal::library, p_class_name._native_ptr(), p_enum_name._native_ptr(), p_constant_name._native_ptr(), p_constant_value, p_is_bitfield);
+	::godot::gdextension_interface::classdb_register_extension_class_integer_constant(::godot::gdextension_interface::library, p_class_name._native_ptr(), p_enum_name._native_ptr(), p_constant_name._native_ptr(), p_constant_value, p_is_bitfield);
 }
 GDExtensionClassCallVirtual ClassDB::get_virtual_func(void *p_userdata, GDExtensionConstStringNamePtr p_name, uint32_t p_hash) {
 	// This is called by Godot the first time it calls a virtual function, and it caches the result, per object instance.
@@ -376,7 +376,7 @@ void ClassDB::add_virtual_method(const StringName &p_class, const MethodInfo &p_
 		}
 	}
 
-	internal::gdextension_interface_classdb_register_extension_class_virtual_method(internal::library, &p_class, &mi);
+	::godot::gdextension_interface::classdb_register_extension_class_virtual_method(::godot::gdextension_interface::library, &p_class, &mi);
 
 	if (mi.arguments) {
 		memfree(mi.arguments);
@@ -419,7 +419,7 @@ void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
 			continue;
 		}
 
-		internal::gdextension_interface_classdb_unregister_extension_class(internal::library, name._native_ptr());
+		::godot::gdextension_interface::classdb_unregister_extension_class(::godot::gdextension_interface::library, name._native_ptr());
 
 		for (const KeyValue<StringName, MethodBind *> &method : cl.method_map) {
 			memdelete(method.value);
@@ -447,7 +447,7 @@ void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
 			}
 		}
 		for (const Object *i : singleton_objects) {
-			internal::gdextension_interface_object_free_instance_binding((*i)._owner, internal::token);
+			::godot::gdextension_interface::object_free_instance_binding((*i)._owner, ::godot::gdextension_interface::token);
 		}
 	}
 }

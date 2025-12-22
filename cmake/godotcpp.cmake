@@ -155,6 +155,7 @@ function(godotcpp_options)
 
     #TODO optimize
 
+    option(GODOTCPP_DEPRECATED "Enable compatibility code for deprecated and removed features" ON)
     option(GODOTCPP_DEV_BUILD "Developer build with dev-only debugging code (DEV_ENABLED)" OFF)
 
     #[[ debug_symbols
@@ -248,6 +249,9 @@ function(godotcpp_generate)
         set(GODOTCPP_GDEXTENSION_API_FILE "${GODOTCPP_CUSTOM_API_FILE}")
     endif()
 
+    # Interface json file.
+    set(GODOTCPP_GDEXTENSION_INTERFACE_FILE "${GODOTCPP_GDEXTENSION_DIR}/gdextension_interface.json")
+
     # Build Profile
     if(GODOTCPP_BUILD_PROFILE)
         message(STATUS "Using build profile to trim api file")
@@ -262,6 +266,7 @@ function(godotcpp_generate)
     endif()
 
     message(STATUS "GODOTCPP_GDEXTENSION_API_FILE = '${GODOTCPP_GDEXTENSION_API_FILE}'")
+    message(STATUS "GODOTCPP_GDEXTENSION_INTERFACE_FILE = '${GODOTCPP_GDEXTENSION_INTERFACE_FILE}'")
 
     # generate the file list to use
     binding_generator_get_file_list( GENERATED_FILES_LIST
@@ -271,6 +276,7 @@ function(godotcpp_generate)
 
     binding_generator_generate_bindings(
             "${GODOTCPP_GDEXTENSION_API_FILE}"
+            "${GODOTCPP_GDEXTENSION_INTERFACE_FILE}"
             "${USE_TEMPLATE_GET_NODE}"
             "${BITS}"
             "${GODOTCPP_PRECISION}"
@@ -351,7 +357,7 @@ function(godotcpp_generate)
     target_include_directories(
         godot-cpp
         ${GODOTCPP_SYSTEM_HEADERS_ATTRIBUTE}
-        PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/gen/include ${GODOTCPP_GDEXTENSION_DIR}
+        PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/gen/include
     )
 
     # gersemi: off

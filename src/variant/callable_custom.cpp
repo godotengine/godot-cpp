@@ -105,7 +105,7 @@ bool CallableCustom::is_valid() const {
 Callable::Callable(CallableCustom *p_callable_custom) {
 	GDExtensionCallableCustomInfo2 info = {};
 	info.callable_userdata = p_callable_custom;
-	info.token = internal::token;
+	info.token = ::godot::gdextension_interface::token;
 	info.object_id = p_callable_custom->get_object();
 	info.call_func = &callable_custom_call;
 	info.is_valid_func = &callable_custom_is_valid;
@@ -116,11 +116,11 @@ Callable::Callable(CallableCustom *p_callable_custom) {
 	info.to_string_func = &callable_custom_to_string;
 	info.get_argument_count_func = &custom_callable_get_argument_count_func;
 
-	::godot::internal::gdextension_interface_callable_custom_create2(_native_ptr(), &info);
+	::godot::gdextension_interface::callable_custom_create2(_native_ptr(), &info);
 }
 
 CallableCustom *Callable::get_custom() const {
-	CallableCustomBase *callable_custom = (CallableCustomBase *)::godot::internal::gdextension_interface_callable_custom_get_userdata(_native_ptr(), internal::token);
+	CallableCustomBase *callable_custom = (CallableCustomBase *)::godot::gdextension_interface::callable_custom_get_userdata(_native_ptr(), ::godot::gdextension_interface::token);
 	return dynamic_cast<CallableCustom *>(callable_custom);
 }
 

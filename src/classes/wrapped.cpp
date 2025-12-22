@@ -74,16 +74,16 @@ Wrapped::Wrapped(const StringName &p_godot_class) {
 	} else
 #endif
 	{
-		_owner = godot::internal::gdextension_interface_classdb_construct_object2(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
+		_owner = ::godot::gdextension_interface::classdb_construct_object2(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
 	}
 
 	if (_constructing_extension_class_name) {
-		godot::internal::gdextension_interface_object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(_constructing_extension_class_name), this);
+		::godot::gdextension_interface::object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(_constructing_extension_class_name), this);
 		_constructing_extension_class_name = nullptr;
 	}
 
 	if (likely(_constructing_class_binding_callbacks)) {
-		godot::internal::gdextension_interface_object_set_instance_binding(_owner, godot::internal::token, this, _constructing_class_binding_callbacks);
+		::godot::gdextension_interface::object_set_instance_binding(_owner, ::godot::gdextension_interface::token, this, _constructing_class_binding_callbacks);
 		_constructing_class_binding_callbacks = nullptr;
 	} else {
 		CRASH_NOW_MSG("BUG: Godot Object created without binding callbacks. Did you forget to use memnew()?");

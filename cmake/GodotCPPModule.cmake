@@ -86,6 +86,7 @@ missing. ]]
 function(
     binding_generator_generate_bindings
     API_FILE
+    INTERFACE_FILE
     USE_TEMPLATE_GET_NODE
     BITS
     PRECISION
@@ -96,6 +97,7 @@ function(
         "from binding_generator import generate_bindings"
         "generate_bindings(
     api_filepath='${API_FILE}',
+    interface_filepath='${INTERFACE_FILE}',
     use_template_get_node='${USE_TEMPLATE_GET_NODE}',
     bits='${BITS}',
     precision='${PRECISION}',
