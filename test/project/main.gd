@@ -274,8 +274,9 @@ func _ready():
 	assert_equal(example.test_virtual_implemented_in_script("Virtual", 939), "Implemented")
 	assert_equal(custom_signal_emitted, ["Virtual", 939])
 
-	# Test that we can access an engine singleton.
-	assert_equal(example.test_use_engine_singleton(), OS.get_name())
+	# Test that we can access an engine singletons.
+	assert_equal(example.test_use_engine_singleton1(), OS.get_name())
+	assert_equal(example.test_use_engine_singleton2(), true)
 
 	if godot_target_version["minor"] >= 4:
 		assert_equal(example.test_get_internal(1), 1)
