@@ -5,8 +5,6 @@ on:
 env:
   # Only used for the cache key. Increment version to force clean build.
   GODOT_BASE_BRANCH: master
-  # Used to select the version of Godot to run the tests with.
-  GODOT_TEST_VERSION: master
   # Use UTF-8 on Linux.
   LANG: en_US.UTF-8
   LC_ALL: en_US.UTF-8
@@ -32,6 +30,16 @@ jobs:
             artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
             run-tests: true
             cache-name: linux-x86_64
+
+          - name: 🐧 Linux (GCC) for Godot 4.5
+            os: ubuntu-22.04
+            platform: linux
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-release-godot45
+            artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
+            run-tests: true
+            api-version: 4.5
+            godot-test-versions: "4.5-stable"
+            cache-name: linux-x86_64-godot45
 
           - name: 🏁 Windows (x86_64, MSVC)
             os: windows-2022
@@ -110,22 +118,23 @@ jobs:
 
       - name: Generate godot-cpp sources only
         run: |
-          scons platform=${{ matrix.platform }} verbose=yes build_library=no ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} verbose=yes build_library=no ${{ matrix.flags }} ${{ matrix.api-version && format('api_version={0}', matrix.api-version) || '' }}
           scons -c
 
       - name: Build godot-cpp (debug)
         run: |
-          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }} ${{ matrix.api-version && format('api_version={0}', matrix.api-version) || '' }}
+
 
       - name: Build test without rebuilding godot-cpp (debug)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }} build_library=no
+          scons platform=${{ matrix.platform }} verbose=yes build_library=no target=template_debug ${{ matrix.flags }} ${{ matrix.api-version && format('api_version={0}', matrix.api-version) || '' }}
 
       - name: Build test and godot-cpp (release)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} verbose=yes target=template_release ${{ matrix.flags }}
+          scons platform=${{ matrix.platform }} verbose=yes target=template_release ${{ matrix.flags }} ${{ matrix.api-version && format('api_version={0}', matrix.api-version) || '' }}
 
       - name: Save Godot build cache
         uses: ./.github/actions/godot-cache-save
@@ -135,7 +144,7 @@ jobs:
 
       - name: Download latest Godot artifacts
         uses: dsnopek/action-download-artifact@1322f74e2dac9feed2ee76a32d9ae1ca3b4cf4e9
-        if: matrix.run-tests && env.GODOT_TEST_VERSION == 'master'
+        if: matrix.run-tests
         with:
           repo: godotengine/godot
           branch: master
@@ -149,27 +158,38 @@ jobs:
           path: godot-artifacts
 
       - name: Prepare Godot artifacts for testing
-        if: matrix.run-tests && env.GODOT_TEST_VERSION == 'master'
+        if: matrix.run-tests
         run: |
-          chmod +x ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono
-          echo "GODOT=$(pwd)/godot-artifacts/godot.linuxbsd.editor.x86_64.mono" >> $GITHUB_ENV
+          mkdir ./godot-builds
+          mv ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono ./godot-builds/godot-master
+          mv ./godot-artifacts/GodotSharp ./godot-builds/
+          chmod +x ./godot-builds/godot-master
 
-      - name: Download requested Godot version for testing
-        if: matrix.run-tests && env.GODOT_TEST_VERSION != 'master'
+      - name: Download supported Godot versions for testing
+        if: matrix.run-tests && matrix.godot-test-versions
         run: |
-          wget "https://github.com/godotengine/godot-builds/releases/download/${GODOT_TEST_VERSION}/Godot_v${GODOT_TEST_VERSION}_linux.x86_64.zip" -O Godot.zip
-          unzip -a Godot.zip
-          chmod +x "Godot_v${GODOT_TEST_VERSION}_linux.x86_64"
-          echo "GODOT=$(pwd)/Godot_v${GODOT_TEST_VERSION}_linux.x86_64" >> $GITHUB_ENV
+          for version in ${{ matrix.godot-test-versions }}; do
+            wget "https://github.com/godotengine/godot-builds/releases/download/${version}/Godot_v${version}_linux.x86_64.zip" -O Godot.zip
+            unzip -a Godot.zip
+            mv "Godot_v${version}_linux.x86_64" "./godot-builds/godot-${version}"
+            chmod +x "./godot-builds/godot-${version}"
+            rm Godot.zip
+          done
 
       - name: Run tests
         if: matrix.run-tests
         run: |
-          $GODOT --headless --version
+          GODOT_BUILDS="$(pwd)/godot-builds"
           cd test
-          # Need to run the editor so .godot is generated... but it crashes! Ignore that :-)
-          (cd project && (timeout 30 $GODOT --import --headless >/dev/null 2>&1 || true))
-          ./run-tests.sh
+          for version in ${{ matrix.godot-test-versions }} master; do
+            rm -rf ./project/.godot
+            export GODOT="${GODOT_BUILDS}/godot-${version}"
+            $GODOT --headless --version
+            # Need to run the editor so .godot is generated... but it crashes! Ignore that :-)
+            (cd project && (timeout 30 $GODOT --import --headless >/dev/null 2>&1 || true))
+            ./run-tests.sh
+          done
+          cd ..
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
