@@ -10,9 +10,9 @@ jobs:
       matrix:
         include:
           - name: 🐧 Linux (GCC)
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             platform: linux
-            artifact-name: godot-cpp-linux-glibc2.31-x86_64-release
+            artifact-name: godot-cpp-linux-glibc2.35-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.release.64.a
             godot_zip: Godot_v3.5-stable_linux_server.64.zip
             executable: Godot_v3.5-stable_linux_server.64
@@ -20,7 +20,7 @@ jobs:
           - name: 🏁 Windows (x86_64, MSVC)
             os: windows-2022
             platform: windows
-            artifact-name: godot-cpp-windows-msvc2019-x86_64-release
+            artifact-name: godot-cpp-windows-msvc2022-x86_64-release
             artifact-path: bin/libgodot-cpp.windows.release.64.lib
 
           - name: 🏁 Windows (x86_64, MinGW)
@@ -31,7 +31,7 @@ jobs:
             flags: use_mingw=yes
 
           - name: 🍎 macOS (universal)
-            os: macos-13
+            os: macos-15
             platform: osx
             artifact-name: godot-cpp-macos-universal-release
             artifact-path: bin/libgodot-cpp.osx.release.64.a
@@ -40,26 +40,26 @@ jobs:
             executable: Godot.app/Contents/MacOS/Godot
 
           - name: 🤖 Android (arm64)
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             platform: android
             artifact-name: godot-cpp-android-arm64-release
             artifact-path: bin/libgodot-cpp.android.release.arm64v8.a
             flags: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME android_arch=arm64v8
 
           - name: 🍏 iOS (arm64)
-            os: macos-13
+            os: macos-15
             platform: ios
             artifact-name: godot-cpp-ios-arm64-release
             artifact-path: bin/libgodot-cpp.ios.release.arm64.a
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
       - name: Set up Python (for SCons)
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 
@@ -75,7 +75,7 @@ jobs:
 
       - name: Windows dependency (MinGW)
         if: ${{ matrix.platform == 'windows' }}
-        uses: egor-tensin/setup-mingw@v2
+        uses: egor-tensin/setup-mingw@v3
         with:
           version: 12.2.0
 
@@ -96,12 +96,12 @@ jobs:
       - name: Run test GDNative library
         if: ${{ matrix.platform == 'linux' || matrix.platform == 'osx' }}
         run: |
-          curl -LO https://downloads.tuxfamily.org/godotengine/3.5/${{ matrix.godot_zip }}
+          curl -LO https://github.com/godotengine/godot/releases/download/3.5-stable/${{ matrix.godot_zip }}
           unzip ${{ matrix.godot_zip }}
           ./${{ matrix.executable }} --path test -s script.gd
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
@@ -109,10 +109,12 @@ jobs:
 
   static-checks:
     name: 📊 Static Checks (clang-format)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - name: Make apt sources.list use the default Ubuntu repositories
         run: |
@@ -122,9 +124,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install -qq dos2unix recode clang-format-11
-          sudo update-alternatives --remove-all clang-format
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-11 100
+          sudo apt-get install -qq dos2unix recode clang-format
 
       - name: Style checks via clang-format
         run: |
