@@ -22,8 +22,8 @@ jobs:
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.35-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.release.64.a
-            godot_zip: Godot_v3.5-stable_linux_server.64.zip
-            executable: Godot_v3.5-stable_linux_server.64
+            godot_zip: Godot_v3.6-stable_linux_server.64.zip
+            executable: Godot_v3.6-stable_linux_server.64
             cache-name: linux-x86_64
 
           - name: 🏁 Windows (x86_64, MSVC)
@@ -47,7 +47,7 @@ jobs:
             artifact-name: godot-cpp-macos-universal-release
             artifact-path: bin/libgodot-cpp.osx.release.64.a
             flags: macos_arch=universal
-            godot_zip: Godot_v3.5-stable_osx.universal.zip
+            godot_zip: Godot_v3.6-stable_osx.universal.zip
             executable: Godot.app/Contents/MacOS/Godot
             cache-name: macos-unversal
 
@@ -119,7 +119,7 @@ jobs:
       - name: Run test GDNative library
         if: ${{ matrix.platform == 'linux' || matrix.platform == 'osx' }}
         run: |
-          curl -LO https://github.com/godotengine/godot/releases/download/3.5-stable/${{ matrix.godot_zip }}
+          curl -LO https://github.com/godotengine/godot/releases/download/3.6-stable/${{ matrix.godot_zip }}
           unzip ${{ matrix.godot_zip }}
           ./${{ matrix.executable }} --path test -s script.gd
 
