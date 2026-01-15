@@ -60,10 +60,17 @@ void Wrapped::_postinitialize() {
 	Wrapped::_constructing_mutex.unlock();
 #endif
 
+#if GODOT_VERSION_MINOR >= 4
 	Object *obj = dynamic_cast<Object *>(this);
 	if (obj) {
 		obj->notification(Object::NOTIFICATION_POSTINITIALIZE);
 	}
+#else
+	// Only send NOTIFICATION_POSTINITIALIZE for extension classes.
+	if (_is_extension_class()) {
+		_notificationv(Object::NOTIFICATION_POSTINITIALIZE);
+	}
+#endif // GODOT_VERSION_MINOR >= 4
 }
 
 Wrapped::Wrapped(const StringName &p_godot_class) {
@@ -74,7 +81,11 @@ Wrapped::Wrapped(const StringName &p_godot_class) {
 	} else
 #endif
 	{
+#if GODOT_VERSION_MINOR >= 4
 		_owner = ::godot::gdextension_interface::classdb_construct_object2(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
+#else
+		_owner = ::godot::gdextension_interface::classdb_construct_object(reinterpret_cast<GDExtensionConstStringNamePtr>(p_godot_class._native_ptr()));
+#endif
 	}
 
 	if (_constructing_extension_class_name) {

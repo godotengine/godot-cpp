@@ -50,7 +50,10 @@ void Variant::init_bindings() {
 		from_type_constructor[i] = ::godot::gdextension_interface::get_variant_from_type_constructor((GDExtensionVariantType)i);
 		to_type_constructor[i] = ::godot::gdextension_interface::get_variant_to_type_constructor((GDExtensionVariantType)i);
 	}
+
+#if GODOT_VERSION_MINOR >= 4
 	VariantInternal::init_bindings();
+#endif // GODOT_VERSION_MINOR >= 4
 
 	StringName::init_bindings();
 	String::init_bindings();
@@ -450,7 +453,18 @@ Variant::operator ObjectID() const {
 	if (get_type() == Type::INT) {
 		return ObjectID(operator uint64_t());
 	} else if (get_type() == Type::OBJECT) {
+#if GODOT_VERSION_MINOR >= 4
 		return ObjectID(::godot::gdextension_interface::variant_get_object_instance_id(_native_ptr()));
+#else
+		// Note: This isn't safe, because the object may have already been freed, but it's the best we
+		//       can do in Godot 4.3 and earlier.
+		Object *obj = operator Object *();
+		if (obj != nullptr) {
+			return ObjectID(obj->get_instance_id());
+		} else {
+			return ObjectID();
+		}
+#endif // GODOT_VERSION_MINOR >= 4
 	} else {
 		return ObjectID();
 	}
@@ -513,7 +527,12 @@ Variant::operator PackedVector4Array() const {
 }
 
 Object *Variant::get_validated_object() const {
+#if GODOT_VERSION_MINOR >= 4
 	return ObjectDB::get_instance(operator ObjectID());
+#else
+	// Note: This isn't actually validated, but we can't do any better in Godot 4.3 or earlier.
+	return operator Object *();
+#endif // GODOT_VERSION_MINOR >= 4
 }
 
 Variant &Variant::operator=(const Variant &other) {

@@ -12,7 +12,6 @@
 #include <godot_cpp/classes/multiplayer_api.hpp>
 #include <godot_cpp/classes/multiplayer_peer.hpp>
 #include <godot_cpp/classes/os.hpp>
-#include <godot_cpp/variant/typed_dictionary.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
@@ -209,8 +208,12 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("test_tarray_arg", "array"), &Example::test_tarray_arg);
 	ClassDB::bind_method(D_METHOD("test_tarray"), &Example::test_tarray);
 	ClassDB::bind_method(D_METHOD("test_dictionary"), &Example::test_dictionary);
+
+#if GODOT_VERSION_MINOR >= 4
 	ClassDB::bind_method(D_METHOD("test_tdictionary_arg", "dictionary"), &Example::test_tdictionary_arg);
 	ClassDB::bind_method(D_METHOD("test_tdictionary"), &Example::test_tdictionary);
+#endif // GODOT_VERSION_MINOR >= 4
+
 	ClassDB::bind_method(D_METHOD("test_node_argument"), &Example::test_node_argument);
 	ClassDB::bind_method(D_METHOD("test_string_ops"), &Example::test_string_ops);
 	ClassDB::bind_method(D_METHOD("test_str_utility"), &Example::test_str_utility);
@@ -254,7 +257,9 @@ void Example::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("callable_bind"), &Example::callable_bind);
 	ClassDB::bind_method(D_METHOD("test_post_initialize"), &Example::test_post_initialize);
 
+#if GODOT_VERSION_MINOR >= 4
 	ClassDB::bind_method(D_METHOD("test_get_internal", "a"), &Example::test_get_internal);
+#endif // GODOT_VERSION_MINOR >= 4
 
 	GDVIRTUAL_BIND(_do_something_virtual, "name", "value");
 	ClassDB::bind_method(D_METHOD("test_virtual_implemented_in_script"), &Example::test_virtual_implemented_in_script);
@@ -569,6 +574,7 @@ Dictionary Example::test_dictionary() const {
 	return dict;
 }
 
+#if GODOT_VERSION_MINOR >= 4
 int Example::test_tdictionary_arg(const TypedDictionary<String, int64_t> &p_dictionary) {
 	int sum = 0;
 	TypedArray<int64_t> values = p_dictionary.values();
@@ -585,6 +591,7 @@ TypedDictionary<Vector2, Vector2i> Example::test_tdictionary() const {
 
 	return dict;
 }
+#endif // GODOT_VERSION_MINOR >= 4
 
 Example *Example::test_node_argument(Example *p_node) const {
 	return p_node;
@@ -767,6 +774,7 @@ Ref<RefCounted> Example::test_get_internal_class() const {
 	return it;
 }
 
+#if GODOT_VERSION_MINOR >= 4
 int64_t Example::test_get_internal(const Variant &p_input) const {
 	if (p_input.get_type() != Variant::INT) {
 		return -1;
@@ -774,6 +782,7 @@ int64_t Example::test_get_internal(const Variant &p_input) const {
 
 	return *VariantInternal::get_int(&p_input);
 }
+#endif // GODOT_VERSION_MINOR >= 4
 
 void ExampleRuntime::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_prop_value", "value"), &ExampleRuntime::set_prop_value);

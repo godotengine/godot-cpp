@@ -30,6 +30,10 @@
 
 #pragma once
 
+#include <godot_cpp/core/version.hpp>
+
+#if GODOT_VERSION_MINOR >= 4
+
 #include <godot_cpp/core/type_info.hpp>
 #include <godot_cpp/templates/pair.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
@@ -463,3 +467,7 @@ MAKE_TYPED_DICTIONARY_INFO(IPAddress, Variant::STRING)
 #undef MAKE_TYPED_DICTIONARY_INFO_WITH_OBJECT
 
 } // namespace godot
+
+#else
+#error "TypedDictionary is only supported when targeting Godot 4.4+"
+#endif // GODOT_VERSION_MINOR >= 4

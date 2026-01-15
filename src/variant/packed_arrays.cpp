@@ -250,10 +250,12 @@ Variant &Dictionary::operator[](const Variant &p_key) {
 	return *var;
 }
 
+#if GODOT_VERSION_MINOR >= 4
 void Dictionary::set_typed(uint32_t p_key_type, const StringName &p_key_class_name, const Variant &p_key_script, uint32_t p_value_type, const StringName &p_value_class_name, const Variant &p_value_script) {
 	// p_key_type/p_value_type are not Variant::Type so that header doesn't depend on <variant.hpp>.
 	::godot::gdextension_interface::dictionary_set_typed((GDExtensionTypePtr *)this, (GDExtensionVariantType)p_key_type, (GDExtensionConstStringNamePtr)&p_key_class_name, (GDExtensionConstVariantPtr)&p_key_script,
 			(GDExtensionVariantType)p_value_type, (GDExtensionConstStringNamePtr)&p_value_class_name, (GDExtensionConstVariantPtr)&p_value_script);
 }
+#endif // GODOT_VERSION_MINOR >= 4
 
 } // namespace godot
