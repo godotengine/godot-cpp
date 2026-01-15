@@ -41,6 +41,16 @@ jobs:
             godot-test-versions: "4.5-stable"
             cache-name: linux-x86_64-godot45
 
+          - name: 🐧 Linux (GCC) for Godot 4.4
+            os: ubuntu-22.04
+            platform: linux
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-release-godot44
+            artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
+            run-tests: true
+            api-version: 4.4
+            godot-test-versions: "4.4-stable 4.5-stable"
+            cache-name: linux-x86_64-godot44
+
           - name: 🏁 Windows (x86_64, MSVC)
             os: windows-2022
             platform: windows

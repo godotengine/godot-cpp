@@ -108,6 +108,8 @@ public:
 	Example();
 	~Example();
 
+	Dictionary get_godot_target_version() const;
+
 	// Functions.
 	void simple_func();
 	void simple_const_func() const;

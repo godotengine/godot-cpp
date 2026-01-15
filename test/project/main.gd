@@ -8,6 +8,7 @@ class TestClass:
 
 func _ready():
 	var example: Example = $Example
+	var godot_target_version := example.get_godot_target_version()
 
 	# Timing of set instance binding.
 	assert_equal(example.is_object_binding_set_by_parent_constructor(), true)
@@ -290,12 +291,13 @@ func _ready():
 	assert_equal(library_path, ProjectSettings.globalize_path(library_path))
 	assert_equal(FileAccess.file_exists(library_path), true)
 
-	# Test that internal classes work as expected (at least for Godot 4.5+).
-	assert_equal(ClassDB.can_instantiate("ExampleInternal"), false)
-	assert_equal(ClassDB.instantiate("ExampleInternal"), null)
-	var internal_class = example.test_get_internal_class()
-	assert_equal(internal_class.get_the_answer(), 42)
-	assert_equal(internal_class.get_class(), "ExampleInternal")
+	if godot_target_version["minor"] >= 5:
+		# Test that internal classes work as expected (at least for Godot 4.5+).
+		assert_equal(ClassDB.can_instantiate("ExampleInternal"), false)
+		assert_equal(ClassDB.instantiate("ExampleInternal"), null)
+		var internal_class = example.test_get_internal_class()
+		assert_equal(internal_class.get_the_answer(), 42)
+		assert_equal(internal_class.get_class(), "ExampleInternal")
 
 	# Test a class with a unicode name.
 	var przykład = ExamplePrzykład.new()

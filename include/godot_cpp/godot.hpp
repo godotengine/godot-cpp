@@ -40,7 +40,11 @@ extern "C" GDExtensionInterfaceGetProcAddress get_proc_address;
 extern "C" GDExtensionClassLibraryPtr library;
 extern "C" void *token;
 
+#if GODOT_VERSION_MINOR >= 5
 extern "C" GDExtensionGodotVersion2 godot_version;
+#else
+extern "C" GDExtensionGodotVersion godot_version;
+#endif
 
 } // namespace gdextension_interface
 
@@ -69,11 +73,13 @@ public:
 		GDExtensionInitializationLevel minimum_initialization_level = GDEXTENSION_INITIALIZATION_CORE;
 		Callback init_callback = nullptr;
 		Callback terminate_callback = nullptr;
+#if GODOT_VERSION_MINOR >= 5
 		GDExtensionMainLoopCallbacks main_loop_callbacks = {};
 
 		inline bool has_main_loop_callbacks() const {
 			return main_loop_callbacks.frame_func || main_loop_callbacks.startup_func || main_loop_callbacks.shutdown_func;
 		}
+#endif
 	};
 
 	class InitDataList {
@@ -108,12 +114,14 @@ public:
 		void register_terminator(Callback p_init) const;
 		void set_minimum_library_initialization_level(ModuleInitializationLevel p_level) const;
 
+#if GODOT_VERSION_MINOR >= 5
 		// Register a callback that is called after all initialization levels when Godot is fully initialized.
 		void register_startup_callback(GDExtensionMainLoopStartupCallback p_callback) const;
 		// Register a callback that is called for every process frame. This will run after all `_process()` methods on Node, and before `ScriptServer::frame()`.
 		void register_frame_callback(GDExtensionMainLoopFrameCallback p_callback) const;
 		// Register a callback that is called before Godot is shutdown when it is still fully initialized.
 		void register_shutdown_callback(GDExtensionMainLoopShutdownCallback p_callback) const;
+#endif
 
 		GDExtensionBool init() const;
 	};
