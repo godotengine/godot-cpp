@@ -237,7 +237,7 @@ def check_type(kind, type, valid_data_types):
             if not is_valid_type(arg["type"], valid_data_types):
                 raise UnknownTypeError(arg["type"], type["name"], arg.get("name"))
         if "return_value" in type:
-            if not is_valid_type(type["return_value"]["type"], valid_data_types):
+            if not base_type_name(type["return_value"]["type"]) in valid_data_types:
                 raise UnknownTypeError(type["return_value"]["type"], type["name"])
 
 
@@ -341,7 +341,7 @@ def write_interface(file, interface):
             arg_doc = " ".join(arg["description"])
             doc.append(f"@param {arg['name']} {arg_doc}")
 
-    if "return_value" in interface:
+    if "return_value" in interface and interface["return_value"]["type"] != "void":
         if "description" not in interface["return_value"]:
             raise Exception(f"Interface function {interface['name']} is missing docs for return value")
         ret_doc = " ".join(interface["return_value"]["description"])
