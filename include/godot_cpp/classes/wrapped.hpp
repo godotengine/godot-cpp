@@ -105,10 +105,6 @@ protected:
 	static GDExtensionBool validate_property_bind(GDExtensionClassInstancePtr p_instance, GDExtensionPropertyInfo *p_property) { return false; }
 	static void to_string_bind(GDExtensionClassInstancePtr p_instance, GDExtensionBool *r_is_valid, GDExtensionStringPtr r_out) {}
 
-	// The only reason this has to be held here, is when we return results of `_get_property_list` to Godot, we pass
-	// pointers to strings in this list. They have to remain valid to pass the bridge, until the list is freed by Godot...
-	::godot::List<::godot::PropertyInfo> plist_owned;
-
 	void _postinitialize();
 	virtual void _notificationv(int32_t p_what, bool p_reversed = false) {}
 
@@ -156,7 +152,7 @@ _FORCE_INLINE_ Vector<StringName> snarray(P... p_args) {
 
 namespace internal {
 
-GDExtensionPropertyInfo *create_c_property_list(const ::godot::List<::godot::PropertyInfo> &plist_cpp, uint32_t *r_size);
+GDExtensionPropertyInfo *create_c_property_list(::godot::List<::godot::PropertyInfo> *plist_cpp, uint32_t *r_size);
 void free_c_property_list(GDExtensionPropertyInfo *plist);
 
 typedef void (*EngineClassRegistrationCallback)();
@@ -317,16 +313,14 @@ public:                                                                         
 			return nullptr;                                                                                                                                                            \
 		}                                                                                                                                                                              \
 		m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                        \
-		::godot::List<::godot::PropertyInfo> &plist_cpp = cls->plist_owned;                                                                                                            \
-		ERR_FAIL_COND_V_MSG(!plist_cpp.is_empty(), nullptr, "Internal error, property list was not freed by engine!");                                                                 \
-		cls->_get_property_list(&plist_cpp);                                                                                                                                           \
+		::godot::List<::godot::PropertyInfo> *plist_cpp = memnew(::godot::List<::godot::PropertyInfo>);                                                                                \
+		cls->_get_property_list(plist_cpp);                                                                                                                                            \
 		return ::godot::internal::create_c_property_list(plist_cpp, r_count);                                                                                                          \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDExtensionPropertyInfo *p_list, uint32_t /*p_count*/) {                                         \
 		if (p_instance) {                                                                                                                                                              \
 			m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
-			cls->plist_owned.clear();                                                                                                                                                  \
 			::godot::internal::free_c_property_list(const_cast<GDExtensionPropertyInfo *>(p_list));                                                                                    \
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \

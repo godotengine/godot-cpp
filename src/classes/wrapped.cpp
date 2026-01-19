@@ -116,16 +116,21 @@ std::vector<EngineClassRegistrationCallback> &get_engine_class_registration_call
 	return engine_class_registration_callbacks;
 }
 
-GDExtensionPropertyInfo *create_c_property_list(const ::godot::List<::godot::PropertyInfo> &plist_cpp, uint32_t *r_size) {
-	GDExtensionPropertyInfo *plist = nullptr;
+GDExtensionPropertyInfo *create_c_property_list(::godot::List<::godot::PropertyInfo> *plist_cpp, uint32_t *r_size) {
 	// Linked list size can be expensive to get so we cache it
-	const uint32_t plist_size = plist_cpp.size();
+	const uint32_t plist_size = plist_cpp->size();
 	if (r_size != nullptr) {
 		*r_size = plist_size;
 	}
-	plist = reinterpret_cast<GDExtensionPropertyInfo *>(memalloc(sizeof(GDExtensionPropertyInfo) * plist_size));
+
+	// Use the padding to stash the plist_cpp pointer, so we can clean it up later.
+	void *mem = ::godot::Memory::alloc_static(sizeof(GDExtensionPropertyInfo) * plist_size, true);
+	GDExtensionPropertyInfo *plist = reinterpret_cast<GDExtensionPropertyInfo *>(mem);
+	::godot::List<::godot::PropertyInfo> **plist_cpp_stash = reinterpret_cast<::godot::List<::godot::PropertyInfo> **>((uint8_t *)mem - ::godot::Memory::DATA_OFFSET + ::godot::Memory::ELEMENT_OFFSET);
+	*plist_cpp_stash = plist_cpp;
+
 	unsigned int i = 0;
-	for (const ::godot::PropertyInfo &E : plist_cpp) {
+	for (const ::godot::PropertyInfo &E : *plist_cpp) {
 		plist[i].type = static_cast<GDExtensionVariantType>(E.type);
 		plist[i].name = E.name._native_ptr();
 		plist[i].hint = E.hint;
@@ -138,7 +143,10 @@ GDExtensionPropertyInfo *create_c_property_list(const ::godot::List<::godot::Pro
 }
 
 void free_c_property_list(GDExtensionPropertyInfo *plist) {
-	memfree(plist);
+	// Get the stashed plist_cpp pointer, before we free the memory that's holding it.
+	::godot::List<::godot::PropertyInfo> *plist_cpp = *reinterpret_cast<::godot::List<::godot::PropertyInfo> **>((uint8_t *)plist - ::godot::Memory::DATA_OFFSET + ::godot::Memory::ELEMENT_OFFSET);
+	::godot::Memory::free_static(plist, true);
+	memdelete(plist_cpp);
 }
 
 void add_engine_class_registration_callback(EngineClassRegistrationCallback p_callback) {
