@@ -320,7 +320,6 @@ public:                                                                         
                                                                                                                                                                                        \
 	static void free_property_list_bind(GDExtensionClassInstancePtr p_instance, const GDExtensionPropertyInfo *p_list, uint32_t /*p_count*/) {                                         \
 		if (p_instance) {                                                                                                                                                              \
-			m_class *cls = reinterpret_cast<m_class *>(p_instance);                                                                                                                    \
 			::godot::internal::free_c_property_list(const_cast<GDExtensionPropertyInfo *>(p_list));                                                                                    \
 		}                                                                                                                                                                              \
 	}                                                                                                                                                                                  \
