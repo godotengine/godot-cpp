@@ -459,6 +459,9 @@ def generate_gdextension_interface_loader_source(data):
 
         for func in data[version]:
             name = func["name"]
+            if name == "print_error":
+                # We manually load "print_error" early, so don't load it again here.
+                continue
             fn = gdextension_interface_type_name(name)
 
             if "deprecated" in func:
