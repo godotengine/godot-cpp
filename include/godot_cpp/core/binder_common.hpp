@@ -56,7 +56,7 @@ namespace godot {
 		}                                                              \
 		typedef int64_t EncodeT;                                       \
 		_FORCE_INLINE_ static void encode(m_enum p_val, void *p_ptr) { \
-			*reinterpret_cast<int64_t *>(p_ptr) = p_val;               \
+			*reinterpret_cast<int64_t *>(p_ptr) = static_cast<int64_t>(p_val);               \
 		}                                                              \
 	};                                                                 \
 	}
@@ -77,7 +77,7 @@ namespace godot {
 		}                                                                        \
 		typedef int64_t EncodeT;                                                 \
 		_FORCE_INLINE_ static void encode(BitField<m_enum> p_val, void *p_ptr) { \
-			*reinterpret_cast<int64_t *>(p_ptr) = p_val;                         \
+			*reinterpret_cast<int64_t *>(p_ptr) = static_cast<int64_t>(p_val);   \
 		}                                                                        \
 	};                                                                           \
 	}
