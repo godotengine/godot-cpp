@@ -47,7 +47,13 @@ if unknown:
 
 scons_cache_path = os.environ.get("SCONS_CACHE")
 if scons_cache_path is not None:
-    CacheDir(scons_cache_path)
+    # Make the cache path unique for each platform and architecture
+    platform_arch = env["PLATFORM"] + "." + env["arch"]
+    platform_cache_path = os.path.join(scons_cache_path, platform_arch)
+    if not os.path.exists(platform_cache_path):
+        os.makedirs(platform_cache_path)
+
+    CacheDir(platform_cache_path)
     Decider("MD5")
 
 cpp_tool.generate(env)
