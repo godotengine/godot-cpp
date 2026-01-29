@@ -40,25 +40,25 @@
 
 namespace godot {
 
-#define VARIANT_ENUM_CAST(m_enum)                                      \
-	namespace godot {                                                  \
-	MAKE_ENUM_TYPE_INFO(m_enum)                                        \
-	template <>                                                        \
-	struct VariantCaster<m_enum> {                                     \
-		static _FORCE_INLINE_ m_enum cast(const Variant &p_variant) {  \
-			return (m_enum)p_variant.operator int64_t();               \
-		}                                                              \
-	};                                                                 \
-	template <>                                                        \
-	struct PtrToArg<m_enum> {                                          \
-		_FORCE_INLINE_ static m_enum convert(const void *p_ptr) {      \
-			return m_enum(*reinterpret_cast<const int64_t *>(p_ptr));  \
-		}                                                              \
-		typedef int64_t EncodeT;                                       \
-		_FORCE_INLINE_ static void encode(m_enum p_val, void *p_ptr) { \
-			*reinterpret_cast<int64_t *>(p_ptr) = static_cast<int64_t>(p_val);               \
-		}                                                              \
-	};                                                                 \
+#define VARIANT_ENUM_CAST(m_enum)                                              \
+	namespace godot {                                                          \
+	MAKE_ENUM_TYPE_INFO(m_enum)                                                \
+	template <>                                                                \
+	struct VariantCaster<m_enum> {                                             \
+		static _FORCE_INLINE_ m_enum cast(const Variant &p_variant) {          \
+			return (m_enum)p_variant.operator int64_t();                       \
+		}                                                                      \
+	};                                                                         \
+	template <>                                                                \
+	struct PtrToArg<m_enum> {                                                  \
+		_FORCE_INLINE_ static m_enum convert(const void *p_ptr) {              \
+			return m_enum(*reinterpret_cast<const int64_t *>(p_ptr));          \
+		}                                                                      \
+		typedef int64_t EncodeT;                                               \
+		_FORCE_INLINE_ static void encode(m_enum p_val, void *p_ptr) {         \
+			*reinterpret_cast<int64_t *>(p_ptr) = static_cast<int64_t>(p_val); \
+		}                                                                      \
+	};                                                                         \
 	}
 
 #define VARIANT_BITFIELD_CAST(m_enum)                                            \
