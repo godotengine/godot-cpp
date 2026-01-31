@@ -2080,8 +2080,24 @@ def generate_global_constants(api, output_dir):
     header.append("namespace godot {")
     header.append("")
 
-    if len(api["global_constants"]) > 0:
-        for constant in api["global_constants"]:
+    # Remove integer limit global constants that overlap with those defined in cstdint
+    limit_constants = {
+        "UINT8_MAX",
+        "UINT16_MAX",
+        "UINT32_MAX",
+        "INT8_MIN",
+        "INT8_MAX",
+        "INT16_MIN",
+        "INT16_MAX",
+        "INT32_MIN",
+        "INT32_MAX",
+        "INT64_MIN",
+        "INT64_MAX",
+    }
+    global_constants = [c for c in api["global_constants"] if c["name"] not in limit_constants]
+
+    if len(global_constants) > 0:
+        for constant in global_constants:
             header.append(f"const int64_t {escape_identifier(constant['name'])} = {constant['value']};")
 
         header.append("")
