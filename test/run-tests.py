@@ -34,7 +34,7 @@ IMPORT_TIMEOUT_SEC = 30
 
 FILTER_PATTERNS = [
     re.compile(r"Narrowing conversion"),
-    re.compile(r"\[\s*\d+%\s*\]"),
+    re.compile(r"\[\s*\d+%\s*]"),
     re.compile(r"first_scan_filesystem"),
     re.compile(r"loading_editor_layout"),
 ]
@@ -98,7 +98,10 @@ def cleanup_temp_portable():
 # Other Helpers (unchanged from previous)
 # ──────────────────────────────────────────────
 
-def filter_output(lines: list[str]) -> list[str]:
+def filter_output(lines: list[str], verbose: bool) -> list[str]:
+    if verbose:
+        return [line.rstrip() for line in lines if line.strip()]  # just trim, keep everything
+    # original quiet filtering
     result = []
     for line in lines:
         cleaned = line.rstrip()
@@ -108,7 +111,6 @@ def filter_output(lines: list[str]) -> list[str]:
             continue
         result.append(cleaned)
     return result
-
 
 def is_successful(output: str) -> bool:
     has_end    = END_MARKER in output
@@ -127,7 +129,7 @@ def cleanup_godot_cache():
             print(f"Warning: Failed to clean .godot: {e}")
 
 
-def run_godot(args: list[str], desc: str, godot_bin: str, timeout_sec: int = TIMEOUT_SEC) -> tuple[int, str, bool]:
+def run_godot(args: list[str], desc: str, godot_bin: str, timeout_sec: int = TIMEOUT_SEC, verbose: bool = False) -> tuple[int, str, bool]:
     print(f"\n{'─' * 10} {desc} {'─' * 10}")
     print(f"→ {godot_bin} {' '.join(args)}")
 
@@ -136,7 +138,6 @@ def run_godot(args: list[str], desc: str, godot_bin: str, timeout_sec: int = TIM
         stderr_path = Path(tmpdir) / "stderr.txt"
 
         cmd = [godot_bin] + args
-
         try:
             start = time.time()
             proc = subprocess.Popen(
@@ -146,7 +147,6 @@ def run_godot(args: list[str], desc: str, godot_bin: str, timeout_sec: int = TIM
                 cwd=os.getcwd(),
                 start_new_session=True,
             )
-
             while proc.poll() is None:
                 if time.time() - start > timeout_sec:
                     print(f"→ TIMEOUT after {timeout_sec}s – killing")
@@ -163,7 +163,18 @@ def run_godot(args: list[str], desc: str, godot_bin: str, timeout_sec: int = TIM
             stderr = stderr_path.read_text("utf-8", errors="replace")
             full_output = stdout + stderr
 
-            print(full_output.rstrip())
+            # ── Output printing logic ──
+            if verbose:
+                print(full_output.rstrip())
+            else:
+                # In quiet mode: show only summary / important parts
+                lines = full_output.splitlines()
+                filtered = filter_output(lines, verbose=False)
+                if filtered:
+                    print("\n".join(filtered))
+                else:
+                    print("(no relevant output)")
+
             print(f"→ Exit code: {exit_code}")
             return exit_code, full_output, False
 
@@ -172,38 +183,38 @@ def run_godot(args: list[str], desc: str, godot_bin: str, timeout_sec: int = TIM
             print(msg)
             return 1, msg, False
 
-
-def pre_import_project(godot_bin: str):
+def pre_import_project(godot_bin: str, verbose: bool):
     print("\nPre-importing project (headless, short timeout)...")
     cleanup_godot_cache()
 
     args = ["--path", str(GODOT_PROJECT), "--import", "--headless"]
-    exit_code, output, timed_out = run_godot(args, "Pre-import", godot_bin, timeout_sec=IMPORT_TIMEOUT_SEC)
+    exit_code, output, timed_out = run_godot(args, "Pre-import", godot_bin, timeout_sec=IMPORT_TIMEOUT_SEC, verbose=verbose)
 
     if timed_out or exit_code != 0:
-        print("→ Pre-import failed/crashed — This is expected, continuing anyway")
+        if verbose:
+            print("→ Pre-import failed or timed out (full output above)")
+        else:
+            print("→ Pre-import failed/crashed — continuing anyway")
     else:
         print("→ Pre-import completed")
 
-def run_tests(mode: str, godot_bin: str) -> bool:
+
+def run_tests(mode: str, godot_bin: str, verbose) -> bool:
     overall_success = True
 
     # ── One-time preparation ──
     print("\nPreparing project (one-time cleanup + pre-import)...")
     cleanup_godot_cache()           # Clean once at start
 
-    pre_import_project(godot_bin)   # Attempt import once (ignore failures)
+    pre_import_project(godot_bin, verbose)   # Attempt import once (ignore failures)
 
     # No more cleanups after this point — let the cache persist
 
     if mode in ("unit", "full"):
         args = ["--path", str(GODOT_PROJECT), "--debug", "--headless", "--quit"]
-        _, output, timed_out = run_godot(args, "Unit / headless tests", godot_bin)
+        _, output, timed_out = run_godot(args, "Unit / headless tests", godot_bin, verbose=verbose)
 
-        filtered = filter_output(output.splitlines())
-        print("\nFiltered output:")
-        print("\n".join(filtered))
-
+        # Summary parsing still uses full output
         if timed_out:
             print("→ Unit phase: TIMEOUT")
             overall_success = False
@@ -213,29 +224,37 @@ def run_tests(mode: str, godot_bin: str) -> bool:
         else:
             print("→ Unit phase: detected PASSED")
 
+    if not verbose:
+        # Optional: print a small reminder about the known error
+        if "ExampleInternal" in output:
+            print("  (known non-fatal warning about 'ExampleInternal' suppressed)")
+
     return overall_success
 
 
 # ──────────────────────────────────────────────
 # Main
 # ──────────────────────────────────────────────
-
 def main():
     parser = argparse.ArgumentParser(description="Run godot-cpp test suite (temp portable Godot)")
     parser.add_argument("--unit-only", action="store_const", const="unit", dest="mode")
+    parser.add_argument("--verbose", action="store_true", default=False,
+        help="Show full unfiltered Godot output + more detailed runner messages")
     args = parser.parse_args()
 
     mode = args.mode or "full"
+    verbose = args.verbose
 
     print(f"Original Godot: {ORIGINAL_GODOT}")
     print(f"Project:        {GODOT_PROJECT}")
-    print(f"Mode:           {mode}\n")
+    print(f"Mode:           {mode}")
+    print(f"Verbose:        {verbose}\n")
 
     # Setup temp portable copy
     godot_bin = setup_temp_portable_godot()
 
     try:
-        all_passed = run_tests(mode, godot_bin)
+        all_passed = run_tests(mode, godot_bin, verbose)
     finally:
         # Always cleanup temp files
         cleanup_temp_portable()
