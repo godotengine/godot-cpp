@@ -349,25 +349,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-#
-# try:
-#     godot_bin = setup_temp_portable_godot()   # still use temp copy for tests
-#
-#     if args.generate_docs_only:
-#         # Standalone mode — use possibly different editor binary
-#         editor_bin = args.godot_editor
-#         success = generate_extension_docs(editor_bin)
-#     else:
-#         # Normal test run
-#         all_passed = run_tests(mode, godot_bin)
-#
-#         if all_passed and mode == "full":   # only do docs in full mode, after tests pass
-#             print("\nAll tests passed → generating GDExtension docs as final step...")
-#             success = generate_extension_docs(godot_bin)   # reuse test Godot binary
-#             all_passed = all_passed and success
-#         else:
-#             success = all_passed   # no docs run → status is just tests
-#
-# finally:
-#     cleanup_temp_portable()
