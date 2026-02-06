@@ -3,7 +3,7 @@ on:
   workflow_call:
 
 env:
-  # Only used for the cache key. Increment version to force clean build.
+  # Only used for the cache key. Increment version to force a clean build.
   GODOT_BASE_BRANCH: master
   # Used to select the version of Godot to run the tests with.
   GODOT_TEST_VERSION: master
@@ -24,50 +24,100 @@ jobs:
       config-flags:
         -DCMAKE_C_COMPILER_LAUNCHER=sccache
         -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+        -DCMAKE_C_LINKER_LAUNCHER=sccache
+        -DCMAKE_CXX_LINKER_LAUNCHER=sccache
         -DGODOTCPP_ENABLE_TESTING=ON
         -DGODOTCPP_BUILD_PROFILE="test/build_profile.json"
       SCCACHE_GHA_ENABLED: "true"
+      DEBUG_BUILD_START: ""
+      RELEASE_BUILD_START: ""
 
     strategy:
       fail-fast: false
       matrix:
         include:
+          # Linux-gcc
           - name: 🐧 Linux (GCC, Makefiles)
             os: ubuntu-22.04
             platform: linux
             config-flags: -DCMAKE_BUILD_TYPE=Release
-            artifact-name: godot-cpp-linux-glibc2.27-x86_64-release.cmake
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-cmake-release
             artifact-path: cmake-build/bin/libgodot-cpp.linux.template_release.x86_64.a
             run-tests: true
+            godot-test-arch: "linux.x86_64"
+            godot-master-workflow: linux_builds.yml
+            godot-master-artifact: linux-editor-mono
 
-          - name: 🏁 Windows (x86_64, MSVC)
-            os: windows-2022
-            platform: windows
-            compiler: msvc
-            build-flags: --config Release
-            artifact-name: godot-cpp-windows-msvc2019-x86_64-release.cmake
-            artifact-path: cmake-build/bin/libgodot-cpp.windows.template_release.x86_64.lib
-            run-tests: false
-
-          - name: 🏁 Windows (x86_64, MinGW, Ninja)
-            os: windows-2022
-            platform: windows
-            compiler: mingw
+          - name: 🐧 Linux (GCC, Makefiles) for Godot 4.6
+            os: ubuntu-22.04
+            platform: linux
             config-flags:
-              -GNinja -DCMAKE_BUILD_TYPE=Release
-              -DCMAKE_CXX_COMPILER=cc -DCMAKE_CXX_COMPILER=c++
-            artifact-name: godot-cpp-linux-mingw-x86_64-release.cmake
-            artifact-path: cmake-build/bin/libgodot-cpp.windows.template_release.x86_64.a
-            run-tests: false
+              -DCMAKE_BUILD_TYPE=Release
+              -DGODOTCPP_API_VERSION=4.6
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-cmake-release-godot46
+            artifact-path: cmake-build/bin/libgodot-cpp.linux.template_release.x86_64.a
+            run-tests: true
+            godot-test-versions: "4.6-stable"
+            godot-test-arch: "linux.x86_64"
+            godot-master-workflow: linux_builds.yml
+            godot-master-artifact: linux-editor-mono
 
-          - name: 🍎 macOS (universal, Makefiles)
-            os: macos-latest
-            platform: macos
-            config-flags: -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
-            artifact-name: godot-cpp-macos-universal-release.cmake
-            artifact-path: cmake-build/bin/libgodot-cpp.macos.template_release.universal.a
-            run-tests: false
+          - name: 🐧 Linux (GCC, Makefiles) for Godot 4.5
+            os: ubuntu-22.04
+            platform: linux
+            config-flags:
+              -DCMAKE_BUILD_TYPE=Release
+              -DGODOTCPP_API_VERSION=4.5
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-cmake-release-godot45
+            artifact-path: cmake-build/bin/libgodot-cpp.linux.template_release.x86_64.a
+            run-tests: true
+            godot-test-versions: "4.5-stable 4.6-stable"
+            godot-test-arch: "linux.x86_64"
+            godot-master-workflow: linux_builds.yml
+            godot-master-artifact: linux-editor-mono
 
+          - name: 🐧 Linux (GCC, Makefiles) for Godot 4.4
+            os: ubuntu-22.04
+            platform: linux
+            config-flags:
+              -DCMAKE_BUILD_TYPE=Release
+              -DGODOTCPP_API_VERSION=4.4
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-cmake-release-godot44
+            artifact-path: cmake-build/bin/libgodot-cpp.linux.template_release.x86_64.a
+            run-tests: true
+            godot-test-versions: "4.4-stable 4.5-stable 4.6-stable"
+            godot-test-arch: "linux.x86_64"
+            godot-master-workflow: linux_builds.yml
+            godot-master-artifact: linux-editor-mono
+
+          - name: 🐧 Linux (GCC, Makefiles) for Godot 4.3
+            os: ubuntu-22.04
+            platform: linux
+            config-flags:
+              -DCMAKE_BUILD_TYPE=Release
+              -DGODOTCPP_API_VERSION=4.3
+            artifact-name: godot-cpp-linux-glibc2.27-x86_64-cmake-release-godot43
+            artifact-path: cmake-build/bin/libgodot-cpp.linux.template_release.x86_64.a
+            run-tests: true
+            godot-test-versions: "4.3-stable 4.4-stable 4.5-stable 4.6-stable"
+            godot-test-arch: "linux.x86_64"
+            godot-master-workflow: linux_builds.yml
+            godot-master-artifact: linux-editor-mono
+
+          # Linux-clang
+          - name: 🐧 Linux (Clang, Makefiles)
+            os: ubuntu-22.04
+            platform: linux
+            compiler: clang
+            config-flags: -DCMAKE_BUILD_TYPE=Release
+            artifact-name: godot-cpp-linux-clang-x86_64-cmake-release
+            artifact-path: cmake-build/bin/libgodot-cpp.linux.template_release.x86_64.a
+            run-tests: true
+            godot-test-arch: "linux.x86_64"
+            godot-master-workflow: linux_builds.yml
+            godot-master-artifact: linux-editor-mono
+
+          # linux android
           - name: 🤖 Android (arm64, Ninja)
             os: ubuntu-22.04
             platform: android
@@ -75,11 +125,69 @@ jobs:
               -G Ninja -DCMAKE_BUILD_TYPE=Release
               --toolchain ${ANDROID_HOME}/ndk/28.1.13356709/build/cmake/android.toolchain.cmake
               -DANDROID_PLATFORM=24 -DANDROID_ABI=arm64-v8a
-            artifact-name: godot-cpp-android-arm64-release.cmake
+            artifact-name: godot-cpp-android-arm64-cmake-release
             artifact-path: cmake-build/bin/libgodot-cpp.android.template_release.arm64.a
-            flags: arch=arm64
-            run-tests: false
 
+          # linux web
+          - name: 🌐 Web (wasm32, Ninja)
+            os: ubuntu-22.04
+            platform: web
+            config-flags:
+              -G Ninja  -DCMAKE_BUILD_TYPE=Release
+              --toolchain ${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
+            artifact-name: godot-cpp-web-wasm32-cmake-release
+            artifact-path: cmake-build/bin/libgodot-cpp.web.template_release.wasm32.a
+          # Linux-double
+          # Linux-dev
+          # Linux-32bit
+
+          # Windows-msvc
+          - name: 🏁 Windows (x86_64, MSVC)
+            os: windows-2022
+            platform: windows
+            compiler: msvc
+            build-flags: --config Release
+            artifact-name: godot-cpp-windows-msvc2022-x86_64-cmake-release
+            artifact-path: cmake-build/bin/libgodot-cpp.windows.template_release.x86_64.lib
+            run-tests: true
+            godot-test-arch: "win64.exe"
+            godot-master-workflow: windows_builds.yml
+            godot-master-artifact: windows-editor
+
+          # Windows-mingw
+          - name: 🏁 Windows (x86_64, MinGW, Ninja)
+            os: windows-2022
+            platform: windows
+            compiler: mingw
+            config-flags:
+              -GNinja -DCMAKE_BUILD_TYPE=Release
+              -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=c++
+            artifact-name: godot-cpp-windows-mingw-x86_64-cmake-release
+            artifact-path: cmake-build/bin/libgodot-cpp.windows.template_release.x86_64.a
+            run-tests: true
+            godot-test-arch: "win64.exe"
+            godot-master-workflow: windows_builds.yml
+            godot-master-artifact: windows-editor
+          # Windows-clang?
+          # Windows-msys2?
+          # Windows-cygwin?
+          # Windows-emscripten?
+          # Windows-android?
+
+          # macos
+          - name: 🍎 macOS (universal, Makefiles)
+            os: macos-latest
+            platform: macos
+            config-flags: -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+            artifact-name: godot-cpp-macos-universal-cmake-release
+            artifact-path: cmake-build/bin/libgodot-cpp.macos.template_release.universal.a
+            run-tests: true
+            godot-test-arch: "macos.universal"
+            godot-master-workflow: macos_builds.yml
+            godot-master-artifact: macos-editor
+          # macos-android?
+          # macos-web?
+          # macos-ios
           - name: 🍏 iOS (arm64, XCode)
             os: macos-latest
             platform: ios
@@ -88,57 +196,59 @@ jobs:
               --toolchain cmake/ios.toolchain.cmake
               -DPLATFORM=OS64
             build-flags: --config Release
-            artifact-name: godot-cpp-ios-arm64-release.cmake
+            artifact-name: godot-cpp-ios-arm64-cmake-release
             artifact-path: cmake-build/bin/libgodot-cpp.ios.template_release.arm64.a
-            flags: arch=arm64
-            run-tests: false
-
-          - name: 🌐 Web (wasm32, Ninja)
-            os: ubuntu-22.04
-            platform: web
-            config-flags:
-              -G Ninja  -DCMAKE_BUILD_TYPE=Release
-              --toolchain ${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
-            artifact-name: godot-cpp-web-wasm32-release.cmake
-            artifact-path: cmake-build/bin/libgodot-cpp.web.template_release.wasm32.a
-            run-tests: false
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.9
+        with:
+          disable_annotations: true
 
       - name: Setup godot-cpp
         uses: ./.github/actions/setup-godot-cpp
         with:
           platform: ${{ matrix.platform }}
-          windows-compiler: ${{ matrix.compiler }}
+          compiler: ${{ matrix.compiler }}
           buildtool: cmake
 
+      - name: Clean committed macOS framework bundles for CMake
+        if: matrix.platform  == 'macos'
+        run: |
+          echo "Removing pre-committed framework folders (required for CMake FRAMEWORK TRUE)"
+          rm -rf test/project/bin/libgdexample.macos.template_debug.framework
+          rm -rf test/project/bin/libgdexample.macos.template_release.framework
+
+      # Configure and build the debug target with CMake
       - name: Configure godot-cpp-test with template_debug
-        run: >
+        id: configure-debug
+        run: |
+          echo "DEBUG_BUILD_START=$(date +%s)" >> $GITHUB_ENV
           cmake --log-level=VERBOSE -S . -B cmake-build ${{ env.config-flags }} ${{ matrix.config-flags }}
 
       - name: Build godot-cpp-test (template_debug)
-        run: >
-          cmake --build cmake-build --verbose  --target godot-cpp-test ${{ matrix.build-flags }}
+        id: build-debug
+        run: |
+          cmake --build cmake-build --verbose --target godot-cpp-test ${{ matrix.build-flags }}
+          echo "DEBUG_BUILD_END=$(date +%s)" >> $GITHUB_ENV
 
+      # Configure and build the release target with CMake
       - name: Configure godot-cpp-test with template_release
-        run: >
-          cmake --fresh --log-level=VERBOSE -S . -B cmake-build
-          -DGODOTCPP_TARGET=template_release ${{ env.config-flags }} ${{ matrix.config-flags }}
+        id: configure-release
+        run: |
+          echo "RELEASE_BUILD_START=$(date +%s)" >> $GITHUB_ENV
+          cmake --fresh --log-level=VERBOSE -S . -B cmake-build -DGODOTCPP_TARGET=template_release ${{ env.config-flags }} ${{ matrix.config-flags }}
 
       - name: Build godot-cpp-test (template_release)
-        run: >
-          cmake --build cmake-build --verbose  --target godot-cpp-test ${{ matrix.build-flags }}
-
-      - name: Run sccache stat for check
-        shell: bash
-        run: ${SCCACHE_PATH} --show-stats
+        id: build-release
+        run: |
+          cmake --build cmake-build --verbose --target godot-cpp-test ${{ matrix.build-flags }}
+          echo "RELEASE_BUILD_END=$(date +%s)" >> $GITHUB_ENV
 
       - name: Download latest Godot artifacts
         uses: dsnopek/action-download-artifact@1322f74e2dac9feed2ee76a32d9ae1ca3b4cf4e9
@@ -147,40 +257,86 @@ jobs:
           repo: godotengine/godot
           branch: master
           event: push
-          workflow: linux_builds.yml
+          workflow: ${{ matrix.godot-master-workflow }}
           workflow_conclusion: success
-          name: linux-editor-mono
+          name: ${{ matrix.godot-master-artifact }}
           search_artifacts: true
           check_artifacts: true
           ensure_latest: true
           path: godot-artifacts
 
-      - name: Prepare Godot artifacts for testing
-        if: matrix.run-tests && env.GODOT_TEST_VERSION == 'master'
-        run: |
-          chmod +x ./godot-artifacts/godot.linuxbsd.editor.x86_64.mono
-          echo "GODOT=$(pwd)/godot-artifacts/godot.linuxbsd.editor.x86_64.mono" >> $GITHUB_ENV
-
-      - name: Download requested Godot version for testing
-        if: matrix.run-tests && env.GODOT_TEST_VERSION != 'master'
-        run: |
-          wget "https://github.com/godotengine/godot-builds/releases/download/${GODOT_TEST_VERSION}/Godot_v${GODOT_TEST_VERSION}_linux.x86_64.zip" -O Godot.zip
-          unzip -a Godot.zip
-          chmod +x "Godot_v${GODOT_TEST_VERSION}_linux.x86_64"
-          echo "GODOT=$(pwd)/Godot_v${GODOT_TEST_VERSION}_linux.x86_64" >> $GITHUB_ENV
-
       - name: Run tests
         if: matrix.run-tests
-        run: |
-          $GODOT --headless --version
-          cd test
-          # Need to run the editor so .godot is generated... but it crashes! Ignore that :-)
-          (cd project && (timeout 30 $GODOT --import --headless >/dev/null 2>&1 || true))
-          ./run-tests.sh
+        run: python -X utf8 run-tests.py --verbose --godot-test-versions "${{ matrix.godot-test-versions }}" --godot-test-arch "${{ matrix.godot-test-arch }}"
+        working-directory: test
+        env:
+          GITHUB_STEP_SUMMARY: ${{ env.GITHUB_STEP_SUMMARY }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
           if-no-files-found: error
+
+      - name: Show build and sccache statistics
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "### ⏱️ Build Times"
+            echo ""
+            echo "| Target              | Duration |"
+            echo "|---------------------|----------|"
+
+            debug_duration=$((DEBUG_BUILD_END - DEBUG_BUILD_START))
+            release_duration=$((RELEASE_BUILD_END - RELEASE_BUILD_START))
+
+            echo "| template_debug      | ${debug_duration}s    |"
+            echo "| template_release    | ${release_duration}s    |"
+            echo ""
+
+            STATS=$("${SCCACHE_PATH}" --show-stats 2>/dev/null || echo "")
+            if [ -n "$STATS" ]; then
+              REQUESTS=$(echo "$STATS" | grep -oP 'Compile requests\s+\K\d+' || echo "0")
+              HITS=$(echo "$STATS" | grep -oP 'Cache hits\s+\K\d+' || echo "0")
+              MISSES=$(echo "$STATS" | grep -oP 'Cache misses\s+\K\d+' || echo "0")
+
+              if [ "$REQUESTS" -gt 0 ]; then
+                HIT_RATE=$(awk "BEGIN {printf \"%.2f\", ($HITS / $REQUESTS) * 100}")
+              else
+                HIT_RATE="0.00"
+              fi
+
+              echo "### 💾 Cache Summary"
+              echo ""
+              echo "**sccache hit rate: ${HIT_RATE}%** (${HITS}/${REQUESTS} requests cached)"
+              if [ "$MISSES" -eq 0 ]; then
+                echo "👌 **Perfect cache hit** — no cache misses!"
+              else
+                echo "**${MISSES} cache miss(es)**"
+              fi
+              echo ""
+
+              # Collapsible full stats
+              echo "<details>"
+              echo "<summary>📈 Full sccache Statistics</summary>"
+              echo ""
+              echo "| Metric | Value |"
+              echo "|--------|-------|"
+              echo "$STATS" | awk '
+                /^[A-Za-z]/ {
+                  gsub(/^[ \t]+|[ \t]+$/, "");
+                  gsub(/[ \t]{2,}/, "|");
+                  print "| " $0 " |";
+                }
+              '
+              echo ""
+              echo "</details>"
+            else
+              echo "**sccache statistics not available**"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY" || true
+
+          # Stop sccache server (ignore errors)
+          "${SCCACHE_PATH}" --stop-server || true

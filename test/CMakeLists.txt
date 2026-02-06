@@ -29,6 +29,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE godot-cpp)
 
 ### Get useful properties from godot-cpp target
 get_target_property(GODOTCPP_SUFFIX godot-cpp GODOTCPP_SUFFIX)
+get_target_property(GODOTCPP_TARGET godot-cpp GODOTCPP_TARGET)
 
 # gersemi: off
 set_target_properties(
@@ -60,10 +61,28 @@ set_target_properties(
 )
 # gersemi: on
 
-# CMAKE_SYSTEM_NAME refers to the target system
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND MINGW)
+    # Make the GDExtension DLL self-contained (no external MinGW runtime DLLs)
+    target_link_options(${TARGET_NAME} PRIVATE "$<IF:$<BOOL:${MINGW}>,-static-libgcc;-static-libstdc++,>")
+
+    # Also ensure no undefined symbols
+    target_link_options(${TARGET_NAME} PRIVATE -Wl,--no-undefined)
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set_target_properties(
         ${TARGET_NAME}
-        PROPERTIES SUFFIX "" OUTPUT_DIR "${OUTPUT_DIR}/libgdexample.macos.${GODOTCPP_TARGET}.framework"
+        PROPERTIES
+            OUTPUT_NAME "libgdexample.macos.${GODOTCPP_TARGET}"
+            FRAMEWORK TRUE
+            FRAMEWORK_VERSION A
+            MACOSX_FRAMEWORK_IDENTIFIER
+                "com.godot.gdexample" # can be anything, doesn't matter much
+            MACOSX_FRAMEWORK_BUNDLE_VERSION 1.0
+            MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1.0
+            # These help with rpath and universal builds
+            MACOSX_RPATH TRUE
+            INSTALL_NAME_DIR "@rpath"
+            BUILD_WITH_INSTALL_NAME_DIR TRUE
     )
 endif()
