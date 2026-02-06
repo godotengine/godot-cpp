@@ -42,63 +42,75 @@ FILTER_PATTERNS = [
 TEMP_EXE_NAME = "godot-temp-portable.exe"
 TEMP_MARKER_NAME = "_sc_"
 
+PHASE_CLEANUP       = 10
+PHASE_PRE_IMPORT    = 20
+PHASE_UNIT_TESTS    = 30
+PHASE_CLEANUP_TEMP  = 40   # not really a failure point, but for completeness
+
 # ──────────────────────────────────────────────
 # Portable Temp Copy Helpers
 # ──────────────────────────────────────────────
-
-def setup_temp_portable_godot() -> str:
+def setup_temp_portable_godot(quiet:bool=False, verbose:bool=False) -> str:
     """Copy Godot exe + create marker for single-session portable mode."""
     original_path = Path(ORIGINAL_GODOT).resolve()
     if not original_path.is_file():
-        print(f"Warning: Original Godot not found at '{original_path}' — using as-is.")
+        if not quiet:
+            print(f"Warning: Original Godot not found — using as-is.")
         return ORIGINAL_GODOT
 
     temp_exe = Path.cwd() / TEMP_EXE_NAME
     temp_marker = Path.cwd() / TEMP_MARKER_NAME
 
     try:
-        print(f"Creating temporary portable copy: {temp_exe}")
+        if not quiet:
+            print("→ Creating portable Godot", end=" ")
         shutil.copy2(original_path, temp_exe)
-
-        print(f"Creating portable marker: {temp_marker}")
         temp_marker.touch(exist_ok=True)
-
-        # Return path to temp exe
+        if not quiet:
+            print("[ DONE ]")
         return str(temp_exe.absolute())
-
     except Exception as e:
-        print(f"Failed to setup temp portable Godot: {e}")
-        print("Falling back to original executable (may pollute system data dirs)")
+        if not quiet:
+            print("[ FAILED ]")
+            print(f"Failed to setup temp portable Godot: {e}")
         return ORIGINAL_GODOT
 
 
-def cleanup_temp_portable():
+def cleanup_temp_portable(quiet:bool=False, verbose:bool=False):
     """Remove temp exe, marker, and any editor_data folder."""
     temp_exe = Path.cwd() / TEMP_EXE_NAME
     temp_marker = Path.cwd() / TEMP_MARKER_NAME
     editor_data = Path.cwd() / "editor_data"
 
+    cleaned = False
     for path in [temp_exe, temp_marker]:
         if path.exists():
             try:
                 path.unlink()
-                print(f"Cleaned: {path}")
+                cleaned = True
+                if verbose: print(f"Cleaned: {path}")
             except Exception as e:
                 print(f"Warning: Could not delete {path}: {e}")
 
     if editor_data.exists():
         try:
             shutil.rmtree(editor_data)
-            print(f"Cleaned editor_data folder: {editor_data}")
+            if verbose: print(f"Cleaned editor_data folder: {editor_data}")
         except Exception as e:
-            print(f"Warning: Could not delete editor_data: {e}")
+            if verbose: print(f"Warning: Could not delete editor_data: {e}")
+
+    if not quiet and cleaned:
+        print("→ Cleaned [ DONE ]")
+
+
+
 
 
 # ──────────────────────────────────────────────
-# Other Helpers (unchanged from previous)
+# Other Helpers
 # ──────────────────────────────────────────────
 
-def filter_output(lines: list[str], verbose: bool) -> list[str]:
+def filter_output(lines: list[str], quiet:bool=False, verbose:bool=False) -> list[str]:
     if verbose:
         return [line.rstrip() for line in lines if line.strip()]  # just trim, keep everything
     # original quiet filtering
@@ -118,8 +130,21 @@ def is_successful(output: str) -> bool:
     has_failed = FAILED_MARKER in output
     return has_end and has_passed and not has_failed
 
+def cleanup_godot_cache(quiet:bool=False, verbose:bool=False):
+    cache_dir = PROJECT_DIR / ".godot"
+    if cache_dir.exists():
+        if not quiet:
+            print("→ Cleaning project cache", end=" ")
+        try:
+            shutil.rmtree(cache_dir, ignore_errors=True)
+            if not quiet:
+                print("[ DONE ]")
+        except Exception as e:
+            if verbose:
+                print(f"Warning: Failed to clean .godot: {e}")
+            elif not quiet:
+                print("[ FAILED ]")
 
-def cleanup_godot_cache():
     cache_dir = PROJECT_DIR / ".godot"
     if cache_dir.exists():
         print(f"Cleaning project cache: {cache_dir}")
@@ -128,8 +153,10 @@ def cleanup_godot_cache():
         except Exception as e:
             print(f"Warning: Failed to clean .godot: {e}")
 
-
-def run_godot(args: list[str], desc: str, godot_bin: str, timeout_sec: int = TIMEOUT_SEC, verbose: bool = False) -> tuple[int, str, bool]:
+def run_godot(
+    args: list[str], desc: str, godot_bin: str, timeout_sec: int = TIMEOUT_SEC, quiet: bool = False,
+    verbose: bool = False, phase_code_on_fail=None
+) -> tuple[int, str, bool]:
     print(f"\n{'─' * 10} {desc} {'─' * 10}")
     print(f"→ {godot_bin} {' '.join(args)}")
 
@@ -183,54 +210,82 @@ def run_godot(args: list[str], desc: str, godot_bin: str, timeout_sec: int = TIM
             print(msg)
             return 1, msg, False
 
-def pre_import_project(godot_bin: str, verbose: bool):
-    print("\nPre-importing project (headless, short timeout)...")
-    cleanup_godot_cache()
+def pre_import_project(godot_bin:str, quiet:bool=False, verbose:bool=False):
+    if verbose:
+        print("\nPre-importing project (headless, short timeout)...")
+    elif not quiet: print("→ Pre-import", end=" ")
+
+    cleanup_godot_cache(quiet=quiet, verbose=verbose)
 
     args = ["--path", str(GODOT_PROJECT), "--import", "--headless"]
-    exit_code, output, timed_out = run_godot(args, "Pre-import", godot_bin, timeout_sec=IMPORT_TIMEOUT_SEC, verbose=verbose)
-
+    exit_code, output, timed_out = run_godot(
+        args, "Pre-import", godot_bin,
+        timeout_sec=IMPORT_TIMEOUT_SEC,
+        verbose=verbose, quiet=quiet
+    )
     if timed_out or exit_code != 0:
         if verbose:
-            print("→ Pre-import failed or timed out (full output above)")
-        else:
-            print("→ Pre-import failed/crashed — continuing anyway")
+            print("→ Pre-import failed or timed out — continuing anyway")
+        elif not quiet:
+            print("[ CRASH/FAIL ]")
+        return False, PHASE_PRE_IMPORT
     else:
-        print("→ Pre-import completed")
+        if verbose:
+            print("→ Pre-import completed")
+        elif not quiet:
+            print("[ DONE ]")
+        return True, 0
 
 
-def run_tests(mode: str, godot_bin: str, verbose) -> bool:
+def run_tests(mode: str, godot_bin: str, quiet:bool=False, verbose:bool=False) -> bool:
     overall_success = True
+    failed_phase = 0
 
-    # ── One-time preparation ──
-    print("\nPreparing project (one-time cleanup + pre-import)...")
-    cleanup_godot_cache()           # Clean once at start
+    if not quiet:
+        print("Preparing project...")
+# ── One-time preparation ──
+    if not quiet:
+        print("\nPreparing project (one-time cleanup + pre-import)...")
+        print("Preparing project...")
 
-    pre_import_project(godot_bin, verbose)   # Attempt import once (ignore failures)
+    ok, phase = pre_import_project(godot_bin, quiet=quiet, verbose=verbose) # Attempt import once (ignore failures)
+    if not ok:
+        return False   # early return — we'll set exit code higher up
 
     # No more cleanups after this point — let the cache persist
 
     if mode in ("unit", "full"):
+        if not quiet: print("→ Unit / headless tests")
+
         args = ["--path", str(GODOT_PROJECT), "--debug", "--headless", "--quit"]
-        _, output, timed_out = run_godot(args, "Unit / headless tests", godot_bin, verbose=verbose)
+        exit_code, output, timed_out = run_godot(
+            args, "Unit / headless tests", godot_bin,
+            verbose=verbose, quiet=quiet )
 
         # Summary parsing still uses full output
         if timed_out:
-            print("→ Unit phase: TIMEOUT")
+            if not quiet: print("→ Unit phase: TIMEOUT")
             overall_success = False
+            failed_phase = PHASE_UNIT_TESTS
         elif not is_successful(output):
-            print("→ Unit phase: did NOT detect clean success")
+            if not quiet:
+                print("→ Unit phase: did NOT detect clean success")
             overall_success = False
-        else:
-            print("→ Unit phase: detected PASSED")
+            failed_phase = PHASE_UNIT_TESTS
+        elif not quiet:
+            # Show minimal success summary even in non-verbose
+            lines = output.splitlines()
+            for line in lines:
+                if any(m in line for m in [END_MARKER, PASSED_MARKER]):
+                    print(line.strip())
+            print("→ Unit phase: [ PASSED ]")
 
-    if not verbose:
-        # Optional: print a small reminder about the known error
-        if "ExampleInternal" in output:
-            print("  (known non-fatal warning about 'ExampleInternal' suppressed)")
+        if verbose:
+            # Optional: print a small reminder about the known error
+            if "ExampleInternal" in output:
+                print("  (known non-fatal warning about 'ExampleInternal' suppressed)")
 
     return overall_success
-
 
 # ──────────────────────────────────────────────
 # Main
@@ -239,33 +294,51 @@ def main():
     parser = argparse.ArgumentParser(description="Run godot-cpp test suite (temp portable Godot)")
     parser.add_argument("--unit-only", action="store_const", const="unit", dest="mode")
     parser.add_argument("--verbose", action="store_true", default=False,
-        help="Show full unfiltered Godot output + more detailed runner messages")
+        help="Show full unfiltered Godot output")
+    parser.add_argument("--quiet", action="store_true", default=False,
+        help="Minimal output — only final exit code (for CI)")
     args = parser.parse_args()
 
-    mode = args.mode or "full"
+    mode   = args.mode or "full"
     verbose = args.verbose
+    quiet  = args.quiet
 
-    print(f"Original Godot: {ORIGINAL_GODOT}")
-    print(f"Project:        {GODOT_PROJECT}")
-    print(f"Mode:           {mode}")
-    print(f"Verbose:        {verbose}\n")
+    # ── Early exit for quiet mode if we want ultra-minimal ──
+    if quiet:
+        # We'll suppress almost all prints later
+        def qprint(*a, **kw): pass
+        global print
+        print = qprint   # monkey-patch print (crude but effective for this script)
 
-    # Setup temp portable copy
-    godot_bin = setup_temp_portable_godot()
-
-    try:
-        all_passed = run_tests(mode, godot_bin, verbose)
-    finally:
-        # Always cleanup temp files
-        cleanup_temp_portable()
-
-    print("\n" + "═" * 40)
-    if all_passed:
-        print("TEST SUITE PASSED")
-        sys.exit(0)
-    else:
-        print("TEST SUITE FAILED")
+    if quiet and verbose:
+        print("Error: --quiet and --verbose are mutually exclusive", file=sys.stderr)
         sys.exit(1)
+
+    print(f"Godot Executable: {ORIGINAL_GODOT}")
+    print(f"Project:          {GODOT_PROJECT}")
+    print(f"Mode:             {mode}")
+    print(f"Verbose:          {verbose}\n")
+
+    godot_bin = setup_temp_portable_godot(quiet=quiet)
+
+    exit_code = 0
+    try:
+        success = run_tests(mode, godot_bin, verbose=verbose, quiet=quiet)
+        if not success:
+            exit_code = 3   # default unit failure; overridden in run_tests if earlier phase
+    except Exception as e:
+        print(f"Runner crashed: {e}", file=sys.stderr)
+        exit_code = 1
+    finally:
+        cleanup_temp_portable(quiet=quiet, verbose=verbose)
+
+    if not quiet:
+        print("\n" + "═" * 40)
+        status = "PASSED" if exit_code == 0 else f"FAILED (code {exit_code})"
+        duration = f" - took {int(time.time() - start_time)}s" if 'start_time' in globals() else ""
+        print(f"TEST SUITE {status}{duration}")
+
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
