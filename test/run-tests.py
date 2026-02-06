@@ -65,15 +65,11 @@ def filter_output(lines: list[str]) -> list[str]:
         result.append(cleaned)
     return result
 
-def is_successful(output: str) -> bool:
-    return END_MARKER in output and PASSED_MARKER in output and FAILED_MARKER not in output
-
 # ──────────────────────────────────────────────
 # Portable Godot
 # ──────────────────────────────────────────────
 
-def setup_temp_portable_godot():
-    original_path = Path(ORIGINAL_GODOT).resolve()
+def setup_temp_portable_godot( original_path:Path ):
     if not original_path.is_file():
         print(f"Warning: Original Godot not found — using as-is.")
         return ORIGINAL_GODOT
@@ -178,12 +174,12 @@ def run_godot(
 
             if verbose:
                 print(full_output.rstrip())
-                print(f"→ Exit code: {exit_code}")
+                print(f"\n{'─' * 10} {desc} - exit:{exit_code:#x} {'─' * 10}")
 
             if timeout:
                 return 124, "TIMEOUT", f'After {timeout_sec}s', full_output
 
-            return exit_code, "DONE", f'Exit code: {exit_code}', full_output
+            return exit_code, "DONE", f'Exit code: {exit_code:#x}', full_output
 
         except Exception as exc:
             stdout = stdout_path.read_text("utf-8", errors="replace")
@@ -215,30 +211,68 @@ def pre_import_project(godot_bin: str, verbose: bool = False):
     return exit_code != 0
 
 
-def run_tests(mode: str, godot_bin: str, verbose: bool = False) -> bool:
-    success = True
+def run_integration_tests(godot_bin: str, verbose: bool = False) -> bool:
+    print("→ Unit/Integration Tests", end=' ', flush=True)
 
-    if mode in ("unit", "full"):
-        print("→ Unit/Integration Tests", end=' ', flush=True)
+    args = [
+        "--path", str(GODOT_PROJECT),
+        "--debug", "--headless", "--quit"]
+    exitcode, strcode, msg, output = run_godot(
+        args, "Unit/Integration tests", godot_bin, verbose=verbose
+    )
 
-        args = ["--path", str(GODOT_PROJECT), "--debug", "--headless", "--quit"]
-        exitcode, strcode, msg, output = run_godot(
-            args, "Unit tests", godot_bin, verbose=verbose
-        )
+    def is_successful(output: str) -> bool:
+        return END_MARKER in output and PASSED_MARKER in output and FAILED_MARKER not in output
 
-        if not verbose:
-            print(f"[ {strcode} ]", end=' ')
-            print(f"- {msg}" if msg else '')
+    if not verbose:
+        print(f"[ {strcode} ]", end=' ')
+        print(f"- {msg}" if msg else '')
 
-        if exitcode == 127:
-            print("→ Unit phase: TIMEOUT")
-            success = False
-        elif not is_successful(output):
-            print("→ Unit phase: FAILED")
-            success = False
+    if exitcode == 127:
+        print("→ Unit phase: TIMEOUT")
+        return False
+    elif not is_successful(output):
+        print("→ Unit phase: FAILED")
+        return False
+    else:
+        return True
 
-    return success
 
+def generate_extension_docs(godot_bin: str, verbose: bool = False) -> bool:
+    print("→ GDExtension XML DocGen", end=' ', flush=True)
+
+    # Run from inside project/ (demo/), pointing --doctool at ../
+    args = [
+        "--path", str(PROJECT_DIR),
+        "--doctool", "..", "--gdextension-docs",
+        "--headless", "--quit",
+    ]
+    exitcode, strcode, msg, output = run_godot(
+        args, "GDExtension XML DocGen", godot_bin, verbose=verbose
+    )
+
+    # print the completion of the non verbose line.
+    if not verbose:
+        print(f"[ {strcode} ]", end=' ')
+        print(f"- {msg}" if msg else '')
+
+    if strcode == 'TIMEOUT':
+        if verbose: print("→ DocGen phase: TIMEOUT")
+        return False
+
+    doc_path = (PROJECT_DIR.parent / "doc_classes").resolve()
+    if doc_path.exists():
+        xml_files = list(doc_path.glob('*.xml'))
+        if len(xml_files) > 0:
+            if verbose:
+                print(f"→ DocGen doc_classes/ created at: {doc_path} ({len(xml_files)} XML files)")
+                for file in xml_files: print(file)
+            return True
+        if verbose: print("→ Warning: DocGen Command succeeded but no doc_classes/*.xml found")
+        return False
+    else:
+        print("→ DocGen phase: FAILED")
+        return False
 
 # ──────────────────────────────────────────────
 # Main
@@ -246,18 +280,28 @@ def run_tests(mode: str, godot_bin: str, verbose: bool = False) -> bool:
 
 def main():
     parser = argparse.ArgumentParser(description="Run godot-cpp test suite")
-    parser.add_argument("--unit-only", action="store_const", const="unit", dest="mode")
+    parser.add_argument("--tests-only", action="store_const", const="unit", dest="mode",
+        help="Only run the integration tests (skip doc xml generation)")
+    parser.add_argument("--docs-only", action="store_const", const="docs", dest="mode",
+        help="Only generate GDExtension XML documentation (skip tests)")
     parser.add_argument("--verbose", action="store_true", default=False,
         help="Show full unfiltered Godot output")
     parser.add_argument("--quiet", action="store_true", default=False,
         help="Only exit code (0=success, >0=failure); no output")
+    parser.add_argument("--editor-bin", default=ORIGINAL_GODOT,
+        help="Path to Godot editor binary for --doctool (default: same as test Godot)")
     args = parser.parse_args()
 
     # store a reference to print
     original_print = builtins.print
 
+    godot_path = Path(ORIGINAL_GODOT).resolve()
+    editor_path = Path(args.editor_bin).resolve()
+    # TODO test godot bin to make sure its ok.
+
     mode   = args.mode or "full"
     verbose = args.verbose
+
 
     if args.quiet:
         def silent(*_args, **_kwargs):
@@ -277,14 +321,19 @@ def main():
     print(f"Mode:             {mode}")
     print(f"Verbose:          {verbose}\n")
 
-    godot_bin = setup_temp_portable_godot()
-    # TODO test godot bin to make sure its ok.
+    godot_bin = setup_temp_portable_godot(godot_path)
 
     pre_clean = cleanup_godot_cache(verbose=verbose)
-
     pre_import = pre_import_project(godot_bin, verbose=verbose)
+    # NOTE: the above arent strictly necessary , and the import will always fail anyway.
 
-    success = run_tests(mode, godot_bin, verbose=verbose)
+    success = True
+    if mode in ("unit", "full") and success:
+        success = run_integration_tests(godot_bin, verbose=verbose)
+
+    if mode in ("docs", "full") and success:
+        editor_bin = godot_bin if editor_path == godot_path else setup_temp_portable_godot(editor_path)
+        success = generate_extension_docs(editor_bin, verbose=verbose)
 
     cleanup_temp_portable()
 
@@ -300,3 +349,25 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#
+# try:
+#     godot_bin = setup_temp_portable_godot()   # still use temp copy for tests
+#
+#     if args.generate_docs_only:
+#         # Standalone mode — use possibly different editor binary
+#         editor_bin = args.godot_editor
+#         success = generate_extension_docs(editor_bin)
+#     else:
+#         # Normal test run
+#         all_passed = run_tests(mode, godot_bin)
+#
+#         if all_passed and mode == "full":   # only do docs in full mode, after tests pass
+#             print("\nAll tests passed → generating GDExtension docs as final step...")
+#             success = generate_extension_docs(godot_bin)   # reuse test Godot binary
+#             all_passed = all_passed and success
+#         else:
+#             success = all_passed   # no docs run → status is just tests
+#
+# finally:
+#     cleanup_temp_portable()
