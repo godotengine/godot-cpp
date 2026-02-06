@@ -19,7 +19,7 @@ target_sources(
 # conditionally add doc data to compile output
 if(GODOTCPP_TARGET MATCHES "editor|template_debug")
     file(GLOB_RECURSE DOC_XML LIST_DIRECTORIES NO CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/doc_classes/*.xml")
-    target_doc_sources( ${TARGET_NAME} ${DOC_XML} )
+    target_doc_sources( ${TARGET_NAME} "${DOC_XML}" )
 endif()
 
 set(OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin/")
