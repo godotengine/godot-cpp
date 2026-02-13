@@ -7,10 +7,10 @@ reloadable=false
 
 [entry]
 
-X11.64="res://bin/libgdexample.linux.release.64.so"
-Server.64="res://bin/libgdexample.linux.release.64.so"
-Windows.64="res://bin/libgdexample.windows.release.64.dll"
-OSX.64="res://bin/libgdexample.osx.release.64.dylib"
+X11.64="res://bin/libgdexample.linux.release.x86_64.so"
+Server.64="res://bin/libgdexample.linux.release.x86_64.so"
+Windows.64="res://bin/libgdexample.windows.release.x86_64.dll"
+OSX.64="res://bin/libgdexample.osx.release.universal.dylib"
 
 [dependencies]
 
