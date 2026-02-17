@@ -13,8 +13,8 @@ update procedure used to sync this repository with upstream releases:
   version/commit which you are using.
   * Or if you use an official release, download that version of the Godot editor.
 - Use the compiled or downloaded executable to generate the `extension_api.json`
-  and `gdextension_interface.h` files with:
+  and `gdextension_interface.json` files with:
 
 ```
-godot --dump-extension-api --dump-gdextension-interface
+godot --dump-extension-api --dump-gdextension-interface-json
 ```
