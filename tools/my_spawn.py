@@ -11,23 +11,12 @@ def configure(env):
     import subprocess
 
     def mySubProcess(cmdline, env):
-        # print "SPAWNED : " + cmdline
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        proc = subprocess.Popen(
-            cmdline,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            startupinfo=startupinfo,
-            shell=False,
-            env=env,
-        )
-        data, err = proc.communicate()
-        rv = proc.wait()
+        # print(cmdline)
+        rv = subprocess.run(args=cmdline, shell=True, env=env).returncode
         if rv:
             print("=====")
-            print(err.decode("utf-8"))
+            print("subprocess.run().returncode=", rv, "(", hex(rv), ")")
+            print("len(cmdline)=", len(cmdline))
             print("=====")
         return rv
 
@@ -36,15 +25,27 @@ def configure(env):
         cmdline = cmd + " " + newargs
 
         rv = 0
-        if len(cmdline) > 32000 and cmd.endswith("ar"):
-            cmdline = cmd + " " + args[1] + " " + args[2] + " "
-            for i in range(3, len(args)):
-                rv = mySubProcess(cmdline + args[i], env)
-                if rv:
-                    break
+        if len(args) > 4 and cmd.endswith("ar"):
+            # print("Long ar command is split.\nargc=", len(args))
+            lead = len(" ".join(args[0:3]))
+            begin = 3
+            length = lead + 1 + len(args[begin])
+            for i in range(4, len(args)):
+                length += 1 + len(args[i])
+                if length > 8158:
+                    cmdline = " ".join(args[0:3] + args[begin:i])
+                    # print("objs=", i - begin, ", length=", len(cmdline))
+                    rv = mySubProcess(cmdline, env)
+                    if rv:
+                        break
+                    begin = i
+                    length = lead + 1 + len(args[begin])
+            if not rv:
+                cmdline = " ".join(args[0:3] + args[begin:])
+                # print("objs=", len(args) - begin, ", length=", len(cmdline))
+                rv = mySubProcess(cmdline, env)
         else:
-            rv = mySubProcess(cmdline, env)
-
+            rv = mySubProcess(" ".join(args), env)
         return rv
 
     env["SPAWN"] = mySpawn
