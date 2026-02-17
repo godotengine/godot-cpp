@@ -2,6 +2,7 @@ import os
 import sys
 
 import common_compiler_flags
+from SCons.Variables import BoolVariable
 
 
 def has_osxcross():
@@ -11,6 +12,7 @@ def has_osxcross():
 def options(opts):
     opts.Add("macos_deployment_target", "macOS deployment target", "default")
     opts.Add("macos_sdk_path", "macOS SDK path", "")
+    opts.Add(BoolVariable("with_x86_64h", "If arch=x86_64 or universal, include an x86_64h slice.", False))
     if has_osxcross():
         opts.Add("osxcross_sdk", "OSXCross SDK version", "darwin16")
 
@@ -54,6 +56,10 @@ def generate(env):
     else:
         env.Append(LINKFLAGS=["-arch", env["arch"]])
         env.Append(CCFLAGS=["-arch", env["arch"]])
+
+    if env["with_x86_64h"] and env["arch"] in ["universal", "x86_64"]:
+        env.Append(LINKFLAGS=["-arch", "x86_64h"])
+        env.Append(CCFLAGS=["-arch", "x86_64h"])
 
     if env["macos_deployment_target"] != "default":
         env.Append(CCFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
