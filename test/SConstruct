@@ -6,6 +6,10 @@ env = SConscript("../SConstruct")
 env.Append(CPPPATH=['src/'])
 sources = Glob('src/*.cpp')
 
+if env["perfetto"]:
+    env.Append(CPPDEFINES=["ENABLE_PERFETTO"])
+    env.Append(CPPPATH=[env["perfetto"]])
+
 library = env.SharedLibrary(
     "bin/libgdexample.{}.{}.{}{}".format(
         env["platform"], env["target"], env["arch_suffix"], env["SHLIBSUFFIX"]

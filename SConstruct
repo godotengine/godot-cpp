@@ -162,6 +162,7 @@ opts.Add(
 )
 
 opts.Add(BoolVariable("build_library", "Build the godot-cpp library.", True))
+opts.Add(PathVariable("perfetto", "Path to the perfetto include directory in the Godot Engine source", None, PathVariable.PathIsDir))
 
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
