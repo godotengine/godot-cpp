@@ -1831,7 +1831,13 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         for value in class_api["constants"]:
             if "type" not in value:
                 value["type"] = "int"
-            result.append(f"\tstatic const {value['type']} {value['name']} = {value['value']};")
+            const_value = value["value"]
+            if value["type"] == "int" and const_value == -2147483648:
+                # -2147483648 is a valid value for int, but MSVC doesn't read the whole thing as a literal,
+                # instead it sees 2147483648 (which is too big for an an int) and then applies the unary minus.
+                # This is a workaround for that.
+                const_value = "-2147483647 - 1"
+            result.append(f"\tstatic const {value['type']} {value['name']} = {const_value};")
         result.append("")
 
     if is_singleton:
