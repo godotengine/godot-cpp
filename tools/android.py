@@ -2,7 +2,6 @@ import os
 import sys
 
 import common_compiler_flags
-import my_spawn
 
 
 def options(opts):
@@ -43,9 +42,6 @@ def generate(env):
     if env["arch"] not in ("arm64", "x86_64", "arm32", "x86_32"):
         print("Only arm64, x86_64, arm32, and x86_32 are supported on Android. Exiting.")
         env.Exit(1)
-
-    if sys.platform == "win32" or sys.platform == "msys":
-        my_spawn.configure(env)
 
     # Validate API level
     if int(env["android_api_level"]) < 24:
@@ -101,6 +97,17 @@ def generate(env):
         },
     }
     arch_info = arch_info_table[env["arch"]]
+    
+    if sys.platform == "win32" or sys.platform == "msys":
+        # Using short path which is guaranteed to have no whitespaces
+        import subprocess
+
+        def get_short_path(long_path):
+            cmd = f'cmd /c for %A in ("{long_path}") do @echo %~sA'
+            output = subprocess.check_output(cmd, shell=True)
+            return output.decode('utf-8').strip()
+
+        toolchain = get_short_path(toolchain)
 
     # Setup tools
     env["CC"] = toolchain + "/bin/clang"
@@ -111,6 +118,12 @@ def generate(env):
     env["STRIP"] = toolchain + "/bin/llvm-strip"
     env["RANLIB"] = toolchain + "/bin/llvm-ranlib"
     env["SHLIBSUFFIX"] = ".so"
+
+    if sys.platform == "win32" or sys.platform == "msys":
+        # Use TempFileMunge since some AR invocations are too long for cmd.exe.
+        # Use POSIX-style paths, required with TempFileMunge.
+        env["ARCOM_POSIX"] = env["ARCOM"].replace("$TARGET", "$TARGET.posix").replace("$SOURCES", "$SOURCES.posix")
+        env["ARCOM"] = "${TEMPFILE(ARCOM_POSIX)}"
 
     env.Append(
         CCFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"], "-fPIC"]
