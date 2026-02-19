@@ -22,10 +22,10 @@ This repository contains the  *C++ bindings* for the [**Godot Engine**](https://
 > - [`godot-4.5-stable`](https://github.com/godotengine/godot-cpp/tree/godot-4.5-stable)
 > - [`3.x`](https://github.com/godotengine/godot-cpp/tree/3.x)
 
-Starting with version 10.x, godot-cpp is versioned independently from Godot. The godot-cpp version you
-choose has no bearing on which Godot versions it is compatible with.
+Starting with version 10.x, godot-cpp is versioned independently from Godot.
+Using the `api_version` parameter (see below), godot-cpp v10 can target Godot 4.3 or later (including 4.6).
 
-Until we have a stable release branch, you can use the `master` branch, or choose any of the previous
+Until we have a stable release branch, you can use the `master` branch (v10), or choose any of the previous
 version branches and tags for your project.
 
 ## Compatibility
