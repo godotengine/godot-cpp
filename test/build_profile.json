@@ -1,6 +1,7 @@
 {
 	"enabled_classes": [
 		"Control",
+		"Engine",
 		"InputEventKey",
 		"Label",
 		"MultiplayerAPI",
@@ -9,6 +10,7 @@
 		"TileMap",
 		"TileSet",
 		"Tween",
-		"Viewport"
+		"Viewport",
+		"XRServer"
 	]
 }

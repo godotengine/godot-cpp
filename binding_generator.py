@@ -2071,6 +2071,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
     result = []
 
     class_name = class_api["name"]
+    inherits = class_api["inherits"] if "inherits" in class_api else "Wrapped"
     snake_class_name = camel_to_snake(class_name)
     is_singleton = class_name in singletons
 
@@ -2110,17 +2111,23 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
         result.append("#ifdef DEBUG_ENABLED")
         result.append("\t\tERR_FAIL_NULL_V(singleton_obj, nullptr);")
         result.append("#endif // DEBUG_ENABLED")
+        # This will lead to the constructor which will set `singleton`.
         result.append(
-            f"\t\tsingleton = reinterpret_cast<{class_name} *>(::godot::gdextension_interface::object_get_instance_binding(singleton_obj, ::godot::gdextension_interface::token, &{class_name}::_gde_binding_callbacks));"
+            f"\t\t::godot::gdextension_interface::object_get_instance_binding(singleton_obj, ::godot::gdextension_interface::token, &{class_name}::_gde_binding_callbacks);"
         )
         result.append("#ifdef DEBUG_ENABLED")
         result.append("\t\tERR_FAIL_NULL_V(singleton, nullptr);")
         result.append("#endif // DEBUG_ENABLED")
-        result.append("\t\tif (likely(singleton)) {")
-        result.append(f"\t\t\tClassDB::_register_engine_singleton({class_name}::get_class_static(), singleton);")
-        result.append("\t\t}")
         result.append("\t}")
         result.append("\treturn singleton;")
+        result.append("}")
+        result.append("")
+
+        result.append(f"{class_name}::{class_name}(GodotObject *p_godot_object) : {inherits}(p_godot_object) {{")
+        result.append("\tif (singleton == nullptr) {")
+        result.append("\t\tsingleton = this;")
+        result.append(f"\t\tClassDB::_register_engine_singleton({class_name}::get_class_static(), singleton);")
+        result.append("\t}")
         result.append("}")
         result.append("")
 
@@ -2129,6 +2136,10 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
         result.append(f"\t\tClassDB::_unregister_engine_singleton({class_name}::get_class_static());")
         result.append("\t\tsingleton = nullptr;")
         result.append("\t}")
+        result.append("}")
+        result.append("")
+    else:
+        result.append(f"{class_name}::{class_name}(GodotObject *p_godot_object) : {inherits}(p_godot_object) {{")
         result.append("}")
         result.append("")
 
