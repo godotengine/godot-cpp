@@ -55,7 +55,7 @@ endif()
 # Define our project.
 project(
     godot-cpp
-    VERSION 4.4
+    VERSION 4.5
     DESCRIPTION "C++ bindings for the Godot Engine's GDExtensions API."
     HOMEPAGE_URL "https://github.com/godotengine/godot-cpp"
     LANGUAGES CXX
