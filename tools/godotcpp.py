@@ -12,6 +12,7 @@ from SCons.Tool import Tool
 from SCons.Variables import BoolVariable, EnumVariable, PathVariable
 from SCons.Variables.BoolVariable import _text2bool
 
+import scu_builders
 from binding_generator import _generate_bindings, _get_file_list, get_file_list
 from build_profile import generate_trimmed_api
 from doc_source_generator import scons_generate_doc_source
@@ -137,6 +138,19 @@ def scons_emit_files(target, source, env):
     profile_filepath = env.get("build_profile", "")
     if profile_filepath:
         profile_filepath = normalize_path(profile_filepath, env)
+
+    # Clean scu files
+    if not env["gen_scu_build"] and not env["scu_build"]:
+        for root, dirs, files in os.walk(".", topdown=False):
+            if os.path.basename(root) == ".scu":
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+                os.rmdir(root)
+
+            if ".scu" in dirs:
+                dirs.remove(".scu")
 
     # Always clean all files
     env.Clean(target, [env.File(f) for f in get_file_list(str(source[0]), target[0].abspath, True, True)])
@@ -395,6 +409,9 @@ def options(opts, env):
     opts.Add(BoolVariable("deprecated", "Enable compatibility code for deprecated and removed features", True))
     opts.Add(BoolVariable("dev_build", "Developer build with dev-only debugging code (DEV_ENABLED)", False))
     opts.Add(BoolVariable("verbose", "Enable verbose output for the compilation", False))
+    opts.Add(BoolVariable("scu_build", "Use single compilation unit build", False))
+    opts.Add(BoolVariable("gen_scu_build", "Generate scu files", False))
+    opts.Add("scu_limit", "Max includes per SCU file when using scu_build (determines RAM use)", "0")
 
     # Add platform options (custom tools can override platforms)
     for pl in sorted(set(platforms + custom_platforms)):
@@ -579,14 +596,34 @@ def _godot_cpp(env):
         env.AlwaysBuild(bindings)
         env.NoCache(bindings)
 
+    # Run SCU file generation script if in a SCU build.
+    if env["gen_scu_build"]:
+        env.AppendUnique(CPPPATH=".")
+        max_includes_per_scu = 8
+        if env.dev_build:
+            max_includes_per_scu = 1024
+
+        read_scu_limit = int(env["scu_limit"])
+        read_scu_limit = max(0, min(read_scu_limit, 1024))
+        if read_scu_limit != 0:
+            max_includes_per_scu = read_scu_limit
+
+        scu_builders.generate_scu_files(max_includes_per_scu)
+
     # Sources to compile
-    sources = [
-        *env.Glob("src/*.cpp"),
-        *env.Glob("src/classes/*.cpp"),
-        *env.Glob("src/core/*.cpp"),
-        *env.Glob("src/variant/*.cpp"),
-        *tuple(f for f in bindings if str(f).endswith(".cpp")),
-    ]
+    if env["scu_build"]:
+        sources = []
+        for f in {"src/classes", "src/variant", "gen/src/variant", "src/core", "gen/src/classes", "src"}:
+            sources.append(env.Glob(f.replace("\\", "/") + "/.scu/*.cpp"))
+        env.AppendUnique(CPPPATH=".")
+    else:
+        sources = [
+            *env.Glob("src/*.cpp"),
+            *env.Glob("src/classes/*.cpp"),
+            *env.Glob("src/core/*.cpp"),
+            *env.Glob("src/variant/*.cpp"),
+            *tuple(f for f in bindings if str(f).endswith(".cpp")),
+        ]
 
     # Includes
     env.AppendUnique(
