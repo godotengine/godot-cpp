@@ -2917,6 +2917,13 @@ def correct_default_value(value, type_name):
         "{}": "Dictionary()",
         "Transform2D(1, 0, 0, 1, 0, 0)": "Transform2D()",  # Default transform.
         "Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)": "Transform3D()",  # Default transform.
+        "pi": "Math_PI",
+        "-pi": "-Math_PI",
+        "tau": "Math_TAU",
+        "-tau": "-Math_TAU",
+        "inf": "Math_INF",
+        "-inf": "-Math_INF",
+        "nan": "Math_NAN",
     }
     if value in value_map:
         return value_map[value]
