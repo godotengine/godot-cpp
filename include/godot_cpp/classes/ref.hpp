@@ -42,30 +42,34 @@ namespace godot {
 
 // Helper class for RefCounted objects, same as Godot one.
 
-class RefCounted;
-
 template <typename T>
 class Ref {
 	T *reference = nullptr;
 
-	void ref(const Ref &p_from) {
-		if (p_from.reference == reference) {
+	_FORCE_INLINE_ void ref(const Ref &p_from) {
+		ref_pointer<false>(p_from.reference);
+	}
+
+	template <bool Init>
+	_FORCE_INLINE_ void ref_pointer(T *p_refcounted) {
+		if (p_refcounted == reference) {
 			return;
 		}
 
-		unref();
-
-		reference = p_from.reference;
+		// This will go out of scope and get unref'd.
+		Ref cleanup_ref;
+		cleanup_ref.reference = reference;
+		reference = p_refcounted;
 		if (reference) {
-			reference->reference();
-		}
-	}
-
-	void ref_pointer(T *p_ref) {
-		ERR_FAIL_NULL(p_ref);
-
-		if (p_ref->init_ref()) {
-			reference = p_ref;
+			if constexpr (Init) {
+				if (!reference->init_ref()) {
+					reference = nullptr;
+				}
+			} else {
+				if (!reference->reference()) {
+					reference = nullptr;
+				}
+			}
 		}
 	}
 
@@ -111,40 +115,32 @@ public:
 		ref(p_from);
 	}
 
-	template <typename T_Other>
-	void operator=(const Ref<T_Other> &p_from) {
-		RefCounted *refb = const_cast<RefCounted *>(static_cast<const RefCounted *>(p_from.ptr()));
-		if (!refb) {
-			unref();
+	void operator=(Ref &&p_from) {
+		if (reference == p_from.reference) {
 			return;
 		}
+		unref();
+		reference = p_from.reference;
+		p_from.reference = nullptr;
+	}
 
-		Ref r;
-		r.reference = Object::cast_to<T>(refb);
-		ref(r);
-		r.reference = nullptr;
+	template <typename T_Other>
+	void operator=(const Ref<T_Other> &p_from) {
+		ref_pointer<false>(Object::cast_to<T>(p_from.ptr()));
+	}
+
+	void operator=(T *p_from) {
+		ref_pointer<true>(p_from);
 	}
 
 	void operator=(const Variant &p_variant) {
-		// Needs testing, Variant has a cast to Object * here.
-
-		// Object *object = p_variant.get_validated_object();
-		Object *object = p_variant;
+		Object *object = p_variant.get_validated_object();
 
 		if (object == reference) {
 			return;
 		}
 
-		unref();
-
-		if (!object) {
-			return;
-		}
-
-		T *r = Object::cast_to<T>(object);
-		if (r && r->reference()) {
-			reference = r;
-		}
+		ref_pointer<false>(Object::cast_to<T>(object));
 	}
 
 	template <typename T_Other>
@@ -152,69 +148,55 @@ public:
 		if (reference == p_ptr) {
 			return;
 		}
-		unref();
 
-		T *r = Object::cast_to<T>(p_ptr);
-		if (r) {
-			ref_pointer(r);
-		}
+		ref_pointer<true>(Object::cast_to<T>(p_ptr));
 	}
 
 	Ref(const Ref &p_from) {
-		ref(p_from);
+		this->operator=(p_from);
+	}
+
+	Ref(Ref &&p_from) {
+		reference = p_from.reference;
+		p_from.reference = nullptr;
 	}
 
 	template <typename T_Other>
 	Ref(const Ref<T_Other> &p_from) {
-		RefCounted *refb = const_cast<RefCounted *>(static_cast<const RefCounted *>(p_from.ptr()));
-		if (!refb) {
-			unref();
-			return;
-		}
-
-		Ref r;
-		r.reference = Object::cast_to<T>(refb);
-		ref(r);
-		r.reference = nullptr;
+		this->operator=(p_from);
 	}
 
-	Ref(T *p_reference) {
-		if (p_reference) {
-			ref_pointer(p_reference);
-		}
+	Ref(T *p_from) {
+		this->operator=(p_from);
 	}
 
-	Ref(const Variant &p_variant) {
-		// Needs testing, Variant has a cast to Object * here.
-
-		// Object *object = p_variant.get_validated_object();
-		Object *object = p_variant;
-
-		if (!object) {
-			return;
-		}
-
-		T *r = Object::cast_to<T>(object);
-		if (r && r->reference()) {
-			reference = r;
-		}
+	Ref(const Variant &p_from) {
+		this->operator=(p_from);
 	}
 
 	inline bool is_valid() const { return reference != nullptr; }
 	inline bool is_null() const { return reference == nullptr; }
 
 	void unref() {
-		if (reference && reference->unreference()) {
-			memdelete(reference);
+		if (reference) {
+			// NOTE: `reinterpret_cast` is "safe" here because we know `T` has simple linear
+			// inheritance to `RefCounted`. This guarantees that `T * == `RefCounted *`, which
+			// allows us to declare `Ref<T>` with forward declared `T` types.
+			if (reinterpret_cast<RefCounted *>(reference)->unreference()) {
+				memdelete(reinterpret_cast<RefCounted *>(reference));
+			}
+			reference = nullptr;
 		}
-		reference = nullptr;
 	}
 
-	void instantiate() {
-		ref(memnew(T()));
+	template <typename... VarArgs>
+	void instantiate(VarArgs... p_params) {
+		ref(memnew(T(p_params...)));
 	}
 
-	Ref() {}
+	uint32_t hash() const { return HashMapHasherDefault::hash(reference); }
+
+	Ref() = default;
 
 	~Ref() {
 		unref();
@@ -224,7 +206,7 @@ public:
 	// without adding to the refcount.
 	inline static Ref<T> _gde_internal_constructor(Object *obj) {
 		Ref<T> r;
-		r.reference = (T *)obj;
+		r.reference = reinterpret_cast<T *>(obj);
 		return r;
 	}
 };
