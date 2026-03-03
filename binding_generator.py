@@ -1676,6 +1676,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
         used_classes = list(used_classes)
         used_classes.sort()
         fully_used_classes = list(fully_used_classes)
+        if class_api["name"] == "RefCounted":
+            fully_used_classes.remove("Ref")  # Special case; Ref should include RefCounted but not vice versa.
         fully_used_classes.sort()
 
         with header_filename.open("w+", encoding="utf-8") as header_file:
