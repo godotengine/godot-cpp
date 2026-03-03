@@ -168,7 +168,7 @@ function(target_doc_sources TARGET SOURCES)
 
     # Create the file generation target, this won't be triggered unless a target
     # that depends on DOC_SOURCE_FILE is built
-    generate_doc_source( "${DOC_SOURCE_FILE}" ${SOURCES} )
+    generate_doc_source( "${DOC_SOURCE_FILE}" "${SOURCES}" )
 
     # Add DOC_SOURCE_FILE as a dependency to TARGET
     target_sources(${TARGET} PRIVATE "${DOC_SOURCE_FILE}")
