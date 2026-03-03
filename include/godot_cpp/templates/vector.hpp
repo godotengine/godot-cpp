@@ -40,6 +40,7 @@
 #include <godot_cpp/templates/cowdata.hpp>
 #include <godot_cpp/templates/search_array.hpp>
 #include <godot_cpp/templates/sort_array.hpp>
+#include <godot_cpp/templates/span.hpp>
 
 #include <climits>
 #include <initializer_list>
@@ -89,6 +90,9 @@ public:
 	_FORCE_INLINE_ const T *ptr() const { return _cowdata.ptr(); }
 	_FORCE_INLINE_ void clear() { resize(0); }
 	_FORCE_INLINE_ bool is_empty() const { return _cowdata.is_empty(); }
+
+	_FORCE_INLINE_ operator Span<T>() const { return _cowdata.span(); }
+	_FORCE_INLINE_ Span<T> span() const { return _cowdata.span(); }
 
 	_FORCE_INLINE_ T get(Size p_index) { return _cowdata.get(p_index); }
 	_FORCE_INLINE_ const T &get(Size p_index) const { return _cowdata.get(p_index); }
