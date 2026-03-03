@@ -45,9 +45,9 @@
 #include <godot_cpp/variant/callable_method_pointer.hpp>
 
 #include <godot_cpp/templates/a_hash_map.hpp>
+#include <godot_cpp/templates/hash_set.hpp>
 #include <godot_cpp/templates/list.hpp>
 #include <mutex>
-#include <set>
 
 namespace godot {
 
@@ -86,10 +86,10 @@ public:
 		StringName parent_name;
 		GDExtensionInitializationLevel level = GDEXTENSION_INITIALIZATION_SCENE;
 		AHashMap<StringName, MethodBind *> method_map;
-		std::set<StringName> signal_names;
+		HashSet<StringName> signal_names;
 		AHashMap<StringName, VirtualMethod> virtual_methods;
-		std::set<StringName> property_names;
-		std::set<StringName> constant_names;
+		HashSet<StringName> property_names;
+		HashSet<StringName> constant_names;
 		// Pointer to the parent custom class, if any. Will be null if the parent class is a Godot class.
 		ClassInfo *parent_ptr = nullptr;
 	};
