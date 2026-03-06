@@ -40,7 +40,7 @@ extern "C" GDExtensionInterfaceGetProcAddress get_proc_address;
 extern "C" GDExtensionClassLibraryPtr library;
 extern "C" void *token;
 
-#if GODOT_VERSION_MINOR >= 5
+#if GODOT_VERSION >= 0x040500
 extern "C" GDExtensionGodotVersion2 godot_version;
 #else
 extern "C" GDExtensionGodotVersion godot_version;
@@ -73,7 +73,7 @@ public:
 		GDExtensionInitializationLevel minimum_initialization_level = GDEXTENSION_INITIALIZATION_CORE;
 		Callback init_callback = nullptr;
 		Callback terminate_callback = nullptr;
-#if GODOT_VERSION_MINOR >= 5
+#if GODOT_VERSION >= 0x040500
 		GDExtensionMainLoopCallbacks main_loop_callbacks = {};
 
 		inline bool has_main_loop_callbacks() const {
@@ -114,7 +114,7 @@ public:
 		void register_terminator(Callback p_init) const;
 		void set_minimum_library_initialization_level(ModuleInitializationLevel p_level) const;
 
-#if GODOT_VERSION_MINOR >= 5
+#if GODOT_VERSION >= 0x040500
 		// Register a callback that is called after all initialization levels when Godot is fully initialized.
 		void register_startup_callback(GDExtensionMainLoopStartupCallback p_callback) const;
 		// Register a callback that is called for every process frame. This will run after all `_process()` methods on Node, and before `ScriptServer::frame()`.

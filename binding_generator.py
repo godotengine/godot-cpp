@@ -376,8 +376,8 @@ def generate_gdextension_interface_loader_header(data):
     versions = sorted(data.keys())
     for version in versions:
         (major, minor) = version.split(".")
-        result.append(f"// Godot 4.{minor} or newer.")
-        result.append(f"#if GODOT_VERSION_MINOR >= {minor}")
+        result.append(f"// Godot {major}.{minor} or newer.")
+        result.append(f"#if GODOT_VERSION >= 0x{major.zfill(2)}{minor.zfill(2)}00")
 
         for func in data[version]:
             name = func["name"]
@@ -385,14 +385,16 @@ def generate_gdextension_interface_loader_header(data):
 
             if "deprecated" in func:
                 (deprecated_major, deprecated_minor) = func["deprecated"]["since"].split(".")
-                result.append(f"#if !defined(DISABLE_DEPRECATED) || GODOT_VERSION_MINOR < {deprecated_minor}")
+                result.append(
+                    f"#if !defined(DISABLE_DEPRECATED) || GODOT_VERSION < 0x{deprecated_major.zfill(2)}{deprecated_minor.zfill(2)}00"
+                )
 
             result.append(f'extern "C" {fn} {name};')
 
             if "deprecated" in func:
                 result.append("#endif")
 
-        result.append(f"#endif // GODOT_VERSION_MINOR >= {minor}")
+        result.append(f"#endif // GODOT_VERSION >= 0x{major.zfill(2)}{minor.zfill(2)}00")
         result.append("")
 
     result.append("} // namespace gdextension_interface")
@@ -426,8 +428,8 @@ def generate_gdextension_interface_loader_source(data):
 
     for version in versions:
         (major, minor) = version.split(".")
-        result.append(f"// Godot 4.{minor} or newer.")
-        result.append(f"#if GODOT_VERSION_MINOR >= {minor}")
+        result.append(f"// Godot {major}.{minor} or newer.")
+        result.append(f"#if GODOT_VERSION >= 0x{major.zfill(2)}{minor.zfill(2)}00")
 
         for func in data[version]:
             name = func["name"]
@@ -435,14 +437,16 @@ def generate_gdextension_interface_loader_source(data):
 
             if "deprecated" in func:
                 (deprecated_major, deprecated_minor) = func["deprecated"]["since"].split(".")
-                result.append(f"#if !defined(DISABLE_DEPRECATED) || GODOT_VERSION_MINOR < {deprecated_minor}")
+                result.append(
+                    f"#if !defined(DISABLE_DEPRECATED) || GODOT_VERSION < 0x{deprecated_major.zfill(2)}{deprecated_minor.zfill(2)}00"
+                )
 
             result.append(f"{fn} {name} = nullptr;")
 
             if "deprecated" in func:
                 result.append("#endif")
 
-        result.append(f"#endif // GODOT_VERSION_MINOR >= {minor}")
+        result.append(f"#endif // GODOT_VERSION >= 0x{major.zfill(2)}{minor.zfill(2)}00")
         result.append("")
 
     result.append("} // namespace gdextension_interface")
@@ -454,8 +458,8 @@ def generate_gdextension_interface_loader_source(data):
 
     for version in versions:
         (major, minor) = version.split(".")
-        result.append(f"\t// Godot 4.{minor} or newer.")
-        result.append(f"#if GODOT_VERSION_MINOR >= {minor}")
+        result.append(f"\t// Godot {major}.{minor} or newer.")
+        result.append(f"#if GODOT_VERSION >= 0x{major.zfill(2)}{minor.zfill(2)}00")
 
         for func in data[version]:
             name = func["name"]
@@ -466,14 +470,16 @@ def generate_gdextension_interface_loader_source(data):
 
             if "deprecated" in func:
                 (deprecated_major, deprecated_minor) = func["deprecated"]["since"].split(".")
-                result.append(f"#if !defined(DISABLE_DEPRECATED) || GODOT_VERSION_MINOR < {deprecated_minor}")
+                result.append(
+                    f"#if !defined(DISABLE_DEPRECATED) || GODOT_VERSION < 0x{deprecated_major.zfill(2)}{deprecated_minor.zfill(2)}00"
+                )
 
             result.append(f"\tLOAD_PROC_ADDRESS({name}, {fn});")
 
             if "deprecated" in func:
                 result.append("#endif")
 
-        result.append(f"#endif // GODOT_VERSION_MINOR >= {minor}")
+        result.append(f"#endif // GODOT_VERSION >= 0x{major.zfill(2)}{minor.zfill(2)}00")
         result.append("")
 
     result.append("\treturn true;")
@@ -1138,7 +1144,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if class_name == "Dictionary":
         result.append("\tconst Variant &operator[](const Variant &p_key) const;")
         result.append("\tVariant &operator[](const Variant &p_key);")
-        result.append("#if GODOT_VERSION_MINOR >= 4")
+        result.append("#if GODOT_VERSION >= 0x040400")
         result.append(
             "\tvoid set_typed(uint32_t p_key_type, const StringName &p_key_class_name, const Variant &p_key_script, uint32_t p_value_type, const StringName &p_value_class_name, const Variant &p_value_script);"
         )
@@ -2331,6 +2337,10 @@ def generate_version_header(api, output_dir):
     header.append(f'#define GODOT_VERSION_BUILD "{api["header"]["version_build"]}"')
 
     header.append("")
+
+    header.append(
+        "#define GODOT_VERSION 0x10000 * GODOT_VERSION_MAJOR + 0x100 * GODOT_VERSION_MINOR + GODOT_VERSION_PATCH"
+    )
 
     with header_file_path.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))
