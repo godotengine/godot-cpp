@@ -32,7 +32,7 @@
 
 #include <godot_cpp/core/version.hpp>
 
-#if GODOT_VERSION_MINOR >= 4
+#if GODOT_VERSION >= 0x040400
 
 #include <gdextension_interface.h>
 #include <godot_cpp/variant/variant.hpp>
@@ -509,4 +509,4 @@ struct VariantDefaultInitializer {
 
 } // namespace godot
 
-#endif // GODOT_VERSION_MINOR >= 4
+#endif // GODOT_VERSION >= 0x040400
