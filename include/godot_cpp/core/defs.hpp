@@ -35,6 +35,10 @@
 #include <type_traits>
 #include <utility>
 
+#if __has_include(<godot_cpp/core/version.hpp>)
+#include <godot_cpp/core/version.hpp>
+#endif
+
 namespace godot {
 
 #if !defined(GDE_EXPORT)
