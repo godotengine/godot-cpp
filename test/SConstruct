@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import os
+
 env = SConscript("../SConstruct")
 
 # For the reference:
@@ -13,6 +15,9 @@ env = SConscript("../SConstruct")
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 env.Append(CPPPATH=["src/"])
 sources = Glob("src/*.cpp")
+
+if "clang" in os.path.basename(env["CC"]) and ARGUMENTS.get("use_pch", "no") == "yes":
+    env.Append(CXXFLAGS=["-include-pch", f"{os.path.abspath('./src/pch.hpp.pch')}"])
 
 if env["target"] in ["editor", "template_debug"]:
     doc_data = env.GodotCPPDocData("src/gen/doc_data.gen.cpp", source=Glob("doc_classes/*.xml"))
