@@ -113,6 +113,62 @@ struct PtrToArg {};
 		}                                                                     \
 	}
 
+#define MAKE_PTRARG_CONVERTER(m_type, m_conv, m_to, m_from)            \
+	template <>                                                        \
+	struct PtrToArg<m_type> {                                          \
+		_FORCE_INLINE_ static m_type convert(const void *p_ptr) {      \
+			return m_to(*reinterpret_cast<const m_conv *>(p_ptr));     \
+		}                                                              \
+		typedef m_conv EncodeT;                                        \
+		_FORCE_INLINE_ static void encode(m_type p_val, void *p_ptr) { \
+			*reinterpret_cast<m_conv *>(p_ptr) = m_from(p_val);        \
+		}                                                              \
+		_FORCE_INLINE_ static m_conv encode_arg(m_type p_val) {        \
+			return m_from(p_val);                                      \
+		}                                                              \
+	};                                                                 \
+	template <>                                                        \
+	struct PtrToArg<const m_type &> {                                  \
+		_FORCE_INLINE_ static m_type convert(const void *p_ptr) {      \
+			return m_to(*reinterpret_cast<const m_conv *>(p_ptr));     \
+		}                                                              \
+		typedef m_conv EncodeT;                                        \
+		_FORCE_INLINE_ static void encode(m_type p_val, void *p_ptr) { \
+			*reinterpret_cast<m_conv *>(p_ptr) = m_from(p_val);        \
+		}                                                              \
+		_FORCE_INLINE_ static m_conv encode_arg(m_type p_val) {        \
+			return m_from(p_val);                                      \
+		}                                                              \
+	}
+
+#define MAKE_PTRARG_CONVERTER_BY_REFERENCE(m_type, m_conv, m_to, m_from)      \
+	template <>                                                               \
+	struct PtrToArg<m_type> {                                                 \
+		_FORCE_INLINE_ static m_type convert(const void *p_ptr) {             \
+			return m_to(*reinterpret_cast<const m_conv *>(p_ptr));            \
+		}                                                                     \
+		typedef m_conv EncodeT;                                               \
+		_FORCE_INLINE_ static void encode(const m_type &p_val, void *p_ptr) { \
+			*reinterpret_cast<m_type *>(p_ptr) = m_from(p_val);               \
+		}                                                                     \
+		_FORCE_INLINE_ static m_conv encode_arg(const m_type &p_val) {        \
+			return m_from(p_val);                                             \
+		}                                                                     \
+	};                                                                        \
+	template <>                                                               \
+	struct PtrToArg<const m_type &> {                                         \
+		_FORCE_INLINE_ static m_type convert(const void *p_ptr) {             \
+			return m_to(*reinterpret_cast<const m_conv *>(p_ptr));            \
+		}                                                                     \
+		typedef m_conv EncodeT;                                               \
+		_FORCE_INLINE_ static void encode(const m_type &p_val, void *p_ptr) { \
+			*reinterpret_cast<m_type *>(p_ptr) = m_from(p_val);               \
+		}                                                                     \
+		_FORCE_INLINE_ static m_conv encode_arg(const m_type &p_val) {        \
+			return m_from(p_val);                                             \
+		}                                                                     \
+	}
+
 MAKE_PTRARGCONV(bool, uint8_t);
 // Integer types.
 MAKE_PTRARGCONV(uint8_t, int64_t);
