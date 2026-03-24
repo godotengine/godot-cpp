@@ -528,6 +528,9 @@ Variant::operator PackedVector4Array() const {
 
 Object *Variant::get_validated_object() const {
 #if GODOT_VERSION_MINOR >= 4
+	if (get_type() != OBJECT) {
+		return nullptr;
+	}
 	return ObjectDB::get_instance(operator ObjectID());
 #else
 	// Note: This isn't actually validated, but we can't do any better in Godot 4.3 or earlier.
