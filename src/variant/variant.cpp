@@ -536,6 +536,10 @@ Object *Variant::get_validated_object() const {
 }
 
 Variant &Variant::operator=(const Variant &other) {
+	if (unlikely(this == &other)) {
+		return *this;
+	}
+
 	clear();
 	::godot::gdextension_interface::variant_new_copy(_native_ptr(), other._native_ptr());
 	return *this;
