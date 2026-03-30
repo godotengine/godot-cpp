@@ -41,6 +41,7 @@
 #include <godot_cpp/core/error_macros.hpp>
 
 #include <stdio.h>
+#include <cstdlib>
 
 namespace godot {
 
