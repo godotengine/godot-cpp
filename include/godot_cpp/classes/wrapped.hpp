@@ -157,7 +157,7 @@ void free_c_property_list(GDExtensionPropertyInfo *plist);
 
 typedef void (*EngineClassRegistrationCallback)();
 void add_engine_class_registration_callback(EngineClassRegistrationCallback p_callback);
-void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks);
+void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks, void (*p_destruct_class_static)());
 void register_engine_classes();
 
 template <typename T>
@@ -167,7 +167,7 @@ struct EngineClassRegistration {
 	}
 
 	static void callback() {
-		register_engine_class(T::get_class_static(), &T::_gde_binding_callbacks);
+		register_engine_class(T::get_class_static(), &T::_gde_binding_callbacks, T::destruct_class_static);
 	}
 };
 
@@ -253,7 +253,16 @@ public:                                                                         
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
 	static const ::godot::StringName &get_class_static() {                                                                                                                             \
-		static const ::godot::StringName string_name = ::godot::StringName(U## #m_class);                                                                                              \
+		return get_class_static_nonconst();                                                                                                                                            \
+	}                                                                                                                                                                                  \
+                                                                                                                                                                                       \
+	static void destruct_class_static() {                                                                                                                                              \
+		::godot::StringName &class_static = get_class_static_nonconst();                                                                                                               \
+		class_static = StringName();                                                                                                                                                   \
+	}                                                                                                                                                                                  \
+                                                                                                                                                                                       \
+	static ::godot::StringName &get_class_static_nonconst() {                                                                                                                          \
+		static ::godot::StringName string_name = ::godot::StringName(U## #m_class);                                                                                                    \
 		return string_name;                                                                                                                                                            \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
@@ -466,7 +475,16 @@ public:                                                                         
 	static void initialize_class() {}                                                                                                                                                  \
                                                                                                                                                                                        \
 	static const ::godot::StringName &get_class_static() {                                                                                                                             \
-		static const ::godot::StringName string_name = ::godot::StringName(#m_alias_for);                                                                                              \
+		return get_class_static_nonconst();                                                                                                                                            \
+	}                                                                                                                                                                                  \
+                                                                                                                                                                                       \
+	static void destruct_class_static() {                                                                                                                                              \
+		::godot::StringName &class_static = get_class_static_nonconst();                                                                                                               \
+		class_static = StringName();                                                                                                                                                   \
+	}                                                                                                                                                                                  \
+                                                                                                                                                                                       \
+	static ::godot::StringName &get_class_static_nonconst() {                                                                                                                          \
+		static ::godot::StringName string_name = ::godot::StringName(#m_alias_for);                                                                                                    \
 		return string_name;                                                                                                                                                            \
 	}                                                                                                                                                                                  \
                                                                                                                                                                                        \
