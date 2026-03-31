@@ -145,12 +145,12 @@ constexpr auto CLAMP(const T m_a, const T2 m_min, const T3 m_max) {
 
 // Returns `true` if a positive integer is a power of 2, `false` otherwise.
 template <typename T>
-inline bool is_power_of_2(const T x) {
+constexpr bool is_power_of_2(const T x) {
 	return x && ((x & (x - 1)) == 0);
 }
 
 // Function to find the next power of 2 to an integer.
-static _FORCE_INLINE_ unsigned int next_power_of_2(unsigned int x) {
+constexpr unsigned int next_power_of_2(unsigned int x) {
 	if (x == 0) {
 		return 0;
 	}
@@ -166,7 +166,7 @@ static _FORCE_INLINE_ unsigned int next_power_of_2(unsigned int x) {
 }
 
 // Function to find the previous power of 2 to an integer.
-static _FORCE_INLINE_ unsigned int previous_power_of_2(unsigned int x) {
+constexpr unsigned int previous_power_of_2(unsigned int x) {
 	x |= x >> 1;
 	x |= x >> 2;
 	x |= x >> 4;
@@ -176,14 +176,14 @@ static _FORCE_INLINE_ unsigned int previous_power_of_2(unsigned int x) {
 }
 
 // Function to find the closest power of 2 to an integer.
-static _FORCE_INLINE_ unsigned int closest_power_of_2(unsigned int x) {
+constexpr unsigned int closest_power_of_2(unsigned int x) {
 	unsigned int nx = next_power_of_2(x);
 	unsigned int px = previous_power_of_2(x);
 	return (nx - x) > (x - px) ? px : nx;
 }
 
 // Get a shift value from a power of 2.
-static inline int get_shift_from_power_of_2(unsigned int p_bits) {
+constexpr int get_shift_from_power_of_2(unsigned int p_bits) {
 	for (unsigned int i = 0; i < 32; i++) {
 		if (p_bits == (unsigned int)(1 << i)) {
 			return i;
@@ -194,13 +194,13 @@ static inline int get_shift_from_power_of_2(unsigned int p_bits) {
 }
 
 template <typename T>
-static _FORCE_INLINE_ T nearest_power_of_2_templated(T x) {
+constexpr T nearest_power_of_2_templated(T x) {
 	--x;
 
 	// The number of operations on x is the base two logarithm
 	// of the number of bits in the type. Add three to account
 	// for sizeof(T) being in bytes.
-	size_t num = get_shift_from_power_of_2(sizeof(T)) + 3;
+	constexpr size_t num = get_shift_from_power_of_2(sizeof(T)) + 3;
 
 	// If the compiler is smart, it unrolls this loop.
 	// If it's dumb, this is a bit slow.
@@ -212,7 +212,7 @@ static _FORCE_INLINE_ T nearest_power_of_2_templated(T x) {
 }
 
 // Function to find the nearest (bigger) power of 2 to an integer.
-static inline unsigned int nearest_shift(unsigned int p_number) {
+constexpr unsigned int nearest_shift(unsigned int p_number) {
 	for (int i = 30; i >= 0; i--) {
 		if (p_number & (1 << i)) {
 			return i + 1;
