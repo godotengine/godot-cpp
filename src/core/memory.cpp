@@ -35,7 +35,7 @@
 namespace godot {
 
 void *Memory::alloc_static(size_t p_bytes, bool p_pad_align) {
-#if GODOT_VERSION_MINOR >= 6
+#if GODOT_VERSION >= 0x040600
 	return ::godot::gdextension_interface::mem_alloc2(p_bytes, p_pad_align);
 #else
 	void *mem = ::godot::gdextension_interface::mem_alloc(p_bytes + (p_pad_align ? DATA_OFFSET : 0));
@@ -58,7 +58,7 @@ void *Memory::realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align) {
 		return nullptr;
 	}
 
-#if GODOT_VERSION_MINOR >= 6
+#if GODOT_VERSION >= 0x040600
 	return ::godot::gdextension_interface::mem_realloc2(p_memory, p_bytes, p_pad_align);
 #else
 	uint8_t *mem = (uint8_t *)p_memory;
@@ -74,7 +74,7 @@ void *Memory::realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align) {
 }
 
 void Memory::free_static(void *p_ptr, bool p_pad_align) {
-#if GODOT_VERSION_MINOR >= 6
+#if GODOT_VERSION >= 0x040600
 	::godot::gdextension_interface::mem_free2(p_ptr, p_pad_align);
 #else
 	uint8_t *mem = (uint8_t *)p_ptr;

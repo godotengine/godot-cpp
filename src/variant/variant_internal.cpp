@@ -30,7 +30,7 @@
 
 #include <godot_cpp/variant/variant_internal.hpp>
 
-#if GODOT_VERSION_MINOR >= 4
+#if GODOT_VERSION >= 0x040400
 
 namespace godot {
 
@@ -44,4 +44,4 @@ void VariantInternal::init_bindings() {
 
 } // namespace godot
 
-#endif // GODOT_VERSION_MINOR >= 4
+#endif // GODOT_VERSION >= 0x040400

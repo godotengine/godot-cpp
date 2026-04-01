@@ -51,7 +51,7 @@ GDExtensionInterfaceGetProcAddress get_proc_address = nullptr;
 GDExtensionClassLibraryPtr library = nullptr;
 void *token = nullptr;
 
-#if GODOT_VERSION_MINOR >= 5
+#if GODOT_VERSION >= 0x040500
 GDExtensionGodotVersion2 godot_version = {};
 #else
 GDExtensionGodotVersion godot_version = {};
@@ -147,7 +147,7 @@ GDExtensionBool GDExtensionBinding::init(GDExtensionInterfaceGetProcAddress p_ge
 	::godot::gdextension_interface::library = p_library;
 	::godot::gdextension_interface::token = p_library;
 
-#if GODOT_VERSION_MINOR >= 5
+#if GODOT_VERSION >= 0x040500
 	LOAD_PROC_ADDRESS(get_godot_version2, GDExtensionInterfaceGetGodotVersion2);
 	::godot::gdextension_interface::get_godot_version2(&::godot::gdextension_interface::godot_version);
 #else
@@ -214,14 +214,14 @@ void GDExtensionBinding::initialize_level(void *p_userdata, GDExtensionInitializ
 	}
 	level_initialized[p_level]++;
 
-#if GODOT_VERSION_MINOR >= 5
+#if GODOT_VERSION >= 0x040500
 	if ((ModuleInitializationLevel)p_level == MODULE_INITIALIZATION_LEVEL_CORE && init_data && init_data->has_main_loop_callbacks()) {
 		::godot::gdextension_interface::register_main_loop_callbacks(::godot::gdextension_interface::library, &init_data->main_loop_callbacks);
 	}
 #endif
 
 	if ((ModuleInitializationLevel)p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
-#if GODOT_VERSION_MINOR >= 5
+#if GODOT_VERSION >= 0x040500
 		::godot::gdextension_interface::editor_register_get_classes_used_callback(::godot::gdextension_interface::library, &ClassDB::_editor_get_classes_used_callback);
 #endif
 
@@ -292,7 +292,7 @@ void GDExtensionBinding::InitObject::set_minimum_library_initialization_level(Mo
 	init_data->minimum_initialization_level = static_cast<GDExtensionInitializationLevel>(p_level);
 }
 
-#if GODOT_VERSION_MINOR >= 5
+#if GODOT_VERSION >= 0x040500
 void GDExtensionBinding::InitObject::register_startup_callback(GDExtensionMainLoopStartupCallback p_callback) const {
 	init_data->main_loop_callbacks.startup_func = p_callback;
 }
