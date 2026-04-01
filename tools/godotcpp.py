@@ -1,6 +1,7 @@
 import os
 import platform
 import sys
+import tempfile
 
 import header_builders
 from SCons import __version__ as scons_raw_version
@@ -545,6 +546,11 @@ def generate(env):
             ),
         }
     )
+    if env["platform"] == "linux" or env.get("use_mingw", False):
+        env.Append(
+            BUILDERS={"GodotStaticLibRspBuilder": Builder(action=Action(_build_static_lib_with_rsp, "$ARCOMSTR"))}
+        )
+
     env.AddMethod(_godot_cpp, "GodotCPP")
 
 
@@ -558,6 +564,25 @@ def _get_api_file(extension_dir, api_version):
         raise UserError("Cannot find `%s` file for api_version %s" % (filename, api_version))
 
     return path
+
+
+def _build_static_lib_with_rsp(target, source, env):
+    target_lib = str(target[0])
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".rsp", delete=False) as rsp_file:
+        rsp_path = rsp_file.name
+        for src in source:
+            rsp_file.write(str(src) + "\n")
+
+    try:
+        ar = env["AR"]
+        arflags = env.get("ARFLAGS", "")
+        command = "{} {} {} @{}".format(ar, arflags, target_lib, rsp_path)
+        env.Execute(command)
+    finally:
+        os.remove(rsp_path)
+
+    return None
 
 
 def _godot_cpp(env):
@@ -600,7 +625,13 @@ def _godot_cpp(env):
     library_name = "libgodot-cpp" + env["suffix"] + env["LIBSUFFIX"]
 
     if env["build_library"]:
-        library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
+        if env["platform"] == "linux" or env.get("use_mingw", False):
+            # Use a custom builder to aggregate object files into a static library using a temporary response file.
+            # This avoids hitting the shell argument limit.
+            library = env.GodotStaticLibRspBuilder(target=env.File("bin/%s" % library_name), source=env.Object(sources))
+        else:
+            library = env.StaticLibrary(target=env.File("bin/%s" % library_name), source=sources)
+
         env.NoCache(library)
         default_args = [library]
 
