@@ -64,6 +64,20 @@ function(godot_arch_name OUTVAR)
         endif()
     endif()
 
+    # Special case for MSVC cross-compilation
+    if(DEFINED CMAKE_VS_PLATFORM_NAME)
+        if(CMAKE_VS_PLATFORM_NAME STREQUAL "Win32")
+            set(${OUTVAR} "x86_32" PARENT_SCOPE)
+            return()
+        elseif(CMAKE_VS_PLATFORM_NAME STREQUAL "x64")
+            set(${OUTVAR} "x86_64" PARENT_SCOPE)
+            return()
+        elseif(CMAKE_VS_PLATFORM_NAME STREQUAL "ARM64")
+            set(${OUTVAR} "arm64" PARENT_SCOPE)
+            return()
+        endif()
+    endif()
+
     # Direct match early out.
     string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" ARCH)
     if(ARCH IN_LIST ARCH_LIST)
