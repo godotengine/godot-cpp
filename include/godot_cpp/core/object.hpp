@@ -70,7 +70,7 @@ struct MethodInfo {
 	GDExtensionClassMethodArgumentMetadata return_val_metadata;
 	LocalVector<GDExtensionClassMethodArgumentMetadata> arguments_metadata;
 
-	inline bool operator==(const MethodInfo &p_method) const { return id == p_method.id; }
+	inline bool operator==(const MethodInfo &p_method) const { return id == p_method.id && name == p_method.name; }
 	inline bool operator<(const MethodInfo &p_method) const { return id == p_method.id ? (name < p_method.name) : (id < p_method.id); }
 
 	operator Dictionary() const;
