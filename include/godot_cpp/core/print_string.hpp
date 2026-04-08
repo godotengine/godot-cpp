@@ -67,4 +67,12 @@ void print_verbose(const Variant &p_variant, Args... p_args) {
 
 bool is_print_verbose_enabled();
 
+// This version avoids processing the text to be printed until it actually has to be printed, saving some CPU usage.
+#define PRINT_VERBOSE(m_variant)          \
+	{                                     \
+		if (is_print_verbose_enabled()) { \
+			print_line(m_variant);        \
+		}                                 \
+	}
+
 } // namespace godot
