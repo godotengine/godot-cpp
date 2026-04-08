@@ -153,8 +153,8 @@ void add_engine_class_registration_callback(EngineClassRegistrationCallback p_ca
 	get_engine_class_registration_callbacks().push_back(p_callback);
 }
 
-void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks) {
-	ClassDB::_register_engine_class(p_name, p_callbacks);
+void register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks, void (*p_destruct_class_static)()) {
+	ClassDB::_register_engine_class(p_name, p_callbacks, p_destruct_class_static);
 }
 
 void register_engine_classes() {

@@ -98,6 +98,7 @@ private:
 	// This may only contain custom classes, not Godot classes
 	static HashMap<StringName, ClassInfo> classes;
 	static AHashMap<StringName, const GDExtensionInstanceBindingCallbacks *> instance_binding_callbacks;
+	static std::set<void (*)()> instance_binding_destruct_class_static_callbacks;
 	// Used to remember the custom class registration order.
 	static LocalVector<StringName> class_register_order;
 	static AHashMap<StringName, Object *> engine_singletons;
@@ -161,8 +162,9 @@ public:
 	template <typename T>
 	static void register_runtime_class();
 
-	_FORCE_INLINE_ static void _register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks) {
+	_FORCE_INLINE_ static void _register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks, void (*p_destruct_class_static)()) {
 		instance_binding_callbacks[p_name] = p_callbacks;
+		instance_binding_destruct_class_static_callbacks.insert(p_destruct_class_static);
 	}
 
 	static void _editor_get_classes_used_callback(GDExtensionTypePtr p_packed_string_array);
@@ -240,6 +242,7 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 	static_assert(!FunctionsAreSame<T::self_type::_bind_methods, T::parent_type::_bind_methods>::value, "Class must declare 'static void _bind_methods'.");
 	static_assert(!std::is_abstract_v<T> || is_abstract, "Class is abstract, please use GDREGISTER_ABSTRACT_CLASS.");
 	instance_binding_callbacks[T::get_class_static()] = &T::_gde_binding_callbacks;
+	instance_binding_destruct_class_static_callbacks.insert(T::destruct_class_static);
 
 	// Register this class within our plugin
 	ClassInfo cl;
