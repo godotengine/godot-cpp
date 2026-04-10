@@ -332,6 +332,7 @@ public:
 	Variant duplicate(bool deep = false) const;
 
 	static String get_type_name(Variant::Type type);
+	static Variant::Type get_type_by_name(const String &p_type_name);
 	static bool can_convert(Variant::Type from, Variant::Type to);
 	static bool can_convert_strict(Variant::Type from, Variant::Type to);
 
