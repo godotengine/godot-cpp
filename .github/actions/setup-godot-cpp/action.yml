@@ -1,71 +1,110 @@
 name: Setup godot-cpp
-description: Setup build dependencies for godot-cpp.
+description: Setup build dependencies for godot-cpp (SCons or CMake).
 
 inputs:
   platform:
     required: true
     description: Target platform.
-  em-version:
-    default: 4.0.11
-    description: Emscripten version.
-  windows-compiler:
-    required: true
-    description: The compiler toolchain to use on Windows ('mingw' or 'msvc').
     type: choice
     options:
-      - mingw
+      - linux
+      - windows
+      - macos
+      - android
+      - web
+
+  compiler:
+    description: Compiler toolchain (auto selects sensible default per platform).
+    required: false
+    default: auto
+    type: choice
+    options:
+      - auto
+      - gcc
+      - clang
       - msvc
-    default: mingw
+      - mingw
+
   mingw-version:
     default: 12.2.0
-    description: MinGW version.
+    description: MinGW version (used only for windows + mingw).
+
   ndk-version:
     default: r28b
     description: Android NDK version.
-  buildtool:
-    default: scons
-    description: scons or cmake
-  scons-version:
-    default: 4.4.0
-    description: SCons version.
 
+  em-version:
+    default: 3.1.74
+    description: Emscripten version (recommended for Godot 4.x web).
+
+  buildtool:
+    description: Build tool to prepare (scons or cmake).
+    default: scons
+    type: choice
+    options:
+      - scons
+      - cmake
+
+  scons-version:
+    default: 4.8.0
+    description: SCons version.
 
 runs:
   using: composite
   steps:
-    - name: Setup Python (for SCons)
+    - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: 3.x
+        python-version: 3.12
 
-    - name: Setup Android dependencies
-      if: inputs.platform == 'android'
+    # === Compiler Toolchain Setup ===
+
+    - name: Setup Clang on Linux or Windows
+      if: ${{ (inputs.platform == 'linux' || inputs.platform == 'windows') && inputs.compiler == 'clang' }}
+      uses: egor-tensin/setup-clang@v2
+      with:
+        version: 18
+
+    - name: Setup MinGW (Windows)
+      if: ${{ inputs.platform == 'windows' && (inputs.compiler == 'mingw' || (inputs.compiler == 'auto' && inputs.compiler != 'msvc')) }}
+      uses: egor-tensin/setup-mingw@v2
+      with:
+        version: ${{ inputs.mingw-version }}
+
+    # MSVC requires no extra setup on windows-latest runners (Visual Studio is preinstalled)
+
+    - name: Setup Android NDK
+      if: ${{ inputs.platform == 'android' }}
       uses: nttld/setup-ndk@v1
       with:
         ndk-version: ${{ inputs.ndk-version }}
         link-to-sdk: true
 
-    - name: Setup Web dependencies
-      if: inputs.platform == 'web'
+    - name: Setup Emscripten (Web)
+      if: ${{ inputs.platform == 'web' }}
       uses: mymindstorm/setup-emsdk@v14
       with:
         version: ${{ inputs.em-version }}
         no-cache: true
 
-    - name: Setup MinGW for Windows/MinGW build
-      if: inputs.platform == 'windows' && inputs.windows-compiler == 'mingw'
-      uses: egor-tensin/setup-mingw@v2
-      with:
-        version: ${{ inputs.mingw-version }}
+    # macOS uses AppleClang by default — no extra setup needed on macos-latest
+
+    # === Build Tool Setup ===
 
     - name: Setup SCons
       if: ${{ inputs.buildtool == 'scons' }}
       shell: bash
       run: |
-        python -c "import sys; print(sys.version)"
         python -m pip install scons==${{ inputs.scons-version }}
         scons --version
 
-    - name: Install Ninja
+    - name: Install Ninja (for CMake)
       if: ${{ inputs.buildtool == 'cmake' }}
-      uses: ashutoshvarma/setup-ninja@master
+      uses: ashutoshvarma/setup-ninja@v1.1
+
+    - name: Debug chosen configuration
+      shell: bash
+      run: |
+        echo "Platform : ${{ inputs.platform }}"
+        echo "Compiler : ${{ inputs.compiler }}"
+        echo "Buildtool: ${{ inputs.buildtool }}"

@@ -133,7 +133,7 @@ jobs:
         uses: ./.github/actions/setup-godot-cpp
         with:
           platform: ${{ matrix.platform }}
-          windows-compiler: ${{ contains(matrix.flags, 'use_mingw=yes') && 'mingw' || 'msvc' }}
+          compiler: ${{ contains(matrix.flags, 'use_mingw=yes') && 'mingw' || 'msvc' }}
           buildtool: scons
 
       - name: Generate godot-cpp sources only
