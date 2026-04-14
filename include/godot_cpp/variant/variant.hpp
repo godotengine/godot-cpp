@@ -299,7 +299,7 @@ public:
 		}
 		Variant result;
 		GDExtensionCallError error;
-		callp_static(type, method, argptrs.data(), argptrs.size(), sizeof...(args), result, error);
+		callp_static(type, method, argptrs.data(), argptrs.size(), result, error);
 		return result;
 	}
 
