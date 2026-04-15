@@ -752,6 +752,15 @@ String Variant::get_type_name(Variant::Type type) {
 	return result;
 }
 
+Variant::Type Variant::get_type_by_name(const String &p_type_name) {
+#if GODOT_VERSION_MINOR >= 7
+	GDExtensionVariantType result = ::godot::gdextension_interface::variant_get_type_by_name(p_type_name._native_ptr());
+	return static_cast<Variant::Type>(result);
+#else
+	return VARIANT_MAX;
+#endif
+}
+
 bool Variant::can_convert(Variant::Type from, Variant::Type to) {
 	GDExtensionBool can = ::godot::gdextension_interface::variant_can_convert(static_cast<GDExtensionVariantType>(from), static_cast<GDExtensionVariantType>(to));
 	return PtrToArg<bool>::convert(&can);
