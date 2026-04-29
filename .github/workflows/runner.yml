@@ -23,7 +23,7 @@ jobs:
       scons: ${{ steps.filter.outputs.scons_any_changed }}
       cmake: ${{ steps.filter.outputs.cmake_any_changed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
       - uses: tj-actions/changed-files@v45
