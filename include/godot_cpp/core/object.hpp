@@ -128,9 +128,9 @@ T *Object::cast_to(Object *p_object) {
 template <typename T>
 const T *Object::cast_to(const Object *p_object) {
 #if GODOT_VERSION_MINOR >= 7
-	return p_object && p_object->is_class(T::get_class_static()) ? static_cast<T *>(p_object) : nullptr;
+	return p_object && p_object->is_class(T::get_class_static()) ? static_cast<const T *>(p_object) : nullptr;
 #else
-	return p_object ? dynamic_cast<T *>(p_object) : nullptr;
+	return p_object ? dynamic_cast<const T *>(p_object) : nullptr;
 #endif
 }
 
