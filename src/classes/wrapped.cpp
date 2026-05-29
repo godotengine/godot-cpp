@@ -40,26 +40,11 @@
 
 namespace godot {
 
-#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
-std::recursive_mutex Wrapped::_constructing_mutex;
-#endif
-
-_GODOT_CPP_THREAD_LOCAL const StringName *Wrapped::_constructing_extension_class_name = nullptr;
-_GODOT_CPP_THREAD_LOCAL const GDExtensionInstanceBindingCallbacks *Wrapped::_constructing_class_binding_callbacks = nullptr;
-
-#ifdef HOT_RELOAD_ENABLED
-_GODOT_CPP_THREAD_LOCAL GDExtensionObjectPtr Wrapped::_constructing_recreate_owner = nullptr;
-#endif
-
 const StringName *Wrapped::_get_extension_class_name() {
 	return nullptr;
 }
 
 void Wrapped::_postinitialize() {
-#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
-	Wrapped::_constructing_mutex.unlock();
-#endif
-
 #if GODOT_VERSION_MINOR >= 4
 	Object *obj = dynamic_cast<Object *>(this);
 	if (obj) {
@@ -74,10 +59,12 @@ void Wrapped::_postinitialize() {
 }
 
 Wrapped::Wrapped(const StringName &p_godot_class) {
+	ConstructInfo &info = _get_construct_info();
+
 #ifdef HOT_RELOAD_ENABLED
-	if (unlikely(Wrapped::_constructing_recreate_owner)) {
-		_owner = Wrapped::_constructing_recreate_owner;
-		Wrapped::_constructing_recreate_owner = nullptr;
+	if (unlikely(info.recreate_owner)) {
+		_owner = info.recreate_owner;
+		info.recreate_owner = nullptr;
 	} else
 #endif
 	{
@@ -90,14 +77,14 @@ Wrapped::Wrapped(const StringName &p_godot_class) {
 #endif
 	}
 
-	if (_constructing_extension_class_name) {
-		::godot::gdextension_interface::object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(_constructing_extension_class_name), this);
-		_constructing_extension_class_name = nullptr;
+	if (info.extension_class_name) {
+		::godot::gdextension_interface::object_set_instance(_owner, reinterpret_cast<GDExtensionConstStringNamePtr>(info.extension_class_name), this);
+		info.extension_class_name = nullptr;
 	}
 
-	if (likely(_constructing_class_binding_callbacks)) {
-		::godot::gdextension_interface::object_set_instance_binding(_owner, ::godot::gdextension_interface::token, this, _constructing_class_binding_callbacks);
-		_constructing_class_binding_callbacks = nullptr;
+	if (likely(info.class_binding_callbacks)) {
+		::godot::gdextension_interface::object_set_instance_binding(_owner, ::godot::gdextension_interface::token, this, info.class_binding_callbacks);
+		info.class_binding_callbacks = nullptr;
 	} else {
 		CRASH_NOW_MSG("BUG: Godot Object created without binding callbacks. Did you forget to use memnew()?");
 	}
