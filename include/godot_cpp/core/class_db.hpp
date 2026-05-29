@@ -117,13 +117,27 @@ private:
 	static GDExtensionObjectPtr _create_instance_func(void *data) {
 #endif // GODOT_VERSION_MINOR >= 4
 		if constexpr (!std::is_abstract_v<T>) {
-			Wrapped::_set_construct_info<T>();
 #if GODOT_VERSION_MINOR >= 4
+#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
+			// When the construction state is a shared global rather than
+			// thread_local (macOS + hot reload), it must be guarded for the
+			// whole construction, mirroring _pre_initialize() (the memnew path).
+			// _postinitialize() releases the lock; when post-init is deferred we
+			// release it here to keep the recursive_mutex balanced.
+			Wrapped::_constructing_mutex.lock();
+#endif
+			Wrapped::_set_construct_info<T>();
 			T *new_object = new ("", "") T;
 			if (p_notify_postinitialize) {
 				new_object->_postinitialize();
 			}
+#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
+			else {
+				Wrapped::_constructing_mutex.unlock();
+			}
+#endif
 #else
+			Wrapped::_set_construct_info<T>();
 			T *new_object = memnew(T);
 #endif // GODOT_VERSION_MINOR >= 4
 			return new_object->_owner;
