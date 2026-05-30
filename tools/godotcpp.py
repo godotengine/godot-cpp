@@ -359,7 +359,7 @@ def options(opts, env):
         BoolVariable(
             key="use_hot_reload",
             help="Enable the extra accounting required to support hot reload.",
-            default=env.get("use_hot_reload", None),
+            default=env.get("use_hot_reload", False),
         )
     )
 
@@ -454,7 +454,7 @@ def generate(env):
     print("Building for architecture " + env["arch"] + " on platform " + env["platform"])
 
     # These defaults may be needed by platform tools
-    env.use_hot_reload = env.get("use_hot_reload", env["target"] != "template_release")
+    env.use_hot_reload = env["use_hot_reload"]
     env.editor_build = env["target"] == "editor"
     env.dev_build = env["dev_build"]
     env.debug_features = env["target"] in ["editor", "template_debug"]
