@@ -315,7 +315,7 @@ function(godotcpp_generate)
     godot_arch_name( ARCH_NAME )
 
     # Transform options into generator expressions
-    set(HOT_RELOAD-UNSET "$<STREQUAL:${GODOTCPP_USE_HOT_RELOAD},>")
+    set(HOT_RELOAD "$<BOOL:${GODOTCPP_USE_HOT_RELOAD}>")
 
     set(DISABLE_EXCEPTIONS "$<BOOL:${GODOTCPP_DISABLE_EXCEPTIONS}>")
 
@@ -337,7 +337,6 @@ function(godotcpp_generate)
     ### Define our godot-cpp library targets
     # Generator Expressions that rely on the target
     set(DEBUG_FEATURES "$<NOT:$<STREQUAL:${GODOTCPP_TARGET},template_release>>")
-    set(HOT_RELOAD "$<IF:${HOT_RELOAD-UNSET},${DEBUG_FEATURES},$<BOOL:${GODOTCPP_USE_HOT_RELOAD}>>")
 
     # Suffix Generator Expression
     string(

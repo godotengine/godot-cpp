@@ -5,7 +5,7 @@ from SCons.Variables import BoolVariable
 
 def options(opts):
     opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler - only effective when targeting Linux", False))
-    opts.Add(BoolVariable("use_static_cpp", "Link libgcc and libstdc++ statically for better portability", False))
+    opts.Add(BoolVariable("use_static_cpp", "Link libgcc and libstdc++ statically for better portability", True))
 
 
 def exists(env):
@@ -19,6 +19,10 @@ def generate(env):
     elif env.use_hot_reload:
         # Required for extensions to truly unload.
         env.Append(CXXFLAGS=["-fno-gnu-unique"])
+
+    if env.use_hot_reload:
+        # Reload won't work with "use_static_cpp", so disable it.
+        env["use_static_cpp"] = False
 
     env.Append(CCFLAGS=["-fPIC", "-Wwrite-strings"])
     env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
