@@ -148,7 +148,7 @@ public:
 	_ALWAYS_INLINE_ void delete_allocation(T *p_allocation) { memdelete(p_allocation); }
 };
 
-#define memnew_arr(m_class, m_count) memnew_arr_template<m_class>(m_count)
+#define memnew_arr(m_class, m_count) ::godot::memnew_arr_template<m_class>(m_count)
 
 _FORCE_INLINE_ uint64_t *_get_element_count_ptr(uint8_t *p_ptr) {
 	return (uint64_t *)(p_ptr - Memory::DATA_OFFSET + Memory::ELEMENT_OFFSET);
