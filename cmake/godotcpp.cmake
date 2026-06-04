@@ -364,8 +364,9 @@ function(godotcpp_generate)
     add_library(godot::cpp ALIAS godot-cpp)
 
     file(GLOB_RECURSE GODOTCPP_SOURCES LIST_DIRECTORIES NO CONFIGURE_DEPENDS src/*.cpp)
+    set(GODOTCPP_NATVIS_FILES natvis/godot-cpp.natvis)
 
-    target_sources(godot-cpp PRIVATE ${GODOTCPP_SOURCES} ${GENERATED_FILES_LIST})
+    target_sources(godot-cpp PRIVATE ${GODOTCPP_SOURCES} ${GENERATED_FILES_LIST} ${GODOTCPP_NATVIS_FILES})
 
     target_include_directories(
         godot-cpp
