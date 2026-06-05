@@ -415,7 +415,7 @@ private:                                                                        
                                                                                                                                                                                        \
 protected:                                                                                                                                                                             \
 	m_class(const char *p_godot_class) : m_inherits(p_godot_class) {}                                                                                                                  \
-	m_class(GodotObject *p_godot_object) : m_inherits(p_godot_object) {}                                                                                                               \
+	m_class(GodotObject *p_godot_object);                                                                                                                                              \
                                                                                                                                                                                        \
 	static void _bind_methods() {}                                                                                                                                                     \
                                                                                                                                                                                        \
