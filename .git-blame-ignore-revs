@@ -9,3 +9,6 @@
 
 # Style: Replace header guards with `#pragma once`
 7056c996dd43ae1aa466c94d95cc2fe63853d8a9
+
+# Style: Don't right-align escaped newlines
+7465a586dcdcc19dc30958f4ddfde92b3e80d6bc
