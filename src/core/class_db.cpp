@@ -40,6 +40,7 @@ namespace godot {
 
 HashMap<StringName, ClassDB::ClassInfo> ClassDB::classes;
 AHashMap<StringName, const GDExtensionInstanceBindingCallbacks *> ClassDB::instance_binding_callbacks;
+std::set<void (*)()> ClassDB::instance_binding_destruct_class_static_callbacks;
 LocalVector<StringName> ClassDB::class_register_order;
 AHashMap<StringName, Object *> ClassDB::engine_singletons;
 std::mutex ClassDB::engine_singletons_mutex;
@@ -458,6 +459,13 @@ void ClassDB::deinitialize(GDExtensionInitializationLevel p_level) {
 		for (const Object *i : singleton_objects) {
 			::godot::gdextension_interface::object_free_instance_binding((*i)._owner, ::godot::gdextension_interface::token);
 		}
+
+		instance_binding_callbacks.clear();
+
+		for (void (*destruct_class_static)() : instance_binding_destruct_class_static_callbacks) {
+			destruct_class_static();
+		}
+		instance_binding_destruct_class_static_callbacks.clear();
 	}
 }
 
