@@ -34,23 +34,23 @@
 
 namespace godot {
 
-#define BSEARCH_CHAR_RANGE(m_array)                      \
-	int low = 0;                                         \
+#define BSEARCH_CHAR_RANGE(m_array) \
+	int low = 0; \
 	int high = sizeof(m_array) / sizeof(m_array[0]) - 1; \
-	int middle = (low + high) / 2;                       \
-                                                         \
-	while (low <= high) {                                \
-		if (p_char < m_array[middle].start) {            \
-			high = middle - 1;                           \
-		} else if (p_char > m_array[middle].end) {       \
-			low = middle + 1;                            \
-		} else {                                         \
-			return true;                                 \
-		}                                                \
-                                                         \
-		middle = (low + high) / 2;                       \
-	}                                                    \
-                                                         \
+	int middle = (low + high) / 2; \
+\
+	while (low <= high) { \
+		if (p_char < m_array[middle].start) { \
+			high = middle - 1; \
+		} else if (p_char > m_array[middle].end) { \
+			low = middle + 1; \
+		} else { \
+			return true; \
+		} \
+\
+		middle = (low + high) / 2; \
+	} \
+\
 	return false
 
 constexpr bool is_unicode_identifier_start(char32_t p_char) {

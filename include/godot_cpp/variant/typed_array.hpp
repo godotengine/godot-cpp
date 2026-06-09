@@ -62,31 +62,31 @@ public:
 
 // specialization for the rest of variant types
 
-#define MAKE_TYPED_ARRAY(m_type, m_variant_type)                                                                 \
-	template <>                                                                                                  \
-	class TypedArray<m_type> : public Array {                                                                    \
-	public:                                                                                                      \
-		_FORCE_INLINE_ void operator=(const Array &p_array) {                                                    \
+#define MAKE_TYPED_ARRAY(m_type, m_variant_type) \
+	template <> \
+	class TypedArray<m_type> : public Array { \
+	public: \
+		_FORCE_INLINE_ void operator=(const Array &p_array) { \
 			ERR_FAIL_COND_MSG(!is_same_typed(p_array), "Cannot assign an array with a different element type."); \
-			Array::operator=(p_array);                                                                           \
-		}                                                                                                        \
-		_FORCE_INLINE_ TypedArray(std::initializer_list<Variant> p_init) :                                       \
-				Array(Array(p_init), m_variant_type, StringName(), Variant()) {                                  \
-		}                                                                                                        \
-		_FORCE_INLINE_ TypedArray(const Variant &p_variant) :                                                    \
-				TypedArray(Array(p_variant)) {                                                                   \
-		}                                                                                                        \
-		_FORCE_INLINE_ TypedArray(const Array &p_array) {                                                        \
-			set_typed(m_variant_type, StringName(), Variant());                                                  \
-			if (is_same_typed(p_array)) {                                                                        \
-				Array::operator=(p_array);                                                                       \
-			} else {                                                                                             \
-				assign(p_array);                                                                                 \
-			}                                                                                                    \
-		}                                                                                                        \
-		_FORCE_INLINE_ TypedArray() {                                                                            \
-			set_typed(m_variant_type, StringName(), Variant());                                                  \
-		}                                                                                                        \
+			Array::operator=(p_array); \
+		} \
+		_FORCE_INLINE_ TypedArray(std::initializer_list<Variant> p_init) : \
+				Array(Array(p_init), m_variant_type, StringName(), Variant()) { \
+		} \
+		_FORCE_INLINE_ TypedArray(const Variant &p_variant) : \
+				TypedArray(Array(p_variant)) { \
+		} \
+		_FORCE_INLINE_ TypedArray(const Array &p_array) { \
+			set_typed(m_variant_type, StringName(), Variant()); \
+			if (is_same_typed(p_array)) { \
+				Array::operator=(p_array); \
+			} else { \
+				assign(p_array); \
+			} \
+		} \
+		_FORCE_INLINE_ TypedArray() { \
+			set_typed(m_variant_type, StringName(), Variant()); \
+		} \
 	};
 
 // All Variant::OBJECT types are intentionally omitted from this list because they are handled by
