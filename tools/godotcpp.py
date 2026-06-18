@@ -179,7 +179,7 @@ def scons_generate_bindings(target, source, env):
 supported_api_versions = ["4.3", "4.4", "4.5", "4.6", "4.7"]
 
 # We default to the latest stable Godot version.
-default_api_version = "4.6"
+default_api_version = "4.7"
 
 platforms = ["linux", "macos", "windows", "android", "ios", "web"]
 
