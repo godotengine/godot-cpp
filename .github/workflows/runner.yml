@@ -31,7 +31,8 @@ jobs:
         with:
           files_yaml: |
             sources:
-              - '.github/workflows/*.yml'
+              - '.github/workflows/runner.yml'
+              - '.github/workflows/static_checks.yml'
               - '**/*.py'
               - '**/*.cpp'
               - '**/*.hpp'
@@ -40,9 +41,11 @@ jobs:
               - 'test/build_profile.json'
               - 'gdextension/extension_api.json'
             scons:
+              - '.github/workflows/ci-scons.yml'
               - '**/SConstruct'
               - '**/SCsub'
             cmake:
+              - '.github/workflows/ci-cmake.yml'
               - '**/CMakeLists.txt'
               - '**/*.cmake'
       - name: echo sources changed
