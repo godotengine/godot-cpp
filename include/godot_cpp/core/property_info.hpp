@@ -78,7 +78,9 @@ struct PropertyInfo {
 		dict["type"] = type;
 		dict["hint"] = hint;
 		dict["hint_string"] = hint_string;
-		dict["usage"] = usage;
+		if (usage != PROPERTY_USAGE_NONE) {
+			dict["usage"] = usage;
+		}
 		return dict;
 	}
 
