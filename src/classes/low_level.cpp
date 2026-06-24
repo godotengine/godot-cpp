@@ -28,10 +28,14 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/worker_thread_pool.hpp>
 #include <godot_cpp/classes/xml_parser.hpp>
+
+#include <godot_cpp/core/object.hpp>
 
 #include <godot_cpp/godot.hpp>
 
@@ -62,6 +66,10 @@ uint8_t *Image::ptrw() {
 
 const uint8_t *Image::ptr() {
 	return ::godot::gdextension_interface::image_ptr(_owner);
+}
+
+SceneTree *SceneTree::get_singleton() {
+	return Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
 }
 
 } // namespace godot

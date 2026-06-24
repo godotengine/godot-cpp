@@ -1953,6 +1953,9 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
             "\tGroupID add_native_group_task(void (*p_func)(void *, uint32_t), void *p_userdata, int p_elements, int p_tasks = -1, bool p_high_priority = false, const String &p_description = String());"
         )
 
+    if class_name == "SceneTree":
+        result.append("\tstatic SceneTree *get_singleton();")
+
     if class_name == "Object":
         result.append("\ttemplate <typename T>")
         result.append("\tstatic T *cast_to(Object *p_object);")
