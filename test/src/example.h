@@ -214,6 +214,7 @@ public:
 	GDVIRTUAL1(_do_something_virtual_with_control, Control *);
 
 	String test_use_engine_singleton() const;
+	bool test_use_scene_tree_singleton() const;
 
 	static String test_library_path();
 

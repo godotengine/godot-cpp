@@ -35,6 +35,17 @@
 
 #include <godot_cpp/godot.hpp>
 
+// Unlike the classes above, `Engine` and `SceneTree` aren't always generated, since they may be left out of a build profile.
+// Only define `SceneTree::get_singleton()` when both of them are available, so that build profiles don't have to include them.
+#if __has_include(<godot_cpp/classes/engine.hpp>) && __has_include(<godot_cpp/classes/scene_tree.hpp>)
+#define GODOT_CPP_SCENE_TREE_SINGLETON
+
+#include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
+
+#include <godot_cpp/core/object.hpp>
+#endif
+
 namespace godot {
 Error XMLParser::_open_buffer(const uint8_t *p_buffer, size_t p_size) {
 	return (Error)::godot::gdextension_interface::xml_parser_open_buffer(_owner, p_buffer, p_size);
@@ -63,5 +74,11 @@ uint8_t *Image::ptrw() {
 const uint8_t *Image::ptr() {
 	return ::godot::gdextension_interface::image_ptr(_owner);
 }
+
+#ifdef GODOT_CPP_SCENE_TREE_SINGLETON
+SceneTree *SceneTree::get_singleton() {
+	return Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
+}
+#endif
 
 } // namespace godot

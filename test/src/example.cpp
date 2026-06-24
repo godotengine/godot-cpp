@@ -12,6 +12,7 @@
 #include <godot_cpp/classes/multiplayer_api.hpp>
 #include <godot_cpp/classes/multiplayer_peer.hpp>
 #include <godot_cpp/classes/os.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
@@ -266,6 +267,7 @@ void Example::_bind_methods() {
 	GDVIRTUAL_BIND(_do_something_virtual_with_control, "control");
 
 	ClassDB::bind_method(D_METHOD("test_use_engine_singleton"), &Example::test_use_engine_singleton);
+	ClassDB::bind_method(D_METHOD("test_use_scene_tree_singleton"), &Example::test_use_scene_tree_singleton);
 
 	ClassDB::bind_method(D_METHOD("test_get_internal_class"), &Example::test_get_internal_class);
 
@@ -757,6 +759,11 @@ String Example::test_virtual_implemented_in_script(const String &p_name, int p_v
 
 String Example::test_use_engine_singleton() const {
 	return OS::get_singleton()->get_name();
+}
+
+bool Example::test_use_scene_tree_singleton() const {
+	SceneTree *scene_tree = SceneTree::get_singleton();
+	return scene_tree != nullptr && scene_tree == get_tree();
 }
 
 String Example::test_library_path() {
