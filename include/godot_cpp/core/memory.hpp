@@ -64,7 +64,16 @@ class Memory {
 	Memory();
 
 public:
-	// Alignment:  ↓ max_align_t        ↓ uint64_t          ↓ max_align_t
+#if defined(__MINGW32__) && !defined(__MINGW64__)
+	// Note: Using hardcoded value, since the value can end up different in different compile units on 32-bit windows
+	// due to a compiler bug (see GH-113145)
+	static constexpr size_t MAX_ALIGN = 16;
+	static_assert(MAX_ALIGN % alignof(max_align_t) == 0);
+#else
+	static constexpr size_t MAX_ALIGN = alignof(max_align_t);
+#endif
+
+	// Alignment:  ↓ max_align_t        ↓ uint64_t          ↓ MAX_ALIGN
 	//             ┌─────────────────┬──┬────────────────┬──┬───────────...
 	//             │ uint64_t        │░░│ uint64_t       │░░│ T[]
 	//             │ alloc size      │░░│ element count  │░░│ data
@@ -74,7 +83,7 @@ public:
 
 	static constexpr size_t SIZE_OFFSET = 0;
 	static constexpr size_t ELEMENT_OFFSET = ((SIZE_OFFSET + sizeof(uint64_t)) % alignof(uint64_t) == 0) ? (SIZE_OFFSET + sizeof(uint64_t)) : ((SIZE_OFFSET + sizeof(uint64_t)) + alignof(uint64_t) - ((SIZE_OFFSET + sizeof(uint64_t)) % alignof(uint64_t)));
-	static constexpr size_t DATA_OFFSET = ((ELEMENT_OFFSET + sizeof(uint64_t)) % alignof(max_align_t) == 0) ? (ELEMENT_OFFSET + sizeof(uint64_t)) : ((ELEMENT_OFFSET + sizeof(uint64_t)) + alignof(max_align_t) - ((ELEMENT_OFFSET + sizeof(uint64_t)) % alignof(max_align_t)));
+	static constexpr size_t DATA_OFFSET = ((ELEMENT_OFFSET + sizeof(uint64_t)) % MAX_ALIGN == 0) ? (ELEMENT_OFFSET + sizeof(uint64_t)) : ((ELEMENT_OFFSET + sizeof(uint64_t)) + MAX_ALIGN - ((ELEMENT_OFFSET + sizeof(uint64_t)) % MAX_ALIGN));
 
 	static void *alloc_static(size_t p_bytes, bool p_pad_align = false);
 	static void *realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align = false);
