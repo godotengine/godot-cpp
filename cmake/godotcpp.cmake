@@ -133,7 +133,7 @@ function(godotcpp_options)
         CACHE STRING
         "The Godot API version to target (ex \"4.5\") using one of the included API JSON files"
     )
-    set_property(CACHE GODOTCPP_API_VERSION PROPERTY STRINGS ";4.3;4.4;4.5;4.6")
+    set_property(CACHE GODOTCPP_API_VERSION PROPERTY STRINGS ";4.3;4.4;4.5;4.6;4.7")
     set(GODOTCPP_GDEXTENSION_DIR
         "gdextension"
         CACHE PATH
@@ -264,7 +264,7 @@ function(godotcpp_generate)
     math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8") # CMAKE_SIZEOF_VOID_P refers to target architecture.
 
     # API json File
-    set(GODOTCPP_LATEST_API_VERSION "4.6")
+    set(GODOTCPP_LATEST_API_VERSION "4.7")
     if(GODOTCPP_API_VERSION STREQUAL "" OR GODOTCPP_API_VERSION STREQUAL GODOTCPP_LATEST_API_VERSION)
         set(GODOTCPP_GDEXTENSION_API_FILE "${GODOTCPP_GDEXTENSION_DIR}/extension_api.json")
     else()
