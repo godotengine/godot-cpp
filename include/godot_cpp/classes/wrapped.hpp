@@ -40,11 +40,9 @@
 #include <godot_cpp/godot.hpp>
 
 #if defined(MACOS_ENABLED) && defined(HOT_RELOAD_ENABLED)
+#include <map>
 #include <mutex>
-#define _GODOT_CPP_AVOID_THREAD_LOCAL
-#define _GODOT_CPP_THREAD_LOCAL
-#else
-#define _GODOT_CPP_THREAD_LOCAL thread_local
+#include <thread>
 #endif
 
 namespace godot {
@@ -65,21 +63,45 @@ class Wrapped {
 	template <typename T, std::enable_if_t<std::is_base_of<::godot::Wrapped, T>::value, bool>>
 	friend _ALWAYS_INLINE_ void _pre_initialize();
 
-#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
-	static std::recursive_mutex _constructing_mutex;
-#endif
-
-	_GODOT_CPP_THREAD_LOCAL static const StringName *_constructing_extension_class_name;
-	_GODOT_CPP_THREAD_LOCAL static const GDExtensionInstanceBindingCallbacks *_constructing_class_binding_callbacks;
-
+	struct ConstructInfo {
+		const StringName *extension_class_name = nullptr;
+		const GDExtensionInstanceBindingCallbacks *class_binding_callbacks = nullptr;
 #ifdef HOT_RELOAD_ENABLED
-	_GODOT_CPP_THREAD_LOCAL static GDExtensionObjectPtr _constructing_recreate_owner;
+		GDExtensionObjectPtr recreate_owner = nullptr;
+#endif
+	};
+
+#if defined(MACOS_ENABLED) && defined(HOT_RELOAD_ENABLED)
+	// On macOS, `thread_local` storage keeps the library from being unloaded,
+	// which breaks hot-reload. Instead we keep each thread's `ConstructInfo` in a
+	// map keyed by thread id.
+	class ConstructInfoStore {
+		std::mutex mutex;
+		std::map<std::thread::id, ConstructInfo> infos;
+
+	public:
+		ConstructInfo &get() {
+			std::lock_guard<std::mutex> lock(mutex);
+			return infos[std::this_thread::get_id()];
+		}
+	};
+
+	static ConstructInfo &_get_construct_info() {
+		static ConstructInfoStore store;
+		return store.get();
+	}
+#else
+	static ConstructInfo &_get_construct_info() {
+		static thread_local ConstructInfo info;
+		return info;
+	}
 #endif
 
 	template <typename T>
 	_ALWAYS_INLINE_ static void _set_construct_info() {
-		_constructing_extension_class_name = T::_get_extension_class_name();
-		_constructing_class_binding_callbacks = &T::_gde_binding_callbacks;
+		ConstructInfo &info = _get_construct_info();
+		info.extension_class_name = T::_get_extension_class_name();
+		info.class_binding_callbacks = &T::_gde_binding_callbacks;
 	}
 
 protected:
@@ -124,9 +146,6 @@ public:
 
 template <typename T, std::enable_if_t<std::is_base_of<::godot::Wrapped, T>::value, bool>>
 _ALWAYS_INLINE_ void _pre_initialize() {
-#ifdef _GODOT_CPP_AVOID_THREAD_LOCAL
-	Wrapped::_constructing_mutex.lock();
-#endif
 	Wrapped::_set_construct_info<T>();
 }
 
