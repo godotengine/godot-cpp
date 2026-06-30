@@ -215,6 +215,9 @@ public:
 	Variant(const PackedVector3Array &v);
 	Variant(const PackedColorArray &v);
 	Variant(const PackedVector4Array &v);
+	template <typename T, typename = std::void_t<decltype(PtrToArg<T>::encode_arg(std::declval<T>()))>>
+	Variant(T v) :
+			Variant(PtrToArg<T>::encode_arg(v)) {}
 	~Variant();
 
 	operator bool() const;
