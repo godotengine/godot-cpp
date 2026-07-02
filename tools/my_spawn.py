@@ -9,6 +9,7 @@ def exists(env):
 # http://www.scons.org/wiki/LongCmdLinesOnWin32
 def configure(env):
     import subprocess
+    import sys
 
     def mySubProcess(cmdline, env):
         # print "SPAWNED : " + cmdline
@@ -27,7 +28,7 @@ def configure(env):
         rv = proc.wait()
         if rv:
             print("=====")
-            print(err.decode("utf-8"))
+            print(err.decode(sys.stdout.encoding, errors="replace"))
             print("=====")
         return rv
 
