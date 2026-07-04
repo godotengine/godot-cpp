@@ -119,7 +119,7 @@ private:
 		if constexpr (!std::is_abstract_v<T>) {
 			Wrapped::_set_construct_info<T>();
 #if GODOT_VERSION_MINOR >= 4
-			T *new_object = new ("", "") T;
+			T *new_object = new (godot::DefaultAllocator{}) T;
 			if (p_notify_postinitialize) {
 				new_object->_postinitialize();
 			}
