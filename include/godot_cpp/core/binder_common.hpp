@@ -232,7 +232,7 @@ template <typename T, typename... P, size_t... Is>
 void call_with_variant_args_helper(T *p_instance, void (T::*p_method)(P...), const Variant **p_args, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
 
-#ifdef DEBUG_METHODS_ENABLED
+#ifdef DEBUG_ENABLED
 	(p_instance->*p_method)(VariantCasterAndValidate<P>::cast(p_args, Is, r_error)...);
 #else
 	(p_instance->*p_method)(VariantCaster<P>::cast(*p_args[Is])...);
@@ -244,7 +244,7 @@ template <typename T, typename... P, size_t... Is>
 void call_with_variant_argsc_helper(T *p_instance, void (T::*p_method)(P...) const, const Variant **p_args, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
 
-#ifdef DEBUG_METHODS_ENABLED
+#ifdef DEBUG_ENABLED
 	(p_instance->*p_method)(VariantCasterAndValidate<P>::cast(p_args, Is, r_error)...);
 #else
 	(p_instance->*p_method)(VariantCaster<P>::cast(*p_args[Is])...);
@@ -256,7 +256,7 @@ template <typename T, typename R, typename... P, size_t... Is>
 void call_with_variant_args_ret_helper(T *p_instance, R (T::*p_method)(P...), const Variant **p_args, Variant &r_ret, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
 
-#ifdef DEBUG_METHODS_ENABLED
+#ifdef DEBUG_ENABLED
 	r_ret = (p_instance->*p_method)(VariantCasterAndValidate<P>::cast(p_args, Is, r_error)...);
 #else
 	r_ret = (p_instance->*p_method)(VariantCaster<P>::cast(*p_args[Is])...);
@@ -268,7 +268,7 @@ template <typename T, typename R, typename... P, size_t... Is>
 void call_with_variant_args_retc_helper(T *p_instance, R (T::*p_method)(P...) const, const Variant **p_args, Variant &r_ret, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
 
-#ifdef DEBUG_METHODS_ENABLED
+#ifdef DEBUG_ENABLED
 	r_ret = (p_instance->*p_method)(VariantCasterAndValidate<P>::cast(p_args, Is, r_error)...);
 #else
 	r_ret = (p_instance->*p_method)(VariantCaster<P>::cast(*p_args[Is])...);
@@ -472,7 +472,7 @@ void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const,
 
 // GCC raises "parameter 'p_args' set but not used" when P = {},
 // it's not clever enough to treat other P values as making this branch valid.
-#if defined(DEBUG_METHODS_ENABLED) && defined(__GNUC__) && !defined(__clang__)
+#if defined(DEBUG_ENABLED) && defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
 #endif
@@ -540,7 +540,7 @@ template <typename... P, size_t... Is>
 void call_with_variant_args_static(void (*p_method)(P...), const Variant **p_args, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
 
-#ifdef DEBUG_METHODS_ENABLED
+#ifdef DEBUG_ENABLED
 	(p_method)(VariantCasterAndValidate<P>::cast(p_args, Is, r_error)...);
 #else
 	(p_method)(VariantCaster<P>::cast(*p_args[Is])...);
@@ -632,7 +632,7 @@ template <typename R, typename... P, size_t... Is>
 void call_with_variant_args_static_ret(R (*p_method)(P...), const Variant **p_args, Variant &r_ret, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
 
-#ifdef DEBUG_METHODS_ENABLED
+#ifdef DEBUG_ENABLED
 	r_ret = (p_method)(VariantCasterAndValidate<P>::cast(p_args, Is, r_error)...);
 #else
 	r_ret = (p_method)(VariantCaster<P>::cast(*p_args[Is])...);

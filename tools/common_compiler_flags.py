@@ -33,6 +33,8 @@ def generate(env):
     # Require C++17
     if env.get("is_msvc", False):
         env.Append(CXXFLAGS=["/std:c++17"])
+        # Allow use of `__cplusplus` macro to determine C++ standard universally.
+        env.Append(CXXFLAGS=["/Zc:__cplusplus"])
     else:
         env.Append(CXXFLAGS=["-std=c++17"])
 
