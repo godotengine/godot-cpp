@@ -71,6 +71,7 @@ inline constexpr size_t ELEMENT_OFFSET = get_aligned_address(SIZE_OFFSET + sizeo
 inline constexpr size_t DATA_OFFSET = get_aligned_address(ELEMENT_OFFSET + sizeof(uint64_t), MAX_ALIGN);
 
 void *alloc_static(size_t p_bytes, bool p_pad_align = false);
+void *alloc_static_zeroed(size_t p_bytes, bool p_pad_align = false);
 void *realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align = false);
 void free_static(void *p_ptr, bool p_pad_align = false);
 }; //namespace Memory
