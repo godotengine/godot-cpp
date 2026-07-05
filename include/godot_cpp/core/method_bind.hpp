@@ -111,7 +111,7 @@ public:
 	}
 
 	void set_argument_names(const LocalVector<StringName> &p_names);
-	LocalVector<StringName> get_argument_names() const;
+	const LocalVector<StringName> &get_argument_names() const;
 
 	virtual GDExtensionClassMethodArgumentMetadata get_argument_metadata(int p_argument) const = 0;
 
