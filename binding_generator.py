@@ -293,7 +293,14 @@ def generate_bindings(
 
 
 def _generate_bindings(
-    api, api_filepath, interface_filepath, use_template_get_node, bits="64", precision="single", output_dir="."
+    api,
+    api_filepath,
+    interface_filepath,
+    use_template_get_node,
+    bits="64",
+    precision="single",
+    output_dir=".",
+    hooks=None,
 ):
     if "precision" in api["header"] and precision != api["header"]["precision"]:
         raise Exception(
@@ -318,12 +325,12 @@ def _generate_bindings(
 
     generate_gdextension_interface_loader(interface_filepath, target_dir)
 
-    generate_global_constants(api, target_dir)
+    generate_global_constants(api, target_dir, hooks)
     generate_version_header(api, target_dir)
     generate_global_constant_binds(api, target_dir)
-    generate_builtin_bindings(api, target_dir, real_t + "_" + bits)
-    generate_engine_classes_bindings(api, target_dir, use_template_get_node)
-    generate_utility_functions(api, target_dir)
+    generate_builtin_bindings(api, target_dir, real_t + "_" + bits, hooks)
+    generate_engine_classes_bindings(api, target_dir, use_template_get_node, hooks)
+    generate_utility_functions(api, target_dir, hooks)
 
 
 def generate_gdextension_interface_loader(interface_filepath, output_dir):
@@ -502,7 +509,7 @@ native_structures = []
 singletons = []
 
 
-def generate_builtin_bindings(api, output_dir, build_config):
+def generate_builtin_bindings(api, output_dir, build_config, hooks=None):
     global builtin_classes
 
     core_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "core"
@@ -606,10 +613,10 @@ def generate_builtin_bindings(api, output_dir, build_config):
         fully_used_classes.sort()
 
         with header_filename.open("w+", encoding="utf-8") as header_file:
-            header_file.write(generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes))
+            header_file.write(generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes, hooks))
 
         with source_filename.open("w+", encoding="utf-8") as source_file:
-            source_file.write(generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes))
+            source_file.write(generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes, hooks))
 
     # Create a header with all builtin types for convenience.
     builtin_header_filename = include_gen_folder / "builtin_types.hpp"
@@ -685,7 +692,7 @@ def generate_builtin_class_vararg_method_implements_header(builtin_classes):
     return "\n".join(result)
 
 
-def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes):
+def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes, hooks=None):
     result = []
 
     class_name = builtin_api["name"]
@@ -1175,10 +1182,13 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     result.append("")
 
+    if hooks:
+        result = hooks.alter_builtin_class_header(builtin_api, result)
+
     return "\n".join(result)
 
 
-def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes):
+def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes, hooks=None):
     result = []
 
     class_name = builtin_api["name"]
@@ -1490,10 +1500,13 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     result.append("} //namespace godot")
     result.append("")
 
+    if hooks:
+        result = hooks.alter_builtin_class_source(builtin_api, result)
+
     return "\n".join(result)
 
 
-def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
+def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hooks=None):
     global engine_classes
     global singletons
     global native_structures
@@ -1685,12 +1698,12 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
 
         with header_filename.open("w+", encoding="utf-8") as header_file:
             header_file.write(
-                generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node)
+                generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node, hooks)
             )
 
         with source_filename.open("w+", encoding="utf-8") as source_file:
             source_file.write(
-                generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node)
+                generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node, hooks)
             )
 
     for native_struct in api["native_structures"]:
@@ -1749,7 +1762,7 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
             header_file.write("\n".join(result))
 
 
-def generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node):
+def generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node, hooks):
     global singletons
     result = []
 
@@ -2068,10 +2081,13 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     result.append("")
 
+    if hooks:
+        result = hooks.alter_engine_class_header(class_api, result)
+
     return "\n".join(result)
 
 
-def generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node):
+def generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node, hooks=None):
     global singletons
     result = []
 
@@ -2246,10 +2262,13 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
     result.append("} // namespace godot")
     result.append("")
 
+    if hooks:
+        result = hooks.alter_engine_class_source(class_api, result)
+
     return "\n".join(result)
 
 
-def generate_global_constants(api, output_dir):
+def generate_global_constants(api, output_dir, hooks=None):
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
     source_gen_folder = Path(output_dir) / "src" / "classes"
 
@@ -2309,6 +2328,9 @@ def generate_global_constants(api, output_dir):
     header.append("} // namespace godot")
 
     header.append("")
+
+    if hooks:
+        header = hooks.alter_global_constants(api, header)
 
     with header_filename.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))
@@ -2376,7 +2398,7 @@ def generate_global_constant_binds(api, output_dir):
         header_file.write("\n".join(header))
 
 
-def generate_utility_functions(api, output_dir):
+def generate_utility_functions(api, output_dir, hooks=None):
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "variant"
     source_gen_folder = Path(output_dir) / "src" / "variant"
 
@@ -2429,6 +2451,9 @@ def generate_utility_functions(api, output_dir):
     header.append("")
     header.append("} // namespace godot")
     header.append("")
+
+    if hooks:
+        header = hooks.alter_utility_functions_header(api, header)
 
     with header_filename.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))
@@ -2509,6 +2534,10 @@ def generate_utility_functions(api, output_dir):
         source.append("")
 
     source.append("} // namespace godot")
+    source.append("")
+
+    if hooks:
+        header = hooks.alter_utility_functions_source(api, source)
 
     with source_filename.open("w+", encoding="utf-8") as source_file:
         source_file.write("\n".join(source))

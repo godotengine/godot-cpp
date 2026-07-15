@@ -1,3 +1,4 @@
+import importlib.util
 import os
 import platform
 import sys
@@ -13,6 +14,7 @@ from SCons.Variables import BoolVariable, EnumVariable, PathVariable
 from SCons.Variables.BoolVariable import _text2bool
 
 from binding_generator import _generate_bindings, _get_file_list, get_file_list
+from binding_generator_hooks import BindingGeneratorHooks
 from build_profile import generate_trimmed_api
 from doc_source_generator import scons_generate_doc_source
 
@@ -164,6 +166,17 @@ def scons_generate_bindings(target, source, env):
 
     api = generate_trimmed_api(str(source[0]), profile_filepath)
 
+    custom_hooks: BindingGeneratorHooks = None
+    if "binding_hook_file" in env:
+        binding_hook_file = env["binding_hook_file"]
+        # yes apparently this is how you import a file dynamically ._.
+        spec = importlib.util.spec_from_file_location("custom_binding_generator", binding_hook_file)
+        loaded_module = importlib.util.module_from_spec(spec)
+        sys.modules["custom_binding_generator"] = loaded_module
+        spec.loader.exec_module(loaded_module)
+        # assume the name 'BindingGeneratorHooksExtension' for the class
+        custom_hooks = loaded_module.BindingGeneratorHooksExtension()
+
     _generate_bindings(
         api,
         str(source[0]),
@@ -172,6 +185,7 @@ def scons_generate_bindings(target, source, env):
         "32" if "32" in env["arch"] else "64",
         env["precision"],
         env["godot_cpp_gen_dir"],
+        custom_hooks,
     )
     return None
 
@@ -229,6 +243,15 @@ def options(opts, env):
         default_platform = ARGUMENTS.get("platform")
     else:
         raise ValueError("Could not detect platform automatically, please specify with platform=<platform>")
+
+    opts.Add(
+        PathVariable(
+            key="binding_hook_file",
+            help="Path to python file containing custom binding generator hooks",
+            default=env.get("binding_hook_file", None),
+            validator=validate_file,
+        )
+    )
 
     opts.Add(
         PathVariable(
