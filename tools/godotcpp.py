@@ -137,6 +137,7 @@ def scons_emit_files(target, source, env):
     profile_filepath = env.get("build_profile", "")
     if profile_filepath:
         profile_filepath = normalize_path(profile_filepath, env)
+        source += [profile_filepath]  # Add to sources so we rebuild if it changes.
 
     # Always clean all files
     env.Clean(target, [env.File(f) for f in get_file_list(str(source[0]), target[0].abspath, True, True)])
@@ -144,12 +145,9 @@ def scons_emit_files(target, source, env):
     api = generate_trimmed_api(str(source[0]), profile_filepath)
     files = []
     for f in _get_file_list(api, target[0].abspath, True, True):
-        file = env.File(f)
-        if profile_filepath:
-            env.Depends(file, profile_filepath)
-        files.append(file)
-    env["godot_cpp_gen_dir"] = target[0].abspath
+        files.append(env.File(f))
 
+    env["godot_cpp_gen_dir"] = target[0].abspath
     # gdextension_interface.h shouldn't depend on extension_api.json or the build_profile.json.
     gdextension_interface_header = os.path.join(str(target[0]), "gen", "include", "gdextension_interface.h")
     env.Ignore(gdextension_interface_header, [source[0], profile_filepath])
