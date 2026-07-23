@@ -88,6 +88,9 @@ function(common_compiler_flags)
 
                 # Interpret source files as utf-8
                 /utf-8
+
+                # Allow use of `__cplusplus` macro to determine C++ standard universally.
+                /Zc:__cplusplus
             >
 
         # Warnings below, these do not need to propagate to consumers.

@@ -30,8 +30,21 @@
 
 #pragma once
 
+/**
+ * Basic definitions and simple functions to be used everywhere.
+ */
+
+// IWYU pragma: always_keep
+
+// Ensure that C++ standard is at least C++17.
+// If on MSVC, also ensures that the `Zc:__cplusplus` flag is present.
+static_assert(__cplusplus >= 201703L, "Minimum of C++17 required.");
+
+// IWYU pragma: begin_exports
+
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <type_traits>
 #include <utility>
 
@@ -39,7 +52,41 @@
 #include <godot_cpp/core/version.hpp>
 #endif
 
+// IWYU pragma: end_exports
+
 namespace godot {
+
+#if defined(__has_feature)
+#define GD_HAS_FEATURE(m_feature) __has_feature(m_feature)
+#else
+#define GD_HAS_FEATURE(m_feature) 0
+#endif
+
+#if defined(__has_cpp_attribute)
+#define GD_HAS_CPP_ATTRIBUTE(m_feature) __has_cpp_attribute(m_feature)
+#else
+#define GD_HAS_CPP_ATTRIBUTE(m_feature) 0
+#endif
+
+#if (GD_HAS_FEATURE(address_sanitizer) || defined(__SANITIZE_ADDRESS__)) && !defined(ASAN_ENABLED)
+#error Address sanitizer was enabled without defining `ASAN_ENABLED`
+#endif
+
+#if (GD_HAS_FEATURE(leak_sanitizer) || defined(__SANITIZE_LEAKS__)) && !defined(LSAN_ENABLED)
+#error Leak sanitizer was enabled without defining `LSAN_ENABLED`
+#endif
+
+#if (GD_HAS_FEATURE(memory_sanitizer) || defined(__SANITIZE_MEMORY__)) && !defined(MSAN_ENABLED)
+#error Memory sanitizer was enabled without defining `MSAN_ENABLED`
+#endif
+
+#if (GD_HAS_FEATURE(thread_sanitizer) || defined(__SANITIZE_THREAD__)) && !defined(TSAN_ENABLED)
+#error Thread sanitizer was enabled without defining `TSAN_ENABLED`
+#endif
+
+#if (GD_HAS_FEATURE(undefined_behavior_sanitizer) || defined(__UNDEFINED_SANITIZER__)) && !defined(UBSAN_ENABLED)
+#error Undefined behavior sanitizer was enabled without defining `UBSAN_ENABLED`
+#endif
 
 #if !defined(GDE_EXPORT)
 #if defined(_WIN32)
@@ -96,6 +143,18 @@ namespace godot {
 #define _ALLOW_DISCARD_ (void)
 #endif
 
+#if GD_HAS_CPP_ATTRIBUTE(clang::lifetimebound)
+#define _LIFETIME_BOUND_ [[clang::lifetimebound]]
+#elif GD_HAS_CPP_ATTRIBUTE(gnu::lifetimebound)
+#define _LIFETIME_BOUND_ [[gnu::lifetimebound]]
+#elif GD_HAS_CPP_ATTRIBUTE(msvc::lifetimebound)
+#define _LIFETIME_BOUND_ [[msvc::lifetimebound]]
+#elif GD_HAS_CPP_ATTRIBUTE(lifetimebound)
+#define _LIFETIME_BOUND_ [[lifetimebound]]
+#else
+#define _LIFETIME_BOUND_
+#endif
+
 // Windows badly defines a lot of stuff we'll never use. Undefine it.
 #ifdef _WIN32
 #undef min // override standard definition
@@ -136,105 +195,16 @@ constexpr auto CLAMP(const T m_a, const T2 m_min, const T3 m_max) {
 	return m_a < m_min ? m_min : (m_a > m_max ? m_max : m_a);
 }
 
+// Like std::size, but without requiring any additional includes.
+template <typename T, size_t SIZE>
+constexpr size_t std_size(const T (&)[SIZE]) {
+	return SIZE;
+}
+
 // Generic swap template.
 #ifndef SWAP
 #define SWAP(m_x, m_y) std::swap((m_x), (m_y))
 #endif // SWAP
-
-/* Functions to handle powers of 2 and shifting. */
-
-// Returns `true` if a positive integer is a power of 2, `false` otherwise.
-template <typename T>
-constexpr bool is_power_of_2(const T x) {
-	return x && ((x & (x - 1)) == 0);
-}
-
-// Function to find the next power of 2 to an integer.
-constexpr unsigned int next_power_of_2(unsigned int x) {
-	if (x == 0) {
-		return 0;
-	}
-
-	--x;
-	x |= x >> 1;
-	x |= x >> 2;
-	x |= x >> 4;
-	x |= x >> 8;
-	x |= x >> 16;
-
-	return ++x;
-}
-
-// Function to find the previous power of 2 to an integer.
-constexpr unsigned int previous_power_of_2(unsigned int x) {
-	x |= x >> 1;
-	x |= x >> 2;
-	x |= x >> 4;
-	x |= x >> 8;
-	x |= x >> 16;
-	return x - (x >> 1);
-}
-
-// Function to find the closest power of 2 to an integer.
-constexpr unsigned int closest_power_of_2(unsigned int x) {
-	unsigned int nx = next_power_of_2(x);
-	unsigned int px = previous_power_of_2(x);
-	return (nx - x) > (x - px) ? px : nx;
-}
-
-// Get a shift value from a power of 2.
-constexpr int get_shift_from_power_of_2(unsigned int p_bits) {
-	for (unsigned int i = 0; i < 32; i++) {
-		if (p_bits == (unsigned int)(1 << i)) {
-			return i;
-		}
-	}
-
-	return -1;
-}
-
-template <typename T>
-constexpr T nearest_power_of_2_templated(T x) {
-	--x;
-
-	// The number of operations on x is the base two logarithm
-	// of the number of bits in the type. Add three to account
-	// for sizeof(T) being in bytes.
-	constexpr size_t num = get_shift_from_power_of_2(sizeof(T)) + 3;
-
-	// If the compiler is smart, it unrolls this loop.
-	// If it's dumb, this is a bit slow.
-	for (size_t i = 0; i < num; i++) {
-		x |= x >> (1 << i);
-	}
-
-	return ++x;
-}
-
-// Function to find the nearest (bigger) power of 2 to an integer.
-constexpr unsigned int nearest_shift(unsigned int p_number) {
-	for (int i = 30; i >= 0; i--) {
-		if (p_number & (1 << i)) {
-			return i + 1;
-		}
-	}
-
-	return 0;
-}
-
-// constexpr function to find the floored log2 of a number
-template <typename T>
-constexpr T floor_log2(T x) {
-	return x < 2 ? x : 1 + floor_log2(x >> 1);
-}
-
-// Get the number of bits needed to represent the number.
-// IE, if you pass in 8, you will get 4.
-// If you want to know how many bits are needed to store 8 values however, pass in (8 - 1).
-template <typename T>
-constexpr T get_num_bits(T x) {
-	return floor_log2(x);
-}
 
 // Swap 16, 32 and 64 bits value for endianness.
 #if defined(__GNUC__)
@@ -313,10 +283,6 @@ struct BuildIndexSequence<0, Is...> : IndexSequence<Is...> {};
 // Limit the depth of recursive algorithms when dealing with Array/Dictionary
 #define MAX_RECURSION 100
 
-#ifdef DEBUG_ENABLED
-#define DEBUG_METHODS_ENABLED
-#endif
-
 // Macro GD_IS_DEFINED() allows to check if a macro is defined. It needs to be defined to anything (say 1) to work.
 #define __GDARG_PLACEHOLDER_1 false,
 #define __gd_take_second_arg(__ignored, val, ...) val
@@ -372,17 +338,58 @@ inline constexpr bool is_zero_constructible_v = is_zero_constructible<T>::value;
 #endif
 
 #if defined(_MSC_VER) && !defined(__clang__)
-#define GODOT_MSVC_PRAGMA(m_content) __pragma(m_content)
+#define GODOT_MSVC_PRAGMA(m_command) __pragma(m_command)
 #define GODOT_MSVC_WARNING_PUSH GODOT_MSVC_PRAGMA(warning(push))
 #define GODOT_MSVC_WARNING_IGNORE(m_warning) GODOT_MSVC_PRAGMA(warning(disable : m_warning))
 #define GODOT_MSVC_WARNING_POP GODOT_MSVC_PRAGMA(warning(pop))
 #define GODOT_MSVC_WARNING_PUSH_AND_IGNORE(m_warning) GODOT_MSVC_WARNING_PUSH GODOT_MSVC_WARNING_IGNORE(m_warning)
 #else
-#define GODOT_MSVC_PRAGMA(m_content)
+#define GODOT_MSVC_PRAGMA(m_command)
 #define GODOT_MSVC_WARNING_PUSH
 #define GODOT_MSVC_WARNING_IGNORE(m_warning)
 #define GODOT_MSVC_WARNING_POP
 #define GODOT_MSVC_WARNING_PUSH_AND_IGNORE(m_warning)
 #endif
+
+// Deprecation warning suppression helper macros.
+#if defined(__clang__)
+#define GODOT_PUSH_IGNORE_DEPRECATION() GODOT_CLANG_WARNING_PUSH_AND_IGNORE("-Wdeprecated-declarations")
+#define GODOT_POP_IGNORE_DEPRECATION() GODOT_CLANG_WARNING_POP
+#endif
+
+#if defined(__GNUC__) && !defined(__clang__)
+#define GODOT_PUSH_IGNORE_DEPRECATION() GODOT_GCC_WARNING_PUSH_AND_IGNORE("-Wdeprecated-declarations")
+#define GODOT_POP_IGNORE_DEPRECATION() GODOT_GCC_WARNING_POP
+#endif
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#define GODOT_PUSH_IGNORE_DEPRECATION() GODOT_MSVC_WARNING_PUSH_AND_IGNORE(4996)
+#define GODOT_POP_IGNORE_DEPRECATION() GODOT_MSVC_WARNING_POP
+#endif
+
+template <typename T, typename = void>
+struct is_fully_defined : std::false_type {};
+
+template <typename T>
+struct is_fully_defined<T, std::void_t<decltype(sizeof(T))>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_fully_defined_v = is_fully_defined<T>::value;
+
+#ifndef SCU_BUILD_ENABLED
+/// Enforces the requirement that a class is not fully defined.
+/// This can be used to reduce include coupling and keep compile times low.
+/// The check must be made at the top of the corresponding .cpp file of a header.
+#define STATIC_ASSERT_INCOMPLETE_TYPE(m_keyword, m_type) \
+	m_keyword m_type; \
+	static_assert(!is_fully_defined_v<m_type>, #m_type " was unexpectedly fully defined. Please check the include hierarchy of '" __FILE__ "' and remove includes that resolve the " #m_keyword ".");
+#else
+#define STATIC_ASSERT_INCOMPLETE_TYPE(m_keyword, m_type)
+#endif
+
+#define _GD_VARNAME_CONCAT_B_(m_ignore, m_name) m_name
+#define _GD_VARNAME_CONCAT_A_(m_a, m_b, m_c) _GD_VARNAME_CONCAT_B_(hello there, m_a##m_b##m_c)
+#define _GD_VARNAME_CONCAT_(m_a, m_b, m_c) _GD_VARNAME_CONCAT_A_(m_a, m_b, m_c)
+#define GD_UNIQUE_NAME(m_name) _GD_VARNAME_CONCAT_(m_name, _, __COUNTER__)
 
 } //namespace godot

@@ -31,6 +31,7 @@
 #pragma once
 
 #include <godot_cpp/core/error_macros.hpp>
+#include <godot_cpp/core/math_funcs_binary.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/templates/sort_array.hpp>
 #include <godot_cpp/templates/span.hpp>
@@ -140,7 +141,7 @@ public:
 	_FORCE_INLINE_ bool is_empty() const { return count == 0; }
 	_FORCE_INLINE_ U get_capacity() const { return capacity; }
 	_FORCE_INLINE_ void reserve(U p_size) {
-		p_size = tight ? p_size : nearest_power_of_2_templated(p_size);
+		p_size = tight ? p_size : Math::nearest_power_of_2_templated(p_size);
 		if (p_size > capacity) {
 			capacity = p_size;
 			data = (T *)memrealloc(data, capacity * sizeof(T));
@@ -158,7 +159,7 @@ public:
 			count = p_size;
 		} else if (p_size > count) {
 			if (unlikely(p_size > capacity)) {
-				capacity = tight ? p_size : nearest_power_of_2_templated(p_size);
+				capacity = tight ? p_size : Math::nearest_power_of_2_templated(p_size);
 				data = (T *)memrealloc(data, capacity * sizeof(T));
 				CRASH_COND_MSG(!data, "Out of memory");
 			}
