@@ -22,5 +22,4 @@
 #include <godot_cpp/templates/spin_lock.hpp>
 #include <godot_cpp/templates/thread_work_pool.hpp>
 #include <godot_cpp/templates/vector.hpp>
-#include <godot_cpp/templates/vmap.hpp>
 #include <godot_cpp/templates/vset.hpp>

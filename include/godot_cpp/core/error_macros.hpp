@@ -48,6 +48,10 @@ void _err_print_index_error(const char *p_function, const char *p_file, int p_li
 void _err_print_index_error(const char *p_function, const char *p_file, int p_line, int64_t p_index, int64_t p_size, const char *p_index_str, const char *p_size_str, const String &p_message, bool p_editor_notify = false, bool p_fatal = false);
 void _err_flush_stdout();
 
+// Normally present in print_string.hpp, added here because our include situation is
+// different from upstream godot and some files might otherwise not compile.
+bool is_print_verbose_enabled();
+
 } // namespace godot
 
 #ifdef __GNUC__
@@ -707,6 +711,16 @@ void _err_flush_stdout();
 		} \
 	} else \
 		((void)0)
+
+/**
+ * Warns about `m_msg` only when verbose mode is enabled.
+ */
+#define WARN_VERBOSE(m_msg) \
+	{ \
+		if (is_print_verbose_enabled()) { \
+			WARN_PRINT(m_msg); \
+		} \
+	}
 
 // Print deprecated warning message macros.
 
