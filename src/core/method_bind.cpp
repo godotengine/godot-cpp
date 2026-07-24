@@ -60,7 +60,7 @@ void MethodBind::set_argument_names(const LocalVector<StringName> &p_names) {
 	argument_names = p_names;
 }
 
-LocalVector<StringName> MethodBind::get_argument_names() const {
+const LocalVector<StringName> &MethodBind::get_argument_names() const {
 	return argument_names;
 }
 
