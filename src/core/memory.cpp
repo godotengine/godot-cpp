@@ -50,6 +50,13 @@ void *Memory::alloc_static(size_t p_bytes, bool p_pad_align) {
 #endif
 }
 
+void *Memory::alloc_static_zeroed(size_t p_bytes, bool p_pad_align) {
+	// TODO Could benefit from binding the upstream alloc_static_zeroed
+	void *mem = alloc_static(p_bytes, p_pad_align);
+	memset(mem, 0, p_bytes);
+	return mem;
+}
+
 void *Memory::realloc_static(void *p_memory, size_t p_bytes, bool p_pad_align) {
 	if (p_memory == nullptr) {
 		return alloc_static(p_bytes, p_pad_align);
