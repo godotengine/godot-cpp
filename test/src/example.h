@@ -29,7 +29,7 @@
 #endif // GODOT_VERSION_MINOR >= 4
 
 #include <godot_cpp/core/binder_common.hpp>
-#include <godot_cpp/core/gdvirtual.gen.inc>
+#include <godot_cpp/core/gdvirtual.hpp>
 
 using namespace godot;
 

@@ -221,8 +221,8 @@ def _get_file_list(api, output_dir, headers=False, sources=False):
     files.append(str((gdextension_gen_folder / "gdextension_interface.h").as_posix()))
     files.append(str((core_gen_folder / "gdextension_interface_loader.hpp").as_posix()))
     files.append(str((source_gen_folder / "gdextension_interface_loader.cpp").as_posix()))
-    files.append(str((core_gen_folder / "ext_wrappers.gen.inc").as_posix()))
-    files.append(str((core_gen_folder / "gdvirtual.gen.inc").as_posix()))
+    files.append(str((core_gen_folder / "ext_wrappers.hpp").as_posix()))
+    files.append(str((core_gen_folder / "gdvirtual.hpp").as_posix()))
 
     for builtin_class in api["builtin_classes"]:
         if is_pod_type(builtin_class["name"]):
@@ -513,8 +513,8 @@ def generate_builtin_bindings(api, output_dir, build_config):
     include_gen_folder.mkdir(parents=True, exist_ok=True)
     source_gen_folder.mkdir(parents=True, exist_ok=True)
 
-    generate_wrappers(core_gen_folder / "ext_wrappers.gen.inc")
-    generate_virtuals(core_gen_folder / "gdvirtual.gen.inc")
+    generate_wrappers(core_gen_folder / "ext_wrappers.hpp")
+    generate_virtuals(core_gen_folder / "gdvirtual.hpp")
 
     # Store types beforehand.
     for builtin_api in api["builtin_classes"]:
