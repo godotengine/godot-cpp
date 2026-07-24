@@ -57,9 +57,9 @@ def silence_msvc(env):
             if not caught and (is_cl and re_cl_capture.match(line)) or (not is_cl and re_link_capture.match(line)):
                 caught = True
                 try:
-                    with open(capture_path, "a", encoding=sys.stdout.encoding) as log:
+                    with open(capture_path, "a", encoding="utf-8") as log:
                         log.write(line + "\n")
-                except OSError:
+                except (OSError, UnicodeError):
                     print(f'WARNING: Failed to log captured line: "{line}".')
                 continue
             content += line + "\n"

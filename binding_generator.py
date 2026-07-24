@@ -336,7 +336,7 @@ def generate_gdextension_interface_loader(interface_filepath, output_dir):
     header_filename = include_gen_folder / "gdextension_interface_loader.hpp"
     source_filename = source_gen_folder / "gdextension_interface_loader.cpp"
 
-    with open(interface_filepath, "rt") as file:
+    with open(interface_filepath, "rt", encoding="utf-8") as file:
         data = json.load(file)
 
     functions_by_version = {}
@@ -657,9 +657,8 @@ def generate_builtin_bindings(api, output_dir, build_config):
 
     # Create a header to implement all builtin class vararg methods and be included in "variant.hpp".
     builtin_vararg_methods_header = include_gen_folder / "builtin_vararg_methods.hpp"
-    builtin_vararg_methods_header.open("w+").write(
-        generate_builtin_class_vararg_method_implements_header(api["builtin_classes"])
-    )
+    with builtin_vararg_methods_header.open("w+", encoding="utf-8") as vararg_methods_file:
+        vararg_methods_file.write(generate_builtin_class_vararg_method_implements_header(api["builtin_classes"]))
 
 
 def generate_builtin_class_vararg_method_implements_header(builtin_classes):

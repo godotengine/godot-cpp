@@ -4,7 +4,7 @@ import os.path
 ## See https://github.com/godotengine/godot/blob/master/glsl_builders.py
 def build_raw_header(source_filename: str, constant_name: str) -> None:
     # Read the source file content.
-    with open(source_filename, "r") as source_file:
+    with open(source_filename, "r", encoding="utf-8", newline="\n") as source_file:
         source_content = source_file.read()
         constant_name = constant_name.replace(".", "_")
         # Build header content using a C raw string literal.
@@ -18,7 +18,7 @@ def build_raw_header(source_filename: str, constant_name: str) -> None:
         )
         # Write the header to the provided file name with a ".gen.h" suffix.
         header_filename = f"{source_filename}.gen.h"
-        with open(header_filename, "w") as header_file:
+        with open(header_filename, "w", encoding="utf-8", newline="\n") as header_file:
             header_file.write(header_content)
 
 
