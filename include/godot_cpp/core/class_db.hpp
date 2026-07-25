@@ -73,7 +73,7 @@ MethodDefinition D_METHOD(StringName p_name, StringName p_arg1, Args... args) {
 class ClassDB {
 	static GDExtensionInitializationLevel current_level;
 
-	friend class godot::GDExtensionBinding;
+	friend class ::godot::GDExtensionBinding;
 
 public:
 	struct ClassInfo {
@@ -119,7 +119,7 @@ private:
 		if constexpr (!std::is_abstract_v<T>) {
 			Wrapped::_set_construct_info<T>();
 #if GODOT_VERSION_MINOR >= 4
-			T *new_object = new (godot::DefaultAllocator{}) T;
+			T *new_object = new (::godot::DefaultAllocator{}) T;
 			if (p_notify_postinitialize) {
 				new_object->_postinitialize();
 			}

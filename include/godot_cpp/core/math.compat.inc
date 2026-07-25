@@ -46,6 +46,6 @@ constexpr T ABS(T m_v) {
 
 // To maintain compatibility an alias is defined outside the namespace.
 // Consider it deprecated.
-using real_t = godot::real_t;
+using real_t = ::godot::real_t;
 
 #endif

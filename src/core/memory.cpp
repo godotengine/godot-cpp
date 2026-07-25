@@ -102,10 +102,10 @@ _GlobalNil _GlobalNilClass::_nil;
 
 } // namespace godot
 
-void *operator new(size_t p_size, godot::DefaultAllocator p_allocator) {
-	return godot::Memory::alloc_static(p_size);
+void *operator new(size_t p_size, ::godot::DefaultAllocator p_allocator) {
+	return ::godot::Memory::alloc_static(p_size);
 }
 
-void *operator new(size_t p_size, godot::DefaultAllocator p_allocator, void *(*p_allocfunc)(size_t p_size)) {
+void *operator new(size_t p_size, ::godot::DefaultAllocator p_allocator, void *(*p_allocfunc)(size_t p_size)) {
 	return p_allocfunc(p_size);
 }
