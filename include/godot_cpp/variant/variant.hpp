@@ -31,6 +31,7 @@
 #pragma once
 
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/core/method_ptrarg.hpp>
 
 #include <godot_cpp/variant/array.hpp>
 #include <godot_cpp/variant/builtin_types.hpp>
@@ -39,6 +40,7 @@
 #include <gdextension_interface.h>
 
 #include <array>
+#include <type_traits>
 
 namespace godot {
 
@@ -215,6 +217,9 @@ public:
 	Variant(const PackedVector3Array &v);
 	Variant(const PackedColorArray &v);
 	Variant(const PackedVector4Array &v);
+	template <typename T, typename = std::enable_if_t<ConvertiblePtrToArg<T>::value>>
+	explicit Variant(T v) :
+			Variant(PtrToArg<T>::encode_arg(v)) {}
 	~Variant();
 
 	operator bool() const;
