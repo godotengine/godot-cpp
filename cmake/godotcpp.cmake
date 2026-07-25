@@ -145,6 +145,12 @@ function(godotcpp_options)
         "Path to a custom GDExtension API JSON file (takes precedence over `GODOTCPP_GDEXTENSION_DIR` and `GODOTCPP_API_VERSION`) ( /path/to/custom_api_file )"
     )
 
+    set(GODOTCPP_BINDING_HOOK_FILE
+        ""
+        CACHE FILEPATH
+        "Path to a Python file defining custom binding generator hooks. The file has to contain a class named `CustomBindingGeneratorHooks`"
+    )
+
     #TODO generate_bindings
 
     option(GODOTCPP_GENERATE_TEMPLATE_GET_NODE "Generate a template version of the Node class's get_node. (ON|OFF)" ON)
@@ -309,6 +315,7 @@ function(godotcpp_generate)
             "${BITS}"
             "${GODOTCPP_PRECISION}"
             "${CMAKE_CURRENT_BINARY_DIR}"
+            "${GODOTCPP_BINDING_HOOK_FILE}"
     )
 
     ### Platform is derived from the toolchain target

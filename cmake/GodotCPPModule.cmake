@@ -91,6 +91,7 @@ function(
     BITS
     PRECISION
     OUTPUT_DIR
+    BINDING_HOOK_FILE
 )
     # This code snippet will be squashed into a single line
     set(PYTHON_SCRIPT
@@ -101,7 +102,8 @@ function(
     use_template_get_node='${USE_TEMPLATE_GET_NODE}',
     bits='${BITS}',
     precision='${PRECISION}',
-    output_dir='${OUTPUT_DIR}')"
+    output_dir='${OUTPUT_DIR}',
+    hooks_path='${BINDING_HOOK_FILE}')"
     )
 
     message(DEBUG "Python:\n${PYTHON_SCRIPT}")
