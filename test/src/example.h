@@ -21,6 +21,7 @@
 #include <godot_cpp/classes/tile_set.hpp>
 #include <godot_cpp/classes/tween.hpp>
 #include <godot_cpp/classes/viewport.hpp>
+#include <godot_cpp/core/mutex_lock.hpp>
 #include <godot_cpp/variant/variant.hpp>
 #include <godot_cpp/variant/variant_internal.hpp>
 
@@ -312,4 +313,18 @@ protected:
 
 public:
 	int get_the_answer() const;
+};
+
+class ExampleThreadSafeClass : public RefCounted {
+	GDCLASS(ExampleThreadSafeClass, RefCounted);
+
+	_THREAD_SAFE_CLASS_
+
+protected:
+	static void _bind_methods();
+
+public:
+	int test();
+	int test_const() const;
+	int test_manual();
 };

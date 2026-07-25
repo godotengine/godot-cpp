@@ -35,22 +35,22 @@
 namespace godot {
 
 class MutexLock {
-	const Mutex &mutex;
+	const Ref<Mutex> &mutex;
 
 public:
-	_ALWAYS_INLINE_ explicit MutexLock(const Mutex &p_mutex) :
+	_ALWAYS_INLINE_ explicit MutexLock(const Ref<Mutex> &p_mutex) :
 			mutex(p_mutex) {
-		const_cast<Mutex *>(&mutex)->lock();
+		const_cast<Mutex *>(*mutex)->lock();
 	}
 
 	_ALWAYS_INLINE_ ~MutexLock() {
-		const_cast<Mutex *>(&mutex)->unlock();
+		const_cast<Mutex *>(*mutex)->unlock();
 	}
 };
 
-#define _THREAD_SAFE_CLASS_ mutable Mutex _thread_safe_;
+#define _THREAD_SAFE_CLASS_ mutable Ref<Mutex> _thread_safe_ = Ref<Mutex>(memnew(Mutex));
 #define _THREAD_SAFE_METHOD_ MutexLock _thread_safe_method_(_thread_safe_);
-#define _THREAD_SAFE_LOCK_ _thread_safe_.lock();
-#define _THREAD_SAFE_UNLOCK_ _thread_safe_.unlock();
+#define _THREAD_SAFE_LOCK_ _thread_safe_->lock();
+#define _THREAD_SAFE_UNLOCK_ _thread_safe_->unlock();
 
 } // namespace godot

@@ -5,6 +5,7 @@
 		"Label",
 		"MultiplayerAPI",
 		"MultiplayerPeer",
+		"Mutex",
 		"OS",
 		"TileMap",
 		"TileSet",
