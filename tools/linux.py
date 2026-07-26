@@ -52,4 +52,11 @@ def generate(env):
     if env["lto"] == "auto":
         env["lto"] = "full"
 
+    # The generated bindings can produce enough object files to exceed the
+    # Linux command-line length limit when linking the static library.
+    # This ARCOM stuff works around that by writing the command to a temporary file.
+    env["ARCOM_ORIG"] = env["ARCOM"]
+    # This is SCons lazy evaluation syntax, only switching to a file when the command is actually too long.
+    env["ARCOM"] = "${TEMPFILE('$ARCOM_ORIG', '$ARCOMSTR')}"
+
     common_compiler_flags.generate(env)
