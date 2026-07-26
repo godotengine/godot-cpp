@@ -1,18 +1,18 @@
 [gd_scene load_steps=3 format=3 uid="uid://dmx2xuigcpvt4"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_qesh5"]
-[ext_resource type="Script" path="res://example.gd" id="2_jju25"]
+[ext_resource type="Script" path="res://my_test.gd" id="2_jju25"]
 
 [node name="Node" type="Node"]
 script = ExtResource("1_qesh5")
 
-[node name="Example" type="Example" parent="."]
+[node name="MyTestMain" type="MyTestMain" parent="."]
 script = ExtResource("2_jju25")
 
-[node name="ExampleMin" type="ExampleMin" parent="Example"]
+[node name="MyTestMin" type="MyTestMin" parent="MyTestMain"]
 layout_mode = 0
 
-[node name="Label" type="Label" parent="Example"]
+[node name="Label" type="Label" parent="MyTestMain"]
 layout_mode = 0
 offset_left = 194.0
 offset_top = -2.0
@@ -24,6 +24,6 @@ offset_right = 79.0
 offset_bottom = 29.0
 text = "Click me!"
 
-[node name="ExampleChild" type="ExampleChild" parent="."]
+[node name="MyTestChild" type="MyTestChild" parent="."]
 
-[connection signal="custom_signal" from="Example" to="." method="_on_Example_custom_signal"]
+[connection signal="custom_signal" from="MyTestMain" to="." method="_on_my_test_custom_signal"]

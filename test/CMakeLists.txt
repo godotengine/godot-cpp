@@ -13,7 +13,7 @@ add_library(${TARGET_NAME} SHARED EXCLUDE_FROM_ALL)
 
 target_sources(
     ${TARGET_NAME}
-    PRIVATE src/example.cpp src/example.h src/register_types.cpp src/register_types.h src/tests.h
+    PRIVATE src/my_test.cpp src/my_test.h src/register_types.cpp src/register_types.h src/tests.h
 )
 
 # conditionally add doc data to compile output
@@ -52,8 +52,7 @@ set_target_properties(
         PDB_OUTPUT_DIRECTORY     "$<1:${OUTPUT_DIR}>" #MSVC Only, ignored on other platforms
 
         PREFIX "lib"
-        OUTPUT_NAME "gdexample${GODOTCPP_SUFFIX}"
-        # TODO rename the file for both CMake and SCons
+        OUTPUT_NAME "mytest${GODOTCPP_SUFFIX}"
 
         # Some IDE's respect this property to logically group targets
         FOLDER "godot-cpp"
@@ -64,6 +63,6 @@ set_target_properties(
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set_target_properties(
         ${TARGET_NAME}
-        PROPERTIES SUFFIX "" OUTPUT_DIR "${OUTPUT_DIR}/libgdexample.macos.${GODOTCPP_TARGET}.framework"
+        PROPERTIES SUFFIX "" OUTPUT_DIR "${OUTPUT_DIR}/libmytest.macos.${GODOTCPP_TARGET}.framework"
     )
 endif()
