@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  mutex_lock.hpp                                                        */
+/*  mutex.hpp                                                             */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -30,27 +30,108 @@
 
 #pragma once
 
-#include <godot_cpp/classes/mutex.hpp>
+#include <godot_cpp/core/defs.hpp>
+
+#ifdef MINGW_ENABLED
+#define MINGW_STDTHREAD_REDUNDANCY_WARNING
+#include <thirdparty/mingw-std-threads/mingw.mutex.h>
+#define THREADING_NAMESPACE mingw_stdthread
+#else
+#include <mutex>
+#define THREADING_NAMESPACE std
+#endif
 
 namespace godot {
 
-class MutexLock {
-	const Mutex &mutex;
+#ifdef THREADS_ENABLED
+
+template <typename MutexT>
+class MutexLock;
+
+template <typename StdMutexT>
+class MutexImpl {
+	friend class MutexLock<MutexImpl<StdMutexT>>;
+
+	using StdMutexType = StdMutexT;
+
+	mutable StdMutexT mutex;
 
 public:
-	_ALWAYS_INLINE_ explicit MutexLock(const Mutex &p_mutex) :
-			mutex(p_mutex) {
-		const_cast<Mutex *>(&mutex)->lock();
+	_ALWAYS_INLINE_ void lock() const {
+		mutex.lock();
 	}
 
-	_ALWAYS_INLINE_ ~MutexLock() {
-		const_cast<Mutex *>(&mutex)->unlock();
+	_ALWAYS_INLINE_ void unlock() const {
+		mutex.unlock();
+	}
+
+	_ALWAYS_INLINE_ bool try_lock() const {
+		return mutex.try_lock();
 	}
 };
+
+template <typename MutexT>
+class [[nodiscard]] MutexLock {
+	mutable THREADING_NAMESPACE::unique_lock<typename MutexT::StdMutexType> lock;
+
+public:
+	explicit MutexLock(const MutexT &p_mutex) :
+			lock(p_mutex.mutex) {}
+
+	// Clarification: all the funny syntax is needed so this function exists only for binary mutexes.
+	template <typename T = MutexT>
+	_ALWAYS_INLINE_ THREADING_NAMESPACE::unique_lock<THREADING_NAMESPACE::mutex> &_get_lock(
+			typename std::enable_if<std::is_same<T, THREADING_NAMESPACE::mutex>::value> * = nullptr) const {
+		return lock;
+	}
+
+	_ALWAYS_INLINE_ void temp_relock() const {
+		lock.lock();
+	}
+
+	_ALWAYS_INLINE_ void temp_unlock() const {
+		lock.unlock();
+	}
+
+	// TODO: Implement a `try_temp_relock` if needed (will also need a dummy method below).
+};
+
+using Mutex = MutexImpl<THREADING_NAMESPACE::recursive_mutex>; // Recursive, for general use
+using BinaryMutex = MutexImpl<THREADING_NAMESPACE::mutex>; // Non-recursive, handle with care
 
 #define _THREAD_SAFE_CLASS_ mutable Mutex _thread_safe_;
 #define _THREAD_SAFE_METHOD_ MutexLock _thread_safe_method_(_thread_safe_);
 #define _THREAD_SAFE_LOCK_ _thread_safe_.lock();
 #define _THREAD_SAFE_UNLOCK_ _thread_safe_.unlock();
+
+#else // No threads.
+
+class MutexImpl {
+	mutable THREADING_NAMESPACE::mutex mutex;
+
+public:
+	void lock() const {}
+	void unlock() const {}
+	bool try_lock() const { return true; }
+};
+
+template <typename MutexT>
+class [[nodiscard]] MutexLock {
+public:
+	MutexLock(const MutexT &p_mutex) {}
+
+	void temp_relock() const {}
+	void temp_unlock() const {}
+};
+
+using Mutex = MutexImpl;
+using BinaryMutex = MutexImpl;
+
+#define _THREAD_SAFE_CLASS_
+#define _THREAD_SAFE_METHOD_
+#define _THREAD_SAFE_LOCK_
+#define _THREAD_SAFE_UNLOCK_
+
+#endif // THREADS_ENABLED
 
 } // namespace godot

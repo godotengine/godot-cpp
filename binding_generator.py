@@ -1792,7 +1792,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append("#include <godot_cpp/core/binder_common.hpp>")
         result.append("")
 
-    result.append("namespace godot {")
+    if class_name == "Mutex":
+        result.append("namespace godot::CoreBind {")
+    else:
+        result.append("namespace godot {")
     result.append("")
 
     for type_name in used_classes:
@@ -2099,7 +2102,10 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
 
         result.append("")
 
-    result.append("namespace godot {")
+    if class_name == "Mutex":
+        result.append("namespace godot::CoreBind {")
+    else:
+        result.append("namespace godot {")
     result.append("")
 
     if is_singleton:
