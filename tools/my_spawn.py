@@ -33,20 +33,15 @@ def configure(env):
         return rv
 
     def mySpawn(sh, escape, cmd, args, env):
+        # Used by TEMPFILE, which spawns a "del" command to clean up the response file.
+        # See the equivalent code in the engine in `methods.py`.
+        if cmd == "del":
+            os.remove(args[1])
+            return 0
+
         newargs = " ".join(args[1:])
         cmdline = cmd + " " + newargs
 
-        rv = 0
-        if len(cmdline) > 32000 and cmd.endswith("ar"):
-            cmdline = cmd + " " + args[1] + " " + args[2] + " "
-            for i in range(3, len(args)):
-                rv = mySubProcess(cmdline + args[i], env)
-                if rv:
-                    break
-        else:
-            rv = mySubProcess(cmdline, env)
-
-        return rv
+        return mySubProcess(cmdline, env)
 
     env["SPAWN"] = mySpawn
-    env.Replace(ARFLAGS=["q"])
