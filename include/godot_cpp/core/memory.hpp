@@ -87,19 +87,19 @@ public:
 // Overload of `new` operator to use the `Memory::alloc_static()` function.
 // The `DefaultAllocator` parameter is just a tag to select this overload.
 // NOTE: do not inline `new` operators due to GCC+LTO compiler bug (see GH-119752).
-void *operator new(size_t p_size, godot::DefaultAllocator p_allocator);
+void *operator new(size_t p_size, ::godot::DefaultAllocator p_allocator);
 
 // Overload of `new` operator to use a custom allocation function.
 // p_allocator argument is added to avoid conflicts with the engine functions when both engine and GDExtension are built as a static library on iOS.
-void *operator new(size_t p_size, godot::DefaultAllocator p_allocator, void *(*p_allocfunc)(size_t p_size));
+void *operator new(size_t p_size, ::godot::DefaultAllocator p_allocator, void *(*p_allocfunc)(size_t p_size));
 
 #if defined(_MSC_VER) && !defined(__clang__)
 // When compiling with VC++ 2017, the above declarations of placement new generate many irrelevant warnings (C4291).
 // The purpose of the following definitions is to muffle these warnings, not to provide a usable implementation of placement delete.
-inline void operator delete(void *p_mem, godot::DefaultAllocator p_allocator) {
+inline void operator delete(void *p_mem, ::godot::DefaultAllocator p_allocator) {
 	CRASH_NOW_MSG("Call to placement delete should not happen.");
 }
-inline void operator delete(void *p_mem, godot::DefaultAllocator, void *(*p_allocfunc)(size_t p_size)) {
+inline void operator delete(void *p_mem, ::godot::DefaultAllocator, void *(*p_allocfunc)(size_t p_size)) {
 	CRASH_NOW_MSG("Call to placement delete should not happen.");
 }
 #endif // defined(_MSC_VER) && !defined(__clang__)
@@ -130,13 +130,13 @@ _ALWAYS_INLINE_ memnew_result_t<T> _post_initialize(T *p_obj) {
 #define memrealloc(m_mem, m_size) ::godot::Memory::realloc_static(m_mem, m_size)
 #define memfree(m_mem) ::godot::Memory::free_static(m_mem)
 
-#define memnew(m_class) (::godot::_pre_initialize<std::remove_pointer_t<decltype(new (godot::DefaultAllocator{}) m_class)>>(), ::godot::_post_initialize(new (godot::DefaultAllocator{}) m_class))
+#define memnew(m_class) (::godot::_pre_initialize<std::remove_pointer_t<decltype(new (::godot::DefaultAllocator{}) m_class)>>(), ::godot::_post_initialize(new (::godot::DefaultAllocator{}) m_class))
 
-#define memnew_allocator(m_class, m_allocator) (::godot::_pre_initialize<std::remove_pointer_t<decltype(new (godot::DefaultAllocator{}, m_allocator::alloc) m_class)>>(), ::godot::_post_initialize(new (godot::DefaultAllocator{}, m_allocator::alloc) m_class))
+#define memnew_allocator(m_class, m_allocator) (::godot::_pre_initialize<std::remove_pointer_t<decltype(new (::godot::DefaultAllocator{}, m_allocator::alloc) m_class)>>(), ::godot::_post_initialize(new (::godot::DefaultAllocator{}, m_allocator::alloc) m_class))
 #define memnew_placement(m_placement, m_class) (::godot::_pre_initialize<std::remove_pointer_t<decltype(new (m_placement) m_class)>>(), ::godot::_post_initialize(new (m_placement) m_class))
 
 template <typename T>
-void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wrapped, T>>::type * = nullptr) {
+void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<::godot::Wrapped, T>>::type * = nullptr) {
 	if constexpr (!std::is_trivially_destructible_v<T>) {
 		p_class->~T();
 	}
@@ -144,7 +144,7 @@ void memdelete(T *p_class, typename std::enable_if<!std::is_base_of_v<godot::Wra
 	Memory::free_static(p_class);
 }
 
-template <typename T, std::enable_if_t<std::is_base_of_v<godot::Wrapped, T>, bool> = true>
+template <typename T, std::enable_if_t<std::is_base_of_v<::godot::Wrapped, T>, bool> = true>
 void memdelete(T *p_class) {
 	::godot::gdextension_interface::object_destroy(p_class->_owner);
 }

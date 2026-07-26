@@ -157,7 +157,7 @@ Variant::Variant(const Quaternion &v) {
 	from_type_constructor[QUATERNION](_native_ptr(), (GDExtensionTypePtr)&v);
 }
 
-Variant::Variant(const godot::AABB &v) {
+Variant::Variant(const ::godot::AABB &v) {
 	from_type_constructor[AABB](_native_ptr(), (GDExtensionTypePtr)&v);
 }
 
@@ -185,7 +185,7 @@ Variant::Variant(const NodePath &v) {
 	from_type_constructor[NODE_PATH](_native_ptr(), v._native_ptr());
 }
 
-Variant::Variant(const godot::RID &v) {
+Variant::Variant(const ::godot::RID &v) {
 	from_type_constructor[RID](_native_ptr(), v._native_ptr());
 }
 
@@ -393,9 +393,9 @@ Variant::operator Quaternion() const {
 	return result;
 }
 
-Variant::operator godot::AABB() const {
+Variant::operator ::godot::AABB() const {
 	// @todo Avoid initializing result before calling constructor (which will initialize it again)
-	godot::AABB result;
+	::godot::AABB result;
 	to_type_constructor[AABB]((GDExtensionTypePtr)&result, _native_ptr());
 	return result;
 }
@@ -436,8 +436,8 @@ Variant::operator NodePath() const {
 	return NodePath(this);
 }
 
-Variant::operator godot::RID() const {
-	return godot::RID(this);
+Variant::operator ::godot::RID() const {
+	return ::godot::RID(this);
 }
 
 Variant::operator Object *() const {
