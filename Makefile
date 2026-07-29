@@ -1,6 +1,7 @@
 TARGET = template_debug
+API_VERSION = 4.7
 
-BASE = scons target=$(TARGET) $(EXTRA_ARGS)
+BASE = scons target=$(TARGET) api_version=$(API_VERSION) $(EXTRA_ARGS)
 LINUX = $(BASE) platform=linux
 WINDOWS = $(BASE) platform=windows
 MACOS = $(BASE) platform=macos
@@ -11,7 +12,7 @@ usage:
 	@echo -e "Specify one of the available targets:\n"
         # https://stackoverflow.com/a/26339924
 	@LC_ALL=C $(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | grep -E -v -e '^[^[:alnum:]]' -e '^$@$$'
-	@echo -e "\nDefine the SCons target with TARGET, and pass extra SCons arguments with EXTRA_ARGS."
+	@echo -e "\nDefine the SCons target with TARGET, the Godot API version to target with API_VERSION, and pass extra SCons arguments with EXTRA_ARGS."
 
 
 linux:

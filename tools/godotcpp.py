@@ -176,9 +176,6 @@ def scons_generate_bindings(target, source, env):
 
 supported_api_versions = ["4.3", "4.4", "4.5", "4.6", "4.7"]
 
-# We default to the latest stable Godot version.
-default_api_version = "4.7"
-
 platforms = ["linux", "macos", "windows", "android", "ios", "web"]
 
 # CPU architecture options.
@@ -550,8 +547,10 @@ def generate(env):
 
 
 def _get_api_file(extension_dir, api_version):
-    if api_version is None or api_version == default_api_version:
-        return os.path.join(extension_dir, "extension_api.json")
+    if api_version is None:
+        raise UserError("'api_version' must be provided")
+    if api_version not in supported_api_versions:
+        raise UserError("Unsupported 'api_version': %s" % api_version)
 
     filename = "extension_api-%s.json" % api_version.replace(".", "-")
     path = os.path.join(extension_dir, filename)
@@ -563,8 +562,11 @@ def _get_api_file(extension_dir, api_version):
 
 def _godot_cpp(env):
     extension_dir = normalize_path(env.get("gdextension_dir", default=env.Dir("gdextension").srcnode().abspath), env)
-    default_api_file = _get_api_file(extension_dir, env.get("api_version", None))
-    api_file = normalize_path(env.get("custom_api_file", default=default_api_file), env)
+
+    api_file = env.get("custom_api_file", None)
+    if api_file is None:
+        api_file = _get_api_file(extension_dir, env.get("api_version", None))
+    api_file = normalize_path(api_file, env)
 
     bindings = env.GodotCPPBindings(
         env.Dir("."),

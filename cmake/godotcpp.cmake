@@ -264,17 +264,19 @@ function(godotcpp_generate)
     math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8") # CMAKE_SIZEOF_VOID_P refers to target architecture.
 
     # API json File
-    set(GODOTCPP_LATEST_API_VERSION "4.7")
-    if(GODOTCPP_API_VERSION STREQUAL "" OR GODOTCPP_API_VERSION STREQUAL GODOTCPP_LATEST_API_VERSION)
-        set(GODOTCPP_GDEXTENSION_API_FILE "${GODOTCPP_GDEXTENSION_DIR}/extension_api.json")
+    if(GODOTCPP_CUSTOM_API_FILE) # User-defined override.
+        set(GODOTCPP_GDEXTENSION_API_FILE "${GODOTCPP_CUSTOM_API_FILE}")
     else()
+        if(GODOTCPP_API_VERSION STREQUAL "")
+            set(GODOTCPP_API_VERSION "${GODOTCPP_DEFAULT_API_VERSION}")
+        endif()
+        if(GODOTCPP_API_VERSION STREQUAL "")
+            message(FATAL_ERROR "'GODOTCPP_API_VERSION' must be provided")
+        endif()
         string(REPLACE "." "-" GODOTCPP_API_VERSION_DASHED "${GODOTCPP_API_VERSION}")
         set(GODOTCPP_GDEXTENSION_API_FILE
             "${GODOTCPP_GDEXTENSION_DIR}/extension_api-${GODOTCPP_API_VERSION_DASHED}.json"
         )
-    endif()
-    if(GODOTCPP_CUSTOM_API_FILE) # User-defined override.
-        set(GODOTCPP_GDEXTENSION_API_FILE "${GODOTCPP_CUSTOM_API_FILE}")
     endif()
 
     # Interface json file.

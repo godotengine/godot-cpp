@@ -48,8 +48,15 @@ godot --dump-extension-api
 scons custom_api_file=extension_api.json
 ```
 
-If you don't provide `api_version` or `custom_api_file`, then, by default, godot-cpp will
-target the latest stable Godot version that it's aware of.
+Extension authors can provide a default target API version by passing it to godot-cpp's
+`SConstruct`, for example:
+
+```python
+env = SConscript("godot-cpp/SConstruct", {"api_version": "4.7"})
+```
+
+This is highly recommended! It allows the extension author to ensure that their extension
+is built with a version that provides all the necessary features by default.
 
 ## Contributing
 
