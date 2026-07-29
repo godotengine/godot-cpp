@@ -313,6 +313,12 @@ func _ready():
 		var przykład = ClassDB.instantiate("ExamplePrzykład")
 		assert_equal(przykład.get_the_word(), "słowo to przykład")
 
+	# Test call some methods on a thread safe class.
+	var example_thread_safe = ExampleThreadSafeClass.new()
+	assert_equal(example_thread_safe.test(), 123)
+	assert_equal(example_thread_safe.test_const(), 456)
+	assert_equal(example_thread_safe.test_manual(), 789)
+
 	exit_with_status()
 
 func _on_Example_custom_signal(signal_name, value):

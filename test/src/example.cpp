@@ -823,3 +823,25 @@ void ExampleInternal::_bind_methods() {
 int ExampleInternal::get_the_answer() const {
 	return 42;
 }
+
+void ExampleThreadSafeClass::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("test"), &ExampleThreadSafeClass::test);
+	ClassDB::bind_method(D_METHOD("test_const"), &ExampleThreadSafeClass::test_const);
+	ClassDB::bind_method(D_METHOD("test_manual"), &ExampleThreadSafeClass::test_manual);
+}
+
+int ExampleThreadSafeClass::test() {
+	_THREAD_SAFE_METHOD_
+	return 123;
+}
+
+int ExampleThreadSafeClass::test_const() const {
+	_THREAD_SAFE_METHOD_
+	return 456;
+}
+
+int ExampleThreadSafeClass::test_manual() {
+	_THREAD_SAFE_LOCK_
+	_THREAD_SAFE_UNLOCK_
+	return 789;
+}
