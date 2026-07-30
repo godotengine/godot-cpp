@@ -585,6 +585,7 @@ def _godot_cpp(env):
         *env.Glob("src/*.cpp"),
         *env.Glob("src/classes/*.cpp"),
         *env.Glob("src/core/*.cpp"),
+        *env.Glob("src/templates/*.cpp"),
         *env.Glob("src/variant/*.cpp"),
         *tuple(f for f in bindings if str(f).endswith(".cpp")),
     ]
