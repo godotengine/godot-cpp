@@ -45,7 +45,7 @@ namespace godot {
 class ObjectID;
 
 class Variant {
-	uint8_t opaque[GODOT_CPP_VARIANT_SIZE]{ 0 };
+	alignas(8) uint8_t opaque[GODOT_CPP_VARIANT_SIZE]{ 0 };
 
 	friend class GDExtensionBinding;
 	friend class MethodBind;
