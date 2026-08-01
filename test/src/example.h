@@ -217,6 +217,9 @@ public:
 	String test_use_engine_singleton() const;
 	bool test_use_scene_tree_singleton() const;
 
+	String test_use_engine_singleton1() const;
+	bool test_use_engine_singleton2() const;
+
 	static String test_library_path();
 
 	Ref<RefCounted> test_get_internal_class() const;
