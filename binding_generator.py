@@ -11,7 +11,7 @@ from make_interface_header import generate_gdextension_interface_header
 def generate_mod_version(argcount, const=False, returns=False):
     s = """
 #define MODBIND$VER($RETTYPE m_name$ARG) \\
-virtual $RETVAL _##m_name($FUNCARGS) $CONST override; \\
+virtual $RETVAL _##m_name($FUNCARGS) $CONST override;
 """
     sproto = str(argcount)
     if returns:
