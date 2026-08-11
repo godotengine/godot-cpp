@@ -162,6 +162,8 @@ def scons_generate_bindings(target, source, env):
 
     api = generate_trimmed_api(str(source[0]), profile_filepath)
 
+    binding_hooks = env.get("binding_hooks", None)
+
     _generate_bindings(
         api,
         str(source[0]),
@@ -170,6 +172,7 @@ def scons_generate_bindings(target, source, env):
         "32" if "32" in env["arch"] else "64",
         env["precision"],
         env["godot_cpp_gen_dir"],
+        binding_hooks,
     )
     return None
 

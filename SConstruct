@@ -19,6 +19,14 @@ except Exception:
 
 env.PrependENVPath("PATH", os.getenv("PATH"))
 
+try:
+    Import("binding_hooks")
+except Exception:
+    # binding_hooks was not exported by the user's env
+    binding_hooks = None
+
+env["binding_hooks"] = binding_hooks
+
 # Custom options and profile flags.
 customs = ["custom.py"]
 try:
