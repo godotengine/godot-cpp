@@ -199,7 +199,7 @@ struct EngineClassRegistration {
 // every line of the macro different
 #define GDCLASS(m_class, m_inherits) \
 private: \
-	void operator=(const m_class & /*p_rval*/) {} \
+	void operator=(const m_class &p_rval) = delete; \
 	friend class ::godot::ClassDB; \
 	friend class ::godot::Wrapped; \
 \
@@ -428,7 +428,7 @@ private:
 #define GDEXTENSION_CLASS_ALIAS(m_class, m_alias_for, m_inherits) \
 private: \
 	inline static ::godot::internal::EngineClassRegistration<m_class> _gde_engine_class_registration_helper; \
-	void operator=(const m_class &p_rval) {} \
+	void operator=(const m_class &p_rval) = delete; \
 	friend class ::godot::ClassDB; \
 	friend class ::godot::Wrapped; \
 \
