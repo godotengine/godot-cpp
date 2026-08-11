@@ -9,7 +9,7 @@ sys.path.insert(1, os.path.join(os.path.dirname(__file__), "..", ".."))
 from binding_generator import _generate_bindings, _get_file_list
 from build_profile import generate_trimmed_api
 
-api_filepath = "gdextension/extension_api.json"
+api_filepath = "gdextension/extension_api-4-7.json"
 interface_filepath = "gdextension/gdextension_interface.json"
 bits = "64"
 precision = "single"

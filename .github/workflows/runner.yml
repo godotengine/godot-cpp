@@ -38,7 +38,7 @@ jobs:
               - '**/*.h'
               - '**/*.inc'
               - 'test/build_profile.json'
-              - 'gdextension/extension_api.json'
+              - 'gdextension/extension_api-*.json'
             scons:
               - '**/SConstruct'
               - '**/SCsub'

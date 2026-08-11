@@ -61,6 +61,13 @@ project(
     LANGUAGES CXX
 )
 
+# Set the default API version for the test project.
+# We're only setting this here because the test project is built weird;
+# in a normal project, it would be set before including this CMakeLists.txt.
+if(GODOTCPP_ENABLE_TESTING)
+    set(GODOTCPP_DEFAULT_API_VERSION "4.7")
+endif()
+
 compiler_detection()
 godotcpp_generate()
 

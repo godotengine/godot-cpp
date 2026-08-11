@@ -17,6 +17,12 @@ except Exception:
     # We apply platform specific toolchains via our custom tools.
     env = Environment(tools=["default"], PLATFORM="")
 
+try:
+    Import("api_version")
+    env["api_version"] = api_version
+except Exception:
+    pass
+
 env.PrependENVPath("PATH", os.getenv("PATH"))
 
 try:

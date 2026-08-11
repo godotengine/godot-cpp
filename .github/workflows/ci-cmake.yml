@@ -7,6 +7,8 @@ env:
   GODOT_BASE_BRANCH: master
   # Used to select the version of Godot to run the tests with.
   GODOT_TEST_VERSION: master
+  # The Godot API version to build against.
+  DEFAULT_API_VERSION: "4.7"
   # Use UTF-8 on Linux.
   LANG: en_US.UTF-8
   LC_ALL: en_US.UTF-8
@@ -121,7 +123,7 @@ jobs:
 
       - name: Configure godot-cpp-test with template_debug
         run: >
-          cmake --log-level=VERBOSE -S . -B cmake-build ${{ env.config-flags }} ${{ matrix.config-flags }}
+          cmake --log-level=VERBOSE -S . -B cmake-build '-DGODOTCPP_API_VERSION=${{ env.DEFAULT_API_VERSION }}' ${{ env.config-flags }} ${{ matrix.config-flags }}
 
       - name: Build godot-cpp-test (template_debug)
         run: >
@@ -129,8 +131,7 @@ jobs:
 
       - name: Configure godot-cpp-test with template_release
         run: >
-          cmake --fresh --log-level=VERBOSE -S . -B cmake-build
-          -DGODOTCPP_TARGET=template_release ${{ env.config-flags }} ${{ matrix.config-flags }}
+          cmake --fresh --log-level=VERBOSE -S . -B cmake-build -DGODOTCPP_TARGET=template_release '-DGODOTCPP_API_VERSION=${{ env.DEFAULT_API_VERSION }}' ${{ env.config-flags }} ${{ matrix.config-flags }}
 
       - name: Build godot-cpp-test (template_release)
         run: >

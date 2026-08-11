@@ -5,6 +5,8 @@ on:
 env:
   # Only used for the cache key. Increment version to force clean build.
   GODOT_BASE_BRANCH: master
+  # The Godot API version used by jobs that don't target a specific one.
+  DEFAULT_API_VERSION: "4.7"
   # Use UTF-8 on Linux.
   LANG: en_US.UTF-8
   LC_ALL: en_US.UTF-8
@@ -29,7 +31,6 @@ jobs:
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
             run-tests: true
-            api-version: 4.7
             cache-name: linux-x86_64
 
           - name: 🐧 Linux (GCC) for Godot 4.6
@@ -149,23 +150,23 @@ jobs:
 
       - name: Generate godot-cpp sources only
         run: |
-          scons platform=${{ matrix.platform }} verbose=yes build_library=no ${{ matrix.flags }} ${{ matrix.api-version && format('api_version={0}', matrix.api-version) || '' }}
-          scons -c
+          scons platform=${{ matrix.platform }} verbose=yes build_library=no ${{ matrix.flags }} api_version=${{ matrix.api-version || env.DEFAULT_API_VERSION }}
+          scons -c platform=${{ matrix.platform }} ${{ matrix.flags }} api_version=${{ matrix.api-version || env.DEFAULT_API_VERSION }}
 
       - name: Build godot-cpp (debug)
         run: |
-          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }} ${{ matrix.api-version && format('api_version={0}', matrix.api-version) || '' }}
+          scons platform=${{ matrix.platform }} verbose=yes target=template_debug ${{ matrix.flags }} api_version=${{ matrix.api-version || env.DEFAULT_API_VERSION }}
 
 
       - name: Build test without rebuilding godot-cpp (debug)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} verbose=yes build_library=no target=template_debug ${{ matrix.flags }} ${{ matrix.api-version && format('api_version={0}', matrix.api-version) || '' }}
+          scons platform=${{ matrix.platform }} verbose=yes build_library=no target=template_debug ${{ matrix.flags }} api_version=${{ matrix.api-version || env.DEFAULT_API_VERSION }}
 
       - name: Build test and godot-cpp (release)
         run: |
           cd test
-          scons platform=${{ matrix.platform }} verbose=yes target=template_release ${{ matrix.flags }} ${{ matrix.api-version && format('api_version={0}', matrix.api-version) || '' }}
+          scons platform=${{ matrix.platform }} verbose=yes target=template_release ${{ matrix.flags }} api_version=${{ matrix.api-version || env.DEFAULT_API_VERSION }}
 
       - name: Save Godot build cache
         uses: ./.github/actions/godot-cache-save
