@@ -30,11 +30,11 @@
 
 #pragma once
 
-#include <godot_cpp/templates/sort_list.h>
 #include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/templates/hashfuncs.hpp>
 #include <godot_cpp/templates/pair.hpp>
+#include <godot_cpp/templates/sort_list.hpp>
 
 #include <initializer_list>
 
