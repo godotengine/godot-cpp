@@ -5,7 +5,7 @@
 
 #pragma once
 
-// We don't need windows.h in this example plugin but many others do, and it can
+// We don't need windows.h in this test plugin but many others do, and it can
 // lead to annoying situations due to the ton of macros it defines.
 // So we include it and make sure CI warns us if we use something that conflicts
 // with a Windows define.
@@ -34,10 +34,10 @@
 
 using namespace godot;
 
-class ExampleInternal;
+class MyTestInternal;
 
-class ExampleRef : public RefCounted {
-	GDCLASS(ExampleRef, RefCounted);
+class MyTestRef : public RefCounted {
+	GDCLASS(MyTestRef, RefCounted);
 
 private:
 	static int instance_count;
@@ -52,8 +52,8 @@ protected:
 	void _notification(int p_what);
 
 public:
-	ExampleRef();
-	~ExampleRef();
+	MyTestRef();
+	~MyTestRef();
 
 	void set_id(int p_id);
 	int get_id() const;
@@ -61,15 +61,15 @@ public:
 	bool was_post_initialized() const { return post_initialized; }
 };
 
-class ExampleMin : public Control {
-	GDCLASS(ExampleMin, Control);
+class MyTestMin : public Control {
+	GDCLASS(MyTestMin, Control);
 
 protected:
 	static void _bind_methods() {}
 };
 
-class Example : public Control {
-	GDCLASS(Example, Control);
+class MyTestMain : public Control {
+	GDCLASS(MyTestMain, Control);
 
 protected:
 	static void _bind_methods();
@@ -109,24 +109,24 @@ public:
 		CONSTANT_WITHOUT_ENUM = 314,
 	};
 
-	Example();
-	~Example();
+	MyTestMain();
+	~MyTestMain();
 
 	Dictionary get_godot_target_version() const;
 
 	// Functions.
 	void simple_func();
 	void simple_const_func() const;
-	int custom_ref_func(Ref<ExampleRef> p_ref);
-	int custom_const_ref_func(const Ref<ExampleRef> &p_ref);
+	int custom_ref_func(Ref<MyTestRef> p_ref);
+	int custom_const_ref_func(const Ref<MyTestRef> &p_ref);
 	String image_ref_func(Ref<Image> p_image);
 	String image_const_ref_func(const Ref<Image> &p_image);
 	String return_something(const String &base);
 	Viewport *return_something_const() const;
-	Ref<ExampleRef> return_ref() const;
-	Ref<ExampleRef> return_empty_ref() const;
-	Ref<ExampleRef> return_extended_ref() const;
-	Ref<ExampleRef> extended_ref_checks(Ref<ExampleRef> p_ref) const;
+	Ref<MyTestRef> return_ref() const;
+	Ref<MyTestRef> return_empty_ref() const;
+	Ref<MyTestRef> return_extended_ref() const;
+	Ref<MyTestRef> extended_ref_checks(Ref<MyTestRef> p_ref) const;
 	Variant varargs_func(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error);
 	int varargs_func_nv(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error);
 	void varargs_func_void(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error);
@@ -145,7 +145,7 @@ public:
 	TypedDictionary<Vector2, Vector2i> test_tdictionary() const;
 #endif // GODOT_VERSION_MINOR >= 4
 
-	Example *test_node_argument(Example *p_node) const;
+	MyTestMain *test_node_argument(MyTestMain *p_node) const;
 	String test_string_ops() const;
 	String test_str_utility() const;
 	bool test_string_is_forty_two(const String &p_str) const;
@@ -156,7 +156,7 @@ public:
 
 	bool test_object_cast_to_node(Object *p_object) const;
 	bool test_object_cast_to_control(Object *p_object) const;
-	bool test_object_cast_to_example(Object *p_object) const;
+	bool test_object_cast_to_my_test_main(Object *p_object) const;
 
 	Vector2i test_variant_vector2i_conversion(const Variant &p_variant) const;
 	int test_variant_int_conversion(const Variant &p_variant) const;
@@ -179,7 +179,7 @@ public:
 	void unbound_method1(Object *p_object, String p_string, int p_int);
 	String unbound_method2(Object *p_object, String p_string, int p_int);
 	String unbound_method3(Object *p_object, String p_string, int p_int) const;
-	static void unbound_static_method1(Example *p_object, String p_string, int p_int);
+	static void unbound_static_method1(MyTestMain *p_object, String p_string, int p_int);
 	static String unbound_static_method2(Object *p_object, String p_string, int p_int);
 
 	BitField<Flags> test_bitfield(BitField<Flags> flags);
@@ -222,23 +222,23 @@ public:
 	Ref<RefCounted> test_get_internal_class() const;
 };
 
-VARIANT_ENUM_CAST(Example::Constants);
-VARIANT_BITFIELD_CAST(Example::Flags);
+VARIANT_ENUM_CAST(MyTestMain::Constants);
+VARIANT_BITFIELD_CAST(MyTestMain::Flags);
 
 enum EnumWithoutClass {
 	OUTSIDE_OF_CLASS = 512
 };
 VARIANT_ENUM_CAST(EnumWithoutClass);
 
-class ExampleVirtual : public Object {
-	GDCLASS(ExampleVirtual, Object);
+class MyTestVirtual : public Object {
+	GDCLASS(MyTestVirtual, Object);
 
 protected:
 	static void _bind_methods() {}
 };
 
-class ExampleAbstractBase : public Object {
-	GDCLASS(ExampleAbstractBase, Object);
+class MyTestAbstractBase : public Object {
+	GDCLASS(MyTestAbstractBase, Object);
 
 protected:
 	static void _bind_methods() {}
@@ -246,8 +246,8 @@ protected:
 	virtual int test_function() = 0;
 };
 
-class ExampleConcrete : public ExampleAbstractBase {
-	GDCLASS(ExampleConcrete, ExampleAbstractBase);
+class MyTestConcrete : public MyTestAbstractBase {
+	GDCLASS(MyTestConcrete, MyTestAbstractBase);
 
 protected:
 	static void _bind_methods() {}
@@ -255,8 +255,8 @@ protected:
 	virtual int test_function() override { return 25; }
 };
 
-class ExampleBase : public Node {
-	GDCLASS(ExampleBase, Node);
+class MyTestBase : public Node {
+	GDCLASS(MyTestBase, Node);
 
 protected:
 	int value1 = 0;
@@ -271,8 +271,8 @@ public:
 	int get_value2() { return value2; }
 };
 
-class ExampleChild : public ExampleBase {
-	GDCLASS(ExampleChild, ExampleBase);
+class MyTestChild : public MyTestBase {
+	GDCLASS(MyTestChild, MyTestBase);
 
 protected:
 	static void _bind_methods() {}
@@ -280,8 +280,8 @@ protected:
 	void _notification(int p_what);
 };
 
-class ExampleRuntime : public Node {
-	GDCLASS(ExampleRuntime, Node);
+class MyTestRuntime : public Node {
+	GDCLASS(MyTestRuntime, Node);
 
 	int prop_value = 12;
 
@@ -292,12 +292,12 @@ public:
 	void set_prop_value(int p_prop_value);
 	int get_prop_value() const;
 
-	ExampleRuntime();
-	~ExampleRuntime();
+	MyTestRuntime();
+	~MyTestRuntime();
 };
 
-class ExamplePrzykład : public RefCounted {
-	GDCLASS(ExamplePrzykład, RefCounted);
+class MyTestPrzykład : public RefCounted {
+	GDCLASS(MyTestPrzykład, RefCounted);
 
 protected:
 	static void _bind_methods();
@@ -306,8 +306,8 @@ public:
 	String get_the_word() const;
 };
 
-class ExampleInternal : public RefCounted {
-	GDCLASS(ExampleInternal, RefCounted);
+class MyTestInternal : public RefCounted {
+	GDCLASS(MyTestInternal, RefCounted);
 
 protected:
 	static void _bind_methods();
@@ -316,8 +316,8 @@ public:
 	int get_the_answer() const;
 };
 
-class ExampleThreadSafeClass : public RefCounted {
-	GDCLASS(ExampleThreadSafeClass, RefCounted);
+class MyTestThreadSafeClass : public RefCounted {
+	GDCLASS(MyTestThreadSafeClass, RefCounted);
 
 	_THREAD_SAFE_CLASS_
 

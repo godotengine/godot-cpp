@@ -20,7 +20,7 @@ if env["target"] in ["editor", "template_debug"]:
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
-        "project/bin/libgdexample.{}.{}.framework/libgdexample.{}.{}".format(
+        "project/bin/libmytest.{}.{}.framework/libmytest.{}.{}".format(
             env["platform"], env["target"], env["platform"], env["target"]
         ),
         source=sources,
@@ -28,17 +28,17 @@ if env["platform"] == "macos":
 elif env["platform"] == "ios":
     if env["ios_simulator"]:
         library = env.StaticLibrary(
-            "project/bin/libgdexample.{}.{}.simulator.a".format(env["platform"], env["target"]),
+            "project/bin/libmytest.{}.{}.simulator.a".format(env["platform"], env["target"]),
             source=sources,
         )
     else:
         library = env.StaticLibrary(
-            "project/bin/libgdexample.{}.{}.a".format(env["platform"], env["target"]),
+            "project/bin/libmytest.{}.{}.a".format(env["platform"], env["target"]),
             source=sources,
         )
 else:
     library = env.SharedLibrary(
-        "project/bin/libgdexample{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "project/bin/libmytest{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 
