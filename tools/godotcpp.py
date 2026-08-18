@@ -243,7 +243,7 @@ def options(opts, env):
 
     opts.Add(
         EnumVariable(
-            key="platform",
+            key=("platform", "p"),
             help="Target platform",
             default=env.get("platform", default_platform),
             allowed_values=platforms + custom_platforms,
