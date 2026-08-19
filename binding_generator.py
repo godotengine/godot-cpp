@@ -1046,6 +1046,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append(f"\tconst {return_type} *ptr() const;")
         result.append(f"\t{return_type} *ptrw();")
         iterators = """
+	struct ConstIterator;
 	struct Iterator {
 		_FORCE_INLINE_ $TYPE &operator*() const {
 			return *elem_ptr;
@@ -1066,6 +1067,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 		Iterator($TYPE *p_ptr) { elem_ptr = p_ptr; }
 		Iterator() {}
 		Iterator(const Iterator &p_it) { elem_ptr = p_it.elem_ptr; }
+
+		operator ConstIterator() const {
+			return ConstIterator(elem_ptr);
+		}
 
 	private:
 		$TYPE *elem_ptr = nullptr;
@@ -1126,6 +1131,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("\tVariant &operator[](int64_t p_index);")
         result.append("\tvoid set_typed(uint32_t p_type, const StringName &p_class_name, const Variant &p_script);")
         result.append("""
+	struct ConstIterator;
 	struct Iterator {
 		_FORCE_INLINE_ Variant &operator*() const;
 		_FORCE_INLINE_ Variant *operator->() const;
@@ -1138,6 +1144,10 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 		Iterator(Variant *p_ptr) { elem_ptr = p_ptr; }
 		Iterator() {}
 		Iterator(const Iterator &p_it) { elem_ptr = p_it.elem_ptr; }
+
+		operator ConstIterator() const {
+			return ConstIterator(elem_ptr);
+		}
 
 	private:
 		Variant *elem_ptr = nullptr;
