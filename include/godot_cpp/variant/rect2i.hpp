@@ -145,8 +145,8 @@ struct [[nodiscard]] Rect2i {
 		return true;
 	}
 
-	bool operator==(const Rect2i &p_rect) const { return position == p_rect.position && size == p_rect.size; }
-	bool operator!=(const Rect2i &p_rect) const { return position != p_rect.position || size != p_rect.size; }
+	constexpr bool operator==(const Rect2i &p_rect) const { return position == p_rect.position && size == p_rect.size; }
+	constexpr bool operator!=(const Rect2i &p_rect) const { return position != p_rect.position || size != p_rect.size; }
 
 	Rect2i grow(int p_amount) const {
 		Rect2i g = *this;
@@ -225,18 +225,20 @@ struct [[nodiscard]] Rect2i {
 		return position + size;
 	}
 
-	operator String() const;
+	explicit operator String() const;
 	operator Rect2() const;
 
-	Rect2i() {}
-	Rect2i(int p_x, int p_y, int p_width, int p_height) :
+	Rect2i() = default;
+	constexpr Rect2i(int p_x, int p_y, int p_width, int p_height) :
 			position(Point2i(p_x, p_y)),
 			size(Size2i(p_width, p_height)) {
 	}
-	Rect2i(const Point2i &p_pos, const Size2i &p_size) :
+	constexpr Rect2i(const Point2i &p_pos, const Size2i &p_size) :
 			position(p_pos),
 			size(p_size) {
 	}
 };
 
+template <>
+struct is_zero_constructible<Rect2i> : std::true_type {};
 } // namespace godot

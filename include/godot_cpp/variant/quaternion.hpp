@@ -37,24 +37,31 @@
 namespace godot {
 
 struct [[nodiscard]] Quaternion {
-	union {
-		struct {
-			real_t x;
-			real_t y;
-			real_t z;
-			real_t w;
-		};
-		real_t components[4] = { 0, 0, 0, 1.0 };
-	};
+	real_t x = 0.0f;
+	real_t y = 0.0f;
+	real_t z = 0.0f;
+	real_t w = 1.0f;
 
-	_FORCE_INLINE_ real_t &operator[](int p_idx) {
-		return components[p_idx];
+	constexpr real_t &operator[](int p_idx) {
+		// The pointer math below assumes that the elements are placed back-to-back, like an array.
+		// This is always true in practice, but technically not guaranteed; we safety-check it here.
+		static_assert(offsetof(Quaternion, x) == 0 * sizeof(real_t));
+		static_assert(offsetof(Quaternion, y) == 1 * sizeof(real_t));
+		static_assert(offsetof(Quaternion, z) == 2 * sizeof(real_t));
+		static_assert(offsetof(Quaternion, w) == 3 * sizeof(real_t));
+		static_assert(sizeof(Quaternion) == 4 * sizeof(real_t));
+
+		DEV_ASSERT((unsigned int)p_idx < 4);
+		return (&x)[p_idx];
 	}
-	_FORCE_INLINE_ const real_t &operator[](int p_idx) const {
-		return components[p_idx];
+	constexpr const real_t &operator[](int p_idx) const {
+		DEV_ASSERT((unsigned int)p_idx < 4);
+		return (&x)[p_idx];
 	}
+
 	_FORCE_INLINE_ real_t length_squared() const;
 	bool is_equal_approx(const Quaternion &p_quaternion) const;
+	bool is_same(const Quaternion &p_quaternion) const;
 	bool is_finite() const;
 	real_t length() const;
 	void normalize();
@@ -85,8 +92,8 @@ struct [[nodiscard]] Quaternion {
 		r_axis.z = z * r;
 	}
 
-	void operator*=(const Quaternion &p_q);
-	Quaternion operator*(const Quaternion &p_q) const;
+	constexpr void operator*=(const Quaternion &p_q);
+	constexpr Quaternion operator*(const Quaternion &p_q) const;
 
 	_FORCE_INLINE_ Vector3 xform(const Vector3 &p_v) const {
 #ifdef MATH_CHECKS
@@ -101,51 +108,37 @@ struct [[nodiscard]] Quaternion {
 		return inverse().xform(p_v);
 	}
 
-	_FORCE_INLINE_ void operator+=(const Quaternion &p_q);
-	_FORCE_INLINE_ void operator-=(const Quaternion &p_q);
-	_FORCE_INLINE_ void operator*=(real_t p_s);
-	_FORCE_INLINE_ void operator/=(real_t p_s);
-	_FORCE_INLINE_ Quaternion operator+(const Quaternion &p_q2) const;
-	_FORCE_INLINE_ Quaternion operator-(const Quaternion &p_q2) const;
-	_FORCE_INLINE_ Quaternion operator-() const;
-	_FORCE_INLINE_ Quaternion operator*(real_t p_s) const;
-	_FORCE_INLINE_ Quaternion operator/(real_t p_s) const;
+	constexpr void operator+=(const Quaternion &p_q);
+	constexpr void operator-=(const Quaternion &p_q);
+	constexpr void operator*=(real_t p_s);
+	constexpr void operator/=(real_t p_s);
+	constexpr Quaternion operator+(const Quaternion &p_q2) const;
+	constexpr Quaternion operator-(const Quaternion &p_q2) const;
+	constexpr Quaternion operator-() const;
+	constexpr Quaternion operator*(real_t p_s) const;
+	constexpr Quaternion operator/(real_t p_s) const;
 
-	_FORCE_INLINE_ bool operator==(const Quaternion &p_quaternion) const;
-	_FORCE_INLINE_ bool operator!=(const Quaternion &p_quaternion) const;
+	constexpr bool operator==(const Quaternion &p_quaternion) const;
+	constexpr bool operator!=(const Quaternion &p_quaternion) const;
 
-	operator String() const;
+	explicit operator String() const;
 
-	_FORCE_INLINE_ Quaternion() {}
+	constexpr Quaternion() = default;
 
-	_FORCE_INLINE_ Quaternion(real_t p_x, real_t p_y, real_t p_z, real_t p_w) :
-			x(p_x),
-			y(p_y),
-			z(p_z),
-			w(p_w) {
-	}
+	constexpr Quaternion(real_t p_x, real_t p_y, real_t p_z, real_t p_w) :
+			x(p_x), y(p_y), z(p_z), w(p_w) {}
 
 	Quaternion(const Vector3 &p_axis, real_t p_angle);
-
-	Quaternion(const Quaternion &p_q) :
-			x(p_q.x),
-			y(p_q.y),
-			z(p_q.z),
-			w(p_q.w) {
-	}
-
-	void operator=(const Quaternion &p_q) {
-		x = p_q.x;
-		y = p_q.y;
-		z = p_q.z;
-		w = p_q.w;
-	}
 
 	Quaternion(const Vector3 &p_v0, const Vector3 &p_v1) { // Shortest arc.
 #ifdef MATH_CHECKS
 		ERR_FAIL_COND_MSG(p_v0.is_zero_approx() || p_v1.is_zero_approx(), "The vectors must not be zero.");
 #endif
-		constexpr real_t ALMOST_ONE = 1.0f - (real_t)CMP_EPSILON;
+#ifdef REAL_T_IS_DOUBLE
+		constexpr real_t ALMOST_ONE = 0.999999999999999;
+#else
+		constexpr real_t ALMOST_ONE = 0.99999975f;
+#endif
 		Vector3 n0 = p_v0.normalized();
 		Vector3 n1 = p_v1.normalized();
 		real_t d = n0.dot(n1);
@@ -168,6 +161,7 @@ struct [[nodiscard]] Quaternion {
 			z = c.z * rs;
 			w = s * 0.5f;
 		}
+		normalize();
 	}
 };
 
@@ -179,63 +173,79 @@ real_t Quaternion::length_squared() const {
 	return dot(*this);
 }
 
-void Quaternion::operator+=(const Quaternion &p_q) {
+constexpr void Quaternion::operator+=(const Quaternion &p_q) {
 	x += p_q.x;
 	y += p_q.y;
 	z += p_q.z;
 	w += p_q.w;
 }
 
-void Quaternion::operator-=(const Quaternion &p_q) {
+constexpr void Quaternion::operator-=(const Quaternion &p_q) {
 	x -= p_q.x;
 	y -= p_q.y;
 	z -= p_q.z;
 	w -= p_q.w;
 }
 
-void Quaternion::operator*=(real_t p_s) {
+constexpr void Quaternion::operator*=(real_t p_s) {
 	x *= p_s;
 	y *= p_s;
 	z *= p_s;
 	w *= p_s;
 }
 
-void Quaternion::operator/=(real_t p_s) {
-	*this *= 1.0f / p_s;
+constexpr void Quaternion::operator/=(real_t p_s) {
+	*this *= (1 / p_s);
 }
 
-Quaternion Quaternion::operator+(const Quaternion &p_q2) const {
+constexpr Quaternion Quaternion::operator+(const Quaternion &p_q2) const {
 	const Quaternion &q1 = *this;
 	return Quaternion(q1.x + p_q2.x, q1.y + p_q2.y, q1.z + p_q2.z, q1.w + p_q2.w);
 }
 
-Quaternion Quaternion::operator-(const Quaternion &p_q2) const {
+constexpr Quaternion Quaternion::operator-(const Quaternion &p_q2) const {
 	const Quaternion &q1 = *this;
 	return Quaternion(q1.x - p_q2.x, q1.y - p_q2.y, q1.z - p_q2.z, q1.w - p_q2.w);
 }
 
-Quaternion Quaternion::operator-() const {
+constexpr Quaternion Quaternion::operator-() const {
 	const Quaternion &q2 = *this;
 	return Quaternion(-q2.x, -q2.y, -q2.z, -q2.w);
 }
 
-Quaternion Quaternion::operator*(real_t p_s) const {
+constexpr Quaternion Quaternion::operator*(real_t p_s) const {
 	return Quaternion(x * p_s, y * p_s, z * p_s, w * p_s);
 }
 
-Quaternion Quaternion::operator/(real_t p_s) const {
-	return *this * (1.0f / p_s);
+constexpr Quaternion Quaternion::operator/(real_t p_s) const {
+	return *this * (1 / p_s);
 }
 
-bool Quaternion::operator==(const Quaternion &p_quaternion) const {
+constexpr bool Quaternion::operator==(const Quaternion &p_quaternion) const {
 	return x == p_quaternion.x && y == p_quaternion.y && z == p_quaternion.z && w == p_quaternion.w;
 }
 
-bool Quaternion::operator!=(const Quaternion &p_quaternion) const {
+constexpr bool Quaternion::operator!=(const Quaternion &p_quaternion) const {
 	return x != p_quaternion.x || y != p_quaternion.y || z != p_quaternion.z || w != p_quaternion.w;
 }
 
-_FORCE_INLINE_ Quaternion operator*(real_t p_real, const Quaternion &p_quaternion) {
+constexpr void Quaternion::operator*=(const Quaternion &p_q) {
+	real_t xx = w * p_q.x + x * p_q.w + y * p_q.z - z * p_q.y;
+	real_t yy = w * p_q.y + y * p_q.w + z * p_q.x - x * p_q.z;
+	real_t zz = w * p_q.z + z * p_q.w + x * p_q.y - y * p_q.x;
+	w = w * p_q.w - x * p_q.x - y * p_q.y - z * p_q.z;
+	x = xx;
+	y = yy;
+	z = zz;
+}
+
+constexpr Quaternion Quaternion::operator*(const Quaternion &p_q) const {
+	Quaternion r = *this;
+	r *= p_q;
+	return r;
+}
+
+constexpr Quaternion operator*(real_t p_real, const Quaternion &p_quaternion) {
 	return p_quaternion * p_real;
 }
 
