@@ -145,6 +145,8 @@ struct [[nodiscard]] Rect2 {
 		return size.x > 0.0f && size.y > 0.0f;
 	}
 
+	Rect2 intersection_transformed(const Transform2D &p_xform, const Rect2 &p_rect) const;
+
 	// Returns the intersection between two Rect2s or an empty Rect2 if there is no intersection.
 	inline Rect2 intersection(const Rect2 &p_rect) const {
 		Rect2 new_rect = p_rect;
@@ -204,10 +206,11 @@ struct [[nodiscard]] Rect2 {
 	}
 
 	bool is_equal_approx(const Rect2 &p_rect) const;
+	bool is_same(const Rect2 &p_rect) const;
 	bool is_finite() const;
 
-	bool operator==(const Rect2 &p_rect) const { return position == p_rect.position && size == p_rect.size; }
-	bool operator!=(const Rect2 &p_rect) const { return position != p_rect.position || size != p_rect.size; }
+	constexpr bool operator==(const Rect2 &p_rect) const { return position == p_rect.position && size == p_rect.size; }
+	constexpr bool operator!=(const Rect2 &p_rect) const { return position != p_rect.position || size != p_rect.size; }
 
 	inline Rect2 grow(real_t p_amount) const {
 		Rect2 g = *this;
@@ -359,18 +362,44 @@ struct [[nodiscard]] Rect2 {
 		return position + size;
 	}
 
-	operator String() const;
+	explicit operator String() const;
 	operator Rect2i() const;
 
-	Rect2() {}
-	Rect2(real_t p_x, real_t p_y, real_t p_width, real_t p_height) :
+	static Rect2 from_points(const Vector2 *p_points, int p_point_count) {
+		Rect2 result;
+		ERR_FAIL_NULL_V_MSG(p_points, result, "The pointer of points passed in is invalid.");
+		ERR_FAIL_COND_V_MSG(p_point_count <= 0, result, "The number of points passed in is invalid.");
+		result.position = p_points[0];
+		Vector2 end = result.position;
+		for (int i = 1; i < p_point_count; i++) {
+			const Vector2 &p = p_points[i];
+
+			if (p.x < result.position.x) {
+				result.position.x = p.x;
+			} else if (p.x > end.x) {
+				end.x = p.x;
+			}
+			if (p.y < result.position.y) {
+				result.position.y = p.y;
+			} else if (p.y > end.y) {
+				end.y = p.y;
+			}
+		}
+		result.size = end - result.position;
+		return result;
+	}
+
+	Rect2() = default;
+	constexpr Rect2(real_t p_x, real_t p_y, real_t p_width, real_t p_height) :
 			position(Point2(p_x, p_y)),
 			size(Size2(p_width, p_height)) {
 	}
-	Rect2(const Point2 &p_pos, const Size2 &p_size) :
+	constexpr Rect2(const Point2 &p_pos, const Size2 &p_size) :
 			position(p_pos),
 			size(p_size) {
 	}
 };
 
+template <>
+struct is_zero_constructible<Rect2> : std::true_type {};
 } // namespace godot
