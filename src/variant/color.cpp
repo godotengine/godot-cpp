@@ -35,7 +35,6 @@
 #include <godot_cpp/variant/string.hpp>
 
 namespace godot {
-
 uint32_t Color::to_argb32() const {
 	uint32_t c = (uint8_t)Math::round(a * 255.0f);
 	c <<= 8;
@@ -245,6 +244,10 @@ bool Color::is_equal_approx(const Color &p_color) const {
 	return Math::is_equal_approx(r, p_color.r) && Math::is_equal_approx(g, p_color.g) && Math::is_equal_approx(b, p_color.b) && Math::is_equal_approx(a, p_color.a);
 }
 
+bool Color::is_same(const Color &p_color) const {
+	return Math::is_same(r, p_color.r) && Math::is_same(g, p_color.g) && Math::is_same(b, p_color.b) && Math::is_same(a, p_color.a);
+}
+
 Color Color::clamp(const Color &p_min, const Color &p_max) const {
 	return Color(
 			CLAMP(r, p_min.r, p_max.r),
@@ -307,47 +310,38 @@ Color Color::inverted() const {
 }
 
 Color Color::html(const String &p_rgba) {
-	String color = p_rgba;
-	if (color.length() == 0) {
+	if (p_rgba.is_empty()) {
 		return Color();
 	}
-	if (color[0] == '#') {
-		color = color.substr(1);
-	}
 
-	// If enabled, use 1 hex digit per channel instead of 2.
-	// Other sizes aren't in the HTML/CSS spec but we could add them if desired.
-	bool is_shorthand = color.length() < 5;
-	bool alpha = false;
+	const int current_pos = (p_rgba[0] == '#') ? 1 : 0;
+	const int num_of_digits = p_rgba.length() - current_pos;
 
-	if (color.length() == 8) {
-		alpha = true;
-	} else if (color.length() == 6) {
-		alpha = false;
-	} else if (color.length() == 4) {
-		alpha = true;
-	} else if (color.length() == 3) {
-		alpha = false;
+	float r, g, b, a = 1.0f;
+
+	if (num_of_digits == 3) {
+		// #rgb
+		r = _parse_col4(p_rgba, current_pos) / 15.0f;
+		g = _parse_col4(p_rgba, current_pos + 1) / 15.0f;
+		b = _parse_col4(p_rgba, current_pos + 2) / 15.0f;
+	} else if (num_of_digits == 4) {
+		r = _parse_col4(p_rgba, current_pos) / 15.0f;
+		g = _parse_col4(p_rgba, current_pos + 1) / 15.0f;
+		b = _parse_col4(p_rgba, current_pos + 2) / 15.0f;
+		a = _parse_col4(p_rgba, current_pos + 3) / 15.0f;
+	} else if (num_of_digits == 6) {
+		r = _parse_col8(p_rgba, current_pos) / 255.0f;
+		g = _parse_col8(p_rgba, current_pos + 2) / 255.0f;
+		b = _parse_col8(p_rgba, current_pos + 4) / 255.0f;
+	} else if (num_of_digits == 8) {
+		r = _parse_col8(p_rgba, current_pos) / 255.0f;
+		g = _parse_col8(p_rgba, current_pos + 2) / 255.0f;
+		b = _parse_col8(p_rgba, current_pos + 4) / 255.0f;
+		a = _parse_col8(p_rgba, current_pos + 6) / 255.0f;
 	} else {
 		ERR_FAIL_V_MSG(Color(), "Invalid color code: " + p_rgba + ".");
 	}
 
-	float r, g, b, a = 1.0f;
-	if (is_shorthand) {
-		r = _parse_col4(color, 0) / 15.0f;
-		g = _parse_col4(color, 1) / 15.0f;
-		b = _parse_col4(color, 2) / 15.0f;
-		if (alpha) {
-			a = _parse_col4(color, 3) / 15.0f;
-		}
-	} else {
-		r = _parse_col8(color, 0) / 255.0f;
-		g = _parse_col8(color, 2) / 255.0f;
-		b = _parse_col8(color, 4) / 255.0f;
-		if (alpha) {
-			a = _parse_col8(color, 6) / 255.0f;
-		}
-	}
 	ERR_FAIL_COND_V_MSG(r < 0.0f, Color(), "Invalid color code: " + p_rgba + ".");
 	ERR_FAIL_COND_V_MSG(g < 0.0f, Color(), "Invalid color code: " + p_rgba + ".");
 	ERR_FAIL_COND_V_MSG(b < 0.0f, Color(), "Invalid color code: " + p_rgba + ".");
@@ -359,22 +353,20 @@ Color Color::html(const String &p_rgba) {
 bool Color::html_is_valid(const String &p_color) {
 	String color = p_color;
 
-	if (color.length() == 0) {
+	if (color.is_empty()) {
 		return false;
 	}
-	if (color[0] == '#') {
-		color = color.substr(1);
-	}
 
-	// Check if the amount of hex digits is valid.
-	int len = color.length();
-	if (!(len == 3 || len == 4 || len == 6 || len == 8)) {
+	const int current_pos = (color[0] == '#') ? 1 : 0;
+	const int len = color.length();
+	const int num_of_digits = len - current_pos;
+	if (!(num_of_digits == 3 || num_of_digits == 4 || num_of_digits == 6 || num_of_digits == 8)) {
 		return false;
 	}
 
 	// Check if each hex digit is valid.
-	for (int i = 0; i < len; i++) {
-		if (_parse_col4(color, i) == -1) {
+	for (int i = current_pos; i < len; i++) {
+		if (!is_hex_digit(p_color[i])) {
 			return false;
 		}
 	}
@@ -406,6 +398,7 @@ int Color::find_named_color(const String &p_name) {
 	name = name.replace("_", "");
 	name = name.replace("'", "");
 	name = name.replace(".", "");
+
 	name = name.to_upper();
 
 	static HashMap<String, int> named_colors_hashmap;
@@ -425,7 +418,7 @@ int Color::find_named_color(const String &p_name) {
 }
 
 int Color::get_named_color_count() {
-	return sizeof(named_colors) / sizeof(NamedColor);
+	return std_size(named_colors);
 }
 
 String Color::get_named_color_name(int p_idx) {
@@ -474,104 +467,6 @@ Color Color::from_rgba8(int64_t p_r8, int64_t p_g8, int64_t p_b8, int64_t p_a8) 
 
 Color::operator String() const {
 	return "(" + String::num(r, 4) + ", " + String::num(g, 4) + ", " + String::num(b, 4) + ", " + String::num(a, 4) + ")";
-}
-
-Color Color::operator+(const Color &p_color) const {
-	return Color(
-			r + p_color.r,
-			g + p_color.g,
-			b + p_color.b,
-			a + p_color.a);
-}
-
-void Color::operator+=(const Color &p_color) {
-	r = r + p_color.r;
-	g = g + p_color.g;
-	b = b + p_color.b;
-	a = a + p_color.a;
-}
-
-Color Color::operator-(const Color &p_color) const {
-	return Color(
-			r - p_color.r,
-			g - p_color.g,
-			b - p_color.b,
-			a - p_color.a);
-}
-
-void Color::operator-=(const Color &p_color) {
-	r = r - p_color.r;
-	g = g - p_color.g;
-	b = b - p_color.b;
-	a = a - p_color.a;
-}
-
-Color Color::operator*(const Color &p_color) const {
-	return Color(
-			r * p_color.r,
-			g * p_color.g,
-			b * p_color.b,
-			a * p_color.a);
-}
-
-Color Color::operator*(float p_scalar) const {
-	return Color(
-			r * p_scalar,
-			g * p_scalar,
-			b * p_scalar,
-			a * p_scalar);
-}
-
-void Color::operator*=(const Color &p_color) {
-	r = r * p_color.r;
-	g = g * p_color.g;
-	b = b * p_color.b;
-	a = a * p_color.a;
-}
-
-void Color::operator*=(float p_scalar) {
-	r = r * p_scalar;
-	g = g * p_scalar;
-	b = b * p_scalar;
-	a = a * p_scalar;
-}
-
-Color Color::operator/(const Color &p_color) const {
-	return Color(
-			r / p_color.r,
-			g / p_color.g,
-			b / p_color.b,
-			a / p_color.a);
-}
-
-Color Color::operator/(float p_scalar) const {
-	return Color(
-			r / p_scalar,
-			g / p_scalar,
-			b / p_scalar,
-			a / p_scalar);
-}
-
-void Color::operator/=(const Color &p_color) {
-	r = r / p_color.r;
-	g = g / p_color.g;
-	b = b / p_color.b;
-	a = a / p_color.a;
-}
-
-void Color::operator/=(float p_scalar) {
-	r = r / p_scalar;
-	g = g / p_scalar;
-	b = b / p_scalar;
-	a = a / p_scalar;
-}
-
-Color Color::operator-() const {
-	return Color(
-			1.0f - r,
-			1.0f - g,
-			1.0f - b,
-			1.0f - a);
 }
 
 } // namespace godot
