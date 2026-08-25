@@ -727,6 +727,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     result.append("")
     result.append("#include <godot_cpp/core/defs.hpp>")
+    result.append("#include <godot_cpp/core/math_defs.hpp>")
     result.append("")
 
     # Special cases.
@@ -2975,6 +2976,8 @@ def is_included(type_name, current_type):
 
 def correct_default_value(value, type_name):
     value_map = {
+        "inf": "Math::INF",
+        "nan": "Math::NaN",
         "null": "nullptr",
         '""': "String()",
         '&""': "StringName()",
