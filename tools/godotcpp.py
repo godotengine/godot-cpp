@@ -549,16 +549,19 @@ def generate(env):
     env.AddMethod(_godot_cpp, "GodotCPP")
 
 
-def _get_api_file(extension_dir, api_version):
-    if api_version is None:
-        raise UserError("'api_version' must be provided")
-    if api_version not in supported_api_versions:
-        raise UserError("Unsupported 'api_version': %s" % api_version)
+def _get_api_file(extension_dir, api_version, custom_extension_dir):
+    if custom_extension_dir:
+        filename = "extension_api.json"
+    else:
+        if api_version is None:
+            raise UserError("'api_version' must be provided")
+        if api_version not in supported_api_versions:
+            raise UserError("Unsupported 'api_version': %s" % api_version)
+        filename = "extension_api-%s.json" % api_version.replace(".", "-")
 
-    filename = "extension_api-%s.json" % api_version.replace(".", "-")
     path = os.path.join(extension_dir, filename)
     if not os.path.exists(path):
-        raise UserError("Cannot find `%s` file for api_version %s" % (filename, api_version))
+        raise UserError("Cannot find `%s` file" % filename)
 
     return path
 
@@ -568,7 +571,7 @@ def _godot_cpp(env):
 
     api_file = env.get("custom_api_file", None)
     if api_file is None:
-        api_file = _get_api_file(extension_dir, env.get("api_version", None))
+        api_file = _get_api_file(extension_dir, env.get("api_version", None), "gdextension_dir" in env)
     api_file = normalize_path(api_file, env)
 
     bindings = env.GodotCPPBindings(
