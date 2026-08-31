@@ -33,6 +33,7 @@
 #if !defined(NO_THREADS)
 
 #include <atomic>
+#include <godot_cpp/core/defs.hpp>
 #include <type_traits>
 
 namespace godot {
