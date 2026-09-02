@@ -288,6 +288,11 @@ struct HashHasher {
 };
 
 template <typename T>
+struct HashableHasher {
+	static _FORCE_INLINE_ uint32_t hash(const T &hashable) { return hashable.hash(); }
+};
+
+template <typename T>
 struct HashMapComparatorDefault {
 	static bool compare(const T &p_lhs, const T &p_rhs) {
 		return p_lhs == p_rhs;
