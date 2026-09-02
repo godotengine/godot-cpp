@@ -1,3 +1,4 @@
+import ar_tempfile
 import common_compiler_flags
 from SCons.Tool import clang, clangxx
 from SCons.Variables import BoolVariable
@@ -51,5 +52,8 @@ def generate(env):
     # Refer to https://github.com/godotengine/godot/blob/master/platform/linuxbsd/detect.py
     if env["lto"] == "auto":
         env["lto"] = "full"
+
+    # Configure ARCOM response file in case the command line call to AR is too long.
+    ar_tempfile.configure(env)
 
     common_compiler_flags.generate(env)

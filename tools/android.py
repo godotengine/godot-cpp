@@ -1,6 +1,7 @@
 import os
 import sys
 
+import ar_tempfile
 import common_compiler_flags
 import my_spawn
 
@@ -111,6 +112,9 @@ def generate(env):
     env["STRIP"] = toolchain + "/bin/llvm-strip"
     env["RANLIB"] = toolchain + "/bin/llvm-ranlib"
     env["SHLIBSUFFIX"] = ".so"
+
+    # Configure ARCOM response file in case the command line call to AR is too long.
+    ar_tempfile.configure(env)
 
     env.Append(
         CCFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"], "-fPIC"]
