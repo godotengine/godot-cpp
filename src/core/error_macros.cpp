@@ -79,6 +79,30 @@ void _err_print_index_error(const char *p_function, const char *p_file, int p_li
 	_err_print_index_error(p_function, p_file, p_line, p_index, p_size, p_index_str, p_size_str, p_message.utf8().get_data(), p_editor_notify, p_fatal);
 }
 
+void _err_print_script_error(const char *p_function, const char *p_file, int p_line, const char *p_error, bool p_editor_notify) {
+	::godot::gdextension_interface::print_script_error(p_error, p_function, p_file, p_line, p_editor_notify);
+}
+
+void _err_print_script_error(const char *p_function, const char *p_file, int p_line, const String &p_error, bool p_editor_notify) {
+	::godot::gdextension_interface::print_script_error(p_error.utf8().get_data(), p_function, p_file, p_line, p_editor_notify);
+}
+
+void _err_print_script_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const char *p_message, bool p_editor_notify) {
+	::godot::gdextension_interface::print_script_error_with_message(p_error, p_message, p_function, p_file, p_line, p_editor_notify);
+}
+
+void _err_print_script_error(const char *p_function, const char *p_file, int p_line, const String &p_error, const char *p_message, bool p_editor_notify) {
+	::godot::gdextension_interface::print_script_error_with_message(p_error.utf8().get_data(), p_message, p_function, p_file, p_line, p_editor_notify);
+}
+
+void _err_print_script_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const String &p_message, bool p_editor_notify) {
+	::godot::gdextension_interface::print_script_error_with_message(p_error, p_message.utf8().get_data(), p_function, p_file, p_line, p_editor_notify);
+}
+
+void _err_print_script_error(const char *p_function, const char *p_file, int p_line, const String &p_error, const String &p_message, bool p_editor_notify) {
+	::godot::gdextension_interface::print_script_error_with_message(p_error.utf8().get_data(), p_message.utf8().get_data(), p_function, p_file, p_line, p_editor_notify);
+}
+
 void _err_flush_stdout() {
 	fflush(stdout);
 }
