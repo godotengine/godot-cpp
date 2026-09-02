@@ -31,15 +31,13 @@
 #pragma once
 
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/core/method_ptrarg.hpp>
 
 #include <godot_cpp/core/object.hpp>
 #include <godot_cpp/godot.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
 namespace godot {
-
-template <typename T>
-struct PtrToArg {};
 
 #define MAKE_PTRARG(m_type) \
 	template <> \
