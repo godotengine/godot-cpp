@@ -117,7 +117,7 @@ function(
         VERBATIM
         WORKING_DIRECTORY ${godot-cpp_SOURCE_DIR}
         MAIN_DEPENDENCY ${GODOTCPP_GDEXTENSION_API_FILE}
-        DEPENDS ${godot-cpp_SOURCE_DIR}/binding_generator.py
+        DEPENDS ${godot-cpp_SOURCE_DIR}/binding_generator.py ${BINDING_HOOK_FILE}
         COMMENT "Generating bindings"
     )
     add_custom_target(generate_bindings DEPENDS ${GENERATED_FILES_LIST})
