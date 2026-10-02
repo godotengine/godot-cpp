@@ -226,7 +226,7 @@ public:
 #define BIND_VIRTUAL_METHOD(m_class, m_method, m_hash) \
 	{ \
 		auto _call##m_method = [](GDExtensionObjectPtr p_instance, const GDExtensionConstTypePtr *p_args, GDExtensionTypePtr p_ret) -> void { \
-			call_with_ptr_args(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret); \
+			call_with_ptr_args<m_class>(reinterpret_cast<m_class *>(p_instance), &m_class::m_method, p_args, p_ret); \
 		}; \
 		::godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, _call##m_method, m_hash); \
 	}
