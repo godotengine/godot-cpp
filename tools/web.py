@@ -50,6 +50,10 @@ def generate(env):
     env.Append(CCFLAGS=["-sSUPPORT_LONGJMP='wasm'"])
     env.Append(LINKFLAGS=["-sSUPPORT_LONGJMP='wasm'"])
 
+    if not env["disable_exceptions"]:
+        env.Append(CCFLAGS=["-fwasm-exceptions"])
+        env.Append(LINKFLAGS=["-fwasm-exceptions"])
+
     env.Append(CPPDEFINES=["WEB_ENABLED", "UNIX_ENABLED"])
 
     # Refer to https://github.com/godotengine/godot/blob/master/platform/web/detect.py
