@@ -30,6 +30,7 @@
 
 #pragma once
 
+#include <godot_cpp/core/bit_field.hpp>
 #include <godot_cpp/core/method_ptrcall.hpp>
 #include <godot_cpp/core/object.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
@@ -258,19 +259,6 @@ inline StringName _gde_constant_get_enum_name(T param, StringName p_constant) {
 	}
 	return GetTypeInfo<T>::get_class_info().class_name;
 }
-
-template <typename T>
-class BitField {
-	int64_t value = 0;
-
-public:
-	_FORCE_INLINE_ void set_flag(T p_flag) { value |= p_flag; }
-	_FORCE_INLINE_ bool has_flag(T p_flag) const { return value & p_flag; }
-	_FORCE_INLINE_ void clear_flag(T p_flag) { value &= ~p_flag; }
-	_FORCE_INLINE_ BitField(int64_t p_value) { value = p_value; }
-	_FORCE_INLINE_ operator int64_t() const { return value; }
-	_FORCE_INLINE_ operator Variant() const { return value; }
-};
 
 #define TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, m_impl) \
 	template <> \

@@ -1821,6 +1821,10 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append("#include <type_traits>")
         result.append("")
 
+    if class_name == "Object":
+        result.append("#include <godot_cpp/core/bit_field.hpp>")
+        result.append("")
+
     if class_name == "ClassDBSingleton":
         result.append("#include <godot_cpp/core/binder_common.hpp>")
         result.append("")
