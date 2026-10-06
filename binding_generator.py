@@ -1277,24 +1277,20 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
         result.append("\tString::_init_bindings_constructors_destructor();")
     result.append(f"\t{class_name}::_init_bindings_constructors_destructor();")
 
-    result.append("\tStringName _gde_name;")
-
     if "methods" in builtin_api:
         for method in builtin_api["methods"]:
             # TODO: Add error check for hash mismatch.
-            result.append(f'\t_gde_name = StringName("{method["name"]}");')
             result.append(
-                f"\t_method_bindings.method_{method['name']} = ::godot::gdextension_interface::variant_get_ptr_builtin_method({enum_type_name}, _gde_name._native_ptr(), {method['hash']});"
+                f'\t_method_bindings.method_{method["name"]} = ::godot::internal::get_builtin_method({enum_type_name}, "{method["name"]}", {method["hash"]});'
             )
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
-            result.append(f'\t_gde_name = StringName("{member["name"]}");')
             result.append(
-                f"\t_method_bindings.member_{member['name']}_setter = ::godot::gdextension_interface::variant_get_ptr_setter({enum_type_name}, _gde_name._native_ptr());"
+                f'\t_method_bindings.member_{member["name"]}_setter = ::godot::internal::get_builtin_setter({enum_type_name}, "{member["name"]}");'
             )
             result.append(
-                f"\t_method_bindings.member_{member['name']}_getter = ::godot::gdextension_interface::variant_get_ptr_getter({enum_type_name}, _gde_name._native_ptr());"
+                f'\t_method_bindings.member_{member["name"]}_getter = ::godot::internal::get_builtin_getter({enum_type_name}, "{member["name"]}");'
             )
 
     if "indexing_return_type" in builtin_api:
@@ -2199,7 +2195,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
 
             # Method body.
             result.append(
-                f'\tstatic GDExtensionMethodBindPtr _gde_method_bind = ::godot::gdextension_interface::classdb_get_method_bind({class_name}::get_class_static()._native_ptr(), StringName("{method["name"]}")._native_ptr(), {method["hash"]});'
+                f'\tstatic GDExtensionMethodBindPtr _gde_method_bind = ::godot::internal::get_method_bind({class_name}::get_class_static(), "{method["name"]}", {method["hash"]});'
             )
             method_call = "\t"
             has_return = "return_value" in method and method["return_value"]["type"] != "void"
@@ -2516,7 +2512,7 @@ def generate_utility_functions(api, output_dir, hooks=None):
         # Function body.
 
         source.append(
-            f'\tstatic GDExtensionPtrUtilityFunction _gde_function = ::godot::gdextension_interface::variant_get_ptr_utility_function(StringName("{function["name"]}")._native_ptr(), {function["hash"]});'
+            f'\tstatic GDExtensionPtrUtilityFunction _gde_function = ::godot::internal::get_utility_function("{function["name"]}", {function["hash"]});'
         )
         has_return = "return_type" in function and function["return_type"] != "void"
         if has_return:
