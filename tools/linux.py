@@ -44,7 +44,14 @@ def generate(env):
 
     # Link statically for portability
     if env["use_static_cpp"]:
-        env.Append(LINKFLAGS=["-static-libgcc", "-static-libstdc++"])
+        env.Append(
+            LINKFLAGS=[
+                "-static-libgcc",
+                "-static-libstdc++",
+                "-Wl,--gc-sections",
+                "-Wl,--exclude-libs=libstdc++.a:libgcc.a:libgcc_eh.a",
+            ]
+        )
 
     env.Append(CPPDEFINES=["LINUX_ENABLED", "UNIX_ENABLED"])
 
