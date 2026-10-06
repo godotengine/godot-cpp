@@ -118,6 +118,8 @@ def generate(env):
     env.Append(CCFLAGS=arch_info["ccflags"])
     env.Append(LINKFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"]])
 
+    env.Append(LINKFLAGS=["-Wl,--gc-sections"])
+
     env.Append(CPPDEFINES=["ANDROID_ENABLED", "UNIX_ENABLED"])
 
     # Refer to https://github.com/godotengine/godot/blob/master/platform/android/detect.py

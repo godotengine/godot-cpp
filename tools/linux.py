@@ -42,6 +42,8 @@ def generate(env):
         env.Append(CCFLAGS=["-march=rv64gc"])
         env.Append(LINKFLAGS=["-march=rv64gc"])
 
+    env.Append(LINKFLAGS=["-Wl,--gc-sections"])
+
     # Link statically for portability
     if env["use_static_cpp"]:
         env.Append(LINKFLAGS=["-static-libgcc", "-static-libstdc++"])

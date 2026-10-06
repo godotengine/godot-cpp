@@ -140,7 +140,7 @@ def generate(env):
         env["SHLIBSUFFIX"] = ".dll"
 
         env.Append(CCFLAGS=["-Wwrite-strings"])
-        env.Append(LINKFLAGS=["-Wl,--no-undefined"])
+        env.Append(LINKFLAGS=["-Wl,--no-undefined", "-Wl,--gc-sections"])
         if env["use_static_cpp"]:
             env.Append(
                 LINKFLAGS=[
@@ -186,7 +186,7 @@ def generate(env):
         env["SHLIBSUFFIX"] = ".dll"
 
         env.Append(CCFLAGS=["-Wwrite-strings"])
-        env.Append(LINKFLAGS=["-Wl,--no-undefined"])
+        env.Append(LINKFLAGS=["-Wl,--no-undefined", "-Wl,--gc-sections"])
         if env["use_static_cpp"]:
             env.Append(
                 LINKFLAGS=[
