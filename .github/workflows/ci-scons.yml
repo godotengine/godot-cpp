@@ -26,7 +26,7 @@ jobs:
       matrix:
         include:
           - name: 🐧 Linux (GCC)
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release
             artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
@@ -34,7 +34,7 @@ jobs:
             cache-name: linux-x86_64
 
           - name: 🐧 Linux (GCC) for Godot 4.6
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release-godot46
             artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
@@ -44,7 +44,7 @@ jobs:
             cache-name: linux-x86_64-godot45
 
           - name: 🐧 Linux (GCC) for Godot 4.5
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release-godot45
             artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
@@ -54,7 +54,7 @@ jobs:
             cache-name: linux-x86_64-godot45
 
           - name: 🐧 Linux (GCC) for Godot 4.4
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release-godot44
             artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
@@ -64,7 +64,7 @@ jobs:
             cache-name: linux-x86_64-godot44
 
           - name: 🐧 Linux (GCC) for Godot 4.3
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             platform: linux
             artifact-name: godot-cpp-linux-glibc2.27-x86_64-release-godot43
             artifact-path: bin/libgodot-cpp.linux.template_release.x86_64.a
@@ -100,7 +100,7 @@ jobs:
             cache-name: macos-universal
 
           - name: 🤖 Android (arm64)
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             platform: android
             artifact-name: godot-cpp-android-arm64-release
             artifact-path: bin/libgodot-cpp.android.template_release.arm64.a
@@ -118,7 +118,7 @@ jobs:
             cache-name: ios-arm64
 
           - name: 🌐 Web (wasm32)
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             platform: web
             artifact-name: godot-cpp-web-wasm32-release
             artifact-path: bin/libgodot-cpp.web.template_release.wasm32.a
