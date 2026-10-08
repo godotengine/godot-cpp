@@ -1,6 +1,7 @@
 import os
 import sys
 
+import ar_tempfile
 import common_compiler_flags
 import my_spawn
 from SCons.Tool import mingw, msvc
@@ -150,8 +151,11 @@ def generate(env):
                 ]
             )
 
-        # Long line hack. Use custom spawn, quick AR append (to avoid files with the same names to override each other).
+        # Long line hack. Use custom spawn to work around the command line length limit.
         my_spawn.configure(env)
+
+        # Configure ARCOM response file in case the command line call to AR is too long.
+        ar_tempfile.configure(env)
 
     else:
         env["use_mingw"] = True
@@ -200,6 +204,9 @@ def generate(env):
 
         if sys.platform == "win32" or sys.platform == "msys":
             my_spawn.configure(env)
+
+        # Configure ARCOM response file in case the command line call to AR is too long.
+        ar_tempfile.configure(env)
 
     env.Append(CPPDEFINES=["WINDOWS_ENABLED"])
 
