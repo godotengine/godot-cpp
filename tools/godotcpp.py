@@ -393,6 +393,7 @@ def options(opts, env):
         )
     )
     opts.Add(BoolVariable("debug_symbols", "Build with debugging symbols", True))
+    opts.Add(BoolVariable("production", "Set defaults to build godot-cpp for use in production", False))
     opts.Add(BoolVariable("deprecated", "Enable compatibility code for deprecated and removed features", True))
     opts.Add(BoolVariable("dev_build", "Developer build with dev-only debugging code (DEV_ENABLED)", False))
     opts.Add(BoolVariable("verbose", "Enable verbose output for the compilation", False))
@@ -466,6 +467,13 @@ def generate(env):
 
     env["optimize"] = ARGUMENTS.get("optimize", opt_level)
     env["debug_symbols"] = get_cmdline_bool("debug_symbols", env.dev_build)
+
+    if env["production"]:
+        if "use_static_cpp" in env:
+            env["use_static_cpp"] = get_cmdline_bool("use_static_cpp", True)
+        env["debug_symbols"] = get_cmdline_bool("debug_symbols", False)
+        # LTO "auto" means we handle the preferred option in each platform tool.
+        env["lto"] = ARGUMENTS.get("lto", "auto")
 
     tool = Tool(env["platform"], toolpath=get_platform_tools_paths(env))
 
