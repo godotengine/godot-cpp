@@ -48,12 +48,20 @@ extern "C" GDExtensionGodotVersion godot_version;
 
 } // namespace gdextension_interface
 
+class StringName;
+
 namespace internal {
 
 class DocDataRegistration {
 public:
 	DocDataRegistration(const char *p_hash, int p_uncompressed_size, int p_compressed_size, const unsigned char *p_data);
 };
+
+GDExtensionMethodBindPtr get_method_bind(const StringName &p_class_name, const char *p_method_name, GDExtensionInt p_hash);
+GDExtensionPtrUtilityFunction get_utility_function(const char *p_function_name, GDExtensionInt p_hash);
+GDExtensionPtrBuiltInMethod get_builtin_method(GDExtensionVariantType p_type, const char *p_method_name, GDExtensionInt p_hash);
+GDExtensionPtrSetter get_builtin_setter(GDExtensionVariantType p_type, const char *p_member_name);
+GDExtensionPtrGetter get_builtin_getter(GDExtensionVariantType p_type, const char *p_member_name);
 
 } // namespace internal
 

@@ -36,6 +36,8 @@
 #include <godot_cpp/core/load_proc_address.inc>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/core/version.hpp>
+#include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/string_name.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
 #include <godot_cpp/core/error_macros.hpp>
@@ -89,6 +91,38 @@ DocDataRegistration::DocDataRegistration(const char *p_hash, int p_uncompressed_
 	doc_data.uncompressed_size = p_uncompressed_size;
 	doc_data.compressed_size = p_compressed_size;
 	doc_data.data = p_data;
+}
+
+GDExtensionMethodBindPtr get_method_bind(const StringName &p_class_name, const char *p_method_name, GDExtensionInt p_hash) {
+	GDExtensionMethodBindPtr method_bind = ::godot::gdextension_interface::classdb_get_method_bind(p_class_name._native_ptr(), StringName(p_method_name)._native_ptr(), p_hash);
+#ifdef DEBUG_ENABLED
+	if (unlikely(!method_bind)) {
+		ERR_PRINT(vformat("Method bind was not found for %s::%s. Likely the engine method changed to an incompatible version.", p_class_name, p_method_name));
+	}
+#endif
+	return method_bind;
+}
+
+GDExtensionPtrUtilityFunction get_utility_function(const char *p_function_name, GDExtensionInt p_hash) {
+	GDExtensionPtrUtilityFunction function = ::godot::gdextension_interface::variant_get_ptr_utility_function(StringName(p_function_name)._native_ptr(), p_hash);
+#ifdef DEBUG_ENABLED
+	if (unlikely(!function)) {
+		ERR_PRINT(vformat("Utility function was not found: %s. Likely the engine function changed to an incompatible version.", p_function_name));
+	}
+#endif
+	return function;
+}
+
+GDExtensionPtrBuiltInMethod get_builtin_method(GDExtensionVariantType p_type, const char *p_method_name, GDExtensionInt p_hash) {
+	return ::godot::gdextension_interface::variant_get_ptr_builtin_method(p_type, StringName(p_method_name)._native_ptr(), p_hash);
+}
+
+GDExtensionPtrSetter get_builtin_setter(GDExtensionVariantType p_type, const char *p_member_name) {
+	return ::godot::gdextension_interface::variant_get_ptr_setter(p_type, StringName(p_member_name)._native_ptr());
+}
+
+GDExtensionPtrGetter get_builtin_getter(GDExtensionVariantType p_type, const char *p_member_name) {
+	return ::godot::gdextension_interface::variant_get_ptr_getter(p_type, StringName(p_member_name)._native_ptr());
 }
 
 } // namespace internal
