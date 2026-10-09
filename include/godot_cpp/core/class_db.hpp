@@ -137,8 +137,9 @@ private:
 		if constexpr (!std::is_abstract_v<T>) {
 #ifdef HOT_RELOAD_ENABLED
 			Wrapped::_get_construct_info().recreate_owner = obj;
-			T *new_instance = (T *)memalloc(sizeof(T));
-			memnew_placement(new_instance, T);
+			Wrapped::_set_construct_info<T>();
+			T *new_instance = new (memalloc(sizeof(T))) T;
+			new_instance->_postinitialize();
 			return new_instance;
 #else
 			return nullptr;
