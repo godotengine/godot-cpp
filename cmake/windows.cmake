@@ -103,6 +103,7 @@ function(windows_generate)
         PUBLIC
             $<${NOT_MSVC}:
                 -Wl,--no-undefined
+                -Wl,--gc-sections
                 $<${STATIC_CPP}:
                     -static
                     -static-libgcc

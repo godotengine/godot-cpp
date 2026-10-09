@@ -49,6 +49,9 @@ def generate(env):
         env.Append(CXXFLAGS=["/EHsc"])
 
     if not env.get("is_msvc", False):
+        if not env["use_mingw"]:
+            env.Append(CCFLAGS=["-ffunction-sections", "-fdata-sections"])
+
         if env["symbols_visibility"] == "visible":
             env.Append(CCFLAGS=["-fvisibility=default"])
             env.Append(LINKFLAGS=["-fvisibility=default"])
@@ -108,7 +111,7 @@ def generate(env):
         else:
             if using_clang(env) and not is_vanilla_clang(env) and not env["use_mingw"]:
                 # Apple Clang, its linker doesn't like -s.
-                env.Append(LINKFLAGS=["-Wl,-S", "-Wl,-x", "-Wl,-dead_strip"])
+                env.Append(LINKFLAGS=["-Wl,-S", "-Wl,-x"])
             else:
                 env.Append(LINKFLAGS=["-s"])
 

@@ -28,6 +28,7 @@ function(linux_generate)
     target_link_options(
         godot-cpp
         PUBLIC
+            -Wl,--gc-sections
             $<${STATIC_CPP}:
                 -static-libgcc
                 -static-libstdc++

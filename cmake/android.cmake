@@ -45,5 +45,7 @@ endfunction()
 function(android_generate)
     target_compile_definitions(godot-cpp PUBLIC ANDROID_ENABLED UNIX_ENABLED)
 
+    target_link_options(godot-cpp PUBLIC -Wl,--gc-sections)
+
     common_compiler_flags()
 endfunction()

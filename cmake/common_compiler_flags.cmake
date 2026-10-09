@@ -81,6 +81,8 @@ function(common_compiler_flags)
 
             $<${HOT_RELOAD}:$<${IS_GNU}:-fno-gnu-unique>>
 
+            $<${NOT_MSVC}:$<$<NOT:$<PLATFORM_ID:Windows>>:-ffunction-sections -fdata-sections>>
+
             # MSVC only
             $<${IS_MSVC}:
                 # /MP isn't valid for clang-cl with msvc frontend
@@ -185,7 +187,7 @@ function(common_compiler_flags)
             $<$<NOT:${DEBUG_SYMBOLS}>:
                 $<${IS_GNU}:-s>
                 $<${IS_CLANG}:-s>
-                $<${IS_APPLECLANG}:-Wl,-S -Wl,-x -Wl,-dead_strip>
+                $<${IS_APPLECLANG}:-Wl,-S -Wl,-x>
             >
         PRIVATE
             $<${IS_MSVC}:

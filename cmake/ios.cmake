@@ -32,5 +32,7 @@ endfunction()
 function(ios_generate)
     target_compile_definitions(godot-cpp PUBLIC IOS_ENABLED UNIX_ENABLED)
 
+    target_link_options(godot-cpp PUBLIC -Wl,-dead_strip)
+
     common_compiler_flags()
 endfunction()
