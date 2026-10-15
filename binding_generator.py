@@ -1498,6 +1498,10 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     # Copy assignment.
     if copy_constructor_index >= 0:
         result.append(f"{class_name} &{class_name}::operator=(const {class_name} &p_other) {{")
+        result.append("\tif (this == &p_other) {")
+        result.append("\t\treturn *this;")
+        result.append("\t}")
+        result.append("")
         if builtin_api["has_destructor"]:
             result.append("\t_method_bindings.destructor(&opaque);")
         (encode, arg_name) = get_encoded_arg(
