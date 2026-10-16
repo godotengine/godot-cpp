@@ -37,5 +37,7 @@ endfunction()
 function(macos_generate)
     target_compile_definitions(godot-cpp PUBLIC MACOS_ENABLED UNIX_ENABLED)
 
+    target_link_options(godot-cpp PUBLIC -Wl,-dead_strip)
+
     common_compiler_flags()
 endfunction()
