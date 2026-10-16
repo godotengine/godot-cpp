@@ -31,6 +31,8 @@ function(linux_generate)
             $<${STATIC_CPP}:
                 -static-libgcc
                 -static-libstdc++
+                -Wl,--gc-sections
+                -Wl,--exclude-libs=libstdc++.a:libgcc.a:libgcc_eh.a
             >
     )
     # gersemi: on
