@@ -21,6 +21,6 @@ jobs:
         uses: tj-actions/changed-files@v47
 
       - name: Style checks via prek
-        uses: j178/prek-action@v3.0.2
+        uses: j178/prek-action@v3.1.0
         with:
           extra-args: --verbose --hook-stage manual --files ${{ steps.changed-files.outputs.all_changed_files }}
