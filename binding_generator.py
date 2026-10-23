@@ -1702,6 +1702,10 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hoo
         else:
             fully_used_classes.add("Wrapped")
 
+        if class_api["name"] == "TextServer":
+            # Only used by methods added by the binding generator.
+            used_classes.add("Glyph")
+
         # In order to ensure that PtrToArg specializations for native structs are
         # always used, let's move any of them into 'fully_used_classes'.
         for type_name in used_classes:
@@ -1761,8 +1765,7 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hoo
 
             for include in includes:
                 result.append(f"#include <{include}>")
-        else:
-            result.append("#include <godot_cpp/core/method_ptrcall.hpp>")
+        result.append("#include <godot_cpp/core/method_ptrcall.hpp>")
 
         result.append("")
 
@@ -1999,6 +2002,13 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     if class_name == "SceneTree":
         result.append("\tstatic SceneTree *get_singleton();")
 
+    if class_name == "TextServer":
+        result.append("#if GODOT_VERSION_MINOR >= 8")
+        result.append("\tconst Glyph *shaped_text_get_glyphs_ptr(const RID &p_shaped_rid) const;")
+        result.append("\tconst Glyph *shaped_text_sort_logical_ptr(const RID &p_shaped_rid) const;")
+        result.append("\tconst Glyph *shaped_text_get_ellipsis_glyphs_ptr(const RID &p_shaped_rid) const;")
+        result.append("#endif")
+
     if class_name == "Object":
         result.append("\ttemplate <typename T>")
         result.append("\tstatic T *cast_to(Object *p_object);")
@@ -2008,7 +2018,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
         result.append("\tvirtual ~Object() = default;")
 
-    elif use_template_get_node and class_name == "Node":
+    if use_template_get_node and class_name == "Node":
         result.append("\ttemplate <typename T>")
         result.append(
             "\tT *get_node(const NodePath &p_path) const { return Object::cast_to<T>(get_node_internal(p_path)); }"

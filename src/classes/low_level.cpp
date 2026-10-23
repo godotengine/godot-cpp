@@ -46,6 +46,10 @@
 #include <godot_cpp/core/object.hpp>
 #endif
 
+#if GODOT_VERSION_MINOR >= 8
+#include <godot_cpp/classes/text_server.hpp>
+#endif
+
 namespace godot {
 Error XMLParser::_open_buffer(const uint8_t *p_buffer, size_t p_size) {
 	return (Error)::godot::gdextension_interface::xml_parser_open_buffer(_owner, p_buffer, p_size);
@@ -78,6 +82,20 @@ const uint8_t *Image::ptr() {
 #ifdef GODOT_CPP_SCENE_TREE_SINGLETON
 SceneTree *SceneTree::get_singleton() {
 	return Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
+}
+#endif
+
+#if GODOT_VERSION_MINOR >= 8
+const Glyph *TextServer::shaped_text_get_glyphs_ptr(const RID &p_shaped_rid) const {
+	return static_cast<const Glyph *>(::godot::gdextension_interface::text_server_shaped_text_get_glyphs(_owner, p_shaped_rid.get_id()));
+}
+
+const Glyph *TextServer::shaped_text_sort_logical_ptr(const RID &p_shaped_rid) const {
+	return static_cast<const Glyph *>(::godot::gdextension_interface::text_server_shaped_text_sort_logical(_owner, p_shaped_rid.get_id()));
+}
+
+const Glyph *TextServer::shaped_text_get_ellipsis_glyphs_ptr(const RID &p_shaped_rid) const {
+	return static_cast<const Glyph *>(::godot::gdextension_interface::text_server_shaped_text_get_ellipsis_glyphs(_owner, p_shaped_rid.get_id()));
 }
 #endif
 
