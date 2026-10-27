@@ -34,6 +34,8 @@
 #include <godot_cpp/variant/color_names.inc.hpp>
 #include <godot_cpp/variant/string.hpp>
 
+#include <godot_cpp/thirdparty/misc/ok_color.h>
+
 namespace godot {
 uint32_t Color::to_argb32() const {
 	uint32_t c = (uint8_t)Math::round(a * 255.0f);
@@ -238,6 +240,32 @@ void Color::set_hsv(float p_h, float p_s, float p_v, float p_alpha) {
 			b = q;
 			break;
 	}
+}
+
+void Color::set_ok_hsl(float p_h, float p_s, float p_l, float p_alpha) {
+	ok_color::HSL hsl;
+	hsl.h = p_h;
+	hsl.s = p_s;
+	hsl.l = p_l;
+	ok_color::RGB rgb = ok_color::okhsl_to_srgb(hsl);
+	Color c = Color(rgb.r, rgb.g, rgb.b, p_alpha).clamp();
+	r = c.r;
+	g = c.g;
+	b = c.b;
+	a = c.a;
+}
+
+void Color::set_ok_hsv(float p_h, float p_s, float p_v, float p_alpha) {
+	ok_color::HSV hsv;
+	hsv.h = p_h;
+	hsv.s = p_s;
+	hsv.v = p_v;
+	ok_color::RGB rgb = ok_color::okhsv_to_srgb(hsv);
+	Color c = Color(rgb.r, rgb.g, rgb.b, p_alpha).clamp();
+	r = c.r;
+	g = c.g;
+	b = c.b;
+	a = c.a;
 }
 
 bool Color::is_equal_approx(const Color &p_color) const {
@@ -469,4 +497,51 @@ Color::operator String() const {
 	return "(" + String::num(r, 4) + ", " + String::num(g, 4) + ", " + String::num(b, 4) + ", " + String::num(a, 4) + ")";
 }
 
+Color Color::from_ok_hsl(float p_h, float p_s, float p_l, float p_alpha) {
+	Color c;
+	c.set_ok_hsl(p_h, p_s, p_l, p_alpha);
+	return c;
+}
+
+Color Color::from_ok_hsv(float p_h, float p_s, float p_l, float p_alpha) {
+	Color c;
+	c.set_ok_hsv(p_h, p_s, p_l, p_alpha);
+	return c;
+}
+
+float Color::get_ok_hsl_h() const {
+	ok_color::RGB rgb;
+	rgb.r = r;
+	rgb.g = g;
+	rgb.b = b;
+	ok_color::HSL ok_hsl = ok_color::srgb_to_okhsl(rgb);
+	if (Math::is_nan(ok_hsl.h)) {
+		return 0.0f;
+	}
+	return CLAMP(ok_hsl.h, 0.0f, 1.0f);
+}
+
+float Color::get_ok_hsl_s() const {
+	ok_color::RGB rgb;
+	rgb.r = r;
+	rgb.g = g;
+	rgb.b = b;
+	ok_color::HSL ok_hsl = ok_color::srgb_to_okhsl(rgb);
+	if (Math::is_nan(ok_hsl.s)) {
+		return 0.0f;
+	}
+	return CLAMP(ok_hsl.s, 0.0f, 1.0f);
+}
+
+float Color::get_ok_hsl_l() const {
+	ok_color::RGB rgb;
+	rgb.r = r;
+	rgb.g = g;
+	rgb.b = b;
+	ok_color::HSL ok_hsl = ok_color::srgb_to_okhsl(rgb);
+	if (Math::is_nan(ok_hsl.l)) {
+		return 0.0f;
+	}
+	return CLAMP(ok_hsl.l, 0.0f, 1.0f);
+}
 } // namespace godot
