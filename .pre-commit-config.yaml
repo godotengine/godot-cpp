@@ -3,6 +3,7 @@ default_language_version:
 
 exclude: |
   (?x)^(
+    .*thirdparty/.*|
     gdextension/extension_api-[0-9]+-[0-9]+\.json|
     gdextension/gdextension_interface\.json
   )$

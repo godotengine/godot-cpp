@@ -53,6 +53,11 @@ struct [[nodiscard]] Color {
 	float get_s() const;
 	float get_v() const;
 	void set_hsv(float p_h, float p_s, float p_v, float p_alpha = 1.0f);
+	float get_ok_hsl_h() const;
+	float get_ok_hsl_s() const;
+	float get_ok_hsl_l() const;
+	void set_ok_hsl(float p_h, float p_s, float p_l, float p_alpha = 1.0f);
+	void set_ok_hsv(float p_h, float p_s, float p_v, float p_alpha = 1.0f);
 
 	constexpr float &operator[](int p_idx) {
 		// The pointer math below assumes that the elements are placed back-to-back, like an array.
@@ -216,6 +221,8 @@ struct [[nodiscard]] Color {
 	static Color get_named_color(int p_idx);
 	static Color from_string(const String &p_string, const Color &p_default);
 	static Color from_hsv(float p_h, float p_s, float p_v, float p_alpha = 1.0f);
+	static Color from_ok_hsl(float p_h, float p_s, float p_l, float p_alpha = 1.0f);
+	static Color from_ok_hsv(float p_h, float p_s, float p_l, float p_alpha = 1.0f);
 	static Color from_rgbe9995(uint32_t p_rgbe);
 	static Color from_rgba8(int64_t p_r8, int64_t p_g8, int64_t p_b8, int64_t p_a8 = 255);
 
@@ -235,6 +242,9 @@ struct [[nodiscard]] Color {
 	_FORCE_INLINE_ void set_h(float p_h) { set_hsv(p_h, get_s(), get_v(), a); }
 	_FORCE_INLINE_ void set_s(float p_s) { set_hsv(get_h(), p_s, get_v(), a); }
 	_FORCE_INLINE_ void set_v(float p_v) { set_hsv(get_h(), get_s(), p_v, a); }
+	_FORCE_INLINE_ void set_ok_hsl_h(float p_h) { set_ok_hsl(p_h, get_ok_hsl_s(), get_ok_hsl_l(), a); }
+	_FORCE_INLINE_ void set_ok_hsl_s(float p_s) { set_ok_hsl(get_ok_hsl_h(), p_s, get_ok_hsl_l(), a); }
+	_FORCE_INLINE_ void set_ok_hsl_l(float p_l) { set_ok_hsl(get_ok_hsl_h(), get_ok_hsl_s(), p_l, a); }
 
 	constexpr Color() = default;
 
