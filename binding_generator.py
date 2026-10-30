@@ -535,6 +535,12 @@ singletons = []
 
 def generate_builtin_bindings(api, output_dir, build_config, hooks=None):
     global builtin_classes
+    global native_structures
+
+    for native_struct in api["native_structures"]:
+        if native_struct["name"] == "ObjectID":
+            continue
+        native_structures.append(native_struct["name"])
 
     core_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "core"
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "variant"
@@ -1410,10 +1416,13 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
 
             if "return_type" in method:
                 return_type = method["return_type"]
+                return_type_base = return_type.removeprefix("const ").removesuffix("*")
                 if is_enum(return_type):
                     method_call += f"return ({get_gdextension_type(correct_type(return_type))})::godot::internal::_call_builtin_method_ptr_ret<int64_t>("
                 elif is_pod_type(return_type) or is_variant(return_type):
                     method_call += f"return ::godot::internal::_call_builtin_method_ptr_ret<{get_gdextension_type(correct_type(return_type))}>("
+                elif return_type_base in native_structures:
+                    method_call += f"return ::godot::internal::_call_builtin_method_ptr_ret<{return_type}>("
                 elif is_refcounted(return_type):
                     method_call += f"return Ref<{return_type}>::_gde_internal_constructor(::godot::internal::_call_builtin_method_ptr_ret_obj<{return_type}>("
                     is_ref = True
@@ -1547,11 +1556,11 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hoo
             class_api["alias_for"] = class_api["name"]
             class_api["name"] = CLASS_ALIASES[class_api["alias_for"]]
         engine_classes[class_api["name"]] = class_api["is_refcounted"]
+
     for native_struct in api["native_structures"]:
         if native_struct["name"] == "ObjectID":
             continue
         engine_classes[native_struct["name"]] = False
-        native_structures.append(native_struct["name"])
 
     for singleton in api["singletons"]:
         # Generate code for the ClassDB singleton under a different name.
@@ -1761,8 +1770,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hoo
 
             for include in includes:
                 result.append(f"#include <{include}>")
-        else:
-            result.append("#include <godot_cpp/core/method_ptrcall.hpp>")
+
+        result.append("#include <godot_cpp/core/method_ptrcall.hpp>")
 
         result.append("")
 
@@ -2219,6 +2228,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
             if not vararg:
                 if has_return:
                     return_type = method["return_value"]["type"]
+                    return_type_base = return_type.removeprefix("const ").removesuffix("*")
                     meta_type = method["return_value"]["meta"] if "meta" in method["return_value"] else None
                     if is_enum(return_type):
                         if method["is_static"]:
@@ -2236,6 +2246,11 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
                         else:
                             method_call += f"return Ref<{return_type}>::_gde_internal_constructor(::godot::internal::_call_native_mb_ret_obj<{return_type}>(_gde_method_bind, _owner"
                         is_ref = True
+                    elif return_type_base in native_structures:
+                        if method["is_static"]:
+                            method_call += f"return ::godot::internal::_call_native_mb_ret<{get_gdextension_type(correct_type(return_type, meta_type))}>(_gde_method_bind, nullptr"
+                        else:
+                            method_call += f"return ::godot::internal::_call_native_mb_ret<{get_gdextension_type(correct_type(return_type, meta_type))}>(_gde_method_bind, _owner"
                     else:
                         if method["is_static"]:
                             method_call += f"return ::godot::internal::_call_native_mb_ret_obj<{return_type}>(_gde_method_bind, nullptr"
