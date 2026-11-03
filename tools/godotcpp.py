@@ -179,7 +179,7 @@ def scons_generate_bindings(target, source, env):
 
 supported_api_versions = ["4.3", "4.4", "4.5", "4.6", "4.7", "4.8"]
 
-platforms = ["linux", "macos", "windows", "android", "ios", "web"]
+platforms = ["linux", "macos", "windows", "android", "ios", "visionos", "web"]
 
 # CPU architecture options.
 architecture_array = [
@@ -428,12 +428,12 @@ def generate(env):
 
     # Process CPU architecture argument.
     if env["arch"] == "":
-        # No architecture specified. Default to arm64 if building for Android,
+        # No architecture specified. Default to arm64 if building for Android or visionOS,
         # universal if building for macOS or iOS, wasm32 if building for web,
         # otherwise default to the host architecture.
         if env["platform"] in ["macos", "ios"]:
             env["arch"] = "universal"
-        elif env["platform"] == "android":
+        elif env["platform"] in ["android", "visionos"]:
             env["arch"] = "arm64"
         elif env["platform"] == "web":
             env["arch"] = "wasm32"
@@ -527,7 +527,7 @@ def generate(env):
     if env["precision"] == "double":
         suffix += ".double"
     suffix += "." + env["arch"]
-    if env["ios_simulator"]:
+    if env["ios_simulator"] or env["visionos_simulator"]:
         suffix += ".simulator"
     if not env["threads"]:
         suffix += ".nothreads"
