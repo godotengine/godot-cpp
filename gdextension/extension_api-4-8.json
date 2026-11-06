@@ -3,9 +3,9 @@
 		"version_major": 4,
 		"version_minor": 8,
 		"version_patch": 0,
-		"version_status": "beta1",
+		"version_status": "beta2",
 		"version_build": "official",
-		"version_full_name": "Godot Engine v4.8.beta1.official",
+		"version_full_name": "Godot Engine v4.8.beta2.official",
 		"precision": "single"
 	},
 	"builtin_class_sizes": [
@@ -109732,7 +109732,7 @@
 					"getter": "is_flat"
 				},
 				{
-					"type": "bool",
+					"type": "int",
 					"name": "control_state",
 					"setter": "set_control_state",
 					"getter": "get_control_state"
@@ -158314,6 +158314,10 @@
 						{
 							"name": "BAKE_ERROR_ATLAS_TOO_SMALL",
 							"value": 11
+						},
+						{
+							"name": "BAKE_ERROR_TEXTURE_EXCEEDS_DEVICE_LIMIT",
+							"value": 12
 						}
 					]
 				},
@@ -188102,7 +188106,10 @@
 					"is_vararg": false,
 					"is_static": false,
 					"is_virtual": false,
-					"hash": 2570952461,
+					"hash": 4170434404,
+					"hash_compatibility": [
+						2570952461
+					],
 					"arguments": [
 						{
 							"name": "node",
@@ -188113,6 +188120,11 @@
 							"name": "keep_groups",
 							"type": "bool",
 							"default_value": "false"
+						},
+						{
+							"name": "keep_owned_children",
+							"type": "bool",
+							"default_value": "true"
 						}
 					]
 				},
