@@ -25,8 +25,8 @@ if env["platform"] == "macos":
         ),
         source=sources,
     )
-elif env["platform"] == "ios":
-    if env["ios_simulator"]:
+elif env["platform"] in ["ios", "visionos"]:
+    if env["ios_simulator"] or env["visionos_simulator"]:
         library = env.StaticLibrary(
             "project/bin/libmytest.{}.{}.simulator.a".format(env["platform"], env["target"]),
             source=sources,
