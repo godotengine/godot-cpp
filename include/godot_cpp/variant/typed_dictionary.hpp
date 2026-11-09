@@ -185,6 +185,8 @@ public:
 	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, Vector3, Variant::VECTOR3) \
 	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, Vector3i, Variant::VECTOR3I) \
 	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, Transform2D, Variant::TRANSFORM2D) \
+	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, Vector4, Variant::VECTOR4) \
+	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, Vector4i, Variant::VECTOR4I) \
 	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, Plane, Variant::PLANE) \
 	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, Quaternion, Variant::QUATERNION) \
 	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, AABB, Variant::AABB) \
@@ -234,6 +236,8 @@ MAKE_TYPED_DICTIONARY(Rect2i, Variant::RECT2I)
 MAKE_TYPED_DICTIONARY(Vector3, Variant::VECTOR3)
 MAKE_TYPED_DICTIONARY(Vector3i, Variant::VECTOR3I)
 MAKE_TYPED_DICTIONARY(Transform2D, Variant::TRANSFORM2D)
+MAKE_TYPED_DICTIONARY(Vector4, Variant::VECTOR4)
+MAKE_TYPED_DICTIONARY(Vector4i, Variant::VECTOR4I)
 MAKE_TYPED_DICTIONARY(Plane, Variant::PLANE)
 MAKE_TYPED_DICTIONARY(Quaternion, Variant::QUATERNION)
 MAKE_TYPED_DICTIONARY(AABB, Variant::AABB)
@@ -385,6 +389,8 @@ struct GetTypeInfo<const TypedDictionary<K, V> &> {
 	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, Vector3, Variant::VECTOR3) \
 	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, Vector3i, Variant::VECTOR3I) \
 	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, Transform2D, Variant::TRANSFORM2D) \
+	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, Vector4, Variant::VECTOR4) \
+	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, Vector4i, Variant::VECTOR4I) \
 	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, Plane, Variant::PLANE) \
 	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, Quaternion, Variant::QUATERNION) \
 	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, AABB, Variant::AABB) \
@@ -434,6 +440,8 @@ MAKE_TYPED_DICTIONARY_INFO(Rect2i, Variant::RECT2I)
 MAKE_TYPED_DICTIONARY_INFO(Vector3, Variant::VECTOR3)
 MAKE_TYPED_DICTIONARY_INFO(Vector3i, Variant::VECTOR3I)
 MAKE_TYPED_DICTIONARY_INFO(Transform2D, Variant::TRANSFORM2D)
+MAKE_TYPED_DICTIONARY_INFO(Vector4, Variant::VECTOR4)
+MAKE_TYPED_DICTIONARY_INFO(Vector4i, Variant::VECTOR4I)
 MAKE_TYPED_DICTIONARY_INFO(Plane, Variant::PLANE)
 MAKE_TYPED_DICTIONARY_INFO(Quaternion, Variant::QUATERNION)
 MAKE_TYPED_DICTIONARY_INFO(AABB, Variant::AABB)
