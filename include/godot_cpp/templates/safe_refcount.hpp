@@ -30,7 +30,7 @@
 
 #pragma once
 
-#if !defined(NO_THREADS)
+#ifdef THREADS_ENABLED
 
 #include <atomic>
 #include <godot_cpp/core/defs.hpp>
@@ -223,4 +223,4 @@ public:
 
 } // namespace godot
 
-#endif // !defined(NO_THREADS)
+#endif // THREADS_ENABLED
