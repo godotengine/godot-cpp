@@ -34,7 +34,7 @@ runs:
   using: composite
   steps:
     - name: Setup Python (for SCons)
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: 3.x
 
@@ -47,7 +47,7 @@ runs:
 
     - name: Setup Web dependencies
       if: inputs.platform == 'web'
-      uses: mymindstorm/setup-emsdk@v14
+      uses: emscripten-core/setup-emsdk@v16
       with:
         version: ${{ inputs.em-version }}
         no-cache: true
@@ -68,4 +68,7 @@ runs:
 
     - name: Install Ninja
       if: ${{ inputs.buildtool == 'cmake' }}
-      uses: ashutoshvarma/setup-ninja@master
+      shell: bash
+      run: |
+        python -m pip install ninja
+        ninja --version
