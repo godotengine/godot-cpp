@@ -3,9 +3,9 @@
 		"version_major": 4,
 		"version_minor": 8,
 		"version_patch": 0,
-		"version_status": "beta2",
+		"version_status": "beta3",
 		"version_build": "official",
-		"version_full_name": "Godot Engine v4.8.beta2.official",
+		"version_full_name": "Godot Engine v4.8.beta3.official",
 		"precision": "single"
 	},
 	"builtin_class_sizes": [
@@ -160226,9 +160226,9 @@
 			]
 		},
 		{
-			"name": "Line3D",
+			"name": "LineBase3D",
 			"is_refcounted": false,
-			"is_instantiable": true,
+			"is_instantiable": false,
 			"inherits": "GeometryInstance3D",
 			"api_type": "core",
 			"enums": [
@@ -188106,10 +188106,7 @@
 					"is_vararg": false,
 					"is_static": false,
 					"is_virtual": false,
-					"hash": 4170434404,
-					"hash_compatibility": [
-						2570952461
-					],
+					"hash": 2570952461,
 					"arguments": [
 						{
 							"name": "node",
@@ -188120,11 +188117,6 @@
 							"name": "keep_groups",
 							"type": "bool",
 							"default_value": "false"
-						},
-						{
-							"name": "keep_owned_children",
-							"type": "bool",
-							"default_value": "true"
 						}
 					]
 				},
@@ -330393,7 +330385,7 @@
 			"name": "Trail3D",
 			"is_refcounted": false,
 			"is_instantiable": true,
-			"inherits": "Line3D",
+			"inherits": "LineBase3D",
 			"api_type": "core",
 			"enums": [
 				{
@@ -330549,11 +330541,11 @@
 					"is_vararg": false,
 					"is_static": false,
 					"is_virtual": false,
-					"hash": 2165032565,
+					"hash": 838352442,
 					"arguments": [
 						{
 							"name": "material_mode",
-							"type": "enum::Line3D.MaterialMode"
+							"type": "enum::LineBase3D.MaterialMode"
 						}
 					]
 				},
@@ -330563,9 +330555,9 @@
 					"is_vararg": false,
 					"is_static": false,
 					"is_virtual": false,
-					"hash": 3629890196,
+					"hash": 3506372543,
 					"return_value": {
-						"type": "enum::Line3D.MaterialMode"
+						"type": "enum::LineBase3D.MaterialMode"
 					}
 				},
 				{
@@ -330599,11 +330591,11 @@
 					"is_vararg": false,
 					"is_static": false,
 					"is_virtual": false,
-					"hash": 3254932473,
+					"hash": 1728914772,
 					"arguments": [
 						{
 							"name": "alignment",
-							"type": "enum::Line3D.MeshAlignment"
+							"type": "enum::LineBase3D.MeshAlignment"
 						}
 					]
 				},
@@ -330613,9 +330605,9 @@
 					"is_vararg": false,
 					"is_static": false,
 					"is_virtual": false,
-					"hash": 603151927,
+					"hash": 1842977196,
 					"return_value": {
-						"type": "enum::Line3D.MeshAlignment"
+						"type": "enum::LineBase3D.MeshAlignment"
 					}
 				},
 				{
@@ -330651,11 +330643,11 @@
 					"is_vararg": false,
 					"is_static": false,
 					"is_virtual": false,
-					"hash": 3698560511,
+					"hash": 3386846958,
 					"arguments": [
 						{
 							"name": "tiling_mode",
-							"type": "enum::Line3D.TilingMode"
+							"type": "enum::LineBase3D.TilingMode"
 						}
 					]
 				},
@@ -330665,9 +330657,9 @@
 					"is_vararg": false,
 					"is_static": false,
 					"is_virtual": false,
-					"hash": 1009472955,
+					"hash": 73744199,
 					"return_value": {
-						"type": "enum::Line3D.TilingMode"
+						"type": "enum::LineBase3D.TilingMode"
 					}
 				},
 				{
