@@ -25,6 +25,18 @@ def exists(env):
     return True
 
 
+def configure_gcc_ar(env, prefix=""):
+    if env.Detect(prefix + "gcc-ar"):
+        env["AR"] = prefix + "gcc-ar"
+        env["RANLIB"] = prefix + "gcc-ranlib"
+        return
+
+    if env["lto"] != "none":
+        print("WARNING: Couldn't find `{0}gcc-ar`; falling back to `{0}ar`. LTO builds might fail.".format(prefix))
+    env["AR"] = prefix + "ar"
+    env["RANLIB"] = prefix + "ranlib"
+
+
 def generate(env):
     assert env["lto"] in ["thin", "full", "none"], "Unrecognized lto: {}".format(env["lto"])
     if env["lto"] != "none":

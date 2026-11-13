@@ -62,6 +62,9 @@ def generate(env):
     if env["lto"] == "auto":
         env["lto"] = "full"
 
+    if not env["use_llvm"]:
+        common_compiler_flags.configure_gcc_ar(env)
+
     # Configure ARCOM response file in case the command line call to AR is too long.
     ar_tempfile.configure(env)
 
