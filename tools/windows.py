@@ -89,6 +89,8 @@ def exists(env):
 
 
 def generate(env):
+    gcc_tool_prefix = None
+
     if not env["use_mingw"] and msvc.exists(env):
         if env["arch"] == "x86_64":
             env["TARGET_ARCH"] = "amd64"
@@ -133,6 +135,7 @@ def generate(env):
 
     elif (sys.platform == "win32" or sys.platform == "msys") and not env["mingw_prefix"]:
         env["use_mingw"] = True
+        gcc_tool_prefix = ""
         mingw.generate(env)
         # Don't want lib prefixes
         env["IMPLIBPREFIX"] = ""
@@ -180,11 +183,10 @@ def generate(env):
             env["RANLIB"] = prefix + "-w64-mingw32-ranlib"
             env["LINK"] = prefix + "-w64-mingw32-clang"
         else:
-            env["CXX"] = prefix + "-w64-mingw32-g++"
-            env["CC"] = prefix + "-w64-mingw32-gcc"
-            env["AR"] = prefix + "-w64-mingw32-gcc-ar"
-            env["RANLIB"] = prefix + "-w64-mingw32-ranlib"
-            env["LINK"] = prefix + "-w64-mingw32-g++"
+            gcc_tool_prefix = prefix + "-w64-mingw32-"
+            env["CXX"] = gcc_tool_prefix + "g++"
+            env["CC"] = gcc_tool_prefix + "gcc"
+            env["LINK"] = gcc_tool_prefix + "g++"
 
         # Want dll suffix
         env["SHLIBSUFFIX"] = ".dll"
@@ -217,5 +219,8 @@ def generate(env):
             env["lto"] = "none"
         else:  # Release
             env["lto"] = "full"
+
+    if gcc_tool_prefix is not None:
+        common_compiler_flags.configure_gcc_ar(env, gcc_tool_prefix)
 
     common_compiler_flags.generate(env)

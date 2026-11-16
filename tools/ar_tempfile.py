@@ -18,12 +18,9 @@ def tempfile_arg_esc_func(arg):
 # writing the command to a response file. Refer to the engine equivalent in
 # https://github.com/godotengine/godot/blob/master/platform/windows/detect.py
 def configure(env):
-    if "ARCOM_ORIG" in env:
-        return  # Already configured, don't wrap ARCOM in TEMPFILE twice.
-
-    env["ARCOM_ORIG"] = env["ARCOM"]
     # This is SCons lazy evaluation syntax, only switching to a file when the command is actually too long.
-    env["ARCOM"] = "${TEMPFILE('$ARCOM_ORIG', '$ARCOMSTR')}"
+    # The flags must stay in the command (not in the file) to work with GCC 13 or older.
+    env["ARCOM"] = "$AR $ARFLAGS ${TEMPFILE('$TARGET $SOURCES', '$ARCOMSTR')}"
     env["TEMPFILESUFFIX"] = ".rsp"
     if os.name == "nt":
         env["TEMPFILEARGESCFUNC"] = tempfile_arg_esc_func
