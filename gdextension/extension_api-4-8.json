@@ -3,9 +3,9 @@
 		"version_major": 4,
 		"version_minor": 8,
 		"version_patch": 0,
-		"version_status": "beta3",
+		"version_status": "beta4",
 		"version_build": "official",
-		"version_full_name": "Godot Engine v4.8.beta3.official",
+		"version_full_name": "Godot Engine v4.8.beta4.official",
 		"precision": "single"
 	},
 	"builtin_class_sizes": [
@@ -250957,6 +250957,23 @@
 					]
 				},
 				{
+					"name": "texture_get_nearest_supported_samples",
+					"is_const": false,
+					"is_vararg": false,
+					"is_static": false,
+					"is_virtual": false,
+					"hash": 1603719724,
+					"return_value": {
+						"type": "enum::RenderingDevice.TextureSamples"
+					},
+					"arguments": [
+						{
+							"name": "format",
+							"type": "RDTextureFormat"
+						}
+					]
+				},
+				{
 					"name": "texture_get_native_handle",
 					"is_const": false,
 					"is_vararg": false,
@@ -281877,7 +281894,7 @@
 			],
 			"properties": [
 				{
-					"type": "typedarray::24/17:InputEvent",
+					"type": "typedarray::24/17:InputEvent,-InputEventShortcut",
 					"name": "events",
 					"setter": "set_events",
 					"getter": "get_events"
@@ -313482,6 +313499,24 @@
 							"name": "data_size",
 							"type": "int",
 							"meta": "int64"
+						}
+					]
+				},
+				{
+					"name": "_font_validate",
+					"is_const": true,
+					"is_static": false,
+					"is_required": false,
+					"is_vararg": false,
+					"is_virtual": true,
+					"hash": 4155700596,
+					"return_value": {
+						"type": "bool"
+					},
+					"arguments": [
+						{
+							"name": "font_rid",
+							"type": "RID"
 						}
 					]
 				},
