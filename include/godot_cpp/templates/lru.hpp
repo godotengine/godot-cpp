@@ -149,6 +149,5 @@ public:
 	LRUCache(int p_capacity) {
 		capacity = p_capacity;
 	}
-
 };
 } //namespace godot

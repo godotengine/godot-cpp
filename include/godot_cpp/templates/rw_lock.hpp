@@ -115,7 +115,8 @@ class RWLockRead {
 	const RWLock &lock;
 
 public:
-	_ALWAYS_INLINE_ RWLockRead(const RWLock &p_lock) : lock(p_lock) {}
+	_ALWAYS_INLINE_ RWLockRead(const RWLock &p_lock) :
+			lock(p_lock) {}
 	_ALWAYS_INLINE_ ~RWLockRead() {}
 };
 
@@ -123,7 +124,8 @@ class RWLockWrite {
 	RWLock &lock;
 
 public:
-	_ALWAYS_INLINE_ RWLockWrite(RWLock &p_lock) : lock(p_lock) {}
+	_ALWAYS_INLINE_ RWLockWrite(RWLock &p_lock) :
+			lock(p_lock) {}
 	_ALWAYS_INLINE_ ~RWLockWrite() {}
 };
 
