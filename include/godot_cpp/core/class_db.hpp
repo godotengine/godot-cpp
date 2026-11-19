@@ -107,9 +107,6 @@ private:
 	static void initialize_class(const ClassInfo &cl);
 	static void bind_method_godot(const StringName &p_class_name, MethodBind *p_method);
 
-	template <typename T, bool is_abstract>
-	static void _register_class(bool p_virtual = false, bool p_exposed = true, bool p_runtime = false);
-
 	template <typename T>
 #if GODOT_VERSION_MINOR >= 4
 	static GDExtensionObjectPtr _create_instance_func(void *data, GDExtensionBool p_notify_postinitialize) {
@@ -150,14 +147,8 @@ private:
 	}
 
 public:
-	template <typename T>
-	static void register_class(bool p_virtual = false);
-	template <typename T>
-	static void register_abstract_class();
-	template <typename T>
-	static void register_internal_class();
-	template <typename T>
-	static void register_runtime_class();
+	template <typename T, bool is_virtual = false, bool is_abstract = false, bool is_exposed = true, bool is_runtime = false>
+	static void register_class();
 
 	_FORCE_INLINE_ static void _register_engine_class(const StringName &p_name, const GDExtensionInstanceBindingCallbacks *p_callbacks) {
 		instance_binding_callbacks[p_name] = p_callbacks;
@@ -232,8 +223,8 @@ public:
 		::godot::ClassDB::bind_virtual_method(m_class::get_class_static(), #m_method, _call##m_method, m_hash); \
 	}
 
-template <typename T, bool is_abstract>
-void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
+template <typename T, bool is_virtual, bool is_abstract, bool is_exposed, bool is_runtime>
+void ClassDB::register_class() {
 	static_assert(TypesAreSame<typename T::self_type, T>::value, "Class not declared properly, please use GDCLASS.");
 	static_assert(!FunctionsAreSame<T::self_type::_bind_methods, T::parent_type::_bind_methods>::value, "Class must declare 'static void _bind_methods'.");
 	static_assert(!std::is_abstract_v<T> || is_abstract, "Class is abstract, please use GDREGISTER_ABSTRACT_CLASS.");
@@ -262,10 +253,10 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 #else
 	GDExtensionClassCreationInfo3 class_info = {
 #endif
-		p_virtual, // GDExtensionBool is_virtual;
+		is_virtual, // GDExtensionBool is_virtual;
 		is_abstract, // GDExtensionBool is_abstract;
-		p_exposed, // GDExtensionBool is_exposed;
-		p_runtime, // GDExtensionBool is_runtime;
+		is_exposed, // GDExtensionBool is_exposed;
+		is_runtime, // GDExtensionBool is_runtime;
 #if GODOT_VERSION_MINOR >= 4
 		nullptr, // GDExtensionConstStringPtr icon_path;
 #endif // GODOT_VERSION_MINOR >= 4
@@ -307,26 +298,6 @@ void ClassDB::_register_class(bool p_virtual, bool p_exposed, bool p_runtime) {
 
 	// now register our class within ClassDB within Godot
 	initialize_class(classes[cl.name]);
-}
-
-template <typename T>
-void ClassDB::register_class(bool p_virtual) {
-	ClassDB::_register_class<T, false>(p_virtual);
-}
-
-template <typename T>
-void ClassDB::register_abstract_class() {
-	ClassDB::_register_class<T, true>();
-}
-
-template <typename T>
-void ClassDB::register_internal_class() {
-	ClassDB::_register_class<T, false>(false, false);
-}
-
-template <typename T>
-void ClassDB::register_runtime_class() {
-	ClassDB::_register_class<T, false>(false, true, true);
 }
 
 template <typename N, typename M, typename... VarArgs>
@@ -385,10 +356,10 @@ MethodBind *ClassDB::bind_vararg_method(uint32_t p_flags, StringName p_name, M p
 }
 
 #define GDREGISTER_CLASS(m_class) ::godot::ClassDB::register_class<m_class>();
-#define GDREGISTER_VIRTUAL_CLASS(m_class) ::godot::ClassDB::register_class<m_class>(true);
-#define GDREGISTER_ABSTRACT_CLASS(m_class) ::godot::ClassDB::register_abstract_class<m_class>();
-#define GDREGISTER_INTERNAL_CLASS(m_class) ::godot::ClassDB::register_internal_class<m_class>();
-#define GDREGISTER_RUNTIME_CLASS(m_class) ::godot::ClassDB::register_runtime_class<m_class>();
+#define GDREGISTER_VIRTUAL_CLASS(m_class) ::godot::ClassDB::register_class<m_class, true>();
+#define GDREGISTER_ABSTRACT_CLASS(m_class) ::godot::ClassDB::register_class<m_class, false, true>();
+#define GDREGISTER_INTERNAL_CLASS(m_class) ::godot::ClassDB::register_class<m_class, false, false, false>();
+#define GDREGISTER_RUNTIME_CLASS(m_class) ::godot::ClassDB::register_class<m_class, false, false, true, true>();
 
 } // namespace godot
 
