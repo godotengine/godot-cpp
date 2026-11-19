@@ -99,8 +99,8 @@ def generate(env):
             env.Append(LINKFLAGS=["-flto=thin"])
         elif env["lto"] == "full":
             if env["use_llvm"]:
-                env.Append(CCFLAGS=["-flto"])
-                env.Append(LINKFLAGS=["-flto"])
+                env.Append(CCFLAGS=["-flto=auto"])
+                env.Append(LINKFLAGS=["-flto=auto"])
             else:
                 env.AppendUnique(CCFLAGS=["/GL"])
                 env.AppendUnique(ARFLAGS=["/LTCG"])
@@ -146,5 +146,5 @@ def generate(env):
             env.Append(CCFLAGS=["-flto=thin"])
             env.Append(LINKFLAGS=["-flto=thin"])
         elif env["lto"] == "full":
-            env.Append(CCFLAGS=["-flto"])
-            env.Append(LINKFLAGS=["-flto"])
+            env.Append(CCFLAGS=["-flto=auto"])
+            env.Append(LINKFLAGS=["-flto=auto"])
