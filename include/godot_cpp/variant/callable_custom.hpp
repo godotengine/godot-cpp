@@ -31,7 +31,7 @@
 #pragma once
 
 #include <godot_cpp/core/object_id.hpp>
-#include <godot_cpp/variant/string_name.hpp>
+#include <godot_cpp/variant/string.hpp>
 
 namespace godot {
 
