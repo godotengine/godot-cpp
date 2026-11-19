@@ -582,15 +582,17 @@ def _godot_cpp(env):
         api_file = _get_api_file(extension_dir, env.get("api_version", None), "gdextension_dir" in env)
     api_file = normalize_path(api_file, env)
 
-    bindings = env.GodotCPPBindings(
-        env.Dir("."),
-        [
-            api_file,
-            os.path.join(extension_dir, "gdextension_interface.json"),
-            "binding_generator.py",
-            "make_interface_header.py",
-        ],
-    )
+    binding_sources = [
+        api_file,
+        os.path.join(extension_dir, "gdextension_interface.json"),
+        "binding_generator.py",
+        "make_interface_header.py",
+    ]
+    binding_hooks = env.get("binding_hooks", None)
+    if binding_hooks:
+        binding_sources.append(normalize_path(binding_hooks, env))
+
+    bindings = env.GodotCPPBindings(env.Dir("."), binding_sources)
     # Forces bindings regeneration.
     if env["generate_bindings"]:
         env.AlwaysBuild(bindings)
