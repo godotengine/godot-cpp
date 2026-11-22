@@ -1,0 +1,36 @@
+{
+  "partial": true,
+  "sources": [
+    "https://github.com/godotengine/godot/blob/4.7-stable/modules/lightmapper_rd/register_types.cpp#L37-L61",
+    "https://github.com/godotengine/godot/blob/4.7-stable/scene/3d/lightmap_gi.cpp#L977-L990"
+  ],
+  "declarations": {
+    "class LightmapperRD : public Lightmapper {": {
+      "xml": "brief_description",
+      "brief": "Godot's built-in GPU lightmapper. The engine creates it through the lightmapper factory when the rendering-device module provides the GPU backend.\n\n**Used for** baking lighting and lightmap textures for a scene through `godot::LightmapGI`.",
+      "example": [
+        "// Before showing GPU lightmapper diagnostics in an editor tool.",
+        "bool has_gpu_lightmapper_class() {",
+        "    return godot::ClassDBSingleton::get_singleton()->class_exists(",
+        "            godot::LightmapperRD::get_class_static());",
+        "}"
+      ]
+    },
+    "GDEXTENSION_CLASS(LightmapperRD, Lightmapper)": {
+      "brief": "Defines engine metadata, construction hooks, and instance binding callbacks for the GPU lightmapper wrapper.\n\n**Used for** associating a GPU lightmapper created by the engine factory with its C++ wrapper.\n\n- `m_class` — C++ wrapper for the registered GPU lightmapper.\n- `m_inherits` — Base wrapper that supplies the common lightmapper interface.",
+      "example": [
+        "// Inside godot::internal::EngineClassRegistration<godot::LightmapperRD>::callback().",
+        "register_engine_class(godot::LightmapperRD::get_class_static(),",
+        "        &godot::LightmapperRD::_gde_binding_callbacks);"
+      ]
+    },
+    "register_virtuals": {
+      "brief": "Forwards virtual method registration to `godot::Lightmapper::register_virtuals()`.\n\n**Used for** continuing registration for an extension class derived from the GPU lightmapper after it binds its methods.\n\n- `T` — Extension class being initialized.\n- `B` — Direct C++ base of `T`, passed along for override checks.",
+      "example": [
+        "// Inside GDCLASS's initialize_class() for PreviewLightmapper, after _bind_methods().",
+        "// PreviewLightmapper inherits godot::LightmapperRD.",
+        "godot::LightmapperRD::register_virtuals<PreviewLightmapper, godot::LightmapperRD>();"
+      ]
+    }
+  }
+}

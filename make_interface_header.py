@@ -242,21 +242,11 @@ def check_type(kind, type, valid_data_types):
 
 
 def write_doc(file, doc, indent=""):
-    if len(doc) == 1:
-        file.write(f"{indent}/* {doc[0]} */\n")
-        return
-
-    first = True
+    file.write(indent + "/**\n")
     for line in doc:
-        if first:
-            file.write(indent + "/*")
-            first = False
-        else:
-            file.write(indent + " *")
-
-        if line != "":
-            file.write(" " + line)
-        file.write("\n")
+        if line.lstrip().startswith("@todo "):
+            continue
+        file.write(indent + " *" + (" " + line.replace("*/", "* /") if line else "") + "\n")
     file.write(indent + " */\n")
 
 
@@ -317,49 +307,31 @@ def write_struct_type(file, struct):
 
 def write_interface(file, interface):
     doc = [
-        f"@name {interface['name']}",
-        f"@since {interface['since']}",
+        *interface["description"],
+        "",
+        f"Engine procedure: `{interface['name']}`. Available since Godot {interface['since']}.",
     ]
 
     if "deprecated" in interface:
-        doc.append(f"@deprecated {make_deprecated_message(interface['deprecated'])}")
+        doc.append(make_deprecated_message(interface["deprecated"]))
 
-    doc += [
-        "",
-        interface["description"][0],
-    ]
-
-    if len(interface["description"]) > 1:
-        doc.append("")
-        doc += interface["description"][1:]
-
-    if "arguments" in interface:
+    if interface["arguments"]:
         doc.append("")
         for arg in interface["arguments"]:
             if "description" not in arg:
                 raise Exception(f"Interface function {interface['name']} is missing docs for {arg['name']} argument")
             arg_doc = " ".join(arg["description"])
-            doc.append(f"@param {arg['name']} {arg_doc}")
+            doc.append(f"- `{arg['name']}`: {arg_doc}")
 
     if "return_value" in interface:
         if "description" not in interface["return_value"]:
             raise Exception(f"Interface function {interface['name']} is missing docs for return value")
         ret_doc = " ".join(interface["return_value"]["description"])
-        doc.append("")
-        doc.append(f"@return {ret_doc}")
+        doc += ["", "Returns: " + ret_doc]
 
     if "see" in interface:
-        doc.append("")
-        for see in interface["see"]:
-            doc.append(f"@see {see}")
-
-    file.write("/**\n")
-    for d in doc:
-        if d != "":
-            file.write(f" * {d}\n")
-        else:
-            file.write(" *\n")
-    file.write(" */\n")
+        doc += ["", "Related procedures: " + ", ".join(f"`{name}`" for name in interface["see"]) + "."]
+    write_doc(file, doc)
 
     fn = interface.copy()
     if "deprecated" in fn:

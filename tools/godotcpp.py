@@ -15,6 +15,7 @@ from SCons.Variables.BoolVariable import _text2bool
 from binding_generator import _generate_bindings, _get_file_list, get_file_list
 from build_profile import generate_trimmed_api
 from doc_source_generator import scons_generate_doc_source
+from header_documentation import HEADER_DOCUMENTATION_DIR
 
 
 def get_cmdline_bool(option, default):
@@ -580,7 +581,11 @@ def _godot_cpp(env):
             api_file,
             os.path.join(extension_dir, "gdextension_interface.json"),
             "binding_generator.py",
+            "header_documentation.py",
             "make_interface_header.py",
+            *(str(path) for path in sorted(HEADER_DOCUMENTATION_DIR.glob("*/*.json"))),
+            *(str(path) for path in sorted(HEADER_DOCUMENTATION_DIR.glob("*/*.xml"))),
+            *(str(path) for path in sorted(HEADER_DOCUMENTATION_DIR.glob("*/*.zip"))),
         ],
     )
     # Forces bindings regeneration.

@@ -40,6 +40,11 @@
 
 namespace godot {
 
+/**
+ * Registers an enum for Godot method binding. Converts between the C++ enum and the engine's signed 64-bit representation.
+ *
+ * - `m_enum` — Enum type to register, qualified with its C++ scope.
+ */
 #define VARIANT_ENUM_CAST(m_enum) \
 	namespace godot { \
 	MAKE_ENUM_TYPE_INFO(m_enum) \
@@ -61,6 +66,11 @@ namespace godot {
 	}; \
 	}
 
+/**
+ * Registers a flag enum and its `godot::BitField` wrapper for method binding. Encodes the flags as a signed 64-bit integer.
+ *
+ * - `m_enum` — Enum type whose values represent flags, qualified with its C++ scope.
+ */
 #define VARIANT_BITFIELD_CAST(m_enum) \
 	namespace godot { \
 	MAKE_BITFIELD_TYPE_INFO(m_enum) \
@@ -82,8 +92,18 @@ namespace godot {
 	}; \
 	}
 
+/**
+ * Selects the conversion used for a method argument passed by value.
+ *
+ * - `T` — C++ type requested by the method signature.
+ */
 template <typename T>
 struct VariantCaster {
+	/**
+	 * Converts the variant to a C++ value. A Godot object pointer uses a class cast before it is returned.
+	 *
+	 * - `p_variant` — Source variant from the engine's argument array.
+	 */
 	static _FORCE_INLINE_ T cast(const Variant &p_variant) {
 		using TStripped = std::remove_pointer_t<T>;
 		if constexpr (std::is_base_of<Object, TStripped>::value) {
@@ -94,8 +114,18 @@ struct VariantCaster {
 	}
 };
 
+/**
+ * Selects the conversion used for a method argument passed by non-const reference.
+ *
+ * - `T` — C++ type requested by the method signature.
+ */
 template <typename T>
 struct VariantCaster<T &> {
+	/**
+	 * Converts the variant to a C++ value. A Godot object pointer uses a class cast before it is returned.
+	 *
+	 * - `p_variant` — Source variant from the engine's argument array.
+	 */
 	static _FORCE_INLINE_ T cast(const Variant &p_variant) {
 		using TStripped = std::remove_pointer_t<T>;
 		if constexpr (std::is_base_of<Object, TStripped>::value) {
@@ -106,8 +136,18 @@ struct VariantCaster<T &> {
 	}
 };
 
+/**
+ * Selects the conversion used for a method argument passed by const reference.
+ *
+ * - `T` — C++ type requested by the method signature.
+ */
 template <typename T>
 struct VariantCaster<const T &> {
+	/**
+	 * Converts the variant to a C++ value. A Godot object pointer uses a class cast before it is returned.
+	 *
+	 * - `p_variant` — Source variant from the engine's argument array.
+	 */
 	static _FORCE_INLINE_ T cast(const Variant &p_variant) {
 		using TStripped = std::remove_pointer_t<T>;
 		if constexpr (std::is_base_of<Object, TStripped>::value) {
@@ -118,8 +158,18 @@ struct VariantCaster<const T &> {
 	}
 };
 
+/**
+ * Adds a class check to variant argument validation for pointers to Godot objects.
+ *
+ * - `T` — C++ argument type whose object class may need validation.
+ */
 template <typename T>
 struct VariantObjectClassChecker {
+	/**
+	 * Checks whether a non-null Godot object can be cast to the required class. Other argument types pass this check.
+	 *
+	 * - `p_variant` — Source variant from the engine's argument array.
+	 */
 	static _FORCE_INLINE_ bool check(const Variant &p_variant) {
 		using TStripped = std::remove_pointer_t<T>;
 		if constexpr (std::is_base_of<Object, TStripped>::value) {
@@ -131,11 +181,26 @@ struct VariantObjectClassChecker {
 	}
 };
 
+/**
+ * Declares the reference wrapper used for object-class checks on reference-counted arguments.
+ *
+ * - `T` — Reference-counted Godot object type.
+ */
 template <typename T>
 class Ref;
 
+/**
+ * Adds a class check for a reference-counted argument passed by const reference.
+ *
+ * - `T` — Type that the object reference must hold.
+ */
 template <typename T>
 struct VariantObjectClassChecker<const Ref<T> &> {
+	/**
+	 * Checks whether the source object can be held as the requested reference type. An empty object also passes this class check.
+	 *
+	 * - `p_variant` — Source variant from the engine's argument array.
+	 */
 	static _FORCE_INLINE_ bool check(const Variant &p_variant) {
 		Object *obj = p_variant;
 		const Ref<T> node = p_variant;
@@ -143,8 +208,20 @@ struct VariantObjectClassChecker<const Ref<T> &> {
 	}
 };
 
+/**
+ * Validates and converts a variant argument passed by value.
+ *
+ * - `T` — C++ type used to determine the required variant type and object class.
+ */
 template <typename T>
 struct VariantCasterAndValidate {
+	/**
+	 * Checks whether the argument can be converted strictly and reports a mismatch. It still attempts the C++ conversion.
+	 *
+	 * - `p_args` — Array of pointers to the incoming variants.
+	 * - `p_arg_idx` — Zero-based index of the argument to check. The array must contain a readable variant pointer at this index.
+	 * - `r_error` — Call status set to invalid argument on a mismatch, with the index and expected variant type. Left unchanged when the check passes.
+	 */
 	static _FORCE_INLINE_ T cast(const Variant **p_args, uint32_t p_arg_idx, GDExtensionCallError &r_error) {
 		GDExtensionVariantType argtype = GDExtensionVariantType(GetTypeInfo<T>::VARIANT_TYPE);
 		if (!::godot::gdextension_interface::variant_can_convert_strict(static_cast<GDExtensionVariantType>(p_args[p_arg_idx]->get_type()), argtype) ||
@@ -158,8 +235,20 @@ struct VariantCasterAndValidate {
 	}
 };
 
+/**
+ * Validates and converts a variant argument passed by non-const reference.
+ *
+ * - `T` — C++ type used to determine the required variant type and object class.
+ */
 template <typename T>
 struct VariantCasterAndValidate<T &> {
+	/**
+	 * Checks whether the argument can be converted strictly and reports a mismatch. It still attempts the C++ conversion.
+	 *
+	 * - `p_args` — Array of pointers to the incoming variants.
+	 * - `p_arg_idx` — Zero-based index of the argument to check. The array must contain a readable variant pointer at this index.
+	 * - `r_error` — Call status set to invalid argument on a mismatch, with the index and expected variant type. Left unchanged when the check passes.
+	 */
 	static _FORCE_INLINE_ T cast(const Variant **p_args, uint32_t p_arg_idx, GDExtensionCallError &r_error) {
 		GDExtensionVariantType argtype = GDExtensionVariantType(GetTypeInfo<T>::VARIANT_TYPE);
 		if (!::godot::gdextension_interface::variant_can_convert_strict(static_cast<GDExtensionVariantType>(p_args[p_arg_idx]->get_type()), argtype) ||
@@ -173,8 +262,20 @@ struct VariantCasterAndValidate<T &> {
 	}
 };
 
+/**
+ * Validates and converts a variant argument passed by const reference.
+ *
+ * - `T` — C++ type used to determine the required variant type and object class.
+ */
 template <typename T>
 struct VariantCasterAndValidate<const T &> {
+	/**
+	 * Checks whether the argument can be converted strictly and reports a mismatch. It still attempts the C++ conversion.
+	 *
+	 * - `p_args` — Array of pointers to the incoming variants.
+	 * - `p_arg_idx` — Zero-based index of the argument to check. The array must contain a readable variant pointer at this index.
+	 * - `r_error` — Call status set to invalid argument on a mismatch, with the index and expected variant type. Left unchanged when the check passes.
+	 */
 	static _FORCE_INLINE_ T cast(const Variant **p_args, uint32_t p_arg_idx, GDExtensionCallError &r_error) {
 		GDExtensionVariantType argtype = GDExtensionVariantType(GetTypeInfo<T>::VARIANT_TYPE);
 		if (!::godot::gdextension_interface::variant_can_convert_strict(static_cast<GDExtensionVariantType>(p_args[p_arg_idx]->get_type()), argtype) ||
@@ -188,46 +289,148 @@ struct VariantCasterAndValidate<const T &> {
 	}
 };
 
+/**
+ * Reads the typed argument slots and invokes the member function.
+ *
+ * - `T` — Class that declares the member function.
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the member function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename T, typename... P, size_t... Is>
 void call_with_ptr_args_helper(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
 	(p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...);
 }
 
+/**
+ * Reads the typed argument slots and invokes the const member function.
+ *
+ * - `T` — Class that declares the member function.
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the const member function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename T, typename... P, size_t... Is>
 void call_with_ptr_argsc_helper(T *p_instance, void (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
 	(p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...);
 }
 
+/**
+ * Reads the typed argument slots and invokes the member function. Encodes the result into the engine return slot.
+ *
+ * - `T` — Class that declares the member function.
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the member function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `r_ret` — Writable engine storage for the encoded result.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename T, typename R, typename... P, size_t... Is>
 void call_with_ptr_args_ret_helper(T *p_instance, R (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
 	PtrToArg<R>::encode((p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...), r_ret);
 }
 
+/**
+ * Reads the typed argument slots and invokes the const member function. Encodes the result into the engine return slot.
+ *
+ * - `T` — Class that declares the member function.
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the const member function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `r_ret` — Writable engine storage for the encoded result.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename T, typename R, typename... P, size_t... Is>
 void call_with_ptr_args_retc_helper(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
 	PtrToArg<R>::encode((p_instance->*p_method)(PtrToArg<P>::convert(p_args[Is])...), r_ret);
 }
 
+/**
+ * Reads the typed argument slots and invokes the member function.
+ *
+ * - `T` — Class that declares the member function.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the member function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `fourth void pointer parameter` — Return storage for the pointer call. The void overload does not use it.
+ */
 template <typename T, typename... P>
 void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, void * /*ret*/) {
 	call_with_ptr_args_helper<T, P...>(p_instance, p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Reads the typed argument slots and invokes the const member function.
+ *
+ * - `T` — Class that declares the member function.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the const member function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `fourth void pointer parameter` — Return storage for the pointer call. The void overload does not use it.
+ */
 template <typename T, typename... P>
 void call_with_ptr_args(T *p_instance, void (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, void * /*ret*/) {
 	call_with_ptr_argsc_helper<T, P...>(p_instance, p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Reads the typed argument slots and invokes the member function. Encodes the result into the engine return slot.
+ *
+ * - `T` — Class that declares the member function.
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the member function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `r_ret` — Writable engine storage for the encoded result.
+ */
 template <typename T, typename R, typename... P>
 void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...), const GDExtensionConstTypePtr *p_args, void *r_ret) {
 	call_with_ptr_args_ret_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Reads the typed argument slots and invokes the const member function. Encodes the result into the engine return slot.
+ *
+ * - `T` — Class that declares the member function.
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the const member function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `r_ret` — Writable engine storage for the encoded result.
+ */
 template <typename T, typename R, typename... P>
 void call_with_ptr_args(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstTypePtr *p_args, void *r_ret) {
 	call_with_ptr_args_retc_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Expands the argument array and invokes the member function with converted variants.
+ *
+ * - `T` — Class that declares the member function.
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the member function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `r_error` — Call status set to success before conversion. Debug builds report type errors during conversion.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename T, typename... P, size_t... Is>
 void call_with_variant_args_helper(T *p_instance, void (T::*p_method)(P...), const Variant **p_args, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
@@ -240,6 +443,18 @@ void call_with_variant_args_helper(T *p_instance, void (T::*p_method)(P...), con
 	(void)(p_args); // Avoid warning.
 }
 
+/**
+ * Expands the argument array and invokes the const member function with converted variants.
+ *
+ * - `T` — Class that declares the member function.
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the const member function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `r_error` — Call status set to success before conversion. Debug builds report type errors during conversion.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename T, typename... P, size_t... Is>
 void call_with_variant_argsc_helper(T *p_instance, void (T::*p_method)(P...) const, const Variant **p_args, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
@@ -252,6 +467,20 @@ void call_with_variant_argsc_helper(T *p_instance, void (T::*p_method)(P...) con
 	(void)(p_args); // Avoid warning.
 }
 
+/**
+ * Expands the argument array and invokes the member function with converted variants. Stores the return value as a variant.
+ *
+ * - `T` — Class that declares the member function.
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the member function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `r_ret` — Variant written with the result if the function is invoked.
+ * - `r_error` — Call status set to success before conversion. Debug builds report type errors during conversion.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename T, typename R, typename... P, size_t... Is>
 void call_with_variant_args_ret_helper(T *p_instance, R (T::*p_method)(P...), const Variant **p_args, Variant &r_ret, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
@@ -264,6 +493,20 @@ void call_with_variant_args_ret_helper(T *p_instance, R (T::*p_method)(P...), co
 	(void)p_args; // Avoid warning.
 }
 
+/**
+ * Expands the argument array and invokes the const member function with converted variants. Stores the return value as a variant.
+ *
+ * - `T` — Class that declares the member function.
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the const member function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `r_ret` — Variant written with the result if the function is invoked.
+ * - `r_error` — Call status set to success before conversion. Debug builds report type errors during conversion.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename T, typename R, typename... P, size_t... Is>
 void call_with_variant_args_retc_helper(T *p_instance, R (T::*p_method)(P...) const, const Variant **p_args, Variant &r_ret, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
@@ -276,6 +519,17 @@ void call_with_variant_args_retc_helper(T *p_instance, R (T::*p_method)(P...) co
 	(void)p_args; // Avoid warning.
 }
 
+/**
+ * Invokes the member function with variant arguments after the debug argument count check.
+ *
+ * - `T` — Class that declares the member function.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the member function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments. Debug builds check it against the number of C++ parameters.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ */
 template <typename T, typename... P>
 void call_with_variant_args(T *p_instance, void (T::*p_method)(P...), const Variant **p_args, int p_argcount, GDExtensionCallError &r_error) {
 #ifdef DEBUG_ENABLED
@@ -294,6 +548,19 @@ void call_with_variant_args(T *p_instance, void (T::*p_method)(P...), const Vari
 	call_with_variant_args_helper<T, P...>(p_instance, p_method, p_args, r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Invokes the member function with variant arguments after the debug argument count check. Stores the return value as a variant.
+ *
+ * - `T` — Class that declares the member function.
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the member function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments. Debug builds check it against the number of C++ parameters.
+ * - `r_ret` — Variant written with the result if the function is invoked.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ */
 template <typename T, typename R, typename... P>
 void call_with_variant_args_ret(T *p_instance, R (T::*p_method)(P...), const Variant **p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error) {
 #ifdef DEBUG_ENABLED
@@ -312,6 +579,19 @@ void call_with_variant_args_ret(T *p_instance, R (T::*p_method)(P...), const Var
 	call_with_variant_args_ret_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Invokes the const member function with variant arguments after the debug argument count check. Stores the return value as a variant.
+ *
+ * - `T` — Class that declares the member function.
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the const member function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments. Debug builds check it against the number of C++ parameters.
+ * - `r_ret` — Variant written with the result if the function is invoked.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ */
 template <typename T, typename R, typename... P>
 void call_with_variant_args_retc(T *p_instance, R (T::*p_method)(P...) const, const Variant **p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error) {
 #ifdef DEBUG_ENABLED
@@ -330,6 +610,18 @@ void call_with_variant_args_retc(T *p_instance, R (T::*p_method)(P...) const, co
 	call_with_variant_args_retc_helper<T, R, P...>(p_instance, p_method, p_args, r_ret, r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Fills omitted trailing arguments with defaults and invokes the member function with converted variants.
+ *
+ * - `T` — Class that declares the member function.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the member function invoked by the binding.
+ * - `p_args` — Borrowed ABI variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments before adding defaults. Debug builds check that it fits the signature and saved defaults.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ * - `default_values` — Defaults for the final parameters in declaration order, used to fill the missing arguments.
+ */
 template <typename T, typename... P>
 void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
@@ -365,6 +657,18 @@ void call_with_variant_args_dv(T *p_instance, void (T::*p_method)(P...), const G
 	call_with_variant_args_helper(p_instance, p_method, argsp.data(), r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Fills omitted trailing arguments with defaults and invokes the const member function with converted variants.
+ *
+ * - `T` — Class that declares the member function.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the const member function invoked by the binding.
+ * - `p_args` — Borrowed ABI variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments before adding defaults. Debug builds check that it fits the signature and saved defaults.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ * - `default_values` — Defaults for the final parameters in declaration order, used to fill the missing arguments.
+ */
 template <typename T, typename... P>
 void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
@@ -400,6 +704,20 @@ void call_with_variant_argsc_dv(T *p_instance, void (T::*p_method)(P...) const, 
 	call_with_variant_argsc_helper(p_instance, p_method, argsp.data(), r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Fills omitted trailing arguments with defaults and invokes the member function with converted variants. Stores the return value as a variant.
+ *
+ * - `T` — Class that declares the member function.
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the member function invoked by the binding.
+ * - `p_args` — Borrowed ABI variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments before adding defaults. Debug builds check that it fits the signature and saved defaults.
+ * - `r_ret` — Variant written with the result if the function is invoked.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ * - `default_values` — Defaults for the final parameters in declaration order, used to fill the missing arguments.
+ */
 template <typename T, typename R, typename... P>
 void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
@@ -435,6 +753,20 @@ void call_with_variant_args_ret_dv(T *p_instance, R (T::*p_method)(P...), const 
 	call_with_variant_args_ret_helper(p_instance, p_method, argsp.data(), r_ret, r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Fills omitted trailing arguments with defaults and invokes the const member function with converted variants. Stores the return value as a variant.
+ *
+ * - `T` — Class that declares the member function.
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_instance` — C++ object on which to invoke the member function.
+ * - `p_method` — Pointer to the const member function invoked by the binding.
+ * - `p_args` — Borrowed ABI variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments before adding defaults. Debug builds check that it fits the signature and saved defaults.
+ * - `r_ret` — Variant written with the result if the function is invoked.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ * - `default_values` — Defaults for the final parameters in declaration order, used to fill the missing arguments.
+ */
 template <typename T, typename R, typename... P>
 void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const, const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
@@ -477,6 +809,14 @@ void call_with_variant_args_retc_dv(T *p_instance, R (T::*p_method)(P...) const,
 #pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
 #endif
 
+/**
+ * Writes the variant type when the current position matches the requested index, then advances the position.
+ *
+ * - `Q` — C++ type of the current parameter.
+ * - `p_arg` — Zero-based index requested by the caller.
+ * - `index` — Current position in the type pack. Incremented on every call.
+ * - `type` — Output for the variant type. Left unchanged at other indices.
+ */
 template <typename Q>
 void call_get_argument_type_helper(int p_arg, int &index, GDExtensionVariantType &type) {
 	if (p_arg == index) {
@@ -485,6 +825,12 @@ void call_get_argument_type_helper(int p_arg, int &index, GDExtensionVariantType
 	index++;
 }
 
+/**
+ * Returns the variant type for the requested argument. Returns nil if the index is outside the pack.
+ *
+ * - `P` — C++ parameter types in signature order.
+ * - `p_arg` — Zero-based index of the requested parameter.
+ */
 template <typename... P>
 GDExtensionVariantType call_get_argument_type(int p_arg) {
 	GDExtensionVariantType type = GDEXTENSION_VARIANT_TYPE_NIL;
@@ -497,6 +843,14 @@ GDExtensionVariantType call_get_argument_type(int p_arg) {
 	return type;
 }
 
+/**
+ * Writes the property information when the current position matches the requested index, then advances the position.
+ *
+ * - `Q` — C++ type of the current parameter.
+ * - `p_arg` — Zero-based index requested by the caller.
+ * - `index` — Current position in the type pack. Incremented on every call.
+ * - `info` — Output for the property information. Left unchanged at other indices.
+ */
 template <typename Q>
 void call_get_argument_type_info_helper(int p_arg, int &index, PropertyInfo &info) {
 	if (p_arg == index) {
@@ -505,6 +859,13 @@ void call_get_argument_type_info_helper(int p_arg, int &index, PropertyInfo &inf
 	index++;
 }
 
+/**
+ * Writes the property information for the requested argument. Leaves the supplied descriptor unchanged if the index is outside the pack.
+ *
+ * - `P` — C++ parameter types in signature order.
+ * - `p_arg` — Zero-based index of the requested parameter.
+ * - `info` — Descriptor written when the argument is found.
+ */
 template <typename... P>
 void call_get_argument_type_info(int p_arg, PropertyInfo &info) {
 	int index = 0;
@@ -515,6 +876,14 @@ void call_get_argument_type_info(int p_arg, PropertyInfo &info) {
 	(void)index; // Suppress GCC warning.
 }
 
+/**
+ * Writes the ABI argument metadata when the current position matches the requested index, then advances the position.
+ *
+ * - `Q` — C++ type of the current parameter.
+ * - `p_arg` — Zero-based index requested by the caller.
+ * - `index` — Current position in the type pack. Incremented on every call.
+ * - `md` — Output for the ABI argument metadata. Left unchanged at other indices.
+ */
 template <typename Q>
 void call_get_argument_metadata_helper(int p_arg, int &index, GDExtensionClassMethodArgumentMetadata &md) {
 	if (p_arg == index) {
@@ -523,6 +892,12 @@ void call_get_argument_metadata_helper(int p_arg, int &index, GDExtensionClassMe
 	index++;
 }
 
+/**
+ * Returns the ABI argument metadata for the requested argument. Returns the empty metadata value if the index is outside the pack.
+ *
+ * - `P` — C++ parameter types in signature order.
+ * - `p_arg` — Zero-based index of the requested parameter.
+ */
 template <typename... P>
 GDExtensionClassMethodArgumentMetadata call_get_argument_metadata(int p_arg) {
 	GDExtensionClassMethodArgumentMetadata md = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
@@ -536,6 +911,16 @@ GDExtensionClassMethodArgumentMetadata call_get_argument_metadata(int p_arg) {
 	return md;
 }
 
+/**
+ * Expands the argument array and invokes the function with converted variants.
+ *
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_method` — Pointer to the function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `r_error` — Call status set to success before conversion. Debug builds report type errors during conversion.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename... P, size_t... Is>
 void call_with_variant_args_static(void (*p_method)(P...), const Variant **p_args, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
@@ -547,6 +932,16 @@ void call_with_variant_args_static(void (*p_method)(P...), const Variant **p_arg
 #endif
 }
 
+/**
+ * Fills omitted trailing arguments with defaults and invokes the function with converted variants.
+ *
+ * - `P` — C++ parameter types in argument order.
+ * - `p_method` — Pointer to the function invoked by the binding.
+ * - `p_args` — Borrowed ABI variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments before adding defaults. Debug builds check that it fits the signature and saved defaults.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ * - `default_values` — Defaults for the final parameters in declaration order, used to fill the missing arguments.
+ */
 template <typename... P>
 void call_with_variant_args_static_dv(void (*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
@@ -582,16 +977,43 @@ void call_with_variant_args_static_dv(void (*p_method)(P...), const GDExtensionC
 	call_with_variant_args_static(p_method, argsp.data(), r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Reads the typed argument slots and invokes the function.
+ *
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_method` — Pointer to the function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename... P, size_t... Is>
 void call_with_ptr_args_static_method_helper(void (*p_method)(P...), const GDExtensionConstTypePtr *p_args, IndexSequence<Is...>) {
 	p_method(PtrToArg<P>::convert(p_args[Is])...);
 }
 
+/**
+ * Reads the typed argument slots and invokes the function.
+ *
+ * - `P` — C++ parameter types in argument order.
+ * - `p_method` — Pointer to the function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ */
 template <typename... P>
 void call_with_ptr_args_static_method(void (*p_method)(P...), const GDExtensionConstTypePtr *p_args) {
 	call_with_ptr_args_static_method_helper<P...>(p_method, p_args, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Invokes the function with variant arguments after the debug argument count check. Stores the return value as a variant.
+ *
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_method` — Pointer to the function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments. Debug builds check it against the number of C++ parameters.
+ * - `r_ret` — Variant written with the result if the function is invoked.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ */
 template <typename R, typename... P>
 void call_with_variant_args_static_ret(R (*p_method)(P...), const Variant **p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error) {
 #ifdef DEBUG_ENABLED
@@ -610,6 +1032,16 @@ void call_with_variant_args_static_ret(R (*p_method)(P...), const Variant **p_ar
 	call_with_variant_args_static_ret<R, P...>(p_method, p_args, r_ret, r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Invokes the function with variant arguments after the debug argument count check.
+ *
+ * - `P` — C++ parameter types in argument order.
+ * - `p_method` — Pointer to the function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments. Debug builds check it against the number of C++ parameters.
+ * - `r_ret` — Return variant supplied by the caller. The void overload leaves it unchanged.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ */
 template <typename... P>
 void call_with_variant_args_static_ret(void (*p_method)(P...), const Variant **p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error) {
 #ifdef DEBUG_ENABLED
@@ -628,6 +1060,18 @@ void call_with_variant_args_static_ret(void (*p_method)(P...), const Variant **p
 	call_with_variant_args_static<P...>(p_method, p_args, r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Expands the argument array and invokes the function with converted variants. Stores the return value as a variant.
+ *
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_method` — Pointer to the function invoked by the binding.
+ * - `p_args` — Borrowed array of variant pointers in call order.
+ * - `r_ret` — Variant written with the result if the function is invoked.
+ * - `r_error` — Call status set to success before conversion. Debug builds report type errors during conversion.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename R, typename... P, size_t... Is>
 void call_with_variant_args_static_ret(R (*p_method)(P...), const Variant **p_args, Variant &r_ret, GDExtensionCallError &r_error, IndexSequence<Is...>) {
 	r_error.error = GDEXTENSION_CALL_OK;
@@ -639,6 +1083,18 @@ void call_with_variant_args_static_ret(R (*p_method)(P...), const Variant **p_ar
 #endif
 }
 
+/**
+ * Fills omitted trailing arguments with defaults and invokes the function with converted variants. Stores the return value as a variant.
+ *
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_method` — Pointer to the function invoked by the binding.
+ * - `p_args` — Borrowed ABI variant pointers in call order.
+ * - `p_argcount` — Number of supplied arguments before adding defaults. Debug builds check that it fits the signature and saved defaults.
+ * - `r_ret` — Variant written with the result if the function is invoked.
+ * - `r_error` — Call status updated by dispatch. Debug builds also report argument count or type mismatches.
+ * - `default_values` — Defaults for the final parameters in declaration order, used to fill the missing arguments.
+ */
 template <typename R, typename... P>
 void call_with_variant_args_static_ret_dv(R (*p_method)(P...), const GDExtensionConstVariantPtr *p_args, int p_argcount, Variant &r_ret, GDExtensionCallError &r_error, const LocalVector<Variant> &default_values) {
 #ifdef DEBUG_ENABLED
@@ -674,11 +1130,31 @@ void call_with_variant_args_static_ret_dv(R (*p_method)(P...), const GDExtension
 	call_with_variant_args_static_ret(p_method, argsp.data(), r_ret, r_error, BuildIndexSequence<sizeof...(P)>{});
 }
 
+/**
+ * Reads the typed argument slots and invokes the function. Encodes the result into the engine return slot.
+ *
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `Is` — Zero-based indices used to pair each argument pointer with its C++ type.
+ * - `p_method` — Pointer to the function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `r_ret` — Writable engine storage for the encoded result.
+ * - `final IndexSequence parameter` — Selects the compile-time argument indices for expansion.
+ */
 template <typename R, typename... P, size_t... Is>
 void call_with_ptr_args_static_method_ret_helper(R (*p_method)(P...), const GDExtensionConstTypePtr *p_args, void *r_ret, IndexSequence<Is...>) {
 	PtrToArg<R>::encode(p_method(PtrToArg<P>::convert(p_args[Is])...), r_ret);
 }
 
+/**
+ * Reads the typed argument slots and invokes the function. Encodes the result into the engine return slot.
+ *
+ * - `R` — C++ result type used to encode the return value.
+ * - `P` — C++ parameter types in argument order.
+ * - `p_method` — Pointer to the function invoked by the binding.
+ * - `p_args` — Borrowed argument addresses in the types expected by the pointer-call ABI.
+ * - `r_ret` — Writable engine storage for the encoded result.
+ */
 template <typename R, typename... P>
 void call_with_ptr_args_static_method_ret(R (*p_method)(P...), const GDExtensionConstTypePtr *p_args, void *r_ret) {
 	call_with_ptr_args_static_method_ret_helper<R, P...>(p_method, p_args, r_ret, BuildIndexSequence<sizeof...(P)>{});

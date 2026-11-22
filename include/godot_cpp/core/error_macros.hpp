@@ -38,36 +38,140 @@ namespace godot {
 
 class String;
 
+/**
+ * Reports an error or warning through Godot with the source location.
+ *
+ * - `p_function` — Function name included in the diagnostic.
+ * - `p_file` — Source file name included in the diagnostic.
+ * - `p_line` — Source line number included in the diagnostic.
+ * - `p_error` — Primary diagnostic text.
+ * - `p_editor_notify` — Whether to also notify the editor.
+ * - `p_is_warning` — Whether to print the diagnostic as a warning. False prints an error.
+ */
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, bool p_editor_notify = false, bool p_is_warning = false);
+/**
+ * Reports an error or warning through Godot with the source location.
+ *
+ * - `p_function` — Function name included in the diagnostic.
+ * - `p_file` — Source file name included in the diagnostic.
+ * - `p_line` — Source line number included in the diagnostic.
+ * - `p_error` — Primary diagnostic text.
+ * - `p_editor_notify` — Whether to also notify the editor.
+ * - `p_is_warning` — Whether to print the diagnostic as a warning. False prints an error.
+ */
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, bool p_editor_notify = false, bool p_is_warning = false);
+/**
+ * Reports an error or warning through Godot with the source location and a separate detail message.
+ *
+ * - `p_function` — Function name included in the diagnostic.
+ * - `p_file` — Source file name included in the diagnostic.
+ * - `p_line` — Source line number included in the diagnostic.
+ * - `p_error` — Primary diagnostic text.
+ * - `p_message` — Additional detail printed with the diagnostic.
+ * - `p_editor_notify` — Whether to also notify the editor.
+ * - `p_is_warning` — Whether to print the diagnostic as a warning. False prints an error.
+ */
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const char *p_message, bool p_editor_notify = false, bool p_is_warning = false);
+/**
+ * Reports an error or warning through Godot with the source location and a separate detail message.
+ *
+ * - `p_function` — Function name included in the diagnostic.
+ * - `p_file` — Source file name included in the diagnostic.
+ * - `p_line` — Source line number included in the diagnostic.
+ * - `p_error` — Primary diagnostic text.
+ * - `p_message` — Additional detail printed with the diagnostic.
+ * - `p_editor_notify` — Whether to also notify the editor.
+ * - `p_is_warning` — Whether to print the diagnostic as a warning. False prints an error.
+ */
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, const char *p_message, bool p_editor_notify = false, bool p_is_warning = false);
+/**
+ * Reports an error or warning through Godot with the source location and a separate detail message.
+ *
+ * - `p_function` — Function name included in the diagnostic.
+ * - `p_file` — Source file name included in the diagnostic.
+ * - `p_line` — Source line number included in the diagnostic.
+ * - `p_error` — Primary diagnostic text.
+ * - `p_message` — Additional detail printed with the diagnostic.
+ * - `p_editor_notify` — Whether to also notify the editor.
+ * - `p_is_warning` — Whether to print the diagnostic as a warning. False prints an error.
+ */
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const String &p_message, bool p_editor_notify = false, bool p_is_warning = false);
+/**
+ * Reports an error or warning through Godot with the source location and a separate detail message.
+ *
+ * - `p_function` — Function name included in the diagnostic.
+ * - `p_file` — Source file name included in the diagnostic.
+ * - `p_line` — Source line number included in the diagnostic.
+ * - `p_error` — Primary diagnostic text.
+ * - `p_message` — Additional detail printed with the diagnostic.
+ * - `p_editor_notify` — Whether to also notify the editor.
+ * - `p_is_warning` — Whether to print the diagnostic as a warning. False prints an error.
+ */
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, const String &p_message, bool p_editor_notify = false, bool p_is_warning = false);
+/**
+ * Formats and reports an out-of-bounds index. The fatal flag marks the message.
+ *
+ * - `p_function` — Function name included in the diagnostic.
+ * - `p_file` — Source file name included in the diagnostic.
+ * - `p_line` — Source line number included in the diagnostic.
+ * - `p_index` — Index value that failed the bounds check.
+ * - `p_size` — Exclusive upper bound of the valid range.
+ * - `p_index_str` — Source text of the index expression.
+ * - `p_size_str` — Source text of the upper-bound expression.
+ * - `p_message` — Additional detail printed with the error.
+ * - `p_editor_notify` — Whether to also notify the editor.
+ * - `p_fatal` — Whether to prefix the report with FATAL. This function does not trigger the trap.
+ */
 void _err_print_index_error(const char *p_function, const char *p_file, int p_line, int64_t p_index, int64_t p_size, const char *p_index_str, const char *p_size_str, const char *p_message = "", bool p_editor_notify = false, bool p_fatal = false);
+/**
+ * Formats and reports an out-of-bounds index. The fatal flag marks the message.
+ *
+ * - `p_function` — Function name included in the diagnostic.
+ * - `p_file` — Source file name included in the diagnostic.
+ * - `p_line` — Source line number included in the diagnostic.
+ * - `p_index` — Index value that failed the bounds check.
+ * - `p_size` — Exclusive upper bound of the valid range.
+ * - `p_index_str` — Source text of the index expression.
+ * - `p_size_str` — Source text of the upper-bound expression.
+ * - `p_message` — Additional detail printed with the error.
+ * - `p_editor_notify` — Whether to also notify the editor.
+ * - `p_fatal` — Whether to prefix the report with FATAL. This function does not trigger the trap.
+ */
 void _err_print_index_error(const char *p_function, const char *p_file, int p_line, int64_t p_index, int64_t p_size, const char *p_index_str, const char *p_size_str, const String &p_message, bool p_editor_notify = false, bool p_fatal = false);
+/**
+ * Flushes standard output so diagnostics can be written before a trap.
+ */
 void _err_flush_stdout();
 
 // Normally present in print_string.hpp, added here because our include situation is
 // different from upstream godot and some files might otherwise not compile.
+/**
+ * Returns whether Godot's verbose output is enabled.
+ */
 bool is_print_verbose_enabled();
 
 } // namespace godot
 
 #ifdef __GNUC__
+/**
+ * Expands to the current function name used in diagnostics.
+ */
 #define FUNCTION_STR __FUNCTION__
 #else
+/**
+ * Expands to the current function name used in diagnostics.
+ */
 #define FUNCTION_STR __FUNCTION__
 #endif
 
 #ifdef _MSC_VER
 /**
- * Don't use GENERATE_TRAP() directly, should only be used be the macros below.
+ * Triggers a debugger break through the MSVC intrinsic.
  */
 #define GENERATE_TRAP() __debugbreak()
 #else
 /**
- * Don't use GENERATE_TRAP() directly, should only be used be the macros below.
+ * Triggers a compiler trap on targets using the builtin.
  */
 #define GENERATE_TRAP() __builtin_trap()
 #endif
@@ -94,11 +198,10 @@ bool is_print_verbose_enabled();
 // Integer index out of bounds error macros.
 
 /**
- * Try using `ERR_FAIL_INDEX_MSG`.
- * Only use this macro if there is no sensible error message.
+ * Logs an error and returns from the current function when the index is negative or at or above the size.
  *
- * Ensures an integer index `m_index` is less than `m_size` and greater than or equal to 0.
- * If not, the current function returns.
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
  */
 #define ERR_FAIL_INDEX(m_index, m_size) \
 	if (unlikely((m_index) < 0 || (m_index) >= (m_size))) { \
@@ -108,8 +211,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Ensures an integer index `m_index` is less than `m_size` and greater than or equal to 0.
- * If not, prints `m_msg` and the current function returns.
+ * Logs an error and returns from the current function when the index is negative or at or above the size.
+ *
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_INDEX_MSG(m_index, m_size, m_msg) \
 	if (unlikely((m_index) < 0 || (m_index) >= (m_size))) { \
@@ -119,7 +225,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_FAIL_INDEX_MSG` but also notifies the editor.
+ * Logs an error and returns from the current function when the index is negative or at or above the size. Also notifies the editor.
+ *
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_INDEX_EDMSG(m_index, m_size, m_msg) \
 	if (unlikely((m_index) < 0 || (m_index) >= (m_size))) { \
@@ -129,11 +239,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_INDEX_V_MSG`.
- * Only use this macro if there is no sensible error message.
+ * Logs an error and returns from the current function when the index is negative or at or above the size.
  *
- * Ensures an integer index `m_index` is less than `m_size` and greater than or equal to 0.
- * If not, the current function returns `m_retval`.
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_retval` — Value returned by the enclosing function on failure.
  */
 #define ERR_FAIL_INDEX_V(m_index, m_size, m_retval) \
 	if (unlikely((m_index) < 0 || (m_index) >= (m_size))) { \
@@ -143,8 +253,12 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Ensures an integer index `m_index` is less than `m_size` and greater than or equal to 0.
- * If not, prints `m_msg` and the current function returns `m_retval`.
+ * Logs an error and returns from the current function when the index is negative or at or above the size.
+ *
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_retval` — Value returned by the enclosing function on failure.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_INDEX_V_MSG(m_index, m_size, m_retval, m_msg) \
 	if (unlikely((m_index) < 0 || (m_index) >= (m_size))) { \
@@ -154,7 +268,12 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_FAIL_INDEX_V_MSG` but also notifies the editor.
+ * Logs an error and returns from the current function when the index is negative or at or above the size. Also notifies the editor.
+ *
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_retval` — Value returned by the enclosing function on failure.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_INDEX_V_EDMSG(m_index, m_size, m_retval, m_msg) \
 	if (unlikely((m_index) < 0 || (m_index) >= (m_size))) { \
@@ -164,12 +283,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_INDEX_MSG` or `ERR_FAIL_INDEX_V_MSG`.
- * Only use this macro if there is no sensible fallback i.e. the error is unrecoverable, and
- * there is no sensible error message.
+ * Logs a fatal error, flushes standard output, and triggers a trap when the index is negative or at or above the size.
  *
- * Ensures an integer index `m_index` is less than `m_size` and greater than or equal to 0.
- * If not, the application crashes.
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
  */
 #define CRASH_BAD_INDEX(m_index, m_size) \
 	if (unlikely((m_index) < 0 || (m_index) >= (m_size))) { \
@@ -180,11 +297,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_INDEX_MSG` or `ERR_FAIL_INDEX_V_MSG`.
- * Only use this macro if there is no sensible fallback i.e. the error is unrecoverable.
+ * Logs a fatal error, flushes standard output, and triggers a trap when the index is negative or at or above the size.
  *
- * Ensures an integer index `m_index` is less than `m_size` and greater than or equal to 0.
- * If not, prints `m_msg` and the application crashes.
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define CRASH_BAD_INDEX_MSG(m_index, m_size, m_msg) \
 	if (unlikely((m_index) < 0 || (m_index) >= (m_size))) { \
@@ -197,11 +314,10 @@ bool is_print_verbose_enabled();
 // Unsigned integer index out of bounds error macros.
 
 /**
- * Try using `ERR_FAIL_UNSIGNED_INDEX_MSG`.
- * Only use this macro if there is no sensible error message.
+ * Logs an error and returns from the current function when the unsigned index is at or above the size.
  *
- * Ensures an unsigned integer index `m_index` is less than `m_size`.
- * If not, the current function returns.
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
  */
 #define ERR_FAIL_UNSIGNED_INDEX(m_index, m_size) \
 	if (unlikely((m_index) >= (m_size))) { \
@@ -211,8 +327,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Ensures an unsigned integer index `m_index` is less than `m_size`.
- * If not, prints `m_msg` and the current function returns.
+ * Logs an error and returns from the current function when the unsigned index is at or above the size.
+ *
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_UNSIGNED_INDEX_MSG(m_index, m_size, m_msg) \
 	if (unlikely((m_index) >= (m_size))) { \
@@ -222,7 +341,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_FAIL_UNSIGNED_INDEX_MSG` but also notifies the editor.
+ * Logs an error and returns from the current function when the unsigned index is at or above the size. Also notifies the editor.
+ *
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_UNSIGNED_INDEX_EDMSG(m_index, m_size, m_msg) \
 	if (unlikely((m_index) >= (m_size))) { \
@@ -232,11 +355,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_UNSIGNED_INDEX_V_MSG`.
- * Only use this macro if there is no sensible error message.
+ * Logs an error and returns from the current function when the unsigned index is at or above the size.
  *
- * Ensures an unsigned integer index `m_index` is less than `m_size`.
- * If not, the current function returns `m_retval`.
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_retval` — Value returned by the enclosing function on failure.
  */
 #define ERR_FAIL_UNSIGNED_INDEX_V(m_index, m_size, m_retval) \
 	if (unlikely((m_index) >= (m_size))) { \
@@ -246,8 +369,12 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Ensures an unsigned integer index `m_index` is less than `m_size`.
- * If not, prints `m_msg` and the current function returns `m_retval`.
+ * Logs an error and returns from the current function when the unsigned index is at or above the size.
+ *
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_retval` — Value returned by the enclosing function on failure.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_UNSIGNED_INDEX_V_MSG(m_index, m_size, m_retval, m_msg) \
 	if (unlikely((m_index) >= (m_size))) { \
@@ -257,7 +384,12 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_FAIL_UNSIGNED_INDEX_V_EDMSG` but also notifies the editor.
+ * Logs an error and returns from the current function when the unsigned index is at or above the size. Also notifies the editor.
+ *
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_retval` — Value returned by the enclosing function on failure.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_UNSIGNED_INDEX_V_EDMSG(m_index, m_size, m_retval, m_msg) \
 	if (unlikely((m_index) >= (m_size))) { \
@@ -267,12 +399,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_UNSIGNED_INDEX_MSG` or `ERR_FAIL_UNSIGNED_INDEX_V_MSG`.
- * Only use this macro if there is no sensible fallback i.e. the error is unrecoverable, and
- * there is no sensible error message.
+ * Logs a fatal error, flushes standard output, and triggers a trap when the unsigned index is at or above the size.
  *
- * Ensures an unsigned integer index `m_index` is less than `m_size`.
- * If not, the application crashes.
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
  */
 #define CRASH_BAD_UNSIGNED_INDEX(m_index, m_size) \
 	if (unlikely((m_index) >= (m_size))) { \
@@ -283,11 +413,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_UNSIGNED_INDEX_MSG` or `ERR_FAIL_UNSIGNED_INDEX_V_MSG`.
- * Only use this macro if there is no sensible fallback i.e. the error is unrecoverable.
+ * Logs a fatal error, flushes standard output, and triggers a trap when the unsigned index is at or above the size.
  *
- * Ensures an unsigned integer index `m_index` is less than `m_size`.
- * If not, prints `m_msg` and the application crashes.
+ * - `m_index` — Index expression. It can be evaluated again to report an error.
+ * - `m_size` — Exclusive upper bound of the valid index range. It can be evaluated again to report an error.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define CRASH_BAD_UNSIGNED_INDEX_MSG(m_index, m_size, m_msg) \
 	if (unlikely((m_index) >= (m_size))) { \
@@ -300,11 +430,9 @@ bool is_print_verbose_enabled();
 // Null reference error macros.
 
 /**
- * Try using `ERR_FAIL_NULL_MSG`.
- * Only use this macro if there is no sensible error message.
+ * Logs an error and returns from the current function when the pointer is null.
  *
- * Ensures a pointer `m_param` is not null.
- * If it is null, the current function returns.
+ * - `m_param` — Pointer expression to check.
  */
 #define ERR_FAIL_NULL(m_param) \
 	if (unlikely(m_param == nullptr)) { \
@@ -314,8 +442,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Ensures a pointer `m_param` is not null.
- * If it is null, prints `m_msg` and the current function returns.
+ * Logs an error and returns from the current function when the pointer is null.
+ *
+ * - `m_param` — Pointer expression to check.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_NULL_MSG(m_param, m_msg) \
 	if (unlikely(m_param == nullptr)) { \
@@ -325,7 +455,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_FAIL_NULL_MSG` but also notifies the editor.
+ * Logs an error and returns from the current function when the pointer is null. Also notifies the editor.
+ *
+ * - `m_param` — Pointer expression to check.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_NULL_EDMSG(m_param, m_msg) \
 	if (unlikely(m_param == nullptr)) { \
@@ -335,11 +468,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_NULL_V_MSG`.
- * Only use this macro if there is no sensible error message.
+ * Logs an error and returns from the current function when the pointer is null.
  *
- * Ensures a pointer `m_param` is not null.
- * If it is null, the current function returns `m_retval`.
+ * - `m_param` — Pointer expression to check.
+ * - `m_retval` — Value returned by the enclosing function on failure.
  */
 #define ERR_FAIL_NULL_V(m_param, m_retval) \
 	if (unlikely(m_param == nullptr)) { \
@@ -349,8 +481,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Ensures a pointer `m_param` is not null.
- * If it is null, prints `m_msg` and the current function returns `m_retval`.
+ * Logs an error and returns from the current function when the pointer is null.
+ *
+ * - `m_param` — Pointer expression to check.
+ * - `m_retval` — Value returned by the enclosing function on failure.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_NULL_V_MSG(m_param, m_retval, m_msg) \
 	if (unlikely(m_param == nullptr)) { \
@@ -360,7 +495,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_FAIL_NULL_V_MSG` but also notifies the editor.
+ * Logs an error and returns from the current function when the pointer is null. Also notifies the editor.
+ *
+ * - `m_param` — Pointer expression to check.
+ * - `m_retval` — Value returned by the enclosing function on failure.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_NULL_V_EDMSG(m_param, m_retval, m_msg) \
 	if (unlikely(m_param == nullptr)) { \
@@ -370,13 +509,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_COND_MSG`.
- * Only use this macro if there is no sensible error message.
- * If checking for null use ERR_FAIL_NULL_MSG instead.
- * If checking index bounds use ERR_FAIL_INDEX_MSG instead.
+ * Logs an error and returns from the current function when the condition is true.
  *
- * Ensures `m_cond` is false.
- * If `m_cond` is true, the current function returns.
+ * - `m_cond` — Condition tested by the macro.
  */
 #define ERR_FAIL_COND(m_cond) \
 	if (unlikely(m_cond)) { \
@@ -386,11 +521,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Ensures `m_cond` is false.
- * If `m_cond` is true, prints `m_msg` and the current function returns.
+ * Logs an error and returns from the current function when the condition is true.
  *
- * If checking for null use ERR_FAIL_NULL_MSG instead.
- * If checking index bounds use ERR_FAIL_INDEX_MSG instead.
+ * - `m_cond` — Condition tested by the macro.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_COND_MSG(m_cond, m_msg) \
 	if (unlikely(m_cond)) { \
@@ -400,7 +534,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_FAIL_COND_MSG` but also notifies the editor.
+ * Logs an error and returns from the current function when the condition is true. Also notifies the editor.
+ *
+ * - `m_cond` — Condition tested by the macro.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_COND_EDMSG(m_cond, m_msg) \
 	if (unlikely(m_cond)) { \
@@ -410,13 +547,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_COND_V_MSG`.
- * Only use this macro if there is no sensible error message.
- * If checking for null use ERR_FAIL_NULL_V_MSG instead.
- * If checking index bounds use ERR_FAIL_INDEX_V_MSG instead.
+ * Logs an error and returns from the current function when the condition is true.
  *
- * Ensures `m_cond` is false.
- * If `m_cond` is true, the current function returns `m_retval`.
+ * - `m_cond` — Condition tested by the macro.
+ * - `m_retval` — Value returned by the enclosing function on failure.
  */
 #define ERR_FAIL_COND_V(m_cond, m_retval) \
 	if (unlikely(m_cond)) { \
@@ -426,11 +560,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Ensures `m_cond` is false.
- * If `m_cond` is true, prints `m_msg` and the current function returns `m_retval`.
+ * Logs an error and returns from the current function when the condition is true.
  *
- * If checking for null use ERR_FAIL_NULL_V_MSG instead.
- * If checking index bounds use ERR_FAIL_INDEX_V_MSG instead.
+ * - `m_cond` — Condition tested by the macro.
+ * - `m_retval` — Value returned by the enclosing function on failure.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_COND_V_MSG(m_cond, m_retval, m_msg) \
 	if (unlikely(m_cond)) { \
@@ -440,7 +574,11 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_FAIL_COND_V_MSG` but also notifies the editor.
+ * Logs an error and returns from the current function when the condition is true. Also notifies the editor.
+ *
+ * - `m_cond` — Condition tested by the macro.
+ * - `m_retval` — Value returned by the enclosing function on failure.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_COND_V_EDMSG(m_cond, m_retval, m_msg) \
 	if (unlikely(m_cond)) { \
@@ -450,11 +588,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_CONTINUE_MSG`.
- * Only use this macro if there is no sensible error message.
+ * Logs an error and skips the rest of the current loop iteration when the condition is true.
  *
- * Ensures `m_cond` is false.
- * If `m_cond` is true, the current loop continues.
+ * - `m_cond` — Condition tested by the macro.
  */
 #define ERR_CONTINUE(m_cond) \
 	if (unlikely(m_cond)) { \
@@ -464,8 +600,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Ensures `m_cond` is false.
- * If `m_cond` is true, prints `m_msg` and the current loop continues.
+ * Logs an error and skips the rest of the current loop iteration when the condition is true.
+ *
+ * - `m_cond` — Condition tested by the macro.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_CONTINUE_MSG(m_cond, m_msg) \
 	if (unlikely(m_cond)) { \
@@ -475,7 +613,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_CONTINUE_MSG` but also notifies the editor.
+ * Logs an error and skips the rest of the current loop iteration when the condition is true. Also notifies the editor.
+ *
+ * - `m_cond` — Condition tested by the macro.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_CONTINUE_EDMSG(m_cond, m_msg) \
 	if (unlikely(m_cond)) { \
@@ -485,11 +626,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_BREAK_MSG`.
- * Only use this macro if there is no sensible error message.
+ * Logs an error and leaves the current loop when the condition is true.
  *
- * Ensures `m_cond` is false.
- * If `m_cond` is true, the current loop breaks.
+ * - `m_cond` — Condition tested by the macro.
  */
 #define ERR_BREAK(m_cond) \
 	if (unlikely(m_cond)) { \
@@ -499,8 +638,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Ensures `m_cond` is false.
- * If `m_cond` is true, prints `m_msg` and the current loop breaks.
+ * Logs an error and leaves the current loop when the condition is true.
+ *
+ * - `m_cond` — Condition tested by the macro.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_BREAK_MSG(m_cond, m_msg) \
 	if (unlikely(m_cond)) { \
@@ -510,7 +651,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_BREAK_MSG` but also notifies the editor.
+ * Logs an error and leaves the current loop when the condition is true. Also notifies the editor.
+ *
+ * - `m_cond` — Condition tested by the macro.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_BREAK_EDMSG(m_cond, m_msg) \
 	if (unlikely(m_cond)) { \
@@ -520,12 +664,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_COND_MSG` or `ERR_FAIL_COND_V_MSG`.
- * Only use this macro if there is no sensible fallback i.e. the error is unrecoverable, and
- * there is no sensible error message.
+ * Logs a fatal error, flushes standard output, and triggers a trap when the condition is true.
  *
- * Ensures `m_cond` is false.
- * If `m_cond` is true, the application crashes.
+ * - `m_cond` — Condition tested by the macro.
  */
 #define CRASH_COND(m_cond) \
 	if (unlikely(m_cond)) { \
@@ -536,11 +677,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_COND_MSG` or `ERR_FAIL_COND_V_MSG`.
- * Only use this macro if there is no sensible fallback i.e. the error is unrecoverable.
+ * Logs a fatal error, flushes standard output, and triggers a trap when the condition is true.
  *
- * Ensures `m_cond` is false.
- * If `m_cond` is true, prints `m_msg` and the application crashes.
+ * - `m_cond` — Condition tested by the macro.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define CRASH_COND_MSG(m_cond, m_msg) \
 	if (unlikely(m_cond)) { \
@@ -553,11 +693,7 @@ bool is_print_verbose_enabled();
 // Generic error macros.
 
 /**
- * Try using `ERR_FAIL_COND_MSG` or `ERR_FAIL_MSG`.
- * Only use this macro if more complex error detection or recovery is required, and
- * there is no sensible error message.
- *
- * The current function returns.
+ * Logs an error and returns from the current function.
  */
 #define ERR_FAIL() \
 	if (true) { \
@@ -567,10 +703,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_COND_MSG`.
- * Only use this macro if more complex error detection or recovery is required.
+ * Logs an error and returns from the current function.
  *
- * Prints `m_msg`, and the current function returns.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_MSG(m_msg) \
 	if (true) { \
@@ -580,7 +715,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_FAIL_MSG` but also notifies the editor.
+ * Logs an error and returns from the current function. Also notifies the editor.
+ *
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_EDMSG(m_msg) \
 	if (true) { \
@@ -590,11 +727,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_COND_V_MSG` or `ERR_FAIL_V_MSG`.
- * Only use this macro if more complex error detection or recovery is required, and
- * there is no sensible error message.
+ * Logs an error and returns from the current function.
  *
- * The current function returns `m_retval`.
+ * - `m_retval` — Value returned by the enclosing function on failure.
  */
 #define ERR_FAIL_V(m_retval) \
 	if (true) { \
@@ -604,10 +739,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_COND_V_MSG`.
- * Only use this macro if more complex error detection or recovery is required.
+ * Logs an error and returns from the current function.
  *
- * Prints `m_msg`, and the current function returns `m_retval`.
+ * - `m_retval` — Value returned by the enclosing function on failure.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_V_MSG(m_retval, m_msg) \
 	if (true) { \
@@ -617,7 +752,10 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_FAIL_V_MSG` but also notifies the editor.
+ * Logs an error and returns from the current function. Also notifies the editor.
+ *
+ * - `m_retval` — Value returned by the enclosing function on failure.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define ERR_FAIL_V_EDMSG(m_retval, m_msg) \
 	if (true) { \
@@ -627,23 +765,25 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Try using `ERR_FAIL_COND_MSG`, `ERR_FAIL_COND_V_MSG`, `ERR_CONTINUE_MSG` or `ERR_BREAK_MSG`.
- * Only use this macro at the start of a function that has not been implemented yet, or
- * if more complex error detection or recovery is required.
+ * Logs an error and continues execution.
  *
- * Prints `m_msg`.
+ * - `m_msg` — Diagnostic message printed when the macro logs.
  */
 #define ERR_PRINT(m_msg) \
 	::godot::_err_print_error(FUNCTION_STR, __FILE__, __LINE__, m_msg)
 
 /**
- * Same as `ERR_PRINT` but also notifies the editor.
+ * Logs an error and continues execution. Also notifies the editor.
+ *
+ * - `m_msg` — Diagnostic message printed when the macro logs.
  */
 #define ERR_PRINT_ED(m_msg) \
 	::godot::_err_print_error(FUNCTION_STR, __FILE__, __LINE__, m_msg, true)
 
 /**
- * Prints `m_msg` once during the application lifetime.
+ * Logs an error the first time execution reaches this expansion.
+ *
+ * - `m_msg` — Diagnostic message printed when the macro logs.
  */
 #define ERR_PRINT_ONCE(m_msg) \
 	if (true) { \
@@ -656,7 +796,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `ERR_PRINT_ONCE` but also notifies the editor.
+ * Logs an error the first time execution reaches this expansion. Also notifies the editor.
+ *
+ * - `m_msg` — Diagnostic message printed when the macro logs.
  */
 #define ERR_PRINT_ONCE_ED(m_msg) \
 	if (true) { \
@@ -671,23 +813,25 @@ bool is_print_verbose_enabled();
 // Print warning message macros.
 
 /**
- * Prints `m_msg`.
+ * Logs a warning and continues execution.
  *
- * If warning about deprecated usage, use `WARN_DEPRECATED` or `WARN_DEPRECATED_MSG` instead.
+ * - `m_msg` — Diagnostic message printed when the macro logs.
  */
 #define WARN_PRINT(m_msg) \
 	::godot::_err_print_error(FUNCTION_STR, __FILE__, __LINE__, m_msg, false, true)
 
 /**
- * Same as `WARN_PRINT` but also notifies the editor.
+ * Logs a warning and continues execution. Also notifies the editor.
+ *
+ * - `m_msg` — Diagnostic message printed when the macro logs.
  */
 #define WARN_PRINT_ED(m_msg) \
 	::godot::_err_print_error(FUNCTION_STR, __FILE__, __LINE__, m_msg, true, true)
 
 /**
- * Prints `m_msg` once during the application lifetime.
+ * Logs a warning the first time execution reaches this expansion.
  *
- * If warning about deprecated usage, use `WARN_DEPRECATED` or `WARN_DEPRECATED_MSG` instead.
+ * - `m_msg` — Diagnostic message printed when the macro logs.
  */
 #define WARN_PRINT_ONCE(m_msg) \
 	if (true) { \
@@ -700,7 +844,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Same as `WARN_PRINT_ONCE` but also notifies the editor.
+ * Logs a warning the first time execution reaches this expansion. Also notifies the editor.
+ *
+ * - `m_msg` — Diagnostic message printed when the macro logs.
  */
 #define WARN_PRINT_ONCE_ED(m_msg) \
 	if (true) { \
@@ -713,7 +859,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Warns about `m_msg` only when verbose mode is enabled.
+ * Logs a warning when verbose output is enabled.
+ *
+ * - `m_msg` — Diagnostic message printed when the macro logs.
  */
 #define WARN_VERBOSE(m_msg) \
 	{ \
@@ -725,7 +873,7 @@ bool is_print_verbose_enabled();
 // Print deprecated warning message macros.
 
 /**
- * Warns that the current function is deprecated.
+ * Warns that the current function is deprecated and records that the warning has been shown for this expansion. Also notifies the editor.
  */
 #define WARN_DEPRECATED \
 	if (true) { \
@@ -738,7 +886,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Warns that the current function is deprecated and prints `m_msg`.
+ * Warns that the current function is deprecated and records that the warning has been shown for this expansion.
+ *
+ * - `m_msg` — Diagnostic message printed when the macro logs.
  */
 #define WARN_DEPRECATED_MSG(m_msg) \
 	if (true) { \
@@ -751,10 +901,7 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Do not use.
- * If the application should never reach this point use CRASH_NOW_MSG(m_msg) to explain why.
- *
- * The application crashes.
+ * Logs a fatal error, flushes standard output, and triggers a trap.
  */
 #define CRASH_NOW() \
 	if (true) { \
@@ -765,9 +912,9 @@ bool is_print_verbose_enabled();
 		((void)0)
 
 /**
- * Only use if the application should never reach this point.
+ * Logs a fatal error, flushes standard output, and triggers a trap.
  *
- * Prints `m_msg`, and then the application crashes.
+ * - `m_msg` — Additional diagnostic detail printed on failure.
  */
 #define CRASH_NOW_MSG(m_msg) \
 	if (true) { \
@@ -782,6 +929,11 @@ bool is_print_verbose_enabled();
  *  only used in dev builds.
  */
 #ifdef DEBUG_ENABLED
+/**
+ * Logs an error, flushes standard output, and triggers a trap if the condition is false.
+ *
+ * - `m_cond` — Condition that must be true to continue execution.
+ */
 #define DEV_ASSERT(m_cond) \
 	if (unlikely(!(m_cond))) { \
 		::godot::_err_print_error(FUNCTION_STR, __FILE__, __LINE__, "FATAL: DEV_ASSERT failed  \"" _STR(m_cond) "\" is false."); \
@@ -790,6 +942,11 @@ bool is_print_verbose_enabled();
 	} else \
 		((void)0)
 #else
+/**
+ * Expands to no check when debug support is disabled.
+ *
+ * - `m_cond` — Condition expression. It is not evaluated in this build.
+ */
 #define DEV_ASSERT(m_cond)
 #endif
 
@@ -798,6 +955,12 @@ bool is_print_verbose_enabled();
  * Avoids crashing the application in this case. It's not free, so it's debug only.
  */
 #ifdef DEBUG_ENABLED
+/**
+ * Reports a missing method binding and returns from the current function before the call. The message is printed once per expansion.
+ *
+ * - `m_mb` — Resolved method binding pointer. A null pointer causes an early return.
+ * - `m_ret` — Value returned when the method binding is missing.
+ */
 #define CHECK_METHOD_BIND_RET(m_mb, m_ret) \
 	if (unlikely(!m_mb)) { \
 		ERR_PRINT_ONCE("Method bind was not found. Likely the engine method changed to an incompatible version."); \
@@ -805,6 +968,11 @@ bool is_print_verbose_enabled();
 	} else \
 		((void)0)
 
+/**
+ * Reports a missing method binding and returns from the current function before the call. The message is printed once per expansion.
+ *
+ * - `m_mb` — Resolved method binding pointer. A null pointer causes an early return.
+ */
 #define CHECK_METHOD_BIND(m_mb) \
 	if (unlikely(!m_mb)) { \
 		ERR_PRINT_ONCE("Method bind was not found. Likely the engine method changed to an incompatible version."); \
@@ -812,6 +980,17 @@ bool is_print_verbose_enabled();
 	} else \
 		((void)0)
 #else
+/**
+ * Expands to no method binding check when debug support is disabled.
+ *
+ * - `m_mb` — Method binding expression. It is not evaluated in this build.
+ * - `m_ret` — Fallback expression. It is not evaluated in this build.
+ */
 #define CHECK_METHOD_BIND_RET(m_mb, m_ret)
+/**
+ * Expands to no method binding check when debug support is disabled.
+ *
+ * - `m_mb` — Method binding expression. It is not evaluated in this build.
+ */
 #define CHECK_METHOD_BIND(m_mb)
 #endif

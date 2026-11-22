@@ -30,9 +30,20 @@
 
 #pragma once
 
+/**
+ * Reports an initialization error using the early engine error function, with the source function, file, and line.
+ *
+ * - `m_msg` — Message passed to the engine's early error printer.
+ */
 #define ERR_PRINT_EARLY(m_msg) \
 	::godot::gdextension_interface::print_error(m_msg, FUNCTION_STR, __FILE__, __LINE__, false)
 
+/**
+ * Resolves the named engine entry point and stores it in the GDExtension interface. Logs an error and returns false from the enclosing initializer if the resolver returns null.
+ *
+ * - `m_name` — Engine interface entry point name, used as both member and lookup string.
+ * - `m_type` — Function pointer type used to store the lookup result.
+ */
 #define LOAD_PROC_ADDRESS(m_name, m_type)                                               \
 	::godot::gdextension_interface::m_name = (m_type)p_get_proc_address(#m_name);                   \
 	if (!::godot::gdextension_interface::m_name) {                                                  \

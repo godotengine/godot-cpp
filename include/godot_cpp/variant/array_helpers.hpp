@@ -32,18 +32,66 @@
 
 namespace godot {
 namespace helpers {
+/**
+ * Appends one element to the container passed by value and returns the result.
+ *
+ * **Used for** extending a packed array with one item before storing the updated array.
+ *
+ * - `T` — Container type with an `append()` method that accepts `ValueT`.
+ * - `ValueT` — Type of the element passed to `append()`.
+ * - `appendable` — Container that receives the element.
+ * - `value` — Element to append at the end.
+ *
+ * ```cpp
+ * PackedInt32Array layer_ids;
+ * layer_ids.append(2); // Existing foreground layer.
+ * const int overlay_id = 7;
+ * layer_ids = helpers::append_all(layer_ids, overlay_id);
+ * ```
+ */
 template <typename T, typename ValueT>
 T append_all(T appendable, ValueT value) {
 	appendable.append(value);
 	return appendable;
 }
 
+/**
+ * Appends each supplied element in order and returns the container by value.
+ *
+ * **Used for** building a Godot array from a list of arguments while keeping their order.
+ *
+ * - `T` — Container type whose `append()` method accepts each supplied element.
+ * - `ValueT` — Type of the first element.
+ * - `Args` — Types of the remaining elements, in order.
+ * - `appendable` — Container that receives the elements.
+ * - `value` — First element to append.
+ * - `args` — Remaining elements to append after `value`.
+ *
+ * ```cpp
+ * const int base_layer = 4, trim_layer = 7, overlay_layer = 9;
+ * PackedInt32Array draw_order = helpers::append_all(PackedInt32Array(), base_layer, trim_layer, overlay_layer);
+ * ```
+ */
 template <typename T, typename ValueT, typename... Args>
 T append_all(T appendable, ValueT value, Args... args) {
 	appendable.append(value);
 	return append_all(appendable, args...);
 }
 
+/**
+ * Returns the supplied container by value without adding an element.
+ *
+ * **Used for** keeping the starting array when a variadic builder receives an empty argument pack.
+ *
+ * - `T` — Type of the container to return.
+ * - `appendable` — Container to return.
+ *
+ * ```cpp
+ * // In a variadic builder, args contains zero or more renderer layer IDs.
+ * // When the pack is empty, this overload keeps the base layer without adding anything.
+ * return helpers::append_all(base_layers, args...);
+ * ```
+ */
 template <typename T>
 T append_all(T appendable) {
 	return appendable;

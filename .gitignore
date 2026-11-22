@@ -3,6 +3,7 @@
 .import/
 .godot/
 /gen/
+/.doc-validation/
 
 # Godot 3.x ignores
 include/gen

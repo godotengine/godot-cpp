@@ -34,11 +34,44 @@
 
 namespace godot {
 
+/**
+ * Sorts a doubly linked range by relinking its elements. Elements that compare equivalent keep their relative order.
+ *
+ * - `Element` — The node type containing the value and links.
+ * - `T` — The value type used by the comparator.
+ * - `value` — Pointer to the element's sortable member.
+ * - `prev` — Pointer to the element's backward link.
+ * - `next` — Pointer to the element's forward link.
+ * - `Comparator` — Callable that returns true if the first value should precede the second.
+ *
+ * ```cpp
+ * // In List::sort_custom(), order the existing nodes by their stored values.
+ * SortList<Element, T, &Element::value, &Element::prev_ptr, &Element::next_ptr, C> sorter;
+ * sorter.sort(_data->first, _data->last);
+ * ```
+ */
 template <typename Element, typename T, T Element::*value, Element *Element::*prev, Element *Element::*next, typename Comparator = Comparator<T>>
 class SortList {
 public:
+	/**
+	 * The ordering object used for every comparison in the linked range.
+	 *
+	 * ```cpp
+	 * // In SortList::_is_sorted(), when comparing two adjacent elements.
+	 * if (compare(r_sorted_until->*next->*value, r_sorted_until->*value)) { return false; }
+	 * ```
+	 */
 	Comparator compare;
 
+	/**
+	 * Sorts the inclusive range between the head and tail and updates both pointers. Links immediately outside the range reconnect to its new ends.
+	 *
+	 * ```cpp
+	 * // In List::sort_custom(), after the short-list check.
+	 * SortList<Element, T, &Element::value, &Element::prev_ptr, &Element::next_ptr, C> sorter;
+	 * sorter.sort(_data->first, _data->last);
+	 * ```
+	 */
 	void sort(Element *&r_head, Element *&r_tail) {
 		Element *sorted_until;
 		if (_is_sorted(r_head, r_tail, sorted_until)) {
@@ -67,6 +100,17 @@ public:
 	}
 
 private:
+	/**
+	 * Scans adjacent items and returns true if none is out of order.
+	 *
+	 * - `r_sorted_until` — Receives the last element of the ordered prefix.
+	 *
+	 * ```cpp
+	 * // In SortList::sort().
+	 * Element *sorted_until;
+	 * if (_is_sorted(r_head, r_tail, sorted_until)) { return; }
+	 * ```
+	 */
 	bool _is_sorted(Element *p_head, Element *p_tail, Element *&r_sorted_until) {
 		r_sorted_until = p_head;
 		while (r_sorted_until != p_tail) {
@@ -80,6 +124,14 @@ private:
 		return true;
 	}
 
+	/**
+	 * Splits a detached range, sorts both halves recursively, and merges them into the new head and tail.
+	 *
+	 * ```cpp
+	 * // In SortList::sort(), after splitting off the unordered suffix.
+	 * _merge_sort(head2, r_tail);
+	 * ```
+	 */
 	void _merge_sort(Element *&r_head, Element *&r_tail) {
 		if (r_head == r_tail) {
 			return;
@@ -94,6 +146,14 @@ private:
 		_merge(r_head, tail1, head2, r_tail, r_head, r_tail);
 	}
 
+	/**
+	 * Relinks two sorted, detached ranges into one sorted range. On ties, takes elements from the first range before the second.
+	 *
+	 * ```cpp
+	 * // In SortList::_merge_sort(), after sorting each half.
+	 * _merge(r_head, tail1, head2, r_tail, r_head, r_tail);
+	 * ```
+	 */
 	void _merge(
 			Element *p_head1, Element *p_tail1,
 			Element *p_head2, Element *p_tail2,
@@ -127,6 +187,14 @@ private:
 		}
 	}
 
+	/**
+	 * Uses the forward links to find the middle element of a detached range. For an even count, returns the last element of the first half.
+	 *
+	 * ```cpp
+	 * // In SortList::_merge_sort().
+	 * Element *tail1 = _get_mid(r_head);
+	 * ```
+	 */
 	Element *_get_mid(Element *p_head) {
 		Element *end = p_head;
 		Element *mid = p_head;
@@ -138,11 +206,27 @@ private:
 		return mid;
 	}
 
+	/**
+	 * Makes the right element follow the left element by setting both links between them.
+	 *
+	 * ```cpp
+	 * // In SortList::sort(), when reconnecting the external predecessor.
+	 * if (head_prev) { _connect(head_prev, r_head); }
+	 * ```
+	 */
 	_FORCE_INLINE_ void _connect(Element *p_a, Element *p_b) {
 		p_a->*next = p_b;
 		p_b->*prev = p_a;
 	}
 
+	/**
+	 * Breaks both links between the last element of the first range and the first element of the second range.
+	 *
+	 * ```cpp
+	 * // In SortList::_merge_sort(), after identifying the adjacent elements.
+	 * _split(tail1, head2);
+	 * ```
+	 */
 	_FORCE_INLINE_ void _split(Element *p_a, Element *p_b) {
 		p_a->*next = nullptr;
 		p_b->*prev = nullptr;

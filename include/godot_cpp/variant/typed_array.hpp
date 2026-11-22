@@ -35,16 +35,73 @@
 
 namespace godot {
 
+/**
+ * An engine array constrained to instances of the specified object class.
+ *
+ * **Used for** keeping an array of related scene nodes constrained to their engine object class.
+ *
+ * - `T` — The C++ object wrapper that supplies the registered engine class name.
+ *
+ * ```cpp
+ * godot::TypedArray<godot::Node> children_of(godot::Node &parent) {
+ *     return parent.get_children();
+ * }
+ * ```
+ */
 template <typename T>
 class TypedArray : public Array {
 public:
+	/**
+	 * Shares the source array when its element type matches. Reports an error for a mismatched element
+	 * type.
+	 *
+	 * **Used for** replacing a typed node array from an already typed engine array.
+	 *
+	 * - `p_array` — Array with the same element type and class. A mismatch leaves this array unchanged.
+	 *
+	 * ```cpp
+	 * void replace_selection(godot::TypedArray<godot::Node> &selection,
+	 *         const godot::TypedArray<godot::Node> &new_selection) {
+	 *     selection = static_cast<const godot::Array &>(new_selection);
+	 * }
+	 * ```
+	 */
 	_FORCE_INLINE_ void operator=(const Array &p_array) {
 		ERR_FAIL_COND_MSG(!is_same_typed(p_array), "Cannot assign an array with a different element type.");
 		Array::operator=(p_array);
 	}
+	/**
+	 * Converts the variant to an array and applies the object element type.
+	 *
+	 * **Used for** recovering an array of scene nodes from a Variant-backed property.
+	 *
+	 * - `p_variant` — Variant holding an array whose elements can be assigned to this object type.
+	 *
+	 * ```cpp
+	 * godot::TypedArray<godot::Node> load_group(godot::Variant stored_nodes) {
+	 *     // stored_nodes holds an Array of Node objects.
+	 *     return godot::TypedArray<godot::Node>(stored_nodes);
+	 * }
+	 * ```
+	 */
 	_FORCE_INLINE_ TypedArray(const Variant &p_variant) :
 			TypedArray(Array(p_variant)) {
 	}
+	/**
+	 * Shares the source array if already typed for this class. Otherwise assigns its elements to a new
+	 * typed array.
+	 *
+	 * **Used for** applying a scene-node element type to a list received as a generic array.
+	 *
+	 * - `p_array` — Source array. A matching typed array shares storage. Otherwise its elements must be assignable to the requested type.
+	 *
+	 * ```cpp
+	 * godot::TypedArray<godot::Node> typed_selection(const godot::Array &nodes) {
+	 *     // The selection tool supplies an array containing only Node objects.
+	 *     return godot::TypedArray<godot::Node>(nodes);
+	 * }
+	 * ```
+	 */
 	_FORCE_INLINE_ TypedArray(const Array &p_array) {
 		set_typed(Variant::OBJECT, T::get_class_static(), Variant());
 		if (is_same_typed(p_array)) {
@@ -53,8 +110,34 @@ public:
 			assign(p_array);
 		}
 	}
+	/**
+	 * Builds an array from the listed variants and assigns them to the object-typed array.
+	 *
+	 * **Used for** building a short typed selection from known scene nodes.
+	 *
+	 * - `p_init` — List of values assignable to the requested object type.
+	 *
+	 * ```cpp
+	 * godot::TypedArray<godot::Node> paired_selection(godot::Node &left, godot::Node &right) {
+	 *     return godot::TypedArray<godot::Node>{ &left, &right };
+	 * }
+	 * ```
+	 */
 	_FORCE_INLINE_ TypedArray(std::initializer_list<Variant> p_init) :
 			TypedArray(Array(p_init)) {}
+	/**
+	 * Creates an empty array that uses the registered object class as its element type.
+	 *
+	 * **Used for** starting an empty typed list before the tool collects matching nodes.
+	 *
+	 * ```cpp
+	 * godot::TypedArray<godot::Node> first_child_of(godot::Node &parent) {
+	 *     godot::TypedArray<godot::Node> result;
+	 *     if (parent.get_child_count() > 0) { result.push_back(parent.get_child(0)); }
+	 *     return result;
+	 * }
+	 * ```
+	 */
 	_FORCE_INLINE_ TypedArray() {
 		set_typed(Variant::OBJECT, T::get_class_static(), Variant());
 	}
@@ -62,6 +145,23 @@ public:
 
 // specialization for the rest of variant types
 
+/**
+ * Defines the typed-array specialization for a C++ type backed by a built-in variant type. Matching
+ * typed arrays share storage on assignment. Constructors set the element type and populate the array
+ * when a source is given.
+ *
+ * **Used for** providing the specialization that keeps a C++ built-in type mapped to its engine array
+ * element type.
+ *
+ * - `m_type` — C++ element type that selects the specialization.
+ * - `m_variant_type` — Godot Variant type constant used for item validation.
+ *
+ * ```cpp
+ * // Uses the int64_t specialization emitted by MAKE_TYPED_ARRAY.
+ * godot::TypedArray<int64_t> lod_levels{ 0, 1, 2 };
+ * const bool stores_integers = lod_levels.get_typed_builtin() == godot::Variant::INT;
+ * ```
+ */
 #define MAKE_TYPED_ARRAY(m_type, m_variant_type) \
 	template <> \
 	class TypedArray<m_type> : public Array { \

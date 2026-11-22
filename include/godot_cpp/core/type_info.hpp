@@ -39,46 +39,97 @@
 
 namespace godot {
 
+/**
+ * Exposes a nested type when the compile-time condition is true.
+ */
 template <bool C, typename T = void>
 struct EnableIf {
+	/**
+	 * Type available to substitution when the condition is true.
+	 */
 	typedef T type;
 };
 
+/**
+ * Removes the nested type for a false condition, allowing substitution to discard a candidate.
+ */
 template <typename T>
 struct EnableIf<false, T> {
 };
 
+/**
+ * Reports that two different C++ types do not match.
+ */
 template <typename, typename>
 struct TypesAreSame {
+	/**
+	 * Indicates that the template arguments are different types.
+	 */
 	static bool const value = false;
 };
 
+/**
+ * Matches two occurrences of the same C++ type.
+ */
 template <typename A>
 struct TypesAreSame<A, A> {
+	/**
+	 * Indicates that the template arguments name the same type.
+	 */
 	static bool const value = true;
 };
 
+/**
+ * Tests whether two non-type arguments identify the same function.
+ */
 template <auto A, auto B>
 struct FunctionsAreSame {
+	/**
+	 * Indicates that the function template arguments differ.
+	 */
 	static bool const value = false;
 };
 
+/**
+ * Matches two uses of the same function as template arguments.
+ */
 template <auto A>
 struct FunctionsAreSame<A, A> {
+	/**
+	 * Indicates that both template arguments identify the same function.
+	 */
 	static bool const value = true;
 };
 
+/**
+ * Checks whether a derived pointer can match the base pointer overload, excluding a void base type.
+ */
 template <typename B, typename D>
 struct TypeInherits {
+	/**
+	 * Supplies a derived pointer type for the unevaluated overload test.
+	 */
 	static D *get_d();
 
+	/**
+	 * Selects a one-byte result when the argument converts to the base pointer.
+	 */
 	static char (&test(B *))[1];
+	/**
+	 * Selects a two-byte result when the base pointer overload does not match.
+	 */
 	static char (&test(...))[2];
 
+	/**
+	 * Reports whether the base pointer overload was selected and the base type is non-void.
+	 */
 	static bool const value = sizeof(test(get_d())) == sizeof(char) &&
 			!TypesAreSame<B volatile const, void volatile const>::value;
 };
 
+/**
+ * Builds registration metadata for a property. A resource-type hint also supplies the property class name.
+ */
 static PropertyInfo make_property_info(Variant::Type p_type, const StringName &p_name, uint32_t p_hint = PROPERTY_HINT_NONE, const String &p_hint_string = "", uint32_t p_usage = PROPERTY_USAGE_DEFAULT, const StringName &p_class_name = "") {
 	PropertyInfo info;
 	info.type = p_type;
@@ -100,9 +151,15 @@ static PropertyInfo make_property_info(Variant::Type p_type, const StringName &p
 // instead of a forward declaration. You can always forward declare 'T' in a header file, and then
 // include the actual declaration of 'T' in the source file where 'GetTypeInfo<T>' is instantiated.
 
+/**
+ * Declares the specialization point that maps supported C++ types to variant and method registration metadata.
+ */
 template <typename T, typename = void>
 struct GetTypeInfo;
 
+/**
+ * Defines variant and property metadata for a C++ type and its const reference, with no additional argument metadata.
+ */
 #define MAKE_TYPE_INFO(m_type, m_var_type) \
 	template <> \
 	struct GetTypeInfo<m_type> { \
@@ -121,6 +178,9 @@ struct GetTypeInfo;
 		} \
 	};
 
+/**
+ * Defines variant and property metadata for a C++ type and its const reference, with an explicit ABI argument metadata value.
+ */
 #define MAKE_TYPE_INFO_WITH_META(m_type, m_var_type, m_metadata) \
 	template <> \
 	struct GetTypeInfo<m_type> { \
@@ -189,42 +249,93 @@ MAKE_TYPE_INFO(PackedVector4Array, GDEXTENSION_VARIANT_TYPE_PACKED_VECTOR4_ARRAY
 MAKE_TYPE_INFO(PackedColorArray, GDEXTENSION_VARIANT_TYPE_PACKED_COLOR_ARRAY)
 
 // For variant.
+/**
+ * Provides binding metadata for parameters and results that accept a variant of any type.
+ */
 template <>
 struct GetTypeInfo<Variant> {
+	/**
+	 * Uses the nil marker for a generic variant in registration metadata.
+	 */
 	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_NIL;
+	/**
+	 * Indicates that the generic variant has no extra argument metadata.
+	 */
 	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	/**
+	 * Marks a nil-typed property descriptor as accepting a variant of any type.
+	 */
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::NIL, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
 	}
 };
 
+/**
+ * Provides binding metadata for a generic variant passed by const reference.
+ */
 template <>
 struct GetTypeInfo<const Variant &> {
+	/**
+	 * Uses the nil marker for a generic variant const reference in registration metadata.
+	 */
 	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_NIL;
+	/**
+	 * Indicates that the const variant reference has no extra argument metadata.
+	 */
 	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	/**
+	 * Marks the const-reference descriptor as accepting a variant of any type.
+	 */
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::NIL, "", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
 	}
 };
 
+/**
+ * Provides object registration metadata for a pointer to a Godot class.
+ */
 template <typename T>
 struct GetTypeInfo<T *, typename EnableIf<TypeInherits<Object, T>::value>::type> {
+	/**
+	 * Registers the pointer as an object variant.
+	 */
 	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_OBJECT;
+	/**
+	 * Indicates that the pointer has no additional ABI argument metadata.
+	 */
 	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	/**
+	 * Builds property metadata with a resource-type hint identifying the object class.
+	 */
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::OBJECT, "", PROPERTY_HINT_RESOURCE_TYPE, T::get_class_static());
 	}
 };
 
+/**
+ * Provides object registration metadata for a pointer to a const Godot class.
+ */
 template <typename T>
 struct GetTypeInfo<const T *, typename EnableIf<TypeInherits<Object, T>::value>::type> {
+	/**
+	 * Registers the pointer to const as an object variant.
+	 */
 	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_OBJECT;
+	/**
+	 * Indicates that the const pointer has no additional ABI argument metadata.
+	 */
 	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	/**
+	 * Builds property metadata with a resource-type hint identifying the object class.
+	 */
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::OBJECT, "", PROPERTY_HINT_RESOURCE_TYPE, T::get_class_static());
 	}
 };
 
+/**
+ * Converts the C++ enum name to Godot's dotted name. With more than two components, keeps only the final two.
+ */
 inline String enum_qualified_name_to_class_info_name(const String &p_qualified_name) {
 	PackedStringArray parts = p_qualified_name.split("::", false);
 	if (parts.size() <= 2) {
@@ -234,6 +345,9 @@ inline String enum_qualified_name_to_class_info_name(const String &p_qualified_n
 	return parts[parts.size() - 2] + "." + parts[parts.size() - 1];
 }
 
+/**
+ * Defines integer variant metadata for one enum spelling and marks its property descriptor as a class enum.
+ */
 #define TEMPL_MAKE_ENUM_TYPE_INFO(m_enum, m_impl) \
 	template <> \
 	struct GetTypeInfo<m_impl> { \
@@ -245,12 +359,18 @@ inline String enum_qualified_name_to_class_info_name(const String &p_qualified_n
 		} \
 	};
 
+/**
+ * Registers the enum type and its const and reference forms.
+ */
 #define MAKE_ENUM_TYPE_INFO(m_enum) \
 	TEMPL_MAKE_ENUM_TYPE_INFO(m_enum, m_enum) \
 	TEMPL_MAKE_ENUM_TYPE_INFO(m_enum, m_enum const) \
 	TEMPL_MAKE_ENUM_TYPE_INFO(m_enum, m_enum &) \
 	TEMPL_MAKE_ENUM_TYPE_INFO(m_enum, const m_enum &)
 
+/**
+ * Gets the registered enum name for an integer constant's type. Reports missing enum metadata when the variant type resolves to nil.
+ */
 template <typename T>
 inline StringName _gde_constant_get_enum_name(T param, StringName p_constant) {
 	if (GetTypeInfo<T>::VARIANT_TYPE == Variant::NIL) {
@@ -259,19 +379,46 @@ inline StringName _gde_constant_get_enum_name(T param, StringName p_constant) {
 	return GetTypeInfo<T>::get_class_info().class_name;
 }
 
+/**
+ * Holds the flags for an enum in a 64-bit integer mask.
+ */
 template <typename T>
 class BitField {
+	/**
+	 * Stores the bits representing the currently selected flags.
+	 */
 	int64_t value = 0;
 
 public:
+	/**
+	 * Sets every bit included in the supplied flag mask.
+	 */
 	_FORCE_INLINE_ void set_flag(T p_flag) { value |= p_flag; }
+	/**
+	 * Returns whether any bit in the supplied mask is set.
+	 */
 	_FORCE_INLINE_ bool has_flag(T p_flag) const { return value & p_flag; }
+	/**
+	 * Clears every bit included in the supplied flag mask.
+	 */
 	_FORCE_INLINE_ void clear_flag(T p_flag) { value &= ~p_flag; }
+	/**
+	 * Initializes the flags from a raw integer mask.
+	 */
 	_FORCE_INLINE_ BitField(int64_t p_value) { value = p_value; }
+	/**
+	 * Returns the stored flags as a signed 64-bit integer.
+	 */
 	_FORCE_INLINE_ operator int64_t() const { return value; }
+	/**
+	 * Converts the flags to an integer variant.
+	 */
 	_FORCE_INLINE_ operator Variant() const { return value; }
 };
 
+/**
+ * Defines integer variant metadata for a flag enum and its `godot::BitField` wrapper and marks the property as a class bitfield.
+ */
 #define TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, m_impl) \
 	template <> \
 	struct GetTypeInfo<m_impl> { \
@@ -292,12 +439,18 @@ public:
 		} \
 	};
 
+/**
+ * Registers bitfield metadata for the enum's value, const, and reference forms.
+ */
 #define MAKE_BITFIELD_TYPE_INFO(m_enum) \
 	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, m_enum) \
 	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, m_enum const) \
 	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, m_enum &) \
 	TEMPL_MAKE_BITFIELD_TYPE_INFO(m_enum, const m_enum &)
 
+/**
+ * Gets the registered bitfield name for a constant's enum type. Reports missing metadata when the variant type resolves to nil.
+ */
 template <typename T>
 inline StringName _gde_constant_get_bitfield_name(T param, StringName p_constant) {
 	if (GetTypeInfo<T>::VARIANT_TYPE == Variant::NIL) {
@@ -306,44 +459,92 @@ inline StringName _gde_constant_get_bitfield_name(T param, StringName p_constant
 	return GetTypeInfo<BitField<T>>::get_class_info().class_name;
 }
 
+/**
+ * Adapts typed arrays passed by value to the engine's array pointer-call storage.
+ */
 template <typename T>
 struct PtrToArg<TypedArray<T>> {
+	/**
+	 * Wraps an incoming array using the requested element type.
+	 */
 	_FORCE_INLINE_ static TypedArray<T> convert(const void *p_ptr) {
 		return TypedArray<T>(*reinterpret_cast<const Array *>(p_ptr));
 	}
+	/**
+	 * Declares the base array type used as the engine return slot.
+	 */
 	typedef Array EncodeT;
+	/**
+	 * Assigns a typed array to the engine array return slot.
+	 */
 	_FORCE_INLINE_ static void encode(TypedArray<T> p_val, void *p_ptr) {
 		*reinterpret_cast<Array *>(p_ptr) = p_val;
 	}
 };
 
+/**
+ * Adapts a const typed-array reference to the engine's array pointer-call storage.
+ */
 template <typename T>
 struct PtrToArg<const TypedArray<T> &> {
+	/**
+	 * Declares the base array used for pointer-call storage.
+	 */
 	typedef Array EncodeT;
+	/**
+	 * Wraps the incoming array with the requested element type for a const reference parameter.
+	 */
 	_FORCE_INLINE_ static TypedArray<T>
 	convert(const void *p_ptr) {
 		return TypedArray<T>(*reinterpret_cast<const Array *>(p_ptr));
 	}
 };
 
+/**
+ * Registers an object-typed array for a parameter or result passed by value.
+ */
 template <typename T>
 struct GetTypeInfo<TypedArray<T>> {
+	/**
+	 * Registers the typed array as an array variant.
+	 */
 	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_ARRAY;
+	/**
+	 * Indicates that the array has no additional ABI argument metadata.
+	 */
 	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	/**
+	 * Builds the array property hint from the element class's registered name.
+	 */
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::ARRAY, "", PROPERTY_HINT_ARRAY_TYPE, T::get_class_static());
 	}
 };
 
+/**
+ * Registers an object-typed array passed by const reference.
+ */
 template <typename T>
 struct GetTypeInfo<const TypedArray<T> &> {
+	/**
+	 * Registers the const array reference as an array variant.
+	 */
 	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_ARRAY;
+	/**
+	 * Indicates that the const reference has no additional ABI argument metadata.
+	 */
 	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	/**
+	 * Builds the array property hint from the element class's registered name.
+	 */
 	static inline PropertyInfo get_class_info() {
 		return make_property_info(Variant::Type::ARRAY, "", PROPERTY_HINT_ARRAY_TYPE, T::get_class_static());
 	}
 };
 
+/**
+ * Defines method registration metadata for typed arrays with a built-in element type, including const references.
+ */
 #define MAKE_TYPED_ARRAY_INFO(m_type, m_variant_type) \
 	template <> \
 	struct GetTypeInfo<TypedArray<m_type>> { \
@@ -413,6 +614,9 @@ MAKE_TYPED_ARRAY_INFO(IPAddress, Variant::STRING)
 
 #undef MAKE_TYPED_ARRAY_INFO
 
+/**
+ * Builds the object property descriptor for a registered C++ class.
+ */
 #define CLASS_INFO(m_type) (GetTypeInfo<m_type *>::get_class_info())
 
 } // namespace godot

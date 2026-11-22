@@ -1,0 +1,162 @@
+{
+  "AudioFrame": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/core/math/audio_frame.h",
+    "description": "A stereo frame containing one audio sample per channel.\n\n**Used for** passing the two channels of a sample together through Godot's audio processing.",
+    "fields": {
+      "left": "The audio sample for the left channel.\n\n**Used for** mixing or processing the left output channel without changing the right channel.",
+      "right": "The audio sample for the right channel.\n\n**Used for** mixing or processing the right output channel without changing the left channel."
+    }
+  },
+  "CaretInfo": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/text/text_server.h",
+    "description": "The caret rectangles and text directions at a position in shaped text.\n\n**Used for** returning both caret placements for one text position from a text server extension.",
+    "fields": {
+      "leading_caret": "The rectangle for the caret at the leading side of the text position.\n\n**Used for** drawing the caret for the leading side of a text position.",
+      "trailing_caret": "The rectangle for the caret at the trailing side of the text position.\n\n**Used for** drawing the caret for the trailing side of a text position.",
+      "leading_direction": "The text direction associated with the leading caret.\n\n**Used for** selecting how to draw the leading caret in bidirectional text.",
+      "trailing_direction": "The text direction associated with the trailing caret.\n\n**Used for** selecting how to draw the trailing caret in bidirectional text."
+    }
+  },
+  "Glyph": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/text/text_server.h",
+    "description": "A glyph in shaped text, with its source string offsets, font, and placement relative to the baseline.\n\n**Used for** returning shaped text from a text server extension for drawing and hit testing.",
+    "fields": {
+      "start": "The starting offset of the glyph's text in the source string.\n\n**Used for** mapping a displayed glyph back to the beginning of its source text.",
+      "end": "The ending offset of the glyph's text in the source string.\n\n**Used for** locating the source-text boundary after the shaped glyph.",
+      "count": "The number of glyphs in the grapheme. The text server stores this count in the first glyph.\n\n**Used for** stepping from the first glyph of one grapheme to the next grapheme.",
+      "repeat": "How many times to draw this glyph in succession.\n\n**Used for** drawing consecutive copies, such as when shaping repeated leader marks.",
+      "flags": "Flags describing the grapheme. The text server stores them in the first glyph.\n\n**Used for** checking the grapheme's direction or whether it contains a valid or virtual glyph.",
+      "x_off": "The horizontal offset from the glyph origin on the baseline.\n\n**Used for** placing the glyph horizontally relative to the current drawing origin.",
+      "y_off": "The vertical offset from the glyph origin on the baseline.\n\n**Used for** placing the glyph vertically relative to the current drawing origin.",
+      "advance": "The advance to the next glyph along the baseline. It applies to X in horizontal text and Y in vertical text.\n\n**Used for** moving the drawing origin along the horizontal or vertical layout axis after the glyph.",
+      "font_rid": "The RID of the font resource supplying the glyph.\n\n**Used for** selecting the font resource to use when drawing the glyph.",
+      "font_size": "The size at which the font supplies the glyph.\n\n**Used for** selecting the glyph size to draw from the selected font.",
+      "index": "The font's glyph index. For an invalid glyph, this holds the UTF-32 code point.\n\n**Used for** selecting the font glyph to draw or identifying the missing code point."
+    }
+  },
+  "PhysicsServer2DExtensionRayResult": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/physics_2d/physics_server_2d.h",
+    "description": "The result of a 2D ray intersection query.\n\n**Used for** reporting a hit from a 2D ray query in a physics server extension.",
+    "fields": {
+      "position": "The point where the ray intersects the collider, in world coordinates.\n\n**Used for** placing an effect or marker at the ray hit.",
+      "normal": "The surface normal at the ray intersection, in world coordinates.\n\n**Used for** orienting an effect or computing a reflection at the ray hit.",
+      "rid": "The physics server RID of the object found by the query.\n\n**Used for** addressing the collider in a later physics server operation.",
+      "collider_id": "The instance ID of the Godot object found by the query.\n\n**Used for** looking up the Godot object associated with the result by instance ID.",
+      "collider": "Object pointer associated with the hit, if available.\n\n**Used for** accessing the hit object directly when the query supplies an object pointer.",
+      "shape": "The index of the matching shape on the collider.\n\n**Used for** selecting which of the collider's shapes the query found."
+    }
+  },
+  "PhysicsServer2DExtensionShapeResult": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/physics_2d/physics_server_2d.h",
+    "description": "Identifies a shape found by a 2D intersection query.\n\n**Used for** returning collider identities and shape indices from a 2D overlap query.",
+    "fields": {
+      "rid": "The physics server RID of the object found by the query.\n\n**Used for** addressing the collider in a later physics server operation.",
+      "collider_id": "The instance ID of the Godot object found by the query.\n\n**Used for** looking up the Godot object associated with the result by instance ID.",
+      "collider": "Object pointer associated with the overlap, if available.\n\n**Used for** accessing the hit object directly when the query supplies an object pointer.",
+      "shape": "The index of the matching shape on the collider.\n\n**Used for** selecting which of the collider's shapes the query found."
+    }
+  },
+  "PhysicsServer2DExtensionShapeRestInfo": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/physics_2d/physics_server_2d.h",
+    "description": "Contact information for the closest shape returned by a 2D rest query.\n\n**Used for** returning the contact chosen by a 2D shape rest query.",
+    "fields": {
+      "point": "The contact point on the collider.\n\n**Used for** locating the reported contact on the collider.",
+      "normal": "The surface normal at the contact point.\n\n**Used for** classifying or orienting a response to the contact.",
+      "rid": "The physics server RID of the object found by the query.\n\n**Used for** addressing the collider in a later physics server operation.",
+      "collider_id": "The instance ID of the Godot object found by the query.\n\n**Used for** looking up the Godot object associated with the result by instance ID.",
+      "shape": "The index of the matching shape on the collider.\n\n**Used for** selecting which of the collider's shapes the query found.",
+      "linear_velocity": "The collider's linear velocity at the contact point.\n\n**Used for** accounting for movement of the collider at the contact."
+    }
+  },
+  "PhysicsServer3DExtensionRayResult": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/physics_3d/physics_server_3d.h",
+    "description": "The result of a 3D ray intersection query.\n\n**Used for** reporting a hit from a 3D ray query in a physics server extension.",
+    "fields": {
+      "position": "The point where the ray intersects the collider, in world coordinates.\n\n**Used for** placing an effect or marker at the ray hit.",
+      "normal": "The surface normal at the ray intersection, in world coordinates.\n\n**Used for** orienting an effect or computing a reflection at the ray hit.",
+      "rid": "The physics server RID of the object found by the query.\n\n**Used for** addressing the collider in a later physics server operation.",
+      "collider_id": "The instance ID of the Godot object found by the query.\n\n**Used for** looking up the Godot object associated with the result by instance ID.",
+      "collider": "Object pointer associated with the hit, if available.\n\n**Used for** accessing the hit object directly when the query supplies an object pointer.",
+      "shape": "The index of the matching shape on the collider.\n\n**Used for** selecting which of the collider's shapes the query found.",
+      "face_index": "The index of the face hit by the ray when the collider supplies face indices.\n\n**Used for** looking up the hit mesh face when the shape reports face indices."
+    }
+  },
+  "PhysicsServer3DExtensionShapeResult": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/physics_3d/physics_server_3d.h",
+    "description": "Identifies a shape found by a 3D intersection query.\n\n**Used for** returning collider identities and shape indices from a 3D overlap query.",
+    "fields": {
+      "rid": "The physics server RID of the object found by the query.\n\n**Used for** addressing the collider in a later physics server operation.",
+      "collider_id": "The instance ID of the Godot object found by the query.\n\n**Used for** looking up the Godot object associated with the result by instance ID.",
+      "collider": "Object pointer associated with the overlap, if available.\n\n**Used for** accessing the hit object directly when the query supplies an object pointer.",
+      "shape": "The index of the matching shape on the collider.\n\n**Used for** selecting which of the collider's shapes the query found."
+    }
+  },
+  "PhysicsServer3DExtensionShapeRestInfo": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/physics_3d/physics_server_3d.h",
+    "description": "Contact information for the closest shape returned by a 3D rest query.\n\n**Used for** returning the contact chosen by a 3D shape rest query.",
+    "fields": {
+      "point": "The contact point on the collider.\n\n**Used for** locating the reported contact on the collider.",
+      "normal": "The surface normal at the contact point.\n\n**Used for** classifying or orienting a response to the contact.",
+      "rid": "The physics server RID of the object found by the query.\n\n**Used for** addressing the collider in a later physics server operation.",
+      "collider_id": "The instance ID of the Godot object found by the query.\n\n**Used for** looking up the Godot object associated with the result by instance ID.",
+      "shape": "The index of the matching shape on the collider.\n\n**Used for** selecting which of the collider's shapes the query found.",
+      "linear_velocity": "The collider's linear velocity at the contact point.\n\n**Used for** accounting for movement of the collider at the contact."
+    }
+  },
+  "PhysicsServer2DExtensionMotionResult": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/physics_2d/physics_server_2d.h",
+    "description": "The displacement and collision information returned by a 2D body motion test.\n\n**Used for** applying the travel from a 2D motion test and deciding how to respond to a collision.",
+    "fields": {
+      "travel": "The displacement completed by the body during the motion test.\n\n**Used for** applying the part of the requested displacement completed by the motion test.",
+      "remainder": "The portion of the requested displacement left after the test.\n\n**Used for** deciding how much of the requested displacement is left for another movement step.",
+      "collision_depth": "The penetration depth reported by the motion test.\n\n**Used for** reporting the amount of penetration along with the result of the motion test.",
+      "collision_safe_fraction": "The fraction of the requested motion that can be completed without a collision.\n\n**Used for** choosing a fraction of the requested movement that remains clear.",
+      "collision_unsafe_fraction": "The fraction of the requested motion at which the test detects a collision.\n\n**Used for** locating the colliding side of the safe-to-unsafe movement interval.",
+      "collision_point": "The reported collision point in world coordinates.\n\n**Used for** locating the reported contact after the movement test.",
+      "collision_normal": "The collider's surface normal at the collision point.\n\n**Used for** classifying a hit or choosing a slide direction.",
+      "collider_velocity": "The collider's velocity at the collision point.\n\n**Used for** accounting for the collider's movement at the contact.",
+      "collision_local_shape": "The index of the shape on the moving body that collided.\n\n**Used for** finding the moving body's shape that made contact.",
+      "collider_id": "The instance ID of the Godot object found by the query.\n\n**Used for** looking up the hit Godot object by instance ID.",
+      "collider": "The physics server RID of the collider.\n\n**Used for** addressing the hit collider in the physics server.",
+      "collider_shape": "The index of the matching shape on the collider.\n\n**Used for** selecting the shape on the collider that caused the hit."
+    }
+  },
+  "PhysicsServer3DExtensionMotionCollision": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/physics_3d/physics_server_3d.h",
+    "description": "One collision reported by a 3D body motion test.\n\n**Used for** examining one contact from a 3D motion test with multiple reported collisions.",
+    "fields": {
+      "position": "The reported collision point in world coordinates.\n\n**Used for** locating the contact to report it or apply a response there.",
+      "normal": "The collider's surface normal at the collision point.\n\n**Used for** classifying the contact as a floor, wall, or ceiling relative to an up direction.",
+      "collider_velocity": "The collider's linear velocity reported at the collision.\n\n**Used for** accounting for movement of the collider at the contact.",
+      "collider_angular_velocity": "The collider's angular velocity reported at the collision.\n\n**Used for** accounting for rotation of the collider when processing the contact.",
+      "depth": "The penetration depth reported for this collision.\n\n**Used for** comparing the penetration reported for this contact with other contacts.",
+      "local_shape": "The index of the shape on the moving body that collided.\n\n**Used for** finding the shape on the moving body that made contact.",
+      "collider_id": "The instance ID of the Godot object found by the query.\n\n**Used for** looking up the hit Godot object by instance ID.",
+      "collider": "The physics server RID of the collider.\n\n**Used for** addressing the hit collider in the physics server.",
+      "collider_shape": "The index of the matching shape on the collider.\n\n**Used for** selecting the shape on the collider that caused the hit."
+    }
+  },
+  "PhysicsServer3DExtensionMotionResult": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/servers/physics_3d/physics_server_3d.h",
+    "description": "The displacement and list of collisions returned by a 3D body motion test.\n\n**Used for** applying tested 3D travel and processing the contacts from that movement.",
+    "fields": {
+      "travel": "The displacement completed by the body during the motion test.\n\n**Used for** applying the part of the requested displacement completed by the motion test.",
+      "remainder": "The portion of the requested displacement left after the test.\n\n**Used for** deciding how much of the requested displacement is left for another movement step.",
+      "collision_depth": "The penetration depth reported by the motion test.\n\n**Used for** reporting the amount of penetration along with the result of the motion test.",
+      "collision_safe_fraction": "The fraction of the requested motion that can be completed without a collision.\n\n**Used for** choosing a fraction of the requested movement that remains clear.",
+      "collision_unsafe_fraction": "The fraction of the requested motion at which the test detects a collision.\n\n**Used for** locating the colliding side of the safe-to-unsafe movement interval.",
+      "collisions": "Storage for up to 32 motion contacts. Entries starting at the collision count are outside the result.\n\n**Used for** reading the reported contact records up to the collision count.",
+      "collision_count": "The number of entries in the collisions array written by the test.\n\n**Used for** iterating only the entries written by the motion test."
+    }
+  },
+  "ScriptLanguageExtensionProfilingInfo": {
+    "source": "https://github.com/godotengine/godot/blob/4.7-stable/core/object/script_language_extension.h",
+    "description": "A script function's profiling record supplied by a script language extension.\n\n**Used for** returning one function's timing and call count to the script profiler.",
+    "fields": {
+      "signature": "The signature identifying the profiled function.\n\n**Used for** grouping timing records by the profiled function.",
+      "call_count": "The number of calls recorded for the function.\n\n**Used for** calculating the average execution time per call.",
+      "total_time": "The accumulated time attributed to this function, including its callees.\n\n**Used for** finding functions whose complete call trees account for the most execution time.",
+      "self_time": "The accumulated time spent in this function's own execution.\n\n**Used for** finding functions whose own execution accounts for the most time."
+    }
+  }
+}

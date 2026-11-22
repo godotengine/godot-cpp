@@ -1,0 +1,348 @@
+{
+  "api_version": "4.7.0-stable",
+  "handwritten_source_revision": "507ed9d840c01a3c5b2a39af8bb4000bfac30bf5",
+  "api_sha256": "53d37f85be32b6d10fb2266ca51f6ef0c3a55728acdb7c8301b1458a93c00943",
+  "completed": false,
+  "batches": [
+    {
+      "path": "include/godot_cpp/core/math.hpp",
+      "file_sha256": "f5297c5f6e81afb37f1934a5c26923c3e581d7ffc434d0706fa5d8ef09f782d0",
+      "scope": "140 scalar math functions and namespace documentation",
+      "checks": [
+        "Read implementation and audit attached parameter entries for 140 functions",
+        "Compare C++ and retained examples against pre-edit snapshot",
+        "Clang C++17 with the matching bindings"
+      ]
+    },
+    {
+      "path": "include/godot_cpp/variant/callable_method_pointer.hpp",
+      "file_sha256": "f86e1162b66a5fd3dff3845596830a401de046b7b44f09dbfa7b3d2dcdf50106",
+      "scope": "Parameter pass and lifetime semantics of the object ID callbacks",
+      "checks": [
+        "Review callable dispatch, registration, and validity implementation",
+        "Compare C++ against pre-edit snapshot",
+        "Clang C++17 with the matching bindings"
+      ]
+    }
+  ],
+  "pending": "Audit all remaining declarations and comments in the handwritten include tree against AGENTS.md, including individual parameter entries and inactive preprocessor branches.",
+  "markdown-coverage-review": {
+    "completed": false,
+    "configuration": "single precision, 64-bit, template get_node enabled",
+    "rules_sha256": "ac56796050353eefe538732195034cbc583a7ea19e399a027bab0cb0b32e3e7d",
+    "verified_declarations": 56,
+    "inputs_and_output_sha256": {
+      "include/godot_cpp/variant/aabb.hpp": "5ad85f4ebc39a5f3d0368d31822196d09e1f1c03a5747e864ae1f6a7665b6bdc",
+      "src/variant/aabb.cpp": "d9bfd2f3902cced7acd8705df06a0c2316d66a089f1d901a36349261117411b9",
+      "include/godot_cpp/variant/plane.hpp": "93c3fa45a13e866650f4474914ad8323d3dacc10c4d290cf81b727b2f0dd9b1d",
+      "src/variant/plane.cpp": "c08a0266db115cefa166c0950d60ea64a5ab7db63d738ef7e51a2bf41fc61f75"
+    },
+    "checks": [
+      "Reviewed declaration attachment, descriptions, parameter entries and existing examples for registered entries.",
+      "No legacy documentation directives in the lexical scan of either tree.",
+      "Clang C++17 syntax check of handwritten headers and changed generated headers in both selected configurations.",
+      "Compared actual C++ and retained example code against a local pre-edit snapshot. Clarified the context of one Plane example."
+    ],
+    "clang_defines": [
+      [
+        "THREADS_ENABLED",
+        "DEBUG_ENABLED",
+        "DEV_ENABLED",
+        "HOT_RELOAD_ENABLED",
+        "TYPED_METHOD_BIND"
+      ],
+      [
+        "DISABLE_DEPRECATED",
+        "MATH_CHECKS"
+      ]
+    ],
+    "pending": "The lexical inventory found 909 of 1,311 one-line parameterized candidates missing at least one entry. It can count declarations with later definitions and omit macros or multiline declarations."
+  },
+  "used-for-four-header-benchmark": {
+    "configuration": "Godot 4.7.0-stable, single precision, 64-bit, template get_node enabled",
+    "rules_sha256": "b400b64007b13b07abe5f7d76ad4cfbbe7b56a5d75bc69da32afcc60b9f163b6",
+    "headers": {
+      "include/godot_cpp/core/object_id.hpp": {
+        "declarations": 15,
+        "with_used_for": 14,
+        "before_sha256": "b47d37c5bd78fff8a583efb57c316d1cbb9bea1136555febdd00af9a4077027b",
+        "sha256": "f8ad2a949cbdf9e7dfc314c210c6219ab0df748afacbf505d28bedbc89e350ef"
+      },
+      "include/godot_cpp/templates/spin_lock.hpp": {
+        "declarations": 4,
+        "with_used_for": 3,
+        "before_sha256": "e5dea437f16ee43ad6e32fd6fdcdd090f8b0715ede2ce9595df3f738943125c0",
+        "sha256": "29fa2e1a5ed8df6e0cbd49e67503ee29e7717219c551f6f53a7aca8b6bb2efcc"
+      }
+    },
+    "source_inputs_sha256": {
+      "binding_generator.py": "0cfb0855dd2857ed5c1dfbe0217c6a46fa8919b7d144b0b267f49797af3c6e04",
+      "header_documentation.py": "46f0018e24033b10b477219fb76f2f42e9ec0561a1003c2b64f8a77633dcc7c8",
+      "gdextension/extension_api-4-7.json": "53d37f85be32b6d10fb2266ca51f6ef0c3a55728acdb7c8301b1458a93c00943",
+      "gdextension/gdextension_interface.json": "7d8c0a039d9743eb8ebf88681ae0c641d8d3aa5ffca11081745a84da803e09a1",
+      "gdextension/header_docs/4.7.0/class_reference.zip": "d831600d34358f8fc46035071226b7411363f769d7057fb1f5d5ebeabd6dce97",
+      "gdextension/header_docs/4.7.0/Material.json": "42a27c0613531b1b492ceb8d69423eca75d4a8798a221bd0231f80595a51dc9e",
+      "gdextension/header_docs/4.7.0/LightmapperRD.json": "68a951a1a33a96f43bc833d29cf0c92aa51fa685eafb1f82070f9ef64bd9c237",
+      "include/godot_cpp/classes/wrapped.hpp": "26c512e79f03895bb12f713ad16f1a82ba3dbe4421f6ea1b8fe696f27469ffd0",
+      "include/godot_cpp/core/object.hpp": "c78d286ab42fc8347bd73d10792b360dc840682bb124373e467e51cfb2aac421",
+      "include/godot_cpp/templates/local_vector.hpp": "802894242dead03da134beab0740ea6d0632848e89b712d42c527c956ffd85e1"
+    },
+    "checks": [
+      "Compared C++ with the pre-edit files. Generated headers also match the independent baseline.",
+      "Reviewed declaration attachment, verified use, parameters, and example context.",
+      "Clang C++17 in threaded debug and alternate unthreaded configurations."
+    ]
+  },
+  "four-header-example-benchmark": {
+    "configuration": "Godot 4.7.0-stable, single precision, 64-bit, template get_node enabled",
+    "rules_sha256": "b400b64007b13b07abe5f7d76ad4cfbbe7b56a5d75bc69da32afcc60b9f163b6",
+    "headers": {
+      "include/godot_cpp/templates/span.hpp": {
+        "examples": 27,
+        "before_sha256": "9556aaa5235f3c60acde9417733cb94eb5d6285ece59025a3cb77500e9d4e659",
+        "output_sha256": "6c0903401b5d7f2bab652edf7dea6a5e27e97386272bfa5950c789ccf8a15d17"
+      },
+      "include/godot_cpp/variant/typed_array.hpp": {
+        "examples": 7,
+        "before_sha256": "7c31050c77c9e90768e338d09ec087f0859c29ac233262a52493159cbae9b696",
+        "output_sha256": "9dd351a1cba54161978a2fde9e11f125914859b7abf95abc4d22327280d9d597"
+      }
+    },
+    "input_sha256": {
+      "include/godot_cpp/core/defs.hpp": "32ebf71887d6b38e5ac906ba1f0a017f5ced51901076f20bcb3fb582b117b60e",
+      "include/godot_cpp/core/error_macros.hpp": "d1b06b98678341bedb737205601763a4ac7974e17261e5ec66ac15ce46700555",
+      "gdextension/extension_api-4-7.json": "53d37f85be32b6d10fb2266ca51f6ef0c3a55728acdb7c8301b1458a93c00943",
+      "gdextension/gdextension_interface.json": "7d8c0a039d9743eb8ebf88681ae0c641d8d3aa5ffca11081745a84da803e09a1"
+    },
+    "checks": [
+      "Verified every example against its declaration and implementation context.",
+      "Compared C++ code with pre-edit and, for generated headers, independent baselines.",
+      "Compiled extracted examples and contextual wrappers with Clang C++17 in threaded debug and unthreaded configurations. Checked the two private Span snippets at their compiled implementation sites."
+    ]
+  },
+  "virtual-registration-and-output-helpers": {
+    "completed": true,
+    "configuration": "Godot 4.7.0-stable official, Windows x86_64, single precision, template get_node enabled",
+    "rules_sha256": "50ad5acde30f07512174823a068ee198231f344b60669f6dcd85eadf554bc3d1",
+    "verified_declarations": 36,
+    "inputs_sha256": {
+      "gdextension/extension_api-4-7.json": "53d37f85be32b6d10fb2266ca51f6ef0c3a55728acdb7c8301b1458a93c00943",
+      "gdextension/gdextension_interface.json": "7d8c0a039d9743eb8ebf88681ae0c641d8d3aa5ffca11081745a84da803e09a1",
+      "gdextension/header_docs/4.7.0/class_reference.zip": "d831600d34358f8fc46035071226b7411363f769d7057fb1f5d5ebeabd6dce97",
+      "src/core/print_string.cpp": "d752024cc829b53fdada2c9f3e0a9f62de14af59ef50443959ffbca7b58b2f70",
+      "src/core/object.cpp": "598a3b0809829c82f009dc8a2c209b289d783b34d6386418e688db2d25d05030",
+      "include/godot_cpp/core/binder_common.hpp": "f79430bcdbbacbac8493a6141493d83022b900dd8d99ab8bd574973dc437e9e9",
+      "gen/include/godot_cpp/variant/utility_functions.hpp": "aae4586b44ecdaccbc20bbdb4111fea39a3e4cca5897188fbaff0824aff5d026",
+      "gen/src/variant/array.cpp": "4932f8b7aa47e044d20be254ccf4d17c7a292a99a28076f66b4011a36697850c",
+      "gen/src/variant/callable.cpp": "2bd8cacf1f168af8ade8fe8cefad747387090772780035306bcb03bb027939e5",
+      "gen/src/variant/node_path.cpp": "ca5a6c095444700670e29f9296f21eb32958b4a66961050cf1dca062fa32d31c",
+      "gen/src/variant/utility_functions.cpp": "a48b3c31c805f9aab0555e2d9c918d2dba2d4822921d223b8a0b0f66c4389846",
+      "gen/src/classes/node.cpp": "872b74cb81fb456416fe4f574b80d12ef182d71cb65384f5fc34dc704d1c802d"
+    },
+    "headers_sha256": {
+      "include/godot_cpp/core/builtin_ptrcall.hpp": "a4a7d4881f2bd2d118eb29d1bc2693e324ca629d22db1f180fdd4b0904396b2a",
+      "include/godot_cpp/core/engine_ptrcall.hpp": "4753b366ad288591eadab3ebe96a451fe538d885cc55bbb530770e75709bbcf3",
+      "include/godot_cpp/core/method_ptrcall.hpp": "1c937767f21fcb2cd56ed2c1148092e097dc27a429ac04331f45414d14896289",
+      "include/godot_cpp/core/print_string.hpp": "0bbce57312a0b724d6eec02c010f83d49605fc5a639b18494728a5dba8bfad5e",
+      "include/godot_cpp/variant/array_helpers.hpp": "317e0e6dd7c977b4b11d20ab455e26ce2a056415c8cc744650e3891e071f0049"
+    },
+    "checks": [
+      "Reviewed Markdown attachment, individual parameter entries, and the concrete Used for paragraph.",
+      "Compared the changed declarations against the pre-edit C++ with documentation comments stripped.",
+      "Clang C++17 syntax in the two listed configurations with the matching generated include tree.",
+      "Preserved existing C++ example payloads and checked overload instantiation."
+    ],
+    "clang_defines": [
+      [
+        "THREADS_ENABLED",
+        "DEBUG_ENABLED",
+        "DEV_ENABLED",
+        "HOT_RELOAD_ENABLED",
+        "TYPED_METHOD_BIND"
+      ],
+      [
+        "DISABLE_DEPRECATED",
+        "MATH_CHECKS"
+      ]
+    ],
+    "clang_scope": {
+      "handwritten": "66 headers in the combined translation unit. Two include fragments were checked through headers and two through src/godot.cpp and src/variant/color.cpp.",
+      "generated": "1,032 changed generated class headers in the combined translation unit and both generated macro fragments with representative expansions.",
+      "configurations": "The two listed Windows x86_64 C++17 define sets."
+    }
+  },
+  "coverage-continuation-status": {
+    "completed": false,
+    "rules_sha256": "50ad5acde30f07512174823a068ee198231f344b60669f6dcd85eadf554bc3d1",
+    "source_revision": "507ed9d840c01a3c5b2a39af8bb4000bfac30bf5",
+    "fresh_verified_declarations": 189,
+    "historical_entries_with_matching_comment_hash": 0,
+    "historical_entries_with_different_comment_hash": 56,
+    "remaining": {
+      "header_files_lexically_scanned": 70,
+      "one_line_parameterized_candidates": 1311,
+      "candidates_missing_at_least_one_parameter_entry": 903,
+      "legacy_documentation_directives_found": 0,
+      "interpretation": "The lexical count includes possible false positives and excludes many multiline declarations and macros. It is not a count of API entities.",
+      "pending_review": "Continue declaration-level semantic review and parameter coverage. Include branches and fragments beyond the two combined C++17 configurations. Review the MinGW threading branch against its compatibility header where available.",
+      "headers_with_most_parameter_candidates": {
+        "include/godot_cpp/core/math.hpp": 91,
+        "include/godot_cpp/variant/transform3d.hpp": 42,
+        "include/godot_cpp/variant/transform2d.hpp": 39,
+        "include/godot_cpp/variant/projection.hpp": 37,
+        "include/godot_cpp/templates/hashfuncs.hpp": 35,
+        "include/godot_cpp/variant/vector3.hpp": 32,
+        "include/godot_cpp/templates/a_hash_map.hpp": 29,
+        "include/godot_cpp/variant/quaternion.hpp": 29,
+        "include/godot_cpp/classes/wrapped.hpp": 28,
+        "include/godot_cpp/templates/cowdata.hpp": 27,
+        "include/godot_cpp/templates/sort_array.hpp": 26,
+        "include/godot_cpp/templates/vector.hpp": 24
+      }
+    },
+    "warnings": [
+      "Both combined C++17 checks passed. Both reported three existing -Wcomment warnings in generated comments in Environment and InputMap."
+    ],
+    "revalidated_from_matching_evidence": 53,
+    "verified_under_current_rules": 194
+  },
+  "native-structures-and-atomic-helpers": {
+    "completed": true,
+    "configuration": "Godot 4.7.0-stable official, Windows x86_64, single precision, template get_node enabled",
+    "rules_sha256": "50ad5acde30f07512174823a068ee198231f344b60669f6dcd85eadf554bc3d1",
+    "verified_declarations": 36,
+    "inputs_sha256": {
+      "gdextension/extension_api-4-7.json": "53d37f85be32b6d10fb2266ca51f6ef0c3a55728acdb7c8301b1458a93c00943",
+      "gdextension/gdextension_interface.json": "7d8c0a039d9743eb8ebf88681ae0c641d8d3aa5ffca11081745a84da803e09a1",
+      "include/godot_cpp/templates/cowdata.hpp": "379e42582178018afb6abfc61769e0618fc46e01be44d84d8bb1197b673268f4",
+      "include/godot_cpp/core/error_macros.hpp": "d1b06b98678341bedb737205601763a4ac7974e17261e5ec66ac15ce46700555"
+    },
+    "headers_sha256": {
+      "include/godot_cpp/templates/safe_refcount.hpp": "acf41e75f38b4992237f40473562a16ec4960e8074e80169e3f60db7280a6d8d"
+    },
+    "checks": [
+      "Reviewed descriptions, applicable Used for paragraphs, and exact parameter names.",
+      "Compared C++ with the before-edit snapshot after removing documentation comments.",
+      "Clang C++17 in threaded debug/development/hot reload and alternate MATH_CHECKS/DISABLE_DEPRECATED configurations.",
+      "Instantiated the numeric, boolean, and reference count helpers in the normal include context.",
+      "Checked the standalone header branch with NO_THREADS."
+    ]
+  },
+  "sorted-set-and-editor-plugins": {
+    "completed": true,
+    "rules_sha256": "50ad5acde30f07512174823a068ee198231f344b60669f6dcd85eadf554bc3d1",
+    "configuration": "Godot 4.7.0-stable official, Windows x86_64, single precision, template get_node enabled",
+    "verified_declarations": 21,
+    "inputs_and_headers_sha256": {
+      "gdextension/extension_api-4-7.json": "53d37f85be32b6d10fb2266ca51f6ef0c3a55728acdb7c8301b1458a93c00943",
+      "include/godot_cpp/templates/vset.hpp": "f4092f6ce3a1832f149540473338512541e615f8a50f1a1e012c4eae35cf810f",
+      "include/godot_cpp/classes/editor_plugin_registration.hpp": "89364ad0aa25aad98b15229bd616314a7de082cfc8ad58a654241829e218fcc1",
+      "include/godot_cpp/templates/vector.hpp": "f35da659bafbd4cadbbc9ce1d099dc2c9d89c6764e5507e59ed161837a0a96cc",
+      "include/godot_cpp/templates/span.hpp": "6c0903401b5d7f2bab652edf7dea6a5e27e97386272bfa5950c789ccf8a15d17",
+      "src/classes/editor_plugin_registration.cpp": "468916a24ce1769c886b9e341425d02528eca9fddc0f6233adaf6ad7fd8bb628",
+      "src/godot.cpp": "42c6a96800219fdcfec6fe823114181f30308e032315811eebe5e716880d16b0",
+      "gen/include/godot_cpp/classes/editor_plugin.hpp": "aae34e1d47a6a7cc299603c771d6ffff092e2a60b33bcb8cf15cb25877d9fbe0"
+    },
+    "checks": [
+      "Reviewed attachment, descriptions, parameter names, and Used for paragraphs.",
+      "Verified that only documentation comments changed and retained example payloads match exactly.",
+      "Clang C++17 of template instantiations and editor_plugin_registration.cpp in threaded debug/development/hot reload and alternate configurations."
+    ]
+  },
+  "matching-prior-documentation-evidence": {
+    "completed": true,
+    "rules_sha256": "50ad5acde30f07512174823a068ee198231f344b60669f6dcd85eadf554bc3d1",
+    "verified_declarations": 53,
+    "declarations_per_header": {
+      "include/godot_cpp/templates/span.hpp": 27,
+      "include/godot_cpp/variant/typed_array.hpp": 7,
+      "include/godot_cpp/core/object_id.hpp": 15,
+      "include/godot_cpp/templates/spin_lock.hpp": 4
+    },
+    "headers_sha256": {
+      "include/godot_cpp/templates/span.hpp": "6c0903401b5d7f2bab652edf7dea6a5e27e97386272bfa5950c789ccf8a15d17",
+      "include/godot_cpp/variant/typed_array.hpp": "9dd351a1cba54161978a2fde9e11f125914859b7abf95abc4d22327280d9d597",
+      "include/godot_cpp/core/object_id.hpp": "f8ad2a949cbdf9e7dfc314c210c6219ab0df748afacbf505d28bedbc89e350ef",
+      "include/godot_cpp/templates/spin_lock.hpp": "29fa2e1a5ed8df6e0cbd49e67503ee29e7717219c551f6f53a7aca8b6bb2efcc"
+    },
+    "inputs_sha256": {
+      "include/godot_cpp/core/defs.hpp": "32ebf71887d6b38e5ac906ba1f0a017f5ced51901076f20bcb3fb582b117b60e",
+      "include/godot_cpp/core/error_macros.hpp": "d1b06b98678341bedb737205601763a4ac7974e17261e5ec66ac15ce46700555",
+      "gdextension/extension_api-4-7.json": "53d37f85be32b6d10fb2266ca51f6ef0c3a55728acdb7c8301b1458a93c00943",
+      "gdextension/gdextension_interface.json": "7d8c0a039d9743eb8ebf88681ae0c641d8d3aa5ffca11081745a84da803e09a1",
+      "include/godot_cpp/classes/wrapped.hpp": "26c512e79f03895bb12f713ad16f1a82ba3dbe4421f6ea1b8fe696f27469ffd0",
+      "include/godot_cpp/core/object.hpp": "c78d286ab42fc8347bd73d10792b360dc840682bb124373e467e51cfb2aac421",
+      "include/godot_cpp/templates/local_vector.hpp": "802894242dead03da134beab0740ea6d0632848e89b712d42c527c956ffd85e1"
+    },
+    "batches_reused": [
+      "four-header-example-benchmark",
+      "used-for-four-header-benchmark"
+    ],
+    "checks": [
+      "Matched complete header bytes and individual registered comments to the previous verified batches.",
+      "Confirmed the same API, source fingerprints and applicable documentation rules. The current rules make examples optional; these existing examples already had matching verification."
+    ]
+  },
+  "character-predicates-and-math-compatibility": {
+    "completed": true,
+    "rules_sha256": "50ad5acde30f07512174823a068ee198231f344b60669f6dcd85eadf554bc3d1",
+    "verified_declarations": 30,
+    "configuration": "Godot 4.7.0-stable official, Windows x86_64, single precision, template get_node enabled",
+    "inputs_and_headers_sha256": {
+      "include/godot_cpp/variant/char_utils.hpp": "992ca96de2875b2ce72e88f8669b8bd8e5920399532e24391a93dde470ef27d7",
+      "include/godot_cpp/variant/char_range.inc.hpp": "9d2355af1b9a263e154e7d66c228e068088e6c8d1b0f557cbdf4bc61e840fcb0",
+      "include/godot_cpp/core/math.compat.inc": "762bd995e90b2ef80ab42a0bad27585ed7cecf6a207dcc7b9a1db3341508381e",
+      "include/godot_cpp/core/math.hpp": "f5297c5f6e81afb37f1934a5c26923c3e581d7ffc434d0706fa5d8ef09f782d0",
+      "gdextension/extension_api-4-7.json": "53d37f85be32b6d10fb2266ca51f6ef0c3a55728acdb7c8301b1458a93c00943"
+    },
+    "checks": [
+      "Compared C++ and retained example payloads exactly against pre-edit headers.",
+      "Verified character bounds against the predicates and their 16.0.0 range arrays.",
+      "Clang C++17 static assertions for the character predicates and supported deprecated compatibility declarations.",
+      "Checked the two configurations with and without DISABLE_DEPRECATED."
+    ]
+  },
+  "class-and-script-registration-macros": {
+    "completed": true,
+    "rules_sha256": "50ad5acde30f07512174823a068ee198231f344b60669f6dcd85eadf554bc3d1",
+    "verified_declarations": 18,
+    "configuration": "Godot 4.7.0-stable official, Windows x86_64, single precision, template get_node enabled",
+    "inputs_and_headers_sha256": {
+      "include/godot_cpp/classes/wrapped.hpp": "ed50409898520a2187c9230354ad3fa016839e50b31a3e74544fc49f5fb12f30",
+      "include/godot_cpp/core/class_db.hpp": "a4bd675bd5a479483444393b186388a123141aea3a7e2d9b9b20b04c2c2a27ec",
+      "gdextension/extension_api-4-7.json": "53d37f85be32b6d10fb2266ca51f6ef0c3a55728acdb7c8301b1458a93c00943",
+      "gdextension/gdextension_interface.json": "7d8c0a039d9743eb8ebf88681ae0c641d8d3aa5ffca11081745a84da803e09a1",
+      "gen/include/godot_cpp/core/gdvirtual.gen.inc": "57e6962ef12e786e850c6f43ab63e58c88a53108dcd687b902cf030723017ec2",
+      "test/src/my_test.cpp": "6e0d1dd99b36f64766bafa55fa61afe635712e0a3c60d3bafa3afde3aaa0df45",
+      "test/src/register_types.cpp": "418bcf46f64152ae072d29edb549b524c212feedbf2744c32f3b7f7ba6298fc1"
+    },
+    "upstream_sources": [
+      "https://github.com/godotengine/godot/blob/4.7-stable/core/object/class_db.cpp#L563-L583",
+      "https://github.com/godotengine/godot/blob/4.7-stable/editor/gui/create_dialog.cpp#L161-L172"
+    ],
+    "checks": [
+      "Compared non-documentation bytes against the pre-edit snapshots.",
+      "Checked exact arguments, including variadic packs, against the macros and their expansions.",
+      "Clang C++17 of test/src/my_test.cpp, test/src/register_types.cpp, and a virtual-call fixture, both with TYPED_METHOD_BIND as required by the Windows build.",
+      "Clang configurations: threaded debug/development/hot reload and alternate DISABLE_DEPRECATED/MATH_CHECKS."
+    ]
+  },
+  "scalar-math-overloads": {
+    "completed": true,
+    "rules_sha256": "50ad5acde30f07512174823a068ee198231f344b60669f6dcd85eadf554bc3d1",
+    "verified_declarations": 48,
+    "configuration": "Godot 4.7.0-stable official, Windows x86_64, single precision, template get_node enabled",
+    "scope": "include/godot_cpp/core/math.hpp",
+    "inputs_and_headers_sha256": {
+      "include/godot_cpp/core/math.hpp": "00b4dada523a66091637fe9a708306fb77f302d2fa43a46ccc7971e987c71886",
+      "gdextension/extension_api-4-7.json": "53d37f85be32b6d10fb2266ca51f6ef0c3a55728acdb7c8301b1458a93c00943",
+      "gdextension/header_docs/4.7.0/@GlobalScope.json": "c93d9012f535b06b064917d62a884d86a19d17539dc478ca0abed519cf32e170"
+    },
+    "checks": [
+      "Verified the float and double implementations and retained exact parameter entries.",
+      "Reused applicable usage context from the matching reviewed utility functions.",
+      "Compared non-documentation bytes and retained examples to the pre-edit snapshot.",
+      "Clang C++17 checked the normal include use in both Windows configurations."
+    ]
+  }
+}

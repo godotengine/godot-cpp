@@ -35,11 +35,44 @@ namespace godot {
 // Names from https://en.wikipedia.org/wiki/X11_color_names
 // Keep these in sync with the engine (both in core and in C#)
 
+/**
+ * Pairs a canonical color name with the RGBA value returned by Godot's named color lookup.
+ *
+ * ```cpp
+ * // In Color's implementation, select the canonical record for a palette entry.
+ * const NamedColor &entry = named_colors[Color::find_named_color("cornflower blue")];
+ * Color swatch = entry.color;
+ * ```
+ */
 struct NamedColor {
+	/**
+	 * Points to the canonical uppercase ASCII name with underscores between words.
+	 *
+	 * ```cpp
+	 * // In Color::get_named_color_name(), after checking p_idx.
+	 * return named_colors[p_idx].name;
+	 * ```
+	 */
 	const char *name;
+	/**
+	 * Stores the RGBA value associated with this name.
+	 *
+	 * ```cpp
+	 * // In Color::get_named_color(), after checking p_idx.
+	 * return named_colors[p_idx].color;
+	 * ```
+	 */
 	Color color;
 };
 
+/**
+ * Stores the indexed names and RGBA values used by `Color` name lookups.
+ *
+ * ```cpp
+ * // In Color::get_named_color_count().
+ * return std_size(named_colors);
+ * ```
+ */
 static NamedColor named_colors[] = {
 	{ "ALICE_BLUE", Color::hex(0xF0F8FFFF) },
 	{ "ANTIQUE_WHITE", Color::hex(0xFAEBD7FF) },

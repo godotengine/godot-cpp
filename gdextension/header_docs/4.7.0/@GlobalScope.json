@@ -1,0 +1,476 @@
+{
+  "partial": true,
+  "sources": [
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/variant/variant_utility.cpp#L352-L420",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/variant/variant_utility.cpp#L40-L350",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/math/math_funcs.h#L54-L306",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/math/math_funcs.h#L490-L580",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/variant/variant_utility.cpp#L639-L907",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/variant/variant_utility.cpp#L1059-L1087",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/math/math_funcs.cpp#L35-L70",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/math/random_pcg.h#L53-L122",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/variant/variant_utility.cpp#L605-L679",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/variant/variant_utility.cpp#L886-L979",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/variant/variant_utility.cpp#L422-L603",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/variant/variant_utility.cpp#L981-L1057",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/math/math_funcs.h#L270-L299",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/math/math_funcs.h#L322-L470",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/math/math_funcs.h#L527-L623",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/math/math_funcs.cpp#L57-L112",
+    "https://github.com/godotengine/godot/blob/4.7-stable/core/typedefs.h#L126"
+  ],
+  "declarations": {
+    "static Variant snapped(const Variant &p_x, const Variant &p_step);": {
+      "xml": "methods/method[@name='snapped']",
+      "brief": "Returns the multiple of `p_step` closest to `p_x`. A fractional step can round a floating-point number to a chosen number of decimal places. For a vector, the function rounds each component separately. The returned `godot::Variant` has the same type as `p_step`. Supported types are `int`, `float`, `godot::Vector2`, `godot::Vector2i`, `godot::Vector3`, `godot::Vector3i`, `godot::Vector4`, and `godot::Vector4i`.\n\n**Used for** aligning a position to a grid with a separate step on each axis, or rounding a numeric value held in a `godot::Variant`.\n\n- `p_x` — Number or vector to round.\n- `p_step` — Spacing between multiples. For a vector, supply one step per component in a vector of the same type as `p_x`. A scalar step may be an integer or a float."
+    },
+    "static double snappedf(double p_x, double p_step);": {
+      "xml": "methods/method[@name='snappedf']",
+      "brief": "Returns the multiple of `p_step` closest to `p_x`. A fractional step can round the value to a chosen number of decimal places.\n\n**Used for** rounding an editor value to a fractional increment, such as `0.25` units.\n\n- `p_x` — Number to round.\n- `p_step` — Spacing between multiples. A zero step returns `p_x` unchanged."
+    },
+    "static int64_t snappedi(double p_x, int64_t p_step);": {
+      "xml": "methods/method[@name='snappedi']",
+      "brief": "Returns the integer multiple of `p_step` closest to `p_x`.\n\n**Used for** aligning a pixel coordinate to a whole-number grid step.\n\n- `p_x` — Number to round. The result must fit in an `int64_t`.\n- `p_step` — Spacing between multiples. A zero step converts `p_x` to an integer by rounding toward zero."
+    },
+    "static double sin(double p_angle_rad);": {
+      "xml": "methods/method[@name='sin']",
+      "brief": "Returns the sine of the angle.\n\n**Used for** finding the vertical component of a unit vector from its angle.\n\n- `p_angle_rad` — Angle in radians."
+    },
+    "static double cos(double p_angle_rad);": {
+      "xml": "methods/method[@name='cos']",
+      "brief": "Returns the cosine of the angle.\n\n**Used for** finding the horizontal component of a unit vector from its angle.\n\n- `p_angle_rad` — Angle in radians."
+    },
+    "static double tan(double p_angle_rad);": {
+      "xml": "methods/method[@name='tan']",
+      "brief": "Returns the tangent of the angle. The tangent is undefined at odd multiples of π/2.\n\n**Used for** converting a slope angle to a rise per unit of horizontal distance.\n\n- `p_angle_rad` — Angle in radians."
+    },
+    "static double sinh(double p_x);": {
+      "xml": "methods/method[@name='sinh']",
+      "brief": "Returns the hyperbolic sine of the input.\n\n**Used for** computing the slope of a hanging curve modeled as a catenary.\n\n- `p_x` — Real input to the hyperbolic function."
+    },
+    "static double cosh(double p_x);": {
+      "xml": "methods/method[@name='cosh']",
+      "brief": "Returns the hyperbolic cosine of the input.\n\n**Used for** computing the height of a point on a catenary.\n\n- `p_x` — Real input to the hyperbolic function."
+    },
+    "static double tanh(double p_x);": {
+      "xml": "methods/method[@name='tanh']",
+      "brief": "Returns the hyperbolic tangent of the input.\n\n**Used for** smoothly limiting a signal's output to the interval between −1 and 1.\n\n- `p_x` — Real input to the hyperbolic function."
+    },
+    "static double asin(double p_x);": {
+      "xml": "methods/method[@name='asin']",
+      "brief": "Returns the inverse sine in radians, from −π/2 to π/2. Clamps inputs below −1 and above 1 to those bounds.\n\n**Used for** recovering an angle from a normalized vertical component.\n\n- `p_x` — Sine value. The accepted range before clamping is −1 to 1."
+    },
+    "static double acos(double p_x);": {
+      "xml": "methods/method[@name='acos']",
+      "brief": "Returns the inverse cosine in radians, from 0 to π. Clamps inputs below −1 and above 1 to those bounds.\n\n**Used for** finding the angle between two normalized vectors from their dot product.\n\n- `p_x` — Cosine value, usually between −1 and 1."
+    },
+    "static double atan(double p_x);": {
+      "xml": "methods/method[@name='atan']",
+      "brief": "Returns the inverse tangent in radians in the range −π/2 to π/2.\n\n**Used for** converting a signed slope to an angle of inclination.\n\n- `p_x` — Ratio of rise to run."
+    },
+    "static double atan2(double p_y, double p_x);": {
+      "xml": "methods/method[@name='atan2']",
+      "brief": "Returns the angle in radians of the 2D vector `(p_x, p_y)` measured from the positive X axis. Uses both signs to choose the quadrant.\n\n**Used for** orienting an object toward a 2D displacement that may point into any quadrant.\n\n- `p_y` — Y component of the displacement.\n- `p_x` — X component of the displacement."
+    },
+    "static double asinh(double p_x);": {
+      "xml": "methods/method[@name='asinh']",
+      "brief": "Returns the inverse hyperbolic sine.\n\n**Used for** solving for the position on a catenary from its slope.\n\n- `p_x` — Value whose hyperbolic sine is being inverted."
+    },
+    "static double acosh(double p_x);": {
+      "xml": "methods/method[@name='acosh']",
+      "brief": "Returns the inverse hyperbolic cosine for inputs at least 1. Returns zero below 1.\n\n**Used for** solving for a distance from the lowest point of a catenary using its normalized height.\n\n- `p_x` — Value whose hyperbolic cosine is being inverted. Use a value of at least 1 for the real inverse."
+    },
+    "static double atanh(double p_x);": {
+      "xml": "methods/method[@name='atanh']",
+      "brief": "Returns the inverse hyperbolic tangent for values strictly between −1 and 1. Returns negative infinity at or below −1 and positive infinity at or above 1.\n\n**Used for** recovering an unbounded signal from a value previously limited with `godot::UtilityFunctions::tanh()`.\n\n- `p_x` — Value between −1 and 1 for a finite result."
+    },
+    "static double sqrt(double p_x);": {
+      "xml": "methods/method[@name='sqrt']",
+      "brief": "Returns the nonnegative square root. Negative inputs return NaN.\n\n**Used for** recovering a length from its squared magnitude.\n\n- `p_x` — Nonnegative value to square-root."
+    },
+    "static double floorf(double p_x);": {
+      "xml": "methods/method[@name='floorf']",
+      "brief": "Rounds down toward negative infinity and returns a floating-point value.\n\n**Used for** choosing the grid cell at or below a position.\n\n- `p_x` — Value to round."
+    },
+    "static int64_t floori(double p_x);": {
+      "xml": "methods/method[@name='floori']",
+      "brief": "Rounds down toward negative infinity and returns an integer.\n\n**Used for** choosing the grid cell at or below a position.\n\n- `p_x` — Value to round. The rounded result must fit in an `int64_t`."
+    },
+    "static double ceilf(double p_x);": {
+      "xml": "methods/method[@name='ceilf']",
+      "brief": "Rounds up toward positive infinity and returns a floating-point value.\n\n**Used for** counting enough whole cells to cover an extent.\n\n- `p_x` — Value to round."
+    },
+    "static int64_t ceili(double p_x);": {
+      "xml": "methods/method[@name='ceili']",
+      "brief": "Rounds up toward positive infinity and returns an integer.\n\n**Used for** counting enough whole cells to cover an extent.\n\n- `p_x` — Value to round. The rounded result must fit in an `int64_t`."
+    },
+    "static double roundf(double p_x);": {
+      "xml": "methods/method[@name='roundf']",
+      "brief": "Rounds to the nearest integer and returns a floating-point value. A value halfway between integers rounds away from zero.\n\n**Used for** aligning a coordinate to the closest integer position.\n\n- `p_x` — Value to round."
+    },
+    "static int64_t roundi(double p_x);": {
+      "xml": "methods/method[@name='roundi']",
+      "brief": "Rounds to the nearest integer and returns an integer. A value halfway between integers rounds away from zero.\n\n**Used for** aligning a coordinate to the closest integer position.\n\n- `p_x` — Value to round. The rounded result must fit in an `int64_t`."
+    },
+    "static double absf(double p_x);": {
+      "xml": "methods/method[@name='absf']",
+      "brief": "Returns the absolute value as a floating-point number.\n\n**Used for** measuring the magnitude of a signed difference.\n\n- `p_x` — Value whose sign is discarded."
+    },
+    "static int64_t absi(int64_t p_x);": {
+      "xml": "methods/method[@name='absi']",
+      "brief": "Returns the absolute value as a signed integer.\n\n**Used for** measuring the number of steps in an integer displacement.\n\n- `p_x` — Signed integer whose magnitude fits in an `int64_t`."
+    },
+    "static double signf(double p_x);": {
+      "xml": "methods/method[@name='signf']",
+      "brief": "Returns −1 for a negative value, 1 for a positive value, and 0 for zero.\n\n**Used for** choosing the direction of a floating-point movement independently of its speed.\n\n- `p_x` — Floating-point value to classify by sign."
+    },
+    "static int64_t signi(int64_t p_x);": {
+      "xml": "methods/method[@name='signi']",
+      "brief": "Returns −1 for a negative integer, 1 for a positive integer, and 0 for zero.\n\n**Used for** choosing a whole-number step toward a target.\n\n- `p_x` — Integer to classify by sign."
+    },
+    "static double pow(double p_base, double p_exp);": {
+      "xml": "methods/method[@name='pow']",
+      "brief": "Raises the base to the given exponent.\n\n**Used for** computing multiplicative growth over a specified number of steps.\n\n- `p_base` — Value to raise to a power. Use a nonnegative base for a nonintegral exponent if a real result is needed.\n- `p_exp` — Exponent applied to the base."
+    },
+    "static double log(double p_x);": {
+      "xml": "methods/method[@name='log']",
+      "brief": "Returns the natural logarithm. Zero returns negative infinity and negative values return NaN.\n\n**Used for** recovering an exponent or converting a multiplicative ratio to a logarithmic scale.\n\n- `p_x` — Positive finite input for a finite result."
+    },
+    "static double exp(double p_x);": {
+      "xml": "methods/method[@name='exp']",
+      "brief": "Returns Euler's number raised to the given exponent.\n\n**Used for** computing a continuous growth or decay factor from an exponent.\n\n- `p_x` — Exponent applied to Euler's number."
+    },
+    "static bool is_nan(double p_x);": {
+      "xml": "methods/method[@name='is_nan']",
+      "brief": "Returns whether the input is NaN.\n\n**Used for** detecting an undefined floating-point result before using it in further calculations.\n\n- `p_x` — Floating-point value to test."
+    },
+    "static bool is_inf(double p_x);": {
+      "xml": "methods/method[@name='is_inf']",
+      "brief": "Returns whether the input is positive or negative infinity.\n\n**Used for** detecting an unbounded floating-point result or an overflow represented as infinity.\n\n- `p_x` — Floating-point value to test."
+    },
+    "static bool is_finite(double p_x);": {
+      "xml": "methods/method[@name='is_finite']",
+      "brief": "Returns whether the input is finite. Infinity and NaN both fail the test.\n\n**Used for** rejecting invalid movement or calculation results before storing them.\n\n- `p_x` — Floating-point value to test."
+    },
+    "static bool is_equal_approx(double p_a, double p_b);": {
+      "xml": "methods/method[@name='is_equal_approx']",
+      "brief": "Returns true for equal inputs, including equal infinities. Otherwise compares the absolute difference against a tolerance scaled to the magnitude of the first value, with a fixed minimum.\n\n**Used for** comparing results from separate floating-point calculations despite rounding differences.\n\n- `p_a` — First value and reference for scaling the tolerance.\n- `p_b` — Second value to compare against the first."
+    },
+    "static bool is_zero_approx(double p_x);": {
+      "xml": "methods/method[@name='is_zero_approx']",
+      "brief": "Returns whether the magnitude is less than Godot's fixed comparison tolerance.\n\n**Used for** detecting a negligible residual before a calculation treats it as zero.\n\n- `p_x` — Value to compare with zero."
+    },
+    "static double deg_to_rad(double p_deg);": {
+      "xml": "methods/method[@name='deg_to_rad']",
+      "brief": "Converts degrees to radians.\n\n**Used for** passing an angle entered in an editor field to a Godot rotation API.\n\n- `p_deg` — Angle in degrees."
+    },
+    "static double rad_to_deg(double p_rad);": {
+      "xml": "methods/method[@name='rad_to_deg']",
+      "brief": "Converts radians to degrees.\n\n**Used for** displaying a Godot rotation angle in an editor or debugging tool.\n\n- `p_rad` — Angle in radians."
+    },
+    "static double linear_to_db(double p_lin);": {
+      "xml": "methods/method[@name='linear_to_db']",
+      "brief": "Converts linear amplitude to decibels. A zero amplitude returns negative infinity.\n\n**Used for** setting decibel-based audio volume from a linear gain control.\n\n- `p_lin` — Linear amplitude ratio. One corresponds to zero decibels."
+    },
+    "static double db_to_linear(double p_db);": {
+      "xml": "methods/method[@name='db_to_linear']",
+      "brief": "Converts decibels to a linear amplitude ratio.\n\n**Used for** applying an audio volume setting as a gain multiplier.\n\n- `p_db` — Gain in decibels. Zero corresponds to a ratio of one."
+    },
+    "static double maxf(double p_a, double p_b);": {
+      "xml": "methods/method[@name='maxf']",
+      "brief": "Returns the greater of the two floating-point values.\n\n**Used for** selecting the higher of two candidate limits.\n\n- `p_a` — First value to compare.\n- `p_b` — Second value to compare."
+    },
+    "static double minf(double p_a, double p_b);": {
+      "xml": "methods/method[@name='minf']",
+      "brief": "Returns the smaller of the two floating-point values.\n\n**Used for** selecting the lower of two candidate limits.\n\n- `p_a` — First value to compare.\n- `p_b` — Second value to compare."
+    },
+    "static double clampf(double p_value, double p_min, double p_max);": {
+      "xml": "methods/method[@name='clampf']",
+      "brief": "Limits a floating-point value to a closed interval. Inputs outside the interval return the nearer bound.\n\n**Used for** keeping a computed setting within the range accepted by its consumer.\n\n- `p_value` — Value to limit.\n- `p_min` — Inclusive lower bound.\n- `p_max` — Inclusive upper bound, at least p_min."
+    },
+    "static int64_t maxi(int64_t p_a, int64_t p_b);": {
+      "xml": "methods/method[@name='maxi']",
+      "brief": "Returns the greater of the two integer values.\n\n**Used for** selecting the higher of two candidate limits.\n\n- `p_a` — First value to compare.\n- `p_b` — Second value to compare."
+    },
+    "static int64_t mini(int64_t p_a, int64_t p_b);": {
+      "xml": "methods/method[@name='mini']",
+      "brief": "Returns the smaller of the two integer values.\n\n**Used for** selecting the lower of two candidate limits.\n\n- `p_a` — First value to compare.\n- `p_b` — Second value to compare."
+    },
+    "static int64_t clampi(int64_t p_value, int64_t p_min, int64_t p_max);": {
+      "xml": "methods/method[@name='clampi']",
+      "brief": "Limits a integer value to a closed interval. Inputs outside the interval return the nearer bound.\n\n**Used for** keeping a computed setting within the range accepted by its consumer.\n\n- `p_value` — Value to limit.\n- `p_min` — Inclusive lower bound.\n- `p_max` — Inclusive upper bound, at least p_min."
+    },
+    "static void randomize();": {
+      "xml": "methods/method[@name='randomize']",
+      "brief": "Reseeds the shared random number generator from time and device state. Godot seeds it automatically at project startup.\n\n**Used for** starting a new random sequence during a running session."
+    },
+    "static int64_t randi();": {
+      "xml": "methods/method[@name='randi']",
+      "brief": "Returns an unsigned 32-bit random value represented as an `int64_t`. Advances the shared generator.\n\n**Used for** drawing a random integer when the full 32-bit range is useful."
+    },
+    "static double randf();": {
+      "xml": "methods/method[@name='randf']",
+      "brief": "Returns a random value in the closed range from 0 to 1. Advances the shared generator.\n\n**Used for** choosing a random blend weight or comparing a sample against a probability."
+    },
+    "static int64_t randi_range(int64_t p_from, int64_t p_to);": {
+      "xml": "methods/method[@name='randi_range']",
+      "brief": "Returns a random integer between the two endpoints, inclusive. The engine converts the endpoints to signed 32-bit integers and uses them in ascending order.\n\n**Used for** selecting an index from a closed range of positions.\n\n- `p_from` — First endpoint. Supply a value in the signed 32-bit range.\n- `p_to` — Second endpoint. Supply a value in the signed 32-bit range."
+    },
+    "static double randf_range(double p_from, double p_to);": {
+      "xml": "methods/method[@name='randf_range']",
+      "brief": "Returns a random floating-point value between the two endpoints, inclusive.\n\n**Used for** varying a property within a chosen interval.\n\n- `p_from` — First endpoint, corresponding to a sample of zero.\n- `p_to` — Second endpoint, corresponding to a sample of one."
+    },
+    "static double randfn(double p_mean, double p_deviation);": {
+      "xml": "methods/method[@name='randfn']",
+      "brief": "Returns a random sample from a normal distribution using the Box–Muller transform.\n\n**Used for** generating noise centered on a value with a specified spread.\n\n- `p_mean` — Center of the distribution.\n- `p_deviation` — Standard deviation. Use a nonnegative value."
+    },
+    "static void seed(int64_t p_base);": {
+      "xml": "methods/method[@name='seed']",
+      "brief": "Resets the shared random number generator using the supplied seed.\n\n**Used for** repeating the same global random sequence when the same calls are made in the same order.\n\n- `p_base` — Seed used to initialize the generator."
+    },
+    "static PackedInt64Array rand_from_seed(int64_t p_seed);": {
+      "xml": "methods/method[@name='rand_from_seed']",
+      "brief": "Returns two integers. The first is a freshly generated unsigned 32-bit value and the second is the input seed. Uses a local generator.\n\n**Used for** reproducing one random sample from a known seed independently of the shared generator.\n\n- `p_seed` — Seed for the local generator. The same seed produces the same pair."
+    },
+    "static Variant weakref(const Variant &p_obj);": {
+      "xml": "methods/method[@name='weakref']",
+      "brief": "Returns a Variant containing a `godot::WeakRef` that does not keep the target alive. A nil or unavailable object produces an empty weak reference. Other Variant types give a call error and return nil.\n\n**Used for** remembering an optional object without extending its lifetime.\n\n- `p_obj` — Variant containing an object or nil."
+    },
+    "static int64_t type_of(const Variant &p_variable);": {
+      "xml": "methods/method[@name='typeof']",
+      "brief": "Returns the Variant's current type as a `godot::Variant::Type` value.\n\n**Used for** choosing how to handle a value from a Variant-based interface.\n\n- `p_variable` — Value whose type is inspected."
+    },
+    "static Variant type_convert(const Variant &p_variant, int64_t p_type);": {
+      "xml": "methods/method[@name='type_convert']",
+      "brief": "Converts a Variant using the conversion for the requested type. Supported conversions include numeric strings to numbers and conversions between array types. An unavailable conversion can produce the default value for the requested type.\n\n**Used for** converting a dynamic value to the type expected by a property or a data format.\n\n- `p_variant` — Value to convert.\n- `p_type` — Requested type from `godot::Variant::Type`."
+    },
+    "static String error_string(int64_t p_error);": {
+      "xml": "methods/method[@name='error_string']",
+      "brief": "Returns a readable message for a Godot error code. Values outside the error enumeration return the invalid-code message.\n\n**Used for** adding the meaning of an error code to a log message or a diagnostic.\n\n- `p_error` — Error code from `godot::Error`."
+    },
+    "static String type_string(int64_t p_type);": {
+      "xml": "methods/method[@name='type_string']",
+      "brief": "Returns the display name for a Variant type. An invalid type reports an error and returns `<invalid type>`.\n\n**Used for** showing the name of a value type in a diagnostic or inspector.\n\n- `p_type` — Type value from `godot::Variant::Type`."
+    },
+    "static int64_t hash(const Variant &p_variable);": {
+      "xml": "methods/method[@name='hash']",
+      "brief": "Returns the hash of a Variant value as an integer.\n\n**Used for** placing Variant values in hash-based lookup buckets.\n\n- `p_variable` — Variant to hash."
+    },
+    "static Object *instance_from_id(int64_t p_instance_id);": {
+      "xml": "methods/method[@name='instance_from_id']",
+      "brief": "Returns the C++ wrapper of the live Godot object with the given ID, or null when the lookup finds no object.\n\n**Used for** resolving a previously stored object ID when the object is needed again.\n\n- `p_instance_id` — Instance ID returned by `godot::Object::get_instance_id()`."
+    },
+    "static bool is_instance_id_valid(int64_t p_id);": {
+      "xml": "methods/method[@name='is_instance_id_valid']",
+      "brief": "Returns whether Godot's object database currently contains the given ID.\n\n**Used for** checking a stored ID before presenting an entry for the associated object.\n\n- `p_id` — Godot object instance ID to check."
+    },
+    "static int64_t rid_allocate_id();": {
+      "xml": "methods/method[@name='rid_allocate_id']",
+      "brief": "Allocates a unique ID for making a resource identifier.\n\n**Used for** assigning IDs to resources managed by a native server extension."
+    },
+    "static RID rid_from_int64(int64_t p_base);": {
+      "xml": "methods/method[@name='rid_from_int64']",
+      "brief": "Creates a resource identifier from the supplied ID.\n\n**Used for** turning an allocated numeric ID into a handle used by a native server extension.\n\n- `p_base` — ID to store in the returned `godot::RID`, such as an ID from `godot::UtilityFunctions::rid_allocate_id()`."
+    },
+    "static bool is_same(const Variant &p_a, const Variant &p_b);": {
+      "xml": "methods/method[@name='is_same']",
+      "brief": "Compares two Variant values. Value types compare by value and reference types compare by identity.\n\n**Used for** checking whether two references share an instance, such as two handles to the same array.\n\n- `p_a` — First value to compare.\n- `p_b` — Second value to compare."
+    },
+    "vararg:static Variant max_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='max']",
+      "brief": "Returns the largest input, preserving that input's Variant type. When values compare equal, keeps the first matching input. A value other than an integer or a float causes an argument error and a nil result.\n\n**Used for** choosing the upper limit from several numeric values.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First numeric value to compare.\n- `p_arg2` — Second numeric value to compare.\n- `p_args` — Additional numeric values to compare after the first two."
+    },
+    "vararg:static Variant min_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='min']",
+      "brief": "Returns the smallest input, preserving that input's Variant type. When values compare equal, keeps the first matching input. A value other than an integer or a float causes an argument error and a nil result.\n\n**Used for** choosing the lower limit from several numeric values.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First numeric value to compare.\n- `p_arg2` — Second numeric value to compare.\n- `p_args` — Additional numeric values to compare after the first two."
+    },
+    "vararg:static String str_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='str']",
+      "brief": "Converts each argument to text and joins the results in argument order with no separator.\n\n**Used for** building a string from a label and computed values before storing or displaying it.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First value to format.\n- `p_args` — Additional values to format after the first."
+    },
+    "vararg:static void print_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='print']",
+      "brief": "Converts the arguments to text, joins them with no separator, and prints a line to standard output. Project settings can disable standard output.\n\n**Used for** logging a status message that combines text and values.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First value to format.\n- `p_args` — Additional values to format after the first."
+    },
+    "vararg:static void print_rich_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='print_rich']",
+      "brief": "Joins the arguments as text with no separator and prints a line with BBCode formatting. Supported tags include `b`, `i`, `u`, `s`, `indent`, `code`, `url`, `center`, `right`, `color`, `bgcolor`, and `fgcolor`. The URL tag supports a URL as its contents. Standard output translates supported tags to ANSI escape codes where the terminal can display them.\n\n**Used for** highlighting important values in console output.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First value to format, including any BBCode tags.\n- `p_args` — Additional values appended in order, including any BBCode tags."
+    },
+    "vararg:static void printerr_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='printerr']",
+      "brief": "Converts the arguments to text, concatenates them, and prints a line to standard error.\n\n**Used for** sending a diagnostic to standard error so it can be collected separately from standard output.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First value to format.\n- `p_args` — Additional values to format after the first."
+    },
+    "vararg:static void printt_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='printt']",
+      "brief": "Prints the arguments as a line with a tab between adjacent values.\n\n**Used for** printing rows with tab-separated columns for inspection.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First value to format.\n- `p_args` — Additional values to format after the first."
+    },
+    "vararg:static void prints_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='prints']",
+      "brief": "Prints the arguments as a line with a space between adjacent values.\n\n**Used for** printing a short list without supplying the separator as a separate argument.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First value to format.\n- `p_args` — Additional values to format after the first."
+    },
+    "vararg:static void printraw_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='printraw']",
+      "brief": "Prints the arguments to the process terminal with no separator and no trailing newline. For Windows editor runs, terminal output requires the console executable.\n\n**Used for** writing fragments of a terminal line that the caller will finish separately.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First value to format.\n- `p_args` — Additional values to format after the first."
+    },
+    "vararg:static void print_verbose_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='print_verbose']",
+      "brief": "Joins the arguments and prints a line to standard output when `godot::OS::is_stdout_verbose()` is true.\n\n**Used for** reporting additional progress or measurements only in verbose runs.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First value to format.\n- `p_args` — Additional values to format after the first."
+    },
+    "vararg:static void push_error_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='push_error']",
+      "brief": "Joins the arguments and sends an error to the engine debugger and terminal. Execution continues.\n\n**Used for** reporting failures that should appear in the debugger as errors.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First value to format.\n- `p_args` — Additional values to format after the first."
+    },
+    "vararg:static void push_warning_internal(const Variant **p_args, GDExtensionInt p_arg_count);": {
+      "xml": "methods/method[@name='push_warning']",
+      "brief": "Joins the arguments and sends a warning to the engine debugger and terminal.\n\n**Used for** flagging an unexpected but recoverable condition in the debugger.\n\n- `Args` — Types of the additional arguments. Each must be convertible to `godot::Variant`.\n- `p_arg1` — First value to format.\n- `p_args` — Additional values to format after the first."
+    },
+    "static double fmod(double p_x, double p_y);": {
+      "xml": "methods/method[@name='fmod']",
+      "brief": "Returns the floating-point remainder after division, using a quotient truncated toward zero. A nonzero result has the sign of the dividend.\n\n**Used for** finding the fraction of a repeating interval that remains while preserving the dividend's direction.\n\n- `p_x` — Dividend.\n- `p_y` — Nonzero divisor in the same units as the dividend."
+    },
+    "static double fposmod(double p_x, double p_y);": {
+      "xml": "methods/method[@name='fposmod']",
+      "brief": "Returns the floating-point remainder adjusted to have the divisor's sign when the remainder is nonzero.\n\n**Used for** wrapping a value into a periodic interval, including values below the start.\n\n- `p_x` — Dividend to wrap.\n- `p_y` — Nonzero divisor that sets the period and its sign."
+    },
+    "static int64_t posmod(int64_t p_x, int64_t p_y);": {
+      "xml": "methods/method[@name='posmod']",
+      "brief": "Returns the integer remainder adjusted to have the divisor's sign when the remainder is nonzero. A zero divisor reports an error and returns zero.\n\n**Used for** wrapping a value into a periodic interval, including values below the start.\n\n- `p_x` — Dividend to wrap.\n- `p_y` — Nonzero divisor that sets the period and its sign."
+    },
+    "static Variant floor(const Variant &p_x);": {
+      "xml": "methods/method[@name='floor']",
+      "brief": "Rounds toward negative infinity. Applies the operation to each vector component and keeps the input type. Integer inputs are already rounded.\n\n**Used for** mapping a Variant-based position to the lower grid cell on each axis.\n\n- `p_x` — An integer, float, or `godot::Vector2`, `godot::Vector2i`, `godot::Vector3`, `godot::Vector3i`, `godot::Vector4`, or `godot::Vector4i`. Unsupported input types cause an argument error."
+    },
+    "static Variant ceil(const Variant &p_x);": {
+      "xml": "methods/method[@name='ceil']",
+      "brief": "Rounds toward positive infinity. Applies the operation to each vector component and keeps the input type. Integer inputs are already rounded.\n\n**Used for** rounding a Variant-based extent up when counting whole cells.\n\n- `p_x` — An integer, float, or `godot::Vector2`, `godot::Vector2i`, `godot::Vector3`, `godot::Vector3i`, `godot::Vector4`, or `godot::Vector4i`. Unsupported input types cause an argument error."
+    },
+    "static Variant round(const Variant &p_x);": {
+      "xml": "methods/method[@name='round']",
+      "brief": "Rounds to the nearest integer, with halfway values rounded away from zero. Applies the operation to each vector component and keeps the input type. Integer inputs are already rounded.\n\n**Used for** aligning a Variant-based position to the nearest whole coordinate.\n\n- `p_x` — An integer, float, or `godot::Vector2`, `godot::Vector2i`, `godot::Vector3`, `godot::Vector3i`, `godot::Vector4`, or `godot::Vector4i`. Unsupported input types cause an argument error."
+    },
+    "static Variant abs(const Variant &p_x);": {
+      "xml": "methods/method[@name='abs']",
+      "brief": "Returns the absolute value of a number or of every vector component. Keeps the input type.\n\n**Used for** measuring the magnitude of each component in a signed offset stored in a Variant.\n\n- `p_x` — An integer, float, or `godot::Vector2`, `godot::Vector2i`, `godot::Vector3`, `godot::Vector3i`, `godot::Vector4`, or `godot::Vector4i`. Integer magnitudes must fit in the corresponding signed type."
+    },
+    "static Variant sign(const Variant &p_x);": {
+      "xml": "methods/method[@name='sign']",
+      "brief": "Returns −1, 0, or 1 for each negative, zero, or positive input component. Keeps the input type.\n\n**Used for** extracting movement directions from Variant-based numeric input without keeping the magnitude.\n\n- `p_x` — An integer, float, or `godot::Vector2`, `godot::Vector2i`, `godot::Vector3`, `godot::Vector3i`, `godot::Vector4`, or `godot::Vector4i`. Unsupported input types cause an argument error."
+    },
+    "static double ease(double p_x, double p_curve);": {
+      "xml": "methods/method[@name='ease']",
+      "brief": "Shapes a weight with a power curve. A positive curve below 1 starts fast and slows down, 1 is linear, and a curve above 1 starts slowly. Negative curves combine two half-curves. A zero curve returns zero.\n\n**Used for** adjusting the progress of a transition so its rate varies over time.\n\n- `p_x` — Progress clamped to the interval from 0 to 1.\n- `p_curve` — Exponent control for the easing curve."
+    },
+    "static int64_t step_decimals(double p_x);": {
+      "xml": "methods/method[@name='step_decimals']",
+      "brief": "Estimates display precision from the magnitude of the fractional part of a step. Uses fixed thresholds and returns a count from 0 to 9. Fractions below the smallest threshold return 0.\n\n**Used for** choosing how many decimal places to display for a numeric control with a fixed step.\n\n- `p_x` — Step to inspect. Its absolute integer part must fit in a C++ int."
+    },
+    "static Variant lerp(const Variant &p_from, const Variant &p_to, const Variant &p_weight);": {
+      "xml": "methods/method[@name='lerp']",
+      "brief": "Interpolates between two same-type Variants. Integers give a floating-point result. Uses component interpolation for floating-point vectors and colors, spherical interpolation for quaternions and bases, and the transform's own interpolation for transforms.\n\n**Used for** blending values supplied by a Variant-based interface.\n\n- `p_from` — Start value. Supports integer, float, floating-point vectors with two to four components, color, quaternion, basis, and 2D or 3D transforms.\n- `p_to` — End value of the same Variant type. A different type causes an argument error.\n- `p_weight` — Interpolation weight. Zero chooses the start and one chooses the end. Supply it as a number."
+    },
+    "static double lerpf(double p_from, double p_to, double p_weight);": {
+      "xml": "methods/method[@name='lerpf']",
+      "brief": "Returns the weighted position from the start to the end using linear interpolation. Weights outside the unit interval extrapolate.\n\n**Used for** blending scalar measurements or animation values without converting them through Variant.\n\n- `p_from` — Value at weight zero.\n- `p_to` — Value at weight one.\n- `p_weight` — Interpolation weight. Zero chooses the start and one chooses the end."
+    },
+    "static double cubic_interpolate(double p_from, double p_to, double p_pre, double p_post, double p_weight);": {
+      "xml": "methods/method[@name='cubic_interpolate']",
+      "brief": "Interpolates between two scalar values on a cubic curve shaped by the preceding and following samples.\n\n**Used for** smoothing a scalar animation curve between sampled values.\n\n- `p_from` — Start sample.\n- `p_to` — End sample.\n- `p_pre` — Sample before the start.\n- `p_post` — Sample after the end.\n- `p_weight` — Interpolation weight. Zero chooses the start and one chooses the end."
+    },
+    "static double cubic_interpolate_in_time(double p_from, double p_to, double p_pre, double p_post, double p_weight, double p_to_t, double p_pre_t, double p_post_t);": {
+      "xml": "methods/method[@name='cubic_interpolate_in_time']",
+      "brief": "Interpolates between two scalar values on a cubic curve shaped by the preceding and following samples. Allows uneven spacing between sample times.\n\n**Used for** smoothing a scalar animation curve between sampled values.\n\n- `p_from` — Start sample.\n- `p_to` — End sample.\n- `p_pre` — Sample before the start.\n- `p_post` — Sample after the end.\n- `p_weight` — Interpolation weight. Zero chooses the start and one chooses the end.\n- `p_to_t` — End sample time relative to the start.\n- `p_pre_t` — Preceding sample time relative to the start.\n- `p_post_t` — Following sample time relative to the start."
+    },
+    "static double cubic_interpolate_angle(double p_from, double p_to, double p_pre, double p_post, double p_weight);": {
+      "xml": "methods/method[@name='cubic_interpolate_angle']",
+      "brief": "Interpolates between two angles in radians on a cubic curve shaped by the preceding and following samples. Adjusts the angles to follow the continuous path across a full turn.\n\n**Used for** smoothing angular motion between sampled rotations.\n\n- `p_from` — Start sample.\n- `p_to` — End sample.\n- `p_pre` — Sample before the start.\n- `p_post` — Sample after the end.\n- `p_weight` — Interpolation weight. Zero chooses the start and one chooses the end."
+    },
+    "static double cubic_interpolate_angle_in_time(double p_from, double p_to, double p_pre, double p_post, double p_weight, double p_to_t, double p_pre_t, double p_post_t);": {
+      "xml": "methods/method[@name='cubic_interpolate_angle_in_time']",
+      "brief": "Interpolates between two angles in radians on a cubic curve shaped by the preceding and following samples. Adjusts the angles to follow the continuous path across a full turn. Allows uneven spacing between sample times.\n\n**Used for** smoothing angular motion between sampled rotations.\n\n- `p_from` — Start sample.\n- `p_to` — End sample.\n- `p_pre` — Sample before the start.\n- `p_post` — Sample after the end.\n- `p_weight` — Interpolation weight. Zero chooses the start and one chooses the end.\n- `p_to_t` — End sample time relative to the start.\n- `p_pre_t` — Preceding sample time relative to the start.\n- `p_post_t` — Following sample time relative to the start."
+    },
+    "static double bezier_interpolate(double p_start, double p_control_1, double p_control_2, double p_end, double p_t);": {
+      "xml": "methods/method[@name='bezier_interpolate']",
+      "brief": "Evaluates a cubic Bézier curve at the supplied parameter.\n\n**Used for** sampling an animation or drawing curve defined by two endpoints and two controls.\n\n- `p_start` — Curve value at parameter zero.\n- `p_control_1` — First control value, shaping the curve near the start.\n- `p_control_2` — Second control value, shaping the curve near the end.\n- `p_end` — Curve value at parameter one.\n- `p_t` — Parameter from 0 to 1 to evaluate within the curve."
+    },
+    "static double bezier_derivative(double p_start, double p_control_1, double p_control_2, double p_end, double p_t);": {
+      "xml": "methods/method[@name='bezier_derivative']",
+      "brief": "Returns the derivative of a cubic Bézier curve with respect to its parameter.\n\n**Used for** finding the slope of a Bézier segment, or the tangent when applied to each component.\n\n- `p_start` — Curve value at parameter zero.\n- `p_control_1` — First control value, shaping the curve near the start.\n- `p_control_2` — Second control value, shaping the curve near the end.\n- `p_end` — Curve value at parameter one.\n- `p_t` — Parameter from 0 to 1 to evaluate within the curve."
+    },
+    "static double angle_difference(double p_from, double p_to);": {
+      "xml": "methods/method[@name='angle_difference']",
+      "brief": "Returns the signed shortest difference in radians from the start angle to the end angle. At half a turn, the sign depends on the input angles.\n\n**Used for** deciding which direction to rotate toward a target heading.\n\n- `p_from` — Current angle in radians.\n- `p_to` — Target angle in radians."
+    },
+    "static double lerp_angle(double p_from, double p_to, double p_weight);": {
+      "xml": "methods/method[@name='lerp_angle']",
+      "brief": "Interpolates along the shortest angular path from the start to the end in radians. At half a turn the sign can depend on rounding.\n\n**Used for** blending headings across the wrap at a full turn.\n\n- `p_from` — Start angle in radians.\n- `p_to` — End angle in radians.\n- `p_weight` — Interpolation weight. Zero chooses the start and one chooses the end."
+    },
+    "static double inverse_lerp(double p_from, double p_to, double p_weight);": {
+      "xml": "methods/method[@name='inverse_lerp']",
+      "brief": "Returns the weight that linearly maps the supplied value from the start to the end. Values outside the interval can return weights outside 0 to 1.\n\n**Used for** normalizing a measured value to a fraction within a known range.\n\n- `p_from` — Value at weight zero.\n- `p_to` — Value at weight one, distinct from p_from.\n- `p_weight` — Value whose interpolation weight is returned."
+    },
+    "static double remap(double p_value, double p_istart, double p_istop, double p_ostart, double p_ostop);": {
+      "xml": "methods/method[@name='remap']",
+      "brief": "Maps the input linearly from one interval to another. Inputs outside the source interval extrapolate.\n\n**Used for** converting a measurement into another scale, such as mapping slider travel to a gain range.\n\n- `p_value` — Input value to map.\n- `p_istart` — Source value mapped to p_ostart.\n- `p_istop` — Source value mapped to p_ostop, distinct from p_istart.\n- `p_ostart` — Output at the source start.\n- `p_ostop` — Output at the source end."
+    },
+    "static double smoothstep(double p_from, double p_to, double p_x);": {
+      "xml": "methods/method[@name='smoothstep']",
+      "brief": "Returns a smooth weight from 0 at the start to 1 at the end. Clamps the input to the interval. Approximately equal bounds use a step at the smaller bound.\n\n**Used for** blending near a threshold with a gradual transition instead of a sudden change.\n\n- `p_from` — Input value that normally maps to weight zero.\n- `p_to` — Input value that normally maps to weight one.\n- `p_x` — Input value to map to a smooth weight."
+    },
+    "static double move_toward(double p_from, double p_to, double p_delta);": {
+      "xml": "methods/method[@name='move_toward']",
+      "brief": "Moves a value toward a target by the given amount. A nonnegative step stops at the target. A negative step moves away when the values differ.\n\n**Used for** advancing a scalar toward a target at a fixed rate per update.\n\n- `p_from` — Current value.\n- `p_to` — Target value.\n- `p_delta` — Maximum step toward the target, or a negative step to move away."
+    },
+    "static double rotate_toward(double p_from, double p_to, double p_delta);": {
+      "xml": "methods/method[@name='rotate_toward']",
+      "brief": "Moves along the shortest angular path by up to the given amount. A positive step stops at the target. A negative step moves away as far as the opposite angle.\n\n**Used for** turning toward a heading at a rate limited per update.\n\n- `p_from` — Current angle in radians.\n- `p_to` — Target angle in radians.\n- `p_delta` — Step limit in radians."
+    },
+    "static int64_t wrapi(int64_t p_value, int64_t p_min, int64_t p_max);": {
+      "xml": "methods/method[@name='wrapi']",
+      "brief": "Wraps an integer into an interval that includes its lower bound and excludes its upper bound. Equal bounds return the lower bound.\n\n**Used for** cycling an index or a periodic value through a fixed interval.\n\n- `p_value` — Value to wrap.\n- `p_min` — Inclusive lower bound.\n- `p_max` — Exclusive upper bound, at least p_min."
+    },
+    "static double wrapf(double p_value, double p_min, double p_max);": {
+      "xml": "methods/method[@name='wrapf']",
+      "brief": "Wraps a floating-point value into an interval that includes its lower bound and excludes its upper bound. Equal bounds return the lower bound.\n\n**Used for** cycling an index or a periodic value through a fixed interval.\n\n- `p_value` — Value to wrap.\n- `p_min` — Inclusive lower bound.\n- `p_max` — Exclusive upper bound, at least p_min."
+    },
+    "static Variant wrap(const Variant &p_value, const Variant &p_min, const Variant &p_max);": {
+      "xml": "methods/method[@name='wrap']",
+      "brief": "Wraps a numeric Variant using an inclusive lower bound and an exclusive upper bound. Uses floating-point wrapping when any input is a float and integer wrapping when all are integers. Equal bounds return the lower bound.\n\n**Used for** cycling an index or a periodic value through a fixed interval.\n\n- `p_value` — Integer or float to wrap. Keep all-integer inputs in the signed 32-bit range.\n- `p_min` — Inclusive lower bound.\n- `p_max` — Exclusive upper bound, at least p_min."
+    },
+    "static Variant clamp(const Variant &p_value, const Variant &p_min, const Variant &p_max);": {
+      "xml": "methods/method[@name='clamp']",
+      "brief": "Returns the input if it falls between the two bounds. Otherwise returns the lower or upper bound as appropriate. The function uses Variant comparisons and returns nil if a comparison is unsupported.\n\n**Used for** restricting a dynamically typed value to the range accepted by its consumer.\n\n- `p_value` — Value to limit.\n- `p_min` — Inclusive lower bound comparable with the value.\n- `p_max` — Inclusive upper bound comparable with the value and at least p_min."
+    },
+    "static int64_t nearest_po2(int64_t p_value);": {
+      "xml": "methods/method[@name='nearest_po2']",
+      "brief": "Rounds a positive integer up to a power of two. Nonpositive inputs return zero, except the smallest signed 64-bit integer, which is returned unchanged.\n\n**Used for** selecting a power-of-two capacity large enough for a requested element count.\n\n- `p_value` — Requested capacity. For a positive result that fits in an `int64_t`, use a value from 1 through 2 to the power of 62."
+    },
+    "static double pingpong(double p_value, double p_length);": {
+      "xml": "methods/method[@name='pingpong']",
+      "brief": "Reflects the input back and forth between zero and the given length over successive periods. A zero length returns zero.\n\n**Used for** animating a position or blending weight that repeatedly reverses direction at its endpoints.\n\n- `p_value` — Position along the repeating motion.\n- `p_length` — Nonnegative endpoint opposite zero."
+    },
+    "static String var_to_str(const Variant &p_variable);": {
+      "xml": "methods/method[@name='var_to_str']",
+      "brief": "Writes a Variant as text in the format read by `godot::UtilityFunctions::str_to_var()`. Callable and signal values serialize as empty values.\n\n**Used for** writing readable saved values when the supported text format is needed.\n\n- `p_variable` — Variant to serialize."
+    },
+    "static Variant str_to_var(const String &p_string);": {
+      "xml": "methods/method[@name='str_to_var']",
+      "brief": "Parses a serialized Variant from text.\n\n**Used for** restoring a value previously written with `godot::UtilityFunctions::var_to_str()`.\n\n- `p_string` — Text in Godot's Variant format."
+    },
+    "static PackedByteArray var_to_bytes(const Variant &p_variable);": {
+      "xml": "methods/method[@name='var_to_bytes']",
+      "brief": "Encodes a Variant into a byte array with object serialization disabled. Returns an empty array if encoding fails.\n\n**Used for** storing supported values for later decoding with `godot::UtilityFunctions::bytes_to_var()`.\n\n- `p_variable` — Variant to encode."
+    },
+    "static Variant bytes_to_var(const PackedByteArray &p_bytes);": {
+      "xml": "methods/method[@name='bytes_to_var']",
+      "brief": "Decodes a Variant with object decoding disabled. Returns nil if decoding fails or the array is empty.\n\n**Used for** restoring a value written with `godot::UtilityFunctions::var_to_bytes()`.\n\n- `p_bytes` — Encoded Variant data."
+    },
+    "static PackedByteArray var_to_bytes_with_objects(const Variant &p_variable);": {
+      "xml": "methods/method[@name='var_to_bytes_with_objects']",
+      "brief": "Encodes a Variant into a byte array and permits object serialization. Returns an empty array if encoding fails.\n\n**Used for** saving a value together with the referenced objects that are part of its serialized state.\n\n- `p_variable` — Variant to encode, including objects when supported by the format."
+    },
+    "static Variant bytes_to_var_with_objects(const PackedByteArray &p_bytes);": {
+      "xml": "methods/method[@name='bytes_to_var_with_objects']",
+      "brief": "Decodes a Variant and permits construction of serialized objects. A decoded object can execute code. Returns nil for empty or invalid input.\n\n**Used for** restoring values with objects from trusted serialized data.\n\n- `p_bytes` — Encoded Variant data from a trusted source."
+    }
+  }
+}

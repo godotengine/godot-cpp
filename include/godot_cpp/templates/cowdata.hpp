@@ -62,11 +62,23 @@ GODOT_GCC_PRAGMA(GCC diagnostic warning "-Wstringop-overflow=0") // Can't "ignor
 GODOT_GCC_PRAGMA(GCC diagnostic warning "-Wdangling-pointer=0") // Can't "ignore" this for some reason.
 #endif
 
+/**
+ * Owns reference-counted contiguous storage that detaches when an operation requires a private buffer.
+ */
 template <typename T>
 class CowData {
 public:
+	/**
+	 * Signed type for element counts and indexed access.
+	 */
 	typedef int64_t Size;
+	/**
+	 * Unsigned type for allocation sizes and counts in the buffer header.
+	 */
 	typedef uint64_t USize;
+	/**
+	 * Largest value representable by the signed count type.
+	 */
 	static constexpr USize MAX_INT = INT64_MAX;
 
 private:
@@ -77,15 +89,33 @@ private:
 	//             └────────────────────┴──┴───────────────┴──┴─────────────┴──┴───────────...
 	// Offset:     ↑ REF_COUNT_OFFSET      ↑ CAPACITY_OFFSET  ↑ SIZE_OFFSET    ↑ DATA_OFFSET
 
+	/**
+	 * Byte offset of the reference count from the allocation base.
+	 */
 	static constexpr size_t REF_COUNT_OFFSET = 0;
+	/**
+	 * Aligned byte offset of the capacity field from the allocation base.
+	 */
 	static constexpr size_t CAPACITY_OFFSET = Memory::get_aligned_address(REF_COUNT_OFFSET + sizeof(SafeNumeric<USize>), alignof(USize));
+	/**
+	 * Aligned byte offset of the live element count from the allocation base.
+	 */
 	static constexpr size_t SIZE_OFFSET = Memory::get_aligned_address(CAPACITY_OFFSET + sizeof(USize), alignof(USize));
+	/**
+	 * Aligned byte offset of the first element from the allocation base.
+	 */
 	static constexpr size_t DATA_OFFSET = Memory::get_aligned_address(SIZE_OFFSET + sizeof(USize), Memory::MAX_ALIGN);
 
+	/**
+	 * Points to the first element after the buffer header, or is null when no buffer is owned.
+	 */
 	mutable T *_ptr = nullptr;
 
 	// internal helpers
 
+	/**
+	 * Computes a growth target of about one and a half times the previous capacity, with a minimum of two.
+	 */
 	static constexpr _FORCE_INLINE_ USize grow_capacity(USize p_previous_capacity) {
 		// 1.5x the given size.
 		// This ratio was chosen because it is close to the ideal growth rate of the golden ratio.
@@ -93,6 +123,9 @@ private:
 		return MAX((USize)2, p_previous_capacity + ((1 + p_previous_capacity) >> 1));
 	}
 
+	/**
+	 * Chooses a capacity large enough for the requested size while preserving useful existing capacity.
+	 */
 	static constexpr _FORCE_INLINE_ USize next_capacity(USize p_previous_capacity, USize p_size) {
 		if (p_previous_capacity < p_size) {
 			return MAX(grow_capacity(p_previous_capacity), p_size);
@@ -100,6 +133,9 @@ private:
 		return p_previous_capacity;
 	}
 
+	/**
+	 * Chooses a smaller capacity when the requested size is below one quarter of the old capacity.
+	 */
 	static constexpr _FORCE_INLINE_ USize smaller_capacity(USize p_previous_capacity, USize p_size) {
 		if (p_size < p_previous_capacity >> 2) {
 			return grow_capacity(p_size);
@@ -107,6 +143,9 @@ private:
 		return p_previous_capacity;
 	}
 
+	/**
+	 * Gets the element pointer from the base of the allocation.
+	 */
 	static _FORCE_INLINE_ T *_get_data_ptr(uint8_t *p_ptr) {
 		return (T *)(p_ptr + DATA_OFFSET);
 	}
@@ -128,8 +167,17 @@ private:
 
 	// Decrements the reference count. Deallocates the backing buffer if needed.
 	// After this function, _ptr is guaranteed to be NULL.
+	/**
+	 * Releases the current buffer reference and clears the data pointer. The final reference destroys the elements and frees the allocation.
+	 */
 	void _unref();
+	/**
+	 * Shares the pointed-to buffer and releases the previous reference. The source pointer must be valid.
+	 */
 	void _ref(const CowData *p_from);
+	/**
+	 * Acquires the source's buffer reference when the pointers differ and releases the previous reference.
+	 */
 	void _ref(const CowData &p_from);
 
 	/// Allocates a backing array of the given capacity. The reference count is initialized to 1, size to 0.
@@ -156,7 +204,13 @@ private:
 	[[nodiscard]] Error _copy_on_write();
 
 public:
+	/**
+	 * Shares the source's buffer, releasing the previous reference if it refers to a different buffer.
+	 */
 	void operator=(const CowData<T> &p_from) { _ref(p_from); }
+	/**
+	 * Takes the source's buffer and clears its pointer if the buffers differ.
+	 */
 	void operator=(CowData<T> &&p_from) {
 		if (_ptr == p_from._ptr) {
 			return;
@@ -167,23 +221,47 @@ public:
 		p_from._ptr = nullptr;
 	}
 
+	/**
+	 * Returns writable storage after making the buffer unique. Detachment failure triggers a crash check.
+	 */
 	_FORCE_INLINE_ T *ptrw() _LIFETIME_BOUND_ {
 		// If forking fails, we can only crash.
 		CRASH_COND(_copy_on_write());
 		return _ptr;
 	}
 
+	/**
+	 * Returns the read-only element pointer without detaching shared storage.
+	 */
 	_FORCE_INLINE_ const T *ptr() const _LIFETIME_BOUND_ {
 		return _ptr;
 	}
 
+	/**
+	 * Returns the number of live elements, or zero without a buffer.
+	 */
 	_FORCE_INLINE_ Size size() const { return !_ptr ? 0 : *_get_size(); }
+	/**
+	 * Returns the number of allocated element slots, or zero without a buffer.
+	 */
 	_FORCE_INLINE_ USize capacity() const { return !_ptr ? 0 : *_get_capacity(); }
+	/**
+	 * Returns the current buffer's reference count, or zero without a buffer.
+	 */
 	_FORCE_INLINE_ USize refcount() const { return !_ptr ? 0 : *_get_refcount(); }
 
+	/**
+	 * Drops this object's buffer reference.
+	 */
 	_FORCE_INLINE_ void clear() { _unref(); }
+	/**
+	 * Returns whether the live element count is zero.
+	 */
 	_FORCE_INLINE_ bool is_empty() const { return size() == 0; }
 
+	/**
+	 * Copies a value into an existing element after checking bounds and detaching shared storage.
+	 */
 	_FORCE_INLINE_ void set(Size p_index, const T &p_elem) {
 		ERR_FAIL_INDEX(p_index, size());
 		// TODO Returning the error would be more appropriate.
@@ -191,6 +269,9 @@ public:
 		_ptr[p_index] = p_elem;
 	}
 
+	/**
+	 * Returns a writable reference at the given index after checking bounds and detaching shared storage.
+	 */
 	_FORCE_INLINE_ T &get_m(Size p_index) _LIFETIME_BOUND_ {
 		CRASH_BAD_INDEX(p_index, size());
 		// If we fail to fork, all we can do is crash,
@@ -199,34 +280,79 @@ public:
 		return _ptr[p_index];
 	}
 
+	/**
+	 * Returns a read-only reference at the given index. An invalid index triggers a crash check.
+	 */
 	_FORCE_INLINE_ const T &get(Size p_index) const _LIFETIME_BOUND_ {
 		CRASH_BAD_INDEX(p_index, size());
 
 		return _ptr[p_index];
 	}
 
+	/**
+	 * Changes the live element count and returns a status. `p_init` controls construction of added elements. Resizing a nonempty range to zero releases its buffer reference.
+	 */
 	template <bool p_init = false>
 	Error resize(Size p_size);
 
+	/**
+	 * Reserves storage for at least the given capacity without changing the element count. `p_exact` uses the given capacity when growth is needed.
+	 */
 	template <bool p_exact = false>
 	Error reserve(USize p_min_capacity);
+	/**
+	 * Grows the buffer to the requested capacity if the existing capacity is smaller.
+	 */
 	_FORCE_INLINE_ Error reserve_exact(USize p_capacity) {
 		return reserve<true>(p_capacity);
 	}
 
+	/**
+	 * Erases the indexed element and shifts later elements into the gap.
+	 */
 	_FORCE_INLINE_ void remove_at(Size p_index);
 
+	/**
+	 * Moves a value into the given insertion position and returns a status. The current size is a valid append position.
+	 */
 	Error insert(Size p_pos, T &&p_val);
+	/**
+	 * Moves a value onto the end and returns a status.
+	 */
 	Error push_back(T &&p_val);
 
+	/**
+	 * Converts to a borrowed read-only view of the live elements.
+	 */
 	_FORCE_INLINE_ operator Span<T>() const _LIFETIME_BOUND_ { return Span<T>(ptr(), size()); }
+	/**
+	 * Returns a borrowed read-only view of the live elements.
+	 */
 	_FORCE_INLINE_ Span<T> span() const _LIFETIME_BOUND_ { return operator Span<T>(); }
 
+	/**
+	 * Creates an empty buffer owner.
+	 */
 	_FORCE_INLINE_ CowData() {}
+	/**
+	 * Releases the buffer reference, destroying the allocation when it is the last reference.
+	 */
 	_FORCE_INLINE_ ~CowData() { _unref(); }
+	/**
+	 * Copies the listed elements into owned storage.
+	 */
 	_FORCE_INLINE_ CowData(std::initializer_list<T> p_init);
+	/**
+	 * Copies the view's elements into owned storage.
+	 */
 	_FORCE_INLINE_ explicit CowData(Span<T> p_span);
+	/**
+	 * Shares the source's buffer.
+	 */
 	_FORCE_INLINE_ CowData(const CowData<T> &p_from) { _ref(p_from); }
+	/**
+	 * Takes the source's buffer reference and leaves the source empty.
+	 */
 	_FORCE_INLINE_ CowData(CowData<T> &&p_from) {
 		_ptr = p_from._ptr;
 		p_from._ptr = nullptr;
@@ -595,6 +721,9 @@ CowData<T>::CowData(Span<T> p_span) {
 GODOT_GCC_WARNING_POP
 
 // Zero-constructing CowData initializes _ptr to nullptr (and thus empty).
+/**
+ * Marks a zero-initialized object as a valid owner of no buffer.
+ */
 template <typename T>
 struct is_zero_constructible<CowData<T>> : std::true_type {};
 

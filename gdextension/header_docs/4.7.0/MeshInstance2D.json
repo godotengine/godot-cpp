@@ -1,0 +1,101 @@
+{
+  "xml_source": "https://github.com/godotengine/godot/blob/4.7-stable/doc/classes/MeshInstance2D.xml (Git blob f6a210699b33092379d2437f99f5d9e87f9c3e95)",
+  "declarations": {
+    "class Mesh;": {
+      "xml": "members/member[@name='mesh']",
+      "brief": "The geometry resource type used by `godot::MeshInstance2D::get_mesh()` and `godot::MeshInstance2D::set_mesh()`. The example uses `godot_cpp/classes/mesh.hpp` for access to the mesh's surfaces.\n\n**Used for** declaring geometry resource references in code that works with a `godot::MeshInstance2D`.",
+      "example": [
+        "// Display the surface count for a preview node selected in the editor.",
+        "int surface_count(const godot::MeshInstance2D &preview) {",
+        "    const godot::Ref<godot::Mesh> mesh = preview.get_mesh();",
+        "    return mesh.is_valid() ? mesh->get_surface_count() : 0;",
+        "}"
+      ]
+    },
+    "class Texture2D;": {
+      "xml": "members/member[@name='texture']",
+      "brief": "The texture resource type used by `godot::MeshInstance2D::get_texture()` and `godot::MeshInstance2D::set_texture()`. The example uses `godot_cpp/classes/texture2d.hpp` for access to the texture's dimensions.\n\n**Used for** declaring texture resource references in code that works with a `godot::MeshInstance2D`.",
+      "example": [
+        "// Size an inspector thumbnail from the assigned texture, in pixels.",
+        "godot::Vector2 thumbnail_size(const godot::MeshInstance2D &preview) {",
+        "    const godot::Ref<godot::Texture2D> texture = preview.get_texture();",
+        "    return texture.is_valid() ? texture->get_size() : godot::Vector2();",
+        "}"
+      ]
+    },
+    "class MeshInstance2D : public Node2D {": {
+      "xml": "brief_description",
+      "brief": "A `godot::Node2D` that draws a `godot::Mesh` on the 2D canvas. The node's transform places the mesh in the scene. The node can also supply a texture for drawing.\n\n**Used for** displaying custom mesh geometry in a 2D scene, such as a shape preview in an editor tool.",
+      "example": [
+        "// Attach the outline mesh built by a shape editor to its preview canvas.",
+        "void add_outline(godot::Node2D &canvas, const godot::Ref<godot::Mesh> &shape_outline) {",
+        "    auto *outline = memnew(godot::MeshInstance2D); // Allocate a Godot node.",
+        "    outline->set_mesh(shape_outline);",
+        "    canvas.add_child(outline);",
+        "}"
+      ]
+    },
+    "GDEXTENSION_CLASS(MeshInstance2D, Node2D)": {
+      "brief": "Defines the class metadata, instance binding callbacks, and construction hooks for the `godot::MeshInstance2D` wrapper. The binding registers the callbacks under the engine class name.",
+      "example": [
+        "// Inside godot::internal::EngineClassRegistration<godot::MeshInstance2D>::callback().",
+        "register_engine_class(godot::MeshInstance2D::get_class_static(),",
+        "        &godot::MeshInstance2D::_gde_binding_callbacks);"
+      ]
+    },
+    "void set_mesh(const Ref<Mesh> &p_mesh);": {
+      "xml": "members/member[@setter='set_mesh']",
+      "brief": "Sets the mesh this node draws. Assigning a different `godot::Ref<godot::Mesh>` queues a redraw. The node also redraws when the assigned mesh reports a change.\n\n**Used for** updating the preview geometry when a tool rebuilds the mesh.\n\n- `p_mesh` — Mesh resource to draw. An empty reference clears the geometry.",
+      "example": [
+        "// Call when the editor selection changes. Pass an empty outline on deselection.",
+        "void update_selection(godot::MeshInstance2D &preview, const godot::Ref<godot::Mesh> &rebuilt_outline) {",
+        "    preview.set_mesh(rebuilt_outline);",
+        "    preview.set_visible(rebuilt_outline.is_valid());",
+        "}"
+      ]
+    },
+    "Ref<Mesh> get_mesh() const;": {
+      "xml": "members/member[@getter='get_mesh']",
+      "brief": "Returns the assigned `godot::Ref<godot::Mesh>`. The reference is empty when no mesh is assigned.\n\n**Used for** reading the assigned mesh bounds to test whether a local pointer position falls inside the preview.",
+      "example": [
+        "// Hit-test the XY bounds of the preview in the node's local coordinates.",
+        "bool mouse_over_preview(const godot::MeshInstance2D &preview) {",
+        "    const godot::Ref<godot::Mesh> mesh = preview.get_mesh();",
+        "    if (mesh.is_null()) { return false; }",
+        "    const godot::AABB bounds = mesh->get_aabb();",
+        "    const godot::Rect2 outline(bounds.position.x, bounds.position.y, bounds.size.x, bounds.size.y);",
+        "    return outline.has_point(preview.get_local_mouse_position());",
+        "}"
+      ]
+    },
+    "void set_texture(const Ref<Texture2D> &p_texture);": {
+      "xml": "members/member[@setter='set_texture']",
+      "brief": "Sets the texture used by the default `godot::CanvasItemMaterial`. Canvas shaders can read it as `TEXTURE`. Assigning a different reference queues a redraw and emits `texture_changed`.\n\n**Used for** drawing a preview mesh with the texture of a source sprite.\n\n- `p_texture` — Texture resource sampled when drawing the mesh. An empty reference clears the assigned texture.",
+      "example": [
+        "// The preview mesh's UVs cover the selected sprite's full texture.",
+        "void show_preview(godot::MeshInstance2D &preview, const godot::Sprite2D &source_sprite) {",
+        "    preview.set_texture(source_sprite.get_texture());",
+        "    preview.show();",
+        "}"
+      ]
+    },
+    "Ref<Texture2D> get_texture() const;": {
+      "xml": "members/member[@getter='get_texture']",
+      "brief": "Returns the assigned `godot::Ref<godot::Texture2D>`. The reference is empty when no texture is assigned.\n\n**Used for** sharing the current texture with a second mesh that uses matching UVs.",
+      "example": [
+        "// Give a second preview with matching mesh UVs the same texture resource.",
+        "void copy_texture(const godot::MeshInstance2D &source, godot::MeshInstance2D &preview) {",
+        "    preview.set_texture(source.get_texture());",
+        "}"
+      ]
+    },
+    "register_virtuals": {
+      "brief": "Delegates virtual method registration to `godot::Node2D::register_virtuals()`. `godot::MeshInstance2D` adds no virtual methods of its own.\n\n**Used for** continuing the registration chain after a derived extension class binds its methods.\n\n- `T` is the extension class whose overrides are registered.\n- `B` is its immediate base, which provides the methods used to detect overrides.",
+      "example": [
+        "// Inside the initialize_class() that GDCLASS generates for PreviewMesh,",
+        "// an extension class derived from godot::MeshInstance2D.",
+        "godot::MeshInstance2D::register_virtuals<PreviewMesh, godot::MeshInstance2D>();"
+      ]
+    }
+  }
+}

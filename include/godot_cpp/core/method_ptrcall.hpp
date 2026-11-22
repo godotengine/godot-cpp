@@ -38,9 +38,23 @@
 
 namespace godot {
 
+/**
+ * Provides the primary template for conversions between C++ values and pointer-call storage.
+ *
+ * **Used for** selecting the argument and result conversions in a C++ method binding.
+ *
+ * - `T` — C++ argument or result type whose storage conversion is defined by a specialization.
+ */
 template <typename T>
 struct PtrToArg {};
 
+/**
+ * Provides by-value and const-reference adapters that copy the type directly between engine storage and C++.
+ *
+ * **Used for** binding types such as `godot::Vector2` whose C++ values share the engine's pointer-call representation.
+ *
+ * - `m_type` — C++ value type stored in the argument and result slots.
+ */
 #define MAKE_PTRARG(m_type) \
 	template <> \
 	struct PtrToArg<m_type> { \
@@ -63,6 +77,14 @@ struct PtrToArg {};
 		} \
 	}
 
+/**
+ * Provides by-value and const-reference adapters that cast between the C++ value type and a different pointer-call storage type. Also exposes the encoded argument value for outgoing calls.
+ *
+ * **Used for** passing C++ types such as `float` through engine slots that use a different type, such as `double`.
+ *
+ * - `m_type` — Type in the C++ method signature.
+ * - `m_conv` — Type used by the engine for the argument and result slots.
+ */
 #define MAKE_PTRARGCONV(m_type, m_conv) \
 	template <> \
 	struct PtrToArg<m_type> { \
@@ -91,6 +113,13 @@ struct PtrToArg {};
 		} \
 	}
 
+/**
+ * Provides value and const-reference adapters that read a copy from engine storage and accept the encoded value by const reference.
+ *
+ * **Used for** writing results such as `godot::Transform3D` into a pointer-call slot from a C++ reference.
+ *
+ * - `m_type` — C++ value type copied between the C++ caller and the engine slot.
+ */
 #define MAKE_PTRARG_BY_REFERENCE(m_type) \
 	template <> \
 	struct PtrToArg<m_type> { \
@@ -169,31 +198,93 @@ MAKE_PTRARG_BY_REFERENCE(Variant);
 
 // This is for Object.
 
+/**
+ * Adapts a non-const Godot object wrapper pointer to the engine object pointer passed through the ABI.
+ *
+ * **Used for** binding C++ methods that take or return mutable Godot object pointers.
+ *
+ * - `T` — Non-const class derived from `godot::Object`.
+ */
 template <typename T>
 struct PtrToArg<T *> {
 	static_assert(std::is_base_of<Object, T>::value, "Cannot encode non-Object value as an Object");
+	/**
+	 * Returns the C++ instance binding for the engine object in the argument slot. Returns null for a null slot
+	 * or null object pointer.
+	 *
+	 * **Used for** passing an engine object argument to a C++ method that can modify the object.
+	 *
+	 * - `p_ptr` — Address of a slot containing a `GDExtensionObjectPtr`, or null for an absent argument.
+	 */
 	_FORCE_INLINE_ static T *convert(const void *p_ptr) {
 		return likely(p_ptr) ? reinterpret_cast<T *>(::godot::internal::get_object_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr)))) : nullptr;
 	}
+	/**
+	 * Defines the common mutable object pointer type used by the return adapter.
+	 *
+	 * **Used for** exposing the result storage type through the same adapter interface as value results.
+	 */
 	typedef Object *EncodeT;
+	/**
+	 * Writes the wrapped engine object pointer, or null for a null C++ pointer.
+	 *
+	 * **Used for** returning an object from a C++ method through the engine's pointer-call result slot.
+	 *
+	 * - `p_var` — C++ wrapper whose engine object is returned, or null.
+	 * - `p_ptr` — Writable address of the result slot. The engine object pointer is always written.
+	 */
 	_FORCE_INLINE_ static void encode(T *p_var, void *p_ptr) {
 		*reinterpret_cast<const void **>(p_ptr) = likely(p_var) ? p_var->_owner : nullptr;
 	}
 };
 
+/**
+ * Adapts a const Godot object wrapper pointer to the engine object pointer passed through the ABI.
+ *
+ * **Used for** binding C++ methods with read-only Godot object pointer parameters or results.
+ *
+ * - `T` — Godot object class whose C++ wrapper is accessed through a const pointer.
+ */
 template <typename T>
 struct PtrToArg<const T *> {
 	static_assert(std::is_base_of<Object, T>::value, "Cannot encode non-Object value as an Object");
+	/**
+	 * Returns the C++ instance binding as a const pointer. Returns null for a null slot or null object pointer.
+	 *
+	 * **Used for** passing an engine object argument to a C++ method that takes a pointer to const.
+	 *
+	 * - `p_ptr` — Address of a slot containing a `GDExtensionObjectPtr`, or null for an absent argument.
+	 */
 	_FORCE_INLINE_ static const T *convert(const void *p_ptr) {
 		return likely(p_ptr) ? reinterpret_cast<const T *>(::godot::internal::get_object_instance_binding(*reinterpret_cast<GDExtensionObjectPtr *>(const_cast<void *>(p_ptr)))) : nullptr;
 	}
+	/**
+	 * Defines the common const object pointer type used by the return adapter.
+	 *
+	 * **Used for** selecting const pointer result storage from the declared C++ return type.
+	 */
 	typedef const Object *EncodeT;
+	/**
+	 * Writes the wrapped engine object pointer, or null for a null C++ pointer.
+	 *
+	 * **Used for** returning the engine object for a const wrapper without modifying the wrapper.
+	 *
+	 * - `p_var` — Const C++ wrapper whose engine object is returned, or null.
+	 * - `p_ptr` — Writable address of the result slot. The engine object pointer is always written.
+	 */
 	_FORCE_INLINE_ static void encode(T *p_var, void *p_ptr) {
 		*reinterpret_cast<const void **>(p_ptr) = likely(p_var) ? p_var->_owner : nullptr;
 	}
 };
 
 // Pointers.
+/**
+ * Provides direct pointer-slot adapters for native pointers and pointers to const native data used by generated virtual calls.
+ *
+ * **Used for** passing data such as `godot::Glyph` buffers through a native pointer in a generated virtual binding.
+ *
+ * - `m_type` — Type addressed by the pointer in the C++ signature.
+ */
 #define GDVIRTUAL_NATIVE_PTR(m_type) \
 	template <> \
 	struct PtrToArg<m_type *> { \

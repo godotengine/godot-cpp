@@ -36,10 +36,25 @@
 
 namespace godot {
 
+/**
+ * A unit quaternion used for representing 3D rotations.
+ */
 struct [[nodiscard]] Quaternion {
+	/**
+	 * The quaternion component along the imaginary i axis.
+	 */
 	real_t x = 0.0f;
+	/**
+	 * The quaternion component along the imaginary j axis.
+	 */
 	real_t y = 0.0f;
+	/**
+	 * The quaternion component along the imaginary k axis.
+	 */
 	real_t z = 0.0f;
+	/**
+	 * The real component of the quaternion.
+	 */
 	real_t w = 1.0f;
 
 	constexpr real_t &operator[](int p_idx) {
@@ -59,29 +74,99 @@ struct [[nodiscard]] Quaternion {
 		return (&x)[p_idx];
 	}
 
+	/**
+	 * Returns the sum of squares of the four components without taking a square root.
+	 */
 	_FORCE_INLINE_ real_t length_squared() const;
+	/**
+	 * Returns `true` if this quaternion and `to` are approximately equal, by calling `is_equal_approx()` on
+	 * each component.
+	 */
 	bool is_equal_approx(const Quaternion &p_quaternion) const;
 	bool is_same(const Quaternion &p_quaternion) const;
+	/**
+	 * Returns `true` if this quaternion is finite, by calling `is_finite()` on each component.
+	 */
 	bool is_finite() const;
+	/**
+	 * Returns this quaternion's length, also called magnitude.
+	 */
 	real_t length() const;
 	void normalize();
+	/**
+	 * Returns a copy of this quaternion, normalized so that its length is `1.0`. See also
+	 * `godot::Quaternion::is_normalized()`.
+	 */
 	Quaternion normalized() const;
+	/**
+	 * Returns `true` if this quaternion is normalized.
+	 */
 	bool is_normalized() const;
+	/**
+	 * Returns the inverse version of this quaternion, inverting the sign of every component except `w`.
+	 */
 	Quaternion inverse() const;
+	/**
+	 * Returns the logarithm of this quaternion. Multiplies this quaternion's rotation axis by its rotation
+	 * angle, and stores the result in the returned quaternion's vector part (`x`, `y`, and `z`). The
+	 * returned quaternion's real part (`w`) is always `0.0`.
+	 */
 	Quaternion log() const;
+	/**
+	 * Returns the exponential of this quaternion. The rotation axis of the result is the normalized
+	 * rotation axis of this quaternion, the angle of the result is the length of the vector part of this
+	 * quaternion.
+	 */
 	Quaternion exp() const;
+	/**
+	 * Returns the dot product between this quaternion and `with`. This is equivalent to `(quat.x * with.x)
+	 * + (quat.y * with.y) + (quat.z * with.z) + (quat.w * with.w)`.
+	 */
 	_FORCE_INLINE_ real_t dot(const Quaternion &p_q) const;
+	/**
+	 * Returns the angle between this quaternion and `to`. This is the magnitude of the angle you would need
+	 * to rotate by to get from one to the other. **Note:** The magnitude of the floating-point error for
+	 * this method is abnormally high, so methods such as `is_zero_approx` will not work reliably.
+	 */
 	real_t angle_to(const Quaternion &p_to) const;
 
 	Vector3 get_euler(EulerOrder p_order = EulerOrder::EULER_ORDER_YXZ) const;
+	/**
+	 * Creates a rotation quaternion from X, Y, and Z angles in radians using intrinsic YXZ order.
+	 */
 	static Quaternion from_euler(const Vector3 &p_euler);
 
+	/**
+	 * Performs a spherical-linear interpolation with the `to` quaternion, given a `weight` and returns the
+	 * result. Both this quaternion and `to` must be normalized.
+	 */
 	Quaternion slerp(const Quaternion &p_to, real_t p_weight) const;
+	/**
+	 * Performs a spherical-linear interpolation with the `to` quaternion, given a `weight` and returns the
+	 * result. Unlike `godot::Quaternion::slerp()`, this method does not check if the rotation path is
+	 * smaller than 90 degrees. Both this quaternion and `to` must be normalized.
+	 */
 	Quaternion slerpni(const Quaternion &p_to, real_t p_weight) const;
+	/**
+	 * Performs a spherical cubic interpolation between quaternions `pre_a`, this vector, `b`, and `post_b`,
+	 * by the given amount `weight`.
+	 */
 	Quaternion spherical_cubic_interpolate(const Quaternion &p_b, const Quaternion &p_pre_a, const Quaternion &p_post_b, real_t p_weight) const;
+	/**
+	 * Performs a spherical cubic interpolation between quaternions `pre_a`, this vector, `b`, and `post_b`,
+	 * by the given amount `weight`. It can perform smoother interpolation than
+	 * `godot::Quaternion::spherical_cubic_interpolate()` by the time values.
+	 */
 	Quaternion spherical_cubic_interpolate_in_time(const Quaternion &p_b, const Quaternion &p_pre_a, const Quaternion &p_post_b, real_t p_weight, real_t p_b_t, real_t p_pre_a_t, real_t p_post_b_t) const;
 
+	/**
+	 * Returns the rotation axis of the rotation represented by this quaternion.
+	 */
 	Vector3 get_axis() const;
+	/**
+	 * Returns the angle of the rotation represented by this quaternion. **Note:** The quaternion must be
+	 * normalized.
+	 */
 	real_t get_angle() const;
 
 	_FORCE_INLINE_ void get_axis_angle(Vector3 &r_axis, real_t &r_angle) const {
@@ -93,6 +178,10 @@ struct [[nodiscard]] Quaternion {
 	}
 
 	constexpr void operator*=(const Quaternion &p_q);
+	/**
+	 * Composes (multiplies) two quaternions. This rotates the `right` quaternion (the child) by this
+	 * quaternion (the parent).
+	 */
 	constexpr Quaternion operator*(const Quaternion &p_q) const;
 
 	_FORCE_INLINE_ Vector3 xform(const Vector3 &p_v) const {
@@ -112,24 +201,60 @@ struct [[nodiscard]] Quaternion {
 	constexpr void operator-=(const Quaternion &p_q);
 	constexpr void operator*=(real_t p_s);
 	constexpr void operator/=(real_t p_s);
+	/**
+	 * Adds each component of the left `godot::Quaternion` to the right `godot::Quaternion`. This operation
+	 * is not meaningful on its own, but it can be used as a part of a larger expression, such as
+	 * approximating an intermediate rotation between two nearby rotations.
+	 */
 	constexpr Quaternion operator+(const Quaternion &p_q2) const;
+	/**
+	 * Subtracts each component of the left `godot::Quaternion` by the right `godot::Quaternion`. This
+	 * operation is not meaningful on its own, but it can be used as a part of a larger expression.
+	 */
 	constexpr Quaternion operator-(const Quaternion &p_q2) const;
 	constexpr Quaternion operator-() const;
+	/**
+	 * Multiplies each component of the `godot::Quaternion` by the right `float` value. This operation is
+	 * not meaningful on its own, but it can be used as a part of a larger expression.
+	 */
 	constexpr Quaternion operator*(real_t p_s) const;
+	/**
+	 * Divides each component of the `godot::Quaternion` by the right `float` value. This operation is not
+	 * meaningful on its own, but it can be used as a part of a larger expression.
+	 */
 	constexpr Quaternion operator/(real_t p_s) const;
 
+	/**
+	 * Tests exact equality of the components.
+	 */
 	constexpr bool operator==(const Quaternion &p_quaternion) const;
+	/**
+	 * Tests whether any component differs.
+	 */
 	constexpr bool operator!=(const Quaternion &p_quaternion) const;
 
 	explicit operator String() const;
 
 	constexpr Quaternion() = default;
 
+	/**
+	 * Constructs a `godot::Quaternion` defined by the given values. **Note:** Only normalized quaternions
+	 * represent rotation; if these values are not normalized, the new `godot::Quaternion` will not be a
+	 * valid rotation.
+	 */
 	constexpr Quaternion(real_t p_x, real_t p_y, real_t p_z, real_t p_w) :
 			x(p_x), y(p_y), z(p_z), w(p_w) {}
 
+	/**
+	 * Constructs a `godot::Quaternion` representing rotation around the `axis` by the given `angle`, in
+	 * radians. The axis must be a normalized vector.
+	 */
 	Quaternion(const Vector3 &p_axis, real_t p_angle);
 
+	/**
+	 * Constructs a `godot::Quaternion` representing the shortest arc between `arc_from` and `arc_to`. These
+	 * can be imagined as two points intersecting a sphere's surface, with a radius of `1.0`.
+	 */
 	Quaternion(const Vector3 &p_v0, const Vector3 &p_v1) { // Shortest arc.
 #ifdef MATH_CHECKS
 		ERR_FAIL_COND_MSG(p_v0.is_zero_approx() || p_v1.is_zero_approx(), "The vectors must not be zero.");

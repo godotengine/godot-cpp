@@ -7,10 +7,27 @@ import shutil
 import sys
 from pathlib import Path
 
+from header_documentation import (
+    ClassHeaderDocumentation,
+    ReferenceDocumentation,
+    append_markdown_comment,
+    describe_parameters,
+    get_header_documentation_paths,
+    load_class_reference,
+    load_native_structure_notes,
+)
 from make_interface_header import generate_gdextension_interface_header
 
 
-def generate_mod_version(argcount, const=False, returns=False):
+def describe_method(docs, method, *, vararg=False):
+    parameters = [(escape_argument(name), role) for name, role in docs.method_parameters(method)]
+    if vararg:
+        parameters[:0] = [("Args", "C++ types of the additional arguments converted to Variant values.")]
+        parameters.append(("p_args", "Additional values forwarded after the method's fixed arguments."))
+    return describe_parameters(docs.method(method), parameters)
+
+
+def generate_mod_version(argcount, const=False, returns=False, documented=False):
     s = """
 #define MODBIND$VER($RETTYPE m_name$ARG) \\
 virtual $RETVAL _##m_name($FUNCARGS) $CONST override;
@@ -49,26 +66,43 @@ virtual $RETVAL _##m_name($FUNCARGS) $CONST override;
         s = s.replace("$ARG", "")
         s = s.replace("$FUNCARGS", funcargs)
 
+    if documented:
+        lines = []
+        qualifier = "`const` " if const else ""
+        result = "`m_ret`" if returns else "`void`"
+        description = (
+            f"Declares a {qualifier}C++ override named `_m_name` with {argcount} "
+            f"{'parameter' if argcount == 1 else 'parameters'} and a return type of {result}.\n\n"
+            "**Used for** declaring an override of a generated engine virtual in an extension class."
+        )
+        parameters = [("m_ret", "C++ return type of the inherited virtual method.")] if returns else []
+        parameters.append(("m_name", "Inherited virtual method name without its leading underscore."))
+        parameters.extend(
+            (f"m_type{i}", f"C++ type of parameter {i} in the inherited virtual method.")
+            for i in range(1, argcount + 1)
+        )
+        append_markdown_comment(lines, "", describe_parameters(description, parameters))
+        s = "\n" + "\n".join(lines) + s
     return s
 
 
-def generate_wrappers(target):
+def generate_wrappers(target, documented=False):
     max_versions = 12
 
     txt = "#pragma once"
 
     for i in range(max_versions + 1):
         txt += "\n/* Module Wrapper " + str(i) + " Arguments */\n"
-        txt += generate_mod_version(i, False, False)
-        txt += generate_mod_version(i, False, True)
-        txt += generate_mod_version(i, True, False)
-        txt += generate_mod_version(i, True, True)
+        txt += generate_mod_version(i, False, False, documented)
+        txt += generate_mod_version(i, False, True, documented)
+        txt += generate_mod_version(i, True, False, documented)
+        txt += generate_mod_version(i, True, True, documented)
 
     with open(target, "w", encoding="utf-8") as f:
         f.write(txt)
 
 
-def generate_virtual_version(argcount, const=False, returns=False, required=False):
+def generate_virtual_version(argcount, const=False, returns=False, required=False, documented=False):
     s = """#define GDVIRTUAL$VER($RET m_name $ARG)\\
 	::godot::StringName _gdvirtual_##m_name##_sn = #m_name;\\
 	_FORCE_INLINE_ bool _gdvirtual_##m_name##_call($CALLARGS) $CONST {\\
@@ -178,10 +212,37 @@ def generate_virtual_version(argcount, const=False, returns=False, required=Fals
     else:
         s = s.replace("\t\t$FILL_METHOD_INFO\\\n", method_info)
 
+    if documented:
+        lines = []
+        description = (
+            f"Defines helpers that call a script override with {argcount} "
+            f"{'argument' if argcount == 1 else 'arguments'}, check for the override, and provide its registration metadata. "
+            "The call helper returns `true` on a successful call and `false` when the override is absent or the call fails."
+        )
+        if const:
+            description += " The call helper is `const` and the metadata marks the virtual as `const`."
+        if returns:
+            description += " The output reference is written from the returned Variant only when the call succeeds."
+        if required:
+            description += " A failed call or missing override also logs an error once at the call site."
+        description += (
+            "\n\n**Used for** exposing an extension callback to scripts with `GDVIRTUAL_BIND` "
+            "and calling the override with `GDVIRTUAL_CALL` when the engine event occurs."
+        )
+        parameters = []
+        if returns:
+            parameters.append(("m_ret", "C++ type of the converted result and of the call helper's output reference."))
+        parameters.append(("m_name", "Script method name used to look up the override and name the generated helpers."))
+        parameters.extend(
+            (f"m_type{i}", f"C++ type of argument {i}. The call helper passes its value to the script as a Variant.")
+            for i in range(1, argcount + 1)
+        )
+        append_markdown_comment(lines, "", describe_parameters(description, parameters))
+        s = "\n".join(lines) + "\n" + s
     return s
 
 
-def generate_virtuals(target):
+def generate_virtuals(target, documented=False):
     max_versions = 12
 
     txt = """/* THIS FILE IS GENERATED DO NOT EDIT */
@@ -191,14 +252,14 @@ def generate_virtuals(target):
 
     for i in range(max_versions + 1):
         txt += f"/* {i} Arguments */\n\n"
-        txt += generate_virtual_version(i, False, False)
-        txt += generate_virtual_version(i, False, True)
-        txt += generate_virtual_version(i, True, False)
-        txt += generate_virtual_version(i, True, True)
-        txt += generate_virtual_version(i, False, False, True)
-        txt += generate_virtual_version(i, False, True, True)
-        txt += generate_virtual_version(i, True, False, True)
-        txt += generate_virtual_version(i, True, True, True)
+        txt += generate_virtual_version(i, False, False, documented=documented)
+        txt += generate_virtual_version(i, False, True, documented=documented)
+        txt += generate_virtual_version(i, True, False, documented=documented)
+        txt += generate_virtual_version(i, True, True, documented=documented)
+        txt += generate_virtual_version(i, False, False, True, documented)
+        txt += generate_virtual_version(i, False, True, True, documented)
+        txt += generate_virtual_version(i, True, False, True, documented)
+        txt += generate_virtual_version(i, True, True, True, documented)
 
     with open(target, "w", encoding="utf-8") as f:
         f.write(txt)
@@ -339,25 +400,30 @@ def _generate_bindings(
     real_t = "double" if precision == "double" else "float"
     print("Built-in type config: " + real_t + "_" + bits)
 
+    reference = load_class_reference(api["header"])
     header_lines = []
     add_header("gdextension_interface.h", header_lines)
     gdextension_gen_folder = Path(output_dir) / "gen" / "include"
     gdextension_gen_folder.mkdir(parents=True, exist_ok=True)
     generate_gdextension_interface_header(
-        str((gdextension_gen_folder / "gdextension_interface.h").as_posix()), interface_filepath, header_lines
+        str((gdextension_gen_folder / "gdextension_interface.h").as_posix()),
+        interface_filepath,
+        header_lines,
     )
 
-    generate_gdextension_interface_loader(interface_filepath, target_dir)
+    generate_gdextension_interface_loader(interface_filepath, target_dir, documented=bool(reference))
 
-    generate_global_constants(api, target_dir, hooks)
-    generate_version_header(api, target_dir)
-    generate_global_constant_binds(api, target_dir)
-    generate_builtin_bindings(api, target_dir, real_t + "_" + bits, hooks)
-    generate_engine_classes_bindings(api, target_dir, use_template_get_node, hooks)
-    generate_utility_functions(api, target_dir, hooks)
+    generate_global_constants(api, target_dir, hooks, reference)
+    generate_version_header(api, target_dir, reference)
+    generate_global_constant_binds(api, target_dir, reference)
+    generate_builtin_bindings(api, target_dir, real_t + "_" + bits, hooks, reference)
+    generate_engine_classes_bindings(api, target_dir, use_template_get_node, hooks, reference)
+    generate_utility_functions(
+        api, target_dir, hooks, reference, get_header_documentation_paths(api["header"]).get("@GlobalScope")
+    )
 
 
-def generate_gdextension_interface_loader(interface_filepath, output_dir):
+def generate_gdextension_interface_loader(interface_filepath, output_dir, documented=False):
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "core"
     source_gen_folder = Path(output_dir) / "src"
 
@@ -378,7 +444,7 @@ def generate_gdextension_interface_loader(interface_filepath, output_dir):
         functions_by_version[since].append(func)
 
     with header_filename.open("wt", encoding="utf-8") as header_file:
-        header_file.write(generate_gdextension_interface_loader_header(functions_by_version))
+        header_file.write(generate_gdextension_interface_loader_header(functions_by_version, documented))
 
     with source_filename.open("wt", encoding="utf-8") as source_file:
         source_file.write(generate_gdextension_interface_loader_source(functions_by_version))
@@ -388,7 +454,7 @@ def gdextension_interface_type_name(name):
     return "GDExtensionInterface" + "".join(word.capitalize() for word in name.split("_"))
 
 
-def generate_gdextension_interface_loader_header(data):
+def generate_gdextension_interface_loader_header(data, documented=False):
     result = []
     add_header("gdextension_interface_loader.hpp", result)
 
@@ -418,7 +484,10 @@ def generate_gdextension_interface_loader_header(data):
                 (deprecated_major, deprecated_minor) = func["deprecated"]["since"].split(".")
                 result.append(f"#if !defined(DISABLE_DEPRECATED) || GODOT_VERSION_MINOR < {deprecated_minor}")
 
-            result.append(f'extern "C" {fn} {name};')
+            declaration = f'extern "C" {fn} {name};'
+            if documented:
+                append_markdown_comment(result, declaration, "\n\n".join(func["description"]))
+            result.append(declaration)
 
             if "deprecated" in func:
                 result.append("#endif")
@@ -430,7 +499,12 @@ def generate_gdextension_interface_loader_header(data):
     result.append("")
     result.append("namespace internal {")
     result.append("")
-    result.append("bool load_gdextension_interface(GDExtensionInterfaceGetProcAddress p_get_proc_address);")
+    declaration = "bool load_gdextension_interface(GDExtensionInterfaceGetProcAddress p_get_proc_address);"
+    if documented:
+        append_markdown_comment(
+            result, declaration, "Resolves the GDExtension procedures required by the selected Godot API."
+        )
+    result.append(declaration)
     result.append("")
     result.append("} // namespace internal")
     result.append("")
@@ -533,7 +607,7 @@ native_structures = []
 singletons = []
 
 
-def generate_builtin_bindings(api, output_dir, build_config, hooks=None):
+def generate_builtin_bindings(api, output_dir, build_config, hooks=None, reference=None):
     global builtin_classes
 
     core_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "core"
@@ -544,8 +618,8 @@ def generate_builtin_bindings(api, output_dir, build_config, hooks=None):
     include_gen_folder.mkdir(parents=True, exist_ok=True)
     source_gen_folder.mkdir(parents=True, exist_ok=True)
 
-    generate_wrappers(core_gen_folder / "ext_wrappers.gen.inc")
-    generate_virtuals(core_gen_folder / "gdvirtual.gen.inc")
+    generate_wrappers(core_gen_folder / "ext_wrappers.gen.inc", bool(reference))
+    generate_virtuals(core_gen_folder / "gdvirtual.gen.inc", bool(reference))
 
     # Store types beforehand.
     for builtin_api in api["builtin_classes"]:
@@ -568,7 +642,15 @@ def generate_builtin_bindings(api, output_dir, build_config, hooks=None):
         add_header("variant_size.hpp", variant_size_source)
 
         variant_size_source.append("#pragma once")
-        variant_size_source.append(f"#define GODOT_CPP_VARIANT_SIZE {builtin_sizes['Variant']}")
+        declaration = f"#define GODOT_CPP_VARIANT_SIZE {builtin_sizes['Variant']}"
+        if reference:
+            append_markdown_comment(
+                variant_size_source,
+                declaration,
+                "Size in bytes of the engine's Variant storage for this ABI.\n\n"
+                "**Used for** reserving the opaque bytes that the engine reads and writes in `godot::Variant`.",
+            )
+        variant_size_source.append(declaration)
 
         variant_size_file.write("\n".join(variant_size_source))
 
@@ -637,7 +719,9 @@ def generate_builtin_bindings(api, output_dir, build_config, hooks=None):
         fully_used_classes.sort()
 
         with header_filename.open("w+", encoding="utf-8") as header_file:
-            header_file.write(generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes, hooks))
+            header_file.write(
+                generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes, hooks, reference)
+            )
 
         with source_filename.open("w+", encoding="utf-8") as source_file:
             source_file.write(generate_builtin_class_source(builtin_api, size, used_classes, fully_used_classes, hooks))
@@ -680,7 +764,12 @@ def generate_builtin_bindings(api, output_dir, build_config, hooks=None):
             if is_included_type(builtin_api["name"]):
                 if "enums" in builtin_api:
                     for enum_api in builtin_api["enums"]:
-                        builtin_binds.append(f"VARIANT_ENUM_CAST({builtin_api['name']}::{enum_api['name']});")
+                        declaration = f"VARIANT_ENUM_CAST({builtin_api['name']}::{enum_api['name']});"
+                        if reference:
+                            append_markdown_comment(
+                                builtin_binds, declaration, "Defines conversions between this enum and Variant values."
+                            )
+                        builtin_binds.append(declaration)
 
         builtin_binds.append("")
 
@@ -715,10 +804,17 @@ def generate_builtin_class_vararg_method_implements_header(builtin_classes):
     return "\n".join(result)
 
 
-def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes, hooks=None):
+def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_classes, hooks=None, reference=None):
     result = []
 
     class_name = builtin_api["name"]
+    docs = ReferenceDocumentation(reference or {}, class_name)
+
+    def declare(line, description=""):
+        if reference:
+            append_markdown_comment(result, line, description)
+        result.append(line)
+
     snake_class_name = camel_to_snake(class_name).upper()
 
     add_header(f"{snake_class_name.lower()}.hpp", result)
@@ -797,12 +893,18 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     if len(used_classes) > 0:
         result.append("")
 
-    result.append(f"class {class_name} {{")
-    result.append(f"\tstatic constexpr size_t {snake_class_name}_SIZE = {size};")
+    declare(f"class {class_name} {{", docs.type_description())
+    declare(
+        f"\tstatic constexpr size_t {snake_class_name}_SIZE = {size};",
+        f"Size in bytes of the engine storage for `godot::{class_name}` in this ABI configuration.",
+    )
     # We don't get alignment information from the JSON so we have to guess.
     # This logic should be correct for all built-in types as they exist right now.
     alignment = 8 if size >= 8 else 4
-    result.append(f"\talignas({alignment}) uint8_t opaque[{snake_class_name}_SIZE] = {{}};")
+    declare(
+        f"\talignas({alignment}) uint8_t opaque[{snake_class_name}_SIZE] = {{}};",
+        "Stores the built-in value in the layout expected by the engine ABI.",
+    )
 
     result.append("")
     result.append("\tfriend class Variant;")
@@ -810,52 +912,77 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append("\tfriend class StringName;")
 
     result.append("")
-    result.append("\tstatic struct _MethodBindings {")
+    declare("\tstatic struct _MethodBindings {", "Holds the cached engine entry points for this built-in type.")
 
-    result.append("\t\tGDExtensionTypeFromVariantConstructorFunc from_variant_constructor;")
+    declare(
+        "\t\tGDExtensionTypeFromVariantConstructorFunc from_variant_constructor;",
+        "Constructs this built-in value from a Variant supplied by the caller.",
+    )
 
     if "constructors" in builtin_api:
         for constructor in builtin_api["constructors"]:
-            result.append(f"\t\tGDExtensionPtrConstructor constructor_{constructor['index']};")
+            declare(
+                f"\t\tGDExtensionPtrConstructor constructor_{constructor['index']};",
+                docs.constructor(constructor),
+            )
 
     if builtin_api["has_destructor"]:
-        result.append("\t\tGDExtensionPtrDestructor destructor;")
+        declare("\t\tGDExtensionPtrDestructor destructor;", "Destroys the value held in the ABI storage.")
 
     if "methods" in builtin_api:
         for method in builtin_api["methods"]:
-            result.append(f"\t\tGDExtensionPtrBuiltInMethod method_{method['name']};")
+            declare(
+                f"\t\tGDExtensionPtrBuiltInMethod method_{method['name']};",
+                f"Engine entry point for `godot::{class_name}::{method['name']}()`.",
+            )
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
-            result.append(f"\t\tGDExtensionPtrSetter member_{member['name']}_setter;")
-            result.append(f"\t\tGDExtensionPtrGetter member_{member['name']}_getter;")
+            declare(
+                f"\t\tGDExtensionPtrSetter member_{member['name']}_setter;",
+                f"Engine entry point for writing the `{member['name']}` member of this value.",
+            )
+            declare(
+                f"\t\tGDExtensionPtrGetter member_{member['name']}_getter;",
+                f"Engine entry point for reading the `{member['name']}` member of this value.",
+            )
 
     if "indexing_return_type" in builtin_api:
-        result.append("\t\tGDExtensionPtrIndexedSetter indexed_setter;")
-        result.append("\t\tGDExtensionPtrIndexedGetter indexed_getter;")
+        declare("\t\tGDExtensionPtrIndexedSetter indexed_setter;", "Engine entry point for writing an element at an integer index.")
+        declare("\t\tGDExtensionPtrIndexedGetter indexed_getter;", "Engine entry point for reading an element at an integer index.")
 
     if "is_keyed" in builtin_api and builtin_api["is_keyed"]:
-        result.append("\t\tGDExtensionPtrKeyedSetter keyed_setter;")
-        result.append("\t\tGDExtensionPtrKeyedGetter keyed_getter;")
-        result.append("\t\tGDExtensionPtrKeyedChecker keyed_checker;")
+        declare("\t\tGDExtensionPtrKeyedSetter keyed_setter;", "Engine entry point for storing the value associated with a Variant key.")
+        declare("\t\tGDExtensionPtrKeyedGetter keyed_getter;", "Engine entry point for reading the value associated with a Variant key.")
+        declare("\t\tGDExtensionPtrKeyedChecker keyed_checker;", "Engine entry point for testing whether a Variant key exists.")
 
     if "operators" in builtin_api:
         for operator in builtin_api["operators"]:
             if "right_type" in operator:
-                result.append(
-                    f"\t\tGDExtensionPtrOperatorEvaluator operator_{get_operator_id_name(operator['name'])}_{operator['right_type']};"
+                declare(
+                    f"\t\tGDExtensionPtrOperatorEvaluator operator_{get_operator_id_name(operator['name'])}_{operator['right_type']};",
+                    f"Engine entry point for evaluating `{operator['name']}` with a `{operator['right_type']}` right operand.",
                 )
             else:
-                result.append(f"\t\tGDExtensionPtrOperatorEvaluator operator_{get_operator_id_name(operator['name'])};")
+                declare(
+                    f"\t\tGDExtensionPtrOperatorEvaluator operator_{get_operator_id_name(operator['name'])};",
+                    f"Engine entry point for evaluating the unary operator `{operator['name']}`.",
+                )
 
     result.append("\t} _method_bindings;")
 
     result.append("")
-    result.append("\tstatic void init_bindings();")
-    result.append("\tstatic void _init_bindings_constructors_destructor();")
+    declare("\tstatic void init_bindings();", "Caches the engine entry points used by the built-in wrapper.")
+    declare(
+        "\tstatic void _init_bindings_constructors_destructor();",
+        "Caches the Variant conversion, construction, and destruction entry points supplied by the engine.",
+    )
 
     result.append("")
-    result.append(f"\t{class_name}(const Variant *p_variant);")
+    declare(
+        f"\t{class_name}(const Variant *p_variant);",
+        "Uses the cached Variant conversion entry point to initialize the built-in storage.",
+    )
 
     if class_name == "Array":
         result.append("")
@@ -865,8 +992,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
     result.append("")
     result.append("public:")
 
-    result.append(
-        f"\t_FORCE_INLINE_ GDExtensionTypePtr _native_ptr() const {{ return const_cast<uint8_t(*)[{snake_class_name}_SIZE]>(&opaque); }}"
+    declare(
+        f"\t_FORCE_INLINE_ GDExtensionTypePtr _native_ptr() const {{ return const_cast<uint8_t(*)[{snake_class_name}_SIZE]>(&opaque); }}",
+        "Returns a pointer to the wrapper's ABI storage. The wrapper owns the storage.",
     )
 
     copy_constructor_index = -1
@@ -882,10 +1010,16 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
                     copy_constructor_index = constructor["index"]
             method_signature += ");"
 
-            result.append(method_signature)
+            constructor_parameters = [(escape_argument(name), role) for name, role in docs.constructor_parameters(constructor)]
+            declare(method_signature, describe_parameters(docs.constructor(constructor), constructor_parameters))
 
     # Move constructor.
-    result.append(f"\t{class_name}({class_name} &&p_other);")
+    move_description = (
+        "Constructs a copy of the supplied value through the engine copy constructor."
+        if needs_copy_instead_of_move(class_name) and copy_constructor_index >= 0
+        else "Constructs the wrapper by exchanging its initial storage with the supplied wrapper's storage."
+    )
+    declare(f"\t{class_name}({class_name} &&p_other);", move_description)
 
     # Special cases.
     if class_name == "String" or class_name == "StringName" or class_name == "NodePath":
@@ -913,10 +1047,13 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
                 if axis_constants_count == 3:
                     result.append("\t};")
             else:
-                result.append(f"\tstatic const {correct_type(constant['type'])} {constant['name']};")
+                declare(
+                    f"\tstatic const {correct_type(constant['type'])} {constant['name']};",
+                    docs.constant(constant),
+                )
 
     if builtin_api["has_destructor"]:
-        result.append(f"\t~{class_name}();")
+        declare(f"\t~{class_name}();", "Calls the engine destructor for the value stored in this wrapper.")
 
     method_list = []
 
@@ -925,8 +1062,9 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
             method_list.append(method["name"])
 
             vararg = method["is_vararg"]
+            description = describe_method(docs, method, vararg=vararg)
             if vararg:
-                result.append("\ttemplate <typename... Args>")
+                declare("\ttemplate <typename... Args>", description)
 
             method_signature = "\t"
             if "is_static" in method and method["is_static"]:
@@ -954,7 +1092,7 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
                 method_signature += " const"
             method_signature += ";"
 
-            result.append(method_signature)
+            declare(method_signature, description if not vararg else "")
 
     # Special cases.
     if class_name == "String":
@@ -974,29 +1112,47 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
 
     if "members" in builtin_api:
         for member in builtin_api["members"]:
+            description = docs.member(member["name"])
             if f"get_{member['name']}" not in method_list:
-                result.append(f"\t{correct_type(member['type'])} get_{member['name']}() const;")
+                declare(f"\t{correct_type(member['type'])} get_{member['name']}() const;", description)
             if f"set_{member['name']}" not in method_list:
-                result.append(f"\tvoid set_{member['name']}({type_for_parameter(member['type'])}value);")
+                declare(
+                    f"\tvoid set_{member['name']}({type_for_parameter(member['type'])}value);",
+                    describe_parameters(description, [("value", f"New value for the `{member['name']}` member.")]),
+                )
 
     if "operators" in builtin_api:
         for operator in builtin_api["operators"]:
             if is_valid_cpp_operator(operator["name"]):
                 if "right_type" in operator:
-                    result.append(
-                        f"\t{correct_type(operator['return_type'])} operator{get_operator_cpp_name(operator['name'])}({type_for_parameter(operator['right_type'])}p_other) const;"
+                    declare(
+                        f"\t{correct_type(operator['return_type'])} operator{get_operator_cpp_name(operator['name'])}({type_for_parameter(operator['right_type'])}p_other) const;",
+                        docs.operator(operator),
                     )
                 else:
-                    result.append(
-                        f"\t{correct_type(operator['return_type'])} operator{get_operator_cpp_name(operator['name'])}() const;"
+                    declare(
+                        f"\t{correct_type(operator['return_type'])} operator{get_operator_cpp_name(operator['name'])}() const;",
+                        docs.operator(operator),
                     )
 
     # Copy assignment.
     if copy_constructor_index >= 0:
-        result.append(f"\t{class_name} &operator=(const {class_name} &p_other);")
+        declare(
+            f"\t{class_name} &operator=(const {class_name} &p_other);",
+            describe_parameters(
+                "Assigns the supplied value to this wrapper through the engine copy constructor.",
+                [("p_other", "Source value copied into this wrapper.")],
+            ),
+        )
 
     # Move assignment.
-    result.append(f"\t{class_name} &operator=({class_name} &&p_other);")
+    declare(
+        f"\t{class_name} &operator=({class_name} &&p_other);",
+        describe_parameters(
+            "Exchanges the underlying values of this wrapper and the supplied wrapper.",
+            [("p_other", "Wrapper that receives this wrapper's previous value.")],
+        ),
+    )
 
     # Special cases.
     if class_name == "String":
@@ -1042,10 +1198,16 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
             return_type = "int32_t"
         elif class_name == "PackedFloat32Array":
             return_type = "float"
-        result.append(f"\tconst {return_type} &operator[](int64_t p_index) const;")
-        result.append(f"\t{return_type} &operator[](int64_t p_index);")
-        result.append(f"\tconst {return_type} *ptr() const;")
-        result.append(f"\t{return_type} *ptrw();")
+        declare(
+            f"\tconst {return_type} &operator[](int64_t p_index) const;",
+            "Returns a read-only reference to the element at a valid index.",
+        )
+        declare(
+            f"\t{return_type} &operator[](int64_t p_index);",
+            "Returns a writable reference to the element at a valid index.",
+        )
+        declare(f"\tconst {return_type} *ptr() const;", "Borrows a read-only pointer to the array's element storage.")
+        declare(f"\t{return_type} *ptrw();", "Borrows a writable pointer to the array's element storage.")
         iterators = """
 	struct Iterator {
 		_FORCE_INLINE_ $TYPE &operator*() const {
@@ -1123,8 +1285,14 @@ def generate_builtin_class_header(builtin_api, size, used_classes, fully_used_cl
         result.append(init_list.replace("$TYPE", return_type).replace("$CLASS", class_name))
 
     if class_name == "Array":
-        result.append("\tconst Variant &operator[](int64_t p_index) const;")
-        result.append("\tVariant &operator[](int64_t p_index);")
+        declare(
+            "\tconst Variant &operator[](int64_t p_index) const;",
+            "Returns a read-only reference to the Variant at a valid array index.",
+        )
+        declare(
+            "\tVariant &operator[](int64_t p_index);",
+            "Returns a writable reference to the Variant at a valid array index.",
+        )
         result.append("\tvoid set_typed(uint32_t p_type, const StringName &p_class_name, const Variant &p_script);")
         result.append("""
 	struct Iterator {
@@ -1525,7 +1693,7 @@ def generate_builtin_class_source(builtin_api, size, used_classes, fully_used_cl
     return "\n".join(result)
 
 
-def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hooks=None):
+def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hooks=None, reference=None):
     global engine_classes
     global singletons
     global native_structures
@@ -1535,6 +1703,7 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hoo
 
     include_gen_folder.mkdir(parents=True, exist_ok=True)
     source_gen_folder.mkdir(parents=True, exist_ok=True)
+    documentation_paths = get_header_documentation_paths(api["header"])
 
     # First create map of classes and singletons.
     for class_api in api["classes"]:
@@ -1715,16 +1884,20 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hoo
             fully_used_classes.remove("Ref")  # Special case; Ref should include RefCounted but not vice versa.
         fully_used_classes.sort()
 
+        documentation_path = documentation_paths.get(class_api.get("alias_for", class_name))
+        documentation = ClassHeaderDocumentation(documentation_path, class_api, reference) if documentation_path else None
+        header = generate_engine_class_header(
+            class_api, used_classes, fully_used_classes, use_template_get_node, hooks, documentation, reference
+        )
         with header_filename.open("w+", encoding="utf-8") as header_file:
-            header_file.write(
-                generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node, hooks)
-            )
+            header_file.write(header)
 
         with source_filename.open("w+", encoding="utf-8") as source_file:
             source_file.write(
                 generate_engine_class_source(class_api, used_classes, fully_used_classes, use_template_get_node, hooks)
             )
 
+    native_notes = load_native_structure_notes(api["header"]) if reference else {}
     for native_struct in api["native_structures"]:
         struct_name = native_struct["name"]
         if struct_name == "ObjectID":
@@ -1765,14 +1938,27 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hoo
         result.append("namespace godot {")
         result.append("")
 
-        result.append(f"struct {struct_name} {{")
+        notes = native_notes.get(struct_name, {})
+        declaration = f"struct {struct_name} {{"
+        append_markdown_comment(result, declaration, notes.get("description", ""))
+        result.append(declaration)
         for field in native_struct["format"].split(";"):
             if field != "":
-                result.append(f"\t{field};")
+                declaration = f"\t{field};"
+                if notes:
+                    name = re.search(r"\b(\w+)(?:\[\d+\])?$", field.split("=", 1)[0].rstrip())
+                    if name:
+                        append_markdown_comment(result, declaration, notes["fields"].get(name[1], ""))
+                result.append(declaration)
         result.append("};")
 
         result.append("")
-        result.append(f"GDVIRTUAL_NATIVE_PTR({struct_name});")
+        declaration = f"GDVIRTUAL_NATIVE_PTR({struct_name});"
+        if reference:
+            append_markdown_comment(
+                result, declaration, f"Defines pointer argument conversions for `godot::{struct_name}`."
+            )
+        result.append(declaration)
         result.append("")
         result.append("} // namespace godot")
         result.append("")
@@ -1781,11 +1967,21 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node, hoo
             header_file.write("\n".join(result))
 
 
-def generate_engine_class_header(class_api, used_classes, fully_used_classes, use_template_get_node, hooks):
+def generate_engine_class_header(
+    class_api, used_classes, fully_used_classes, use_template_get_node, hooks, documentation=None, reference=None
+):
     global singletons
     result = []
 
     class_name = class_api["name"]
+    docs = ReferenceDocumentation(reference or {}, class_api.get("alias_for", class_name), class_api.get("inherits"))
+
+    def declare(line, description="", *, key=None, api_member=None):
+        reviewed = documentation is not None and documentation.append_comment(result, line, key=key, api_member=api_member)
+        if not reviewed and reference:
+            append_markdown_comment(result, line, description)
+        result.append(line)
+
     snake_class_name = camel_to_snake(class_name).upper()
     is_singleton = class_name in singletons
 
@@ -1833,24 +2029,30 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
 
     for type_name in used_classes:
         if is_struct_type(type_name):
-            result.append(f"struct {type_name};")
+            declare(f"struct {type_name};")
         else:
-            result.append(f"class {type_name};")
+            declare(f"class {type_name};")
 
     if len(used_classes) > 0:
         result.append("")
 
     inherits = class_api["inherits"] if "inherits" in class_api else "Wrapped"
-    result.append(f"class {class_name} : public {inherits} {{")
+    declare(f"class {class_name} : public {inherits} {{", docs.type_description())
 
+    binding_description = (
+        f"Defines the engine metadata, construction hooks, and instance binding callbacks for `godot::{class_name}`."
+    )
     if "alias_for" in class_api:
-        result.append(f"\tGDEXTENSION_CLASS_ALIAS({class_name}, {class_api['alias_for']}, {inherits})")
+        declare(f"\tGDEXTENSION_CLASS_ALIAS({class_name}, {class_api['alias_for']}, {inherits})", binding_description)
     else:
-        result.append(f"\tGDEXTENSION_CLASS({class_name}, {inherits})")
+        declare(f"\tGDEXTENSION_CLASS({class_name}, {inherits})", binding_description)
     result.append("")
 
     if is_singleton:
-        result.append(f"\tstatic {class_name} *singleton;")
+        declare(
+            f"\tstatic {class_name} *singleton;",
+            f"Caches the engine-owned wrapper resolved by `godot::{class_name}::get_singleton()`.",
+        )
         result.append("")
 
     result.append("public:")
@@ -1858,12 +2060,16 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     if "enums" in class_api:
         for enum_api in class_api["enums"]:
             if enum_api["is_bitfield"]:
-                result.append(f"\tenum {enum_api['name']} : uint64_t {{")
+                declare(f"\tenum {enum_api['name']} : uint64_t {{", docs.enum_description(enum_api["name"], class_api.get("methods", ())))
             else:
-                result.append(f"\tenum {enum_api['name']} {{")
+                declare(f"\tenum {enum_api['name']} {{", docs.enum_description(enum_api["name"], class_api.get("methods", ())))
 
             for value in enum_api["values"]:
-                result.append(f"\t\t{value['name']} = {value['value']},")
+                declare(
+                    f"\t\t{value['name']} = {value['value']},",
+                    docs.constant(value, enum_api["name"]),
+                    api_member=value["name"],
+                )
             result.append("\t};")
             result.append("")
 
@@ -1877,11 +2083,18 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
                 # instead it sees 2147483648 (which is too big for an an int) and then applies the unary minus.
                 # This is a workaround for that.
                 const_value = "-2147483647 - 1"
-            result.append(f"\tstatic const {value['type']} {value['name']} = {const_value};")
+            declare(
+                f"\tstatic const {value['type']} {value['name']} = {const_value};",
+                docs.constant(value),
+                api_member=value["name"],
+            )
         result.append("")
 
     if is_singleton:
-        result.append(f"\tstatic {class_name} *get_singleton();")
+        declare(
+            f"\tstatic {class_name} *get_singleton();",
+            f"Returns the C++ wrapper for Godot's `{class_api.get('alias_for', class_name)}` singleton.",
+        )
         result.append("")
 
     if "methods" in class_api:
@@ -1900,13 +2113,27 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
             method_signature += make_signature(
                 class_name, method, for_header=True, use_template_get_node=use_template_get_node
             )
-            result.append(method_signature + ";")
+            description = describe_method(docs, method, vararg=vararg)
+            internal_description = describe_parameters(
+                f"Invokes the engine's `{method['name']}` method with the Variant pointers supplied by the public wrapper.",
+                [
+                    ("p_args", "Borrowed array of pointers in call order, including fixed and additional arguments."),
+                    ("p_arg_count", "Number of argument pointers passed to the engine."),
+                ],
+            )
+            declare(
+                method_signature + ";", internal_description if vararg else description, api_member=method["name"]
+            )
 
             if vararg:
                 result.append("")
                 result.append("public:")
                 # Add templated version.
-                result += make_varargs_template(method)
+                template = make_varargs_template(method)
+                declare(
+                    template[0], description, key=f"vararg:{method_signature.strip()}", api_member=method["name"]
+                )
+                result += template[1:]
 
         # Virtuals now.
         for method in class_api["methods"]:
@@ -1917,14 +2144,35 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
             method_signature += make_signature(
                 class_name, method, for_header=True, use_template_get_node=use_template_get_node
             )
-            result.append(method_signature + ";")
+            declare(method_signature + ";", describe_method(docs, method), api_member=method["name"])
 
         result.append("")
 
     result.append("protected:")
     # T is the custom class we want to register (from which the call initiates, going up the inheritance chain),
     # B is its base class (can be a custom class too, that's why we pass it).
-    result.append("\ttemplate <typename T, typename B>")
+    virtual_description = (
+        f"Calls `godot::{inherits}::register_virtuals()` first, then binds this wrapper's virtual methods "
+        "when their member pointer types differ between `T` and `B`.\n\n"
+        "**Used for** routing engine callbacks to the C++ overrides bound during extension class initialization."
+    )
+    if class_name == "Object":
+        virtual_description = (
+            "Ends the registration chain at the root of the generated object wrappers. "
+            "This step registers no overrides.\n\n"
+            "**Used for** letting wrappers whose base is `godot::Object` delegate to their base "
+            "before binding their own virtual methods."
+        )
+    elif not any(method["is_virtual"] for method in class_api.get("methods", ())):
+        virtual_description = (
+            f"Passes `T` and `B` to `godot::{inherits}::register_virtuals()`.\n\n"
+            "**Used for** binding overrides of inherited engine callbacks when an extension class "
+            f"derives from `godot::{class_name}`."
+        )
+    virtual_parameters = [("T", "Extension class whose overrides are registered."), ("B", "Immediate C++ base used to detect overrides.")]
+    if class_name == "Object":
+        virtual_parameters = [("T", "Extension class carried through the registration chain."), ("B", "Base class carried through the registration chain.")]
+    declare("\ttemplate <typename T, typename B>", describe_parameters(virtual_description, virtual_parameters), key="register_virtuals")
     result.append("\tstatic void register_virtuals() {")
     if class_name != "Object":
         result.append(f"\t\t{inherits}::register_virtuals<T, B>();")
@@ -1948,7 +2196,7 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     result.append("")
 
     if is_singleton:
-        result.append(f"\t~{class_name}();")
+        declare(f"\t~{class_name}();", "Clears the cached singleton wrapper when that wrapper is destroyed.")
         result.append("")
 
     if class_name == "Object":
@@ -2001,7 +2249,17 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
         result.append("\tvirtual ~Object() = default;")
 
     elif use_template_get_node and class_name == "Node":
-        result.append("\ttemplate <typename T>")
+        declare(
+            "\ttemplate <typename T>",
+            describe_parameters(
+                "Looks up the node at the supplied path and casts the result. Returns null if the lookup or cast fails.",
+                [
+                    ("T", "Godot object wrapper type required for the result."),
+                    ("p_path", "Node path passed to the ordinary lookup on this node."),
+                ],
+            ),
+            key="typed_get_node",
+        )
         result.append(
             "\tT *get_node(const NodePath &p_path) const { return Object::cast_to<T>(get_node_internal(p_path)); }"
         )
@@ -2015,9 +2273,15 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     if "enums" in class_api and class_name != "Object":
         for enum_api in class_api["enums"]:
             if enum_api["is_bitfield"]:
-                result.append(f"VARIANT_BITFIELD_CAST({class_name}::{enum_api['name']});")
+                declare(
+                    f"VARIANT_BITFIELD_CAST({class_name}::{enum_api['name']});",
+                    "Defines conversions between this bitfield type and Godot Variant values.",
+                )
             else:
-                result.append(f"VARIANT_ENUM_CAST({class_name}::{enum_api['name']});")
+                declare(
+                    f"VARIANT_ENUM_CAST({class_name}::{enum_api['name']});",
+                    "Defines conversions between this enum type and Godot Variant values.",
+                )
         result.append("")
 
     if class_name == "ClassDBSingleton":
@@ -2109,6 +2373,8 @@ def generate_engine_class_header(class_api, used_classes, fully_used_classes, us
     if hooks:
         result = hooks.alter_engine_class_header(class_api, result)
 
+    if documentation is not None:
+        documentation.check_matches()
     return "\n".join(result)
 
 
@@ -2296,7 +2562,7 @@ def generate_engine_class_source(class_api, used_classes, fully_used_classes, us
     return "\n".join(result)
 
 
-def generate_global_constants(api, output_dir, hooks=None):
+def generate_global_constants(api, output_dir, hooks=None, reference=None):
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
     source_gen_folder = Path(output_dir) / "src" / "classes"
 
@@ -2307,6 +2573,11 @@ def generate_global_constants(api, output_dir, hooks=None):
 
     header = []
     add_header("global_constants.hpp", header)
+    docs = ReferenceDocumentation(reference or {}, "@GlobalScope")
+
+    def declare(line, description):
+        append_markdown_comment(header, line, description)
+        header.append(line)
 
     header_filename = include_gen_folder / "global_constants.hpp"
 
@@ -2335,7 +2606,10 @@ def generate_global_constants(api, output_dir, hooks=None):
 
     if len(global_constants) > 0:
         for constant in global_constants:
-            header.append(f"const int64_t {escape_identifier(constant['name'])} = {constant['value']};")
+            declare(
+                f"const int64_t {escape_identifier(constant['name'])} = {constant['value']};",
+                docs.constant(constant),
+            )
 
         header.append("")
 
@@ -2344,12 +2618,12 @@ def generate_global_constants(api, output_dir, hooks=None):
             continue
 
         if enum_def["is_bitfield"]:
-            header.append(f"enum {enum_def['name']} : uint64_t {{")
+            declare(f"enum {enum_def['name']} : uint64_t {{", docs.enum_description(enum_def["name"]))
         else:
-            header.append(f"enum {enum_def['name']} {{")
+            declare(f"enum {enum_def['name']} {{", docs.enum_description(enum_def["name"]))
 
         for value in enum_def["values"]:
-            header.append(f"\t{value['name']} = {value['value']},")
+            declare(f"\t{value['name']} = {value['value']},", docs.constant(value, enum_def["name"]))
         header.append("};")
         header.append("")
 
@@ -2364,7 +2638,7 @@ def generate_global_constants(api, output_dir, hooks=None):
         header_file.write("\n".join(header))
 
 
-def generate_version_header(api, output_dir):
+def generate_version_header(api, output_dir, reference=None):
     header = []
     header_filename = "version.hpp"
     add_header(header_filename, header)
@@ -2377,11 +2651,36 @@ def generate_version_header(api, output_dir):
     header.append("#pragma once")
     header.append("")
 
-    header.append(f"#define GODOT_VERSION_MAJOR {api['header']['version_major']}")
-    header.append(f"#define GODOT_VERSION_MINOR {api['header']['version_minor']}")
-    header.append(f"#define GODOT_VERSION_PATCH {api['header']['version_patch']}")
-    header.append(f'#define GODOT_VERSION_STATUS "{api["header"]["version_status"]}"')
-    header.append(f'#define GODOT_VERSION_BUILD "{api["header"]["version_build"]}"')
+    def define(line, description, purpose):
+        if reference:
+            append_markdown_comment(header, line, f"{description}\n\n**Used for** {purpose}")
+        header.append(line)
+
+    define(
+        f"#define GODOT_VERSION_MAJOR {api['header']['version_major']}",
+        "Major version of the Godot API used to generate the binding.",
+        "checking the running engine's major version before loading the extension.",
+    )
+    define(
+        f"#define GODOT_VERSION_MINOR {api['header']['version_minor']}",
+        "Minor version of the Godot API used to generate the binding.",
+        "selecting code that needs an interface introduced in a particular Godot minor release.",
+    )
+    define(
+        f"#define GODOT_VERSION_PATCH {api['header']['version_patch']}",
+        "Patch version of the Godot API used to generate the binding.",
+        "checking the minimum engine patch when the generated API requires a nonzero patch.",
+    )
+    define(
+        f'#define GODOT_VERSION_STATUS "{api["header"]["version_status"]}"',
+        "Release status recorded in the Godot API metadata, such as `stable`.",
+        "identifying whether the extension was built against a stable or prerelease API.",
+    )
+    define(
+        f'#define GODOT_VERSION_BUILD "{api["header"]["version_build"]}"',
+        "Build label recorded in the Godot API metadata.",
+        "reporting the API build label with the version in an extension diagnostic.",
+    )
 
     header.append("")
 
@@ -2389,7 +2688,7 @@ def generate_version_header(api, output_dir):
         header_file.write("\n".join(header))
 
 
-def generate_global_constant_binds(api, output_dir):
+def generate_global_constant_binds(api, output_dir, reference=None):
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "classes"
     source_gen_folder = Path(output_dir) / "src" / "classes"
 
@@ -2408,17 +2707,22 @@ def generate_global_constant_binds(api, output_dir):
     header.append("#include <godot_cpp/classes/global_constants.hpp>")
     header.append("")
 
+    def declare(line):
+        if reference:
+            append_markdown_comment(header, line, "Defines conversions between this type and Godot Variant values.")
+        header.append(line)
+
     for enum_def in api["global_enums"]:
         if enum_def["name"].startswith("Variant."):
             continue
 
         if enum_def["is_bitfield"]:
-            header.append(f"VARIANT_BITFIELD_CAST({enum_def['name']});")
+            declare(f"VARIANT_BITFIELD_CAST({enum_def['name']});")
         else:
-            header.append(f"VARIANT_ENUM_CAST({enum_def['name']});")
+            declare(f"VARIANT_ENUM_CAST({enum_def['name']});")
 
     # Variant::Type is not a global enum, but only one line, it is worth to place in this file instead of creating new file.
-    header.append("VARIANT_ENUM_CAST(godot::Variant::Type);")
+    declare("VARIANT_ENUM_CAST(godot::Variant::Type);")
 
     header.append("")
 
@@ -2426,7 +2730,7 @@ def generate_global_constant_binds(api, output_dir):
         header_file.write("\n".join(header))
 
 
-def generate_utility_functions(api, output_dir, hooks=None):
+def generate_utility_functions(api, output_dir, hooks=None, reference=None, documentation_path=None):
     include_gen_folder = Path(output_dir) / "include" / "godot_cpp" / "variant"
     source_gen_folder = Path(output_dir) / "src" / "variant"
 
@@ -2437,6 +2741,12 @@ def generate_utility_functions(api, output_dir, hooks=None):
 
     header = []
     add_header("utility_functions.hpp", header)
+    docs = ReferenceDocumentation(reference or {}, "@GlobalScope")
+    documentation = (
+        ClassHeaderDocumentation(documentation_path, {"name": "@GlobalScope"}, reference)
+        if documentation_path
+        else None
+    )
 
     header_filename = include_gen_folder / "utility_functions.hpp"
 
@@ -2449,6 +2759,13 @@ def generate_utility_functions(api, output_dir, hooks=None):
     header.append("")
     header.append("namespace godot {")
     header.append("")
+    if reference:
+        append_markdown_comment(
+            header,
+            "class UtilityFunctions {",
+            "Provides C++ wrappers for the engine's global Variant utility functions.\n\n"
+            "**Used for** performing engine math, data conversion, and console output directly from C++ code.",
+        )
     header.append("class UtilityFunctions {")
     header.append("public:")
 
@@ -2467,13 +2784,36 @@ def generate_utility_functions(api, output_dir, hooks=None):
 
         function_signature = "\t"
         function_signature += make_signature("UtilityFunctions", function, for_header=True, static=True)
+        description = describe_method(docs, function, vararg=vararg)
+        reviewed = documentation is not None and documentation.append_comment(
+            header, function_signature + ";", api_member=function["name"]
+        )
+        if not reviewed:
+            if vararg and reference:
+                internal_description = describe_parameters(
+                    f"Passes the prepared arguments to the engine utility for "
+                    f"`godot::UtilityFunctions::{escape_identifier(function['name'])}()`.",
+                    [
+                        ("p_args", "Array of pointers to Variant values in call order, valid during the call."),
+                        ("p_arg_count", "Number of argument pointers in the array."),
+                    ],
+                )
+                append_markdown_comment(header, function_signature, internal_description)
+            elif not vararg:
+                append_markdown_comment(header, function_signature, description)
         header.append(function_signature + ";")
 
         if vararg:
             header.append("")
             header.append("public:")
             # Add templated version.
-            header += make_varargs_template(function, static=True)
+            template = make_varargs_template(function, static=True)
+            reviewed_template = documentation is not None and documentation.append_comment(
+                header, template[0], key=f"vararg:{function_signature.strip()};", api_member=function["name"]
+            )
+            if not reviewed_template:
+                append_markdown_comment(header, template[0], description)
+            header += template
 
     header.append("};")
     header.append("")
@@ -2483,6 +2823,8 @@ def generate_utility_functions(api, output_dir, hooks=None):
     if hooks:
         header = hooks.alter_utility_functions_header(api, header)
 
+    if documentation is not None:
+        documentation.check_matches()
     with header_filename.open("w+", encoding="utf-8") as header_file:
         header_file.write("\n".join(header))
 

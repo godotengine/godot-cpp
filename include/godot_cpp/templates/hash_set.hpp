@@ -50,19 +50,49 @@ template <typename TKey,
 		typename Comparator = HashMapComparatorDefault<TKey>>
 class _WARN_UNUSED_ HashSet {
 public:
+	/**
+	 * Index of the default minimum bucket count in `godot::hash_table_size_primes`.
+	 */
 	static constexpr uint32_t MIN_CAPACITY_INDEX = 2; // Use a prime.
+	/**
+	 * Maximum occupied fraction of the table before a new insertion grows it.
+	 */
 	static constexpr float MAX_OCCUPANCY = 0.75;
+	/**
+	 * Hash reserved for an empty bucket.
+	 */
 	static constexpr uint32_t EMPTY_HASH = 0;
 
 private:
+	/**
+	 * Owns the contiguous array of stored keys.
+	 */
 	TKey *_keys = nullptr;
+	/**
+	 * Maps occupied hash bucket indices to packed key indices.
+	 */
 	uint32_t *_hash_idx_to_key_idx = nullptr;
+	/**
+	 * Maps packed key indices to their occupied hash buckets.
+	 */
 	uint32_t *_key_idx_to_hash_idx = nullptr;
+	/**
+	 * Stores the remapped hash for each bucket. Zero marks a vacant bucket.
+	 */
 	uint32_t *_hashes = nullptr;
 
+	/**
+	 * Selects the bucket count and reciprocal from the supported table sizes.
+	 */
 	uint32_t _capacity_idx = 0;
+	/**
+	 * Counts the live keys at the start of the packed array.
+	 */
 	uint32_t _size = 0;
 
+	/**
+	 * Hashes a key and remaps zero to one to preserve the empty-bucket marker.
+	 */
 	_FORCE_INLINE_ uint32_t _hash(const TKey &p_key) const {
 		uint32_t hash = Hasher::hash(p_key);
 
@@ -73,6 +103,9 @@ private:
 		return hash;
 	}
 
+	/**
+	 * Advances the bucket index and wraps to zero when it reaches the bucket count.
+	 */
 	_FORCE_INLINE_ static constexpr void _increment_mod(uint32_t &r_idx, const uint32_t p_capacity) {
 		r_idx++;
 		// `if` is faster than both fastmod and mod.
@@ -81,6 +114,9 @@ private:
 		}
 	}
 
+	/**
+	 * Computes the forward distance from a key's starting bucket to its current bucket, with wraparound.
+	 */
 	static _FORCE_INLINE_ uint32_t _get_probe_length(const uint32_t p_hash_idx, const uint32_t p_hash, const uint32_t p_capacity, const uint64_t p_capacity_inv) {
 		const uint32_t original_idx = fastmod(p_hash, p_capacity_inv, p_capacity);
 		const uint32_t distance_idx = p_hash_idx - original_idx + p_capacity;
@@ -88,6 +124,9 @@ private:
 		return distance_idx >= p_capacity ? distance_idx - p_capacity : distance_idx;
 	}
 
+	/**
+	 * Looks up a key and writes its packed array index when found.
+	 */
 	bool _lookup_key_idx(const TKey &p_key, uint32_t &r_key_idx) const {
 		if (_keys == nullptr || _size == 0) {
 			return false; // Failed lookups, no elements
@@ -118,6 +157,9 @@ private:
 		}
 	}
 
+	/**
+	 * Inserts a hash and packed key index, updating both index maps as Robin Hood probing displaces entries. Returns the last bucket filled.
+	 */
 	uint32_t _insert_with_hash(uint32_t p_hash, uint32_t p_key_idx) {
 		const uint32_t capacity = hash_table_size_primes[_capacity_idx];
 		const uint64_t capacity_inv = hash_table_size_primes_inv[_capacity_idx];
@@ -148,6 +190,9 @@ private:
 		}
 	}
 
+	/**
+	 * Resizes the arrays and rebuilds the bucket indices from existing hashes.
+	 */
 	void _resize_and_rehash(uint32_t p_new_capacity_idx) {
 		// Capacity can't be 0.
 		_capacity_idx = MAX((uint32_t)MIN_CAPACITY_INDEX, p_new_capacity_idx);
@@ -173,6 +218,9 @@ private:
 	}
 
 	// Returns key index.
+	/**
+	 * Returns the existing or newly appended key's packed index. Returns `-1` when the table cannot grow further.
+	 */
 	_FORCE_INLINE_ int32_t _insert(const TKey &p_key) {
 		uint32_t capacity = hash_table_size_primes[_capacity_idx];
 		if (unlikely(_keys == nullptr)) {
@@ -204,6 +252,9 @@ private:
 		}
 	}
 
+	/**
+	 * Copies another set's keys and bucket mappings into unallocated storage.
+	 */
 	void _init_from(const HashSet &p_other) {
 		_capacity_idx = p_other._capacity_idx;
 		_size = p_other._size;
@@ -231,15 +282,27 @@ private:
 	}
 
 public:
+	/**
+	 * Returns the selected bucket count, even before storage allocation.
+	 */
 	_FORCE_INLINE_ uint32_t get_capacity() const { return hash_table_size_primes[_capacity_idx]; }
+	/**
+	 * Returns the number of unique keys.
+	 */
 	_FORCE_INLINE_ uint32_t size() const { return _size; }
 
 	/* Standard Godot Container API */
 
+	/**
+	 * Returns whether the set contains no keys.
+	 */
 	bool is_empty() const {
 		return _size == 0;
 	}
 
+	/**
+	 * Destroys all keys and marks the table empty while retaining the allocation.
+	 */
 	void clear() {
 		if (_keys == nullptr || _size == 0) {
 			return;
@@ -257,11 +320,17 @@ public:
 		_size = 0;
 	}
 
+	/**
+	 * Returns whether the set contains the key.
+	 */
 	_FORCE_INLINE_ bool has(const TKey &p_key) const {
 		uint32_t _idx = 0;
 		return _lookup_key_idx(p_key, _idx);
 	}
 
+	/**
+	 * Removes the key and returns whether it existed. If needed, moves the last key into the gap to keep storage packed.
+	 */
 	bool erase(const TKey &p_key) {
 		uint32_t key_idx = 0;
 		bool exists = _lookup_key_idx(p_key, key_idx);
@@ -302,6 +371,9 @@ public:
 
 	// Reserves space for a number of elements, useful to avoid many resizes and rehashes.
 	// If adding a known (possibly large) number of elements at once, must be larger than old capacity.
+	/**
+	 * Grows the selected bucket count to a supported size that meets the request. Defers allocation when the keys have no storage yet.
+	 */
 	void reserve(uint32_t p_new_capacity) {
 		uint32_t new_capacity_idx = _capacity_idx;
 
@@ -326,13 +398,25 @@ public:
 
 	/** Iterator API **/
 
+	/**
+	 * Traverses the packed array with read-only access to keys. Growth can invalidate the iterator and erasing can move the last key.
+	 */
 	struct Iterator {
+		/**
+		 * Returns a reference to the current key. The iterator must be on a key.
+		 */
 		_FORCE_INLINE_ const TKey &operator*() const {
 			return _keys[_key_idx];
 		}
+		/**
+		 * Returns a pointer to the current key. The iterator must be on a key.
+		 */
 		_FORCE_INLINE_ const TKey *operator->() const {
 			return &_keys[_key_idx];
 		}
+		/**
+		 * Advances to the next packed key and resets to the end sentinel after the last key.
+		 */
 		_FORCE_INLINE_ Iterator &operator++() {
 			_key_idx++;
 			if (_key_idx >= (int32_t)_num_keys) {
@@ -342,6 +426,9 @@ public:
 			}
 			return *this;
 		}
+		/**
+		 * Moves to the previous packed key and resets to the end sentinel before the first key.
+		 */
 		_FORCE_INLINE_ Iterator &operator--() {
 			_key_idx--;
 			if (_key_idx < 0) {
@@ -352,24 +439,45 @@ public:
 			return *this;
 		}
 
+		/**
+		 * Tests whether the iterators refer to the same key array and index.
+		 */
 		_FORCE_INLINE_ bool operator==(const Iterator &p_other) const { return _keys == p_other._keys && _key_idx == p_other._key_idx; }
+		/**
+		 * Tests whether the iterators differ in key array or index.
+		 */
 		_FORCE_INLINE_ bool operator!=(const Iterator &p_other) const { return _keys != p_other._keys || _key_idx != p_other._key_idx; }
 
+		/**
+		 * Returns whether the iterator holds a key array pointer.
+		 */
 		_FORCE_INLINE_ explicit operator bool() const {
 			return _keys != nullptr;
 		}
 
+		/**
+		 * Records the key array, the number of keys, and the initial index.
+		 */
 		_FORCE_INLINE_ Iterator(const TKey *p_keys, uint32_t p_num_keys, int32_t p_key_idx = -1) {
 			_keys = p_keys;
 			_num_keys = p_num_keys;
 			_key_idx = p_key_idx;
 		}
+		/**
+		 * Creates an end iterator with no key array.
+		 */
 		_FORCE_INLINE_ Iterator() {}
+		/**
+		 * Copies the source iterator's array, range size, and index.
+		 */
 		_FORCE_INLINE_ Iterator(const Iterator &p_it) {
 			_keys = p_it._keys;
 			_num_keys = p_it._num_keys;
 			_key_idx = p_it._key_idx;
 		}
+		/**
+		 * Replaces this iterator's array, range size, and index with the source's.
+		 */
 		_FORCE_INLINE_ void operator=(const Iterator &p_it) {
 			_keys = p_it._keys;
 			_num_keys = p_it._num_keys;
@@ -377,17 +485,35 @@ public:
 		}
 
 	private:
+		/**
+		 * Points to the packed keys for the iteration range, or is null for the end sentinel.
+		 */
 		const TKey *_keys = nullptr;
+		/**
+		 * Stores the number of keys captured for iteration.
+		 */
 		uint32_t _num_keys = 0;
+		/**
+		 * Stores the current packed key index. The end sentinel uses `-1`.
+		 */
 		int32_t _key_idx = -1;
 	};
 
+	/**
+	 * Returns an iterator to the first packed key, or the end sentinel for an empty set.
+	 */
 	_FORCE_INLINE_ Iterator begin() const _LIFETIME_BOUND_ {
 		return _size ? Iterator(_keys, _size, 0) : Iterator();
 	}
+	/**
+	 * Returns the end sentinel with no key array.
+	 */
 	_FORCE_INLINE_ Iterator end() const _LIFETIME_BOUND_ {
 		return Iterator();
 	}
+	/**
+	 * Returns an iterator to the last key, or the end sentinel for an empty set.
+	 */
 	_FORCE_INLINE_ Iterator last() const _LIFETIME_BOUND_ {
 		if (_size == 0) {
 			return Iterator();
@@ -395,6 +521,9 @@ public:
 		return Iterator(_keys, _size, _size - 1);
 	}
 
+	/**
+	 * Returns an iterator to the key, or the end sentinel if it is absent.
+	 */
 	_FORCE_INLINE_ Iterator find(const TKey &p_key) const _LIFETIME_BOUND_ {
 		uint32_t key_idx = 0;
 		bool exists = _lookup_key_idx(p_key, key_idx);
@@ -404,6 +533,9 @@ public:
 		return Iterator(_keys, _size, key_idx);
 	}
 
+	/**
+	 * Erases the key at the iterator's position. The end sentinel has no effect.
+	 */
 	_FORCE_INLINE_ void remove(const Iterator &p_iter) {
 		if (p_iter) {
 			erase(*p_iter);
@@ -412,6 +544,9 @@ public:
 
 	/* Insert */
 
+	/**
+	 * Inserts the key if absent and returns an iterator to the corresponding packed position.
+	 */
 	Iterator insert(const TKey &p_key) _LIFETIME_BOUND_ {
 		uint32_t key_idx = _insert(p_key);
 		return Iterator(_keys, _size, key_idx);
@@ -419,10 +554,16 @@ public:
 
 	/* Constructors */
 
+	/**
+	 * Creates an independent copy of the keys and bucket mappings.
+	 */
 	explicit HashSet(const HashSet &p_other) {
 		_init_from(p_other);
 	}
 
+	/**
+	 * Takes ownership of the source arrays and leaves the source empty.
+	 */
 	HashSet(HashSet &&p_other) {
 		_keys = p_other._keys;
 		_hash_idx_to_key_idx = p_other._hash_idx_to_key_idx;
@@ -441,6 +582,9 @@ public:
 		p_other._size = 0;
 	}
 
+	/**
+	 * Destroys the old keys and storage and copies the source set, unless assigned to itself.
+	 */
 	void operator=(const HashSet &p_other) {
 		if (this == &p_other) {
 			return; // Ignore self assignment.
@@ -462,6 +606,9 @@ public:
 		_init_from(p_other);
 	}
 
+	/**
+	 * Exchanges the key arrays, bucket tables, and counts with the source set.
+	 */
 	void operator=(HashSet &&p_other) {
 		if (this == &p_other) {
 			return; // Ignore self assignment.
@@ -476,6 +623,9 @@ public:
 		SWAP(_size, p_other._size);
 	}
 
+	/**
+	 * Returns whether both sets contain the same keys, regardless of iteration order.
+	 */
 	bool operator==(const HashSet &p_other) const {
 		if (_size != p_other._size) {
 			return false;
@@ -487,18 +637,30 @@ public:
 		}
 		return true;
 	}
+	/**
+	 * Returns whether the sets differ in membership.
+	 */
 	bool operator!=(const HashSet &p_other) const {
 		return !(*this == p_other);
 	}
 
+	/**
+	 * Selects the initial bucket count for an empty set and defers allocation.
+	 */
 	HashSet(uint32_t p_initial_capacity) {
 		// Capacity can't be 0.
 		_capacity_idx = 0;
 		reserve(p_initial_capacity);
 	}
+	/**
+	 * Creates an empty set with the default bucket count and no allocated arrays.
+	 */
 	HashSet() {
 		_capacity_idx = MIN_CAPACITY_INDEX;
 	}
+	/**
+	 * Inserts all listed keys, keeping one entry per unique key.
+	 */
 	HashSet(std::initializer_list<TKey> p_init) {
 		reserve(p_init.size());
 		for (const TKey &E : p_init) {
@@ -506,6 +668,9 @@ public:
 		}
 	}
 
+	/**
+	 * Destroys the keys, frees the arrays, and restores the default bucket count.
+	 */
 	void reset() {
 		clear();
 
@@ -522,6 +687,9 @@ public:
 		_capacity_idx = MIN_CAPACITY_INDEX;
 	}
 
+	/**
+	 * Destroys any live keys and frees the set's arrays.
+	 */
 	~HashSet() {
 		clear();
 

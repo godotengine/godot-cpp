@@ -41,16 +41,31 @@
 
 namespace godot {
 
+/**
+ * A dictionary whose key and value types are constrained to registered Godot object classes.
+ *
+ * - `K` — The Godot C++ wrapper type for object keys.
+ * - `V` — The Godot C++ wrapper type for object values.
+ */
 template <typename K, typename V>
 class TypedDictionary : public Dictionary {
 public:
+	/**
+	 * Shares the source dictionary if its key and value types match. Reports an error if either type differs.
+	 */
 	_FORCE_INLINE_ void operator=(const Dictionary &p_dictionary) {
 		ERR_FAIL_COND_MSG(!is_same_typed(p_dictionary), "Cannot assign a dictionary with a different element type.");
 		Dictionary::operator=(p_dictionary);
 	}
+	/**
+	 * Converts the variant to a dictionary and applies the configured key and value types.
+	 */
 	_FORCE_INLINE_ TypedDictionary(const Variant &p_variant) :
 			TypedDictionary(Dictionary(p_variant)) {
 	}
+	/**
+	 * Shares a source with matching types. Otherwise assigns the source entries into a dictionary configured with these key and value types.
+	 */
 	_FORCE_INLINE_ TypedDictionary(const Dictionary &p_dictionary) {
 		set_typed(Variant::OBJECT, K::get_class_static(), Variant(), Variant::OBJECT, V::get_class_static(), Variant());
 		if (is_same_typed(p_dictionary)) {
@@ -59,9 +74,15 @@ public:
 			assign(p_dictionary);
 		}
 	}
+	/**
+	 * Creates an empty dictionary configured with the registered key and value classes.
+	 */
 	_FORCE_INLINE_ TypedDictionary() {
 		set_typed(Variant::OBJECT, K::get_class_static(), Variant(), Variant::OBJECT, V::get_class_static(), Variant());
 	}
+	/**
+	 * Creates a typed dictionary and inserts the supplied pairs in list order.
+	 */
 	_FORCE_INLINE_ TypedDictionary(std::initializer_list<KeyValue<K, V>> p_init) :
 			Dictionary() {
 		set_typed(Variant::OBJECT, K::get_class_static(), Variant(), Variant::OBJECT, V::get_class_static(), Variant());
@@ -73,6 +94,9 @@ public:
 
 //specialization for the rest of variant types
 
+/**
+ * Defines the specializations that pair a registered object class with a built-in variant type, on either the key or the value side.
+ */
 #define MAKE_TYPED_DICTIONARY_WITH_OBJECT(m_type, m_variant_type) \
 	template <typename T> \
 	class TypedDictionary<T, m_type> : public Dictionary { \
@@ -133,6 +157,9 @@ public:
 		} \
 	};
 
+/**
+ * Defines the specialization for an exact key and value type pair, using the supplied built-in variant types in its constructors.
+ */
 #define MAKE_TYPED_DICTIONARY_EXPANDED(m_type_key, m_variant_type_key, m_type_value, m_variant_type_value) \
 	template <> \
 	class TypedDictionary<m_type_key, m_type_value> : public Dictionary { \
@@ -164,6 +191,9 @@ public:
 		} \
 	};
 
+/**
+ * Defines specializations for the supplied C++ type as key and all supported value types, including object types. Used to allow unrestricted variant keys.
+ */
 #define MAKE_TYPED_DICTIONARY_NIL(m_type, m_variant_type) \
 	MAKE_TYPED_DICTIONARY_WITH_OBJECT(m_type, m_variant_type) \
 	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, bool, Variant::BOOL) \
@@ -210,6 +240,9 @@ public:
 	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, PackedVector4Array, Variant::PACKED_VECTOR4_ARRAY) \
 	/*MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, IPAddress, Variant::STRING)*/
 
+/**
+ * Defines the built-in combinations for this C++ type, including dictionaries with unrestricted variant values.
+ */
 #define MAKE_TYPED_DICTIONARY(m_type, m_variant_type) \
 	MAKE_TYPED_DICTIONARY_EXPANDED(m_type, m_variant_type, Variant, Variant::NIL) \
 	MAKE_TYPED_DICTIONARY_NIL(m_type, m_variant_type)
@@ -266,44 +299,92 @@ MAKE_TYPED_DICTIONARY(IPAddress, Variant::STRING)
 #undef MAKE_TYPED_DICTIONARY_EXPANDED
 #undef MAKE_TYPED_DICTIONARY_WITH_OBJECT
 
+/**
+ * Adapts a typed dictionary passed or returned by value to the dictionary storage used by pointer calls.
+ */
 template <typename K, typename V>
 struct PtrToArg<TypedDictionary<K, V>> {
+	/**
+	 * Wraps an incoming dictionary with the requested key and value types.
+	 */
 	_FORCE_INLINE_ static TypedDictionary<K, V> convert(const void *p_ptr) {
 		return TypedDictionary<K, V>(*reinterpret_cast<const Dictionary *>(p_ptr));
 	}
+	/**
+	 * The engine dictionary type used as pointer-call storage.
+	 */
 	typedef Dictionary EncodeT;
+	/**
+	 * Assigns a typed dictionary to a dictionary return slot.
+	 */
 	_FORCE_INLINE_ static void encode(TypedDictionary<K, V> p_val, void *p_ptr) {
 		*(Dictionary *)p_ptr = p_val;
 	}
 };
 
+/**
+ * Adapts a const typed-dictionary reference to the incoming dictionary pointer-call storage.
+ */
 template <typename K, typename V>
 struct PtrToArg<const TypedDictionary<K, V> &> {
+	/**
+	 * The dictionary type used by the pointer-call ABI.
+	 */
 	typedef Dictionary EncodeT;
+	/**
+	 * Wraps an incoming dictionary with the requested key and value types for a const reference parameter.
+	 */
 	_FORCE_INLINE_ static TypedDictionary<K, V>
 	convert(const void *p_ptr) {
 		return TypedDictionary<K, V>(*reinterpret_cast<const Dictionary *>(p_ptr));
 	}
 };
 
+/**
+ * Provides method-registration type information for dictionaries with object keys and values.
+ */
 template <typename K, typename V>
 struct GetTypeInfo<TypedDictionary<K, V>> {
+	/**
+	 * Registers the value as a dictionary variant.
+	 */
 	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_DICTIONARY;
+	/**
+	 * Indicates that the argument has no extra method-argument metadata.
+	 */
 	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	/**
+	 * Builds dictionary property information using the registered classes of the key and value types.
+	 */
 	static inline PropertyInfo get_class_info() {
 		return PropertyInfo(Variant::Type::DICTIONARY, String(), PROPERTY_HINT_DICTIONARY_TYPE, vformat("%s;%s", K::get_class_static(), V::get_class_static()));
 	}
 };
 
+/**
+ * Provides method-registration type information for const references to dictionaries with object keys and values.
+ */
 template <typename K, typename V>
 struct GetTypeInfo<const TypedDictionary<K, V> &> {
+	/**
+	 * Registers the const reference as a dictionary variant.
+	 */
 	static constexpr GDExtensionVariantType VARIANT_TYPE = GDEXTENSION_VARIANT_TYPE_DICTIONARY;
+	/**
+	 * Indicates that the const reference has no extra method-argument metadata.
+	 */
 	static constexpr GDExtensionClassMethodArgumentMetadata METADATA = GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE;
+	/**
+	 * Builds dictionary property information using the registered classes of the key and value types.
+	 */
 	static inline PropertyInfo get_class_info() {
 		return PropertyInfo(Variant::Type::DICTIONARY, String(), PROPERTY_HINT_DICTIONARY_TYPE, vformat("%s;%s", K::get_class_static(), V::get_class_static()));
 	}
 };
 
+/**
+ * Defines dictionary type information for a registered object class paired with a built-in variant type, for values and const references.
+ */
 #define MAKE_TYPED_DICTIONARY_INFO_WITH_OBJECT(m_type, m_variant_type) \
 	template <typename T> \
 	struct GetTypeInfo<TypedDictionary<T, m_type>> { \
@@ -342,6 +423,9 @@ struct GetTypeInfo<const TypedDictionary<K, V> &> {
 		} \
 	};
 
+/**
+ * Defines dictionary type information for an exact pair of built-in types, for values and const references.
+ */
 #define MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type_key, m_variant_type_key, m_type_value, m_variant_type_value) \
 	template <> \
 	struct GetTypeInfo<TypedDictionary<m_type_key, m_type_value>> { \
@@ -364,6 +448,9 @@ struct GetTypeInfo<const TypedDictionary<K, V> &> {
 		} \
 	};
 
+/**
+ * Emits registration metadata for the supported pairings of the unrestricted variant key type.
+ */
 #define MAKE_TYPED_DICTIONARY_INFO_NIL(m_type, m_variant_type) \
 	MAKE_TYPED_DICTIONARY_INFO_WITH_OBJECT(m_type, m_variant_type) \
 	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, bool, Variant::BOOL) \
@@ -410,6 +497,9 @@ struct GetTypeInfo<const TypedDictionary<K, V> &> {
 	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, PackedColorArray, Variant::PACKED_COLOR_ARRAY) \
 	/* MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, IPAddress, Variant::STRING) */
 
+/**
+ * Emits registration metadata for the supported pairings of a built-in key type.
+ */
 #define MAKE_TYPED_DICTIONARY_INFO(m_type, m_variant_type) \
 	MAKE_TYPED_DICTIONARY_INFO_EXPANDED(m_type, m_variant_type, Variant, Variant::NIL) \
 	MAKE_TYPED_DICTIONARY_INFO_NIL(m_type, m_variant_type)

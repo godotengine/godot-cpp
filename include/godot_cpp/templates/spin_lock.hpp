@@ -35,15 +35,58 @@
 
 namespace godot {
 
+/**
+ * Provides exclusive access through an atomic flag. A thread waiting to acquire the flag repeatedly tests it.
+ *
+ * **Used for** protecting a worker queue while a thread adds or removes an item.
+ *
+ * ```cpp
+ * // A worker has decoded decoded_id. SpinLock ready_lock protects the shared ready_ids queue.
+ * std::lock_guard<SpinLock> guard(ready_lock); // With <mutex> included.
+ * ready_ids.push_back(decoded_id);
+ * ```
+ */
 class SpinLock {
+	/**
+	 * Tracks ownership. The flag starts clear and is published as clear when the owner releases it.
+	 *
+	 * ```cpp
+	 * // In SpinLock::unlock().
+	 * locked.clear(std::memory_order_release);
+	 * ```
+	 */
 	std::atomic_flag locked = ATOMIC_FLAG_INIT;
 
 public:
+	/**
+	 * Waits until it can set the flag and take the lock. The acquire operation observes work published by a previous unlock.
+	 *
+	 * **Used for** taking exclusive access before writing an item to a shared queue.
+	 *
+	 * ```cpp
+	 * // A worker publishes decoded_id after decoding it. SpinLock ready_lock protects ready_ids.
+	 * ready_lock.lock();
+	 * ready_ids.push_back(decoded_id);
+	 * ready_lock.unlock();
+	 * ```
+	 */
 	_ALWAYS_INLINE_ void lock() {
 		while (locked.test_and_set(std::memory_order_acquire)) {
 			;
 		}
 	}
+	/**
+	 * Clears the flag with release ordering so another thread can acquire the lock and observe the protected writes.
+	 *
+	 * **Used for** letting another worker take the lock before the current thread processes the work it
+	 * removed.
+	 *
+	 * ```cpp
+	 * // In the main thread, with ready_lock taken and ready_ids shared with workers.
+	 * const bool has_finished_work = !ready_ids.is_empty();
+	 * ready_lock.unlock(); // Workers can publish more IDs before main-thread processing.
+	 * ```
+	 */
 	_ALWAYS_INLINE_ void unlock() {
 		locked.clear(std::memory_order_release);
 	}

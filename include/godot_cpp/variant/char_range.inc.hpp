@@ -35,11 +35,52 @@
 
 namespace godot {
 
+/**
+ * Represents an inclusive interval of Unicode code points for the character lookup tables.
+ *
+ * **Used for** storing the searchable intervals shared by Godot's Unicode character predicates.
+ *
+ * ```cpp
+ * constexpr CharRange decimal_digits{ U'0', U'9' };
+ * const char32_t token = U'7';
+ * bool digit = token >= decimal_digits.start && token <= decimal_digits.end;
+ * ```
+ */
 struct CharRange {
+	/**
+	 * The first code point included in the range.
+	 *
+	 * **Used for** checking whether a code point comes before this interval during a binary search.
+	 *
+	 * ```cpp
+	 * // In the range search, with middle pointing to a candidate interval.
+	 * if (p_char < xid_start[middle].start) { high = middle - 1; }
+	 * ```
+	 */
 	char32_t start;
+	/**
+	 * The last code point included in the range.
+	 *
+	 * **Used for** checking whether a code point comes after this interval during a binary search.
+	 *
+	 * ```cpp
+	 * // In the range search, with middle pointing to a candidate interval.
+	 * if (p_char > xid_start[middle].end) { low = middle + 1; }
+	 * ```
+	 */
 	char32_t end;
 };
 
+/**
+ * Sorted Unicode XID_Start ranges with an extra range for underscore, used to validate an identifier's first code point.
+ *
+ * **Used for** checking the first code point of a Unicode identifier.
+ *
+ * ```cpp
+ * // In the corresponding predicate in char_utils.hpp.
+ * BSEARCH_CHAR_RANGE(xid_start);
+ * ```
+ */
 constexpr inline CharRange xid_start[] = {
 	{ 0x41, 0x5a },
 	{ 0x5f, 0x5f }, // Underscore technically isn't in XID_Start, but for our purposes it's included.
@@ -728,6 +769,16 @@ constexpr inline CharRange xid_start[] = {
 	{ 0x31350, 0x323af },
 };
 
+/**
+ * Sorted Unicode XID_Continue ranges used to validate code points after an identifier's first character.
+ *
+ * **Used for** checking the later code points of a Unicode identifier.
+ *
+ * ```cpp
+ * // In the corresponding predicate in char_utils.hpp.
+ * BSEARCH_CHAR_RANGE(xid_continue);
+ * ```
+ */
 constexpr inline CharRange xid_continue[] = {
 	{ 0x30, 0x39 },
 	{ 0x41, 0x5a },
@@ -1531,6 +1582,16 @@ constexpr inline CharRange xid_continue[] = {
 	{ 0xe0100, 0xe01ef },
 };
 
+/**
+ * Sorted inclusive Unicode ranges used by the uppercase letter test.
+ *
+ * **Used for** recognizing uppercase letters in labels and tokens.
+ *
+ * ```cpp
+ * // In the corresponding predicate in char_utils.hpp.
+ * BSEARCH_CHAR_RANGE(uppercase_letter);
+ * ```
+ */
 constexpr inline CharRange uppercase_letter[] = {
 	{ 0x41, 0x5a },
 	{ 0xc0, 0xd6 },
@@ -2190,6 +2251,16 @@ constexpr inline CharRange uppercase_letter[] = {
 	{ 0x1f170, 0x1f189 },
 };
 
+/**
+ * Sorted inclusive Unicode ranges used by the lowercase letter test.
+ *
+ * **Used for** recognizing lowercase letters in labels and tokens.
+ *
+ * ```cpp
+ * // In the corresponding predicate in char_utils.hpp.
+ * BSEARCH_CHAR_RANGE(lowercase_letter);
+ * ```
+ */
 constexpr inline CharRange lowercase_letter[] = {
 	{ 0x61, 0x7a },
 	{ 0xaa, 0xaa },
@@ -2868,6 +2939,16 @@ constexpr inline CharRange lowercase_letter[] = {
 	{ 0x1e922, 0x1e943 },
 };
 
+/**
+ * Sorted inclusive Unicode ranges used by the letter test.
+ *
+ * **Used for** checking the letter category of a code point.
+ *
+ * ```cpp
+ * // In the corresponding predicate in char_utils.hpp.
+ * BSEARCH_CHAR_RANGE(unicode_letter);
+ * ```
+ */
 constexpr inline CharRange unicode_letter[] = {
 	{ 0x41, 0x5a },
 	{ 0x61, 0x7a },

@@ -38,21 +38,59 @@ namespace godot {
 class String;
 struct Vector4;
 
+/**
+ * A 4D vector using integer coordinates.
+ */
 struct [[nodiscard]] Vector4i {
+	/**
+	 * The number of components in the vector.
+	 */
 	static constexpr int AXIS_COUNT = 4;
 
+	/**
+	 * Component indices accepted by `godot::Vector4i::operator[]()`.
+	 */
 	enum Axis {
+		/**
+		 * Index 0, which selects the X component.
+		 */
 		AXIS_X,
+		/**
+		 * Index 1, which selects the Y component.
+		 */
 		AXIS_Y,
+		/**
+		 * Index 2, which selects the Z component.
+		 */
 		AXIS_Z,
+		/**
+		 * Index 3, which selects the W component.
+		 */
 		AXIS_W,
 	};
 
+	/**
+	 * The vector's X component. Also accessible by using the index position `[0]`.
+	 */
 	int32_t x = 0;
+	/**
+	 * The vector's Y component. Also accessible by using the index position `[1]`.
+	 */
 	int32_t y = 0;
+	/**
+	 * The vector's Z component. Also accessible by using the index position `[2]`.
+	 */
 	int32_t z = 0;
+	/**
+	 * The vector's W component. Also accessible by using the index position `[3]`.
+	 */
 	int32_t w = 0;
 
+	/**
+	 * Returns a writable reference to the component at index zero through 3 in X, Y, Z, W order.
+	 *
+	 * - `p_axis` — Zero-based component index in X, Y, Z, and W order.
+	 */
 	constexpr int32_t &operator[](int p_axis) {
 		// The pointer math below assumes that the elements are placed back-to-back, like an array.
 		// This is always true in practice, but technically not guaranteed; we safety-check it here.
@@ -65,78 +103,313 @@ struct [[nodiscard]] Vector4i {
 		DEV_ASSERT((unsigned int)p_axis < 4);
 		return (&x)[p_axis];
 	}
+	/**
+	 * Returns the component at index zero through 3 in X, Y, Z, W order.
+	 *
+	 * - `p_axis` — Zero-based component index in X, Y, Z, and W order.
+	 */
 	constexpr const int32_t &operator[](int p_axis) const {
 		DEV_ASSERT((unsigned int)p_axis < 4);
 		return (&x)[p_axis];
 	}
 
+	/**
+	 * Returns the axis of the vector's lowest value. See `AXIS_*` constants. If all components are equal,
+	 * this method returns `godot::Vector4i::AXIS_W`.
+	 */
 	Vector4i::Axis min_axis_index() const;
+	/**
+	 * Returns the axis of the vector's highest value. See `AXIS_*` constants. If all components are equal,
+	 * this method returns `godot::Vector4i::AXIS_X`.
+	 */
 	Vector4i::Axis max_axis_index() const;
 
+	/**
+	 * Returns each component's smaller value after comparing it with the matching component of the other vector.
+	 *
+	 * - `p_vector4i` — Vector that supplies the other X, Y, Z, and W values.
+	 */
 	Vector4i min(const Vector4i &p_vector4i) const {
 		return Vector4i(MIN(x, p_vector4i.x), MIN(y, p_vector4i.y), MIN(z, p_vector4i.z), MIN(w, p_vector4i.w));
 	}
 
+	/**
+	 * Returns each component's smaller value after comparing it with the same scalar.
+	 *
+	 * - `p_scalar` — Value compared with every component.
+	 */
 	Vector4i mini(int32_t p_scalar) const {
 		return Vector4i(MIN(x, p_scalar), MIN(y, p_scalar), MIN(z, p_scalar), MIN(w, p_scalar));
 	}
 
+	/**
+	 * Returns each component's larger value after comparing it with the matching component of the other vector.
+	 *
+	 * - `p_vector4i` — Vector that supplies the other X, Y, Z, and W values.
+	 */
 	Vector4i max(const Vector4i &p_vector4i) const {
 		return Vector4i(MAX(x, p_vector4i.x), MAX(y, p_vector4i.y), MAX(z, p_vector4i.z), MAX(w, p_vector4i.w));
 	}
 
+	/**
+	 * Returns each component's larger value after comparing it with the same scalar.
+	 *
+	 * - `p_scalar` — Value compared with every component.
+	 */
 	Vector4i maxi(int32_t p_scalar) const {
 		return Vector4i(MAX(x, p_scalar), MAX(y, p_scalar), MAX(z, p_scalar), MAX(w, p_scalar));
 	}
 
+	/**
+	 * Returns the squared length (squared magnitude) of this vector. This method runs faster than
+	 * `godot::Vector4i::length()`, so prefer it if you need to compare vectors or need the squared distance
+	 * for some formula.
+	 */
 	_FORCE_INLINE_ int64_t length_squared() const;
+	/**
+	 * Returns the length (magnitude) of this vector.
+	 */
 	_FORCE_INLINE_ double length() const;
 
+	/**
+	 * Sets every component to zero.
+	 */
 	_FORCE_INLINE_ void zero();
 
+	/**
+	 * Returns the Euclidean distance between the points represented by the two vectors.
+	 *
+	 * - `p_to` — Other point in the same coordinate system.
+	 */
 	_FORCE_INLINE_ double distance_to(const Vector4i &p_to) const;
+	/**
+	 * Returns the squared Euclidean distance between the points represented by the two vectors without
+	 * taking a square root.
+	 *
+	 * - `p_to` — Other point in the same coordinate system.
+	 */
 	_FORCE_INLINE_ int64_t distance_squared_to(const Vector4i &p_to) const;
 
+	/**
+	 * Returns a new vector with all components in absolute values (i.e. positive).
+	 */
 	_FORCE_INLINE_ Vector4i abs() const;
+	/**
+	 * Returns a new vector with each component set to `1` if it's positive, `-1` if it's negative, and `0`
+	 * if it's zero. The result is identical to calling `sign()` on each component.
+	 */
 	_FORCE_INLINE_ Vector4i sign() const;
+	/**
+	 * Returns a new vector with all components clamped between the components of `min` and `max`, by
+	 * running `clamp()` on each component.
+	 *
+	 * - `p_min` — Inclusive lower bounds for X, Y, Z, and W.
+	 * - `p_max` — Inclusive upper bounds for X, Y, Z, and W.
+	 */
 	Vector4i clamp(const Vector4i &p_min, const Vector4i &p_max) const;
+	/**
+	 * Returns a new vector with all components clamped between `min` and `max`, by running `clamp()` on
+	 * each component.
+	 *
+	 * - `p_min` — Inclusive lower bound used for every component.
+	 * - `p_max` — Inclusive upper bound used for every component.
+	 */
 	Vector4i clampi(int32_t p_min, int32_t p_max) const;
+	/**
+	 * Returns a new vector with each component snapped to the closest multiple of the corresponding
+	 * component in `step`.
+	 *
+	 * - `p_step` — Grid spacing for each component. A zero spacing leaves that component unchanged.
+	 */
 	Vector4i snapped(const Vector4i &p_step) const;
+	/**
+	 * Returns a new vector with each component snapped to the closest multiple of `step`.
+	 *
+	 * - `p_step` — Grid spacing used for every component. Zero leaves the vector unchanged.
+	 */
 	Vector4i snappedi(int32_t p_step) const;
 
 	/* Operators */
 
+	/**
+	 * Adds the right-hand vector to this vector component by component.
+	 *
+	 * - `p_v` — Vector whose components are added in place.
+	 */
 	constexpr Vector4i &operator+=(const Vector4i &p_v);
+	/**
+	 * Adds each component of the `godot::Vector4i` by the components of the given `godot::Vector4i`.
+	 *
+	 * - `p_v` — Vector whose components are added.
+	 */
 	constexpr Vector4i operator+(const Vector4i &p_v) const;
+	/**
+	 * Subtracts the right-hand vector from this vector component by component.
+	 *
+	 * - `p_v` — Vector whose components are subtracted in place.
+	 */
 	constexpr Vector4i &operator-=(const Vector4i &p_v);
+	/**
+	 * Subtracts each component of the `godot::Vector4i` by the components of the given `godot::Vector4i`.
+	 *
+	 * - `p_v` — Vector whose components are subtracted.
+	 */
 	constexpr Vector4i operator-(const Vector4i &p_v) const;
+	/**
+	 * Multiplies each component by the corresponding component of the right-hand vector in place.
+	 *
+	 * - `p_v` — Vector that supplies a factor for each component.
+	 */
 	constexpr Vector4i &operator*=(const Vector4i &p_v);
+	/**
+	 * Multiplies each component of the `godot::Vector4i` by the components of the given `godot::Vector4i`.
+	 *
+	 * - `p_v` — Vector that supplies a factor for each component.
+	 */
 	constexpr Vector4i operator*(const Vector4i &p_v) const;
+	/**
+	 * Divides each component by the corresponding component of the right-hand vector in place.
+	 *
+	 * - `p_v` — Vector that supplies a nonzero divisor for each component.
+	 */
 	constexpr Vector4i &operator/=(const Vector4i &p_v);
+	/**
+	 * Divides each component of the `godot::Vector4i` by the components of the given `godot::Vector4i`.
+	 *
+	 * - `p_v` — Vector that supplies a nonzero divisor for each component.
+	 */
 	constexpr Vector4i operator/(const Vector4i &p_v) const;
+	/**
+	 * Replaces each component with its signed C++ remainder after division by the corresponding right-hand
+	 * component.
+	 *
+	 * - `p_v` — Vector that supplies a nonzero divisor for each component.
+	 */
 	constexpr Vector4i &operator%=(const Vector4i &p_v);
+	/**
+	 * Gets the remainder of each component of the `godot::Vector4i` with the components of the given
+	 * `godot::Vector4i`. This operation uses truncated division, which is often not desired as it does not
+	 * work well with negative numbers. Consider using `posmod()` instead if you want to handle negative
+	 * numbers.
+	 *
+	 * - `p_v` — Vector that supplies a nonzero divisor for each component.
+	 */
 	constexpr Vector4i operator%(const Vector4i &p_v) const;
 
+	/**
+	 * Multiplies each component by the given scalar in place.
+	 *
+	 * - `p_scalar` — Factor applied to every component.
+	 */
 	constexpr Vector4i &operator*=(int32_t p_scalar);
+	/**
+	 * Multiplies each component of the `godot::Vector4i` by the given `int`.
+	 *
+	 * - `p_scalar` — Factor applied to every component.
+	 */
 	constexpr Vector4i operator*(int32_t p_scalar) const;
+	/**
+	 * Divides each component by the given scalar in place.
+	 *
+	 * - `p_scalar` — Nonzero divisor applied to every component.
+	 */
 	constexpr Vector4i &operator/=(int32_t p_scalar);
+	/**
+	 * Divides each component of the `godot::Vector4i` by the given `int`.
+	 *
+	 * - `p_scalar` — Nonzero divisor applied to every component.
+	 */
 	constexpr Vector4i operator/(int32_t p_scalar) const;
+	/**
+	 * Replaces each component with its signed C++ remainder after division by the scalar.
+	 *
+	 * - `p_scalar` — Nonzero divisor applied to every component.
+	 */
 	constexpr Vector4i &operator%=(int32_t p_scalar);
+	/**
+	 * Gets the remainder of each component of the `godot::Vector4i` with the given `int`. This operation
+	 * uses truncated division, which is often not desired as it does not work well with negative numbers.
+	 * Consider using `posmod()` instead if you want to handle negative numbers.
+	 *
+	 * - `p_scalar` — Nonzero divisor applied to every component.
+	 */
 	constexpr Vector4i operator%(int32_t p_scalar) const;
 
+	/**
+	 * Returns a vector with each component negated.
+	 */
 	constexpr Vector4i operator-() const;
 
+	/**
+	 * Tests exact equality of the components.
+	 *
+	 * - `p_v` — Right-hand vector in the comparison.
+	 */
 	constexpr bool operator==(const Vector4i &p_v) const;
+	/**
+	 * Tests whether any component differs.
+	 *
+	 * - `p_v` — Right-hand vector in the comparison.
+	 */
 	constexpr bool operator!=(const Vector4i &p_v) const;
+	/**
+	 * Compares two `godot::Vector4i` vectors by first checking if the X value of the left vector is less
+	 * than the X value of the `right` vector. If the X values are exactly equal, then it repeats this check
+	 * with the Y values of the two vectors, Z values of the two vectors, and then with the W values. This
+	 * operator is useful for sorting vectors.
+	 *
+	 * - `p_v` — Right-hand vector in the comparison.
+	 */
 	constexpr bool operator<(const Vector4i &p_v) const;
+	/**
+	 * Compares two `godot::Vector4i` vectors by first checking if the X value of the left vector is less
+	 * than or equal to the X value of the `right` vector. If the X values are exactly equal, then it
+	 * repeats this check with the Y values of the two vectors, Z values of the two vectors, and then with
+	 * the W values. This operator is useful for sorting vectors.
+	 *
+	 * - `p_v` — Right-hand vector in the comparison.
+	 */
 	constexpr bool operator<=(const Vector4i &p_v) const;
+	/**
+	 * Compares two `godot::Vector4i` vectors by first checking if the X value of the left vector is greater
+	 * than the X value of the `right` vector. If the X values are exactly equal, then it repeats this check
+	 * with the Y values of the two vectors, Z values of the two vectors, and then with the W values. This
+	 * operator is useful for sorting vectors.
+	 *
+	 * - `p_v` — Right-hand vector in the comparison.
+	 */
 	constexpr bool operator>(const Vector4i &p_v) const;
+	/**
+	 * Compares two `godot::Vector4i` vectors by first checking if the X value of the left vector is greater
+	 * than or equal to the X value of the `right` vector. If the X values are exactly equal, then it
+	 * repeats this check with the Y values of the two vectors, Z values of the two vectors, and then with
+	 * the W values. This operator is useful for sorting vectors.
+	 *
+	 * - `p_v` — Right-hand vector in the comparison.
+	 */
 	constexpr bool operator>=(const Vector4i &p_v) const;
 
+	/**
+	 * Formats X, Y, Z, and W as a parenthesized, comma-separated string.
+	 */
 	explicit operator String() const;
+	/**
+	 * Copies the four integer components into a floating-point vector.
+	 */
 	operator Vector4() const;
 
+	/**
+	 * Constructs a default-initialized `godot::Vector4i` with all components set to `0`.
+	 */
 	constexpr Vector4i() = default;
+	/**
+	 * Returns a `godot::Vector4i` with the given components.
+	 *
+	 * - `p_x` — X component.
+	 * - `p_y` — Y component.
+	 * - `p_z` — Z component.
+	 * - `p_w` — W component.
+	 */
 	constexpr Vector4i(int32_t p_x, int32_t p_y, int32_t p_z, int32_t p_w) :
 			x(p_x), y(p_y), z(p_z), w(p_w) {}
 };
@@ -241,18 +514,42 @@ constexpr Vector4i Vector4i::operator*(int32_t p_scalar) const {
 
 // Multiplication operators required to workaround issues with LLVM using implicit conversion.
 
+/**
+ * Multiplies each component by the left-hand integer factor.
+ *
+ * - `p_scalar` — Left-hand factor applied to every component.
+ * - `p_vector` — Vector whose components are multiplied.
+ */
 constexpr Vector4i operator*(int32_t p_scalar, const Vector4i &p_vector) {
 	return p_vector * p_scalar;
 }
 
+/**
+ * Converts the factor to a 32-bit integer before multiplying each component.
+ *
+ * - `p_scalar` — Left-hand factor converted to a 32-bit integer before multiplication.
+ * - `p_vector` — Vector whose components are multiplied.
+ */
 constexpr Vector4i operator*(int64_t p_scalar, const Vector4i &p_vector) {
 	return p_vector * p_scalar;
 }
 
+/**
+ * Converts the floating-point factor to a 32-bit integer by truncating toward zero, then multiplies each component.
+ *
+ * - `p_scalar` — Left-hand factor converted to a 32-bit integer before multiplication.
+ * - `p_vector` — Vector whose components are multiplied.
+ */
 constexpr Vector4i operator*(float p_scalar, const Vector4i &p_vector) {
 	return p_vector * p_scalar;
 }
 
+/**
+ * Converts the floating-point factor to a 32-bit integer by truncating toward zero, then multiplies each component.
+ *
+ * - `p_scalar` — Left-hand factor converted to a 32-bit integer before multiplication.
+ * - `p_vector` — Vector whose components are multiplied.
+ */
 constexpr Vector4i operator*(double p_scalar, const Vector4i &p_vector) {
 	return p_vector * p_scalar;
 }
@@ -361,6 +658,9 @@ void Vector4i::zero() {
 	x = y = z = w = 0;
 }
 
+/**
+ * Marks a zero-filled vector as a valid vector with all components equal to zero.
+ */
 template <>
 struct is_zero_constructible<Vector4i> : std::true_type {};
 } // namespace godot

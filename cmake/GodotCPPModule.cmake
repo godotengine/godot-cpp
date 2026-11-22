@@ -111,6 +111,12 @@ function(
     # Strip newlines and whitespace to make it a one-liner.
     string(REGEX REPLACE "\n *" " " PYTHON_SCRIPT "${PYTHON_SCRIPT}")
 
+    file(GLOB_RECURSE HEADER_DOCUMENTATION_INPUTS CONFIGURE_DEPENDS
+        "${godot-cpp_SOURCE_DIR}/gdextension/header_docs/*.json"
+        "${godot-cpp_SOURCE_DIR}/gdextension/header_docs/*.xml"
+        "${godot-cpp_SOURCE_DIR}/gdextension/header_docs/*.zip"
+    )
+
     add_custom_command(
         OUTPUT ${GENERATED_FILES_LIST}
         COMMAND "${Python3_EXECUTABLE}" "-c" "${PYTHON_SCRIPT}"
@@ -118,6 +124,9 @@ function(
         WORKING_DIRECTORY ${godot-cpp_SOURCE_DIR}
         MAIN_DEPENDENCY ${GODOTCPP_GDEXTENSION_API_FILE}
         DEPENDS ${godot-cpp_SOURCE_DIR}/binding_generator.py
+                ${godot-cpp_SOURCE_DIR}/header_documentation.py
+                ${godot-cpp_SOURCE_DIR}/make_interface_header.py
+                ${HEADER_DOCUMENTATION_INPUTS}
         COMMENT "Generating bindings"
     )
     add_custom_target(generate_bindings DEPENDS ${GENERATED_FILES_LIST})

@@ -36,6 +36,14 @@ namespace godot {
 #undef ABS
 
 // Generic ABS function, for math uses please use Math::abs.
+/**
+ * Returns the absolute value through comparison with zero and unary negation. Kept for source compatibility when deprecated APIs are enabled.
+ *
+ * **Used for** compiling older extension code that obtains a magnitude through the generic ABS function.
+ *
+ * - `T` — Type supporting comparison with zero and unary negation.
+ * - `m_v` — Value whose magnitude is returned if representable as this type.
+ */
 template <typename T>
 [[deprecated("Use Math::abs instead")]]
 constexpr T ABS(T m_v) {
@@ -46,6 +54,11 @@ constexpr T ABS(T m_v) {
 
 // To maintain compatibility an alias is defined outside the namespace.
 // Consider it deprecated.
+/**
+ * Exposes `godot::real_t` in the global namespace for source compatibility with older extension code.
+ *
+ * **Used for** compiling older extension code that uses the scalar type without a namespace qualification.
+ */
 using real_t = ::godot::real_t;
 
 #endif
