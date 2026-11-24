@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import glob
+import hashlib
 import os
 import zlib
 
@@ -30,7 +31,7 @@ def generate_doc_source(dst, source):
     g.write("#include <godot_cpp/godot.hpp>\n")
     g.write("\n")
 
-    g.write('static const char *_doc_data_hash = "' + str(hash(buf)) + '";\n')
+    g.write('static const char *_doc_data_hash = "' + hashlib.sha256(buf).hexdigest()[:16] + '";\n')
     g.write("static const int _doc_data_uncompressed_size = " + str(decomp_size) + ";\n")
     g.write("static const int _doc_data_compressed_size = " + str(len(buf)) + ";\n")
     g.write("static const unsigned char _doc_data_compressed[] = {\n")
