@@ -3,9 +3,9 @@
 		"version_major": 4,
 		"version_minor": 8,
 		"version_patch": 0,
-		"version_status": "beta4",
+		"version_status": "beta5",
 		"version_build": "official",
-		"version_full_name": "Godot Engine v4.8.beta4.official",
+		"version_full_name": "Godot Engine v4.8.beta5.official",
 		"precision": "single"
 	},
 	"builtin_class_sizes": [
